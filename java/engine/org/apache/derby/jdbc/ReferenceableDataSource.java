@@ -65,7 +65,7 @@ public class ReferenceableDataSource implements
 	private static final long serialVersionUID = 1872877359127597176L;
 
 
-	private static final Class[] STRING_ARG = { copyrightNotice.getClass() };
+	private static final Class[] STRING_ARG = { "".getClass() };
 	private static final Class[] INT_ARG = { Integer.TYPE };
 	private static final Class[] BOOLEAN_ARG = { Boolean.TYPE };
 

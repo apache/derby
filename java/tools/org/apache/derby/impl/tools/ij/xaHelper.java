@@ -454,7 +454,7 @@ class xaHelper implements xaAbstractHelper
 
 		throw new ijException(LocalizedResource.getMessage("IJ_XANoI"));
 	}
-	private static final Class[] STRING_P = { copyrightNotice.getClass() };
+	private static final Class[] STRING_P = { "".getClass() };
 	private static final Class[] INT_P = { Integer.TYPE };
 
 	private static void setDataSourceProperty(Object ds, String property, String value) throws SQLException {
