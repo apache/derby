@@ -242,7 +242,6 @@ public class SQLClob
 
 	public void setValue(byte theValue) throws StandardException
 	{
-		new Throwable("FRED").printStackTrace(System.out);
 		throwLangSetMismatch("byte");
 	}
 

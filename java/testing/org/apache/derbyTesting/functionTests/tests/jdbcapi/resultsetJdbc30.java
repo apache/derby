@@ -103,7 +103,7 @@ public class resultsetJdbc30 {
 			  System.out.println();
 			  System.out.println("trying rs.updateBlob(int, Blob) :");
 			  rs.updateBlob(8,null);
-			  System.out.println("Shouldn't reach here. Method not implemented yet.");
+			  System.out.println("Shouldn't reach here because method is being invoked on a read only resultset");
  			} catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}
@@ -112,7 +112,7 @@ public class resultsetJdbc30 {
 			  System.out.println();
 			  System.out.println("trying rs.updateBlob(String, Blob) :");
 			  rs.updateBlob("c",null);
-			  System.out.println("Shouldn't reach here. Method not implemented yet.");
+			  System.out.println("Shouldn't reach here because method is being invoked on a read only resultset");
  			} catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}
@@ -121,7 +121,7 @@ public class resultsetJdbc30 {
 			  System.out.println();
 			  System.out.println("trying rs.updateClob(int, Clob) :");
 			  rs.updateClob(8,null);
-			  System.out.println("Shouldn't reach here. Method not implemented yet.");
+			  System.out.println("Shouldn't reach here because method is being invoked on a read only resultset");
  			} catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}
@@ -130,7 +130,7 @@ public class resultsetJdbc30 {
 			  System.out.println();
 			  System.out.println("trying rs.updateClob(String, Clob) :");
 			  rs.updateClob("c",null);
-			  System.out.println("Shouldn't reach here. Method not implemented yet.");
+			  System.out.println("Shouldn't reach here because method is being invoked on a read only resultset");
  			} catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}

@@ -20,45 +20,31 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.catalog.DD_Version;
 import org.apache.derby.impl.sql.execute.GenericConstantActionFactory;
 import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
 
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.DB2Limit;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import java.util.Properties;
-import java.util.Enumeration;
 
 import java.sql.DatabaseMetaData;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.Types;
 
 import java.io.IOException;
@@ -2618,7 +2604,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @see Connection
      */
 	public boolean supportsResultSetConcurrency(int type, int concurrency) {
-		//FORWARD_ONLY + CONCUR_UPDATABLE combination is supported (at this point, delete functionality only)
+		//FORWARD_ONLY + CONCUR_UPDATABLE combination is supported (at this point, delete and update functionality only)
 		if ((type == JDBC20Translation.TYPE_FORWARD_ONLY) &&
 				(concurrency == JDBC20Translation.CONCUR_UPDATABLE))
 			return true;
@@ -2658,7 +2644,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
     //Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes
     //made by others and hence following 3 metadata calls will return true for forward only ResultSets.
-    //Scroll insensitive ResultSet by their definition do not see chnages made by others.
+    //Scroll insensitive ResultSet by their definition do not see changes made by others.
     //Derby does not yet implement scroll sensitive resultsets.
     public boolean othersUpdatesAreVisible(int type) {
 		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
@@ -2687,6 +2673,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @param result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are detected by the resultset type
      */
+    //updatable resultsets are supported for forward only resultset types only. And for forward only
+    //resultsets, we move to before the next row after a update and that is why updatesAreDetected returns false
     public boolean updatesAreDetected(int type) {
 		  return false;
 	}
@@ -2694,13 +2682,15 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     /**
      * JDBC 2.0
      *
-     * Determine whether or not a visible row delete can be detected by 
+     * Determine whether or not a visible row delete can be detected by
      * calling ResultSet.rowDeleted().  If deletesAreDetected()
      * returns false, then deleted rows are removed from the result set.
      *
      * @param result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are detected by the resultset type
      */
+    //updatable resultsets are supported for forward only resultset types only. And for forward only
+    //resultsets, we move to before the next row after a delete and that is why deletesAreDetected returns false
     public boolean deletesAreDetected(int type) {
 		  return false;
 	}

@@ -23,7 +23,6 @@ package org.apache.derby.impl.jdbc;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
@@ -32,7 +31,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
-
+                                         
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import java.sql.Statement;
@@ -71,7 +70,7 @@ public class EmbedResultSet20
         //////////////////////////////////////////////////////////////
 
         /**
-         * This class provides the glue between the Cloudscape
+         * This class provides the glue between the Derby
          * resultset and the JDBC resultset, mapping calls-to-calls.
          */
         public EmbedResultSet20(org.apache.derby.impl.jdbc.EmbedConnection conn, 
@@ -165,32 +164,49 @@ public class EmbedResultSet20
                         return getBigDecimal(findColumnName(columnName));
         }
 
-
-
-
-    /**
-     * JDBC 2.0
-     *  
-     * Update a column with a BigDecimal value.
-     *
-     * The updateXXX() methods are used to update column values in the
-     * current row, or the insert row.  The updateXXX() methods do not 
-     * update the underlying database, instead the updateRow() or insertRow()
-     * methods are called to update the database.
-     *
-     * @param columnIndex the first column is 1, the second is 2, ...
-     * @param x the new column value
-     * @exception SQLException if a database-access error occurs
-     */
     public void updateBigDecimal(int columnIndex, BigDecimal x)
     throws SQLException {
-                throw Util.notImplemented();
+        try {
+            getDVDforColumnToBeUpdated(columnIndex, "updateBigDecimal").setValue(x);
+        } catch (StandardException t) {
+            throw noStateChangeException(t);
         }
+    }
 
+	/**
+	 * JDBC 2.0
+	 * 
+	 * Update a column with an Object value.
+	 * 
+	 * The updateXXX() methods are used to update column values in the current
+	 * row, or the insert row. The updateXXX() methods do not update the
+	 * underlying database, instead the updateRow() or insertRow() methods are
+	 * called to update the database.
+	 * 
+	 * @param columnIndex
+	 *            the first column is 1, the second is 2, ...
+	 * @param x
+	 *            the new column value
+	 * @exception SQLException
+	 *                if a database-access error occurs
+	 */
+	public void updateObject(int columnIndex, Object x) throws SQLException {
+		//If the Object x is the right datatype, this method will eventually call getDVDforColumnToBeUpdated which will check for
+		//the read only resultset. But for other datatypes of x, we want to catch if this updateObject is being
+		//issued against a read only resultset. And that is the reason for call to checksBeforeUpdateOrDelete here.
+		checksBeforeUpdateOrDelete("updateObject", columnIndex);
+		int colType = getColumnType(columnIndex);
+
+		if (x instanceof BigDecimal) {
+			updateBigDecimal(columnIndex, (BigDecimal) x);
+			return;
+		}
+		super.updateObject(columnIndex, x);
+	}
 
     /**
      * JDBC 2.0
-     *  
+     *
      * Update a column with a BigDecimal value.
      *
      * The updateXXX() methods are used to update column values in the
@@ -204,15 +220,13 @@ public class EmbedResultSet20
      */
     public void updateBigDecimal(String columnName, BigDecimal x)
     throws SQLException {
-                throw Util.notImplemented();
+            updateBigDecimal(findColumnName(columnName), x);
         }
-
-
 
     /**
      * JDBC 2.0
      *
-     * Returns the value of column @i as a Java object.  Use the 
+     * Returns the value of column @i as a Java object.  Use the
      * param map to determine the class from which to construct data of 
      * SQL structured and distinct types.
      *
@@ -355,7 +369,6 @@ public class EmbedResultSet20
         {
                 throw Util.notImplemented();
         }
-
 
         /**
     * JDBC 3.0

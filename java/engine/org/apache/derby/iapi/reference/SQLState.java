@@ -1234,6 +1234,7 @@ public interface SQLState {
 	String LANG_OBSOLETE_PARAMETERS                                    = "XCL10.S";
 	String LANG_DATA_TYPE_SET_MISMATCH                                 = "XCL12.S";
 	String LANG_INVALID_PARAM_POSITION                                 = "XCL13.S";
+	String LANG_INVALID_COLUMN_POSITION                                 = "XCL14.S";
 	String LANG_INVALID_COMPARE_TO                                     = "XCL15.S";
 	String LANG_RESULT_SET_NOT_OPEN                                    = "XCL16.S";
 	String LANG_MISSING_ROW                                            = "XCL19.S";
@@ -1380,6 +1381,7 @@ public interface SQLState {
 
     //updatable resultset related
     String UPDATABLE_RESULTSET_API_DISALLOWED = "XJ083.U";
+    String COLUMN_NOT_FROM_BASE_TABLE = "XJ084.U";
 
     //following are session severity.
     String DATABASE_NOT_FOUND = "XJ004.C";

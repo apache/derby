@@ -34,14 +34,20 @@ import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.CursorActivation;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.VariableSizeDataValue;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.services.io.StreamStorable;
 
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.services.io.NewByteArrayInputStream;
+import org.apache.derby.iapi.services.io.LimitReader;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.SQLState;
@@ -91,9 +97,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	// mutable state
 	protected ExecRow currentRow;
-	//rowData is protected so deleteRow in EmbedResultSet20.java can make it null.
-	//This ensures that after deleteRow, ResultSet is not positioned on the deleted row.
-	protected DataValueDescriptor[] rowData;
+	//deleteRow & updateRow make rowData null so that ResultSet is not positioned on deleted/updated row.
+	private DataValueDescriptor[] rowData;
 	protected boolean wasNull;
 	protected boolean isClosed;
 	private Object	currentStream;
@@ -115,7 +120,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	// Order of creation 
 	final int order;
 
-
+  
 	private final ResultDescription resultDescription;
 
     // max rows limit for this result set
@@ -142,15 +147,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	protected final int concurrencyOfThisResultSet;
 
+	//copyOfDatabaseRow will keep the original contents of the columns of the current row which got updated.
+	//These will be used if user decides to cancel the changes made to the row using cancelRowUpdates.
+	private DataValueDescriptor[] copyOfDatabaseRow;
+	private boolean[] columnGotUpdated; //these are the columns which have been updated so far. Used to build UPDATE...WHERE CURRENT OF sql
+	private boolean currentRowHasBeenUpdated; //Gets set to true after first updateXXX on a row. Gets reset to false when the cursor moves off the row
+
     private int fetchDirection;
     private int fetchSize;
+    //td will be used to ensure the column selected for updateXXX is part of the table.
+    private TableDescriptor td = null;
 
 	/**
 	 * This class provides the glue between the Cloudscape
 	 * resultset and the JDBC resultset, mapping calls-to-calls.
 	 */
 	public EmbedResultSet(EmbedConnection conn, ResultSet resultsToWrap,
-		boolean forMetaData, EmbedStatement stmt, boolean isAtomic) 
+		boolean forMetaData, EmbedStatement stmt, boolean isAtomic)
         throws SQLException {
 
 		super(conn);
@@ -185,11 +198,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 		// Fill in the column types
 		resultDescription = theResults.getResultDescription();
 
+		//initialize arrays related to updateRow implementation
+		columnGotUpdated = new boolean[getMetaData().getColumnCount()];
+		copyOfDatabaseRow = new DataValueDescriptor[columnGotUpdated.length];
+
         // assign the max rows and maxfiled size limit for this result set
         if (stmt != null)
         {
            // At connectivity level we handle only for forward only cursor
-           if (stmt.resultSetType == JDBC20Translation.TYPE_FORWARD_ONLY) 
+           if (stmt.resultSetType == JDBC20Translation.TYPE_FORWARD_ONLY)
                maxRows = stmt.maxRows;
 
            maxFieldSize = stmt.MaxFieldSize;
@@ -275,6 +292,11 @@ public abstract class EmbedResultSet extends ConnectionChild
                 return false;
             }
         }
+
+	    //since we are moving off of the current row, need to initialize state corresponding to updateRow implementation
+	    for (int i=0; i < columnGotUpdated.length; i++)
+            columnGotUpdated[i] = false;
+	    currentRowHasBeenUpdated = false;
 
 	    return movePosition(NEXT, 0, "next");
 	}
@@ -508,6 +530,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 			currentRow = null;
 			rowData = null;
 			rMetaData = null; // let it go, we can make a new one
+	    //since we are moving off of the current row(by closing the resultset), need to initialize state corresponding to updateRow implementation
+	    for (int i=0; i < columnGotUpdated.length; i++)
+				columnGotUpdated[i] = false;
+	    currentRowHasBeenUpdated = false;
 
 			// we hang on to theResults and messenger
 			// in case more calls come in on this resultSet
@@ -1975,7 +2001,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @see EmbedDatabaseMetaData#updatesAreDetected
 	 */
 	public boolean rowUpdated() throws SQLException {
-		throw Util.notImplemented();
+		return false;
 	}
 
 	/**
@@ -1996,20 +2022,108 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Determine if this row has been deleted. A deleted row may leave a visible
 	 * "hole" in a result set. This method can be used to detect holes in a
 	 * result set. The value returned depends on whether or not the result set
 	 * can detect deletions.
-	 * 
+	 *
 	 * @return true if deleted and deletes are detected
 	 * @exception SQLException
 	 *                if a database-access error occurs
-	 * 
+	 *
 	 * @see EmbedDatabaseMetaData#deletesAreDetected
 	 */
 	public boolean rowDeleted() throws SQLException {
 		return false;
+	}
+
+	//do following few checks before accepting updatable resultset api
+	//1)Make sure this is an updatable ResultSet
+	//2)Make sure JDBC ResultSet is not closed
+	//3)Make sure JDBC ResultSet is positioned on a row
+	//4)Make sure underneath language resultset is not closed
+	//5)Make sure for updateXXX methods, the column position is not out of range
+	//6)Make sure the column corresponds to a column in the base table and it is not a derived column
+	//7)Make sure correlation names are not used for base table column names in updateXXXX. This is because the mapping
+	//  of correlation name to base table column position is not available at runtime.
+	protected void checksBeforeUpdateOrDelete(String methodName, int columnIndex) throws SQLException {
+
+      //1)Make sure this is an updatable ResultSet
+      if (getConcurrency() != JDBC20Translation.CONCUR_UPDATABLE)//if not updatable resultset, then throw exception
+        throw Util.generateCsSQLException(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED, methodName);
+
+      //2)Make sure JDBC ResultSet is not closed
+      checkIfClosed(methodName);
+
+      //3)Make sure JDBC ResultSet is positioned on a row
+      checkOnRow(); // first make sure there's a current row
+      //in case of autocommit on, if there was an exception which caused runtime rollback in this transaction prior to this call,
+      //the rollback code will mark the language resultset closed (it doesn't mark the JDBC ResultSet closed).
+      //That is why alongwith the earlier checkIfClosed call in this method, there is a check for language resultset close as well.
+
+      //4)Make sure underneath language resultset is not closed
+      if (theResults.isClosed())
+        throw Util.generateCsSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, methodName);
+
+      //the remaining checks only apply to updateXXX methods
+      if (methodName.equals("updateRow") || methodName.equals("deleteRow") || methodName.equals("cancelRowUpdates"))
+        return;
+
+      //5)Make sure for updateXXX methods, the column position is not out of range
+      ResultDescription rd = theResults.getResultDescription();
+      if (columnIndex < 1 || columnIndex > rd.getColumnCount())
+        throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION, new Integer(columnIndex), String.valueOf(rd.getColumnCount()));
+
+      //6)Make sure the column corresponds to a column in the base table and it is not a derived column
+      if (rd.getColumnDescriptor(columnIndex).getSourceTableName() == null)
+        throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE, methodName);
+
+      //7)Make sure correlation names are not used for base table column names in updateXXX. This is because the mapping
+      //  of correlation name to base table column position is not available at runtime.
+      //If can't find the column in the base table, then throw exception. This will happen if correlation name is used for column names
+      if (td == null) getTargetTableDescriptor();
+      if (td.getColumnDescriptor(rd.getColumnDescriptor(columnIndex).getName()) == null)
+        throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE, methodName);
+	}
+
+	//Get the table descriptor for the target table for updateXXX. td will be used to ensure the column selected for updateXXX
+	//is part of the table.
+	private void getTargetTableDescriptor() throws SQLException {
+      setupContextStack();
+      try {
+        LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+        CursorActivation activation = lcc.lookupCursorActivation(getCursorName());
+        ExecCursorTableReference targetTable = activation.getPreparedStatement().getTargetTable();
+        SchemaDescriptor sd = null;
+        if (targetTable.getSchemaName() != null)
+            sd = lcc.getDataDictionary().getSchemaDescriptor(targetTable.getSchemaName(),null, false);
+        else
+            sd = lcc.getDataDictionary().getSchemaDescriptor(lcc.getCurrentSchemaName(),null, false);
+
+        if ((sd != null) && sd.getSchemaName().equals(SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME))
+            td = lcc.getTableDescriptorForDeclaredGlobalTempTable(targetTable.getBaseName()); //check if this is a temp table before checking data dictionary
+
+        if (td == null) //td null here means it is not a temporary table. Look for table in physical SESSION schema
+            td = lcc.getDataDictionary().getTableDescriptor(targetTable.getBaseName(), sd);
+      } catch (StandardException t) {
+        throw noStateChangeException(t);
+      } finally {
+        restoreContextStack();
+      }
+	}
+
+	//mark the column as updated and return DataValueDescriptor for it. It will be used by updateXXX methods to put new values
+	protected DataValueDescriptor getDVDforColumnToBeUpdated(int columnIndex, String updateMethodName) throws StandardException, SQLException {
+      checksBeforeUpdateOrDelete(updateMethodName, columnIndex);
+      if (columnGotUpdated[columnIndex-1] == false) {//this is the first updateXXX call on this column
+        //this is the first updateXXX method call on this column. Save the original content of the column into copyOfDatabaseRow
+        //The saved copy of the column will be needed if cancelRowUpdates is issued
+        copyOfDatabaseRow[columnIndex - 1] = currentRow.getColumn(columnIndex).getClone();
+      }
+      columnGotUpdated[columnIndex-1] = true;
+	    currentRowHasBeenUpdated = true;
+      return currentRow.getColumn(columnIndex);
 	}
 
 	/**
@@ -2028,19 +2142,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateNull(int columnIndex) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateNull").setToNull();
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a boolean value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2049,19 +2167,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBoolean(int columnIndex, boolean x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateBoolean").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a byte value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2070,19 +2192,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateByte(int columnIndex, byte x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateByte").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a short value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2091,19 +2217,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateShort(int columnIndex, short x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateShort").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with an integer value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2112,19 +2242,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateInt(int columnIndex, int x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateInt").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a long value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2133,19 +2267,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateLong(int columnIndex, long x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateLong").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a float value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2154,14 +2292,18 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateFloat(int columnIndex, float x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateFloat").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a Double value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
@@ -2175,7 +2317,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateDouble(int columnIndex, double x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateDouble").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
@@ -2196,7 +2342,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateString(int columnIndex, String x) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateString").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
@@ -2217,19 +2367,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBytes(int columnIndex, byte x[]) throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateBytes").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a Date value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2239,19 +2393,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateDate(int columnIndex, java.sql.Date x)
 			throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateDate").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a Time value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2261,19 +2419,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTime(int columnIndex, java.sql.Time x)
 			throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateTime").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a Timestamp value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2283,19 +2445,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTimestamp(int columnIndex, java.sql.Timestamp x)
 			throws SQLException {
-		throw Util.notImplemented();
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, "updateTimestamp").setValue(x);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with an ascii stream value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2307,19 +2473,41 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateAsciiStream(int columnIndex, java.io.InputStream x,
 			int length) throws SQLException {
-		throw Util.notImplemented();
+		checksBeforeUpdateOrDelete("updateAsciiStream", columnIndex);
+
+		int colType = getColumnType(columnIndex);
+		switch (colType) {
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+				break;
+			default:
+				throw dataTypeConversion(columnIndex, "java.io.InputStream");
+		}
+
+		java.io.Reader r = null;
+		if (x != null)
+		{
+			try {
+				r = new java.io.InputStreamReader(x, "ISO-8859-1");
+			} catch (java.io.UnsupportedEncodingException uee) {
+				throw new SQLException(uee.getMessage());
+			}
+		}
+		updateCharacterStream(columnIndex, r, length);
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with a binary stream value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2331,7 +2519,38 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateBinaryStream(int columnIndex, java.io.InputStream x,
 			int length) throws SQLException {
-		throw Util.notImplemented();
+		checksBeforeUpdateOrDelete("updateBinaryStream", columnIndex);
+		int colType = getColumnType(columnIndex);
+		switch (colType) {
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+			case Types.BLOB:
+				break;
+			default:
+				throw dataTypeConversion(columnIndex, "java.io.InputStream");
+		}
+		if (length < 0) //we are doing the check here and not in updateBinaryStreamInternal becuase updateClob needs to pass -1 for length.
+			throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+
+		if (x == null)
+		{
+			updateNull(columnIndex);
+			return;
+		}
+
+		updateBinaryStreamInternal(columnIndex, x, length,"updateBinaryStream");
+	}
+
+	protected void updateBinaryStreamInternal(int columnIndex,
+						java.io.InputStream x, int length, String updateMethodName)
+	    throws SQLException
+	{
+		try {
+			getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(new RawToBinaryFormatStream(x, length), length);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
@@ -2355,19 +2574,56 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateCharacterStream(int columnIndex, java.io.Reader x,
 			int length) throws SQLException {
-		throw Util.notImplemented();
+		//If the column type is the right datatype, this method will eventually call getDVDforColumnToBeUpdated which will check for
+		//the read only resultset. But for other datatypes, we want to catch if this updateCharacterStream is being issued
+		//against a read only resultset. And that is the reason for call to checksBeforeUpdateOrDelete here.
+		checksBeforeUpdateOrDelete("updateCharacterStream", columnIndex);
+		int colType = getColumnType(columnIndex);
+		switch (colType) {
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+				break;
+			default:
+				throw dataTypeConversion(columnIndex, "java.io.Reader");
+		}
+		if (length < 0) //we are doing the check here and not in updateCharacterStreamInternal becuase updateClob needs to pass -1 for length.
+			throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+
+		if (x == null)
+		{
+			updateNull(columnIndex);
+			return;
+		}
+		updateCharacterStreamInternal(columnIndex, x, length, "updateCharacterStream");
+	}
+
+    protected void updateCharacterStreamInternal(int columnIndex,
+						java.io.Reader reader, int length, String updateMethodName)
+	    throws SQLException
+	{
+		try {
+			LimitReader limitIn = new LimitReader(reader);
+			if (length != -1)
+				limitIn.setLimit(length);
+			ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(limitIn);
+			getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(utfIn, length);
+		} catch (StandardException t) {
+			throw noStateChangeException(t);
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with an Object value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2381,19 +2637,41 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateObject(int columnIndex, Object x, int scale)
 			throws SQLException {
-		throw Util.notImplemented();
+		updateObject(columnIndex, x);
+		/*
+		* If the parameter type is DECIMAL or NUMERIC, then
+		* we need to set them to the passed scale.
+		*/
+		int colType = getColumnType(columnIndex);
+		if ((colType == Types.DECIMAL) || (colType == Types.NUMERIC)) {
+			if (scale < 0)
+				throw newSQLException(SQLState.BAD_SCALE_VALUE, new Integer(scale));
+
+			try {
+				DataValueDescriptor value = currentRow.getColumn(columnIndex);
+
+				int origvaluelen = value.getLength();
+				((VariableSizeDataValue)
+						value).setWidth(VariableSizeDataValue.IGNORE_PRECISION,
+							scale,
+							false);
+
+			} catch (StandardException t) {
+				throw EmbedResultSet.noStateChangeException(t);
+			}
+		}
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with an Object value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnIndex
 	 *            the first column is 1, the second is 2, ...
 	 * @param x
@@ -2402,7 +2680,88 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateObject(int columnIndex, Object x) throws SQLException {
-		throw Util.notImplemented();
+		checksBeforeUpdateOrDelete("updateObject", columnIndex);
+		int colType = getColumnType(columnIndex);
+		if (colType == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT) {
+			try {
+				getDVDforColumnToBeUpdated(columnIndex, "updateObject").setValue(x);
+				return;
+			} catch (StandardException t) {
+				throw noStateChangeException(t);
+			}
+		}
+
+		if (x == null) {
+			updateNull(columnIndex);
+			return;
+		}
+
+		if (x instanceof String) {
+			updateString(columnIndex, (String) x);
+			return;
+		}
+
+		if (x instanceof Boolean) {
+			updateBoolean(columnIndex, ((Boolean) x).booleanValue());
+			return;
+		}
+
+		if (x instanceof Short) {
+			updateShort(columnIndex, ((Short) x).shortValue());
+			return;
+		}
+
+		if (x instanceof Integer) {
+			updateInt(columnIndex, ((Integer) x).intValue());
+			return;
+		}
+
+		if (x instanceof Long) {
+			updateLong(columnIndex, ((Long) x).longValue());
+			return;
+		}
+
+		if (x instanceof Float) {
+			updateFloat(columnIndex, ((Float) x).floatValue());
+			return;
+		}
+
+		if (x instanceof Double) {
+			updateDouble(columnIndex, ((Double) x).doubleValue());
+			return;
+		}
+
+		if (x instanceof byte[]) {
+			updateBytes(columnIndex, (byte[]) x);
+			return;
+		}
+
+		if (x instanceof Date) {
+			updateDate(columnIndex, (Date) x);
+			return;
+		}
+
+		if (x instanceof Time) {
+			updateTime(columnIndex, (Time) x);
+			return;
+		}
+
+		if (x instanceof Timestamp) {
+			updateTimestamp(columnIndex, (Timestamp) x);
+			return;
+		}
+
+		if (x instanceof Blob) {
+			updateBlob(columnIndex, (Blob) x);
+			return;
+		}
+
+		if (x instanceof Clob) {
+			updateClob(columnIndex, (Clob) x);
+			return;
+		}
+
+		throw dataTypeConversion(columnIndex, x.getClass().getName());
 	}
 
 	/**
@@ -2421,7 +2780,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateNull(String columnName) throws SQLException {
-		throw Util.notImplemented();
+		updateNull(findColumnName(columnName));
 	}
 
 	/**
@@ -2442,7 +2801,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBoolean(String columnName, boolean x) throws SQLException {
-		throw Util.notImplemented();
+		updateBoolean(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2463,7 +2822,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateByte(String columnName, byte x) throws SQLException {
-		throw Util.notImplemented();
+		updateByte(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2484,7 +2843,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateShort(String columnName, short x) throws SQLException {
-		throw Util.notImplemented();
+		updateShort(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2505,7 +2864,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateInt(String columnName, int x) throws SQLException {
-		throw Util.notImplemented();
+		updateInt(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2526,7 +2885,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateLong(String columnName, long x) throws SQLException {
-		throw Util.notImplemented();
+		updateLong(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2547,7 +2906,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateFloat(String columnName, float x) throws SQLException {
-		throw Util.notImplemented();
+		updateFloat(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2568,7 +2927,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateDouble(String columnName, double x) throws SQLException {
-		throw Util.notImplemented();
+		updateDouble(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2589,7 +2948,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateString(String columnName, String x) throws SQLException {
-		throw Util.notImplemented();
+		updateString(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2610,7 +2969,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBytes(String columnName, byte x[]) throws SQLException {
-		throw Util.notImplemented();
+		updateBytes(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2632,7 +2991,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateDate(String columnName, java.sql.Date x)
 			throws SQLException {
-		throw Util.notImplemented();
+		updateDate(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2654,7 +3013,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTime(String columnName, java.sql.Time x)
 			throws SQLException {
-		throw Util.notImplemented();
+		updateTime(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2676,7 +3035,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTimestamp(String columnName, java.sql.Timestamp x)
 			throws SQLException {
-		throw Util.notImplemented();
+		updateTimestamp(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2700,7 +3059,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateAsciiStream(String columnName, java.io.InputStream x,
 			int length) throws SQLException {
-		throw Util.notImplemented();
+		updateAsciiStream(findColumnName(columnName), x, length);
 	}
 
 	/**
@@ -2724,7 +3083,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateBinaryStream(String columnName, java.io.InputStream x,
 			int length) throws SQLException {
-		throw Util.notImplemented();
+		updateBinaryStream(findColumnName(columnName), x, length);
 	}
 
 	/**
@@ -2748,45 +3107,41 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateCharacterStream(String columnName, java.io.Reader reader,
 			int length) throws SQLException {
-		throw Util.notImplemented();
+		updateCharacterStream(findColumnName(columnName), reader, length);
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with an Object value.
-	 * 
-	 * The updateXXX() methods are used to update column values in the current
-	 * row, or the insert row. The updateXXX() methods do not update the
-	 * underlying database, instead the updateRow() or insertRow() methods are
-	 * called to update the database.
-	 * 
-	 * @param columnName
-	 *            the name of the column
-	 * @param x
-	 *            the new column value
-	 * @param scale
-	 *            For java.sql.Types.DECIMAL or java.sql.Types.NUMERIC types
-	 *            this is the number of digits after the decimal. For all other
-	 *            types this value will be ignored.
-	 * @exception SQLException
-	 *                if a database-access error occurs
+	 *
+	 * The updateXXX() methods are used to update column values in the
+	 * current row, or the insert row.  The updateXXX() methods do not
+	 * update the underlying database, instead the updateRow() or insertRow()
+	 * methods are called to update the database.
+	 *
+	 * @param columnName the name of the column
+	 * @param x the new column value
+	 * @param scale For java.sql.Types.DECIMAL or java.sql.Types.NUMERIC types
+	 *  this is the number of digits after the decimal.  For all other
+	 *  types this value will be ignored.
+	 * @exception SQLException if a database-access error occurs
 	 */
 	public void updateObject(String columnName, Object x, int scale)
-			throws SQLException {
-		throw Util.notImplemented();
+      throws SQLException {
+		updateObject(findColumnName(columnName), x, scale);
 	}
 
 	/**
 	 * JDBC 2.0
-	 * 
+	 *
 	 * Update a column with an Object value.
-	 * 
+	 *
 	 * The updateXXX() methods are used to update column values in the current
 	 * row, or the insert row. The updateXXX() methods do not update the
 	 * underlying database, instead the updateRow() or insertRow() methods are
 	 * called to update the database.
-	 * 
+	 *
 	 * @param columnName
 	 *            the name of the column
 	 * @param x
@@ -2795,7 +3150,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateObject(String columnName, Object x) throws SQLException {
-		throw Util.notImplemented();
+		updateObject(findColumnName(columnName), x);
 	}
 
 	/**
@@ -2813,102 +3168,119 @@ public abstract class EmbedResultSet extends ConnectionChild
 		throw Util.notImplemented();
 	}
 
-	/**
-	 * JDBC 2.0
-	 * 
-	 * Update the underlying database with the new contents of the current row.
-	 * Cannot be called when on the insert row.
-	 * 
-	 * @exception SQLException
-	 *                if a database-access error occurs, or if called when on
-	 *                the insert row
-	 */
-	public void updateRow() throws SQLException {
-		throw Util.notImplemented();
-	}
+    /**
+     * JDBC 2.0
+     *
+     * Update the underlying database with the new contents of the
+     * current row.  Cannot be called when on the insert row.
+     *
+     * @exception SQLException if a database-access error occurs, or
+     * if called when on the insert row
+     */
+    public void updateRow() throws SQLException {
+			synchronized (getConnectionSynchronization()) {
+        checksBeforeUpdateOrDelete("updateRow", -1);
+        setupContextStack();
+        LanguageConnectionContext lcc = null;
+        StatementContext statementContext = null;
+        try {
+            if (currentRowHasBeenUpdated == false) //nothing got updated on this row 
+                return; //nothing to do since no updates were made to this row
 
-	/**
-	 * JDBC 2.0
-	 * 
-	 * Delete the current row from the result set and the underlying database.
-	 * Cannot be called when on the insert row.
-	 * 
-	 * @exception SQLException
-	 *                if a database-access error occurs, or if called when on
-	 *                the insert row.
-	 */
-	public void deleteRow() throws SQLException {
-		synchronized (getConnectionSynchronization()) {
-			checkIfClosed("deleteRow");
-			checkOnRow(); // first make sure there's a current row
+            //now construct the update where current of sql
+            boolean foundOneColumnAlready = false;
+            StringBuffer updateWhereCurrentOfSQL = new StringBuffer("UPDATE ");
+            CursorActivation activation = getEmbedConnection().getLanguageConnection().lookupCursorActivation(getCursorName());
+            ExecCursorTableReference targetTable = activation.getPreparedStatement().getTargetTable();
+            updateWhereCurrentOfSQL.append(getFullBaseTableName(targetTable));//got the underlying (schema.)table name
+            updateWhereCurrentOfSQL.append(" SET ");
+            ResultDescription rd = theResults.getResultDescription();
 
-			if (getConcurrency() != JDBC20Translation.CONCUR_UPDATABLE)//if not
-																	   // updatable
-																	   // resultset,
-																	   // can't
-																	   // issue
-																	   // deleteRow
-				throw Util.generateCsSQLException(
-						SQLState.UPDATABLE_RESULTSET_API_DISALLOWED,
-						"deleteRow");
+            for (int i=1; i<=rd.getColumnCount(); i++) { //in this for loop we are constructing columnname=?,... part of the update sql
+                if (columnGotUpdated[i-1]) { //if the column got updated, do following
+                    if (foundOneColumnAlready)
+                        updateWhereCurrentOfSQL.append(",");
+                    //using quotes around the column name to preserve case sensitivity
+                    updateWhereCurrentOfSQL.append("\"" + rd.getColumnDescriptor(i).getName() + "\"=?");
+                    foundOneColumnAlready = true;
+                }
+            }
+            //using quotes around the cursor name to preserve case sensitivity
+            updateWhereCurrentOfSQL.append(" WHERE CURRENT OF \"" + getCursorName() + "\"");
+            lcc = getEmbedConnection().getLanguageConnection();
+            statementContext = lcc.pushStatementContext(isAtomic, updateWhereCurrentOfSQL.toString(), null, false);
+            org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(updateWhereCurrentOfSQL.toString());
+            Activation act = ps.getActivation(lcc, false);
 
-			setupContextStack();
-			try {
-				//in case of autocommit on, if there was an exception which
-				// caused runtime rollback in this transaction prior to this
-				// deleteRow,
-				//the rollback code will mark the language resultset closed (it
-				// doesn't mark the JDBC ResultSet closed).
-				//That is why alongwith the earlier checkIfClosed call in this
-				// method, there is a check for language resultset close as
-				// well.
-				if (theResults.isClosed())
-					throw Util.generateCsSQLException(
-							SQLState.LANG_RESULT_SET_NOT_OPEN, "deleteRow");
-				StringBuffer deleteWhereCurrentOfSQL = new StringBuffer(
-						"DELETE FROM ");
-				Activation activation = getEmbedConnection()
-						.getLanguageConnection().lookupCursorActivation(
-								getCursorName());
-				deleteWhereCurrentOfSQL.append(getFullBaseTableName(activation
-						.getPreparedStatement().getTargetTable()));//get the
-																   // underlying
-																   // (schema.)table
-																   // name
-				//using quotes around the cursor name to preserve case
-				// sensitivity
-				deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF \""
-						+ getCursorName() + "\"");
-
-				LanguageConnectionContext lcc = getEmbedConnection()
-						.getLanguageConnection();
-				StatementContext statementContext = lcc.pushStatementContext(
-						isAtomic, deleteWhereCurrentOfSQL.toString(), null,
-						false);
-				org.apache.derby.iapi.sql.PreparedStatement ps = lcc
-						.prepareInternalStatement(deleteWhereCurrentOfSQL
-								.toString());
-				org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true);
-				rs.close();
-				rs.finish();
-				//For forward only resultsets, after a delete, the ResultSet
-				// will be positioned right before the next row.
-				rowData = null;
-				lcc.popStatementContext(statementContext, null);
-			} catch (StandardException t) {
-				throw closeOnTransactionError(t);
-			} finally {
-				restoreContextStack();
+            //in this for loop we are assigning values for parameters in sql constructed earlier with columnname=?,... 
+            for (int i=1, paramPosition=0; i<=rd.getColumnCount(); i++) { 
+                if (columnGotUpdated[i-1])  //if the column got updated, do following
+                    act.getParameterValueSet().getParameterForSet(paramPosition++).setValue(currentRow.getColumn(i));
+            }
+            org.apache.derby.iapi.sql.ResultSet rs = ps.execute(act, false, true, true); //execute the update where current of sql
+            rs.close();
+            rs.finish();
+            //For forward only resultsets, after a update, the ResultSet will be positioned right before the next row.
+            rowData = null;
+            currentRow = null;
+            lcc.popStatementContext(statementContext, null);
+        } catch (StandardException t) {
+            throw closeOnTransactionError(t);
+        } finally {
+            if (statementContext != null)
+                lcc.popStatementContext(statementContext, null);
+            restoreContextStack();
+        }
 			}
-		}
-	}
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Delete the current row from the result set and the underlying
+     * database.  Cannot be called when on the insert row.
+     *
+     * @exception SQLException if a database-access error occurs, or if
+     * called when on the insert row.
+     */
+    public void deleteRow() throws SQLException {
+        synchronized (getConnectionSynchronization()) {
+            checksBeforeUpdateOrDelete("deleteRow", -1);
+
+            setupContextStack();
+            //now construct the delete where current of sql
+            try {
+                StringBuffer deleteWhereCurrentOfSQL = new StringBuffer("DELETE FROM ");
+                CursorActivation activation = getEmbedConnection().getLanguageConnection().lookupCursorActivation(getCursorName());
+                deleteWhereCurrentOfSQL.append(getFullBaseTableName(activation.getPreparedStatement().getTargetTable()));//get the underlying (schema.)table name
+                //using quotes around the cursor name to preserve case sensitivity
+                deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF \"" + getCursorName() + "\"");
+
+                LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+                StatementContext statementContext = lcc.pushStatementContext(isAtomic, deleteWhereCurrentOfSQL.toString(), null, false);
+                org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
+                org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true); //execute delete where current of sql
+                rs.close();
+                rs.finish();
+                //For forward only resultsets, after a delete, the ResultSet will be positioned right before the next row.
+                rowData = null;
+                currentRow = null;
+                lcc.popStatementContext(statementContext, null);
+            } catch (StandardException t) {
+                    throw closeOnTransactionError(t);
+            } finally {
+                restoreContextStack();
+            }
+        }
+    }
 
 	private String getFullBaseTableName(ExecCursorTableReference targetTable) {
+		//using quotes to preserve case sensitivity
 		if (targetTable.getSchemaName() != null)
-			return targetTable.getSchemaName() + "."
-					+ targetTable.getBaseName();
+			return "\"" + targetTable.getSchemaName() + "\".\""
+					+ targetTable.getBaseName() + "\"";
 		else
-			return targetTable.getBaseName();
+			return "\"" + targetTable.getBaseName() + "\"";
 	}
 
 	/**
@@ -2937,22 +3309,31 @@ public abstract class EmbedResultSet extends ConnectionChild
 		throw Util.notImplemented();
 	}
 
-	/**
-	 * JDBC 2.0
-	 * 
-	 * The cancelRowUpdates() method may be called after calling an updateXXX()
-	 * method(s) and before calling updateRow() to rollback the updates made to
-	 * a row. If no updates have been made or updateRow() has already been
-	 * called, then this method has no effect.
-	 * 
-	 * @exception SQLException
-	 *                if a database-access error occurs, or if called when on
-	 *                the insert row.
-	 *  
-	 */
-	public void cancelRowUpdates() throws SQLException {
-		throw Util.notImplemented();
-	}
+    /**
+     * JDBC 2.0
+     *
+     * The cancelRowUpdates() method may be called after calling an
+     * updateXXX() method(s) and before calling updateRow() to rollback 
+     * the updates made to a row.  If no updates have been made or 
+     * updateRow() has already been called, then this method has no 
+     * effect.
+     *
+     * @exception SQLException if a database-access error occurs, or if
+     * called when on the insert row.
+     *
+     */
+    public void cancelRowUpdates () throws SQLException {
+        checksBeforeUpdateOrDelete("cancelRowUpdates", -1);
+        if (currentRowHasBeenUpdated == false) return; //nothing got updated on this row so cancelRowUpdates is a no-op in this case.
+
+        for (int i=0; i < columnGotUpdated.length; i++){
+            if (columnGotUpdated[i] == true) currentRow.setColumn(i+1, copyOfDatabaseRow[i]);//if column got updated, resotre the original data
+            columnGotUpdated[i] = false;
+        }
+        currentRowHasBeenUpdated = false;
+        //rowData needs to be refreshed with the currentRow otherwise it will continue to have changes made by updateXXX methods
+        rowData = currentRow.getRowArray();
+        }
 
 	/**
 	 * JDBC 2.0
@@ -3141,7 +3522,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateBlob(int columnIndex, Blob x) throws SQLException {
-		throw Util.notImplemented();
+        checksBeforeUpdateOrDelete("updateBlob", columnIndex);
+        int colType = getColumnType(columnIndex);
+        if (colType != Types.BLOB)
+            throw dataTypeConversion(columnIndex, "java.sql.Blob");
+
+        if (x == null)
+            updateNull(columnIndex);
+        else
+            updateBinaryStreamInternal(columnIndex, x.getBinaryStream(), -1, "updateBlob");
 	}
 
 	/**
@@ -3160,7 +3549,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateBlob(String columnName, Blob x) throws SQLException {
-		throw Util.notImplemented();
+		updateBlob(findColumnName(columnName), x);
 	}
 
 	/**
@@ -3179,7 +3568,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateClob(int columnIndex, Clob x) throws SQLException {
-		throw Util.notImplemented();
+        checksBeforeUpdateOrDelete("updateClob", columnIndex);
+        int colType = getColumnType(columnIndex);
+        if (colType != Types.CLOB)
+            throw dataTypeConversion(columnIndex, "java.sql.Clob");
+
+        if (x == null)
+            updateNull(columnIndex);
+        else
+            updateCharacterStreamInternal(columnIndex, x.getCharacterStream(), -1, "updateClob");
 	}
 
 	/**
@@ -3198,7 +3595,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateClob(String columnName, Clob x) throws SQLException {
-		throw Util.notImplemented();
+		updateClob(findColumnName(columnName), x);
 	}
 	
 	
@@ -3504,6 +3901,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 	protected final SQLException dataTypeConversion(String targetType, int column) {
 		return newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, targetType,
 			resultDescription.getColumnDescriptor(column).getType().getTypeId().getSQLTypeName());
+	}
+
+	protected final SQLException dataTypeConversion(int column, String targetType) {
+		return newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH,
+			resultDescription.getColumnDescriptor(column).getType().getTypeId().getSQLTypeName(), targetType);
 	}
 }
 

@@ -8,13 +8,13 @@ Expected : Feature not implemented: no details.
 trying rs.updateRef(String, Ref) :
 Expected : Feature not implemented: no details.
 trying rs.updateBlob(int, Blob) :
-Expected : Feature not implemented: no details.
+Expected : 'updateBlob' not allowed because the ResultSet is not an updatable ResultSet. 
 trying rs.updateBlob(String, Blob) :
-Expected : Feature not implemented: no details.
+Expected : 'updateBlob' not allowed because the ResultSet is not an updatable ResultSet. 
 trying rs.updateClob(int, Clob) :
-Expected : Feature not implemented: no details.
+Expected : 'updateClob' not allowed because the ResultSet is not an updatable ResultSet. 
 trying rs.updateClob(String, Clob) :
-Expected : Feature not implemented: no details.
+Expected : 'updateClob' not allowed because the ResultSet is not an updatable ResultSet. 
 trying rs.updateArray(int, Array) :
 Expected : Feature not implemented: no details.
 trying rs.updateClob(String, Array) :

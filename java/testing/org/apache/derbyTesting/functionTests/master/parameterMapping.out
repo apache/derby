@@ -2386,8 +2386,7 @@ setNull() with all JDBC Types on CLOB(1k)
   setNull(235350345) IC
 setXXX() with all JDBC Types on CLOB(1k)
 For setXXX() methods that pass an object, a null and valid values are checked
-  setByte() java.lang.Throwable: FRED
-IC JDBC MATCH (INVALID)
+  setByte() IC JDBC MATCH (INVALID)
   setShort() IC JDBC MATCH (INVALID)
   setInt() IC JDBC MATCH (INVALID)
   setLong() IC JDBC MATCH (INVALID)
