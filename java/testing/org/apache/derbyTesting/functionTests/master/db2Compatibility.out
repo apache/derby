@@ -90,13 +90,13 @@ ij> DROP STATEMENT insert1;
 ERROR 42X01: Syntax error: Encountered "STATEMENT" at line 1, column 6.
 ij> -- Primary key constraint, DB2 requires NOT null on the columns.
 create table customer (id int primary key, name char(100));
-ERROR 42831: 'ID' cannot be a column of a primary key or unique key because it can contain null values.
+0 rows inserted/updated/deleted
 ij> drop table customer;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CUSTOMER' because it does not exist.
+0 rows inserted/updated/deleted
 ij> create table customer (id  int NOT NULL, id2 int, name char(100), primary key (id, id2));
-ERROR 42831: 'ID2' cannot be a column of a primary key or unique key because it can contain null values.
+0 rows inserted/updated/deleted
 ij> drop table customer;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CUSTOMER' because it does not exist.
+0 rows inserted/updated/deleted
 ij> -- Unique key constraint, DB2 requires NOT null on the columns.
 create table customer (id int unique, name char(100));
 ERROR 42831: 'ID' cannot be a column of a primary key or unique key because it can contain null values.
@@ -1308,13 +1308,6 @@ ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compat
 ij> drop table likeable;
 0 rows inserted/updated/deleted
 ij> drop table likes;
-0 rows inserted/updated/deleted
-ij> -- no schema names in constraint names (beetle 5143)
-CREATE TABLE S5143.T5143_1 (C1 int CONSTRAINT S5143.CPK1 PRIMARY KEY);
-ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
-ij> CREATE TABLE S5143.T5143_2 (C1 int, C2 int, CONSTRAINT S5143.CPK1  PRIMARY KEY(C1,C2));
-ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
-ij> CREATE TABLE S5143.T5143_3 (C1 int, C2 int, CONSTRAINT S5143.C3 CHECK(C1 > C2));
 0 rows inserted/updated/deleted
 ij> -- READ ONLY not allowed in "FOR" clause of a select.
 create table roTable (i int);

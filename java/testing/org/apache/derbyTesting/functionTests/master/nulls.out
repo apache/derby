@@ -85,10 +85,6 @@ ij> -- defining primarykey table constraint on explicitly nullable columns
 -- give error
 create table a1(ac1 int null, ac2 int not null, primary key(ac1,ac2));
 ERROR 42X01: Syntax error: Encountered "null" at line 3, column 25.
-ij> -- should fail because
--- not null must explicitly be specified for columns that have primary keys
-create table a1(ac1 int, ac2 int not null, primary key(ac1,ac2));
-ERROR 42831: 'AC1' cannot be a column of a primary key or unique key because it can contain null values.
 ij> -- say null twice should fail
 create table a2(ac1 int null null);
 ERROR 42X01: Syntax error: Encountered "null" at line 2, column 25.

@@ -80,10 +80,6 @@ create table a1(ac1 int null primary key);
 -- give error
 create table a1(ac1 int null, ac2 int not null, primary key(ac1,ac2));
 
--- should fail because
--- not null must explicitly be specified for columns that have primary keys
-create table a1(ac1 int, ac2 int not null, primary key(ac1,ac2));
-
 -- say null twice should fail
 create table a2(ac1 int null null);
 

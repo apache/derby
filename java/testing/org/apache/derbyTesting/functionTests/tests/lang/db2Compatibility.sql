@@ -872,12 +872,6 @@ select * from likes where ts like '2004-04-09 08:5%';
 drop table likeable;
 drop table likes;
 
--- no schema names in constraint names (beetle 5143)
-CREATE TABLE S5143.T5143_1 (C1 int CONSTRAINT S5143.CPK1 PRIMARY KEY);
-CREATE TABLE S5143.T5143_2 (C1 int, C2 int, CONSTRAINT S5143.CPK1  PRIMARY KEY(C1,C2));
-CREATE TABLE S5143.T5143_3 (C1 int, C2 int, CONSTRAINT S5143.C3 CHECK(C1 > C2));
-
-
 -- READ ONLY not allowed in "FOR" clause of a select.
 create table roTable (i int);
 insert into roTable values (8);

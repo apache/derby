@@ -33,7 +33,6 @@ import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
@@ -47,6 +46,7 @@ import org.apache.derby.impl.sql.execute.ConstraintConstantAction;
 import org.apache.derby.impl.sql.execute.IndexConstantAction;
 
 import	org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.catalog.UUID;
 
@@ -62,8 +62,8 @@ import java.util.Vector;
 
 public class TableElementList extends QueryTreeNodeVector
 {
-	int				numColumns;
-	TableDescriptor td;
+	private int				numColumns;
+	private TableDescriptor td;
 
 	/**
 	 * Add a TableElementNode to this TableElementList
@@ -173,7 +173,7 @@ public class TableElementList extends QueryTreeNodeVector
 				checkForDuplicateColumns(ddlStmt, columnHT, cdn.getColumnName());
 				cdn.checkUserType(td);
 				cdn.bindAndValidateDefault(dd, td);
-				
+
 				cdn.validateAutoincrement(dd, td, tableType);
 
 				if (tableElement instanceof ModifyColumnNode)
@@ -262,7 +262,7 @@ public class TableElementList extends QueryTreeNodeVector
 
 					String dropSchemaName = cdn.getDropSchemaName();
 
-					SchemaDescriptor sd = dropSchemaName == null ? td.getSchemaDescriptor() : 
+					SchemaDescriptor sd = dropSchemaName == null ? td.getSchemaDescriptor() :
 											getSchemaDescriptor(dropSchemaName);
 
 					ConstraintDescriptor cd =
@@ -280,22 +280,33 @@ public class TableElementList extends QueryTreeNodeVector
 				}
 			}
 
-			/* For primary/unique/unique keys, verify that the constraint's column
-			 * list contains valid columns and does not contain any duplicates
-			 * (Also, all columns in a primary key will be set to non-null,
-				but only in Cloudscape mode. SQL and DB2 require explict NOT NULL.
-			 */
-			if (cdn.hasPrimaryKeyConstraint() ||
-				cdn.hasForeignKeyConstraint() ||
-				cdn.hasUniqueKeyConstraint())
-			{
-				verifyUniqueColumnList(ddlStmt, cdn);
-				/* Raise error if primary or unique key columns can be nullable. */
-				if (cdn.hasPrimaryKeyConstraint() || cdn.hasUniqueKeyConstraint())
-				{
-					setColumnListToNotNull(cdn, td);
-				}
-			}
+            if (cdn.hasPrimaryKeyConstraint())
+            {
+                // for PRIMARY KEY, check that columns are unique
+                verifyUniqueColumnList(ddlStmt, cdn);
+
+                if (td == null)
+                {
+                    // in CREATE TABLE so set PRIMARY KEY columns to NOT NULL
+                    setColumnListToNotNull(cdn);
+                }
+                else
+                {
+                    // in ALTER TABLE so raise error if any columns are nullable
+                    checkForNullColumns(cdn, td);
+                }
+            }
+            else if (cdn.hasUniqueKeyConstraint())
+            {
+                // for UNIQUE, check that columns are unique and NOT NULL
+                verifyUniqueColumnList(ddlStmt, cdn);
+                checkForNullColumns(cdn, td);
+            }
+            else if (cdn.hasForeignKeyConstraint())
+            {
+                // for FOREIGN KEY, check that columns are unique
+                verifyUniqueColumnList(ddlStmt, cdn);
+            }
 		}
 
 		/* Can have only one autoincrement column in DB2 mode */
@@ -303,8 +314,8 @@ public class TableElementList extends QueryTreeNodeVector
 			throw StandardException.newException(SQLState.LANG_MULTIPLE_AUTOINCREMENT_COLUMNS);
 
 	}
-	
-	/**
+
+    /**
 	 * Count the number of constraints of the specified type.
 	 *
 	 * @param constraintType	The constraint type to search for.
@@ -872,62 +883,78 @@ public class TableElementList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Set all columns in that appear in a primary/unique key constraint in a create
-	 * table statement to NOT NULL in Cloudscape mode and raises an error in DB2 mode.
+	 * Set all columns in that appear in a PRIMARY KEY constraint in a CREATE TABLE statement to NOT NULL.
 	 *
-	 * @param cdn		The ConstraintDefinitionNode
-	 * @param td		TableDescriptor for the table
+	 * @param cdn		The ConstraintDefinitionNode for a PRIMARY KEY constraint
 	 */
-	private void setColumnListToNotNull(ConstraintDefinitionNode cdn, TableDescriptor td)
-		throws StandardException
+	private void setColumnListToNotNull(ConstraintDefinitionNode cdn)
 	{
 		ResultColumnList rcl = cdn.getColumnList();
 		int rclSize = rcl.size();
 		for (int index = 0; index < rclSize; index++)
 		{
 			String colName = ((ResultColumn) rcl.elementAt(index)).getName();
-
-			/* For ALTER TABLE ADD CONSTRAINT, make sure columns are not nullable for
-			 * primary and unique constraints.
-			 */
-			if (td != null && cdn instanceof ConstraintDefinitionNode)
-			{
-				ColumnDescriptor cd = td.getColumnDescriptor(colName);
-				if (cd != null && cd.getType().isNullable())
-					throw StandardException.newException(SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS, colName);
-			}
-
-			setColumnToNotNull(colName);
-		}
+            DataTypeDescriptor dtd = getColumnDataTypeDescriptor(colName);
+            dtd.setNullability(false);
+        }
 	}
 
-	/**
-	 * Set a column that appears in a primary/unique key constraint in
-	 * a create table statement to NOT NULL (but only in Cloudscape mode).
-	 *
-	 * @param colName	The column name
-	 */
-	private void setColumnToNotNull(String colName) throws StandardException
-	{
-		int size = size();
 
-		for (int index = 0; index < size; index++)
-		{
-			TableElementNode tableElement = (TableElementNode) elementAt(index);
+    private void checkForNullColumns(ConstraintDefinitionNode cdn, TableDescriptor td) throws StandardException
+    {
+        ResultColumnList rcl = cdn.getColumnList();
+        int rclSize = rcl.size();
+        for (int index = 0; index < rclSize; index++)
+        {
+            String colName = ((ResultColumn) rcl.elementAt(index)).getName();
+            DataTypeDescriptor dtd;
+            if (td == null)
+            {
+                dtd = getColumnDataTypeDescriptor(colName);
+            }
+            else
+            {
+                dtd = getColumnDataTypeDescriptor(colName, td);
+            }
+            // todo dtd may be null if the column does not exist, we should check that first
+            if (dtd != null && dtd.isNullable())
+            {
+                throw StandardException.newException(SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS, colName);
+            }
+        }
+    }
 
-			if (tableElement instanceof ColumnDefinitionNode)
-			{
-				ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElement;
-				if (colName.equals(cdn.getColumnName()))
-				{
-					DataTypeDescriptor dtd = cdn.getDataTypeServices();
+    private DataTypeDescriptor getColumnDataTypeDescriptor(String colName)
+    {
+        int size = size();
 
-					if (dtd.isNullable())
-						throw StandardException.newException(SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS, colName);
-				}
-			}
-		}
-	}
+        for (int index = 0; index < size; index++)
+        {
+            TableElementNode tableElement = (TableElementNode) elementAt(index);
+
+            if (tableElement instanceof ColumnDefinitionNode)
+            {
+                ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElement;
+                if (colName.equals(cdn.getColumnName()))
+                {
+                    return cdn.getDataTypeServices();
+                }
+            }
+        }
+        return null;
+    }
+
+    private DataTypeDescriptor getColumnDataTypeDescriptor(String colName, TableDescriptor td)
+    {
+        // check existing columns
+        ColumnDescriptor cd = td.getColumnDescriptor(colName);
+        if (cd != null)
+        {
+            return cd.getType();
+        }
+        // check for new columns
+        return getColumnDataTypeDescriptor(colName);
+    }
 
 	/**
 	 * Determine whether or not the parameter matches a column name in this list.

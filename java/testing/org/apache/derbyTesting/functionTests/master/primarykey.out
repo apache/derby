@@ -59,19 +59,24 @@ create table neg2(c1 int null constraint asdf primary key);
 ERROR 42X01: Syntax error: Encountered "null" at line 2, column 26.
 ij> create table neg2(c1 int null, c2 int, constraint asdf primary key(c1, c2));
 ERROR 42X01: Syntax error: Encountered "null" at line 1, column 26.
-ij> -- verify that you can not create a primary key column with default null
--- a primary key column can only be create if the column is explicitly not null
-create table neg1 (c1 int default null primary key);
-ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
-ij> create table neg1 (c1 int default null, c2 int not null, primary key(c2, c1));
-ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
 ij> -- test that a unique key can be not be explicitly nullable
-create table neg1(c1 int null unique);
-ERROR 42X01: Syntax error: Encountered "null" at line 2, column 26.
-ij> create table neg1(c1 int null, c2 int, constraint asdf unique(c1));
-ERROR 42X01: Syntax error: Encountered "null" at line 1, column 26.
+create table neg1(c1 int unique);
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> create table neg1(c1 int, c2 int, constraint asdf unique(c1));
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
 ij> -- positive tests
--- verify that a unique key can not contain nulls
+-- verify that a primary key implies not null
+create table pos1 (c1 int primary key);
+0 rows inserted/updated/deleted
+ij> insert into pos1(c1) values(1);
+1 row inserted/updated/deleted
+ij> insert into pos1(c1) values(1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'POS1'.
+ij> insert into pos1(c1) values(null);
+ERROR 23502: Column 'C1'  cannot accept a NULL value.
+ij> drop table pos1;
+0 rows inserted/updated/deleted
+ij> -- verify that a unique key can not contain nulls
 create table pos1 (c1 int not null unique, c2 int);
 0 rows inserted/updated/deleted
 ij> insert into pos1 (c1) values(null);

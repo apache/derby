@@ -49,18 +49,20 @@ create table neg2(c1 int not null constraint app.asdf primary key);
 create table neg2(c1 int null constraint asdf primary key);
 create table neg2(c1 int null, c2 int, constraint asdf primary key(c1, c2));
 
--- verify that you can not create a primary key column with default null
--- a primary key column can only be create if the column is explicitly not null
-create table neg1 (c1 int default null primary key);
-create table neg1 (c1 int default null, c2 int not null, primary key(c2, c1));
-
 -- test that a unique key can be not be explicitly nullable
-create table neg1(c1 int null unique);
-create table neg1(c1 int null, c2 int, constraint asdf unique(c1));
+create table neg1(c1 int unique);
+create table neg1(c1 int, c2 int, constraint asdf unique(c1));
 
 
 
 -- positive tests
+
+-- verify that a primary key implies not null
+create table pos1 (c1 int primary key);
+insert into pos1(c1) values(1);
+insert into pos1(c1) values(1);
+insert into pos1(c1) values(null);
+drop table pos1;
 
 -- verify that a unique key can not contain nulls
 create table pos1 (c1 int not null unique, c2 int);
