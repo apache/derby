@@ -1079,7 +1079,7 @@ public class outparams
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 				strbuf.append("getBigDecimal("+arg+") = ");
-				BigDecimal bd = cs.getBigDecimal(arg, 2);
+				BigDecimal bd = cs.getBigDecimal(arg);
 				strbuf.append(bd == null ? "null" : bd.toString());
 				break;
 
