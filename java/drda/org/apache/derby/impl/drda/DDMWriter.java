@@ -888,7 +888,6 @@ class DDMWriter
 	 *
 	 * @param 	codePoint - code point to write
 	 * @param	dataLength - length of object data
-	 * @param	length - number of bytes to write
 	 */
 	protected void writeScalarHeader (int codePoint, int dataLength)
 	{
@@ -1123,7 +1122,7 @@ class DDMWriter
 	 *
 	 * @param v value to write
 	 * @param precision Precison of decimal or numeric type
-	 * @param declared scale
+	 * @param scale declared scale
 	 * @exception SQLException thrown if number of digits > 31
 	 */
 	protected void writeBigDecimal (java.math.BigDecimal v, int precision, int scale)

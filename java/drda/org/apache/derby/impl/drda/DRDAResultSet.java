@@ -150,7 +150,7 @@ class DRDAResultSet
 
 	/** 
 	 * Set ResultSet DRDA DataTypes
-	 * @param drddaTypes for columns.
+	 * @param value drdaTypes for columns.
 	 **/
 	protected void setRsDRDATypes(int [] value)
 	{

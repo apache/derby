@@ -44,7 +44,6 @@ public class utilMain14 extends utilMain
 	 *
 	 * @param numConnections	The number of connections/users to test.
 	 *
-	 * @return Nothing.
 	 */
 	public utilMain14(int numConnections, LocalizedOutput out)
 		throws ijFatalException
@@ -64,7 +63,6 @@ public class utilMain14 extends utilMain
 	 *							thrown.  ignoreErrors is used for stress
 	 *							tests.
 	 *
-	 * @return Nothing.
 	 */
 	public utilMain14(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
 		throws ijFatalException

@@ -181,7 +181,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
   /**
     prints out the jbms info to the specified AppStreamWriter.
-    @param aw the AppStreamWriter to use. If null, System.out is
+    @param localAW the AppStreamWriter to use. If null, System.out is
     used
   */
 
@@ -222,7 +222,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     Writes out the relevant info about the Java environment to
     the specified AppStreamWriter.
 
-    @param aw The AppStreamWriter to write info out to. If this is
+    @param localAW The AppStreamWriter to write info out to. If this is
     null, the info is written to System.out
   */
 
@@ -325,7 +325,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     Writes out information about the locales with the
     product.
 
-    @param aw the AppStreamWriter to which the info is written. If this
+    @param localAW the AppStreamWriter to which the info is written. If this
     value is null, the info is written to System.out
 
   */

@@ -518,7 +518,7 @@ public class NetServlet extends HttpServlet {
 	 *	Start the network server and attempt to connect to it before
 	 *	returning
 	 *
-	 * @param localAppUI	AppUI to use to translate messages
+	 * @param localUtil LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for error forms
 	 * @param returnMessage	localized continue message for continue button on error form	
 	 * @exception ServletException throws an exception if error in starting the 
@@ -595,7 +595,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 *	Display an error form
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for error forms
 	 * @param e		Exception to be displayed
 	 * @param returnMessage	localized continue message for continue button on error form
@@ -612,7 +612,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 *	Display an error form
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for error forms
 	 * @param msg	String to be displayed
 	 * @param returnMessage	localized continue message for continue button on error form
@@ -630,7 +630,7 @@ public class NetServlet extends HttpServlet {
 	 *	Display the current Network server status
 	 *
 	 * @param request	HttpServetRequest for  forms
-	 * @param appUI		appUI to use for localizing messages
+	 * @param localUtil		LocalizedResource to use for localizing messages
 	 * @param returnMessage	localized continue message for continue button on error form	
 	 */
 	private void displayCurrentStatus(HttpServletRequest request,
@@ -680,7 +680,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 *	Shutdown the network server
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for  forms
 	 * @param returnMessage	localized continue message for continue button on error form	
 	 * @return true if succeeded; false; otherwise
@@ -701,7 +701,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 *	Turn logging of connections on
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for  forms
 	 * @param returnMessage	localized continue message for continue button on error form	
 	 * @return true if succeeded; false; otherwise
@@ -722,7 +722,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 *	Change tracing for all sessions 
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param val	if true, turn tracing on, if false turn it off
 	 * @param request HttpServetRequest for  forms
 	 * @param returnMessage	localized continue message for continue button on error form	
@@ -744,7 +744,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 *	Change tracing for a given session
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param val	if true, turn tracing on, if false turn it off
 	 * @param session	session to trace
 	 * @param request HttpServetRequest for  forms
@@ -768,7 +768,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 * Set trace directory
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param traceDirectory	directory for trace files
 	 * @param request 			HttpServetRequest for  forms
 	 * @param returnMessage		localized continue message for continue 
@@ -801,7 +801,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 * Set Network server parameters
 	 *
-	 * @param appUI	AppUI to use to translate messages
+	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param max				maximum number of threads
 	 * @param slice				time slice for each connection
 	 * @param request 			HttpServetRequest for  forms
@@ -840,7 +840,7 @@ public class NetServlet extends HttpServlet {
 	 * @param request 			HttpServetRequest for  forms
 	 * @param name				parameter name
 	 * @param fieldKey			Key for the name of the field we're reading.
-	 * @param appUI				appUI to use in localizing messages
+	 * @param localUtil				LocalizedResource to use in localizing messages
 	 * @param returnMessage		localized continue message for continue 
 	 *							button on error form	
 	 */

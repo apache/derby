@@ -1071,10 +1071,10 @@ class DDMReader
    /**
     * Convert a range of packed nybbles (up to 9 digits without overflow) to an int.
     * Note that for performance purpose, it does not do array-out-of-bound checking.
-	* @param	buffer to read from
-	* @param	offset in the buffer
-	* @param	start nybble
-	* @param	number of nybbles
+	* @param buffer			buffer to read from
+	* @param offset			offset in the buffer
+	* @param startNybble		start nybble
+	* @param numberOfNybbles	number of nybbles
 	* @return	an int value
     */
     private int packedNybblesToInt (byte[] buffer,
@@ -1108,10 +1108,10 @@ class DDMReader
     /**
      * Convert a range of packed nybbles (up to 18 digits without overflow) to a long.
      * Note that for performance purpose, it does not do array-out-of-bound checking.
-	 * @param	buffer to read from
-	 * @param	offset in the buffer
-	 * @param	start nybble
-	 * @param	number of nybbles
+	 * @param buffer		buffer to read from
+	 * @param offset		offset in the buffer
+	 * @param startNybble		start nybble
+	 * @param numberOfNybbles	number of nybbles
 	 * @return	an long value
      */
     private long packedNybblesToLong (byte[] buffer,
@@ -1184,7 +1184,7 @@ class DDMReader
 	/**
 	 * Read encrypted string
 	 * @param   decryptM  decryption manager
-	 * @param   security mechanism
+	 * @param   securityMechanism security mechanism
 	 * @param   initVector   initialization vector for cipher
 	 * @param   sourcePublicKey  public key (as in Deffie-Hellman algorithm)
 	 *                           from source (encryptor)

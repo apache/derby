@@ -310,10 +310,9 @@ public class DB2jServerImpl {
 
 	/**
 	 * Internal constructor for NetworkServerControl API. 
-	 * @ param address - InetAddress to listen on, May not be null. 
-	 * Throws NPE if null
-	 * @ portNumber - portNumber to listen on, -1 use propert or default.
-	 * @ throw Exception on error
+	 * @param address - InetAddress to listen on, May not be null.  Throws NPE if null
+	 * @param portNumber - portNumber to listen on, -1 use propert or default.
+	 * @exception throw Exception on error
 	 * @see NetworkServerControl
 	 */
 	public DB2jServerImpl(InetAddress address, int portNumber) throws Exception
@@ -402,7 +401,7 @@ public class DB2jServerImpl {
 	 * Set the output stream for console messages
 	 * If this is set to null, no messages will be written to the console
 	 *
-	 * @param outStream	output stream for console messages
+	 * @param outWriter	output stream for console messages
 	 */
 	public void setLogWriter(PrintWriter outWriter)
 	{
@@ -733,10 +732,6 @@ public class DB2jServerImpl {
 	/**
 	 * Shutdown a network server
 	 *
-	 * @param host		machine network server is running on, if null, localhost is used
-	 * @param portNumber	port number server is to use, if <= 0, default port number
-	 *			is used
-	 *
 	 * @exception Exception	throws an exception if an error occurs
 	 */
 	public void shutdown()
@@ -821,9 +816,6 @@ public class DB2jServerImpl {
 	 * Turn tracing on or off for all sessions
 	 *
 	 * @param on			true to turn tracing on, false to turn tracing off
-	 * @param host		machine network server is running on, if null, localhost is used
-	 * @param portNumber	port number server is to use, if <= 0, default port number
-	 *			is used
 	 *
 	 * @exception Exception	throws an exception if an error occurs
 	 */
@@ -879,9 +871,6 @@ public class DB2jServerImpl {
 	 * written to DB2j.log each time a connection connects or disconnects.
 	 *
 	 * @param on			true to turn on, false to turn  off
-	 * @param host		machine network server is running on, if null, localhost is used
-	 * @param portNumber	port number server is to use, if <= 0, default port number
-	 *			is used
 	 *
 	 * @exception Exception	throws an exception if an error occurs
 	 */
@@ -1433,7 +1422,7 @@ public class DB2jServerImpl {
 	/**
 	 * Get the server manager level for a given manager
 	 *
-	 * @param manger codepoint for manager
+	 * @param manager codepoint for manager
 	 * @return manager level
 	 */
 	protected int getManagerLevel(int manager)
@@ -1448,7 +1437,7 @@ public class DB2jServerImpl {
 	/**
 	 * Check whether a CCSID code page is supported
 	 *
-	 * @param CCSID to check
+	 * @param ccsid	CCSID to check
 	 * @return true if supported; false otherwise
 	 */
 	protected boolean supportsCCSID(int ccsid)
@@ -2047,7 +2036,7 @@ public class DB2jServerImpl {
 	/**
 	 * Is string "on" or "off"
 	 *
-	 * @param string	string to check
+	 * @param arg	string to check
 	 *
 	 * @return  true if string is "on", false if string is "off"
 	 *
@@ -2792,7 +2781,7 @@ public class DB2jServerImpl {
 	 * Localize a message given a particular AppUI 
 	 *
 	 * @param msgProp	message key
-	 * @param localAppUI	AppUI to use to localize message
+	 * @param localLangUtil LocalizedResource to use to localize message
 	 * @param args		arguments to message
 	 *
 	 */
@@ -3322,7 +3311,7 @@ public class DB2jServerImpl {
 	/**
 	 * Add To Session Table - for use by ClientThread, add a new Session to the sessionTable.
 	 *
-	 * @param num	Connection number to register
+	 * @param i	Connection number to register
 	 * @param s	Session to add to the sessionTable
 	 */
 	protected void addToSessionTable(Integer i, Session s)

@@ -92,7 +92,7 @@ class XADatabase extends Database {
 	}
 
 	/** Set DRDA id for this connection
-	 * @param drdaId
+	 * @param drdaID
 	 */
 	protected void setDrdaID(String drdaID)
 	{

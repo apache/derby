@@ -196,8 +196,8 @@ public class DecryptionManager
    * EUSRIDPWD - The middle 8 bytes of the server's connection key is used as
    * the token.  Decryption needs to use exactly the same token as encryption.
    *
-   * @param  int     securityMechanism
-   * @param  byte[]  userid or server(this side)'s connection key
+   * @param  securityMechanism security mechanism
+   * @param  initVector  userid or server(this side)'s connection key
    * @return byte[]  the decryption token
    */
   private byte[] calculateDecryptionToken (int securityMechanism, byte[] initVector)
@@ -234,7 +234,7 @@ public class DecryptionManager
    * decrypted data in a byte array.
    *
    * @param cipherText        The byte array form userid/password to decrypt.
-   * @param security mechanism
+   * @param securityMechanism security mechanism
    * @param initVector        The byte array which is used to calculate the
    *                          decryption token for initializing the cipher
    * @param sourcePublicKey   application requester (encrypter)'s public key.

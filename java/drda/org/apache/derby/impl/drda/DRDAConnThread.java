@@ -901,7 +901,7 @@ public class DRDAConnThread extends Thread {
 	 * a set of chained commands or received separately.  The chaining was originally
 	 * defined as a way to save network costs.
 	 *
- 	 * @param		the SQLException raised
+ 	 * @param e		the SQLException raised
 	 * @exception	DRDAProtocolException
 	 */
 	private void errorInChain(SQLException e) throws DRDAProtocolException
@@ -2364,7 +2364,7 @@ public class DRDAConnThread extends Thread {
 	 * Write ENDQRYRM - query process has terminated in such a manner that the
 	 *	query or result set is now closed.  It cannot be resumed with the CNTQRY
 	 *  command or closed with the CLSQRY command
-	 * @param srvCod  Severity code - WARNING or ERROR
+	 * @param svrCod  Severity code - WARNING or ERROR
 	 * @exception DRDAProtocolException
 	 */
 	private void writeENDQRYRM(int svrCod) throws DRDAProtocolException
@@ -3612,7 +3612,7 @@ public class DRDAConnThread extends Thread {
 	 * the values sent in the ACCRDB are used.
 	 * Objects may follow in one DSS or in several DSS chained together.
 	 * 
-	 * @param the DRDAStatement to execute
+	 * @param stmt	the DRDAStatement to execute
 	 * @exception DRDAProtocolException, SQLException
 	 */
 	private void parseEXCSQLSTTobjects(DRDAStatement stmt) throws DRDAProtocolException, SQLException
@@ -3753,7 +3753,7 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Parse SQLDTA - SQL program variable data 
 	 * and handle exception.
-	 * @see parseSQLDTA_work
+	 * @see #parseSQLDTA_work
 	 */
 
 	private void parseSQLDTA(DRDAStatement stmt) throws DRDAProtocolException,SQLException
@@ -4139,7 +4139,7 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Read different types of input parameters and set them in PreparedStatement
 	 * @param i			index of the parameter
-	 * @param ps		associated ps
+	 * @param stmt			associated ps
 	 * @param drdaType	drda type of the parameter
 	 *
 	 * @exception DRDAProtocolException, SQLException
@@ -5184,8 +5184,8 @@ public class DRDAConnThread extends Thread {
 	 *   SQLRDBNAME; DRDA TYPE VCS; ENVLID 0x32; Length Override 255
 	 *   SQLERRMSG_m; DRDA TYPE VCM; ENVLID 0x3E; Length Override 70
 	 *   SQLERRMSG_s; DRDA TYPE VCS; ENVLID 0x32; Length Override 70
-	 * @param e 	SQLException encountered
-	 * @param sqlcode	sqlcode
+	 * @param nextException SQLException encountered
+	 * @param sqlerrmc sqlcode
 	 * 
 	 * @exception DRDAProtocolException
 	 */
@@ -5432,7 +5432,7 @@ public class DRDAConnThread extends Thread {
 	 *   SQLDHROW; ROW LID 0xE0; ELEMENT TAKEN 0(all); REP FACTOR 1
 	 *   SQLNUMROW; ROW LID 0x68; ELEMENT TAKEN 0(all); REP FACTOR 1
 	 *
-	 * @param ps prepared statement
+	 * @param stmt	prepared statement
 	 *
 	 * @exception DRDAProtocolException, SQLException
 	 */
@@ -5472,7 +5472,7 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Write QRYDSC - Query Answer Set Description
 	 *
-	 * @param stmt			associated statement
+	 * @param stmt DRDAStatement we are working on
 	 * @param FDODSConly	simply the FDODSC, without the wrap
 	 *
 	 * Instance Variables
@@ -5482,7 +5482,7 @@ public class DRDAConnThread extends Thread {
 	 * they must be sent in subsequent QRYDSC.
 	 * If the QRYDSC will not fit into the current block, as many columns as can
 	 * fit are sent and then the remaining are sent in the following blocks.
-	 * @param stmt DRDAStatement we are working on
+	 * 
 	 * @exception DRDAProtocolException, SQLException
 	 */
 	private void writeQRYDSC(DRDAStatement stmt, boolean FDODSConly)
@@ -6712,7 +6712,7 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Database name given under code point doesn't match previous database names
 	 *
-	 * @param codepoint codepoint where the mismatch occurred
+	 * @param codePoint codepoint where the mismatch occurred
  	 *
 	 * @exception DRDAProtocolException
 	 */

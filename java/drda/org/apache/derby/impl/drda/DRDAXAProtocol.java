@@ -594,8 +594,8 @@ public class DRDAXAProtocol {
 
 	/** 
 	 * printable xaflags
-	 * @param - xaflags
-	 * @return - printable xaflags for debug output
+	 * @param xaflags
+	 * @return printable xaflags for debug output
 	 */
 	private String xaflagsToString(int xaflags)
 	{

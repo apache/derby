@@ -195,7 +195,7 @@ public class util implements java.security.PrivilegedAction {
 	  resourceName is not absolute (does not begin with a "/") this qualifies
 	  the name with the "ij.defaultResourcePackage" name.
 
-	  @param String the name of the resource
+	  @param resourceName the name of the resource
 	  @return a buffered stream for the resource if it exists and null otherwise.
 	  */
 	static public InputStream getResourceAsStream(String resourceName) 
@@ -662,9 +662,9 @@ AppUI.out.println("SIZE="+l);
 	 * remaining characters on the line become part of the associated
 	 * element string."
 	 *
-	 * @param iStr: An input stream from which the new properties are to be
+	 * @param iStr An input stream from which the new properties are to be
 	 *  loaded (should already be initialized).
-	 * @param prop: A set of properties to which the properties from
+	 * @param prop A set of properties to which the properties from
 	 *  iStr will be added (should already be initialized).
 	 * @return A final properties set consisting of 'prop' plus all
 	 * properties loaded from 'iStr' (with the extra whitespace (if any)
@@ -745,7 +745,7 @@ AppUI.out.println("SIZE="+l);
 	 * frameworks. So, ulitmately  this function will look at the driver
 	 * rather than the framework.
 	 * 
-	 * @ return true if the framework contains Net or JCC.
+	 * @return true if the framework contains Net or JCC.
 	 */
 	private static boolean isNetFramework()
 	{

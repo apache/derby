@@ -531,7 +531,7 @@ class DRDAStatement
 	 * resultSet and then calling getResultSet() or the other access 
 	 * methods to get resultset data.
 	 *
-	 * @ return true if the execution has resultSets
+	 * @return true if the execution has resultSets
 	 */
 	protected boolean execute() throws SQLException
 	{
@@ -691,7 +691,7 @@ class DRDAStatement
 	 * Just get the resultset. Don't set it to current
 	 * Assumes resultSet rsnum exists.
 	 *
-	 * @param rsnum - resultSetNumber starting with 0
+	 * @param rsNum resultSetNumber starting with 0
 	 * @return  The result set in the order it was retrieved
 	 *         
 	 *          with getMoreResults()
@@ -738,7 +738,7 @@ class DRDAStatement
 	/**
  	 * Set currentDrdaResultSet 
 	 *
-	 * @String pkgnamcsn  The pkgid section number and unique resultset
+	 * @param pkgnamcsn  The pkgid section number and unique resultset
 	 *                    consistency token
 	 *                 
 	 */
@@ -866,7 +866,7 @@ class DRDAStatement
 
 	/** 
 	 * Set ResultSet DRDA DataTypes
-	 * @param drddaTypes for columns.
+	 * @param value drdaTypes for columns.
 	 **/
 	protected void setRsDRDATypes(int [] value)
 	{
@@ -886,7 +886,7 @@ class DRDAStatement
 
 	/** 
 	 * Set ResultSet DRDA DataTypes Lengths
-	 * @param drddaTypes for columns.
+	 * @param value drdaTypes for columns.
 	 **/
 	protected void setRsLens(int [] value)
 	{
@@ -1182,7 +1182,7 @@ class DRDAStatement
 	/**
 	 * set resultset column data length
 	 * @param index starting with 1
-	 * @value length
+	 * @param value length
 	 */
 	protected void  setRsLen(int index, int value)
 	{
@@ -1483,7 +1483,7 @@ class DRDAStatement
 	 *  BrokeredConnection prepareStatement() method.
 	 *  @param sqlStmt - SQL statement text
 	 *  @param scrollType - scroll type
-	 *  @param concurtype - concurrency type
+	 *  @param concurType - concurrency type
 	 *  @param withHoldCursor - holdability
 	 * 
 	 *  @throws SQLException
@@ -1550,7 +1550,7 @@ class DRDAStatement
 	 * @param current - flag to pass to Statement.getMoreResults(current)
 	 * @return true if there are more results.
 	 * @throws SQLException
-	 * @see java.sql.Statemen#getMoreResults
+	 * @see java.sql.Statement#getMoreResults
 	 *
 	 */
 	protected boolean getMoreResults(int current) throws SQLException

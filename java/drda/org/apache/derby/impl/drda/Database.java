@@ -368,7 +368,7 @@ class Database
 	/**
 	 *  Set the internal isolation level to use for preparing statements.
 	 *  Subsequent prepares will use this isoalation level
-	 * @param internal isolation level 
+	 * @param level internal isolation level 
 	 *
 	 * @throws SQLException
 	 * @see EmbedConnection#setPrepareIsolation
