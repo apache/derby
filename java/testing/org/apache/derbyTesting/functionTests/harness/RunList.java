@@ -967,6 +967,15 @@ public class RunList
 			driverNotFound = true;
 			result = true;
 		}
+
+		try {
+			Class.forName("com.ibm.db2.jcc.DB2Driver");
+		} catch (ClassNotFoundException cnfe) {
+			driverNotFound = true;
+			result = true;
+		}
+
+
 	    }
 	}
 
