@@ -44,8 +44,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.DB2Limit;
 import org.apache.derby.iapi.reference.SQLState;
 
-import java.math.BigDecimal;
-
 /**
  * This class implements TypeId for the SQL numeric datatype.
  *

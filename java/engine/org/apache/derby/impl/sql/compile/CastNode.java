@@ -78,8 +78,6 @@ import org.apache.derby.catalog.TypeDescriptor;
 
 import org.apache.derby.iapi.types.SQLReal;
 
-import java.math.BigDecimal;
-
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
