@@ -47,6 +47,7 @@ public class NetServer
     BackgroundStreamSaver outSaver, errSaver;
     FileOutputStream fosOut, fosErr;
     private String java;
+	private boolean startServer;  // whether test will start it's own server
 
 	//  Variables for test connection
     Object networkServer;   // Server needs to be created with reflection
@@ -112,7 +113,7 @@ public class NetServer
     }
 
     public NetServer(File homeDir, String jvmName, String clPath, String
-		     javaCmd, String jvmflags, String framework) 
+		     javaCmd, String jvmflags, String framework, boolean startServer) 
 	throws Exception
     {
 	this.homeDir = homeDir;
@@ -124,12 +125,18 @@ public class NetServer
 	frameworkInfo =  (Object[]) m.get(framework);
 	
 	this.port = Integer.parseInt((String) frameworkInfo[PORT_POS]);
-	
+	this.startServer = startServer;
 	// System.out.println("framework: " + this.framework + "port: " + this.port);
 	
     }
     public void start() throws Exception
     {
+	  if (! startServer)
+	  {
+		System.out.println("startServer = false. Bypass server startup");
+		return;
+	  }
+
 	// Create the Server directory under the    server dir
 	(new File(homeDir, framework + "Server")).mkdir();
 	String[] startcmd = (String[]) frameworkInfo[START_CMD_POS];
@@ -232,6 +239,12 @@ public class NetServer
     
 	public boolean  testNetworkServerConnection() throws Exception
 	{ 	
+		if (! startServer)
+		{
+			System.out.println("startServer = false. Bypass server check");
+			return true;
+		}
+		
 	    Object[] testConnectionArg  = null;
 		if (networkServer == null)
 		{
@@ -249,6 +262,13 @@ public class NetServer
     // stop the Server
 	public void stop() throws Exception
     {
+	  if (! startServer)
+	  {
+		return;
+	  }
+
+	System.out.println("Attempt to shutdown framework: " 
+						 + framework);
 	jvm jvm = null; // to quiet the compiler
 	jvm = jvm.getJvm(jvmName);
 	Vector jvmCmd = jvm.getCommandLine();

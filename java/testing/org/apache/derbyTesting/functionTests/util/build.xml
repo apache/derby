@@ -60,6 +60,24 @@
       <include name="${this.dir}/*.java"/> 
       <include name="${this.dir}/StaticInitializers/*.java"/> 
       <include name="${this.dir}/VTIClasses/*.java"/> 
+      <exclude name="${this.dir}/TestUtil.java"/>
+    </javac>
+<javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <!--exclude name=""/-->
+      <include name="${this.dir}/TestUtil.java"/>
     </javac>
   </target>
 

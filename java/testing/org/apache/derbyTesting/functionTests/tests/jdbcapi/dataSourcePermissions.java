@@ -148,7 +148,7 @@ public class dataSourcePermissions
 		} catch (SQLException sqle) {
 			System.out.println("EXPECTED CONNFAIL " + sqle.getMessage());
 		}
-
+		
 		checkConnection(ds.getConnection("EDWARD", "noodle"));
 		checkConnection(ds.getConnection("FRANCES", "isabella"));
 		if (supportsUnicodeNames()) {

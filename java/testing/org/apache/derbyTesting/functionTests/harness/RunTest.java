@@ -119,6 +119,7 @@ public class RunTest
 	static String commonDBHome = "testCSHome";
 	static boolean dbIsNew = true;
 	static String runwithjvm="true";
+	static boolean startServer=true; // should test harness start the server
 
 	// Other test variables for directories, files, output
 	static String scriptName = ""; // testname as passed in
@@ -255,7 +256,7 @@ public class RunTest
 	    if ((driverName != null) && (!skiptest) )
 	    {
             System.out.println("Initialize for framework: "+ framework );
-            if (jvmnet && (framework.equals("DB2jNet")  || framework.startsWith("DerbyNet")))
+            if (jvmnet && framework.startsWith("DerbyNet"))
             {
                 // first check to see if properties were set to use a different jvm for server/client
                 String jvmnetjvm = System.getProperty("serverJvmName");
@@ -265,10 +266,12 @@ public class RunTest
                     jvmnetjvm = "j9_22";
                 }
 			
-                ns = new NetServer(baseDir, jvmnetjvm, classpathServer, null, jvmflags,framework);
+                ns = new NetServer(baseDir, jvmnetjvm, classpathServer, null,
+								   jvmflags,framework, startServer);
             }
             else
-			    ns = new NetServer(baseDir, jvmName, classpathServer, javaCmd, jvmflags,framework);
+			    ns = new NetServer(baseDir, jvmName, classpathServer, 
+								   javaCmd, jvmflags,framework, startServer);
 		    ns.start();
 		    frameworkInitialized = true;
 	    }
@@ -298,8 +301,6 @@ public class RunTest
         // Stop the Network server if necessary
 		if (frameworkInitialized)
 		{
-		    System.out.println("Attempt to shutdown framework: " 
-				       + framework);
 		    ns.stop();
 		}
 
@@ -1461,7 +1462,13 @@ clp.list(System.out);
 				addSkiptestReason("Test skipped: test cannot run with jvm: " +
 								  jvmName + ".  " + scriptFileName);
 			}
-
+			// startServer will determine whether the server will be started 
+			// for network server tests or that will be left to the test.
+			String startServerProp = ap.getProperty("startServer");
+			if (startServerProp != null &&
+				startServerProp.equalsIgnoreCase("false"))
+				startServer =false;
+			
 	        // Check for jvmflags (like "-nojit -ms32M -mx32M")
 	        // These may have been set as a system property already
 	        if (jvmflags == null)

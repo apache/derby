@@ -45,9 +45,11 @@ import javax.sql.ConnectionEvent;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import java.io.*;
 import java.net.InetAddress;
 import java.util.Hashtable;
+import java.util.Properties;
 
 import javax.naming.*;
 import javax.naming.directory.*;
@@ -71,7 +73,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		// start the server on that port before calling runTest.
 
 		try {
-			Class.forName("com.ibm.db2.jcc.DB2Driver").newInstance();
+			TestUtil.loadDriver();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -119,8 +121,10 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	public void setProperties() {
 
 		// Set required server properties.
-		System.setProperty("database", "jdbc:derby:net://localhost:"
-			+ NETWORKSERVER_PORT + "/wombat;create=true");
+		System.setProperty("database", 
+						   TestUtil.getJdbcUrlPrefix("localhost",
+													 NETWORKSERVER_PORT) +
+						   "wombat;create=true");
 		System.setProperty("ij.user", "EDWARD");
 		System.setProperty("ij.password", "noodle");
 
@@ -128,10 +132,11 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 
 	public String getJDBCUrl(String db, String attrs) {
 
-		String s = "jdbc:derby:net://localhost:" + NETWORKSERVER_PORT + "/" + db;
+		String s = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT) 
+			+ db;
 		if (attrs != null)
 			s = s + ":" + attrs + ";";
-
+		//System.out.println("getJDBCUrl:" + s);
 		return s;
 
 	}
@@ -139,65 +144,36 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	public javax.sql.DataSource getDS(String database, String user, String
 									  password)  
 {
-		return (javax.sql.DataSource) getDataSourceWithReflection("com.ibm.db2.jcc.DB2SimpleDataSource",
-									database,user,password);
-
+	Properties attrs = new Properties();
+	attrs.setProperty("databaseName", database);
+	if (user != null)
+		attrs.setProperty("user", user);
+	if (password != null)
+		attrs.setProperty("password", password);
+	attrs = addRequiredAttributes(attrs);
+	return TestUtil.getDataSource(attrs);
 	}
+	
 
-	public Object getDataSourceWithReflection(String classname, String database,
-											  String user, String password)
-	{
-		Class[] STRING_ARG_TYPE = {String.class};
-		Class[] INT_ARG_TYPE = {Integer.TYPE};
-		Object[] args = null;
-		Object ds = null;
-		Method sh = null;
-		try {
-		ds  = Class.forName(classname).newInstance();
-			
-			// Need to use reflection to load indirectly
-			// setDatabaseName
-			sh = ds.getClass().getMethod("setDatabaseName", STRING_ARG_TYPE);
-			args = new String[] {database};
-			sh.invoke(ds, args);
-			if (user != null) {
-				// setUser
-				sh = ds.getClass().getMethod("setUser", STRING_ARG_TYPE);
-				args = new String[] {user};
-				sh.invoke(ds, args);
-				// setPassword
-				sh = ds.getClass().getMethod("setPassword", STRING_ARG_TYPE);
-				args = new String[] {password};
-				sh.invoke(ds, args);
-			}
-			
-			// setServerName
-			sh = ds.getClass().getMethod("setServerName", STRING_ARG_TYPE);
-			args = new String[] {"localhost"};
-			sh.invoke(ds, args);
-
-			//setPortNumber
-			sh = ds.getClass().getMethod("setPortNumber", INT_ARG_TYPE);
-			args = new Integer[] {new Integer(NETWORKSERVER_PORT)};
-			sh.invoke(ds, args);
-
-			//setDriverType
-			sh = ds.getClass().getMethod("setDriverType", INT_ARG_TYPE);
-			args = new Integer[] {new Integer(4)};
-			sh.invoke(ds, args);
-
-		} catch (Exception e)
-		{
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-		return ds;
-	}
 
 	public javax.sql.ConnectionPoolDataSource getCPDS(String database, String user, String password) {
-		
-		return (javax.sql.ConnectionPoolDataSource) getDataSourceWithReflection("com.ibm.db2.jcc.DB2ConnectionPoolDataSource",database,user,password);
+		Properties attrs = new Properties();
+		attrs.setProperty("databaseName", database);
+		if (user != null)
+			attrs.setProperty("user", user);
+		if (password != null)
+			attrs.setProperty("password", password);
+		attrs = addRequiredAttributes(attrs);
+		return TestUtil.getConnectionPoolDataSource(attrs);
+	}
 
+	private Properties addRequiredAttributes(Properties attrs)
+	{
+		attrs.setProperty("driverType","4");
+		attrs.setProperty("serverName","localhost");
+		attrs.setProperty("portNumber","20000");
+		//attrs.setProperty("retrieveMessagesFromServerOnGetMessage","true");
+		return attrs;
 	}
 
 	public boolean supportsUnicodeNames() {
@@ -217,8 +193,9 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	public void shutdown() {
 
 		try {
-			DriverManager.getConnection("jdbc:derby:net://localhost:" +
-				NETWORKSERVER_PORT + "/wombat;shutdown=true",
+			DriverManager.getConnection(TestUtil.getJdbcUrlPrefix("localhost",
+																  NETWORKSERVER_PORT) +
+										"wombat;shutdown=true",
 				"EDWARD", "noodle");
 			System.out.println("FAIL - Shutdown returned connection");
 

@@ -23,7 +23,11 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.sql.*;
 import java.io.*;
+import java.lang.reflect.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Properties;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 
@@ -69,6 +73,13 @@ public class TestUtil {
 
 	private static int framework = UNKNOWN_FRAMEWORK;
 
+
+	// DataSource Type strings used to build up datasource names.
+	// e.g. "Embed" + XA_DATASOURCE_STRING + "DataSource
+	private static String XA_DATASOURCE_STRING = "XA";
+	private static String CONNECTION_POOL_DATASOURCE_STRING = "ConnectionPool";
+	private static String REGULAR_DATASOURCE_STRING = "";
+	
 	// Methods for making framework dependent decisions in tests.
 
 	/**
@@ -207,6 +218,151 @@ public class TestUtil {
 		Class.forName(driverName).newInstance();
 	}
 
+
+	/**
+	 * Get a data source for the appropriate framework
+	 * @param attrs  A set of attribute values to set on the datasource.
+	 *                The appropriate setter method wil b
+	 *                For example the property databaseName with value wombat,
+	 *                will mean ds.setDatabaseName("wombat") will be called
+	 *  @return datasource for current framework
+	 */
+	public static javax.sql.DataSource getDataSource(Properties attrs)
+	{
+		
+		String classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
+		return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
+	}
+
+	/**
+	 * Get an xa  data source for the appropriate framework
+	 * @param attrs  A set of attribute values to set on the datasource.
+	 *                The appropriate setter method wil b
+	 *                For example the property databaseName with value wombat,
+	 *                will mean ds.setDatabaseName("wombat") will be called
+	 *  @return datasource for current framework
+	 */
+	public static javax.sql.XADataSource getXADatasource(Properties attrs)
+	{
+		
+		String classname = getDataSourcePrefix() + XA_DATASOURCE_STRING + "DataSource";
+		return (javax.sql.XADataSource) getDataSourceWithReflection(classname, attrs);
+	}
+
+	
+	/**
+	 * Get a ConnectionPoolDataSource  for the appropriate framework
+	 * @param attrs  A set of attribute values to set on the datasource.
+	 *                The appropriate setter method wil b
+	 *                For example the property databaseName with value wombat,
+	 *                will mean ds.setDatabaseName("wombat") will be called
+	 *  @return datasource for current framework
+	 */
+	public static javax.sql.ConnectionPoolDataSource getConnectionPoolDataSource(Properties attrs)
+	{
+		
+		String classname = getDataSourcePrefix() + CONNECTION_POOL_DATASOURCE_STRING + "DataSource";
+		return (javax.sql.ConnectionPoolDataSource) getDataSourceWithReflection(classname, attrs);
+	}
+
+	private static String getDataSourcePrefix()
+		{
+			framework = getFramework();
+			switch(framework)
+			{
+				case OLD_NET_FRAMEWORK:
+				case DERBY_NET_FRAMEWORK:
+				case DB2JCC_FRAMEWORK:
+					return "com.ibm.db2.jcc.DB2";
+				case DERBY_NET_CLIENT_FRAMEWORK:
+					return "org.apache.derby.jdbc.Client";
+				case EMBEDDED_FRAMEWORK:
+					return "org.apache.derby.jdbc.Embed";
+				default:
+					Exception e = new Exception("FAIL: No DataSource Prefix for framework: " + framework);
+					e.printStackTrace();
+			}
+			return null;
+		}
+
+	static private Class[] STRING_ARG_TYPE = {String.class};
+	static private Class[] INT_ARG_TYPE = {Integer.TYPE};
+	static private Class[] BOOLEAN_ARG_TYPE = { Boolean.TYPE };
+	// A hashtable of special non-string attributes.
+	private static Hashtable specialAttributes = null;
+	
+
+	private static Object getDataSourceWithReflection(String classname, Properties attrs)
+	{
+		Object[] args = null;
+		Object ds = null;
+		Method sh = null;
+
+		
+		if (specialAttributes == null)
+		{
+			specialAttributes = new Hashtable();
+			specialAttributes.put("portNumber",INT_ARG_TYPE);
+			specialAttributes.put("driverType",INT_ARG_TYPE);
+			specialAttributes.put("retrieveMessagesFromServerOnGetMessage",
+								  BOOLEAN_ARG_TYPE);
+		}
+		
+		try {
+		ds  = Class.forName(classname).newInstance();
+
+		for (Enumeration propNames = attrs.propertyNames(); 
+			 propNames.hasMoreElements();)
+		{
+			String key = (String) propNames.nextElement();
+			Class[] argType = (Class[]) specialAttributes.get(key);
+			if (argType == null) 
+				argType = STRING_ARG_TYPE;
+			String value = attrs.getProperty(key);
+			if (argType  == INT_ARG_TYPE)
+			{
+				args = new Integer[] 
+				{ new Integer(Integer.parseInt(value)) };	
+			}
+			else if (argType  == BOOLEAN_ARG_TYPE)
+			{
+				args = new Boolean[] { new Boolean(value) };	
+			}
+			else if (argType == STRING_ARG_TYPE)
+			{
+				args = new String[] { value };
+			}
+			else  // No other property types supported right now
+			{
+				throw new Exception("FAIL: getDataSourceWithReflection: Argument type " + argType[0].getName() +  " not supportted for attribute: " +
+									" key:" + key + " value:" +value);
+			   
+			}
+			String methodName = getSetterName(key);
+
+			
+			// Need to use reflection to load indirectly
+			// setDatabaseName
+			sh = ds.getClass().getMethod(methodName, argType);
+			sh.invoke(ds, args);
+		}
+
+		} catch (Exception e)
+		{
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return ds;
+	}
+
+	
+	private static String  getSetterName(String attribute)
+	{
+		return "set" + Character.toUpperCase(attribute.charAt(0)) + attribute.substring(1);
+	}
+
+	
+	// Some methods for test output.
 	public static void dumpSQLExceptions(SQLException sqle) {
 		TestUtil.dumpSQLExceptions(sqle, false);
 	}
@@ -464,11 +620,6 @@ public class TestUtil {
 
 
 }
-
-
-
-
-
 
 
 
