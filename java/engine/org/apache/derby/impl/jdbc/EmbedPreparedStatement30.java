@@ -30,10 +30,15 @@ import java.sql.SQLException;
 import java.net.URL;
 
 /**
- * This class extends the EmbedPreparedStatement class from Local20
+ * This class extends the EmbedPreparedStatement20 class
  * in order to support new methods and classes that come with JDBC 3.0.
- *
- * @see org.apache.derby.impl.jdbc.EmbedPreparedStatement
+
+  <P><B>Supports</B>
+   <UL>
+   <LI> JDBC 3.0 - dependency on java.sql.ParameterMetaData introduced in JDBC 3.0 
+   </UL>
+
+  * @see org.apache.derby.impl.jdbc.EmbedPreparedStatement
  *
  */
 public class EmbedPreparedStatement30 extends EmbedPreparedStatement20

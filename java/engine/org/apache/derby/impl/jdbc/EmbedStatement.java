@@ -47,6 +47,14 @@ import java.sql.ResultSet;
  *
  * EmbedStatement is a local JDBC statement.
  *
+   <P><B>Supports</B>
+   <UL>
+   <LI> JSR169 - no subsetting for java.sql.Statement
+   <LI> JDBC 2.0
+   <LI> JDBC 3.0 - no new dependencies on new JDBC 3.0 or JDK 1.4 classes,
+        new methods can safely be added into implementation.
+   </UL>
+
  * @author ames
  */
 public class EmbedStatement extends ConnectionChild

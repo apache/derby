@@ -41,7 +41,7 @@ import java.io.EOFException;
 import java.sql.SQLException;
 import java.sql.Clob;
 
-/*
+/**
     Implements java.sql.Clob (see the JDBC 2.0 spec).
     A clob sits on top of a CHAR, VARCHAR or LONG VARCHAR column.
     If its data is small (less than 1 page) it is a byte array taken from
@@ -60,6 +60,13 @@ import java.sql.Clob;
     multiple threads and sucks data from the stream (returned from
     getAsciiStream()) at the same time as calling the Clob methods.
 
+  <P><B>Supports</B>
+   <UL>
+   <LI> JSR169 - no subsetting for java.sql.Clob
+   <LI> JDBC 2.0
+   <LI> JDBC 3.0 - no new dependencies on new JDBC 3.0 or JDK 1.4 classes,
+        new update methods can safely be added into implementation.
+   </UL>
  */
 final class EmbedClob extends ConnectionChild implements Clob
 {

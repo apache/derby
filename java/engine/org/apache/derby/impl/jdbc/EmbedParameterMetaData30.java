@@ -31,6 +31,11 @@ import java.sql.ParameterMetaData;
  * But note that the bulk of it resides in its parent class.  The reason is
  * we want to provide the functionality to the JDKs before JDBC3.0.
  *
+  <P><B>Supports</B>
+   <UL>
+   <LI> JDBC 3.0 - java.sql.ParameterMetaData introduced in JDBC3
+   </UL>
+
  * @see java.sql.ParameterMetaData
  *
  */

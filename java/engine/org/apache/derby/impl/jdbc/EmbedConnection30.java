@@ -42,6 +42,16 @@ import java.util.Vector;
 /**
  * This class extends the EmbedConnection20 class in order to support new
  * methods and classes that come with JDBC 3.0.
+
+   <P><B>Supports</B>
+   <UL>
+   <LI> JSR169 - Subsetting only removes getTypeMap and setTypeMap, which references
+        java.util.Map which exists in Foundation and ee.miniumum. Thus the methods can
+		safely be left in the implementation for JSR169.
+
+  <LI> JDBC 3.0 - Separate from JDBC 2.0 implementation as JDBC 3.0 introduces
+        a new class java.sql.Savepoint, which is referenced by java.sql.Connection.
+   </UL>
  *
  * @see org.apache.derby.impl.jdbc.EmbedConnection20
  *

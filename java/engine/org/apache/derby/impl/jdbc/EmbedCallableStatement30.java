@@ -31,9 +31,15 @@ import org.apache.derby.impl.jdbc.EmbedConnection;
 
 
 /**
- * This class extends the EmbedCallableStatement class from Local20
+ * This class extends the EmbedCallableStatement20
  * in order to support new methods and classes that come with JDBC 3.0.
- *
+
+  <P><B>Supports</B>
+   <UL>
+   <LI> JDBC 3.0 - dependency on java.sql.ParameterMetaData introduced in JDBC 3.0 
+   </UL>
+
+  *
  * @see org.apache.derby.impl.jdbc.EmbedCallableStatement
  *
  */

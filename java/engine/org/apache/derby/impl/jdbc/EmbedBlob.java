@@ -39,7 +39,7 @@ import java.io.InputStream;
 import java.io.EOFException;
 import java.io.IOException;
 
-/*
+/**
     Implements java.sql.Blob (see the JDBC 2.0 spec).
     A blob sits on top of a BINARY, VARBINARY or LONG VARBINARY column.
     If its data is small (less than 1 page) it is a byte array taken from
@@ -58,9 +58,17 @@ import java.io.IOException;
     multiple threads and sucks data from the stream (returned from
     getBinaryStream()) at the same time as calling the Blob methods.
 
+  <P><B>Supports</B>
+   <UL>
+   <LI> JSR169 - no subsetting for java.sql.Blob
+   <LI> JDBC 2.0
+   <LI> JDBC 3.0 - no new dependencies on new JDBC 3.0 or JDK 1.4 classes,
+        new update methods can safely be added into implementation.
+   </UL>
+
  */
 
-class EmbedBlob extends ConnectionChild implements Blob
+final class EmbedBlob extends ConnectionChild implements Blob
 {
     // clob is either bytes or stream
     private boolean         isBytes;

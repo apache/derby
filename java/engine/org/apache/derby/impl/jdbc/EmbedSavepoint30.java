@@ -38,6 +38,11 @@ import java.sql.SQLException;
  * control of transactions by marking intermediate points within
  * a transaction. Once a savepoint has been set, the transaction
  * can be rolled back to that savepoint without affecting preceding work.
+   <P><B>Supports</B>
+   <UL>
+   <LI> JSR169 - no subsetting for java.sql.Savepoint
+   <LI> JDBC 3.0 - class introduced in JDBC 3.0
+   </UL>
  *
  * @see java.sql.Savepoint
  *
