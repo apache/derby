@@ -61,6 +61,8 @@ public class closed implements Runnable {
 
 			String url = conn.getMetaData().getURL();
 
+			passed = testDerby62(conn) && passed;
+
 			// want all tests to run regardless of intermediate errors
 			passed = testStatement(conn) && passed;
 
@@ -417,6 +419,30 @@ public class closed implements Runnable {
 			System.out.println("FAIL -- no error on getting metadata after connection close");
 
 		return passed;
+	}
+
+	static boolean testDerby62(Connection conn) throws SQLException {
+
+		System.out.println("Test case for Derby-62 - serialization error with SQLException");
+		try {
+			conn.createStatement().execute("DROP TABLE APP.DERBY62_DAIN_SUNDSTROM");
+			return false;
+		} catch (SQLException sqle) {
+			boolean passed = true;
+			try {
+				// ensure we can serialize this exception.
+				java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(new java.io.ByteArrayOutputStream(1024));
+				oos.writeObject(sqle);
+				oos.close();
+			} catch (java.io.IOException ioe)
+			{
+				System.out.println("IOException " + ioe.getMessage());
+				passed = false;
+
+			}
+			System.out.println(sqle.getMessage());
+			return passed;
+		}
 	}
 
 }

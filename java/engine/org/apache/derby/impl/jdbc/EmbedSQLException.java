@@ -38,7 +38,7 @@ import java.io.PrintWriter;
 */
 public class EmbedSQLException extends SQLException {
 
-	private Object[] arguments;
+	private transient Object[] arguments;
 	private String messageId;
 
 	/**
@@ -47,7 +47,7 @@ public class EmbedSQLException extends SQLException {
     //Because it's transient, it doesn't get sent over to the client
     //side and hence the classes which needs to be included in the
     //client.jar file decreases 5 folds.
-	transient protected Throwable javaException;
+	private transient Throwable javaException;
 
 	/**
 	 * Because SQLException does not have settable fields,

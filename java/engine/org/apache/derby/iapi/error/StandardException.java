@@ -57,11 +57,11 @@ public class StandardException extends Exception
 	 * Exception State
 	 */
 	private Throwable nestedException;
-	private Object[] arguments;
+	private transient Object[] arguments;
 	private int severity;
 	private String textMessage;
 	private String sqlState;
-	private int report;
+	private transient int report;
 
 	/*
 	** End of constructors
