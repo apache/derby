@@ -154,7 +154,7 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 	protected static String att_extnam;
 	protected static String att_srvrlslv; 
 	protected static String prdId;
-	private static int buildNumber;
+	private static String buildNumber;
 	// we will use single or mixed, not double byte to reduce traffic on the
 	// wire, this is in keeping with JCC
 	// Note we specify UTF8 for the single byte encoding even though it can

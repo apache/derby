@@ -279,26 +279,26 @@ public class BasicUUID implements UUID, Formatable
 		byte[] result = new byte[16];
 
 		int lsequence = sequence; 
-		result[0] = (byte)((lsequence & 0xff000000) >>> 24);
-		result[1] = (byte)((lsequence & 0x00ff0000) >>> 16);
-		result[2] = (byte)((lsequence & 0x0000ff00) >>> 8);
-		result[3] = (byte) (lsequence & 0x000000ff);
+		result[0] = (byte)(lsequence >>> 24);
+		result[1] = (byte)(lsequence >>> 16);
+		result[2] = (byte)(lsequence >>> 8);
+		result[3] = (byte)lsequence;
 
 		long ltimemillis = timemillis;
-		result[4] = (byte)((ltimemillis & 0x0000ff0000000000L) >>> 40);
-		result[5] = (byte)((ltimemillis & 0x000000ff00000000L) >>> 32);
-		result[6] = (byte)((ltimemillis & 0x00000000ff000000L) >>> 24);
-		result[7] = (byte)((ltimemillis & 0x0000000000ff0000L) >>> 16);
- 		result[8] = (byte)((ltimemillis & 0x000000000000ff00L) >>> 8);
-		result[9] = (byte) (ltimemillis & 0x00000000000000ffL);
+		result[4] = (byte)(ltimemillis >>> 40);
+		result[5] = (byte)(ltimemillis >>> 32);
+		result[6] = (byte)(ltimemillis >>> 24);
+		result[7] = (byte)(ltimemillis >>> 16);
+ 		result[8] = (byte)(ltimemillis >>> 8);
+		result[9] = (byte)ltimemillis;
 
 		long linetaddr = majorId;
-		result[10] = (byte)((linetaddr & 0x0000ff0000000000L) >>> 40);
-		result[11] = (byte)((linetaddr & 0x000000ff00000000L) >>> 32);
-		result[12] = (byte)((linetaddr & 0x00000000ff000000L) >>> 24);
-		result[13] = (byte)((linetaddr & 0x0000000000ff0000L) >>> 16);
-		result[14] = (byte)((linetaddr & 0x000000000000ff00L) >>> 8);
-		result[15] = (byte) (linetaddr & 0x00000000000000ffL);
+		result[10] = (byte)(linetaddr >>> 40);
+		result[11] = (byte)(linetaddr >>> 32);
+		result[12] = (byte)(linetaddr >>> 24);
+		result[13] = (byte)(linetaddr >>> 16);
+		result[14] = (byte)(linetaddr >>> 8);
+		result[15] = (byte)linetaddr;
 
 		return result;
 	}

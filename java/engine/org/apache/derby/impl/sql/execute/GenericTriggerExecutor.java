@@ -157,7 +157,18 @@ public abstract class GenericTriggerExecutor
 			*/
 			try
 			{
-				ps.execute(spsActivation, false, false, false);
+				ResultSet rs = ps.execute(spsActivation, false, false, false);
+                if( rs.returnsRows())
+                {
+                    // Fetch all the data to ensure that functions in the select list or values statement will
+                    // be evaluated and side effects will happen. Why else would the trigger action return
+                    // rows, but for side effects?
+                    // The result set was opened in ps.execute()
+                    while( rs.getNextRow() != null)
+                    {
+                    }
+                }
+                rs.close();
 			} 
 			catch (StandardException e)
 			{
