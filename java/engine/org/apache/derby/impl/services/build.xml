@@ -18,7 +18,7 @@
 
 <!-- Targets -->
 
-  <target name="compile_impl_services">
+  <target name="compile_impl_services_169">
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -36,6 +36,9 @@
       <include name="${derby.dir}/impl/services/**"/>
       <exclude name="${derby.dir}/impl/services/jce/**"/>
     </javac>
+ </target>
+ 
+ <target name="compile_impl_services" depends="compile_impl_services_169">
     <javac
       bootclasspath="${empty}"
       nowarn="on"

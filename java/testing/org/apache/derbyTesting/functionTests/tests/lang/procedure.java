@@ -240,7 +240,15 @@ public class procedure
 		s.execute("create procedure ambigious02(p1 INTEGER, p2 INTEGER) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2'");
 		callExceptionExpected(conn, "call AMBIGIOUS02(?, ?)");
 		s.execute("drop procedure AMBIGIOUS02");
-		s.close();
+
+        // verify we can find it with a Java signature
+        s.execute("create procedure ambigious03(p1 INTEGER, p2 INTEGER) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(int,java.lang.Integer)'");
+        executeProcedure(s, "{call ambigious03(1, NULL)}");
+        s.execute("drop procedure AMBIGIOUS03");
+        s.execute("create procedure ambigious04(p1 INTEGER, p2 INTEGER) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(java.lang.Integer,int)'");
+        executeProcedure(s, "{call ambigious04(NULL, 1)}");
+        s.execute("drop procedure AMBIGIOUS04");
+        s.close();
 	}
 
 	public static void zeroArgProcedures(Connection conn) throws SQLException {

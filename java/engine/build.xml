@@ -34,16 +34,12 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="engine"
+  <target name="engine" depends="engine_169"
           description="Build Derby engine">
 
-    <ant dir="${derby.engine.dir}/iapi/reference"/>
-    <ant dir="${derby.engine.dir}/authentication"/>
-    <ant dir="${derby.engine.dir}/io"/>
     <ant dir="${derby.engine.dir}/iapi"/>
-    <ant dir="${derby.engine.dir}/jdbc"/>
-    <ant dir="${derby.engine.dir}/database"/>
     <ant dir="${derby.engine.dir}/impl"/>
+    <ant dir="${derby.engine.dir}/jdbc"/>
     <ant dir="${derby.engine.dir}/osgi"/>
     <ant dir="${derby.engine.dir}/catalog"/>
     <ant dir="${derby.engine.dir}/diag"/>
@@ -55,6 +51,16 @@
       </fileset>
     </copy>
   </target>
+  
+  <target name="engine_169"
+          description="Build base JSR169 elements of Derby engine">
+    <ant dir="${derby.engine.dir}/iapi/reference"/>
+    <ant dir="${derby.engine.dir}/authentication"/>
+    <ant dir="${derby.engine.dir}/io"/>
+     <ant dir="${derby.engine.dir}/iapi" target="compile_iapi_error_jsr169"/>
+     <ant dir="${derby.engine.dir}/database"/>
+     <ant dir="${derby.engine.dir}/impl" target="compile_impl_169"/>
+ </target>
 
 <!--             ============= End Targets ==============                -->
 

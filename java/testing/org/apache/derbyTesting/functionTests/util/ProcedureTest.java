@@ -413,8 +413,12 @@ public abstract class ProcedureTest implements ResultSet {
 	public static void ambigious1(int p1, String p2, ResultSet[] data1) {}
 
 
-	public static void ambigious2(int p1, Integer p2) {};
-	public static void ambigious2(Integer p1, int p2) {};
+	public static void ambigious2(int p1, Integer p2) {
+        System.out.println("ambigious2(int,Integer) called");
+    };
+	public static void ambigious2(Integer p1, int p2) {
+        System.out.println("ambigious2(Integer,int) called");
+    };
 
 	public static void missingDynamicParameter(int p1)  {}
 	public static void missingDynamicParameter(int p1, Object p2)  {}

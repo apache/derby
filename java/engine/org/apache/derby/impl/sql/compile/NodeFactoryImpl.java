@@ -603,24 +603,20 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 
 		nodeType = C_NodeTypes.CREATE_ALIAS_NODE;
 
-		{
-			/*
-			** Parse the class name, splitting out the class name from
-			** the method name.
-			*/
-			int lastPeriod = fullStaticMethodName.lastIndexOf(".");
-			if ((lastPeriod == -1) ||
-				fullStaticMethodName.length() == lastPeriod + 1)
-			{
-				throw StandardException.newException(SQLState.LANG_INVALID_FULL_STATIC_METHOD_NAME, 
-														fullStaticMethodName);
-			}
-			else
-			{
-				methodName = fullStaticMethodName.substring(lastPeriod + 1);
-				javaClassName = fullStaticMethodName.substring(0, lastPeriod);
-			}
-		}
+        int lastPeriod;
+        int paren = fullStaticMethodName.indexOf('(');
+        if (paren == -1) {
+            // not a Java signature - split based on last period
+            lastPeriod = fullStaticMethodName.lastIndexOf('.');
+        } else {
+            // a Java signature - split on last period before the '('
+            lastPeriod = fullStaticMethodName.substring(0, paren).lastIndexOf('.');
+        }
+        if (lastPeriod == -1 || lastPeriod == fullStaticMethodName.length()-1) {
+            throw StandardException.newException(SQLState.LANG_INVALID_FULL_STATIC_METHOD_NAME, fullStaticMethodName);
+        }
+        javaClassName = fullStaticMethodName.substring(0, lastPeriod);
+        methodName = fullStaticMethodName.substring(lastPeriod + 1);
 
 		return getNode(
 			nodeType,

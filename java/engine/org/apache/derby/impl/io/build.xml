@@ -18,7 +18,7 @@
 
 <!-- Targets -->
 
-  <target name="compile_impl_io">
+  <target name="compile_impl_io_169">
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -38,7 +38,9 @@
       <exclude name="${derby.dir}/impl/io/DirRandomAccessFile4.java"/>
       <exclude name="${derby.dir}/impl/io/DirStorageFactory4.java"/>
     </javac>
-    <javac
+  </target>
+  <target name="compile_impl_io" depends="compile_impl_io_169">
+      <javac
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

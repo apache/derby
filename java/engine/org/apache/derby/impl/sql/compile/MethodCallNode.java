@@ -677,53 +677,60 @@ public abstract class MethodCallNode extends JavaValueNode
 
 		boolean hasDynamicResultSets = (routineInfo != null) && (count != 0) && (count != methodParms.length);
 
-		/*
-		** Find the matching method that is public.
-		*/
-		try
-		{
-			/* First try with built-in types and mappings */
-			method = classInspector.findPublicMethod(javaClassName,
-												methodName,
-												parmTypeNames,
-												null,
-												isParam,
-												staticMethod,
-												hasDynamicResultSets);
+        /*
+        ** Find the matching method that is public.
+        */
+        try
+        {
+            // support Java signatures by checking if the method name contains a '('
+            if (methodName.indexOf('(') != -1) {
+                method = classInspector.findPublicMethod(javaClassName, methodName, staticMethod);
+                methodName = method.getName();
+            }
+            else
+            {
+                /* First try with built-in types and mappings */
+                method = classInspector.findPublicMethod(javaClassName,
+                                                    methodName,
+                                                    parmTypeNames,
+                                                    null,
+                                                    isParam,
+                                                    staticMethod,
+                                                    hasDynamicResultSets);
 
 
-			// DB2 LUW does not support Java object types for SMALLINT, INTEGER, BIGINT, REAL, DOUBLE
-			// and these are the only types that can map to a primitive or an object type according
-			// to SQL part 13. So we never have a second chance match.
-			if (routineInfo == null) {
+                // DB2 LUW does not support Java object types for SMALLINT, INTEGER, BIGINT, REAL, DOUBLE
+                // and these are the only types that can map to a primitive or an object type according
+                // to SQL part 13. So we never have a second chance match.
+                if (routineInfo == null) {
 
-				/* If no match, then retry with combinations of object and 
-				 * primitive types.
-				 */
-				if (method == null)
-				{
-					primParmTypeNames = getPrimitiveSignature(false);
+                    /* If no match, then retry with combinations of object and
+                     * primitive types.
+                     */
+                    if (method == null)
+                    {
+                        primParmTypeNames = getPrimitiveSignature(false);
 
-					method = classInspector.findPublicMethod(javaClassName,
-												methodName,
-												parmTypeNames,
-												primParmTypeNames,
-												isParam,
-												staticMethod,
-												hasDynamicResultSets);
-				}
-			}
-		}
-		catch (ClassNotFoundException e)
-		{
-			/*
-			** If one of the classes couldn't be found, just act like the
-			** method couldn't be found.  The error lists all the class names,
-			** which should give the user enough info to diagnose the problem.
-			*/
-			method = null;
-		}
-
+                        method = classInspector.findPublicMethod(javaClassName,
+                                                    methodName,
+                                                    parmTypeNames,
+                                                    primParmTypeNames,
+                                                    isParam,
+                                                    staticMethod,
+                                                    hasDynamicResultSets);
+                    }
+                }
+            }
+        }
+        catch (ClassNotFoundException e)
+        {
+            /*
+            ** If one of the classes couldn't be found, just act like the
+            ** method couldn't be found.  The error lists all the class names,
+            ** which should give the user enough info to diagnose the problem.
+            */
+            method = null;
+        }
 		/* Throw exception if no matching signature found */
 		if (method == null)
 		{

@@ -27,6 +27,11 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.lang.reflect.*;
+import java.util.StringTokenizer;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.Collections;
 
 /**
 	Methods to find out relationships between classes and methods within a class.
@@ -307,9 +312,45 @@ public final class ClassInspector
 			}
 		}
 
-		return resolveMethod(receiverClass, methodName, paramClasses, 
+		return resolveMethod(receiverClass, methodName, paramClasses,
 						primParamClasses, isParam, staticMethod, repeatLastParameter, methodList);
 	}
+
+    public Method findPublicMethod(String className, String signature, boolean isStatic) throws ClassNotFoundException {
+        Class javaClass = getClass(className);
+        StringTokenizer tokenizer = new StringTokenizer(signature, "(,)", true);
+        try {
+            String methodName = tokenizer.nextToken();
+            if (!tokenizer.nextToken().equals("(")) {
+                return null;
+            }
+            List paramTypes;
+            String token = tokenizer.nextToken();
+            if (")".equals(token)) {
+                paramTypes = Collections.EMPTY_LIST;
+            } else {
+                paramTypes = new ArrayList();
+                paramTypes.add(getClass(token));
+                while ((token = tokenizer.nextToken()).equals(",")) {
+                    token = tokenizer.nextToken();
+                    paramTypes.add(getClass(token));
+                }
+            }
+
+            Method method;
+            try {
+                method = javaClass.getMethod(methodName, (Class[])paramTypes.toArray(new Class[paramTypes.size()]));
+                if (isStatic != Modifier.isStatic(method.getModifiers())) {
+                    return null;
+                }
+            } catch (NoSuchMethodException e) {
+                return null;
+            }
+            return method;
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+    }
 
 	/**
 	 * Find a public field  for a class.
