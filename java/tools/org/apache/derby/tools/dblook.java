@@ -118,7 +118,7 @@ public class dblook {
 
 		// Parse the command line.
 		if (!parseArgs(args)) {
-			System.out.println(lookupMessage("CSLOOK_Usage"));
+			System.out.println(lookupMessage("DBLOOK_Usage"));
 			System.exit(1);
 		}
 
@@ -461,20 +461,20 @@ public class dblook {
 
 		if (ddlFileName != null) {
 			Logs.reportString("============================\n");
-			Logs.reportMessage("CSLOOK_FileCreation");
+			Logs.reportMessage("DBLOOK_FileCreation");
 			if (verbose)
-				writeVerboseOutput("CSLOOK_OutputLocation",
+				writeVerboseOutput("DBLOOK_OutputLocation",
 					ddlFileName);
 		}
 
-		Logs.reportMessage("CSLOOK_Timestamp",
+		Logs.reportMessage("DBLOOK_Timestamp",
 			new Timestamp(System.currentTimeMillis()).toString());
-		Logs.reportMessage("CSLOOK_DBName", sourceDBName);
-		Logs.reportMessage("CSLOOK_DBUrl", sourceDBUrl);
+		Logs.reportMessage("DBLOOK_DBName", sourceDBName);
+		Logs.reportMessage("DBLOOK_DBUrl", sourceDBUrl);
 		if (tableList != null)
-			Logs.reportMessage("CSLOOK_TargetTables");
+			Logs.reportMessage("DBLOOK_TargetTables");
 		if (schemaParam != null)
-			Logs.reportMessage("CSLOOK_TargetSchema", stripQuotes(schemaParam));
+			Logs.reportMessage("DBLOOK_TargetSchema", stripQuotes(schemaParam));
 		Logs.reportString("appendLogs: " + appendLogs + "\n");
 		return;
 
