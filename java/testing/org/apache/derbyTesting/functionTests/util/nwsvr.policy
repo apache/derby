@@ -72,7 +72,7 @@ grant {
 	permission java.util.PropertyPermission "derby.database.mode", "read, write";
 
 	// need acces to socket for ldap tests
-	permission java.net.SocketPermission "socket.ibmus2.ibm.com",
+	permission java.net.SocketPermission "yourldaphost.yourdomain.com",
 	"connect, resolve";
 
 	// tests like import/export need file write permission
