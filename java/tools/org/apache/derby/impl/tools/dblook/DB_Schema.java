@@ -64,7 +64,7 @@ public class DB_Schema {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_SchemasHeader");
+				Logs.reportMessage("DBLOOK_SchemasHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

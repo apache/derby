@@ -291,7 +291,7 @@ public class Logs {
 		try {
 			if (atLeastOneDebug)
 				dblook.writeVerboseOutput(
-					"CSLOOK_AtLeastOneDebug", null);
+					"DBLOOK_AtLeastOneDebug", null);
 			logFile.close();
 			if (ddlFile != null)
 				ddlFile.close();

@@ -86,7 +86,7 @@ public class DB_Table {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_TablesHeader");
+				Logs.reportMessage("DBLOOK_TablesHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

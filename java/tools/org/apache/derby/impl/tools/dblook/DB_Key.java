@@ -111,9 +111,9 @@ public class DB_Key {
 			if (firstTime) {
 				printHeader();
 				if (rs.getString(2).equals("F"))
-					Logs.reportMessage("CSLOOK_ForeignHeader");
+					Logs.reportMessage("DBLOOK_ForeignHeader");
 				else
-					Logs.reportMessage("CSLOOK_PrimUniqueHeader");
+					Logs.reportMessage("DBLOOK_PrimUniqueHeader");
 			}
 
 			StringBuffer kString = createKeyString(tableId, tableName, rs);
@@ -261,7 +261,7 @@ public class DB_Key {
 			return;
 
 		Logs.reportString("----------------------------------------------");
-		Logs.reportMessage("CSLOOK_KeysHeader");
+		Logs.reportMessage("DBLOOK_KeysHeader");
 		Logs.reportString("----------------------------------------------\n");
 		printedHeader = true;
 

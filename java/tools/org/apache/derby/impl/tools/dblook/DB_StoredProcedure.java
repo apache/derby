@@ -76,7 +76,7 @@ public class DB_StoredProcedure {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_StoredProcHeader");
+				Logs.reportMessage("DBLOOK_StoredProcHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

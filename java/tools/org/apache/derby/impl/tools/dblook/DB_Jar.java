@@ -68,8 +68,8 @@ public class DB_Jar {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_JarsHeader");
-				Logs.reportMessage("CSLOOK_Jar_Note");
+				Logs.reportMessage("DBLOOK_JarsHeader");
+				Logs.reportMessage("DBLOOK_Jar_Note");
 				Logs.reportString("----------------------------------------------\n");
 			}
 
@@ -119,7 +119,7 @@ public class DB_Jar {
 				oldJarFile.close();
 
 			} catch (Exception e) {
-				Logs.debug("CSLOOK_FailedToLoadJar",
+				Logs.debug("DBLOOK_FailedToLoadJar",
 					absJarDir + jarFullName.toString());
 				Logs.debug(e);
 				firstTime = false;

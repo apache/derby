@@ -59,7 +59,7 @@ public class DB_View {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_ViewsHeader");
+				Logs.reportMessage("DBLOOK_ViewsHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 
@@ -82,7 +82,7 @@ public class DB_View {
 
 		// Set schema back to default ("APP").
 		if (!firstTime) {
-			Logs.reportMessage("CSLOOK_DefaultSchema");
+			Logs.reportMessage("DBLOOK_DefaultSchema");
 			Logs.writeToNewDDL("SET SCHEMA \"APP\"");
 			Logs.writeStmtEndToNewDDL();
 			Logs.writeNewlineToNewDDL();

@@ -63,7 +63,7 @@ public class DB_Check {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_ChecksHeader");
+				Logs.reportMessage("DBLOOK_ChecksHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 
