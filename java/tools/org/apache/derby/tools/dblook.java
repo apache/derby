@@ -297,28 +297,31 @@ public class dblook {
 
 	/* ************************************************
 	 * loadDriver:
-	 * Load db2j driver.
+	 * Load derby driver.
 	 * @param precondition sourceDBUrl has been loaded.
 	 * @return false if anything goes wrong; true otherwise.
 	 ****/
 
 	private boolean loadDriver() {
 
-		String db2jDriver;
-		if (sourceDBUrl.indexOf(":net://") != -1)
-			db2jDriver = "com.ibm.db2.jcc.DB2Driver";
-		else
-			db2jDriver = "org.apache.derby.jdbc.EmbeddedDriver";
+		String derbyDriver = System.getProperty("driver");
+		if (derbyDriver == null) {
+			if (sourceDBUrl.indexOf(":net://") != -1)
+				derbyDriver = "com.ibm.db2.jcc.DB2Driver";
+			else
+				derbyDriver = "org.apache.derby.jdbc.EmbeddedDriver";
+	    }
+
 		try {
-			Class.forName(db2jDriver).newInstance();
-		} catch (Exception e)
+			Class.forName(derbyDriver).newInstance();
+	    }
+		catch (Exception e)
 		{
 			Logs.debug(e);
 			return false;
 		}
 
 		return true;
-
 	}
 
 	/* ************************************************
