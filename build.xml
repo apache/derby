@@ -354,79 +354,94 @@
 
   <target name="publishedapi">
 
-    <delete dir="${basedir}/javadoc/publishedapi"/>
-    <delete dir="${basedir}/javadoc/sourcedir"/>
-    <mkdir dir="${basedir}/javadoc/publishedapi"/>
-    <mkdir dir="${basedir}/javadoc/sourcedir"/>
+    <delete dir="${out.javadoc.dir}/publishedapi"/>
+    <delete dir="${out.javadoc.dir}/sourcedir"/>
+    <mkdir dir="${out.javadoc.dir}/publishedapi"/>
+    <mkdir dir="${out.javadoc.dir}/sourcedir"/>
 
     <!-- drda files -->
-    <mkdir dir="${basedir}/javadoc/sourcedir"/>
-    <copy todir="${basedir}/javadoc/sourcedir"> 
+    <mkdir dir="${out.javadoc.dir}/sourcedir"/>
+    <copy todir="${out.javadoc.dir}/sourcedir"> 
       <fileset dir="${derby.drda.src.dir}"
                includesfile="${javadoctools.dir}/publishedapi.ant"/>
     </copy>
 	
     <!-- engine files -->
-    <copy todir="${basedir}/javadoc/sourcedir">
+    <copy todir="${out.javadoc.dir}/sourcedir">
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoctools.dir}/publishedapi.ant"/>
     </copy>
 
     <!-- tools files -->
-    <copy todir="${basedir}/javadoc/sourcedir">
+    <copy todir="${out.javadoc.dir}/sourcedir">
       <fileset dir="${derby.tools.src.dir}"
                includesfile="${javadoctools.dir}/publishedapi.ant"/>
     </copy>
 
-    <javadoc sourcepath="${basedir}/javadoc/sourcedir/"
+    <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
              classpath="${compile.classpath};${osgi};${servlet22};${out.dir}"
              breakiterator="true"
-             destdir="${basedir}/javadoc/publishedapi"
+             destdir="${out.javadoc.dir}/publishedapi"
              packagenames="org.apache.derby.authentication,org.apache.derby.drda,org.apache.derby.jdbc.io,org.apache.derby.jdbc,org.apache.derby.tools"
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
              bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; IBM Corp. 1997,2004 All Rights Reserved.&lt;/i&gt;"/>
 
-    <delete dir="${basedir}/javadoc/sourcedir"/>
+    <delete dir="${out.javadoc.dir}/sourcedir"/>
 
   </target>
 
   <target name="derbydocs">
 
-    <delete dir="${basedir}/javadoc/engine"/>
-    <mkdir dir="${basedir}/javadoc/engine"/>
+    <delete dir="${out.javadoc.dir}/engine"/>
+    <mkdir dir="${out.javadoc.dir}/engine"/>
 
-    <antcall target="javadocsubpackages">
-      <param name="javadoc.sourcepath" value="${derby.engine.src.dir};${derby.drda.src.dir};${derby.tools.src.dir}"/>
-      <param name="javadoc.classpath" value="${basedir}/classes;${java14compile.classpath};${jars.extras};${osgi}"/>
-      <param name="javadoc.destdir" value="${basedir}/javadoc/engine"/>
-      <param name="javadoc.subpackages" value="org.apache.derby"/>
-      <param name="javadoc.doctitle" value="Apache Derby V${major}.${minor} Engine Documentation"/>
-      <param name="javadoc.windowtitle" value="Apache Derby V${major}.${minor} Engine Documentation"/>
-      <param name="javadoc.bottom" value="Apache Derby V${major}.${minor} Engine Documentation  -  &lt;i&gt;Copyright &amp;copy; IBM Corp. 1997,2004 All Rights Reserved.&lt;/i&gt;"/>
-    </antcall>
+    <javadoc
+        additionalparam="-J-mx320M"
+        packagenames="org.*"
+        access="private"
+        breakiterator="yes"
+        sourcepath="${derby.engine.src.dir};${derby.drda.src.dir};${derby.tools.src.dir}"
+        classpath="${basedir}/classes;${java14compile.classpath};${jars.extras};${osgi}"
+        destdir="${out.javadoc.dir}/engine"
+        windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
+        doctitle="Apache Derby V${major}.${minor} Engine Documentation"
+        bottom="Apache Derby V${major}.${minor} Engine Documentation - &lt;i&gt;Copyright &amp;copy; IBM Corp. 1997,2004 All Rights Reserved.&lt;/i&gt;"
+        source="1.4">
+        <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.PurposeTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.UpgradeTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.DiskLayoutTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.EndFormatTaglet" 
+                path="${basedir}/classes"/>
+    </javadoc>
+
   </target>
 
   <target name="toolsdocs">
 
-    <delete dir="${basedir}/javadoc/tools"/>
-    <mkdir dir="${basedir}/javadoc/tools"/>
+    <delete dir="${out.javadoc.dir}/tools"/>
+    <mkdir dir="${out.javadoc.dir}/tools"/>
 
     <antcall target="dojjdocs">
       <param name="jjtodoc" value="${derby.tools.dir}/impl/tools/ij/ij.jj"/>
-      <param name="jjdoctarget" value="${basedir}/javadoc/tools/ij.html"/>
+      <param name="jjdoctarget" value="${out.javadoc.dir}/tools/ij.html"/>
     </antcall>
 
   </target>
 
   <target name="grammardocs">
 
-    <delete dir="${basedir}/javadoc/language"/>
-    <mkdir dir="${basedir}/javadoc/language"/>	
+    <delete dir="${out.javadoc.dir}/language"/>
+    <mkdir dir="${out.javadoc.dir}/language"/>	
 
     <antcall target="dojjdocs">
       <param name="jjtodoc" value="${derby.engine.dir}/impl/sql/compile/sqlgrammar.jj"/>
-      <param name="jjdoctarget" value="${basedir}/javadoc/language/sqlgrammar.html"/>
+      <param name="jjdoctarget" value="${out.javadoc.dir}/language/sqlgrammar.html"/>
     </antcall>
 
   </target>
@@ -442,42 +457,9 @@
 
   </target>
 
-  <target name="javadocsubpackages">
-    <java classname="com.sun.tools.javadoc.Main" fork="yes">
-      <classpath path="${java.home}/../lib/tools.jar;${out.dir}"/>
-      <jvmarg value="-mx320M"/>
-      <arg value="-subpackages"/>
-      <arg value="org"/>
-      <arg value="-private"/>
-      <arg value="-breakiterator"/>
-      <arg value="-sourcepath"/>
-      <arg value="${javadoc.sourcepath}"/>
-      <arg value="-classpath"/>
-      <arg value="${javadoc.classpath}"/>
-      <arg value="-d"/>
-      <arg value="${javadoc.destdir}"/>
-      <arg value="-windowtitle"/>
-      <arg value="${javadoc.windowtitle}"/>
-      <arg value="-doctitle"/>
-      <arg value="${javadoc.doctitle}"/>
-      <arg value="-bottom"/>
-      <arg value="${javadoc.bottom}"/>
-      <arg value="-taglet"/>
-      <arg value="org.apache.derbyBuild.javadoc.FormatIdTaglet"/>
-      <arg value="-taglet"/>
-      <arg value="org.apache.derbyBuild.javadoc.PurposeTaglet"/>
-      <arg value="-taglet"/>
-      <arg value="org.apache.derbyBuild.javadoc.UpgradeTaglet"/>
-      <arg value="-taglet"/>
-      <arg value="org.apache.derbyBuild.javadoc.DiskLayoutTaglet"/>
-      <arg value="-taglet"/>
-      <arg value="org.apache.derbyBuild.javadoc.EndFormatTaglet"/>
-    </java>
-  </target>
-
   <target name="cleandocs">
 
-    <delete dir="${basedir}/javadoc"/>
+    <delete dir="${out.javadoc.dir}"/>
 
   </target>
 
