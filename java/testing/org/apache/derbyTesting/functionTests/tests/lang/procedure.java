@@ -829,17 +829,14 @@ public class procedure
 		ptsi.execute();
 		System.out.println("p_inout " + ptsi.getByte(2) + " null?" + ptsi.wasNull() + " p_out " + ptsi.getByte(3) + " null?" + ptsi.wasNull());
 
-		if (!TestUtil.isDerbyNetClientFramework())
-		{
-			// with setObject . Beetle 5439
-			ptsi.setObject(1, new Integer(6));
-			ptsi.setObject(2, new Integer(3));
-			
-			ptsi.execute();
-			System.out.println("p_inout " + ptsi.getByte(2) + " null?" + ptsi.wasNull() + " p_out " + ptsi.getByte(3) + " null?" + ptsi.wasNull());
-		}
+		// with setObject . Beetle 5439
+		ptsi.setObject(1, new Integer(6));
+		ptsi.setObject(2, new Integer(3));
+		
+		ptsi.execute();
+		System.out.println("p_inout " + ptsi.getByte(2) + " null?" + ptsi.wasNull() + " p_out " + ptsi.getByte(3) + " null?" + ptsi.wasNull());
 		ptsi.close();
-
+		
 		s.execute("DROP procedure PTSMALLINT2");		
 		s.execute("DROP TABLE PT1");
 

@@ -264,6 +264,7 @@ EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which 
 EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
 p_inout 9 p_out 6
 p_inout 9 null?false p_out 6 null?false
+p_inout 9 null?false p_out 6 null?false
 outparams
 DEFINED PROCEDURES FOR OP1
   APP.OP1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.outparams1(OUT A INTEGER,IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
