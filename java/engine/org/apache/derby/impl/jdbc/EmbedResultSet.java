@@ -108,18 +108,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 
 	private final ResultDescription resultDescription;
-	/**
-		An array of the JDBC column types for this
-		result set, indexed by column identifier
-		with the first column at index 1. Position 0
-		in the array is not used.
-	*/
-	private final int[] jdbcColumnTypes;
 
     // max rows limit for this result set
     private int maxRows;
     // The Maximum field size limt set for this result set
-    private int maxFieldSize;
+    private final int maxFieldSize;
 
     /*
      * Incase of forward only cursors we limit the number of rows
@@ -156,14 +149,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		this.stmt = owningStmt = stmt;
 		this.isAtomic = isAtomic;
 
-		// Fill in the column types
-		ResultDescription rd = resultDescription = theResults.getResultDescription();
-		jdbcColumnTypes = new int[rd.getColumnCount() + 1];
-
-		for (int column = 1; column < jdbcColumnTypes.length; column++) {
-			jdbcColumnTypes[column] =
-				rd.getColumnDescriptor(column).getType().getTypeId().getJDBCTypeId();
-		}
+		resultDescription = theResults.getResultDescription();
 
         // assign the max rows and maxfiled size limit for this result set
         if (stmt != null)
@@ -174,11 +160,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 
            maxFieldSize = stmt.MaxFieldSize;
         }
+		else
+			maxFieldSize = 0;
 
 		order = conn.getResultSetOrderId();
-
-	//	System.out.println(conn.getClass() + " create RS " + this);
-	//	new Throwable("CRS").printStackTrace(System.out);
 	}
 
 	/**
@@ -214,15 +199,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		@exception SQLException ResultSet is not on a row or columnIndex is out of range.
 	*/
-	protected int getColumnType(int columnIndex) throws SQLException {
+	final int getColumnType(int columnIndex) throws SQLException {
 		checkOnRow(); // first make sure there's a row
 		
 		if (columnIndex < 1 ||
-		    columnIndex >= jdbcColumnTypes.length)
+		    columnIndex > resultDescription.getColumnCount())
 			throw newSQLException(SQLState.COLUMN_NOT_FOUND, 
                          new Integer(columnIndex));
 
-		return jdbcColumnTypes[columnIndex];
+		return resultDescription.getColumnDescriptor(columnIndex).getType().getJDBCTypeId();
 	}
 
 	/*
@@ -528,13 +513,6 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public final String getString(int columnIndex) throws SQLException {
 
-
-			// never need to push a context stack because everything can be converted
-			// into an String without a conversion error. With one exception! If
-			// the type is OTHER (ie an object) then while Object.toString() cannot
-			// throw an exception a user implementation of it could require the
-			// current connection. In order to get the current connection the
-			// context stack must be set up.
 			try {
 
 				DataValueDescriptor dvd = getColumn(columnIndex);
@@ -542,26 +520,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 				if (wasNull = dvd.isNull())
 					return null;
 
-				int colType = jdbcColumnTypes[columnIndex];
-
-				String value;
-
-				if (colType == Types.OTHER || colType == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT) {
-					synchronized (getConnectionSynchronization()) {
-						setupContextStack();
-						try {
-							value = dvd.getString();
-						} finally {
-							restoreContextStack();
-						}
-					}
-
-				} else {
-					value = dvd.getString();
-				}
+				String value = dvd.getString();
 
 				// check for the max field size limit 
-                if (maxFieldSize > 0 && isMaxFieldSizeType(colType))
+                if (maxFieldSize > 0 && isMaxFieldSizeType(getColumnType(columnIndex)))
                 {
                     if (value.length() > maxFieldSize )
                     {
@@ -759,7 +721,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			byte[] value = dvd.getBytes();
 
             // check for the max field size limit 
-            if (maxFieldSize > 0 && isMaxFieldSizeType(jdbcColumnTypes[columnIndex]))
+            if (maxFieldSize > 0 && isMaxFieldSizeType(getColumnType(columnIndex)))
             {
                  if (value.length > maxFieldSize)
                  {
@@ -1008,7 +970,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		Object syncLock = getConnectionSynchronization();
 
-		synchronized (getConnectionSynchronization()) {
+		synchronized (syncLock) {
 
 		boolean pushStack = false;
 		try {
@@ -1116,7 +1078,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		Object syncLock = getConnectionSynchronization();
 
-		synchronized (getConnectionSynchronization()) {
+		synchronized (syncLock) {
 
 		boolean pushStack = false;
 		try {
@@ -1714,10 +1676,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	   DataValueDescriptor[] theCurrentRow = checkOnRow(); // first make sure there's a row
 		
-	   //if (columnIndex < 1 ||
-		//    columnIndex >= jdbcColumnTypes.length)
-		//	
-
 	   try {
 		   return theCurrentRow[columnIndex - 1];
 	   } catch (ArrayIndexOutOfBoundsException aoobe) {
