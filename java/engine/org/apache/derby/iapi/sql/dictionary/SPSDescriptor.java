@@ -304,7 +304,7 @@ public class SPSDescriptor extends TupleDescriptor
 	)
 		throws StandardException
 	{
-		ContextManager cm = ContextService.getFactory().getCurrentContextManager();
+		ContextManager cm = lcc.getContextManager();
 		DependencyManager dm;
 		ProviderInfo[] providerInfo;
 
