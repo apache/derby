@@ -1,5 +1,5 @@
 Start testing delete and update using JDBC2.0 updateable resultset apis
----Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
+Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
 warnings on connection = SQL Warning: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
 requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
@@ -8,81 +8,113 @@ ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
 othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
 deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
+SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
----Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
+Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
 Make sure that we got CONCUR_READ_ONLY? true
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
+SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
----Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
+Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset.
+SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send an updateRow on a read only resultset.
+SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
----Negative Test4 - request a read only resultset and send a sql with FOR UPDATE clause and attempt deleteRow/updateRow on it
+Negative Test4 - request a read only resultset and send a sql with FOR UPDATE clause and attempt deleteRow/updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
+SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send a updateRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
+SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
----Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause
+Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause
 Make sure that we got CONCUR_READ_ONLY? true
+Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
+Will see the warnings in embedded mode only
 Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with no FOR UPDATE clause.
+SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send a updateRow on a sql with no FOR UPDATE clause.
+SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
----Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
+Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
 Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
+SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send a updateRow on a sql with FOR READ ONLY clause.
+SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
----Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row
+Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row
 Make sure that we got CONCUR_UPDATABLE? true
 Now attempt a deleteRow without first doing next on the resultset.
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Now attempt a updateRow without first doing next on the resultset.
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 ResultSet is positioned after the last row. attempt to updateRow at this point should fail!
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
----Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset
+Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset
 Make sure that we got CONCUR_UPDATABLE? true
+SQL State : XCL16
 Got expected exception ResultSet not open, operation 'deleteRow' not permitted. Verify that autocommit is OFF.
+SQL State : XCL16
 Got expected exception ResultSet not open, operation 'updateRow' not permitted. Verify that autocommit is OFF.
----Negative Test9 - try updatable resultset on system table
-expected exception FOR UPDATE is not permitted on this type of statement.
----Negative Test10 - try updatable resultset on a view
-expected exception FOR UPDATE is not permitted on this type of statement.
----Negative Test11 - attempt to open updatable resultset when there is join in the select query should fail
-expected exception FOR UPDATE is not permitted on this type of statement.
----Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it
+Negative Test9 - try updatable resultset on system table
+SQL State : 42Y90
+Got expected exception FOR UPDATE is not permitted on this type of statement.
+Negative Test10 - try updatable resultset on a view
+SQL State : 42Y90
+Got expected exception FOR UPDATE is not permitted on this type of statement.
+Negative Test11 - attempt to open updatable resultset when there is join in the select query should fail
+SQL State : 42Y90
+Got expected exception FOR UPDATE is not permitted on this type of statement.
+Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it
 Opened an updatable resultset. Now trying to drop that table through another Statement
-expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+SQL State : X0X95
+Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
 Since autocommit is on, the drop table exception resulted in a runtime rollback causing updatable resultset object to close
-expected exception ResultSet not open, operation 'updateRow' not permitted. Verify that autocommit is OFF.
-expected exception ResultSet not open, operation 'deleteRow' not permitted. Verify that autocommit is OFF.
----Negative Test13 - foreign key constraint failure will cause deleteRow to fail
-expected exception DELETE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+SQL State : XCL16
+Got expected exception ResultSet not open, operation 'updateRow' not permitted. Verify that autocommit is OFF.
+SQL State : XCL16
+Got expected exception ResultSet not open, operation 'deleteRow' not permitted. Verify that autocommit is OFF.
+Negative Test13 - foreign key constraint failure will cause deleteRow to fail
+SQL State : 23503
+Got expected exception DELETE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
 Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
-expected exception ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
----Negative Test14 - foreign key constraint failure will cause updateRow to fail
-expected exception UPDATE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+SQL State : XCL16
+Got expected exception ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Negative Test14 - foreign key constraint failure will cause updateRow to fail
+SQL State : 23503
+Got expected exception UPDATE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
 Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
-expected exception ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
----Negative Test15 - Can't call updateXXX methods on columns that do not correspond to a column in the table
-expected exception Column does not correspond to a column in the base table. Cant issue {0} on this column.
----Negative Test16 - Call updateXXX method on out of the range column
+SQL State : XCL16
+Got expected exception ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Negative Test15 - Can't call updateXXX methods on columns that do not correspond to a column in the table
+SQL State : XJ084
+Got expected exception Column does not correspond to a column in the base table. Cant issue {0} on this column.
+Negative Test16 - Call updateXXX method on out of the range column
 There are only 2 columns in the select list and we are trying to send updateXXX on column position 3
-expected exception The column position '3' is out of range.  The number of columns for this ResultSet is '2'.
----Positive Test1a - request updatable resultset for forward only type resultset
+SQL State : XCL14
+Got expected exception The column position '3' is out of range.  The number of columns for this ResultSet is '2'.
+Positive Test1a - request updatable resultset for forward only type resultset
 requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
 got TYPE_FORWARD_ONLY? true
 got CONCUR_UPDATABLE? true
@@ -90,23 +122,27 @@ JDBC 2.0 updatable resultset apis on this ResultSet object will pass because thi
 column 1 on this row before deleteRow is 1
 column 2 on this row before deleteRow is aa                  
 Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
----Positive Test1b - request updatable resultset for forward only type resultset
+Positive Test1b - request updatable resultset for forward only type resultset
 column 1 on this row before updateInt is 1
 column 1 on this row after updateInt is 234
 column 2 on this row before updateString is aa                  
 now updateRow on the row
 Since after updateRow(), ResultSet is positioned before the next row, getXXX will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling updateRow again w/o first positioning the ResultSet on the next row will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to updateRow() on the current row now
----Positive Test2 - even if no columns from table specified in the column list, we should be able to get updatable resultset
+Positive Test2 - even if no columns from table specified in the column list, we should be able to get updatable resultset
 total number of rows in T1 
 	 1
 	 -
@@ -116,47 +152,55 @@ total number of rows in T1 after one deleteRow is
 	 1
 	 -
 	{2}
----Positive Test3a - use prepared statement with concur updatable status to test deleteRow
+Positive Test3a - use prepared statement with concur updatable status to test deleteRow
 requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
 got TYPE_FORWARD_ONLY? true
 got CONCUR_UPDATABLE? true
 column 1 on this row is 1
 Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
----Positive Test3b - use prepared statement with concur updatable status to test updateXXX
+Positive Test3b - use prepared statement with concur updatable status to test updateXXX
 requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
 got TYPE_FORWARD_ONLY? true
 got CONCUR_UPDATABLE? true
 column 1 on this row is 1
 column 1 on this row after updateInt is 5
 Since after updateRow(), ResultSet is positioned before the next row, getXXX will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling updateRow/updateXXX again w/o first positioning the ResultSet on the next row will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to cancelRowUpdates() on the current row now
----Positive Test4 - use callable statement with concur updatable status
+Positive Test4 - use callable statement with concur updatable status
 requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
 got TYPE_FORWARD_ONLY? true
 got CONCUR_UPDATABLE? true
 column 1 on this row is 1
 Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
----Positive Test5 - donot have to select primary key to get an updatable resultset
+Positive Test5 - donot have to select primary key to get an updatable resultset
 column 1 on this row is 1
 now try to delete row when primary key is not selected for that row
----Positive Test6a - For Forward Only resultsets, DatabaseMetaData will return false for ownDeletesAreVisible and deletesAreDetected
----This is because, after deleteRow, we position the ResultSet before the next row. We don't make a hole for the deleted row and then stay on that deleted hole
+Positive Test6a - For Forward Only resultsets, DatabaseMetaData will return false for ownDeletesAreVisible and deletesAreDetected
+This is because, after deleteRow, we position the ResultSet before the next row. We don't make a hole for the deleted row and then stay on that deleted hole
 ownDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? false
 othersDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? true
 deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
@@ -164,8 +208,8 @@ The JDBC program should look at rowDeleted only if deletesAreDetected returns tr
 Since Derby returns false for detlesAreDetected for FORWARD_ONLY updatable resultset,the program should not rely on rs.rowDeleted() for FORWARD_ONLY updatable resultsets
 Have this call to rs.rowDeleted() just to make sure the method does always return false? false
 Have this call to rs.rowDeleted() just to make sure the method does always return false? false
----Positive Test6b - For Forward Only resultsets, DatabaseMetaData will return false for ownUpdatesAreVisible and updatesAreDetected
----This is because, after updateRow, we position the ResultSet before the next row
+Positive Test6b - For Forward Only resultsets, DatabaseMetaData will return false for ownUpdatesAreVisible and updatesAreDetected
+This is because, after updateRow, we position the ResultSet before the next row
 ownUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? false
 othersUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? true
 updatesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
@@ -173,7 +217,7 @@ The JDBC program should look at rowUpdated only if updatesAreDetected returns tr
 Since Derby returns false for updatesAreDetected for FORWARD_ONLY updatable resultset,the program should not rely on rs.rowUpdated() for FORWARD_ONLY updatable resultsets
 Have this call to rs.rowUpdated() just to make sure the method does always return false? false
 Have this call to rs.rowUpdated() just to make sure the method does always return false? false
----Positive Test7a - delete using updatable resultset api from a temporary table
+Positive Test7a - delete using updatable resultset api from a temporary table
 following rows in temp table before deleteRow
 	 C21,C22
 	 --- ---
@@ -182,7 +226,7 @@ following rows in temp table before deleteRow
 As expected, no rows in temp table after deleteRow
 	 C21,C22
 	 --- ---
----Positive Test7b - update using updatable resultset api from a temporary table
+Positive Test7b - update using updatable resultset api from a temporary table
 following rows in temp table before deleteRow
 	 C31,C32
 	 --- ---
@@ -193,16 +237,16 @@ As expected, updated rows in temp table after updateRow
 	 --- ---
 	{123,1}
 	{123,1}
----Positive Test8a - change the name of the resultset and see if deleteRow still works
+Positive Test8a - change the name of the resultset and see if deleteRow still works
 change the cursor name(case sensitive name) with setCursorName and then try to deleteRow
 change the cursor name one more time with setCursorName and then try to deleteRow
----Positive Test8b - change the name of the resultset and see if updateRow still works
+Positive Test8b - change the name of the resultset and see if updateRow still works
 change the cursor name one more time with setCursorName and then try to updateRow
 change the cursor name(case sensitive name) with setCursorName and then try to updateRow
----Positive Test9a - using correlation name for the table in the select sql is not a problem
+Positive Test9a - using correlation name for the table in the select sql is not a problem
 column 1 on this row is 1
 now try to deleteRow
----Positive Test9b - using correlation name for column names is not allowed with updateXXX
+Positive Test9b - using correlation name for column names is not allowed with updateXXX
 Table t1 has following rows
 	 C1,C2
 	 -- --
@@ -211,6 +255,7 @@ Table t1 has following rows
 	{3,cc                  }
 column 1 on this row is 1
 attempt to send updateXXX on correlation name column will fail
+SQL State : XJ084
 Got expected exception Column does not correspond to a column in the base table. Cant issue {0} on this column.
 Table t1 after updateRow has following rows
 	 C1,C2
@@ -218,12 +263,13 @@ Table t1 after updateRow has following rows
 	{1,aa                  }
 	{2,bb                  }
 	{3,cc                  }
----Positive Test10 - 2 updatable resultsets going against the same table, will they conflict?
+Positive Test10 - 2 updatable resultsets going against the same table, will they conflict?
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
+SQL State : XCL08
 Got expected exception Cursor 'SQLCUR16' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
----Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
+Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -289,7 +335,7 @@ null			stop position:
 null			qualifiers:
 None
 statement's fetch size is 200
----Positive Test12a - make sure delete trigger gets fired when deleteRow is issued
+Positive Test12a - make sure delete trigger gets fired when deleteRow is issued
 Verify that before delete trigger got fired, row count is 0 in deleteTriggerInsertIntoThisTable
 	 1
 	 -
@@ -300,7 +346,7 @@ Verify that delete trigger got fired by verifying the row count to be 1 in delet
 	 1
 	 -
 	{1}
----Positive Test12b - make sure update trigger gets fired when updateRow is issued
+Positive Test12b - make sure update trigger gets fired when updateRow is issued
 Verify that before update trigger got fired, row count is 0 in updateTriggerInsertIntoThisTable
 	 1
 	 -
@@ -311,15 +357,16 @@ Verify that update trigger got fired by verifying the row count to be 1 in updat
 	 1
 	 -
 	{1}
----Positive Test13a - Another test case for delete trigger
+Positive Test13a - Another test case for delete trigger
 column 1 on this row is 1
 this delete row will fire the delete trigger which will delete all the rows from the table and from the resultset
-expected exception Invalid cursor state - no current row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Verify that delete trigger got fired by verifying the row count to be 0 in table1WithTriggers
 	 1
 	 -
 	{0}
----Positive Test13b - Another test case for update trigger
+Positive Test13b - Another test case for update trigger
 Look at the current contents of table2WithTriggers
 	 C1,C2
 	 -- --
@@ -329,7 +376,8 @@ Look at the current contents of table2WithTriggers
 	{4,4}
 column 1 on this row is 2
 this update row will fire the update trigger which will update all the rows in the table to have c1=1 and hence no more rows will qualify for the resultset
-expected exception Invalid cursor state - no current row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Verify that update trigger got fired by verifying that all column c1s have value 1 in table2WithTriggers
 	 C1,C2
 	 -- --
@@ -337,7 +385,7 @@ Verify that update trigger got fired by verifying that all column c1s have value
 	{1,2}
 	{1,3}
 	{1,4}
----Positive Test14a - make sure self referential delete cascade works when deleteRow is issued
+Positive Test14a - make sure self referential delete cascade works when deleteRow is issued
 	 C1,C2
 	 -- --
 	{e1,null}
@@ -346,12 +394,13 @@ Verify that update trigger got fired by verifying that all column c1s have value
 	{e4,e3}
 column 1 on this row is e1
 this delete row will cause the delete cascade constraint to delete all the rows from the table and from the resultset
-expected exception Invalid cursor state - no current row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Verify that delete trigger got fired by verifying the row count to be 0 in selfReferencingT1
 	 1
 	 -
 	{0}
----Positive Test14b - make sure self referential update restrict works when updateRow is issued
+Positive Test14b - make sure self referential update restrict works when updateRow is issued
 	 C1,C2
 	 -- --
 	{e1,null}
@@ -360,12 +409,14 @@ Verify that delete trigger got fired by verifying the row count to be 0 in selfR
 	{e4,e3}
 column 1 on this row is e1
 update row should fail because cascade constraint is update restrict
-expected exception UPDATE on table 'SELFREFERENCINGT2' caused a violation of foreign key constraint 'MANAGES2' for key (e1).  The statement has been rolled back.
----Positive Test15 - With autocommit off, attempt to drop a table when there is an open updatable resultset on it
+SQL State : 23503
+Got expected exception UPDATE on table 'SELFREFERENCINGT2' caused a violation of foreign key constraint 'MANAGES2' for key (e1).  The statement has been rolled back.
+Positive Test15 - With autocommit off, attempt to drop a table when there is an open updatable resultset on it
 Opened an updatable resultset. Now trying to drop that table through another Statement
-expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+SQL State : X0X95
+Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
 Since autocommit is off, the drop table exception will NOT result in a runtime rollback and hence updatable resultset object is still open
----Positive Test16a - Do deleteRow within a transaction and then rollback the transaction
+Positive Test16a - Do deleteRow within a transaction and then rollback the transaction
 Verify that before delete trigger got fired, row count is 0 in deleteTriggerInsertIntoThisTable
 	 1
 	 -
@@ -392,7 +443,7 @@ Verify that after rollback, row count is back to 4 in table0WithTriggers
 	 1
 	 -
 	{4}
----Positive Test16b - Do updateRow within a transaction and then rollback the transaction
+Positive Test16b - Do updateRow within a transaction and then rollback the transaction
 Verify that before update trigger got fired, row count is 0 in updateTriggerInsertIntoThisTable
 	 1
 	 -
@@ -428,14 +479,16 @@ Verify that after rollback, table0WithTriggers is back to its original contents
 	{2,2}
 	{3,3}
 	{4,4}
----Positive Test17 - After deleteRow, resultset is positioned before the next row
+Positive Test17 - After deleteRow, resultset is positioned before the next row
 getXXX right after deleteRow will fail because resultset is not positioned on a row, instead it is right before the next row
-expected exception Invalid cursor state - no current row.
----Positive Test18 - Test cancelRowUpdates method as the first updatable ResultSet api on a read-only resultset
-expected exception 'cancelRowUpdates' not allowed because the ResultSet is not an updatable ResultSet. 
----Positive Test19 - Test updateRow method as the first updatable ResultSet api on a read-only resultset
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
+Positive Test18 - Test cancelRowUpdates method as the first updatable ResultSet api on a read-only resultset
+SQL State : XJ083
+Got expected exception 'cancelRowUpdates' not allowed because the ResultSet is not an updatable ResultSet. 
+Positive Test19 - Test updateRow method as the first updatable ResultSet api on a read-only resultset
   Got expected exception : 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
----Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on a read-only resultset
+Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on a read-only resultset
   Test updateShort on a readonly resultset
   Using column position as first parameter to updateShort
   Got expected exception : 'updateShort' not allowed because the ResultSet is not an updatable ResultSet. 
@@ -533,7 +586,7 @@ expected exception 'cancelRowUpdates' not allowed because the ResultSet is not a
   Test updateRef on a readonly resultset
   Using column position as first parameter to updateRef
   Using column name as first parameter to updateRef
----Positive Test21 - Test all updateXXX(excluding updateObject) methods on all the supported sql datatypes
+Positive Test21 - Test all updateXXX(excluding updateObject) methods on all the supported sql datatypes
 Next datatype to test is SMALLINT
   Testing updateShort on SQL type SMALLINT
     Using column position as first parameter to updateShort
@@ -1932,7 +1985,7 @@ Next datatype to test is BLOB(1k)
   Testing updateRef on SQL type BLOB(1k)
     Using column position as first parameter to updateRef
     Using column name as first parameter to updateRef
----Positive Test22 - Test updateObject method
+Positive Test22 - Test updateObject method
 Next datatype to test is SMALLINT
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2608,7 +2661,7 @@ Next datatype to test is BLOB(1k)
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'BLOB'.
   updateObject with column position & null as parameters
   updateObject with column name & null as parameters
----Positive Test23 - Test cancelRowUpdates after updateXXX methods on all the supported sql datatypes
+Positive Test23 - Test cancelRowUpdates after updateXXX methods on all the supported sql datatypes
   updateShort and then cancelRowUpdates
   updateInt and then cancelRowUpdates
   updateLong and then cancelRowUpdates
@@ -2624,7 +2677,7 @@ Next datatype to test is BLOB(1k)
   updateDate and then cancelRowUpdates
   updateTime and then cancelRowUpdates
   updateTimestamp and then cancelRowUpdates
----Positive Test24a - after updateXXX, try cancelRowUpdates and then deleteRow
+Positive Test24a - after updateXXX, try cancelRowUpdates and then deleteRow
 column 1 on this row before updateInt is 1
 column 1 on this row after updateInt is 234
 now cancelRowUpdates on the row
@@ -2633,16 +2686,20 @@ column 1 on this row after cancelRowUpdates is 1
 Since after cancelRowUpdates(), ResultSet is positioned on the same row, a deleteRow at this point will pass
 PASS : deleteRow passed as expected
 calling updateRow after deleteRow w/o first positioning the ResultSet on the next row will fail
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to updateRow() on the current row now
----Positive Test25 - issue cancelRowUpdates without any updateXXX
----Positive Test26 - issue updateRow without any updateXXX will not move the resultset position
----Positive Test27 - issue updateXXX and then deleteRow
+Positive Test25 - issue cancelRowUpdates without any updateXXX
+Positive Test26 - issue updateRow without any updateXXX will not move the resultset position
+Positive Test27 - issue updateXXX and then deleteRow
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
+SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
----Positive Test28 - issue updateXXXs and then move off the row, the changes should be ignored
+Positive Test28 - issue updateXXXs and then move off the row, the changes should be ignored
 	 C1,C2
 	 -- --
 	{1,aa                  }
@@ -2657,7 +2714,7 @@ Got expected exception Invalid cursor state - no current row.
 	{1,aa                  }
 	{2,bb                  }
 	{3,cc                  }
----Positive Test29 - issue multiple updateXXXs and then a updateRow
+Positive Test29 - issue multiple updateXXXs and then a updateRow
 	 C1,C2
 	 -- --
 	{1,aa                  }
@@ -2674,7 +2731,7 @@ Got expected exception Invalid cursor state - no current row.
 	{9999,xxxxxxx             }
 	{2,bb                  }
 	{3,cc                  }
----Positive Test30 - call updateXXX methods on only columns that correspond to a column in the table
+Positive Test30 - call updateXXX methods on only columns that correspond to a column in the table
 	 C1,C2
 	 -- --
 	{9999,xxxxxxx             }
@@ -2686,22 +2743,23 @@ Got expected exception Invalid cursor state - no current row.
 	{22,xxxxxxx             }
 	{2,bb                  }
 	{3,cc                  }
----Positive Test31a - case sensitive table and column names
+Positive Test31a - case sensitive table and column names
   Make sure that changes made it to the database correctly
 	 c11,C12
 	 --- ---
 	{11,22}
----Positive Test31b - table and column names with spaces in middle and end
+Positive Test31b - table and column names with spaces in middle and end
   Make sure for table " t 11 " that changes made it to the database correctly
 	  c 111 ,C112
 	 ------- ----
 	{11,22}
----Positive Test32 - call updateXXX methods on column that is not in for update columns list
+Positive Test32 - call updateXXX methods on column that is not in for update columns list
 	 C1,C2
 	 -- --
 	{22,xxxxxxx             }
 	{2,bb                  }
 	{3,cc                  }
+SQL State : 42X31
 Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR1055'.
   Make sure the contents of table are unchanged
 	 C1,C2
@@ -2709,7 +2767,7 @@ Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR10
 	{22,xxxxxxx             }
 	{2,bb                  }
 	{3,cc                  }
----Positive Test33 - try to update a table from another schema
+Positive Test33 - try to update a table from another schema
   contents of table t1 from current schema
 	 C1,C2
 	 -- --

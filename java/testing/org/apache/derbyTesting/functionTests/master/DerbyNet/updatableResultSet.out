@@ -1,0 +1,49 @@
+Start testing delete and update using JDBC2.0 updateable resultset apis
+Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
+warnings on connection = com.ibm.db2.jcc.c.SqlWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
+requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
+Make sure that we got TYPE_SCROLL_INSENSITIVE? true
+Make sure that we got CONCUR_READ_ONLY? true
+ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
+Make sure that we got CONCUR_READ_ONLY? true
+Now attempting to send a deleteRow on a read only resultset.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Now attempting to send an updateRow on a read only resultset.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative Test4 - request a read only resultset and send a sql with FOR UPDATE clause and attempt deleteRow/updateRow on it
+Make sure that we got CONCUR_READ_ONLY? true
+Now attempting to send a deleteRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Now attempting to send a updateRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause
+Make sure that we got CONCUR_READ_ONLY? true
+Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
+Will see the warnings in embedded mode only
+Now attempting to send a delete on a sql with no FOR UPDATE clause.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Now attempting to send a updateRow on a sql with no FOR UPDATE clause.
+SQL State : null
+Got expected exception Invalid operation: result set closed
+Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
+Make sure that we got CONCUR_READ_ONLY? true
+Now attempting to send a delete on a sql with FOR READ ONLY clause.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Now attempting to send a updateRow on a sql with FOR READ ONLY clause.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Finished testing updateable resultsets

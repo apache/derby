@@ -2372,9 +2372,15 @@ public class DRDAConnThread extends Thread {
 			}
 			else
 			{
-				if (stmt.getConcurType() == ResultSet.CONCUR_UPDATABLE)
-					writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYUPD);
-				else
+				if (stmt.getConcurType() == ResultSet.CONCUR_UPDATABLE) {
+					if (stmt.getResultSet() != null) { //resultset concurrency can be less than statement concurreny if the underlying language resultset is not updatable
+						if (stmt.getResultSet().getConcurrency() == ResultSet.CONCUR_UPDATABLE)
+							writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYUPD);
+						else
+							writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYRDO);
+					} else
+						writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYUPD);
+				} else
 					writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYRDO);
 			}
 
