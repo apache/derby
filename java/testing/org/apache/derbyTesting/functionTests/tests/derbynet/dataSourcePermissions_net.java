@@ -137,7 +137,10 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		String s = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT) 
 			+ db;
 		if (attrs != null)
-			s = s + ":" + attrs + ";";
+			if (TestUtil.isJCCFramework())
+				s = s + ":" + attrs + ";";
+			else
+				s = s + ";" + attrs;
 		//System.out.println("getJDBCUrl:" + s);
 		return s;
 

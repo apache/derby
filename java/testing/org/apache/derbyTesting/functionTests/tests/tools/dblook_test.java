@@ -387,8 +387,14 @@ public class dblook_test {
 		printAsHeader("\nDumping DDL for all objects, " +
 			"using\nNetwork Server:\n");
 		jdbcProtocol = TestUtil.getJdbcUrlPrefix("localhost",SERVER_PORT);
-		String sourceDBUrl = jdbcProtocol + "\"" + dbPath +
-			separator + dbName + "\":user=someusr;password=somepwd;";
+
+		String sourceDBUrl;
+		if (TestUtil.isJCCFramework())
+			sourceDBUrl = jdbcProtocol + "\"" + dbPath +
+				separator + dbName + "\":user=someusr;password=somepwd;";
+		else
+			sourceDBUrl = jdbcProtocol + dbPath +
+			separator + dbName + ";user=someusr;password=somepwd";
 
 		// Make sure we're not connected to the database
 		// (we connected to it in embedded mode when we
