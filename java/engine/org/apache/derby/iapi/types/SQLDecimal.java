@@ -409,7 +409,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 		if (value != null) {
 			scale = value.scale();
-			BigInteger bi = value.movePointRight(scale).toBigInteger();
+			BigInteger bi = value.unscaledValue();
 			byteArray = bi.toByteArray();
 		} else {
 			scale = rawScale;
@@ -448,25 +448,8 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		if ((rawData == null) || size != rawData.length)
 		{
 			rawData = new byte[size];
-			in.readFully(rawData);
 		}
-		/*
-		** Copy the incoming array into the last
-		** bytes of the existing array.  BigInteger
-		** is implemented to ignore leading zeroed bytes.
-		*/
-		else
-		{
-			// zero out the leading bytes
-			int stop = (rawData.length - size);
-			for (int i = 0; i < stop; i++)
-			{
-				rawData[i] = 0;
-			}
-			in.readFully(rawData,
-					     stop,  // start at rawData[stop]
-					     size); // read in size bytes
-		}
+		in.readFully(rawData);
 
 	}
 	public void readExternalFromArray(ArrayInputStream in) throws IOException 
@@ -489,26 +472,8 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		if ((rawData == null) || size != rawData.length)
 		{
 			rawData = new byte[size];
-			in.readFully(rawData);
 		}
-		/*
-		** Copy the incoming array into the last
-		** bytes of the existing array.  BigInteger
-		** is implemented to ignore leading zeroed bytes.
-		*/
-		else
-		{
-			// zero out the leading bytes
-			int stop = (rawData.length - size);
-			for (int i = 0; i < stop; i++)
-			{
-				rawData[i] = 0;
-			}
-			in.readFully(rawData,
-					     stop,  // start at rawData[stop]
-					     size); // read in size bytes
-		}
-
+		in.readFully(rawData);
 	}
 
 	/**
