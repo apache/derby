@@ -361,7 +361,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
                     keyColumns,      
                     eliminateDuplicates,// remove duplicates?
                     -1,                 // RESOLVE - is there a row estimate?
-                    -1,                 // RESOLVE - when should it go to disk?
+                    maxCapacity,
                     initialCapacity,    // in memory Hashtable initial capacity
                     loadFactor,         // in memory Hashtable load factor
                     runTimeStatisticsOn,

@@ -95,6 +95,8 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 
 	private FormatableBitSet refCols;
 
+    private double perRowUsage = -1;
+    
 	private boolean considerSortAvoidancePath;
 
   //this flag tells you if all the columns from this table are projected using * from it.
@@ -660,15 +662,53 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	}
 
 	/** @see Optimizable#maxCapacity */
-	public int maxCapacity()
+	public int maxCapacity( JoinStrategy joinStrategy, int maxMemoryPerTable) throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Not expected to be called");
-		}
-
-		return 0;
+        return joinStrategy.maxCapacity( maxCapacity, maxMemoryPerTable, getPerRowUsage());
 	}
+
+    private double getPerRowUsage() throws StandardException
+    {
+        if( perRowUsage < 0)
+        {
+            // Do not use getRefCols() because the cached refCols may no longer be valid.
+            FormatableBitSet refCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable(), true, false);
+            perRowUsage = 0.0;
+
+            /* Add up the memory usage for each referenced column */
+            for (int i = 0; i < refCols.size(); i++)
+            {
+                if (refCols.isSet(i))
+                {
+                    ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+                    DataTypeDescriptor expressionType = rc.getExpressionType();
+                    if( expressionType != null)
+                        perRowUsage += expressionType.estimatedMemoryUsage();
+                }
+            }
+
+            /*
+            ** If the proposed conglomerate is a non-covering index, add the 
+            ** size of the RowLocation column to the total.
+            **
+            ** NOTE: We don't have a DataTypeDescriptor representing a
+            ** REF column here, so just add a constant here.
+            */
+            ConglomerateDescriptor cd =
+              getCurrentAccessPath().getConglomerateDescriptor();
+            if (cd != null)
+            {
+                if (cd.isIndex() && ( ! isCoveringIndex(cd) ) )
+                {
+                    // workaround for a jikes bug. Can't directly reference a 
+                    // double with a value of 12.0 in this classfile. 
+                    double baseIndexUsage = 1.0;
+                    perRowUsage += ( baseIndexUsage + 11 );
+                }
+            }
+        }
+        return perRowUsage ;
+    } // end of getPerRowUsage
 
 	/** @see Optimizable#hashKeyColumns */
 	public int[] hashKeyColumns()
@@ -701,67 +741,20 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 								feasible(this, predList, optimizer);
 	}
 
-	/**
-	 * @see Optimizable#memoryUsage
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public double memoryUsage(double rowCount) throws StandardException
-	{
-		double retval = 0.0;
-		
-		// workaround for a jikes bug. Can't directly reference a 
-		// double with a value of 12.0 in this classfile. 
-		double baseIndexUsage = 1.0;
-
+    /** @see Optimizable#considerMemoryUsageOK */
+    public boolean memoryUsageOK( double rowCount, int maxMemoryPerTable)
+			throws StandardException
+    {
 		/*
 		** Don't enforce maximum memory usage for a user-specified join
 		** strategy.
 		*/
-		if (userSpecifiedJoinStrategy == null)
-		{
-			FormatableBitSet refCols = getRefCols();
-			double perRowUsage = 0.0;
+        if( userSpecifiedJoinStrategy != null)
+            return true;
 
-			/* Add up the memory usage for each referenced column */
-			for (int i = 0; i < refCols.size(); i++)
-			{
-				if (refCols.isSet(i))
-				{
-					ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
-                    DataTypeDescriptor expressionType = rc.getExpressionType();
-                    if( expressionType != null)
-                        perRowUsage += expressionType.estimatedMemoryUsage();
-				}
-			}
-
-			/*
-			** If the proposed conglomerate is a non-covering index, add the 
-			** size of the RowLocation column to the total.
-			**
-			** NOTE: We don't have a DataTypeDescriptor representing a
-			** REF column here, so just add a constant here.
-			*/
-			ConglomerateDescriptor cd =
-					getCurrentAccessPath().getConglomerateDescriptor();
-			if (cd != null)
-			{
-				if (cd.isIndex() && ( ! isCoveringIndex(cd) ) )
-				{
-					perRowUsage += ( baseIndexUsage + 11 );
-				}
-			}
-
-			/*
-			** Let the join strategy tell us how much memory it uses.
-			** Some use memory and some don't.
-			*/
-			retval = getCurrentAccessPath().getJoinStrategy().
-											memoryUsage(perRowUsage, rowCount);
-		}
-
-		return retval;
-	}
+        int intRowCount = (rowCount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) rowCount;
+        return intRowCount <= maxCapacity( getCurrentAccessPath().getJoinStrategy(), maxMemoryPerTable);
+    }
 
 	/**
 	 * @see Optimizable#legalJoinOrder

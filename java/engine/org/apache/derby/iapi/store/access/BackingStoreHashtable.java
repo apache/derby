@@ -29,10 +29,13 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.CloneableObject;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
+import org.apache.derby.iapi.services.cache.ClassSize;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties; 
 import java.util.Vector;
+import java.util.NoSuchElementException;
 
 /**
 A BackingStoreHashtable is a utility class which will store a set of rows into
@@ -102,12 +105,35 @@ public class BackingStoreHashtable
      * Fields of the class
      **************************************************************************
      */
+    private TransactionController tc;
     private Hashtable   hash_table;
     private int[]       key_column_numbers;
     private boolean     remove_duplicates;
 	private boolean		skipNullKeyColumns;
     private Properties  auxillary_runtimestats;
 	private RowSource	row_source;
+    /* If max_inmemory_rowcnt > 0 then use that to decide when to spill to disk.
+     * Otherwise compute max_inmemory_size based on the JVM memory size when the BackingStoreHashtable
+     * is constructed and use that to decide when to spill to disk.
+     */
+    private long max_inmemory_rowcnt;
+    private long inmemory_rowcnt;
+    private long max_inmemory_size;
+    private boolean keepAfterCommit;
+
+    private static int vectorSize; // The estimated number of bytes used by Vector(0)
+    static {
+        try
+        {
+            vectorSize = ClassSize.estimateBase( java.util.Vector.class);
+        }
+        catch( SecurityException se)
+        {
+            vectorSize = 4*ClassSize.refSize;
+        }
+    };
+    
+    private DiskHashtable diskHashtable;
 
     /**************************************************************************
      * Constructors for This class:
@@ -163,6 +189,9 @@ public class BackingStoreHashtable
 	 *
 	 * @param skipNullKeyColumns	Skip rows with a null key column, if true.
      *
+     * @param keepAfterCommit If true the hash table is kept after a commit,
+     *                        if false the hash table is dropped on the next commit.
+     *
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -175,13 +204,21 @@ public class BackingStoreHashtable
     long                    max_inmemory_rowcnt,
     int                     initialCapacity,
     float                   loadFactor,
-	boolean					skipNullKeyColumns)
+	boolean					skipNullKeyColumns,
+    boolean                 keepAfterCommit)
         throws StandardException
     {
         this.key_column_numbers    = key_column_numbers;
         this.remove_duplicates    = remove_duplicates;
 		this.row_source			   = row_source;
 		this.skipNullKeyColumns	   = skipNullKeyColumns;
+        this.max_inmemory_rowcnt = max_inmemory_rowcnt;
+        if( max_inmemory_rowcnt > 0)
+            max_inmemory_size = Long.MAX_VALUE;
+        else
+            max_inmemory_size = Runtime.getRuntime().totalMemory()/100;
+        this.tc = tc;
+        this.keepAfterCommit = keepAfterCommit;
 
         Object[] row;
 
@@ -280,7 +317,7 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    private Object[] cloneRow(Object[] old_row)
+    static Object[] cloneRow(Object[] old_row)
         throws StandardException
     {
         Object[] new_row = new DataValueDescriptor[old_row.length];
@@ -300,8 +337,6 @@ public class BackingStoreHashtable
      * @param row               Row to add to the hash table.
      * @param hash_table        The java HashTable to load into.
      *
-	 * @return true if successful, false if heap add fails.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     private void add_row_to_hash_table(
@@ -310,9 +345,14 @@ public class BackingStoreHashtable
     Object[]    row)
 		throws StandardException
     {
+        if( spillToDisk( hash_table, key, row))
+            return;
+        
         Object  duplicate_value = null;
 
-        if ((duplicate_value = hash_table.put(key, row)) != null)
+        if ((duplicate_value = hash_table.put(key, row)) == null)
+            doSpaceAccounting( row, false);
+        else
         {
             if (!remove_duplicates)
             {
@@ -321,6 +361,7 @@ public class BackingStoreHashtable
                 // inserted a duplicate
                 if ((duplicate_value instanceof Vector))
                 {
+                    doSpaceAccounting( row, false);
                     row_vec = (Vector) duplicate_value;
                 }
                 else
@@ -330,6 +371,7 @@ public class BackingStoreHashtable
 
                     // insert original row into vector
                     row_vec.addElement(duplicate_value);
+                    doSpaceAccounting( row, true);
                 }
 
                 // insert new row into vector
@@ -345,6 +387,89 @@ public class BackingStoreHashtable
         row = null;
     }
 
+    private void doSpaceAccounting( Object[] row,
+                                    boolean firstDuplicate)
+    {
+        inmemory_rowcnt++;
+        if( max_inmemory_rowcnt <= 0)
+        {
+            for( int i = 0; i < row.length; i++)
+            {
+                if( row[i] instanceof DataValueDescriptor)
+                    max_inmemory_size -= ((DataValueDescriptor) row[i]).estimateMemoryUsage();
+                max_inmemory_size -= ClassSize.refSize;
+            }
+            max_inmemory_size -= ClassSize.refSize;
+            if( firstDuplicate)
+                max_inmemory_size -= vectorSize;
+        }
+    } // end of doSpaceAccounting
+
+    /**
+     * Determine whether a new row should be spilled to disk and, if so, do it.
+     *
+     * @param hash_table The in-memory hash table
+     * @param key The row's key
+     * @param row
+     *
+     * @return true if the row was spilled to disk, false if not
+     *
+     * @exception  StandardException  Standard exception policy.
+     */
+    private boolean spillToDisk( Hashtable   hash_table,
+                                 Object      key,
+                                 Object[]    row)
+		throws StandardException
+    {
+        // Once we have started spilling all new rows will go to disk, even if we have freed up some
+        // memory by moving duplicates to disk. This simplifies handling of duplicates and accounting.
+        if( diskHashtable == null)
+        {
+            if( max_inmemory_rowcnt > 0)
+            {
+                if( inmemory_rowcnt < max_inmemory_rowcnt)
+                    return false; // Do not spill
+            }
+            else if( max_inmemory_size > 0)
+                return false;
+            // Want to start spilling
+            if( ! (row instanceof DataValueDescriptor[]))
+            {
+                if( SanityManager.DEBUG)
+                    SanityManager.THROWASSERT( "BackingStoreHashtable row is not DataValueDescriptor[]");
+                // Do not know how to put it on disk
+                return false;
+            }
+            diskHashtable = new DiskHashtable( tc,
+                                               (DataValueDescriptor[]) row,
+                                               key_column_numbers,
+                                               remove_duplicates,
+                                               keepAfterCommit);
+        }
+        
+        Object duplicateValue = hash_table.get( key);
+        if( duplicateValue != null)
+        {
+            if( remove_duplicates)
+                return true; // a degenerate case of spilling
+            // If we are keeping duplicates then move all the duplicates from memory to disk
+            // This simplifies finding duplicates: they are either all in memory or all on disk.
+            if( duplicateValue instanceof Vector)
+            {
+                Vector duplicateVec = (Vector) duplicateValue;
+                for( int i = duplicateVec.size() - 1; i >= 0; i--)
+                {
+                    Object[] dupRow = (Object[]) duplicateVec.elementAt(i);
+                    diskHashtable.put( key, dupRow);
+                }
+            }
+            else
+                diskHashtable.put( key, (Object []) duplicateValue);
+            hash_table.remove( key);
+        }
+        diskHashtable.put( key, row);
+        return true;
+    } // end of spillToDisk
     /**************************************************************************
      * Public Methods of This class:
      **************************************************************************
@@ -364,6 +489,11 @@ public class BackingStoreHashtable
 		throws StandardException
     {
         hash_table = null;
+        if( diskHashtable != null)
+        {
+            diskHashtable.close();
+            diskHashtable = null;
+        }
         return;
     }
 
@@ -380,7 +510,9 @@ public class BackingStoreHashtable
     public Enumeration elements()
         throws StandardException
     {
-        return(hash_table.elements());
+        if( diskHashtable == null)
+            return(hash_table.elements());
+        return new BackingStoreHashtableEnumeration();
     }
 
     /**
@@ -420,7 +552,10 @@ public class BackingStoreHashtable
     public Object get(Object key)
 		throws StandardException
     {
-        return(hash_table.get(key));
+        Object obj = hash_table.get(key);
+        if( diskHashtable == null || obj != null)
+            return obj;
+        return diskHashtable.get( key);
     }
 
     /**
@@ -451,7 +586,10 @@ public class BackingStoreHashtable
     Object      key)
 		throws StandardException
     {
-        return(hash_table.remove(key));
+        Object obj = hash_table.remove(key);
+        if( obj != null || diskHashtable == null)
+            return obj;
+        return diskHashtable.remove(key);
     }
 
     /**
@@ -553,7 +691,54 @@ public class BackingStoreHashtable
     public int size()
 		throws StandardException
     {
-        return(hash_table.size());
+        if( diskHashtable == null)
+            return(hash_table.size());
+        return hash_table.size() + diskHashtable.size();
     }
 
+    private class BackingStoreHashtableEnumeration implements Enumeration
+    {
+        private Enumeration memoryEnumeration;
+        private Enumeration diskEnumeration;
+
+        BackingStoreHashtableEnumeration()
+        {
+            memoryEnumeration = hash_table.elements();
+            if( diskHashtable != null)
+            {
+                try
+                {
+                    diskEnumeration = diskHashtable.elements();
+                }
+                catch( StandardException se)
+                {
+                    diskEnumeration = null;
+                }
+            }
+        }
+        
+        public boolean hasMoreElements()
+        {
+            if( memoryEnumeration != null)
+            {
+                if( memoryEnumeration.hasMoreElements())
+                    return true;
+                memoryEnumeration = null;
+            }
+            if( diskEnumeration == null)
+                return false;
+            return diskEnumeration.hasMoreElements();
+        }
+
+        public Object nextElement() throws NoSuchElementException
+        {
+            if( memoryEnumeration != null)
+            {
+                if( memoryEnumeration.hasMoreElements())
+                    return memoryEnumeration.nextElement();
+                memoryEnumeration = null;
+            }
+            return diskEnumeration.nextElement();
+        }
+    } // end of class BackingStoreHashtableEnumeration
 }

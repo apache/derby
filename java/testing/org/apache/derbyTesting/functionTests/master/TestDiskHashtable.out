@@ -1,0 +1,6 @@
+Test DiskHashtable starting
+Starting single key, keep duplicates test
+Starting single key, remove duplicates test
+Starting multiple key, keep duplicates test
+Starting multiple key, remove duplicates test
+OK

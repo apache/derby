@@ -215,6 +215,11 @@ public class OptimizerImpl implements Optimizer
 		timeOptimizationStarted = System.currentTimeMillis();
 	}
 
+    public int getMaxMemoryPerTable()
+    {
+        return maxMemoryPerTable;
+    }
+    
 	/**
 	 * @see Optimizer#getNextPermutation
 	 *
@@ -1440,14 +1445,11 @@ public class OptimizerImpl implements Optimizer
 		** a single scan is the total number of rows divided by the number
 		** of outer rows.  The optimizable may over-ride this assumption.
 		*/
-		double memusage = optimizable.memoryUsage(
-							estimatedCost.rowCount() / outerCost.rowCount());
-
-		if (memusage > maxMemoryPerTable)
+		if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(), maxMemoryPerTable))
 		{
 			if (optimizerTrace)
 			{
-				trace(SKIPPING_DUE_TO_EXCESS_MEMORY, 0, 0, memusage, null);
+				trace(SKIPPING_DUE_TO_EXCESS_MEMORY, 0, 0, 0.0, null);
 			}
 			return;
 		}
@@ -1566,14 +1568,12 @@ public class OptimizerImpl implements Optimizer
 		** NOTE: This is probably not necessary here, because we should
 		** get here only for nested loop joins, which don't use memory.
 		*/
-		double memusage = optimizable.memoryUsage(
-							estimatedCost.rowCount() / outerCost.rowCount());
-
-		if (memusage > maxMemoryPerTable)
+        if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(),
+                                         maxMemoryPerTable))
 		{
 			if (optimizerTrace)
 			{
-				trace(SKIPPING_DUE_TO_EXCESS_MEMORY, 0, 0, memusage, null);
+				trace(SKIPPING_DUE_TO_EXCESS_MEMORY, 0, 0, 0.0, null);
 			}
 			return;
 		}

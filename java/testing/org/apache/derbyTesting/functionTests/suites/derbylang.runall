@@ -110,6 +110,7 @@ lang/schemas.sql
 lang/select.sql
 lang/simpleThreadWrapper.java
 lang/specjPlans.sql
+lang/SpillHash.java
 lang/staleplans.sql
 lang/stmtCache0.sql
 lang/stmtCache1.sql

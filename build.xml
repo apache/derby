@@ -413,6 +413,7 @@
       <arg value="java.math.BigDecimal"/>
       <arg value="java.util.ArrayList"/>
       <arg value="java.util.GregorianCalendar"/>
+      <arg value="java.util.Vector"/>
     </java>
 
     <javac

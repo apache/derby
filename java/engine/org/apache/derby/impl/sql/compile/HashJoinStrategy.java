@@ -44,6 +44,8 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.SQLState;
 
+import org.apache.derby.iapi.services.cache.ClassSize;
+
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
@@ -217,9 +219,16 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		*/
 	}
 
-	/** @see JoinStrategy#memoryUsage */
-	public double memoryUsage(double memoryPerRow, double rowCount) {
-		return memoryPerRow * rowCount;
+	/** @see JoinStrategy#maxCapacity */
+	public int maxCapacity( int userSpecifiedCapacity,
+                            int maxMemoryPerTable,
+                            double perRowUsage) {
+        if( userSpecifiedCapacity >= 0)
+            return userSpecifiedCapacity;
+        perRowUsage += ClassSize.estimateHashEntrySize();
+        if( perRowUsage <= 1)
+            return maxMemoryPerTable;
+        return (int)(maxMemoryPerTable/perRowUsage);
 	}
 
 	/** @see JoinStrategy#getName */
@@ -265,7 +274,8 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 							int indexColItem,
 							int lockMode,
 							boolean tableLocked,
-							int isolationLevel
+							int isolationLevel,
+                            int maxMemoryPerTable
 							)
 						throws StandardException {
 		ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
@@ -280,7 +290,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		nonStoreRestrictionList.generateQualifiers(acb,	mb, innerTable, true);
 		mb.push(innerTable.initialCapacity());
 		mb.push(innerTable.loadFactor());
-		mb.push(innerTable.maxCapacity());
+		mb.push(innerTable.maxCapacity( (JoinStrategy) this, maxMemoryPerTable));
 		/* Get the hash key columns and wrap them in a formattable */
 		int[] hashKeyColumns = innerTable.hashKeyColumns();
 		FormatableIntHolder[] fihArray = 

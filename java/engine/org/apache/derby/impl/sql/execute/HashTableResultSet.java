@@ -221,7 +221,8 @@ public class HashTableResultSet extends NoPutResultSetImpl
 										   maxInMemoryRowCount,
 										   (int) initialCapacity,
 										   loadFactor,
-										   skipNullKeyColumns);
+										   skipNullKeyColumns,
+                                           false /* Not kept after a commit */);
 
 			if (runTimeStatsOn)
 			{

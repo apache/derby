@@ -250,9 +250,7 @@ public class Level2OptimizerImpl extends OptimizerImpl
 
 			case SKIPPING_DUE_TO_EXCESS_MEMORY:
 				traceString = 
-					"Skipping access path due to excess memory usage of " +
-					doubleParam +
-					" bytes - maximum is " +
+					"Skipping access path due to excess memory usage, maximum is " +
 					maxMemoryPerTable;
 				break;
 

@@ -1918,21 +1918,13 @@ public class FromBaseTable extends FromTable
 		return loadFactor;
 	}
 
-	/** @see Optimizable#maxCapacity */
-	public int maxCapacity()
-	{
-		return maxCapacity;
-	}
-
 	/**
-	 * @see Optimizable#memoryUsage
-	 *
-	 * @exception StandardException		Thrown on error
+	 * @see Optimizable#memoryUsageOK
 	 */
-	public double memoryUsage(double rowCount)
+	public boolean memoryUsageOK(double rowCount, int maxMemoryPerTable)
 			throws StandardException
 	{
-		return super.memoryUsage(singleScanRowCount);
+		return super.memoryUsageOK(singleScanRowCount, maxMemoryPerTable);
 	}
 
 	/**
@@ -3306,8 +3298,8 @@ public class FromBaseTable extends FromTable
 			}
 		}
 
-		JoinStrategy trulyTheBestJoinStrategy =
-			getTrulyTheBestAccessPath().getJoinStrategy();
+        AccessPath ap = getTrulyTheBestAccessPath();
+		JoinStrategy trulyTheBestJoinStrategy =	ap.getJoinStrategy();
 
 		/*
 		** We can only do bulkFetch on NESTEDLOOP
@@ -3337,9 +3329,8 @@ public class FromBaseTable extends FromTable
 											getTrulyTheBestAccessPath().
 																getLockMode(),
 											(tableDescriptor.getLockGranularity() == TableDescriptor.TABLE_LOCK_GRANULARITY),
-											getCompilerContext().
-														getScanIsolationLevel()
-											
+											getCompilerContext().getScanIsolationLevel(),
+											ap.getOptimizer().getMaxMemoryPerTable()
 											);
 
 		closeMethodArgument(acb, mb);

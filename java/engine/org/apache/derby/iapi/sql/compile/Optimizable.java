@@ -308,9 +308,6 @@ public interface Optimizable {
 	/** Return the load factor of the hash table, for hash join strategy */
 	public float loadFactor();
 
-	/** Return the maximum capacity of the hash table, for hash join strategy */
-	public int maxCapacity();
-
 	/** Return the hash key column numbers, for hash join strategy */
 	public int[] hashKeyColumns();
 
@@ -333,16 +330,25 @@ public interface Optimizable {
 										Optimizer optimizer)
 			throws StandardException;
 
+    /**
+     * @param rowCount
+     * @param maxMemoryPerTable
+     * @return true if the memory usage of the proposed access path is OK, false if not.
+     *
+     * @exception StandardException standard error policy
+     */
+    public boolean memoryUsageOK( double rowCount, int maxMemoryPerTable)
+			throws StandardException;
+
 	/**
-	 * What is the memory usage in bytes of the proposed access path for this
-	 * optimizable?
-	 *
-	 * @param rowCount	The estimated number of rows returned by a single
-	 *					scan of this optimizable
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public double memoryUsage(double rowCount) throws StandardException;
+     * Return the maximum capacity of the hash table, for hash join strategy
+     *
+     * @param maxMemoryPerTable The maximum number of bytes to be used. Ignored if the user has set a maximum
+     *                          number of rows for the Optimizable.
+     *
+     * @exception StandardException Standard error policy
+     */
+	public int maxCapacity( JoinStrategy joinStrategy, int maxMemoryPerTable) throws StandardException;
 
 	/**
 	 * Can this Optimizable appear at the current location in the join order.

@@ -66,7 +66,6 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 
 
 	private int							sourceRowWidth;
-	private TransactionController		tc;
 
 	private	  BackingStoreHashtable		ht;
 	private	  ExecRow					resultRow;
@@ -86,6 +85,8 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	private int maxRows;
 
     private GeneratedMethod closeCleanup;
+
+    private boolean keepAfterCommit;
 
 	/**
 	 * Constructor for a ScrollInsensitiveResultSet
@@ -110,6 +111,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.source = source;
 		this.sourceRowWidth = sourceRowWidth;
+        keepAfterCommit = activation.getResultSetHoldability();
 		maxRows = activation.getMaxRows();
 		if (SanityManager.DEBUG)
 		{
@@ -160,7 +162,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		 * We need BackingStoreHashtable to actually go to disk when it doesn't fit.
 		 * This is a known limitation.
 		 */
-		ht = new BackingStoreHashtable(tc,
+		ht = new BackingStoreHashtable(getTransactionController(),
 									   null,
 									   keyCols,
 									   false,
@@ -168,7 +170,8 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 									   HashScanResultSet.DEFAULT_MAX_CAPACITY,
 									   HashScanResultSet.DEFAULT_INITIAL_CAPACITY,
 									   HashScanResultSet.DEFAULT_MAX_CAPACITY,
-									   false);
+									   false,
+                                       keepAfterCommit);
 
 		openTime += getElapsedMillis(beginTime);
 		setBeforeFirstRow();

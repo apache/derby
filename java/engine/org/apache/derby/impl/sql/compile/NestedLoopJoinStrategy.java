@@ -152,9 +152,11 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 						costEstimate);
 	}
 
-	/** @see JoinStrategy#memoryUsage */
-	public double memoryUsage(double memoryPerRow, double rowCount) {
-		return 0.0;
+	/** @see JoinStrategy#maxCapacity */
+	public int maxCapacity( int userSpecifiedCapacity,
+                            int maxMemoryPerTable,
+                            double perRowUsage) {
+		return Integer.MAX_VALUE;
 	}
 
 	/** @see JoinStrategy#getName */
@@ -203,7 +205,8 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 							int indexColItem,
 							int lockMode,
 							boolean tableLocked,
-							int isolationLevel
+							int isolationLevel,
+                            int maxMemoryPerTable
 							)
 						throws StandardException {
 		ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;

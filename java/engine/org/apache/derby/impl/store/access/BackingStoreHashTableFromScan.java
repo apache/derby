@@ -97,7 +97,8 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
             max_inmemory_rowcnt,
             initialCapacity,
             loadFactor,
-			skipNullKeyColumns);
+			skipNullKeyColumns,
+            false /* Do not keep the hash table after a commit. */);
 
         open_scan =  (ScanManager)
             tc.openScan(

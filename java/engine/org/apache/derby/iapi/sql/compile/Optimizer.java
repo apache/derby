@@ -322,4 +322,9 @@ public interface Optimizer {
 	 * @see #USE_STATISTICS
 	 */
 	public boolean useStatistics();
+
+    /**
+     * @return the maximum number of bytes to be used per table.
+     */
+    public int getMaxMemoryPerTable();
 }

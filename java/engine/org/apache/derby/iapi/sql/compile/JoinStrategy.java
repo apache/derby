@@ -157,12 +157,17 @@ public interface JoinStrategy {
 						CostEstimate costEstimate)
 		throws StandardException;
 
-	/**
-	 * Get the estimated memory usage for this join strategy, given
-	 * the number of rows and the memory usage per row.
-	 */
-	double memoryUsage(double memoryPerRow, double rowCount);
-
+    /**
+     * @param userSpecifiedCapacity
+     * @param maxMemoryPerTable maximum number of bytes per table
+     * @param perRowUsage number of bytes per row
+     *
+     * @return The maximum number of rows that can be handled by this join strategy
+     */
+    public int maxCapacity( int userSpecifiedCapacity,
+                            int maxMemoryPerTable,
+                            double perRowUsage);
+    
 	/** Get the name of this join strategy */
 	String getName();
 
@@ -227,7 +232,8 @@ public interface JoinStrategy {
 							int indexColItem,
 							int lockMode,
 							boolean tableLocked,
-							int isolationLevel
+                            int isolationLevel,
+                            int maxMemoryPerTable
 							)
 					throws StandardException;
 
