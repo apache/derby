@@ -664,7 +664,7 @@ class DDMReader
 	protected byte readByte () throws DRDAProtocolException
 	{
 		ensureBLayerDataInBuffer (1, ADJUST_LENGTHS);
-		return (byte) (buffer[pos++] & 0xff);
+		return buffer[pos++];
 	}
 
 	/**

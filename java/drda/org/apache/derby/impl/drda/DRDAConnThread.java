@@ -6913,7 +6913,7 @@ public class DRDAConnThread extends Thread {
 	private boolean readBoolean(int codepoint) throws DRDAProtocolException
 	{
 		checkLength(codepoint, 1);
-		int val = reader.readByte();
+		byte val = reader.readByte();
 		if (val == CodePoint.TRUE)
 			return true;
 		else if (val == CodePoint.FALSE)
