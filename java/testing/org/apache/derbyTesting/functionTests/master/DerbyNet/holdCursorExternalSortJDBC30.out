@@ -22,9 +22,9 @@ ij> ----------------------------------------------------------------------------
 -----     open.
 -----
 run resource 'createTestProcedures.subsql';
-ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functiontests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
-ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functiontests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
 ij> autocommit off;
 ij> create table foo (a int, data varchar(2000));

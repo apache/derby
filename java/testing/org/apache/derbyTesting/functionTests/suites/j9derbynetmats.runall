@@ -24,3 +24,5 @@ lang/holdCursorJavaReflection.java
 lang/procedure.java
 lang/simpleScroll.sql
 lang/supersimple.sql
+store/holdCursorExternalSortJDBC30.sql
+store/holdCursorJDBC30.sql
