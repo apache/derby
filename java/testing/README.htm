@@ -13,7 +13,7 @@ org.apache.derbyTesting<!--mozToc h1 1 h2 2 h3 3 h4 4 h5 5 h6 6--><br>
 </h2>
 <p>
 <small>created by myrna@golux.com<br>
-last updated on 11/11/2004 by: myrna@golux.com<br>
+last updated on 12/02/2004 by: myrna@golux.com<br>
 </small>
 </p>
 <ul>
@@ -139,7 +139,14 @@ and db2jcc_license_c.jar <br>
       </small></li>
     <small>&nbsp;&nbsp;&nbsp; IBM Universal JDBC Driver classes. (See
 IBM <a href="http://www-106.ibm.com/developerworks/db2/downloads/jcc/">developerworks</a>
-for download)</small>
+for download)</small><br>
+    <li><small>derbyLocale_*.jar</small></li>
+    <small>&nbsp;&nbsp;&nbsp; locale files holding translated messages.</small><br>
+  </ul>
+</ul>
+<small></small>
+<ul>
+  <ul>
   </ul>
 </ul>
 <p>
@@ -151,11 +158,15 @@ For example:<br>
   <tbody>
     <tr>
       <td style="vertical-align: top;"><small>(note that $jardir is
-only a convenience variable):<br>
+only a convenience variable and that the command below has carriage
+returns for formatting reasons):<br>
       </small><small>set jardir=/local/derbyjar<br>
 set
 CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbynet.jar:$jardir/db2jcc.jar:<br>
 $jardir/db2jcc_license_c.jar:$jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<br>
+$jardir/derbyLocale_de_DE.jar:$jardir/derbyLocale_es.jar:$jardir/derbyLocale_fr.jar:<br>
+$jardir/derbyLocale_it.jar:$jardir/derbyLocale_ja_JP.jar:$jardir/derbyLocale_ko_KR.jar:<br>
+$jardir/derbyLocale_pt_BR.jar:$jardir/derbyLocale_zh_CN.jar:$jardir/derbyLocale_zh_TW.jar:<br>
 $CLASSPATH</small><br>
       <small>set PATH=/local/jdk141/bin:$PATH</small><br>
       </td>
@@ -250,7 +261,7 @@ begun, although individual test files and result files will be cleaned
 out and overwritten.&nbsp;
 </p>
 <p>
-Initially the suites provided are:
+The suites provided are:
 </p>
 <ul>
   <li>derbylang: <br>
@@ -261,14 +272,39 @@ language implementation in derby. <br>
     </li>
     <li>Mostly .sql type tests. <br>
     </li>
-    <li>tested on a variety of hardware takes from 1.15m to 3 hours<br>
+    <li>tested on a variety of hardware takes from 1.15m to 2.00 hours<br>
     </li>
   </ul>
   <li>derbynetmats</li>
   <ul>
     <li>basic network server tests.</li>
     <li>variety of tests, including some from derbylang suite</li>
-    <li>tested on a variety of hardware takes from 15 to 50 minutes<br>
+    <li>tested on a variety of hardware takes from 15 to 30 minutes</li>
+  </ul>
+  <li>storeall</li>
+  <ul>
+    <li>tests for storage area</li>
+    <li>includes:</li>
+    <ul>
+      <li>storemats: most basic quick verification tests.<br>
+      </li>
+      <li>storemore: more extensive storage tests</li>
+      <li>storetests: set of store tests grouped together because they
+do not each need to create a new database</li>
+    </ul>
+    <li>tested on a variety of hardware takes from 10 to 25 minutes<br>
+    </li>
+  </ul>
+  <li>xa</li>
+  <ul>
+    <li>tests the xa implementation. There is both a storage and
+language element to these tests</li>
+    <li>tested on a variety of hardware takes from 2 to 4 minutes<br>
+    </li>
+  </ul>
+  <li>derbytools</li>
+  <ul>
+    <li>currently only test included is for the dblook utility. <br>
     </li>
   </ul>
   <li>derbyall</li>
@@ -277,8 +313,7 @@ language implementation in derby. <br>
     </li>
   </ul>
   <ul>
-    <li>tested on a variety of hardware takes from 1.30 - 3.45 minutes <br>
-    </li>
+    <li>tested on a variety of hardware takes from 1.50 - 4.00 hours </li>
   </ul>
   <li><a href="#Note1:"><small>See Note1</small></a><br>
   </li>
@@ -523,7 +558,10 @@ skipped (for more details on this, see the section on <a
  href="#skipping">skipping tests</a>).
 </p>
 <p>
-RunSuite does not empty the top level directory before running. Thus, if another suite was run in the same directory at an earlier time, the resulting summary files might contain results for more than the current run. Therefore it is important to run each suite in a clean directory.
+RunSuite does not empty the top level directory before running. Thus,
+if another suite was run in the same directory at an earlier time, the
+resulting summary files might contain results for more than the current
+run. Therefore it is important to run each suite in a clean directory.
 </p>
 <p>Sample output from RunSuite:<br>
 </p>
@@ -779,7 +817,7 @@ The lowest level suite always needs to have a .runall file.
 </p>
 <p>
 For example, the derbyall suite is only a derbyall.properties file that
-refers to 2 other suites in the 'suites' property:
+refers to other suites in the 'suites' property:
 </p>
 <table
  style="text-align: left; width: 527px; height: 32px; margin-left: 40px;"
@@ -787,7 +825,7 @@ refers to 2 other suites in the 'suites' property:
   <tbody>
     <tr>
       <td style="vertical-align: top;"><small>-----------------------derbyall.properties---------------<br>
-suites=derbylang derbynetmats<br>
+suites=derbylang derbynetmats storeall xa derbytools<br>
 derby.debug.true=enableBtreeConsistencyCheck<br>
 derby.stream.error.logSeverityLevel=0<br>
       </small></td>
