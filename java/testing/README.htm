@@ -322,6 +322,35 @@ implementation, Metadata etc.</li>
     <li>takes 2 to 5 minutes<br>
     </li>
   </ul>
+  <li>demo, simpledemo<br>
+  </li>
+  <ul>
+    <li>tests the SimpleApp example <br>
+    </li>
+    <li>simpledemo runs SimpleApp itself - and thus has a different
+default resource package name (namely, no package) than all the other
+tests. Hence it needed its own suite.properties file.</li>
+    <li>takes 30 to 1 minute</li>
+  </ul>
+  <li>nist</li>
+  <ul>
+    <li>test obtained from the NIST SQL suite v 6.0</li>
+    <li>takes 5 to 10 minutes<br>
+    </li>
+  </ul>
+  <li>encryption</li>
+  <ul>
+    <li>runs the storemats suite in encryption scheme DESede<br>
+    </li>
+    <li>takes 25 to 40 minutes<br>
+    </li>
+  </ul>
+  <li>multi</li>
+  <ul>
+    <li>runs a simple test case with 10 threads</li>
+    <li>runs for 10 minutes, then shuts down all threads<br>
+    </li>
+  </ul>
   <li>derbytools<br>
   </li>
   <ul>
@@ -335,7 +364,7 @@ implementation, Metadata etc.</li>
     </li>
   </ul>
   <ul>
-    <li>tested on a variety of hardware takes from 2 - 4.30 hours </li>
+    <li>tested on a variety of hardware takes from 2.30 - 5.00 hours </li>
   </ul>
   <li><a href="#Note1:"><small>See Note1</small></a><br>
   </li>
@@ -945,8 +974,10 @@ values for system and vendor properties</li>
 </ul>
 <br>
 <h3><a name="skipping"></a>4.10 Skipping a test</h3>
-<p>
-Some tests are written to test specific functionality only available
+<p>There are 2 skipping mechanisms in place for different kinds of
+skipping of a test.<br>
+</p>
+<p>Some tests are written to test specific functionality only available
 with for instance certain jvms, or, with network server, certain
 versions of the IBM Universal Driver. To control this, properties can
 be set for each test, for instance, if a test should not be run when
@@ -957,6 +988,19 @@ runwithjdk141=false has no effect, and setting runwithjdk14 affects
 runs with jdk141 as well as jdk142.<br>
 Other skip reasons are encryption protocols specific to a certain jvm. <br>
 </p>
+<p>Another skipping mechanism works on entire 'frameworks'. Currently
+there are only 3 supported in the harness, embedded, NetworkServer with
+the IBM Universal JDBC Driver ('DerbyNet') and NetworkServer with the
+not yet available new driver ('DerbyNetClient'). In the suites
+directory there are .exclude files for each of the frameworks - if for
+some reason an exclude file were not there, you would see a warning
+message show up for every test run. In this 'framework'.exclude file
+tests can be placed that for some reason need to be excluded from
+running with that framework. This mechanism enables adding of suites to
+a framework run even if a few of the tests are not appropriate for that
+particular framework.</p>
+<p>Note that at this time, only skipped suites show up in the .skip
+result file. This still needs to be corrected.</p>
 <br>
 <h3><a name="frameworks"></a>4.11 Frameworks</h3>
 <p>
@@ -1033,8 +1077,13 @@ on the executable, j9.exe), based on the property 'serverJvm'. Running
 this suite requires providing the property&nbsp; bootcp,
 which is&nbsp; interpreted from the test harness class j9_13. See also
 section on adding a new <a href="#ov9%22">jvm setup</a>.
-</small><br>
-</div>
+<br>
+Another suite is derbynetclientmats. This suite is for testing the
+networkserver with a yet to be contributed open source client. IBM
+staff is working on contributing this. In essence it is the same as the
+derbynetmats suite.&nbsp; At this time, it can only be run by the IBM
+staff working on this driver.<br>
+</small></div>
 <br>
 <small><a name="Note2:"></a>Note2:<br>
 </small>

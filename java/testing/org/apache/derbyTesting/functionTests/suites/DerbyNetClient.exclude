@@ -1,3 +1,4 @@
+derbynet/dataSourcePermissions_net.java
 # excluding resultsetStream.java because this test uses java.io.FileInputStream throughout the test
 # excluding scrollCursors2.java because updatable resultsets & scroll sensitive cursors are not supported
 # excluding batchUpdate.java for it hits a problem in networkserver ('beetle' 5561)

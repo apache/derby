@@ -24,7 +24,7 @@
 
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.suites.dir}">
-      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/suites" includes="*.runall,*.properties"/>
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/suites" includes="*.runall,*.properties,*.exclude"/>
     </copy>
   </target>
 

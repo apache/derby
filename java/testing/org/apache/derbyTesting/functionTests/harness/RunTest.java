@@ -827,7 +827,7 @@ public class RunTest
 		String skipFile;
 		// Some tests will not work with some frameworks,
 		// so check property files for tests to be skipped
-		skipFile = "no" + framework + ".runall";
+		skipFile = framework + ".exclude";
 
 		if (!framework.equals(""))
 		{
