@@ -1,0 +1,48 @@
+Test longStringColumn starting
+... 0
+... 10000
+... 20000
+... 30000
+... 40000
+... 50000
+... 60000
+i = 65521, testing length: 65526
+i = 65522, testing length: 65527
+i = 65523, testing length: 65528
+i = 65524, testing length: 65529
+i = 65525, testing length: 65530
+i = 65526, testing length: 65531
+i = 65527, testing length: 65532
+i = 65528, testing length: 65533
+i = 65529, testing length: 65534
+i = 65530, testing length: 65535
+i = 65531, testing length: 65536
+i = 65532, testing length: 65537
+i = 65533, testing length: 65538
+i = 65534, testing length: 65539
+i = 65535, testing length: 65540
+i = 65536, testing length: 65541
+i = 65537, testing length: 65542
+i = 65538, testing length: 65543
+i = 65539, testing length: 65544
+i = 65540, testing length: 65545
+i = 65541, testing length: 65546
+i = 65542, testing length: 65547
+i = 65543, testing length: 65548
+i = 65544, testing length: 65549
+i = 65545, testing length: 65550
+i = 65546, testing length: 65551
+i = 65547, testing length: 65552
+i = 65548, testing length: 65553
+i = 65549, testing length: 65554
+i = 65550, testing length: 65555
+i = 65551, testing length: 65556
+i = 65552, testing length: 65557
+i = 65553, testing length: 65558
+i = 65554, testing length: 65559
+i = 65555, testing length: 65560
+i = 65556, testing length: 65561
+i = 65557, testing length: 65562
+i = 65558, testing length: 65563
+i = 65559, testing length: 65564
+Test longStringColumn finished

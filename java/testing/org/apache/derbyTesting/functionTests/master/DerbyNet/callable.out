@@ -1,0 +1,37 @@
+CallableStatement Test Starts
+Sum of 6 and 9 is: 15
+return value: Square of 6 then plus 6 is: 42
+return value is: 55
+return short: 3
+return int: 4
+return long: 5
+return float: 6.0
+return double: 7.0
+return decimal: 88.880
+return date: 2002-05-12
+return time: 10:05:02
+return time stamp: xxxxxxFILTERED-TIMESTAMPxxxxx
+return byte[0]: 1
+return byte[1]: 2
+method 5 return decimal: 33.3330
+method 5 return decimal: -33332.9966
+method 5 return decimal: -966.6669
+method 5 return decimal: 0.0000
+method 5 return decimal: 0.0000
+method 5 return decimal: 99999999.0000
+method 5 return decimal: -99999999.0000
+Integer: Sum of 6 and 9 is: 15
+Short: Sum of 6 and 9 is: 15
+Long: Sum of 99999 and 88888888 is: 88988887
+Float: Sum of 6.123453 and 77777 is: 77783.125
+Double: Sum of 6.987654 and 8888888888888.01234 is: 8.888888888894135E12
+Time: Old time of 10:05:02 changed to: 11:06:03
+cstmt.getBigDecimal(1): 999999999999999.000000000000000
+cstmt.getBigDecimal(2): 0.000000000000001
+cstmt.getBigDecimal(3): null
+get the CallableStatement object
+execute the procedure with LONGVARBINARY
+execute the procedure with BLOB
+Select lvbc from Longvarbinary_Tab
+done testing long varbinary
+CallableStatement Test Ends

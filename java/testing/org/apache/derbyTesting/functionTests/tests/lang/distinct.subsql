@@ -1,0 +1,90 @@
+--
+-- this is the script we run over various data flavors of the following
+-- table.  distinct.sql uses this script repeatedly.
+--
+-- create table t (i int, s smallint, r real, f float, 
+--  d date, t time, ts timestamp, c char(10), v varchar(20));
+
+-- here are the flavors of select:
+-- . select distinct one column, each data type (include usertypes)
+select distinct i from t;
+select distinct s from t;
+select distinct r from t;
+select distinct f from t;
+select distinct d from t;
+select distinct t from t;
+select distinct ts from t;
+select distinct c from t;
+select distinct v from t;
+
+-- . select distinct multiple columns, each data type
+-- . select distinct all or just some columns of the table
+select distinct t,i,s,f,d from t;
+select distinct * from t;
+select distinct t.*,ts from t;
+
+-- . select distinct in an exists subquery
+select * from t where exists (select distinct i from t);
+select * from t where exists (select distinct * from t);
+select * from t where not exists (select distinct t from t);
+
+-- . select distinct in an in subquery
+select * from t where i in (select distinct s from t);
+select * from t where s not in (select distinct r from t);
+
+-- . select distinct in a quantified subquery
+
+-- same result as i in distinct s above
+select * from t where i =any (select distinct s from t);
+
+-- same result as s not in distinct r above
+select * from t where s <>any (select distinct r from t);
+
+select * from t where d >=any (select distinct d from t);
+select * from t where t <=all (select distinct t from t);
+
+-- . select distinct in a scalar subquery
+select * from t where c = (select distinct v from t);
+select * from t where v < (select distinct d from t);
+
+-- . select distinct in a from subquery
+select * from (select distinct t,i,s,f,d from t) as s(a,b,c,d,e);
+select * from (select distinct * from t) as s;
+select * from (select distinct t.*,ts as tts from t) as s;
+
+-- . select distinct in a from subquery joining with another table
+select * from t, (select distinct t.*,ts as tts from t) as s where t.i=s.i;
+select * from (select distinct t.*,ts as tts from t) as s, t where t.i=s.i;
+
+-- . multiple select distincts -- outer & sqs, just sqs, outer & from(s)
+select distinct * from (select distinct t,i,s,f,d from t) as s(a,b,c,d,e);
+
+select i, s from t as touter
+where touter.i in (select distinct i from t)
+and exists (select distinct s from t as ti where touter.s=ti.s);
+
+-- same result as exists above
+select i, s from t as touter
+where touter.i in (select distinct i from t)
+and touter.s =any (select distinct s from t);
+
+select distinct i, s from t
+where t.i in (select distinct i from t)
+and t.s in (select distinct s from t);
+
+-- . select distinct under a union all/ over a union all
+-- expect 2 rows of any value
+select distinct i from t
+union all
+select distinct i from t;
+
+-- at most 1 row of any value
+select distinct * from (select i from t union all select i from t) as s;
+
+-- . select distinct over a from subquery (itself distinct/not)
+select distinct * from (select t,i,s,f,d from t) as s(a,b,c,d,e);
+select distinct * from (select distinct t,i,s,f,d from t) as s(a,b,c,d,e);
+
+-- . select distinct over a join
+select distinct * from t t1, t t2 where t1.i = t2.i;
+

@@ -1,0 +1,472 @@
+ij> --
+-- this tests derived column lists and derived tables
+--
+create table s (a int, b int, c int, d int, e int, f int);
+0 rows inserted/updated/deleted
+ij> create table t (aa int, bb int, cc int, dd int, ee int, ff int);
+0 rows inserted/updated/deleted
+ij> insert into s values (0,1,2,3,4,5);
+1 row inserted/updated/deleted
+ij> insert into s values (10,11,12,13,14,15);
+1 row inserted/updated/deleted
+ij> -- tests without a derived table
+-- negative tests
+-- # of columns does not match
+select aa from s ss (aa);
+ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'S'.
+ij> select aa from s ss (aa, bb, cc, dd, ee, ff, gg);
+ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'S'.
+ij> -- duplicate names in derived column list
+select aa from s ss (aa, ee, bb, cc, dd, aa);
+ERROR 42X33: The derived column list contains a duplicate column name 'AA'.
+ij> -- test case insensitivity
+select aa from s ss (aa, bb, cc, dd, ee, AA);
+ERROR 42X33: The derived column list contains a duplicate column name 'AA'.
+ij> -- test uniqueness of names
+select aa from s ss (aa, bb, cc, dd, ee, ff), t;
+ERROR 42X03: Column name 'AA' is in more than one table in the FROM list.
+ij> -- test uniqueness of names
+insert into t select aa 
+from s aa (aa, bb, cc, dd, ee, ff), s bb (aa, bb, cc, dd, ee, ff);
+ERROR 42X03: Column name 'AA' is in more than one table in the FROM list.
+ij> -- verify using "exposed" names
+select a from s ss (aa, bb, cc, dd, ee, ff);
+ERROR 42X04: Column 'A' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'A' is not a column in the target table.
+ij> -- positive tests
+-- rename the columns
+select * from s ss (f, e, d, c, b, a) where f = 0;
+F          |E          |D          |C          |B          |A          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+ij> -- delimited identifiers in list
+select * from s ss ("a a", "b b", "c c", "d d", "e e", "f f") where "a a" = 0;
+a a        |b b        |c c        |d d        |e e        |f f        
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+ij> -- uniqueness of "exposed" names
+select a, aa from s a, s b (aa, bb, cc, dd, ee, ff)	where f = ff and aa = 10;
+A          |AA         
+-----------------------
+10         |10         
+ij> select a.a, b.aa from s a, s b (aa, bb, cc, dd, ee, ff) where f = ff and b.aa = 10;
+A          |AA         
+-----------------------
+10         |10         
+ij> -- insert tests
+insert into t select * from s ss (aa, bb, cc, dd, ee, ff);
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> insert into t (aa,bb) select ff, aa from s ss (aa, bb, cc, dd, ee, ff);
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+5          |0          |NULL       |NULL       |NULL       |NULL       
+15         |10         |NULL       |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- derived tables
+-- negative tests
+-- no correlation name
+select * from (select * from s);
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 5, column 31.
+ij> -- # of columns does not match
+select aa from (select * from s) ss (aa);
+ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'SS'.
+ij> select aa from (select * from s) ss (aa, bb, cc, dd, ee, ff, gg);
+ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'SS'.
+ij> -- duplicate names in derived column list
+select aa from (select * from s) ss (aa, ee, bb, cc, dd, aa);
+ERROR 42X33: The derived column list contains a duplicate column name 'AA'.
+ij> -- test case insensitivity
+select aa from (select * from s) ss (aa, bb, cc, dd, ee, AA);
+ERROR 42X33: The derived column list contains a duplicate column name 'AA'.
+ij> -- test uniqueness of names
+select aa from (select * from s) ss (aa, bb, cc, dd, ee, ff), t;
+ERROR 42X03: Column name 'AA' is in more than one table in the FROM list.
+ij> -- test uniqueness of names
+insert into t select aa 
+from (select * from s) aa (aa, bb, cc, dd, ee, ff), 
+	 (select * from s) bb (aa, bb, cc, dd, ee, ff);
+ERROR 42X03: Column name 'AA' is in more than one table in the FROM list.
+ij> -- verify using "exposed" names
+select a from (select * from s) ss (aa, bb, cc, dd, ee, ff);
+ERROR 42X04: Column 'A' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'A' is not a column in the target table.
+ij> -- ambiguous column reference
+select a from (select * from s a, s b) ss;
+ERROR 42Y34: Column name 'A' matches more than one result column in table 'SS'.
+ij> -- positive tests
+-- simple derived table
+select a from (select a from s) a;
+A          
+-----------
+0          
+10         
+ij> -- select * query's
+select * from (select * from s) a;
+A          |B          |C          |D          |E          |F          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> select * from (select a, b, c, d, e, f from s) a;
+A          |B          |C          |D          |E          |F          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> select * from (select a, b, c from s) a;
+A          |B          |C          
+-----------------------------------
+0          |1          |2          
+10         |11         |12         
+ij> select a, b, c, d, e, f from (select * from s) a;
+A          |B          |C          |D          |E          |F          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> -- simple derived table
+insert into t (aa) select a from (select a from s) a;
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |NULL       |NULL       |NULL       |NULL       |NULL       
+10         |NULL       |NULL       |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- select * query's
+insert into t select * from (select * from s) a;
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> insert into t select * from (select a, b, c, d, e, f from s) a;
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> insert into t (aa, bb, cc) select * from (select a, b, c from s) a;
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |NULL       |NULL       |NULL       
+10         |11         |12         |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> insert into t select a, b, c, d, e, f from (select * from s) a;
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- simple derived table with derived column list
+select a from (select a from s) a (a);
+A          
+-----------
+0          
+10         
+ij> -- select * query's	with derived column lists
+select * from (select * from s) a (f, e, d, c, b, a);
+F          |E          |D          |C          |B          |A          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> select * from (select a, b, c, d, e, f from s) a (f, e, d, c, b, a);
+F          |E          |D          |C          |B          |A          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> select * from (select a, b, c from s) a (c, f, e);
+C          |F          |E          
+-----------------------------------
+0          |1          |2          
+10         |11         |12         
+ij> select a, b, c, d, e, f from (select * from s) a (a, b, c, d, e, f);
+A          |B          |C          |D          |E          |F          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> -- simple derived table with derived column list
+insert into t (aa) select a from (select a from s) a (a);
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |NULL       |NULL       |NULL       |NULL       |NULL       
+10         |NULL       |NULL       |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- select * query's with derived column lists
+insert into t select * from (select * from s) a (c, b, a, e, f, d);
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> insert into t select * from (select a, b, c, d, e, f from s) a (f, a, c, b, e, d);
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> insert into t (aa, bb, cc) select * from (select a, b, c from s) a (f, e, a);
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |NULL       |NULL       |NULL       
+10         |11         |12         |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> insert into t select a, c, "a", "b", b, "c" from (select * from s) a (a, c, "a", "b", b, "c");
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- project and reorder derived column list
+select a, f from (select * from s) a (b, c, d, e, f, a);
+A          |F          
+-----------------------
+5          |4          
+15         |14         
+ij> insert into t (aa, bb) select a, f from (select * from s) a (b, c, d, e, f, a);
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+5          |4          |NULL       |NULL       |NULL       |NULL       
+15         |14         |NULL       |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- outer where clause references columns from derived table 
+select * from (select * from s) a (a, b, c, d, e, f) where a = 0;
+A          |B          |C          |D          |E          |F          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+ij> select * from (select * from s) a (f, e, d, c, b, a) where f = 0;
+F          |E          |D          |C          |B          |A          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+ij> insert into t select * from (select * from s) a (a, b, c, d, e, f) where a = 0;
+1 row inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+ij> delete from t;
+1 row inserted/updated/deleted
+ij> insert into t select * from (select * from s) a (f, e, d, c, b, a) where f = 0;
+1 row inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+ij> delete from t;
+1 row inserted/updated/deleted
+ij> -- join between 2 derived tables
+select * from (select a from s) a, (select a from s) b;
+A          |A          
+-----------------------
+0          |0          
+0          |10         
+10         |0          
+10         |10         
+ij> select * from (select a from s) a, (select a from s) b where a.a = b.a;
+A          |A          
+-----------------------
+0          |0          
+10         |10         
+ij> insert into t (aa, bb) select * from (select a from s) a, (select a from s) b where a.a = b.a;
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |0          |NULL       |NULL       |NULL       |NULL       
+10         |10         |NULL       |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- join within a derived table
+select * from (select a.a, b.a from s a, s b) a (b, a) where b = a;
+B          |A          
+-----------------------
+0          |0          
+10         |10         
+ij> select * from (select a.a, b.a from s a, s b) a (b, a),
+			  (select a.a, b.a from s a, s b) b (b, a) where a.b = b.b;
+B          |A          |B          |A          
+-----------------------------------------------
+0          |0          |0          |0          
+0          |10         |0          |0          
+0          |0          |0          |10         
+0          |10         |0          |10         
+10         |0          |10         |0          
+10         |10         |10         |0          
+10         |0          |10         |10         
+10         |10         |10         |10         
+ij> select * from (select (select 1 from s where 1 = 0), b.a from s a, s b) a (b, a),
+			  (select (select 1 from s where 1 = 0), b.a from s a, s b) b (b, a) where a.b = b.b;
+B          |A          |B          |A          
+-----------------------------------------------
+ij> insert into t (aa, bb) select * from (select a.a, b.a from s a, s b) a (b, a) where b = a;
+2 rows inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |0          |NULL       |NULL       |NULL       |NULL       
+10         |10         |NULL       |NULL       |NULL       |NULL       
+ij> delete from t;
+2 rows inserted/updated/deleted
+ij> -- join within a derived table, 2 predicates can be pushed all the way down
+select * from (select a.a, b.a from s a, s b) a (b, a) where b = a and a = 0 and b = 0;
+B          |A          
+-----------------------
+0          |0          
+ij> insert into t (aa, bb) select * from (select a.a, b.a from s a, s b) a (b, a) where b = a and a = 0 and b = 0;
+1 row inserted/updated/deleted
+ij> select * from t;
+AA         |BB         |CC         |DD         |EE         |FF         
+-----------------------------------------------------------------------
+0          |0          |NULL       |NULL       |NULL       |NULL       
+ij> delete from t;
+1 row inserted/updated/deleted
+ij> -- nested derived tables
+select * from (select * from (select * from s) a ) a;
+A          |B          |C          |D          |E          |F          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> select * from 
+	(select * from 
+		(select * from 
+			(select * from 
+				(select * from 
+					(select * from
+						(select * from
+							(select * from
+								(select * from
+									(select * from
+										(select * from
+											(select * from
+												(select * from
+													(select * from
+														(select * from
+															(select * from s) a
+														) a
+													) a
+												) a
+											) a
+										) a
+									) a
+								) a
+							) a
+						) a
+					) a
+				) a
+			) a
+		) a
+	) a;
+A          |B          |C          |D          |E          |F          
+-----------------------------------------------------------------------
+0          |1          |2          |3          |4          |5          
+10         |11         |12         |13         |14         |15         
+ij> -- test predicate push through
+select * from
+(select a.a as a1, b.a as a2 from s a, s b) a 
+where a.a1 = 0 and a.a2 = 10;
+A1         |A2         
+-----------------------
+0          |10         
+ij> -- push column = column through
+select * from (select a, a from s) a (x, y) where x = y;
+X          |Y          
+-----------------------
+0          |0          
+10         |10         
+ij> select * from (select a, a from s) a (x, y) where x + y = x * y;
+X          |Y          
+-----------------------
+0          |0          
+ij> -- return contants and expressions from derived table
+select * from (select 1 from s) a;
+1          
+-----------
+1          
+1          
+ij> select * from (select 1 from s) a (x) where x = 1;
+X          
+-----------
+1          
+1          
+ij> select * from (select 1 from s a, s b where a.a = b.a) a (x);
+X          
+-----------
+1          
+1          
+ij> select * from (select 1 from s a, s b where a.a = b.a) a (x) where x = 1;
+X          
+-----------
+1          
+1          
+ij> select * from (select a + 1 from s) a;
+1          
+-----------
+1          
+11         
+ij> select * from (select a + 1 from s) a (x) where x = 1;
+X          
+-----------
+1          
+ij> select * from (select a.a + 1 from s a, s b where a.a = b.a) a (x) where x = 1;
+X          
+-----------
+1          
+ij> -- Bug 2767, don't flatten derived table with join
+create table tab1(tab1_c1 int, tab1_c2 int);
+0 rows inserted/updated/deleted
+ij> create table tab2(tab2_c1 int, tab2_c2 int);
+0 rows inserted/updated/deleted
+ij> insert into tab1 values (1, 1), (2, 2);
+2 rows inserted/updated/deleted
+ij> insert into tab2 values (1, 1), (2, 2);
+2 rows inserted/updated/deleted
+ij> select * from (select * from tab1, tab2) c where tab1_c1 in (1, 3);
+TAB1_C1    |TAB1_C2    |TAB2_C1    |TAB2_C2    
+-----------------------------------------------
+1          |1          |1          |1          
+1          |1          |2          |2          
+ij> drop table tab1;
+0 rows inserted/updated/deleted
+ij> drop table tab2;
+0 rows inserted/updated/deleted
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> 

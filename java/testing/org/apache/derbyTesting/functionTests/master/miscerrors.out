@@ -1,0 +1,31 @@
+ij> --
+-- this test is for miscellaneous errors
+--
+-- lexical error
+select @#^%*&! from swearwords;
+ERROR 42X02: Lexical error at line 6, column 8.  Encountered: "@" (64), after : "".
+ij> --
+-- try to create duplicate table
+--
+create table a (one int);
+0 rows inserted/updated/deleted
+ij> create table a (one int, two int);
+ERROR X0Y32: Table/View 'A' already exists in Schema 'APP'.
+ij> create table a (one int);
+ERROR X0Y32: Table/View 'A' already exists in Schema 'APP'.
+ij> drop table a ;
+0 rows inserted/updated/deleted
+ij> create table a (one int, two int, three int);
+0 rows inserted/updated/deleted
+ij> insert into a values (1,2,3);
+1 row inserted/updated/deleted
+ij> select * from a;
+ONE        |TWO        |THREE      
+-----------------------------------
+1          |2          |3          
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> -- set isolation to repeatable read
+set isolation serializable;
+0 rows inserted/updated/deleted
+ij> 

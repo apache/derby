@@ -1,0 +1,892 @@
+ij> -- ** insert aggregatesPositive.sql
+autocommit on;
+ij> -- General aggregate tests.  Aggregate
+-- specifics are tested in specific test (e.g. sum.jsql).
+--
+-- Note that this test does NOT test multiple datatypes,
+-- that is exercised in the specific aggregate tests.
+-- INSERT SELECT is also in the specific aggregate tests.
+-- 
+-- need to add: objects
+create table t1 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create table oneRow (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into oneRow values(1,1);
+1 row inserted/updated/deleted
+ij> create table empty (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create table emptyNull (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into emptyNull values (null, null);
+1 row inserted/updated/deleted
+ij> insert into t1 values (null, null), (1,1), (null, null), (2,1), (3,1), (10,10);
+6 rows inserted/updated/deleted
+ij> insert into t2 values (null, null), (1,1), (null, null), (2,1), (3,1), (10,10);
+6 rows inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         
+-----------------------
+NULL       |NULL       
+1          |1          
+NULL       |NULL       
+2          |1          
+3          |1          
+10         |10         
+ij> --------------------------------------
+-- Expressions within an aggregate
+--------------------------------------
+select max(c1+10) from t1;
+1          
+-----------
+20         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(c1+10) from t1 group by c2;
+1          
+-----------
+13         
+20         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(2*10) from t1;
+1          
+-----------
+20         
+ij> select max(2*10) from t1 group by c2;
+1          
+-----------
+20         
+20         
+20         
+ij> -- conditional operator within aggregate
+select max(case when c1 <> 1 then 666 else 999 end) from oneRow;
+1          
+-----------
+999        
+ij> select max(case when c1 = 1 then 666 else c2 end) from oneRow;
+1          
+-----------
+666        
+ij> select max(case when c1 = 1 then 666 else c1 end) from oneRow;
+1          
+-----------
+666        
+ij> -- subquery in aggregate
+select max((select c1 from empty)) from t1;
+1          
+-----------
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- cast to string in aggregate
+select max(cast (c1 as char(1))) from oneRow;
+1   
+----
+1   
+ij> -- cast to string in aggregate and concatenate with another
+select max(cast(c1 as char(1)) || cast (c2 as char(1))) from oneRow;
+1   
+----
+11  
+ij> -- unary
+select max(-c1) from t1;
+1          
+-----------
+-1         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- count
+select count(c1) from t1;
+1          
+-----------
+4          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- cast
+select count(cast (null as int)) from t1;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- avg
+-- DB2 returns error 22003
+-- CS returns no error!
+select avg(2147483647) from t1;
+1          
+-----------
+2147483647 
+ij> --------------------------------------
+-- Expressions on an aggregates/with aggregates
+--------------------------------------
+select 10+sum(c1) from t1;
+1          
+-----------
+26         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select 10+sum(c1+10) from t1;
+1          
+-----------
+66         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- conditional operator on aggregate
+select (case when max(c1) = 1 then 666 else 1 end) from t1;
+1          
+-----------
+1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select (case when max(c1) = 1 then 666 else c1 end) from t1 group by c1;
+1          
+-----------
+666        
+2          
+3          
+10         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- method call on aggregate, cannot use nulls
+select cast (max(c1) as char(1)) from oneRow;
+1   
+----
+1   
+ij> select cast (max(c1) as char(1)) from oneRow group by c1;
+1   
+----
+1   
+ij> select (cast(c1 as char(1)) || (cast (max(c2) as char(1)))) from oneRow group by c1;
+1   
+----
+11  
+ij> -- subquery on aggregate
+select (select max(c1) from t2)from t1;
+1          
+-----------
+10         
+10         
+10         
+10         
+10         
+10         
+ij> select (select max(c1) from oneRow group by c2)from t1;
+1          
+-----------
+1          
+1          
+1          
+1          
+1          
+1          
+ij> -- unary
+select -max(c1) from t1;
+1          
+-----------
+-10        
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select -max(c1) from t1 group by c1;
+1          
+-----------
+-1         
+-2         
+-3         
+-10        
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- cast
+select cast (null as int), count(c1) from t1 group by c1;
+1          |2          
+-----------------------
+NULL       |1          
+NULL       |1          
+NULL       |1          
+NULL       |1          
+NULL       |0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(cast (null as int)) from t1 group by c1;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- binary list operator
+-- beetle 5571 - transient boolean type not allowed in DB2
+select (1 in (1,2)), count(c1) from t1 group by c1;
+ERROR 42X01: Syntax error: Encountered "in" at line 3, column 11.
+ij> select count((1 in (1,2))) from t1 group by c1;
+1          
+-----------
+1          
+1          
+1          
+1          
+2          
+ij> -- some group by specific tests
+select c2, 10+sum(c1), c2 from t1 group by c2;
+C2         |2          |C2         
+-----------------------------------
+1          |16         |1          
+10         |20         |10         
+NULL       |NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select c2, 10+sum(c1+10), c2*2 from t1 group by c2;
+C2         |2          |3          
+-----------------------------------
+1          |46         |2          
+10         |30         |20         
+NULL       |NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select c2+sum(c1)+c2 from t1 group by c2;
+1          
+-----------
+8          
+30         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select (c2+sum(c1)+c2)+10, c1, c2 from t1 group by c1, c2;
+1          |C1         |C2         
+-----------------------------------
+13         |1          |1          
+14         |2          |1          
+15         |3          |1          
+40         |10         |10         
+NULL       |NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select c1+10, c2, c1*1, c1, c2*5 from t1 group by c1, c2;
+1          |C2         |3          |C1         |5          
+-----------------------------------------------------------
+11         |1          |1          |1          |5          
+12         |1          |2          |2          |5          
+13         |1          |3          |3          |5          
+20         |10         |10         |10         |50         
+NULL       |NULL       |NULL       |NULL       |NULL       
+ij> --------------------------------------
+-- Distincts
+--------------------------------------
+select sum(c1) from t1;
+1          
+-----------
+16         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1) from t1;
+1          
+-----------
+16         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1), sum(c1) from t1;
+1          |2          
+-----------------------
+16         |16         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1), sum(c1) from oneRow;
+1          |2          
+-----------------------
+1          |1          
+ij> select max(c1), sum(distinct c1), sum(c1) from t1;
+1          |2          |3          
+-----------------------------------
+10         |16         |16         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1) from empty;
+1          
+-----------
+NULL       
+ij> select sum(distinct c1) from emptyNull;
+1          
+-----------
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(c1) from t1 group by c2;
+1          
+-----------
+6          
+10         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1) from t1 group by c2;
+1          
+-----------
+6          
+10         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1), sum(c1) from t1 group by c2;
+1          |2          
+-----------------------
+6          |6          
+10         |10         
+NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1), sum(c1) from oneRow group by c2;
+1          |2          
+-----------------------
+1          |1          
+ij> select max(c1), sum(distinct c1), sum(c1) from t1 group by c2;
+1          |2          |3          
+-----------------------------------
+3          |6          |6          
+10         |10         |10         
+NULL       |NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select c2, max(c1), c2+1, sum(distinct c1), c2+2, sum(c1) from t1 group by c2;
+C2         |2          |3          |4          |5          |6          
+-----------------------------------------------------------------------
+1          |3          |2          |6          |3          |6          
+10         |10         |11         |10         |12         |10         
+NULL       |NULL       |NULL       |NULL       |NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(distinct c1) from empty group by c2;
+1          
+-----------
+ij> select sum(distinct c1) from emptyNull group by c2;
+1          
+-----------
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> --------------------------------------
+-- Subqueries in where clause
+--------------------------------------
+-- subqueries that might return more than 1 row
+select c1 from t1 where c1 not in (select sum(c1) from t2);
+C1         
+-----------
+1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+2          
+3          
+10         
+ij> select c1 from t1 where c1 not in (select sum(distinct c1) from t2);
+C1         
+-----------
+1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+2          
+3          
+10         
+ij> select c1 from t1 where c1 not in (select sum(distinct c1)+10 from t2);
+C1         
+-----------
+1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+2          
+3          
+10         
+ij> select c1 from t1 where c1 in (select max(c1) from t2 group by c2);
+C1         
+-----------
+3          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+10         
+ij> select c1 from t1 where c1 in (select max(distinct c1) from t2 group by c2);
+C1         
+-----------
+3          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+10         
+ij> select c1 from t1 where c1 in (select max(distinct c1)+10 from t2 group by c2);
+C1         
+-----------
+ij> -- subqueries that return 1 row
+select c1 from t1 where c1 = (select max(c1) from t2);
+C1         
+-----------
+10         
+ij> select c1 from t1 where c1 = (select max(distinct c1) from t2);
+C1         
+-----------
+10         
+ij> select c1 from t1 where c1 = (select max(distinct c1)+10 from t2);
+C1         
+-----------
+ij> select c1 from t1 where c1 = (select max(c1) from oneRow group by c2);
+C1         
+-----------
+1          
+ij> select c1 from t1 where c1 = (select max(distinct c1) from oneRow group by c2);
+C1         
+-----------
+1          
+ij> select c1 from t1 where c1 = (select max(distinct c1)+10 from oneRow group by c2);
+C1         
+-----------
+ij> --------------------------------------
+-- From Subqueries (aka table expressions)
+--------------------------------------
+select tmpC1 from 
+	(select max(c1+10) from t1) as tmp (tmpC1);
+TMPC1      
+-----------
+20         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(tmpC1) from 
+	(select max(c1+10) from t1) as tmp (tmpC1);
+1          
+-----------
+20         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select tmpC1 from 
+	(select max(c1+10) from t1 group by c2) as tmp (tmpC1);
+TMPC1      
+-----------
+13         
+20         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(tmpC1) from 
+	(select max(c1+10) from t1 group by c2) as tmp (tmpC1);
+1          
+-----------
+20         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(tmpC1), tmpC2 from 
+	(select max(c1+10), c2 from t1 group by c2) as tmp (tmpC1, tmpC2)
+group by tmpC2;
+1          |TMPC2      
+-----------------------
+13         |1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+20         |10         
+NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> --------------------------------------
+-- Cartesian product on from subquery: forces
+-- multiple opens/closes on the sort
+-- result set (bug 447)
+--------------------------------------
+select * from t1, (select max(c1) from t1) as mytab(c1);
+C1         |C2         |C1         
+-----------------------------------
+NULL       |NULL       |10         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+1          |1          |10         
+NULL       |NULL       |10         
+2          |1          |10         
+3          |1          |10         
+10         |10         |10         
+ij> select * from t1, (select max(c1) from t1 group by c1) as mytab(c1);
+C1         |C2         |C1         
+-----------------------------------
+NULL       |NULL       |1          
+1          |1          |1          
+NULL       |NULL       |1          
+2          |1          |1          
+3          |1          |1          
+10         |10         |1          
+NULL       |NULL       |2          
+1          |1          |2          
+NULL       |NULL       |2          
+2          |1          |2          
+3          |1          |2          
+10         |10         |2          
+NULL       |NULL       |3          
+1          |1          |3          
+NULL       |NULL       |3          
+2          |1          |3          
+3          |1          |3          
+10         |10         |3          
+NULL       |NULL       |10         
+1          |1          |10         
+NULL       |NULL       |10         
+2          |1          |10         
+3          |1          |10         
+10         |10         |10         
+NULL       |NULL       |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+1          |1          |NULL       
+NULL       |NULL       |NULL       
+2          |1          |NULL       
+3          |1          |NULL       
+10         |10         |NULL       
+ij> --------------------------------------
+-- Union
+--------------------------------------
+select max(c1) from t1
+union all
+select max(c1) from t2;
+1          
+-----------
+10         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+10         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> --------------------------------------
+-- Joins
+--------------------------------------
+select max(t1.c1), max(t2.c2) 
+from t1, t2
+where t1.c1 = t2.c1;
+1          |2          
+-----------------------
+10         |10         
+ij> select max(t1.c1), max(t2.c2) 
+from t1, t2
+where t1.c1 = t2.c1
+group by t1.c1;
+1          |2          
+-----------------------
+1          |1          
+2          |1          
+3          |1          
+10         |10         
+ij> --------------------------------------
+-- Having
+--------------------------------------
+-- having with agg on a join
+select max(t1.c1), max(t2.c2) 
+from t1, t2
+where t1.c1 = t2.c1
+group by t1.c1
+having count(*) > 0;
+1          |2          
+-----------------------
+1          |1          
+2          |1          
+3          |1          
+10         |10         
+ij> -- having with subqueries and aggs, agg on grouping col
+select c1 from t1
+group by c1
+having max(c2) in (select c1 from t2);
+C1         
+-----------
+1          
+2          
+3          
+10         
+ij> -- agg not on grouping column
+select c1 from t1
+group by c1
+having max(c2) in (select c1 from t2);
+C1         
+-----------
+1          
+2          
+3          
+10         
+ij> -- having with a subquery that returns a single value
+select c1 from t1
+group by c1
+having avg(c2) in (select max(t2.c1) from t2);
+C1         
+-----------
+10         
+ij> -- similar to above
+select c1 from t1
+group by c1
+having (select max(t2.c1) from t2) = avg(c2);
+C1         
+-----------
+10         
+ij> -- various and sundry column references in the having clause
+select c1 from t1
+group by c1
+having max(c2) > (select avg(t2.c1 + t1.c1)-20 from t2);
+C1         
+-----------
+1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+2          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+3          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+10         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- multiple subqueries
+select c1 from t1
+group by c1
+having (max(c2) in (select c1 from t2)) OR
+		(max(c1) in (select c2-999 from t2)) OR
+		(count(*) > 0)
+;
+C1         
+-----------
+1          
+2          
+3          
+10         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- non-correlated subquery w/o aggregate in aggreate select list
+select max(c1), (select c1 from oneRow) from t1;
+1          |2          
+-----------------------
+10         |1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(c1), (select c1 from oneRow) from t1 group by c1;
+1          |2          
+-----------------------
+1          |1          
+2          |1          
+3          |1          
+10         |1          
+NULL       |1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> --- tests of exact numeric results
+create table bd (i decimal(31,30));
+0 rows inserted/updated/deleted
+ij> insert into bd values(0.1);
+1 row inserted/updated/deleted
+ij> insert into bd values(0.2);
+1 row inserted/updated/deleted
+ij> select * from bd;
+I                                 
+----------------------------------
+0.100000000000000000000000000000  
+0.200000000000000000000000000000  
+ij> -- should be the same
+select avg(i), sum(i)/count(i) from bd;
+1                                 |2                                 
+---------------------------------------------------------------------
+0.150000000000000000000000000000  |0.150000000000000000000000000000  
+ij> drop table bd;
+0 rows inserted/updated/deleted
+ij> create table it (i int);
+0 rows inserted/updated/deleted
+ij> insert into it values (1);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (0);
+1 row inserted/updated/deleted
+ij> insert into it values (200001);
+1 row inserted/updated/deleted
+ij> -- should be the same
+select avg(i), sum(i)/count(i), sum(i), count(i) from it;
+1          |2          |3          |4          
+-----------------------------------------------
+18182      |18182      |200002     |11         
+ij> drop table it;
+0 rows inserted/updated/deleted
+ij> --- test avg cases where the sum will overflow
+create table ovf_int (i int);
+0 rows inserted/updated/deleted
+ij> insert into ovf_int values (2147483647);
+1 row inserted/updated/deleted
+ij> insert into ovf_int values (2147483647 - 1);
+1 row inserted/updated/deleted
+ij> insert into ovf_int values (2147483647 - 2);
+1 row inserted/updated/deleted
+ij> select avg(i), 2147483647 - 1 from ovf_int;
+1          |2          
+-----------------------
+2147483646 |2147483646 
+ij> drop table ovf_int;
+0 rows inserted/updated/deleted
+ij> create table ovf_small (i smallint);
+0 rows inserted/updated/deleted
+ij> insert into ovf_small values (32767);
+1 row inserted/updated/deleted
+ij> insert into ovf_small values (32767 - 1);
+1 row inserted/updated/deleted
+ij> insert into ovf_small values (32767 - 2);
+1 row inserted/updated/deleted
+ij> select avg(i), 32767 - 1 from ovf_small;
+1     |2          
+------------------
+32766 |32766      
+ij> drop table ovf_small;
+0 rows inserted/updated/deleted
+ij> create table ovf_long (i bigint);
+0 rows inserted/updated/deleted
+ij> insert into ovf_long values (9223372036854775807);
+1 row inserted/updated/deleted
+ij> insert into ovf_long values (9223372036854775807 - 1);
+1 row inserted/updated/deleted
+ij> insert into ovf_long values (9223372036854775807 - 2);
+1 row inserted/updated/deleted
+ij> -- beetle 5571 - transient boolean type not allowed in DB2 UDB
+select avg(i), 9223372036854775807 - 1 from ovf_long;
+1                   |2                   
+-----------------------------------------
+9223372036854775806 |9223372036854775806 
+ij> select avg(i), 9223372036854775807 from ovf_long;
+1                   |2                   
+-----------------------------------------
+9223372036854775806 |9223372036854775807 
+ij> -- operands are allowed in DB2 UDB
+select avg(i) from ovf_long;
+1                   
+--------------------
+9223372036854775806 
+ij> select avg(i) - 1  from ovf_long;
+1                   
+--------------------
+9223372036854775805 
+ij> drop table ovf_long;
+0 rows inserted/updated/deleted
+ij> -- Test that AVG is not limited by columns type precision
+-- using DB2 MAX REAL VALUES
+create table ovf_real (i real);
+0 rows inserted/updated/deleted
+ij> insert into ovf_real values (+3.402E+38);
+1 row inserted/updated/deleted
+ij> insert into ovf_real values (+3.402E+38 - 1);
+1 row inserted/updated/deleted
+ij> insert into ovf_real values (+3.402E+38 - 2);
+1 row inserted/updated/deleted
+ij> select avg(i) from ovf_real;
+1            
+-------------
+3.402E38     
+ij> drop table ovf_real;
+0 rows inserted/updated/deleted
+ij> -- Test that AVG is not limited by columns type precision
+-- using DB2 MAX DOUBLE VALUES
+create table ovf_double (i double precision);
+0 rows inserted/updated/deleted
+ij> insert into ovf_double values (+1.79769E+308);
+1 row inserted/updated/deleted
+ij> insert into ovf_double values (+1.79769E+308 - 1);
+1 row inserted/updated/deleted
+ij> insert into ovf_double values (+1.79769E+308 - 2);
+1 row inserted/updated/deleted
+ij> select avg(i) from ovf_double;
+1                     
+----------------------
+1.79769E308           
+ij> drop table ovf_double;
+0 rows inserted/updated/deleted
+ij> --------------------------------------
+-- CLEAN UP
+--------------------------------------
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table oneRow;
+0 rows inserted/updated/deleted
+ij> drop table empty;
+0 rows inserted/updated/deleted
+ij> drop table emptyNull;
+0 rows inserted/updated/deleted
+ij> -- ** insert aggregateNegative.sql
+-- For aggregates.  General issues
+autocommit on;
+ij> create table t (i int, l bigint);
+0 rows inserted/updated/deleted
+ij> create table t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int);
+0 rows inserted/updated/deleted
+ij> --------------------------------------
+-- NEGATIVE TESTS
+--------------------------------------
+-- only a single distinct is supported
+select sum(distinct i), sum(distinct l) from t;
+ERROR 42Z02: Multiple DISTINCT aggregates are not supported at this time.
+ij> -- parameters in aggregate
+prepare p1 as 'select max(?) from t';
+ERROR 42X36: The 'MAX' operator is not allowed to take a ? parameter as an operand.
+ij> -- aggregates in aggregates
+select max(max(i)) from t;
+ERROR 42Y33: Aggregate MAX contains one or more aggregates.
+ij> select max(1+1+1+max(i)) from t;
+ERROR 42Y33: Aggregate MAX contains one or more aggregates.
+ij> -- TEMPORARY RESTRICTION, aggregates in the select list
+-- of a subquery on an aggregated result set
+select max(c1), (select max(c1) from t2) from t1;
+ERROR 42Y29: The SELECT list of a non-grouped query contains at least 1 invalid expression.  When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ij> select max(c1), (select max(t1.c1) from t2) from t1;
+ERROR 42Y29: The SELECT list of a non-grouped query contains at least 1 invalid expression.  When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ij> select max(c1), max(c1), (select max(c1) from t1) from t1;
+ERROR 42Y29: The SELECT list of a non-grouped query contains at least 1 invalid expression.  When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ij> -- cursor with aggregate is not updatable
+get cursor c1 as 'select max(i) from t group by i for update';
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- max over a join on a column with an index -- Beetle 4423
+create table t3(a int);
+0 rows inserted/updated/deleted
+ij> insert into t3 values(1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> create table t4(a int);
+0 rows inserted/updated/deleted
+ij> insert into t4 select a from t3;
+5 rows inserted/updated/deleted
+ij> create index tindex on t3(a);
+0 rows inserted/updated/deleted
+ij> select max(t3.a)
+from t3, t4
+where t3.a = t4.a
+and t3.a = 1;
+1          
+-----------
+1          
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> -- beetle 5122, aggregate on JoinNode
+CREATE TABLE DOCUMENT_VERSION
+   (
+      DOCUMENT_ID INT,
+      DOCUMENT_STATUS_ID INT
+   )
+;
+0 rows inserted/updated/deleted
+ij> insert into DOCUMENT_VERSION values (2,2),(9,9),(5,5),(1,3),(10,5),(1,6),(10,8),(1,10);
+8 rows inserted/updated/deleted
+ij> CREATE VIEW MAX_DOCUMENT_VERSION
+   AS SELECT  DOCUMENT_ID  FROM DOCUMENT_VERSION
+;
+0 rows inserted/updated/deleted
+ij> CREATE VIEW MAX_DOCUMENT_VERSION_AND_STATUS_ID
+   AS SELECT  MAX(DV.DOCUMENT_STATUS_ID) AS MAX_DOCUMENT_STATUS_ID
+   FROM DOCUMENT_VERSION AS DV , MAX_DOCUMENT_VERSION 
+   WHERE DV.DOCUMENT_ID = 1;
+0 rows inserted/updated/deleted
+ij> CREATE VIEW LATEST_DOC_VERSION
+   AS SELECT DOCUMENT_ID 
+   FROM DOCUMENT_VERSION AS DV, MAX_DOCUMENT_VERSION_AND_STATUS_ID AS MDVASID
+   WHERE DV.DOCUMENT_ID = MDVASID.MAX_DOCUMENT_STATUS_ID;
+0 rows inserted/updated/deleted
+ij> select * from LATEST_DOC_VERSION;
+DOCUMENT_ID
+-----------
+10         
+10         
+ij> drop view LATEST_DOC_VERSION;
+0 rows inserted/updated/deleted
+ij> drop view MAX_DOCUMENT_VERSION_AND_STATUS_ID;
+0 rows inserted/updated/deleted
+ij> drop view  MAX_DOCUMENT_VERSION;
+0 rows inserted/updated/deleted
+ij> drop table DOCUMENT_VERSION;
+0 rows inserted/updated/deleted
+ij> -- Defect 5737. Prevent aggregates being used in VALUES clause or WHERE clause.
+create table tmax(i int);
+0 rows inserted/updated/deleted
+ij> values sum(1);
+ERROR 42903: Invalid use of an aggregate function.
+ij> values max(3);
+ERROR 42903: Invalid use of an aggregate function.
+ij> select * from tmax where sum(i)=1;
+ERROR 42903: Invalid use of an aggregate function.
+ij> select i from tmax where substr('abc', sum(1), 3) = 'abc';
+ERROR 42903: Invalid use of an aggregate function.
+ij> drop table tmax;
+0 rows inserted/updated/deleted
+ij> 

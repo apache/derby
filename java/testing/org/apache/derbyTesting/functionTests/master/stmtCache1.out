@@ -1,0 +1,82 @@
+ij> --
+-- testing a cache size of 1
+-- a little bit self-defeating since you can never remove
+-- the emptyCache statement from the cache and the
+-- statement to test what is in removes the previous one...
+--
+autocommit off;
+ij> -- set up aliases
+CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE EC()
+EXTERNAL NAME 'org.apache.derby.diag.StatementCache.emptyCache'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> run resource 'stmtCacheAliases.subsql';
+ij> --
+-- this script registers the various consistency checks for
+-- statement caching as simple aliases for ease of scripting
+--
+create view SC_CONTENTS as select CAST (SUBSTR (CAST (SQL_TEXT as char(200)), 1, 30) AS CHAR(30)) AS SQL_TEXT from new org.apache.derby.diag.StatementCache() as SCVD;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- see that it starts out almost empty; well, just us...
+select count(*) from SC_CONTENTS;
+1          
+-----------
+1          
+ij> -- see if we can detect ourselves in the cache;
+-- again, because the size is one, this is the
+-- only statement we can look for...
+select SQL_TEXT from SC_CONTENTS;
+SQL_TEXT                      
+------------------------------
+-- see if we can detect oursel
+ij> prepare p1 as 'values 1';
+ij> select SQL_TEXT from SC_CONTENTS;
+SQL_TEXT                      
+------------------------------
+select SQL_TEXT from SC_CONTEN
+ij> -- kick 'em all out and then test the size
+call EC();
+0 rows inserted/updated/deleted
+ij> select count(*) from SC_CONTENTS;
+1          
+-----------
+1          
+ij> execute p1;
+1          
+-----------
+1          
+ij> select SQL_TEXT from SC_CONTENTS;
+SQL_TEXT                      
+------------------------------
+select SQL_TEXT from SC_CONTEN
+ij> remove p1;
+ij> call EC();
+0 rows inserted/updated/deleted
+ij> select count(*) from SC_CONTENTS;
+1          
+-----------
+1          
+ij> -- expect everything to be okay
+-- is a dependency on EMPTYCACHE
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> commit;
+ij> -- clean up aliases
+run resource 'stmtCacheAliasesRemove.subsql';
+ij> --
+-- this script de-registers the various consistency checks for
+-- statement caching
+--
+drop view SC_CONTENTS;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> 

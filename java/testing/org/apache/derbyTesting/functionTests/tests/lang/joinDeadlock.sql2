@@ -1,0 +1,12 @@
+-- user 2 for bug 1573
+-- a deadlock when reopening a join gets an assertion
+-- violation in close()
+create table inner1(c1 int, c2 char(500));
+create index i1_i1 on inner1(c1);
+create table inner2(c1 int, c2 char(500));
+create index i2_i1 on inner2(c1);
+values 1;
+autocommit off;
+values 1;
+update inner1 set c1 = c1 where c1 = 1;
+values 1;

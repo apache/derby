@@ -1,0 +1,428 @@
+Test declaredGlobalTempTableJava starting
+TEST1 : global temporary tables can only be in SESSION schema
+Expected message: The qualifier for a declared global temporary table name must be SESSION.
+TEST1 PASSED
+TEST2A : Declaring a global temporary table while in SYS schema will pass because temp tables always go in SESSION schema and never in default schema
+TEST2A PASSED
+TEST2B : Drop the declared global temporary table declared in TEST2A while in schema SYS
+TEST2B PASSED
+TEST3A : positive grammar tests for DECLARE command
+TEST3A PASSED
+TEST3B : negative grammar tests for DECLARE command
+  Expected exception. Attempted to declare a temp table without NOT LOGGED. Syntax error: Encountered "<EOF>" at line 1, column 42.
+  Expected exception. Attempted to declare a temp table with multiple NOT LOGGED. Multiple or conflicting keywords involving the 'NOT LOGGED' clause are present.
+  Expected exception. Attempted to declare a temp table with multiple ON COMMIT. Multiple or conflicting keywords involving the 'ON COMMIT' clause are present.
+  Expected exception. Attempted to declare a temp table with multiple ON ROLLBACK. Multiple or conflicting keywords involving the 'ON ROLLBACK' clause are present.
+  Expected exception. Attempted to declare a temp table with syntax error ON ROLLBACK PRESERVE ROWS. Syntax error: Encountered "PRESERVE" at line 1, column 67.
+  Expected exception. Attempted to declare a temp table without NOT LOGGED. Syntax error: MISSING NOT LOGGED.
+TEST3B PASSED
+TEST4A : ALTER TABLE not allowed on global temporary tables
+Expected message: The requested function does not apply to global temporary tables.
+TEST4A PASSED
+TEST4B : ALTER TABLE on physical table in SESSION schema should work
+TEST4B PASSED
+TEST5A : LOCK TABLE not allowed on global temporary tables
+Expected message: The requested function does not apply to global temporary tables.
+TEST5A PASSED
+TEST5B : LOCK TABLE on physical table in SESSION schema should work
+TEST5B PASSED
+TEST6A : RENAME TABLE not allowed on global temporary tables
+Expected message: The requested function does not apply to global temporary tables.
+TEST6A PASSED
+TEST6B : RENAME TABLE on physical table in SESSION schema should work
+TEST6B PASSED
+TEST6C : RENAME COLUMN on physical table in SESSION schema should work
+TEST6C PASSED
+TEST8 : generated always as identity not supported for declared global temporary tables
+Expected message: The requested function does not apply to global temporary tables.
+TEST8 PASSED
+TEST9 : long datatypes not supported for declared global temporary tables
+  Expected exception. Attempted to declare a temp table with blob. Long column type column or parameter 'C22' not permitted in declared global temporary tables or procedure definitions. 
+  Expected exception. Attempted to declare a temp table with clob. Long column type column or parameter 'C22' not permitted in declared global temporary tables or procedure definitions. 
+  Expected exception. Attempted to declare a temp table with long varchar. Long column type column or parameter 'C22' not permitted in declared global temporary tables or procedure definitions. 
+  Expected exception. Attempted to declare a temp table with user defined type. Syntax error: Encountered "" at line 1, column 56.
+TEST9 PASSED
+TEST10A : Primary key constraint not allowed on a declared global temporary table.
+Expected message: The requested function does not apply to global temporary tables.
+TEST10A PASSED
+TEST10B : Primary key constraint allowed on a physical table in SESSION schema.
+TEST10B PASSED
+TEST10C : Unique key constraint not allowed on a declared global temporary table.
+Expected message: The requested function does not apply to global temporary tables.
+TEST10C PASSED
+TEST10D : Foreign key constraint not allowed on a declared global temporary table.
+Expected message: The requested function does not apply to global temporary tables.
+TEST10D PASSED
+TEST11 : Attempt to declare the same global temporary table twice will fail. Plan to support WITH REPLACE in future
+Expected message: Declared global temporary table 'T2' already exists in Schema 'SESSION'.
+TEST11 PASSED
+TEST12 : Try to drop a declared global temporary table that doesn't exist.
+Expected message: 'DROP TABLE' cannot be performed on 'SESSION.T2' because it does not exist.
+TEST12 PASSED
+TEST13A : insert into declared global temporary table will pass.
+	 1
+	 -
+	{56}
+TEST13A PASSED
+TEST13B : attempt to insert null into non-null column in declared global temporary table will fail.
+Declare the table with non-null column, insert a row and commit
+In the next transaction, attempt to insert a null value in the table will fail and we will loose all the rows from the table as part of internal rollback
+Expected message: Column 'C22'  cannot accept a NULL value.
+should see no data in t2
+	 C21,C22
+	 --- ---
+TEST13B PASSED
+TEST13C : declare a temporary table with default and then insert into it.
+	 C21,C22,C23
+	 --- --- ---
+	{1,aa,null}
+	{2,aa,APP}
+TEST13C PASSED
+TEST14 : Should be able to create Session schema manually.
+TEST14 PASSED
+TEST15 : Session schema can be dropped like any other user-defined schema.
+TEST15 PASSED
+TEST16 : Create a physical SESSION schema, drop it. Next attempt to drop SESSION schema will throw an exception because now we are dealing with in-memory SESSION schema and it can not be dropped by drop schema.
+In TEST16, now attempting to drop in-memory SESSION schema
+Expected message: Schema 'SESSION' does not exist
+TEST16 PASSED
+TEST17A : Check constraint not allowed on global temporary table
+Expected message: The requested function does not apply to global temporary tables.
+TEST17A PASSED
+TEST17B : Check constraint allowed on physical SESSION schema table
+TEST17B PASSED
+TEST18 : Test declared temporary table with ON COMMIT DELETE ROWS with and without open cursors
+Tests with holdable cursor are in a different class since holdability support is only under jdk14 and higher
+Temp table t2 with not holdable cursor open on it. Data should get deleted from t2 at commit time
+	 1
+	 -
+	{2}
+Temp table t3 with no open cursors of any kind on it. Data should get deleted from t3 at commit time
+	 1
+	 -
+	{2}
+After commit, verify the 2 tables
+Temp table t2 will have no data after commit
+	 1
+	 -
+	{0}
+Temp table t3 will have no data after commit
+	 1
+	 -
+	{0}
+TEST18 PASSED
+TEST19 : Declare a temporary table with ON COMMIT PRESERVE ROWS with and without open cursors
+Tests with holdable cursor are in a different class since holdability support is only under jdk14 and higher
+Temp table t2 with not holdable cursor open on it. Data should be preserved, holdability shouldn't matter
+	 1
+	 -
+	{2}
+Temp table t3 with no open cursors of any kind on it. Data should be preserved, holdability shouldn't matter
+	 1
+	 -
+	{2}
+After commit, verify the 2 tables
+Temp table t2 will have data after commit
+	 1
+	 -
+	{2}
+Temp table t3 will have data after commit
+	 1
+	 -
+	{2}
+TEST19 PASSED
+TEST20A : CREATE INDEX not allowed on global temporary table.
+Expected message: The requested function does not apply to global temporary tables.
+TEST20A PASSED
+TEST21A : CREATE INDEX on physical table in SESSION schema should work
+TEST21A PASSED
+TEST26A : CREATE VIEW not allowed on global temporary table.
+Expected message: The requested function can not reference tables in SESSION schema.
+TEST26A PASSED
+TEST27A : CREATE VIEW not allowed on physical table in SESSION schema
+Expected message: The requested function can not reference tables in SESSION schema.
+TEST27A PASSED
+TEST29A : DELETE FROM global temporary table allowed.
+	 1
+	 -
+	{2}
+	 1
+	 -
+	{0}
+TEST29A PASSED
+TEST31A : UPDATE on global temporary table allowed.
+TEST31A PASSED
+Multiple tests to make sure we do not do statement caching for statement referencing SESSION schema tables
+TEST34A : CREATE physical table and then DECLARE GLOBAL TEMPORARY TABLE with the same name in session schema.
+	 C21
+	 ---
+	{21}
+	 C21,C22
+	 --- ---
+	{22,22}
+	{23,23}
+	 C21,C22
+	 --- ---
+	{22,22}
+	{23,23}
+	 C21
+	 ---
+	{21}
+TEST34A PASSED
+TEST34B : Physical table & TEMPORARY TABLE with the same name in session schema, try insert.
+	 C21
+	 ---
+	{21}
+	 C21
+	 ---
+	 C21
+	 ---
+	{99}
+	 C21
+	 ---
+	{21}
+TEST34B PASSED
+TEST35A : Temporary table created in one connection should not be available in another connection
+	 1
+	 -
+	{1}
+Expected message: Table 'SESSION.T2' does not exist.
+TEST35A PASSED
+TEST35B : Temp table in one connection should not conflict with temp table with same name in another connection
+	 C21,C22
+	 --- ---
+	{22,22}
+	 C21
+	 ---
+	{99}
+	 C21,C22
+	 --- ---
+	{22,22}
+TEST35B PASSED
+TEST36 : After creating SESSION schema and making it current schema, temporary tables should not require SESSION qualification
+TEST36 PASSED
+TEST37A : Prepared statement test - drop the temp table underneath
+	 C21,C22
+	 --- ---
+	{21,1}
+Expected message: Table 'SESSION.T2' does not exist.
+TEST37A PASSED
+TEST37B : Prepared statement test - drop and recreate the temp table with different definition underneath
+	 C21,C22
+	 --- ---
+	{21,1}
+Expected message: The number of values assigned is not the same as the number of specified or implied columns.
+TEST37B PASSED
+TEST38A : Rollback behavior - declare temp table, rollback, select should fail
+	 C21,C22
+	 --- ---
+	{21,1}
+TEST38A : select should fail since temp table got dropped as part of rollback
+Expected message: Table 'SESSION.T2' does not exist.
+TEST38A PASSED
+TEST38B : Rollback behavior - declare temp table, commit, drop temp table, rollback, select should pass
+	 C21,C22
+	 --- ---
+	{21,1}
+	 C21,C22
+	 --- ---
+	{21,1}
+TEST38B : select should pass since temp table drop was rolled back
+	 C21,C22
+	 --- ---
+TEST38B PASSED
+TEST38C : Rollback behavior
+ In the transaction:
+  Declare temp table t2 with 3 columns
+	 C21,C22,C23
+	 --- --- ---
+	{1,1,1}
+  Drop temp table t2 (with 3 columns)
+  Attempted to select from temp table t2 but it failed as expected with exception Table 'SESSION.T2' does not exist.
+  Declare temp table t2 again but this time with 2 columns
+	 C21,C22
+	 --- ---
+ Commit the transaction. Should have temp table t2 with 2 columns
+ In the next transaction:
+	 C21,C22
+	 --- ---
+  Drop temp table t2 (with 2 columns)
+  Declare temp table t2 again but this time with 1 column
+	 C21
+	 ---
+ Rollback this transaction. Should have temp table t2 with 2 columns
+	 C21,C22
+	 --- ---
+TEST38C PASSED
+TEST38D : Rollback behavior for tables touched with DML
+ In the transaction:
+  Declare temp table t2 & t3 & t4 & t5 with preserve rows, insert data and commit
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	{23,3}
+	 C31,C32
+	 --- ---
+	{31,1}
+	{32,2}
+	{33,3}
+	 C41,C42
+	 --- ---
+	{41,1}
+	{42,2}
+	{43,3}
+	 C51,C52
+	 --- ---
+	{51,1}
+	{52,2}
+	{53,3}
+ In the next transaction:
+  Declare temp table t6 with preserve rows, insert data and inspect data in all the tables
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	{23,3}
+	 C31,C32
+	 --- ---
+	{31,1}
+	{32,2}
+	{33,3}
+	 C41,C42
+	 --- ---
+	{41,1}
+	{42,2}
+	{43,3}
+	 C51,C52
+	 --- ---
+	{51,1}
+	{52,2}
+	{53,3}
+	 C61,C62
+	 --- ---
+	{61,1}
+	{62,2}
+	{63,3}
+  delete from t2 with t5 in it's where clause, look at t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+  delete with where clause from t3 so that no rows get deleted, look at the rows
+	 C31,C32
+	 --- ---
+	{31,1}
+	{32,2}
+	{33,3}
+  do not touch t4
+  rollback this transaction, should not see any rows in temp table t2 after rollback
+	 C21,C22
+	 --- ---
+  temp table t3 should have no rows because attempt was made to delete from it (even though nothing actually got deleted from it in the transaction)
+	 C31,C32
+	 --- ---
+  temp table t4 should have its data intact because it was not touched in the transaction that got rolled back
+	 C41,C42
+	 --- ---
+	{41,1}
+	{42,2}
+	{43,3}
+  temp table t5 should have its data intact because it was only used in where clause and not touched in the transaction that got rolled back
+	 C51,C52
+	 --- ---
+	{51,1}
+	{52,2}
+	{53,3}
+  temp table t6 got dropped as part of rollback of this transaction since it was declared in this same transaction
+  Attempted to select from temp table t6 but it failed as expected with exception Table 'SESSION.T6' does not exist.
+TEST38D PASSED
+TEST39A : Verify that there is no entry in system catalogs for temporary tables
+ Declare a temp table T2 and check system catalogs. Shouldn't find anything. Then drop the temp table
+	 TABLEID,TABLENAME,TABLETYPE,SCHEMAID,LOCKGRANULARITY
+	 ------- --------- --------- -------- ---------------
+	 TABLENAME,SCHEMANAME
+	 --------- ----------
+ Create physical schema SESSION, create a physical table T2 in SESSION schema and check system catalogs. Should be there
+	 TABLEID,TABLENAME,TABLETYPE,SCHEMAID,LOCKGRANULARITY
+	 ------- --------- --------- -------- ---------------
+	{xxxxFILTERED-UUIDxxxx,T2,T,xxxxFILTERED-UUIDxxxx,R}
+TEST39A PASSED
+TEST39B : Verify that there is no entry in system catalogs for SESSION schmea after declare table
+ Declare a temp table T2 and check system catalogs for SESSION schmea. Shouldn't find anything. Then drop the temp table
+	 SCHEMANAME
+	 ----------
+TEST39B PASSED
+TEST40 : DatabaseMetaData.getTables() should not return temporary tables
+getTables() with no types:
+	 TABLE_CAT,TABLE_SCHEM,TABLE_NAME,TABLE_TYPE,REMARKS
+	 --------- ----------- ---------- ---------- -------
+	{,SYS,SYSALIASES,SYSTEM TABLE,}
+	{,SYS,SYSCHECKS,SYSTEM TABLE,}
+	{,SYS,SYSCOLUMNS,SYSTEM TABLE,}
+	{,SYS,SYSCONGLOMERATES,SYSTEM TABLE,}
+	{,SYS,SYSCONSTRAINTS,SYSTEM TABLE,}
+	{,SYS,SYSDEPENDS,SYSTEM TABLE,}
+	{,SYS,SYSFILES,SYSTEM TABLE,}
+	{,SYS,SYSFOREIGNKEYS,SYSTEM TABLE,}
+	{,SYS,SYSKEYS,SYSTEM TABLE,}
+	{,SYS,SYSSCHEMAS,SYSTEM TABLE,}
+	{,SYS,SYSSTATEMENTS,SYSTEM TABLE,}
+	{,SYS,SYSSTATISTICS,SYSTEM TABLE,}
+	{,SYS,SYSTABLES,SYSTEM TABLE,}
+	{,SYS,SYSTRIGGERS,SYSTEM TABLE,}
+	{,SYS,SYSVIEWS,SYSTEM TABLE,}
+	{,SYSIBM,SYSDUMMY1,SYSTEM TABLE,}
+	{,SESSION,T3,TABLE,}
+TEST40 PASSED
+TEST41 : delete where current of on temporary tables
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,1}
+	 C21,C22
+	 --- ---
+	{22,1}
+	 C21,C22
+	 --- ---
+TEST41 PASSED
+TEST42 : update where current of on temporary tables
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,1}
+	 C21,C22
+	 --- ---
+	{21,2}
+	{22,1}
+	 C21,C22
+	 --- ---
+	{21,2}
+	{22,2}
+TEST42 PASSED
+TEST44A : Prepared statement test - DML and rollback behavior
+ In the transaction:
+  Declare temp table t2, insert data using prepared statement and commit
+	 C21,C22
+	 --- ---
+	{21,1}
+ In the next transaction:
+  insert more data using same prepared statement and rollback. Should loose all the data in t2
+	 C21,C22
+	 --- ---
+TEST44A PASSED
+TEST44B : Prepared statement test - DML and rollback behavior
+ In the transaction:
+  Declare temp table t2, insert data and commit
+	 C21,C22
+	 --- ---
+	{21,1}
+ In the next transaction:
+  prepare a statement for insert into table but do not execute it and rollback
+  Should not loose the data from t2
+	 C21,C22
+	 --- ---
+	{21,1}
+TEST44B PASSED
+PASS
+Test declaredGlobalTempTable finished

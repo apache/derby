@@ -1,0 +1,2455 @@
+ij> -- test various aggregate optimizations
+set isolation to rr;
+0 rows inserted/updated/deleted
+ij> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij> -- create and populate tables
+create table t1(c1 int, c2 char(200));
+0 rows inserted/updated/deleted
+ij> insert into t1 (c1) values 10, 9, 10, 9, 8, 7, 6, 1, 3;
+9 rows inserted/updated/deleted
+ij> update t1 set c2 = CHAR(c1);
+9 rows inserted/updated/deleted
+ij> -- distinct min -> min, distinct max -> max
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 7000;
+ij> select min(distinct c1), max(distinct(c1)) from t1;
+1          |2          
+-----------------------
+1          |10         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select min(distinct c1), max(distinct(c1)) from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 9
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 9
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 9
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of pages visited=1
+				Number of rows qualified=9
+				Number of rows visited=9
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+ij> select min(distinct c1), max(distinct(c1)) from t1 group by c1;
+1          |2          
+-----------------------
+1          |1          
+3          |3          
+6          |6          
+7          |7          
+8          |8          
+9          |9          
+10         |10         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select min(distinct c1), max(distinct(c1)) from t1 group by c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 7
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (4):
+	Number of opens = 1
+	Rows seen = 7
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Grouped Aggregate ResultSet:
+		Number of opens = 1
+		Rows input = 9
+		Has distinct aggregate = false
+		In sorted order = false
+		Sort information: 
+			Number of rows input=9
+			Number of rows output=7
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Project-Restrict ResultSet (3):
+			Number of opens = 1
+			Rows seen = 9
+			Rows filtered = 0
+			restriction = false
+			projection = true
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 9
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0}
+					Number of columns fetched=1
+					Number of pages visited=1
+					Number of rows qualified=9
+					Number of rows visited=9
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+ij> -- min optimization
+create index i1 on t1(c1);
+0 rows inserted/updated/deleted
+ij> -- min column is 1st column in index
+select min(c1) from t1;
+1          
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- min column is 1st column in index
+select min(c1) from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index I1 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> create index i2 on t1(c2, c1);
+0 rows inserted/updated/deleted
+ij> -- equality predicates on all key columns preceding min column 
+select min(c1) from t1 where c2 = '10';
+1          
+-----------
+10         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- equality predicates on all key columns preceding min column 
+select min(c1) from t1 where c2 = '10'
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Project-Restrict ResultSet (3):
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			restriction = false
+			projection = true
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Index Scan ResultSet for T1 using index I2 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0, 1}
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> -- equality predicates on all key columns preceding min column, 
+-- not a unique index
+select min(c2) from t1 where c1 = 1;
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                                                                                                       
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- equality predicates on all key columns preceding min column, 
+-- not a unique index
+select min(c2) from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T1:
+			Number of opens = 1
+			Rows seen = 1
+			Columns accessed from heap = {0, 1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T1 using index I1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=2
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> delete from t1;
+9 rows inserted/updated/deleted
+ij> drop index i1;
+0 rows inserted/updated/deleted
+ij> create unique index i1 on t1(c1);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, '1'), (2, '2');
+2 rows inserted/updated/deleted
+ij> -- equality predicates on all key columns preceding min column, 
+-- a unique index
+select min(c2) from t1 where c1 = 1;
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                                                                                                       
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- equality predicates on all key columns preceding min column, 
+-- a unique index
+select min(c2) from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T1:
+			Number of opens = 1
+			Rows seen = 1
+			Columns accessed from heap = {1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T1 using index I1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> -- group by ordered on grouping columns
+create table t2(c1 int, c2 int, c3 int, c4 int);
+0 rows inserted/updated/deleted
+ij> create index t2_i1 on t2(c1);
+0 rows inserted/updated/deleted
+ij> create index t2_i2 on t2(c1, c2);
+0 rows inserted/updated/deleted
+ij> -- empty table
+select c1, sum(c2) from t2 group by c1;
+C1         |2          
+-----------------------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- empty table
+select c1, sum(c2) from t2 group by c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Grouped Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 0
+	Has distinct aggregate = false
+	In sorted order = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 0
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T2 using index T2_I2 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 0
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=0
+				Number of rows visited=0
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> -- 1 row table
+insert into t2 values (1, 1, 1, 1);
+1 row inserted/updated/deleted
+ij> select c1, sum(c2) from t2 group by c1;
+C1         |2          
+-----------------------
+1          |1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select c1, sum(c2) from t2 group by c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Grouped Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+	Has distinct aggregate = false
+	In sorted order = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T2 using index T2_I2 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> -- multiple rows, 1 group
+insert into t2 values (1, 2, 2, 2), (1, -1, -1, -1);
+2 rows inserted/updated/deleted
+ij> select c1, sum(c2) from t2 group by c1;
+C1         |2          
+-----------------------
+1          |2          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select c1, sum(c2) from t2 group by c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Grouped Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 3
+	Has distinct aggregate = false
+	In sorted order = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T2 using index T2_I2 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 3
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=3
+				Number of rows visited=3
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> -- multiple rows, multiple groups
+insert into t2 values (2, 3, 2, 2), (2, 3, -1, -1);
+2 rows inserted/updated/deleted
+ij> select c1, sum(c2) from t2 group by c1;
+C1         |2          
+-----------------------
+1          |2          
+2          |6          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select c1, sum(c2) from t2 group by c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 2
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Grouped Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 5
+	Has distinct aggregate = false
+	In sorted order = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T2 using index T2_I2 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> -- ordered, but in reverse order 
+select c2, c1, sum(c3) from t2 group by c2, c1;
+C2         |C1         |3          
+-----------------------------------
+-1         |1          |-1         
+1          |1          |1          
+2          |1          |2          
+3          |2          |1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- ordered, but in reverse order 
+select c2, c1, sum(c3) from t2 group by c2, c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 4
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Grouped Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 5
+	Has distinct aggregate = false
+	In sorted order = false
+	Sort information: 
+		Number of rows input=5
+		Number of rows output=4
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for T2 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1, 2}
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --
+-- max optimization: the optimization is to call the store
+-- with a special request for the last row in an index.  so
+-- we cannot deal with any predicates
+--
+set isolation read committed;
+0 rows inserted/updated/deleted
+ij> create table x (x int, y int);
+0 rows inserted/updated/deleted
+ij> create index ix on x(x);
+0 rows inserted/updated/deleted
+ij> create index ixy on x(x,y);
+0 rows inserted/updated/deleted
+ij> insert into x values (3,3),(7,7),(2,2),(666,6),(1,1);
+5 rows inserted/updated/deleted
+ij> select max(x) from x;
+1          
+-----------
+666        
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for X using index IXat read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> select max(x) from x;
+1          
+-----------
+666        
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for X using index IXat read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> -- cannot use max opt
+select max(x) from x;
+1          
+-----------
+666        
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- cannot use max opt
+select max(x) from x
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for X using index IXat read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> select max(x) from x where x < 99;
+1          
+-----------
+7          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x where x < 99
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 4
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for X using index IX at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 4
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=4
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				qualifiers:
+None
+ij> select max(x) from x where x = 7;
+1          
+-----------
+7          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x where x = 7
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for X using index IX at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=btree
+				Tree height=1
+				start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				qualifiers:
+None
+ij> select max(x) from x where y = 7;
+1          
+-----------
+7          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x where y = 7
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for X using index IXY at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select max(x) from x where y = 7;
+1          
+-----------
+7          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x where y = 7
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for X using index IXY at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select max(y) from x where y = 7;
+1          
+-----------
+7          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(y) from x where y = 7
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for X using index IXY at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={1}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select max(x) from x group by x;
+1          
+-----------
+1          
+2          
+3          
+7          
+666        
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x group by x
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 5
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (4):
+	Number of opens = 1
+	Rows seen = 5
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Grouped Aggregate ResultSet:
+		Number of opens = 1
+		Rows input = 5
+		Has distinct aggregate = false
+		In sorted order = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Project-Restrict ResultSet (3):
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			restriction = false
+			projection = true
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Index Scan ResultSet for X using index IX at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 5
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0}
+					Number of columns fetched=1
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=5
+					Scan type=btree
+					Tree height=1
+					start position: 
+	None
+					stop position: 
+	None
+					qualifiers:
+None
+ij> -- could do max optimization on this, but we don't 
+-- really know much about qualifications
+select max(x) from x where x > 99;
+1          
+-----------
+666        
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- could do max optimization on this, but we don't 
+-- really know much about qualifications
+select max(x) from x where x > 99
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for X using index IX at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=1
+				start position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				stop position: 
+	None
+				qualifiers:
+None
+ij> autocommit off;
+ij> prepare p as 'select max(x) from x';
+ij> execute p;
+1          
+-----------
+666        
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(x) from x
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for X using index IXat read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> insert into x values (99999,99999);
+1 row inserted/updated/deleted
+ij> execute p;
+1          
+-----------
+99999      
+ij> rollback;
+ij> execute p;
+1          
+-----------
+666        
+ij> delete from x;
+5 rows inserted/updated/deleted
+ij> execute p;
+1          
+-----------
+NULL       
+ij> rollback;
+ij> -- since max uses some funky store interface, lets
+-- check locking
+connect 'wombat' as conn2;
+ij(CONN2)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(CONN2)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(CONN2)> autocommit off;
+ij(CONN2)> insert into x values (99999,null);
+1 row inserted/updated/deleted
+ij(CONN2)> set connection connection0;
+ij(CONNECTION0)> -- should deadlock
+select max(x) from x;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CONNECTION0)> set connection conn2;
+ij(CONN2)> commit;
+ij(CONN2)> insert into x values (99980,null);
+1 row inserted/updated/deleted
+ij(CONN2)> set connection connection0;
+ij(CONNECTION0)> -- ok - should not block on previous key (lock held by conn2 on 99980)
+select max(x) from x;
+1          
+-----------
+99999      
+ij(CONNECTION0)> set connection conn2;
+ij(CONN2)> delete from x where x = 99980;
+1 row inserted/updated/deleted
+ij(CONN2)> delete from x where x = 99999;
+1 row inserted/updated/deleted
+ij(CONN2)> commit;
+ij(CONN2)> set connection connection0;
+ij(CONNECTION0)> -- ok
+select max(x) from x;
+1          
+-----------
+666        
+ij(CONNECTION0)> set connection conn2;
+ij(CONN2)> insert into x values (-1,null);
+1 row inserted/updated/deleted
+ij(CONN2)> set connection connection0;
+ij(CONNECTION0)> -- does not deadlock in current implementation, as it handles cases where
+-- the last row is deleted, but the maximum values is somewhere on the last
+-- page.
+select max(x) from x;
+1          
+-----------
+666        
+ij(CONNECTION0)> set connection conn2;
+ij(CONN2)> insert into x values (100000,null);
+1 row inserted/updated/deleted
+ij(CONN2)> commit;
+ij(CONN2)> set connection connection0;
+ij(CONNECTION0)> -- ok
+select max(x) from x;
+1          
+-----------
+100000     
+ij(CONNECTION0)> set connection connection0;
+ij(CONNECTION0)> rollback;
+ij(CONNECTION0)> disconnect;
+ij> set connection conn2;
+ij> rollback;
+ij> disconnect;
+ij> -- check case where all rows are deleted off the last page of index, store 
+-- will fault over to doing full table scan, rather than max optimization.
+connect 'wombat' as conn1;
+ij> set isolation to rr;
+0 rows inserted/updated/deleted
+ij> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij> autocommit off;
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> create table x (a bigint, b int);
+0 rows inserted/updated/deleted
+ij> -- insert enough rows so that there are multiple pages in the index.
+insert into x values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into x (select a + 1,   b from x);
+1 row inserted/updated/deleted
+ij> insert into x (select a + 2,   b from x);
+2 rows inserted/updated/deleted
+ij> insert into x (select a + 4,   b from x);
+4 rows inserted/updated/deleted
+ij> insert into x (select a + 8,   b from x);
+8 rows inserted/updated/deleted
+ij> insert into x (select a + 16,  b from x);
+16 rows inserted/updated/deleted
+ij> insert into x (select a + 32,  b from x);
+32 rows inserted/updated/deleted
+ij> insert into x (select a + 64,  b from x);
+64 rows inserted/updated/deleted
+ij> insert into x (select a + 128, b from x);
+128 rows inserted/updated/deleted
+ij> insert into x (select a + 256, b from x);
+256 rows inserted/updated/deleted
+ij> create index x_idx on x (a);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> connect 'wombat' as conn2;
+ij(CONN2)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(CONN2)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(CONN2)> autocommit off;
+ij(CONN2)> commit;
+ij(CONN2)> set connection conn1;
+ij(CONN1)> -- get lock on first row of table
+insert into x values (0, 0);
+1 row inserted/updated/deleted
+ij(CONN1)> set connection conn2;
+ij(CONN2)> -- delete all the rows from the last page in the index, but don't commit or
+-- else post commit will remove the page from the index.
+delete from x where a > 4;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CONN2)> -- lock timeout in current implementation - to be fixed when row level locked
+-- backward scan exists.
+--
+--      this one deadlocks because we have not done a complete implementation
+--      of backward scan for max on btree.  If the last page in the table is
+--      all deletes, then instead of doing a backward scan we fault over
+--      to the un-optimized max code which does a forward scan from the 
+--      beginnning of the table.
+select max(a) from x;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CONN2)> -- cleanup
+set connection conn1;
+ij(CONN1)> rollback;
+ij(CONN1)> disconnect;
+ij> set connection conn2;
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- test a table with null values to be sure we do the right thing on optimization
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> create table t1(a int, b int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (null, null);
+1 row inserted/updated/deleted
+ij> insert into t1 values (10, 10), (9, 9), (10, 10), (9, 9), (8, 8), (7, 7), (6, 6), 
+	(1,1), (3,3);
+9 rows inserted/updated/deleted
+ij> create index aindex on t1(a);
+0 rows inserted/updated/deleted
+ij> create index bindex on t1(b desc);
+0 rows inserted/updated/deleted
+ij> select min(a) from t1;
+1          
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select min(a) from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index AINDEX at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> -- min of b should use max optimization whether b in nullable or not because NULLS are sorted high
+select min(b) from t1;
+1          
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- min of b should use max optimization whether b in nullable or not because NULLS are sorted high
+select min(b) from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for T1 using index BINDEXat serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> select max(a) from t1;
+1          
+-----------
+10         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(a) from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for T1 using index AINDEXat serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> select max(b) from t1;
+1          
+-----------
+10         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select max(b) from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 10
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 10
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index BINDEX at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 10
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=10
+				Number of rows visited=10
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> create table t2 (a int not null, b int not null);
+0 rows inserted/updated/deleted
+ij> insert into t2 select a, b from t1 where a is not null and b is not null;
+9 rows inserted/updated/deleted
+ij> create index bindex2 on t2(b desc);
+0 rows inserted/updated/deleted
+ij> -- min of b should use max optimization since b is nullable or not because NULLS are sorted high
+select min(b) from t2;
+1          
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- min of b should use max optimization since b is nullable or not because NULLS are sorted high
+select min(b) from t2
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for T2 using index BINDEX2at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> 

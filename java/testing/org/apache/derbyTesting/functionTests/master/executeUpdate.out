@@ -1,0 +1,8 @@
+executeUpdate Test Starts
+PASS - create table
+PASS - insert 1 row
+PASS - insert 3 rows
+Rows in table should be 1,2,3,4
+PASS - correct rows in table
+PASS - drop table
+executeUpdate Test ends

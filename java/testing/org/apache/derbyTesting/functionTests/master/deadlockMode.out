@@ -1,0 +1,51 @@
+Test deadlockMode starting
+PASS: expected and got 0 rows
+PASS: expected and got 1 row
+PASS: expected and got 1 row
+PASS: expected and got 1 row
+PASS: expected and got 1 row
+PASS: setup complete
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Starting thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+Done Thread
+PASS: expected and got 0 rows
+PASS: teardown complete
+PASS
+Test cursor finished

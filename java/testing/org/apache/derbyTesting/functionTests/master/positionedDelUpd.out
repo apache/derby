@@ -1,0 +1,1151 @@
+ij> -- ** insert positionedDelete.sql
+--
+-- tests for positioned delete
+--
+-- note that comments that begin '-- .' are test cases from the test plan
+-- assumed available in queries at time of initial writing:
+-- subqueries.  Additional tests will be needed once we have:
+-- order by, group by, having, aggregates, distinct, views ...
+-- setup some tables for use in the tests
+create table t1 ( i int, v varchar(10), d double precision, t time );
+0 rows inserted/updated/deleted
+ij> create table t1_copy ( i int, v varchar(10), d double precision, t time );
+0 rows inserted/updated/deleted
+ij> create table t2 ( s smallint, c char(10), r real, ts timestamp );
+0 rows inserted/updated/deleted
+ij> -- populate the first table and copy
+insert into t1 values (1, '1111111111', 11e11, time('11:11:11'));
+1 row inserted/updated/deleted
+ij> insert into t1_copy select * from t1;
+1 row inserted/updated/deleted
+ij> -- we need to turn autocommit off so that cursors aren't closed before
+-- the positioned statements against them.
+autocommit off;
+ij> -- empty table tests
+-- .no table name given
+-- this should fail with a syntax error
+delete;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 5, column 6.
+ij> -- this should succeed
+get cursor c0 as 'select * from t1 for update';
+ij> next c0;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c0;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c0;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .same table name
+-- .cursor before 1st row
+get cursor c1 as 'select * from t2 for update';
+ij> -- 'cursor not on a row' expected
+delete from t2 where current of c1;
+ERROR XCL08: Cursor 'C1' is not on a row.
+ij> -- .different table name
+delete from t1 where current of c1;
+ERROR 42X28: Delete table 'T1' is not target of cursor 'C1'.
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .non-existant table
+delete from not_exists where current of c1;
+ERROR 42X28: Delete table 'NOT_EXISTS' is not target of cursor 'C1'.
+ij> close c1;
+ij> -- .delete from  base table, not exposed table name
+-- (this one should work, since base table)
+get cursor c2 as 'select * from t2 asdf for update';
+ij> delete from t2 where current of c2;
+ERROR XCL08: Cursor 'C2' is not on a row.
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .match correlation name
+-- (this one should fail, since correlation name)
+delete from asdf where current of c2;
+ERROR 42X28: Delete table 'ASDF' is not target of cursor 'C2'.
+ij> close c2;
+ij> -- .non-updatable cursor
+-- NOTE - forupdate responsible for extensive tests
+get cursor c3 as 'select * from t2 for read only';
+ij> delete from t2 where current of c3;
+ERROR 42X23: Cursor C3 is not updatable.
+ij> close c3;
+ij> -- .target cursor does not exist
+delete from t2 where current of c44;
+ERROR 42X30: Cursor 'C44' not found. Verify that autocommit is OFF.
+ij> -- .target cursor after last row
+get cursor c4 as 'select * from t1 for update';
+ij> next c4;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> next c4;
+No current row
+ij> next c4;
+No current row
+ij> delete from t1 where current of c4;
+ERROR XCL08: Cursor 'C4' is not on a row.
+ij> close c4;
+ij> -- .target cursor exists, closed
+get cursor c5 as 'select * from t1';
+ij> close c5;
+ij> delete from t1 where current of c5;
+ERROR 42X30: Cursor 'C5' not found. Verify that autocommit is OFF.
+ij> -- .target cursor on row
+get cursor c6 as 'select * from t1 for update';
+ij> next c6;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c6;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c6;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .target cursor on row deleted by another cursor
+get cursor c7 as 'select * from t1 for update';
+ij> next c7;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> get cursor c8 as 'select * from t1 for update';
+ij> next c8;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c7;
+1 row inserted/updated/deleted
+ij> delete from t1 where current of c8;
+ERROR XCL08: Cursor 'C8' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c7;
+ij> close c8;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .target cursor on already deleted row
+get cursor c9 as 'select * from t1 for update';
+ij> next c9;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c9;
+1 row inserted/updated/deleted
+ij> delete from t1 where current of c9;
+ERROR XCL08: Cursor 'C9' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c9;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- delete to row which was subject to searched update
+-- (row still within cursor qualification)
+get cursor c10 as 'select * from t1 for update';
+ij> next c10;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c10;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c10;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- delete to row which was subject to searched update
+-- (row becomes outside of cursor qualification)
+get cursor c10a as 'select * from t1 where i = 1 for update';
+ij> next c10a;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c10a;
+ERROR XCL08: Cursor 'C10A' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> close c10a;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- delete to row which was subject to positioned update
+-- (row becomes outside of cursor qualification)
+get cursor c11 as 'select * from t1 where i = 1 for update';
+ij> next c11;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1 where current of c11;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c11;
+ERROR XCL08: Cursor 'C11' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> close c11;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- delete to row which was subject to 2 searched updates
+-- (1st puts row outside of cursor qualification, 2nd restores it)
+get cursor c12 as 'select * from t1 where i = 1 for update';
+ij> next c12;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1;
+1 row inserted/updated/deleted
+ij> update t1 set i = 1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c12;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c12;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- positioned delete on table with index (#724)
+create table t5 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t5 values (1, 1), (2, 2), (3, 3), (4, 4);
+4 rows inserted/updated/deleted
+ij> commit;
+ij> create index i5 on t5(c1);
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select * from t5 where c1 > 1 for update of c2';
+ij> next c1;
+C1         |C2         
+-----------------------
+2          |2          
+ij> delete from t5 where current of c1;
+1 row inserted/updated/deleted
+ij> next c1;
+C1         |C2         
+-----------------------
+3          |3          
+ij> next c1;
+C1         |C2         
+-----------------------
+4          |4          
+ij> delete from t5 where current of c1;
+1 row inserted/updated/deleted
+ij> select * from t5;
+C1         |C2         
+-----------------------
+1          |1          
+3          |3          
+ij> close c1;
+ij> rollback;
+ij> create index i5 on t5(c2);
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select * from t5 where c1 > 1 for update of c2';
+ij> next c1;
+C1         |C2         
+-----------------------
+2          |2          
+ij> delete from t5 where current of c1;
+1 row inserted/updated/deleted
+ij> next c1;
+C1         |C2         
+-----------------------
+3          |3          
+ij> next c1;
+C1         |C2         
+-----------------------
+4          |4          
+ij> delete from t5 where current of c1;
+1 row inserted/updated/deleted
+ij> select * from t5;
+C1         |C2         
+-----------------------
+1          |1          
+3          |3          
+ij> close c1;
+ij> rollback;
+ij> -- reset autocommit
+autocommit on;
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t5;
+0 rows inserted/updated/deleted
+ij> drop table t1_copy;
+0 rows inserted/updated/deleted
+ij> -- ** insert positionedUpdate.sql
+--
+-- tests for positioned update
+--
+-- note that comments that begin '-- .' are test cases from the test plan
+-- assumed available in queries at time of initial writing:
+-- subqueries.  Additional tests will be needed once we have:
+-- order by, group by, having, aggregates, distinct, views ...
+-- setup some tables for use in the tests
+create table t1 ( i int, v varchar(10), d double precision, t time );
+0 rows inserted/updated/deleted
+ij> create table t1_copy ( i int, v varchar(10), d double precision, t time );
+0 rows inserted/updated/deleted
+ij> create table t2 ( s smallint, c char(10), r real, ts timestamp );
+0 rows inserted/updated/deleted
+ij> -- populate the first table and copy
+insert into t1 values (1, '1111111111', 11e11, time('11:11:11'));
+1 row inserted/updated/deleted
+ij> insert into t1_copy select * from t1;
+1 row inserted/updated/deleted
+ij> -- we need to turn autocommit off so that cursors aren't closed before
+-- the positioned statements against them.
+autocommit off;
+ij> -- empty table tests
+-- .no table name given
+-- this should fail with a syntax error
+update set c1 = c1;
+ERROR 42X01: Syntax error: Encountered "set" at line 5, column 8.
+ij> -- this should succeed
+get cursor c0 as 'select * from t1 for update';
+ij> next c0;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = 999 where current of c0;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+999        |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = 1 where current of c0;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> close c0;
+ij> -- .same table name
+-- .cursor before 1st row
+get cursor c1 as 'select * from t2 for update';
+ij> -- 'cursor not on a row' expected
+update t2 set s = s where current of c1;
+ERROR XCL08: Cursor 'C1' is not on a row.
+ij> -- .different table name
+update t1 set i = i where current of c1;
+ERROR 42X29: Update table 'T1' is not target of cursor 'C1'.
+ij> -- .non-existant table
+update not_exists set i = i where current of c1;
+ERROR 42X29: Update table 'NOT_EXISTS' is not target of cursor 'C1'.
+ij> close c1;
+ij> -- .update base table, not exposed table name
+-- (this one should work, since base table)
+get cursor c2 as 'select * from t2 asdf for update';
+ij> update t2 set s = s where current of c2;
+ERROR XCL08: Cursor 'C2' is not on a row.
+ij> -- .match correlation name
+-- (this one should fail, since correlation name)
+update asdf set s = s where current of c2;
+ERROR 42X29: Update table 'ASDF' is not target of cursor 'C2'.
+ij> close c2;
+ij> -- .non-updatable cursor
+-- NOTE - forupdate responsible for extensive tests
+get cursor c3 as 'select * from t2 for read only';
+ij> update t2 set s = s where current of c3;
+ERROR 42X23: Cursor C3 is not updatable.
+ij> close c3;
+ij> -- .target cursor does not exist
+update t2 set s = s where current of c44;
+ERROR 42X30: Cursor 'C44' not found. Verify that autocommit is OFF.
+ij> -- .target cursor after last row
+get cursor c4 as 'select * from t1 for update';
+ij> next c4;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> next c4;
+No current row
+ij> next c4;
+No current row
+ij> update t1 set i = i where current of c4;
+ERROR XCL08: Cursor 'C4' is not on a row.
+ij> close c4;
+ij> -- .target cursor exists, closed
+get cursor c5 as 'select * from t1';
+ij> close c5;
+ij> update t1 set i = i where current of c5;
+ERROR 42X30: Cursor 'C5' not found. Verify that autocommit is OFF.
+ij> -- .target cursor on row
+get cursor c6 as 'select * from t1 for update';
+ij> next c6;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1 where current of c6;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> -- .consecutive updates to same row in cursor, keeping it in the cursor qual
+update t1 set i = i + 1 where current of c6;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+3          |1111111111|1.1E12                |11:11:11
+ij> close c6;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .target cursor on row deleted by another cursor
+get cursor c7 as 'select * from t1 for update';
+ij> next c7;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> get cursor c8 as 'select * from t1 for update';
+ij> next c8;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c7;
+1 row inserted/updated/deleted
+ij> update t1 set i = i + 1 where current of c8;
+ERROR XCL08: Cursor 'C8' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c7;
+ij> close c8;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .target cursor on already deleted row
+get cursor c9 as 'select * from t1 for update';
+ij> next c9;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> delete from t1 where current of c9;
+1 row inserted/updated/deleted
+ij> update t1 set i = i + 1 where current of c9;
+ERROR XCL08: Cursor 'C9' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+ij> close c9;
+ij> -- restore t1
+delete from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- update to row which was subject to searched update
+-- (row still within cursor qualification)
+get cursor c10 as 'select * from t1 for update';
+ij> next c10;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 2 where current of c10;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+4          |1111111111|1.1E12                |11:11:11
+ij> close c10;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- update to row which was subject to searched update
+-- (row becomes outside of cursor qualification)
+get cursor c10a as 'select * from t1 where i = 1 for update';
+ij> next c10a;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 2 where current of c10a;
+ERROR XCL08: Cursor 'C10A' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> close c10a;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- update to row which was subject to positioned update
+-- (row becomes outside of cursor qualification)
+get cursor c11 as 'select * from t1 where i = 1 for update';
+ij> next c11;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1 where current of c11;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 2 where current of c11;
+ERROR XCL08: Cursor 'C11' is not on a row.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+2          |1111111111|1.1E12                |11:11:11
+ij> close c11;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- update to row which was subject to 2 searched updates
+-- (1st puts row outside of cursor qualification, 2nd restores it)
+get cursor c12 as 'select * from t1 where i = 1 for update';
+ij> next c12;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 1;
+1 row inserted/updated/deleted
+ij> update t1 set i = 1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> update t1 set i = i + 2 where current of c12;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+3          |1111111111|1.1E12                |11:11:11
+ij> -- negative test - try to update a non-existant column
+update t1 set notacolumn = i + 1 where current of c12;
+ERROR 42X14: 'NOTACOLUMN' is not a column in table or VTI 'APP.T1'.
+ij> close c12;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- update column not in SELECT list, but in FOR UPDATE OF list
+get cursor c13 as 'select i from t1 for update of v';
+ij> next c13;
+I          
+-----------
+1          
+ij> update t1 set v = '999' where current of c13;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |999       |1.1E12                |11:11:11
+ij> -- update column not in FOR UPDATE OF list (negative test)
+update t1 set i = 999 where current of c13;
+ERROR 42X31: Column 'I' is not in FOR UPDATE list of cursor 'C13'.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |999       |1.1E12                |11:11:11
+ij> close c13;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- update a non-referenced column
+get cursor c14 as 'select i from t1 for update';
+ij> next c14;
+I          
+-----------
+1          
+ij> update t1 set v = '999' where current of c14;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |999       |1.1E12                |11:11:11
+ij> close c14;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .update columns in list in order different from the list's
+get cursor c15 as 'select i, v from t1 for update of i, v';
+ij> next c15;
+I          |V         
+----------------------
+1          |1111111111
+ij> update t1 set v = '999', i = 888 where current of c15;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+888        |999       |1.1E12                |11:11:11
+ij> -- . show that target table name must be used as qualifier, other names not allowed
+update t1 set t1.v = '998' where current of c15;
+1 row inserted/updated/deleted
+ij> update t1 set t2.v = '997' where current of c15;
+ERROR 42X55: Table name 'T2' should be the same as 'T1'.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+888        |998       |1.1E12                |11:11:11
+ij> close c15;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .update only 1 column in the list
+get cursor c16 as 'select i, v from t1 for update of i, v';
+ij> next c16;
+I          |V         
+----------------------
+1          |1111111111
+ij> update t1 set v = '999' where current of c16;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |999       |1.1E12                |11:11:11
+ij> close c16;
+ij> -- restore t1
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 select * from t1_copy;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- .try to update through a closed cursor
+get cursor c17 as 'select i, v from t1 for update of i, v';
+ij> next c17;
+I          |V         
+----------------------
+1          |1111111111
+ij> close c17;
+ij> update t1 set v = '999' where current of c17;
+ERROR 42X30: Cursor 'C17' not found. Verify that autocommit is OFF.
+ij> select * from t1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> -- a positioned update requires a named target table.
+-- if we prepare the positioned update, close the underlying cursor
+-- and reopen it on a different table, then the positioned update
+-- should fail 
+create table t3(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t3 values (1,1), (2, 1), (3,3);
+3 rows inserted/updated/deleted
+ij> create table t4(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t4 select * from t3;
+3 rows inserted/updated/deleted
+ij> get cursor c1 as 'select c1 from t3 for update of c1';
+ij> next c1;
+C1         
+-----------
+1          
+ij> prepare u1 as 'update t3 set c1 = c1 + 1 where current of c1';
+ij> execute u1;
+1 row inserted/updated/deleted
+ij> next c1;
+C1         
+-----------
+2          
+ij> select * from t3;
+C1         |C2         
+-----------------------
+2          |1          
+2          |1          
+3          |3          
+ij> close c1;
+ij> get cursor c1 as 'select c1 from t4 for update of c1';
+ij> next c1;
+C1         
+-----------
+1          
+ij> execute u1;
+ERROR 42X29: Update table 'T3' is not target of cursor 'C1'.
+ij> select * from t4;
+C1         |C2         
+-----------------------
+1          |1          
+2          |1          
+3          |3          
+ij> select * from t3;
+C1         |C2         
+-----------------------
+2          |1          
+2          |1          
+3          |3          
+ij> close c1;
+ij> -- now, reopen c1 on a table without column c1 and see
+-- what happens on an attempted positioned update
+get cursor c1 as 'select * from t1 for update';
+ij> next c1;
+I          |V         |D                     |T       
+------------------------------------------------------
+1          |1111111111|1.1E12                |11:11:11
+ij> execute u1;
+ERROR 42X29: Update table 'T3' is not target of cursor 'C1'.
+ij> close c1;
+ij> -- now, reopen c1 on t3, but as a read only cursor
+select * from t3;
+C1         |C2         
+-----------------------
+2          |1          
+2          |1          
+3          |3          
+ij> get cursor c1 as 'select c1 from t3 ';
+ij> next c1;
+C1         
+-----------
+2          
+ij> execute u1;
+ERROR 42X23: Cursor C1 is not updatable.
+ij> select * from t3;
+C1         |C2         
+-----------------------
+2          |1          
+2          |1          
+3          |3          
+ij> close c1;
+ij> -- positioned update on table with index (#724)
+create table t5 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t5 values (1, 1), (2, 2), (3, 3), (4, 4);
+4 rows inserted/updated/deleted
+ij> commit;
+ij> create index i5 on t5(c1);
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select * from t5 where c1 > 1 for update of c2';
+ij> next c1;
+C1         |C2         
+-----------------------
+2          |2          
+ij> update t5 set c2 = 9 where current of c1;
+1 row inserted/updated/deleted
+ij> next c1;
+C1         |C2         
+-----------------------
+3          |3          
+ij> next c1;
+C1         |C2         
+-----------------------
+4          |4          
+ij> update t5 set c2 = 9 where current of c1;
+1 row inserted/updated/deleted
+ij> select * from t5;
+C1         |C2         
+-----------------------
+1          |1          
+2          |9          
+3          |3          
+4          |9          
+ij> close c1;
+ij> rollback;
+ij> create index i5 on t5(c2);
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select * from t5 where c1 > 1 for update of c2';
+ij> next c1;
+C1         |C2         
+-----------------------
+2          |2          
+ij> update t5 set c2 = 9 where current of c1;
+1 row inserted/updated/deleted
+ij> next c1;
+C1         |C2         
+-----------------------
+3          |3          
+ij> next c1;
+C1         |C2         
+-----------------------
+4          |4          
+ij> update t5 set c2 = 9 where current of c1;
+1 row inserted/updated/deleted
+ij> select * from t5;
+C1         |C2         
+-----------------------
+1          |1          
+2          |9          
+3          |3          
+4          |9          
+ij> close c1;
+ij> rollback;
+ij> -- reset autocommit
+autocommit on;
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t5;
+0 rows inserted/updated/deleted
+ij> drop table t1_copy;
+0 rows inserted/updated/deleted
+ij> -- tests for beetle 4417, schema and correlation name not working with
+-- current of
+create schema ejb;
+0 rows inserted/updated/deleted
+ij> create table ejb.test1
+	(primarykey varchar(41) not null primary key,
+	name varchar(200),
+	parentkey varchar(41));
+0 rows inserted/updated/deleted
+ij> insert into ejb.test1 values('0','jack','jill');
+1 row inserted/updated/deleted
+ij> autocommit off;
+ij> -- test update with schema name
+get cursor c1 as 'select primarykey, parentkey, name from ejb.test1 where primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |jack                                                                                                                            
+ij> prepare p1 as 'update ejb.test1 set name = ''john'' where current of c1';
+ij> execute p1;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |john                                                                                                                            
+ij> close c1;
+ij> -- test update with schema name and correlation name
+get cursor c1 as 'select t1.primarykey, t1.parentkey, t1.name from ejb.test1 t1 where t1.primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |john                                                                                                                            
+ij> prepare p1 as 'update ejb.test1 set name = ''joe'' where current of c1';
+ij> execute p1;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |joe                                                                                                                             
+ij> close c1;
+ij> -- test update with set schema
+set schema ejb;
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select primarykey, parentkey, name from test1 where primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |joe                                                                                                                             
+ij> prepare p1 as 'update test1 set name = ''john'' where current of c1';
+ij> execute p1;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |john                                                                                                                            
+ij> close c1;
+ij> -- test update with set schema and correlation name
+get cursor c1 as 'select t1.primarykey, t1.parentkey, t1.name from test1 t1 where t1.primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |john                                                                                                                            
+ij> prepare p1 as 'update test1 set name = ''joe'' where current of c1';
+ij> execute p1;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |joe                                                                                                                             
+ij> close c1;
+ij> -- test update with set schema and correlation name and schema name
+get cursor c1 as 'select t1.primarykey, t1.parentkey, t1.name from ejb.test1 t1 where t1.primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |joe                                                                                                                             
+ij> prepare p1 as 'update ejb.test1 set name = ''joe'' where current of c1';
+ij> execute p1;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |joe                                                                                                                             
+ij> close c1;
+ij> -- 
+-- reset schema name
+set schema app;
+0 rows inserted/updated/deleted
+ij> -- test delete with schema name 
+get cursor c1 as 'select primarykey, parentkey, name from ejb.test1 where primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |joe                                                                                                                             
+ij> prepare p2 as 'delete from ejb.test1 where current of c1';
+ij> execute p2;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> close c1;
+ij> -- test delete with schema name and correlation name
+insert into ejb.test1 values('0','jack','jill');
+1 row inserted/updated/deleted
+ij> get cursor c1 as 'select t1.primarykey, t1.parentkey, t1.name from ejb.test1 t1 where t1.primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |jack                                                                                                                            
+ij> prepare p2 as 'delete from ejb.test1 where current of c1';
+ij> execute p2;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> close c1;
+ij> -- test delete with set schema 
+set schema ejb;
+0 rows inserted/updated/deleted
+ij> insert into test1 values('0','jack','jill');
+1 row inserted/updated/deleted
+ij> get cursor c1 as 'select primarykey, parentkey, name from test1 where primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |jack                                                                                                                            
+ij> prepare p2 as 'delete from test1 where current of c1';
+ij> execute p2;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> close c1;
+ij> -- test delete with set schema and correlation name
+insert into test1 values('0','jack','jill');
+1 row inserted/updated/deleted
+ij> get cursor c1 as 'select t1.primarykey, t1.parentkey, t1.name from test1 t1 where t1.primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |jack                                                                                                                            
+ij> prepare p2 as 'delete from test1 where current of c1';
+ij> execute p2;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> close c1;
+ij> -- test delete with set schema and correlation name and schema name
+insert into test1 values('0','jack','jill');
+1 row inserted/updated/deleted
+ij> get cursor c1 as 'select t1.primarykey, t1.parentkey, t1.name from ejb.test1 t1 where t1.primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |jack                                                                                                                            
+ij> prepare p2 as 'delete from ejb.test1 where current of c1';
+ij> execute p2;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from ejb.test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> close c1;
+ij> commit;
+ij> -- clean up
+autocommit on;
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> drop table ejb.test1;
+0 rows inserted/updated/deleted
+ij> --drop schema ejb restrict; - can't drop this because it will fail SPS tests since
+--statements are created and would need to be dropped
+-- test correlation on select in current of cursor in current schema
+-- this was also broken
+create table test1
+	(primarykey varchar(41) not null primary key,
+	name varchar(200),
+	parentkey varchar(41));
+0 rows inserted/updated/deleted
+ij> -- make sure a cursor will work fine in this situation
+insert into test1 values('0','jack','jill');
+1 row inserted/updated/deleted
+ij> autocommit off;
+ij> get cursor c1 as 'select t1.primarykey, t1.parentkey, t1.name from test1 t1 where t1.primarykey = ''0'' for update';
+ij> next c1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0                                        |jill                                     |jack                                                                                                                            
+ij> prepare p2 as 'delete from test1 where current of c1';
+ij> execute p2;
+1 row inserted/updated/deleted
+ij> select primarykey, parentkey, name from test1;
+PRIMARYKEY                               |PARENTKEY                                |NAME                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> close c1;
+ij> commit;
+ij> -- clean up
+autocommit on;
+ij> drop table test1;
+0 rows inserted/updated/deleted
+ij> 

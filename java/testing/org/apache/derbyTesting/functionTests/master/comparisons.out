@@ -1,0 +1,2264 @@
+ij> --
+-- this test shows the current supported comparison operators
+--
+-- first, do comparisons on the int type
+-- create a table with couple of int columns
+create table inttab (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> -- insert some values
+insert into inttab values (0, 0);
+1 row inserted/updated/deleted
+ij> insert into inttab values (null, 5);
+1 row inserted/updated/deleted
+ij> insert into inttab values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into inttab values (2147483647, 2147483647);
+1 row inserted/updated/deleted
+ij> -- select each one in turn
+select c1 from inttab where c1 = 0;
+C1         
+-----------
+0          
+ij> select c1 from inttab where c1 = 1;
+C1         
+-----------
+1          
+ij> select c1 from inttab where c1 = 2147483647;
+C1         
+-----------
+2147483647 
+ij> -- now look for a value that isn't in the table
+select c1 from inttab where c1 = 2;
+C1         
+-----------
+ij> -- now test null = null semantics
+select c1 from inttab where c1 = c1;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> -- test is null semantics
+select c1 from inttab where c1 is null;
+C1         
+-----------
+NULL       
+ij> select c1 from inttab where c1 is not null;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where not c1 is null;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> -- now test <>
+select c1 from inttab where c1 <> 0;
+C1         
+-----------
+1          
+2147483647 
+ij> select c1 from inttab where c1 <> 1;
+C1         
+-----------
+0          
+2147483647 
+ij> select c1 from inttab where c1 <> 2147483647;
+C1         
+-----------
+0          
+1          
+ij> select c1 from inttab where c1 <> 2;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where c1 <> c1;
+C1         
+-----------
+ij> select c1 from inttab where c1 <> c2;
+C1         
+-----------
+ij> -- now test !=
+select c1 from inttab where c1 != 0;
+C1         
+-----------
+1          
+2147483647 
+ij> select c1 from inttab where c1 != 1;
+C1         
+-----------
+0          
+2147483647 
+ij> select c1 from inttab where c1 != 2147483647;
+C1         
+-----------
+0          
+1          
+ij> select c1 from inttab where c1 != 2;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where c1 != c1;
+C1         
+-----------
+ij> select c1 from inttab where c1 != c2;
+C1         
+-----------
+ij> -- now test <
+select c1 from inttab where c1 < 0;
+C1         
+-----------
+ij> select c1 from inttab where c1 < 1;
+C1         
+-----------
+0          
+ij> select c1 from inttab where c1 < 2;
+C1         
+-----------
+0          
+1          
+ij> select c1 from inttab where c1 < 2147483647;
+C1         
+-----------
+0          
+1          
+ij> select c1 from inttab where c1 < c1;
+C1         
+-----------
+ij> select c1 from inttab where c1 < c2;
+C1         
+-----------
+ij> -- now test >
+select c1 from inttab where c1 > 0;
+C1         
+-----------
+1          
+2147483647 
+ij> select c1 from inttab where c1 > 1;
+C1         
+-----------
+2147483647 
+ij> select c1 from inttab where c1 > 2;
+C1         
+-----------
+2147483647 
+ij> select c1 from inttab where c1 > 2147483647;
+C1         
+-----------
+ij> select c1 from inttab where c1 > c1;
+C1         
+-----------
+ij> select c1 from inttab where c1 > c2;
+C1         
+-----------
+ij> -- now test <=
+select c1 from inttab where c1 <= 0;
+C1         
+-----------
+0          
+ij> select c1 from inttab where c1 <= 1;
+C1         
+-----------
+0          
+1          
+ij> select c1 from inttab where c1 <= 2;
+C1         
+-----------
+0          
+1          
+ij> select c1 from inttab where c1 <= 2147483647;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where c1 <= c1;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where c1 <= c2;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> -- now test >=
+select c1 from inttab where c1 >= 0;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where c1 >= 1;
+C1         
+-----------
+1          
+2147483647 
+ij> select c1 from inttab where c1 >= 2;
+C1         
+-----------
+2147483647 
+ij> select c1 from inttab where c1 >= 2147483647;
+C1         
+-----------
+2147483647 
+ij> select c1 from inttab where c1 >= c1;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where c1 >= c2;
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> -- now test not
+select c1 from inttab where not (c1 = 0);
+C1         
+-----------
+1          
+2147483647 
+ij> select c1 from inttab where not (c1 <> 0);
+C1         
+-----------
+0          
+ij> select c1 from inttab where not (c1 != 0);
+C1         
+-----------
+0          
+ij> select c1 from inttab where not (c1 < 0);
+C1         
+-----------
+0          
+1          
+2147483647 
+ij> select c1 from inttab where not (c1 <= 0);
+C1         
+-----------
+1          
+2147483647 
+ij> select c1 from inttab where not (c1 > 0);
+C1         
+-----------
+0          
+ij> select c1 from inttab where not (c1 >= 0);
+C1         
+-----------
+ij> -- create a table with a couple of smallint columns.  All smallint vs. smallint
+-- comparisons must be done between columns, because there are no smallint
+-- constants in the language
+create table smallinttab (c1 smallint, c2 smallint);
+0 rows inserted/updated/deleted
+ij> -- insert some values
+insert into smallinttab values (0, 0);
+1 row inserted/updated/deleted
+ij> insert into smallinttab values (null, null);
+1 row inserted/updated/deleted
+ij> insert into smallinttab values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into smallinttab values (32767, 32767);
+1 row inserted/updated/deleted
+ij> insert into smallinttab values (0, 9);
+1 row inserted/updated/deleted
+ij> insert into smallinttab values (null, 8);
+1 row inserted/updated/deleted
+ij> insert into smallinttab values (1, 7);
+1 row inserted/updated/deleted
+ij> insert into smallinttab values (32767, 6);
+1 row inserted/updated/deleted
+ij> -- select the ones where the columns are equal
+select c1, c2 from smallinttab where c1 = c2;
+C1    |C2    
+-------------
+0     |0     
+1     |1     
+32767 |32767 
+ij> -- test smallint = int semantics
+select c1 from smallinttab where c1 = 0;
+C1    
+------
+0     
+0     
+ij> select c1 from smallinttab where c1 = 1;
+C1    
+------
+1     
+1     
+ij> select c1 from smallinttab where c1 = 32767;
+C1    
+------
+32767 
+32767 
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where c1 = 65537;
+C1    
+------
+ij> -- test int = smallint semantics
+select c1 from smallinttab where 0 = c1;
+C1    
+------
+0     
+0     
+ij> select c1 from smallinttab where 1 = c1;
+C1    
+------
+1     
+1     
+ij> select c1 from smallinttab where 32767 = c1;
+C1    
+------
+32767 
+32767 
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where 65537 = c1;
+C1    
+------
+ij> -- Now test <>
+select c1, c2 from smallinttab where c1 <> c2;
+C1    |C2    
+-------------
+0     |9     
+1     |7     
+32767 |6     
+ij> select c1, c2 from smallinttab where c1 != c2;
+C1    |C2    
+-------------
+0     |9     
+1     |7     
+32767 |6     
+ij> -- test smallint <> int semantics
+select c1 from smallinttab where c1 <> 0;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where c1 <> 1;
+C1    
+------
+0     
+32767 
+0     
+32767 
+ij> select c1 from smallinttab where c1 <> 32767;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> select c1 from smallinttab where c1 != 0;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where c1 != 1;
+C1    
+------
+0     
+32767 
+0     
+32767 
+ij> select c1 from smallinttab where c1 != 32767;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where c1 <> 65537;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> select c1 from smallinttab where c1 != 65537;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- test int = smallint semantics
+select c1 from smallinttab where 0 <> c1;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where 1 <> c1;
+C1    
+------
+0     
+32767 
+0     
+32767 
+ij> select c1 from smallinttab where 32767 <> c1;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> select c1 from smallinttab where 0 != c1;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where 1 != c1;
+C1    
+------
+0     
+32767 
+0     
+32767 
+ij> select c1 from smallinttab where 32767 != c1;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where 65537 <> c1;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> select c1 from smallinttab where 65537 != c1;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- Now test <
+select c1, c2 from smallinttab where c1 < c2;
+C1    |C2    
+-------------
+0     |9     
+1     |7     
+ij> -- test smallint < int semantics
+select c1 from smallinttab where c1 < 0;
+C1    
+------
+ij> select c1 from smallinttab where c1 < 1;
+C1    
+------
+0     
+0     
+ij> select c1 from smallinttab where c1 < 32767;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where c1 < 65537;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- test int < smallint semantics
+select c1 from smallinttab where 0 < c1;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where 1 < c1;
+C1    
+------
+32767 
+32767 
+ij> select c1 from smallinttab where 32767 < c1;
+C1    
+------
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where 65537 < c1;
+C1    
+------
+ij> -- Now test >
+select c1, c2 from smallinttab where c1 > c2;
+C1    |C2    
+-------------
+32767 |6     
+ij> -- test smallint > int semantics
+select c1 from smallinttab where c1 > 0;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where c1 > 1;
+C1    
+------
+32767 
+32767 
+ij> select c1 from smallinttab where c1 > 32767;
+C1    
+------
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where c1 > 65537;
+C1    
+------
+ij> -- test int > smallint semantics
+select c1 from smallinttab where 0 > c1;
+C1    
+------
+ij> select c1 from smallinttab where 1 > c1;
+C1    
+------
+0     
+0     
+ij> select c1 from smallinttab where 32767 > c1;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where 65537 > c1;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- Now test <=
+select c1, c2 from smallinttab where c1 <= c2;
+C1    |C2    
+-------------
+0     |0     
+1     |1     
+32767 |32767 
+0     |9     
+1     |7     
+ij> -- test smallint <= int semantics
+select c1 from smallinttab where c1 <= 0;
+C1    
+------
+0     
+0     
+ij> select c1 from smallinttab where c1 <= 1;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> select c1 from smallinttab where c1 <= 32767;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where c1 <= 65537;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- test int <= smallint semantics
+select c1 from smallinttab where 0 <= c1;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> select c1 from smallinttab where 1 <= c1;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where 32767 <= c1;
+C1    
+------
+32767 
+32767 
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where 65537 <= c1;
+C1    
+------
+ij> -- Now test >=
+select c1, c2 from smallinttab where c1 >= c2;
+C1    |C2    
+-------------
+0     |0     
+1     |1     
+32767 |32767 
+32767 |6     
+ij> -- test smallint >= int semantics
+select c1 from smallinttab where c1 >= 0;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> select c1 from smallinttab where c1 >= 1;
+C1    
+------
+1     
+32767 
+1     
+32767 
+ij> select c1 from smallinttab where c1 >= 32767;
+C1    
+------
+32767 
+32767 
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where c1 >= 65537;
+C1    
+------
+ij> -- test int >= smallint semantics
+select c1 from smallinttab where 0 >= c1;
+C1    
+------
+0     
+0     
+ij> select c1 from smallinttab where 1 >= c1;
+C1    
+------
+0     
+1     
+0     
+1     
+ij> select c1 from smallinttab where 32767 >= c1;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- test is null semantics
+select c1 from smallinttab where c1 is null;
+C1    
+------
+NULL  
+NULL  
+ij> select c1 from smallinttab where c1 is not null;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> select c1 from smallinttab where not c1 is null;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- test that the smallint gets promoted to int, and not vice versa.  65537
+-- when converted to short becomes 1
+select c1 from smallinttab where 65537 >= c1;
+C1    
+------
+0     
+1     
+32767 
+0     
+1     
+32767 
+ij> -- create a table with a couple of bigint columns.  
+create table biginttab (c1 bigint, c2 bigint, c3 int, c4 smallint);
+0 rows inserted/updated/deleted
+ij> -- insert some values
+insert into biginttab values (0, 0, 0, 0 );
+1 row inserted/updated/deleted
+ij> insert into biginttab values (null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into biginttab values (9223372036854775807, 
+							   9223372036854775807,
+							   2147483647,
+							   32767);
+1 row inserted/updated/deleted
+ij> insert into biginttab values (-9223372036854775808, 
+							   -9223372036854775808,
+							   -2147483648,
+							   -32768);
+1 row inserted/updated/deleted
+ij> -- select the ones where the columns are equal
+select c1, c2 from biginttab where c1 = c2;
+C1                  |C2                  
+-----------------------------------------
+0                   |0                   
+9223372036854775807 |9223372036854775807 
+-9223372036854775808|-9223372036854775808
+ij> -- test bigint = int semantics
+select c1 from biginttab where c1 = 0;
+C1                  
+--------------------
+0                   
+ij> select c1 from biginttab where c1 = c3;
+C1                  
+--------------------
+0                   
+ij> -- test int = bigint semantics
+select c1 from biginttab where 0 = c1;
+C1                  
+--------------------
+0                   
+ij> select c1 from biginttab where c3 = c1;
+C1                  
+--------------------
+0                   
+ij> -- test bigint = smallint semantics
+select c1 from biginttab where c1 = c4;
+C1                  
+--------------------
+0                   
+ij> -- test smallint = bigint semantics
+select c1 from biginttab where c4 = c1;
+C1                  
+--------------------
+0                   
+ij> -- Now test <>
+select c1, c2 from biginttab where c1 <> c2;
+C1                  |C2                  
+-----------------------------------------
+ij> -- test bigint <> int semantics
+select c1 from biginttab where c1 <> 0;
+C1                  
+--------------------
+9223372036854775807 
+-9223372036854775808
+ij> select c1 from biginttab where c1 <> c3;
+C1                  
+--------------------
+9223372036854775807 
+-9223372036854775808
+ij> -- test int <> bigint semantics
+select c1 from biginttab where 0 <> c1;
+C1                  
+--------------------
+9223372036854775807 
+-9223372036854775808
+ij> select c1 from biginttab where c3 <> c1;
+C1                  
+--------------------
+9223372036854775807 
+-9223372036854775808
+ij> -- test bigint <> smallint semantics
+select c1 from biginttab where c1 <> c4;
+C1                  
+--------------------
+9223372036854775807 
+-9223372036854775808
+ij> -- test smallint <> bigint semantics
+select c1 from biginttab where c4 <> c1;
+C1                  
+--------------------
+9223372036854775807 
+-9223372036854775808
+ij> -- Now test <
+select c1, c2 from biginttab where c1 < c2;
+C1                  |C2                  
+-----------------------------------------
+ij> -- test bigint < int semantics
+select c1 from biginttab where c1 < 0;
+C1                  
+--------------------
+-9223372036854775808
+ij> select c1 from biginttab where c1 < c3;
+C1                  
+--------------------
+-9223372036854775808
+ij> -- test int < bigint semantics
+select c1 from biginttab where 0 < c1;
+C1                  
+--------------------
+9223372036854775807 
+ij> select c1 from biginttab where c3 < c1;
+C1                  
+--------------------
+9223372036854775807 
+ij> -- test bigint < smallint semantics
+select c1 from biginttab where c1 < c4;
+C1                  
+--------------------
+-9223372036854775808
+ij> -- test smallint < bigint semantics
+select c1 from biginttab where c4 < c1;
+C1                  
+--------------------
+9223372036854775807 
+ij> -- Now test >
+select c1, c2 from biginttab where c1 > c2;
+C1                  |C2                  
+-----------------------------------------
+ij> -- test bigint > int semantics
+select c1 from biginttab where c1 > 0;
+C1                  
+--------------------
+9223372036854775807 
+ij> select c1 from biginttab where c1 > c3;
+C1                  
+--------------------
+9223372036854775807 
+ij> -- test int > bigint semantics
+select c1 from biginttab where 0 > c1;
+C1                  
+--------------------
+-9223372036854775808
+ij> select c1 from biginttab where c3 > c1;
+C1                  
+--------------------
+-9223372036854775808
+ij> -- test bigint > smallint semantics
+select c1 from biginttab where c1 > c4;
+C1                  
+--------------------
+9223372036854775807 
+ij> -- test smallint > bigint semantics
+select c1 from biginttab where c4 > c1;
+C1                  
+--------------------
+-9223372036854775808
+ij> -- Now test <=
+select c1, c2 from biginttab where c1 <= c2;
+C1                  |C2                  
+-----------------------------------------
+0                   |0                   
+9223372036854775807 |9223372036854775807 
+-9223372036854775808|-9223372036854775808
+ij> -- test bigint <= int semantics
+select c1 from biginttab where c1 <= 0;
+C1                  
+--------------------
+0                   
+-9223372036854775808
+ij> select c1 from biginttab where c1 <= c3;
+C1                  
+--------------------
+0                   
+-9223372036854775808
+ij> -- test int <= bigint semantics
+select c1 from biginttab where 0 <= c1;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+ij> select c1 from biginttab where c3 <= c1;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+ij> -- test bigint <= smallint semantics
+select c1 from biginttab where c1 <= c4;
+C1                  
+--------------------
+0                   
+-9223372036854775808
+ij> -- test smallint <= bigint semantics
+select c1 from biginttab where c4 <= c1;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+ij> -- Now test >=
+select c1, c2 from biginttab where c1 >= c2;
+C1                  |C2                  
+-----------------------------------------
+0                   |0                   
+9223372036854775807 |9223372036854775807 
+-9223372036854775808|-9223372036854775808
+ij> -- test bigint >= int semantics
+select c1 from biginttab where c1 >= 0;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+ij> select c1 from biginttab where c1 >= c3;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+ij> -- test int >= bigint semantics
+select c1 from biginttab where 0 >= c1;
+C1                  
+--------------------
+0                   
+-9223372036854775808
+ij> select c1 from biginttab where c3 >= c1;
+C1                  
+--------------------
+0                   
+-9223372036854775808
+ij> -- test bigint >= smallint semantics
+select c1 from biginttab where c1 >= c4;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+ij> -- test smallint >= bigint semantics
+select c1 from biginttab where c4 >= c1;
+C1                  
+--------------------
+0                   
+-9223372036854775808
+ij> -- test is null semantics
+select c1 from biginttab where c1 is null;
+C1                  
+--------------------
+NULL                
+ij> select c1 from biginttab where c1 is not null;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+-9223372036854775808
+ij> select c1 from biginttab where not c1 is null;
+C1                  
+--------------------
+0                   
+9223372036854775807 
+-9223372036854775808
+ij> -- create a table with char columns of different lengths
+create table chartab (c1 char(1), c2 char(5));
+0 rows inserted/updated/deleted
+ij> -- insert some values
+insert into chartab values (' ', '     ');
+1 row inserted/updated/deleted
+ij> insert into chartab values ('a', 'a    ');
+1 row inserted/updated/deleted
+ij> insert into chartab values ('b', 'bcdef');
+1 row inserted/updated/deleted
+ij> insert into chartab values (null, null);
+1 row inserted/updated/deleted
+ij> -- select each one in turn
+select c1 from chartab where c1 = ' ';
+C1  
+----
+ij> select c2 from chartab where c2 = '     ';
+C2   
+-----
+ij> select c1 from chartab where c1 = 'a';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 = 'a    ';
+C2   
+-----
+a    
+ij> select c1 from chartab where c1 = 'b';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 = 'bcdef';
+C2   
+-----
+bcdef
+ij> -- now check for end-of-string blank semantics
+select c1 from chartab where c1 = '';
+C1  
+----
+ij> select c1 from chartab where c1 = '                      ';
+C1  
+----
+ij> select c2 from chartab where c2 = '';
+C2   
+-----
+ij> select c2 from chartab where c2 = ' ';
+C2   
+-----
+ij> select c2 from chartab where c2 = '                           ';
+C2   
+-----
+ij> select c1 from chartab where c1 = 'a        ';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 = 'a ';
+C2   
+-----
+a    
+ij> select c1 from chartab where c1 = 'b             ';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 = 'bcdef                ';
+C2   
+-----
+bcdef
+ij> select c2 from chartab where c2 = 'bcde       ';
+C2   
+-----
+ij> -- now check null = null semantics
+select c1, c2 from chartab where c1 = c2;
+C1  |C2   
+----------
+    |     
+a   |a    
+ij> -- test is null semantics
+select c1 from chartab where c1 is null;
+C1  
+----
+NULL
+ij> select c1 from chartab where c1 is not null;
+C1  
+----
+a   
+b   
+ij> select c1 from chartab where not c1 is null;
+C1  
+----
+a   
+b   
+ij> -- Now test <>
+select c1 from chartab where c1 <> ' ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 <> '     ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 <> 'a';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 <> 'a    ';
+C2   
+-----
+bcdef
+ij> select c1 from chartab where c1 <> 'b';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 <> 'bcdef';
+C2   
+-----
+a    
+ij> select c1 from chartab where c1 != ' ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 != '     ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 != 'a';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 != 'a    ';
+C2   
+-----
+bcdef
+ij> select c1 from chartab where c1 != 'b';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 != 'bcdef';
+C2   
+-----
+a    
+ij> -- now check for end-of-string blank semantics
+select c1 from chartab where c1 <> '';
+C1  
+----
+a   
+b   
+ij> select c1 from chartab where c1 <> '                      ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 <> '';
+C2   
+-----
+a    
+bcdef
+ij> select c2 from chartab where c2 <> ' ';
+C2   
+-----
+a    
+bcdef
+ij> select c2 from chartab where c2 <> '                           ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 <> 'a        ';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 <> 'a ';
+C2   
+-----
+bcdef
+ij> select c1 from chartab where c1 <> 'b             ';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 <> 'bcdef                ';
+C2   
+-----
+a    
+ij> select c2 from chartab where c2 <> 'bcde       ';
+C2   
+-----
+a    
+bcdef
+ij> -- now check null <> null semantics
+select c1, c2 from chartab where c1 <> c2;
+C1  |C2   
+----------
+b   |bcdef
+ij> -- Now test <
+select c1 from chartab where c1 < ' ';
+C1  
+----
+ij> select c2 from chartab where c2 < '     ';
+C2   
+-----
+ij> select c1 from chartab where c1 < 'a';
+C1  
+----
+ij> select c2 from chartab where c2 < 'a    ';
+C2   
+-----
+ij> select c1 from chartab where c1 < 'b';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 < 'bcdef';
+C2   
+-----
+a    
+ij> -- now check for end-of-string blank semantics
+select c1 from chartab where c1 < '';
+C1  
+----
+ij> select c1 from chartab where c1 < '                      ';
+C1  
+----
+ij> select c2 from chartab where c2 < '';
+C2   
+-----
+ij> select c2 from chartab where c2 < ' ';
+C2   
+-----
+ij> select c2 from chartab where c2 < '                           ';
+C2   
+-----
+ij> select c1 from chartab where c1 < 'a        ';
+C1  
+----
+ij> select c2 from chartab where c2 < 'a ';
+C2   
+-----
+ij> select c1 from chartab where c1 < 'b             ';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 < 'bcdef                ';
+C2   
+-----
+a    
+ij> select c2 from chartab where c2 < 'bcde       ';
+C2   
+-----
+a    
+ij> -- now check null < null semantics
+select c1, c2 from chartab where c1 < c2;
+C1  |C2   
+----------
+b   |bcdef
+ij> -- Now test >
+select c1 from chartab where c1 > ' ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 > '     ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 > 'a';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 > 'a    ';
+C2   
+-----
+bcdef
+ij> select c1 from chartab where c1 > 'b';
+C1  
+----
+ij> select c2 from chartab where c2 > 'bcdef';
+C2   
+-----
+ij> -- now check for end-of-string blank semantics
+select c1 from chartab where c1 > '';
+C1  
+----
+a   
+b   
+ij> select c1 from chartab where c1 > '                      ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 > '';
+C2   
+-----
+a    
+bcdef
+ij> select c2 from chartab where c2 > ' ';
+C2   
+-----
+a    
+bcdef
+ij> select c2 from chartab where c2 > '                           ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 > 'a        ';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 > 'a ';
+C2   
+-----
+bcdef
+ij> select c1 from chartab where c1 > 'b             ';
+C1  
+----
+ij> select c2 from chartab where c2 > 'bcdef                ';
+C2   
+-----
+ij> select c2 from chartab where c2 > 'bcde       ';
+C2   
+-----
+bcdef
+ij> -- now check null > null semantics
+select c1, c2 from chartab where c1 > c2;
+C1  |C2   
+----------
+ij> -- Now test <=
+select c1 from chartab where c1 <= ' ';
+C1  
+----
+ij> select c2 from chartab where c2 <= '     ';
+C2   
+-----
+ij> select c1 from chartab where c1 <= 'a';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 <= 'a    ';
+C2   
+-----
+a    
+ij> select c1 from chartab where c1 <= 'b';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 <= 'bcdef';
+C2   
+-----
+a    
+bcdef
+ij> -- now check for end-of-string blank semantics
+select c1 from chartab where c1 <= '';
+C1  
+----
+ij> select c1 from chartab where c1 <= '                      ';
+C1  
+----
+ij> select c2 from chartab where c2 <= '';
+C2   
+-----
+ij> select c2 from chartab where c2 <= ' ';
+C2   
+-----
+ij> select c2 from chartab where c2 <= '                           ';
+C2   
+-----
+ij> select c1 from chartab where c1 <= 'a        ';
+C1  
+----
+a   
+ij> select c2 from chartab where c2 <= 'a ';
+C2   
+-----
+a    
+ij> select c1 from chartab where c1 <= 'b             ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 <= 'bcdef                ';
+C2   
+-----
+a    
+bcdef
+ij> select c2 from chartab where c2 <= 'bcde       ';
+C2   
+-----
+a    
+ij> -- now check null <= null semantics
+select c1, c2 from chartab where c1 <= c2;
+C1  |C2   
+----------
+    |     
+a   |a    
+b   |bcdef
+ij> -- Now test >=
+select c1 from chartab where c1 >= ' ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 >= '     ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 >= 'a';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 >= 'a    ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 >= 'b';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 >= 'bcdef';
+C2   
+-----
+bcdef
+ij> -- now check for end-of-string blank semantics
+select c1 from chartab where c1 >= '';
+C1  
+----
+a   
+b   
+ij> select c1 from chartab where c1 >= '                      ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 >= '';
+C2   
+-----
+a    
+bcdef
+ij> select c2 from chartab where c2 >= ' ';
+C2   
+-----
+a    
+bcdef
+ij> select c2 from chartab where c2 >= '                           ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 >= 'a        ';
+C1  
+----
+a   
+b   
+ij> select c2 from chartab where c2 >= 'a ';
+C2   
+-----
+a    
+bcdef
+ij> select c1 from chartab where c1 >= 'b             ';
+C1  
+----
+b   
+ij> select c2 from chartab where c2 >= 'bcdef                ';
+C2   
+-----
+bcdef
+ij> select c2 from chartab where c2 >= 'bcde       ';
+C2   
+-----
+bcdef
+ij> -- now check null >= null semantics
+select c1, c2 from chartab where c1 >= c2;
+C1  |C2   
+----------
+    |     
+a   |a    
+ij> -- create a table with a few varchar columns.  All varchar vs. varchar
+-- comparisons must be done between columns, because there are no varchar
+-- constants in the language
+create table varchartab (c1 varchar(1), c2 varchar(1), c3 varchar(5),
+			 c4 varchar(5));
+0 rows inserted/updated/deleted
+ij> -- insert some values
+insert into varchartab values ('', '', '', '');
+1 row inserted/updated/deleted
+ij> insert into varchartab values ('a', 'a', 'a', 'a');
+1 row inserted/updated/deleted
+ij> insert into varchartab values ('b', 'b', 'bcdef', 'bcdef');
+1 row inserted/updated/deleted
+ij> insert into varchartab values (null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into varchartab values ('', null, '', null);
+1 row inserted/updated/deleted
+ij> insert into varchartab values ('a', 'b', 'a', 'b');
+1 row inserted/updated/deleted
+ij> insert into varchartab values ('b', '', 'b', 'bcdef');
+1 row inserted/updated/deleted
+ij> -- select the ones where the columns are equal
+select c1 from varchartab where c1 = c2;
+C1  
+----
+a   
+b   
+ij> select c3 from varchartab where c3 = c4;
+C3   
+-----
+a    
+bcdef
+ij> -- test varchar = char semantics.  Test with trailing blanks.
+select c1 from varchartab where c1 = '                 ';
+C1  
+----
+ij> select c1 from varchartab where c1 = '';
+C1  
+----
+ij> select c1 from varchartab where c1 = 'a ';
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where c1 = 'b                               ';
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where c1 = 'bb';
+C1  
+----
+ij> select c3 from varchartab where c3 = ' ';
+C3   
+-----
+ij> select c3 from varchartab where c3 = '';
+C3   
+-----
+ij> select c3 from varchartab where c3 = 'a    ';
+C3   
+-----
+a    
+a    
+ij> select c3 from varchartab where c3 = 'bcdef                   ';
+C3   
+-----
+bcdef
+ij> select c3 from varchartab where c3 = 'bbbb';
+C3   
+-----
+ij> -- test char = varchar semantics.  Test with trailing blanks.
+select c1 from varchartab where '                 ' = c1;
+C1  
+----
+ij> select c1 from varchartab where '' = c1;
+C1  
+----
+ij> select c1 from varchartab where 'a ' = c1;
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where 'b                               ' = c1;
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where 'bb' = c1;
+C1  
+----
+ij> select c3 from varchartab where ' ' = c3;
+C3   
+-----
+ij> select c3 from varchartab where '' = c3;
+C3   
+-----
+ij> select c3 from varchartab where 'a    ' = c3;
+C3   
+-----
+a    
+a    
+ij> select c3 from varchartab where 'bcdef                   ' = c3;
+C3   
+-----
+bcdef
+ij> select c3 from varchartab where 'bbbb' = c3;
+C3   
+-----
+ij> -- Now test <>
+select c1 from varchartab where c1 <> c2;
+C1  
+----
+a   
+b   
+ij> select c3 from varchartab where c3 <> c4;
+C3   
+-----
+a    
+b    
+ij> -- test varchar <> char semantics.  Test with trailing blanks.
+select c1 from varchartab where c1 <> '                 ';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 <> '';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 <> 'a ';
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where c1 <> 'b                               ';
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where c1 <> 'bb';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c3 from varchartab where c3 <> ' ';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 <> '';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 <> 'a    ';
+C3   
+-----
+bcdef
+b    
+ij> select c3 from varchartab where c3 <> 'bcdef                   ';
+C3   
+-----
+a    
+a    
+b    
+ij> select c3 from varchartab where c3 <> 'bbbb';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c1 from varchartab where c1 != '                 ';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 != '';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 != 'a ';
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where c1 != 'b                               ';
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where c1 != 'bb';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c3 from varchartab where c3 != ' ';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 != '';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 != 'a    ';
+C3   
+-----
+bcdef
+b    
+ij> select c3 from varchartab where c3 != 'bcdef                   ';
+C3   
+-----
+a    
+a    
+b    
+ij> select c3 from varchartab where c3 != 'bbbb';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> -- test char <> varchar semantics.  Test with trailing blanks.
+select c1 from varchartab where '                 ' <> c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where '' <> c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where 'a ' <> c1;
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where 'b                               ' <> c1;
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where 'bb' <> c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c3 from varchartab where ' ' <> c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where '' <> c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where 'a    ' <> c3;
+C3   
+-----
+bcdef
+b    
+ij> select c3 from varchartab where 'bcdef                   ' <> c3;
+C3   
+-----
+a    
+a    
+b    
+ij> select c3 from varchartab where 'bbbb' <> c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> -- Now test <
+select c1 from varchartab where c1 < c2;
+C1  
+----
+a   
+ij> select c3 from varchartab where c3 < c4;
+C3   
+-----
+a    
+b    
+ij> -- test varchar < char semantics.  Test with trailing blanks.
+select c1 from varchartab where c1 < '                 ';
+C1  
+----
+ij> select c1 from varchartab where c1 < '';
+C1  
+----
+ij> select c1 from varchartab where c1 < 'a ';
+C1  
+----
+ij> select c1 from varchartab where c1 < 'b                               ';
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where c1 < 'bb';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c3 from varchartab where c3 < ' ';
+C3   
+-----
+ij> select c3 from varchartab where c3 < '';
+C3   
+-----
+ij> select c3 from varchartab where c3 < 'a    ';
+C3   
+-----
+ij> select c3 from varchartab where c3 < 'bcdef                   ';
+C3   
+-----
+a    
+a    
+b    
+ij> select c3 from varchartab where c3 < 'bbbb';
+C3   
+-----
+a    
+a    
+b    
+ij> -- test char < varchar semantics.  Test with trailing blanks.
+select c1 from varchartab where '                 ' < c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where '' < c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where 'a ' < c1;
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where 'b                               ' < c1;
+C1  
+----
+ij> select c1 from varchartab where 'bb' < c1;
+C1  
+----
+ij> select c3 from varchartab where ' ' < c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where '' < c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where 'a    ' < c3;
+C3   
+-----
+bcdef
+b    
+ij> select c3 from varchartab where 'bcdef                   ' < c3;
+C3   
+-----
+ij> select c3 from varchartab where 'bbbb' < c3;
+C3   
+-----
+bcdef
+ij> -- Now test >
+select c1 from varchartab where c1 > c2;
+C1  
+----
+b   
+ij> select c3 from varchartab where c3 > c4;
+C3   
+-----
+ij> -- test varchar > char semantics.  Test with trailing blanks.
+select c1 from varchartab where c1 > '                 ';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 > '';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 > 'a ';
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where c1 > 'b                               ';
+C1  
+----
+ij> select c1 from varchartab where c1 > 'bb';
+C1  
+----
+ij> select c3 from varchartab where c3 > ' ';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 > '';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 > 'a    ';
+C3   
+-----
+bcdef
+b    
+ij> select c3 from varchartab where c3 > 'bcdef                   ';
+C3   
+-----
+ij> select c3 from varchartab where c3 > 'bbbb';
+C3   
+-----
+bcdef
+ij> -- test char > varchar semantics.  Test with trailing blanks.
+select c1 from varchartab where '                 ' > c1;
+C1  
+----
+ij> select c1 from varchartab where '' > c1;
+C1  
+----
+ij> select c1 from varchartab where 'a ' > c1;
+C1  
+----
+ij> select c1 from varchartab where 'b                               ' > c1;
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where 'bb' > c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c3 from varchartab where ' ' > c3;
+C3   
+-----
+ij> select c3 from varchartab where '' > c3;
+C3   
+-----
+ij> select c3 from varchartab where 'a    ' > c3;
+C3   
+-----
+ij> select c3 from varchartab where 'bcdef                   ' > c3;
+C3   
+-----
+a    
+a    
+b    
+ij> select c3 from varchartab where 'bbbb' > c3;
+C3   
+-----
+a    
+a    
+b    
+ij> -- Now test <=
+select c1 from varchartab where c1 <= c2;
+C1  
+----
+a   
+b   
+a   
+ij> select c3 from varchartab where c3 <= c4;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> -- test varchar <= char semantics.  Test with trailing blanks.
+select c1 from varchartab where c1 <= '                 ';
+C1  
+----
+ij> select c1 from varchartab where c1 <= '';
+C1  
+----
+ij> select c1 from varchartab where c1 <= 'a ';
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where c1 <= 'b                               ';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 <= 'bb';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c3 from varchartab where c3 <= ' ';
+C3   
+-----
+ij> select c3 from varchartab where c3 <= '';
+C3   
+-----
+ij> select c3 from varchartab where c3 <= 'a    ';
+C3   
+-----
+a    
+a    
+ij> select c3 from varchartab where c3 <= 'bcdef                   ';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 <= 'bbbb';
+C3   
+-----
+a    
+a    
+b    
+ij> -- test char <= varchar semantics.  Test with trailing blanks.
+select c1 from varchartab where '                 ' <= c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where '' <= c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where 'a ' <= c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where 'b                               ' <= c1;
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where 'bb' <= c1;
+C1  
+----
+ij> select c3 from varchartab where ' ' <= c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where '' <= c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where 'a    ' <= c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where 'bcdef                   ' <= c3;
+C3   
+-----
+bcdef
+ij> select c3 from varchartab where 'bbbb' <= c3;
+C3   
+-----
+bcdef
+ij> -- Now test >=
+select c1 from varchartab where c1 >= c2;
+C1  
+----
+a   
+b   
+b   
+ij> select c3 from varchartab where c3 >= c4;
+C3   
+-----
+a    
+bcdef
+ij> -- test varchar >= char semantics.  Test with trailing blanks.
+select c1 from varchartab where c1 >= '                 ';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 >= '';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 >= 'a ';
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where c1 >= 'b                               ';
+C1  
+----
+b   
+b   
+ij> select c1 from varchartab where c1 >= 'bb';
+C1  
+----
+ij> select c3 from varchartab where c3 >= ' ';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 >= '';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 >= 'a    ';
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where c3 >= 'bcdef                   ';
+C3   
+-----
+bcdef
+ij> select c3 from varchartab where c3 >= 'bbbb';
+C3   
+-----
+bcdef
+ij> -- test char >= varchar semantics.  Test with trailing blanks.
+select c1 from varchartab where '                 ' >= c1;
+C1  
+----
+ij> select c1 from varchartab where '' >= c1;
+C1  
+----
+ij> select c1 from varchartab where 'a ' >= c1;
+C1  
+----
+a   
+a   
+ij> select c1 from varchartab where 'b                               ' >= c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where 'bb' >= c1;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c3 from varchartab where ' ' >= c3;
+C3   
+-----
+ij> select c3 from varchartab where '' >= c3;
+C3   
+-----
+ij> select c3 from varchartab where 'a    ' >= c3;
+C3   
+-----
+a    
+a    
+ij> select c3 from varchartab where 'bcdef                   ' >= c3;
+C3   
+-----
+a    
+bcdef
+a    
+b    
+ij> select c3 from varchartab where 'bbbb' >= c3;
+C3   
+-----
+a    
+a    
+b    
+ij> -- test is null semantics
+select c1 from varchartab where c1 is null;
+C1  
+----
+NULL
+ij> select c1 from varchartab where c1 is not null;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> select c1 from varchartab where not c1 is null;
+C1  
+----
+a   
+b   
+a   
+b   
+ij> -- clean up
+drop table inttab;
+0 rows inserted/updated/deleted
+ij> drop table smallinttab;
+0 rows inserted/updated/deleted
+ij> drop table biginttab;
+0 rows inserted/updated/deleted
+ij> drop table chartab;
+0 rows inserted/updated/deleted
+ij> drop table varchartab;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,17 @@
+--
+-- tests for DISTINCT
+--
+-- these tests assume: no indexes, no order by, no grouping
+--
+-- test plan is represented by '.' items in comments. 
+-- the flavors of select are shown in distinct.subsql, which is
+-- run over a variety of data configurations.
+-- this file expects to be run from a directory under $WS/systest.
+
+-- speed up a fraction with autocommit off...
+autocommit off;
+
+create table t (i int, s smallint, r real, f float, b boolean, d date, t time,
+	ts timestamp, c char(10), v varchar(20));
+
+drop table t;

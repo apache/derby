@@ -1,0 +1,17 @@
+Start testProperties to test property priority
+Testing cloudscape.properties Port 1528 
+org.apache.derby.drda.NetworkServerControl start 
+Successfully Connected
+org.apache.derby.drda.NetworkServerControl shutdown 
+Shutdown successful.
+Testing System properties  Port 1529 
+-----Dderby.drda.portNumber=1529 org.apache.derby.drda.NetworkServerControl start 
+Successfully Connected
+org.apache.derby.drda.NetworkServerControl shutdown -p 1529 
+Shutdown successful.
+Testing command line option. Port 1530
+org.apache.derby.drda.NetworkServerControl start -p 1530 
+Successfully Connected
+org.apache.derby.drda.NetworkServerControl shutdown -p 1530 
+Shutdown successful.
+End test

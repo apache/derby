@@ -1,0 +1,12 @@
+NSinSameJVM_app.properties
+badConnection_sed.properties
+dblook_test_net_app.properties
+dataSourcePermissions_net_app.properties
+dataSourcePermissions_net_sed.properties
+default_app.properties
+default_derby.properties
+runtimeinfo_sed.properties
+sysinfo_sed.properties
+testij.sql
+testij_app.properties
+testij_sed.properties

@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>Cloudscape Network Server sample program</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+</HEAD>
+<BODY>
+<H2><A name=Top_Of_Page></A><A name=nsrun></A><A name=nssample></A>Cloudscape 
+Network Server sample program</H2>
+<P>The Network Server sample demo program (NsSample) is a simple JDBC application that 
+interacts with the Cloudscape Network Server. The program:</P>
+<UL>
+  <LI>starts the Cloudscape Network Server 
+  <LI>checks if the Cloudscape Network Server is running 
+  <LI>loads the DB2 JDBC Universal Driver 
+  <LI>creates the database '<tt>NsSampledb</tt>' if not already created 
+  <LI>checks to see if the schema is already created, and if not, 
+  creates the schema which includes the <tt>SAMPLETBL</tt> table and corresponding 
+  indexes. 
+  <LI>connects to the database 
+  <LI>loads the schema by inserting data 
+  <LI>starts client threads to perform database related operations 
+  <LI>has each of the clients perform DML operations (select, insert, delete, update) 
+  using JDBC calls, in particular one client opens an embedded connection to 
+  perform database operations while the other client opens a client connection 
+  to the Cloudscape Network Server to perform database operations. 
+  <LI>waits for the client threads to finish the tasks 
+  <LI>shuts down the Cloudscape Network Server at the end of the demo </LI></UL>
+<P>The following files should be installed in the <SPAN 
+class=italic>%CLOUDSCAPE_INSTALL%</SPAN><TT>\demo\programs\nserverdemo\</TT> directory in 
+order to run the sample program:</P>
+<UL>
+  <LI><TT>NsSample.java</tt><br>
+This is the entry point into the demo application. The program starts up two clients. One client opens an embedded 
+connection to perform database operations while the other client opens a client 
+connection to the Cloudscape Network Server to perform database operations.  This program provides the following constants that 
+can be changed to modify the sample demo:
+<UL>
+
+    <LI><tt>NUM_ROWS</tt> - The number of rows that must be initially loaded into the schema.</li>
+    <LI><tt>ITERATIONS</tt> - The number of iterations for which each client thread does database related work.</LI>
+<LI><tt>NUM_CLIENT_THREADS</tt> - The number of clients that you want to run the program against.</li> 
+    <LI><tt>NETWORKSERVER_PORT</tt> - The port on which the network server is running.</LI>
+</UL>
+
+You can also modify the program to exclude starting the Network Server as part of the sample program. 
+Make sure to recompile the java files before running the program if you make any 
+changes to the source code.
+
+</li>
+
+<li><tt>NsSampleClientThread.java</tt></br>
+This file contains two Java classes:
+  <UL>
+    <LI>The <tt>NsSampleClientThread</tt> class extends Thread and does all the 
+necessary work by instantiating a <tt>NsSampleWork</tt> instance.</li>
+    <LI>The <tt>NsSampleWork</tt> class contains everything required to perform 
+DML operations using JDBC calls. The <tt>doWork</tt> method in 
+the <tt>NsSampleWork</tt> class represents all the work done as 
+part of this sample program.</LI>
+</UL>
+</li>
+  <LI><tt>NetworkServerUtil.java</tt><br>
+This file contains helper methods to start the Cloudscape Network Server and to shutdown the server.
+</li>
+  <LI>Compiled class files:
+<UL>
+    <LI><tt>NsSample.class</tt></li> 
+    <LI><tt>NsSampleClientThread.class</tt></li> 
+    <LI><tt>NsSampleWork.class</tt></li> 
+    <LI><tt>NetworkServerUtil.class</tt></li> 
+</UL>
+</li>
+</ul>
+
+
+<H2>Running the Network Server demo program</H2>
+<P>To run the Cloudscape Network Server demonstration program:</P>
+<OL>
+  <LI>Open a command prompt and change directories to the <SPAN 
+  class=italic>%CLOUDSCAPE_INSTALL%</SPAN><tt>\demo\programs\</tt> directory, where <SPAN 
+  class=italic>%CLOUDSCAPE_INSTALL%</SPAN> is the directory where you installed Cloudscape. 
+  <LI>Set the CLASSPATH to the current directory (".") and also include the following 
+  jar files in order to use the Cloudscape Network Server and the DB2 JDBC Universal Driver.
+<ul>
+<li><tt>derbynet.jar</tt><br>The Network Server jar file. It must be in your CLASSPATH to use any of the Cloudscape Network 
+Server functions.</li>
+<li><tt>db2jcc.jar</tt><br>This jar file must be in your CLASSPATH to use the 
+DB2 JDBC Universal Driver.</li>
+<li><tt>db2jcc_license_c.jar</tt><br>This jar file is the license file for the Universal 
+Driver.</li>
+<li><tt>derby.jar</tt><br>The Cloudscape database engine jar file.</li>
+</ul>
+</LI>
+<li>Test the CLASSPATH settings by running the following java command:<pre>java org.apache.derby.tools.sysinfo</pre>This command will show the Cloudscape jar files that are in the CLASSPATH as well as 
+the DB2 JDBC Universal Driver along with their respective versions.</li>
+<li>Once you have set up your environment correctly, execute the application from the <br> <SPAN 
+  class=italic>%CLOUDSCAPE_INSTALL%</SPAN><tt>\demo\programs\</tt> directory:<br>
+<pre>java nserverdemo.NsSample</pre>
+</li>
+</OL>
+You should receive output similar to the following if the 
+program runs successfully:<br><br>
+
+<tt>Derby Network Server created<br>
+[NsSample] Unable to obtain a connection to network server, trying again after 3000 ms.<br>
+Server is ready to accept connections on port 1621.<br>
+Connection number: 1.<br>
+[NsSample] Derby Network Server started.<br>
+[NsSample] Sample Derby Network Server program demo starting. <br>
+Please wait .....................<br>
+Connection number: 2.<br>
+[NsSampleWork] Table 'SAMPLETBL' already exists; no need to create schema again.<br>
+[NsSampleClientThread] Thread id - 1; started.<br>
+[NsSampleWork] Thread id - 1; requests database connection, dbUrl =jdbc:derby:NSSampledb;<br>
+[NsSampleClientThread] Thread id - 2; started.<br>
+[NsSampleWork] Thread id - 2; requests database connection, dbUrl <br>=jdbc:derby:net://localhost:1621/NSSampledb;create=true:retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;<br>
+Connection number: 3.<br>
+[NsSampleWork] Thread id - 1 selected 1 row [61,Derby28        ,3.20918E21,9854]<br>
+[NsSampleWork] Thread id - 1; inserted 1 row.<br>
+[NsSampleWork] Thread id - 1; deleted 1 row with t_key = 9854<br>
+[NsSampleWork] Thread id - 1; inserted 1 row.<br>
+[NsSampleWork] Thread id - 1; deleted 1 row with t_key = 9818<br>
+[NsSampleWork] Thread id - 2; deleted 0 row with t_key = 9854<br>
+[NsSampleWork] Thread id - 1; updated 1 row with t_key = 9481<br>
+[NsSampleWork] Thread id - 1; updated 1 row with t_key = 9481<br>
+[NsSampleWork] Thread id - 1; updated 0 row with t_key = 9481<br>
+[NsSampleWork] Thread id - 2; deleted 1 row with t_key = 9481<br>
+[NsSampleWork] Thread id - 1; inserted 1 row.<br>
+[NsSampleWork] Thread id - 1; updated 1 row with t_key = 9150<br>
+[NsSampleWork] Thread id - 1; closed connection to the database.<br>
+[NsSampleClientThread] Thread id - 1; finished all tasks.<br>
+[NsSampleWork] Thread id - 2 selected 1 row [57,Derby18        ,7.873628,9150]<br>
+[NsSampleWork] Thread id - 2; updated 1 row with t_key = 9150<br>
+[NsSampleWork] Thread id - 2 selected 1 row [58,Derby18        ,7.873628,9150]<br>
+[NsSampleWork] Thread id - 2; inserted 1 row.<br>
+[NsSampleWork] Thread id - 2 selected 1 row [58,Derby18        ,7.873628,9150]<br>
+[NsSampleWork] Thread id - 2; inserted 1 row.<br>
+[NsSampleWork] Thread id - 2; updated 1 row with t_key = 9150<br>
+[NsSampleWork] Thread id - 2 selected 1 row [61,Derby18        ,7.873628,9150]<br>
+[NsSampleWork] Thread id - 2; closed connection to the database.<br>
+[NsSampleClientThread] Thread id - 2; finished all tasks.<br>
+[NsSample] Shutting down network server.<br>
+Connection number: 4.<br>
+Shutdown successful.<br>
+[NsSample] End of Network server demo.</tt>
+
+<P>Running the demo program will also create new directories and files:</P>
+<UL>
+  <LI><A name=Bot_Of_Page></A><tt>NSSampledb</tt><br>This directory makes up the 
+NSSampledb database.</li>
+  <LI><tt>derby.log</tt><br>This log file contains Cloudscape progress and error messages.</li>
+</ul>
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+
+<!-- ==================================================================== -->
+<!--                       Cloudscape build file                          -->
+<!-- ==================================================================== -->
+
+<project default="FTOtestsubdir" basedir="../../../../../../../.." >
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties" />
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/sane${sanity}.properties"/>
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <!--property file="${properties.dir}/parser.properties"/-->
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+  <!-- derby testing specific properties files -->
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/tests/jdbcapi"/>
+
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="FTOtestsubdir" depends="compilet2,compilet1,copyfiles"/>
+
+  <!-- mkdir / init target may not be necessary, just here for reference... -->
+  <target name="init">
+    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/jdbcapi"/>
+  </target>
+
+  <target name="compilet1" depends="compilet2">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <!--pathelement location="${oro}"/-->
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${this.dir}/*.java"/>
+      <exclude name="${this.dir}/savepointJdbc30.java"/>
+      <exclude name="${this.dir}/dataSourcePermissions.java"/>
+      <exclude name="${this.dir}/parameterMetaDataJdbc30.java"/>
+    </javac>
+  </target>
+
+  <target name="compilet2">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <!--exclude name=""/-->
+      <include name="${this.dir}/savepointJdbc30.java"/>
+      <include name="${this.dir}/dataSourcePermissions.java"/>
+      <include name="${this.dir}/parameterMetaDataJdbc30.java"/>
+    </javac>
+  </target>
+
+  <target name="compilet3">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <!--include name=""/-->
+    </javac>
+  </target> 
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/jdbcapi">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbcapi" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbcapi/copyfiles.ant"/>  
+    </copy>
+  </target> 
+
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
+</project>
+

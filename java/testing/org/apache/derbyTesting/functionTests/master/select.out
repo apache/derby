@@ -1,0 +1,163 @@
+ij> --
+-- this test shows the current supported select functionality
+--
+create table t(i int, s smallint);
+0 rows inserted/updated/deleted
+ij> insert into t (i,s) values (1956,475);
+1 row inserted/updated/deleted
+ij> -- select a subset of the columns
+select i from t;
+I          
+-----------
+1956       
+ij> -- select all columns in order
+select i,s from t;
+I          |S     
+------------------
+1956       |475   
+ij> -- select columns out of order
+select s,i from t;
+S     |I          
+------------------
+475   |1956       
+ij> -- select with repeating columns
+select i,i,s,s,i,i from t;
+I          |I          |S     |S     |I          |I          
+-------------------------------------------------------------
+1956       |1956       |475   |475   |1956       |1956       
+ij> -- select with constants
+select 10 from t;
+1          
+-----------
+10         
+ij> -- select with table name
+select t.i from t;
+I          
+-----------
+1956       
+ij> -- select with correlation name
+select b.i from t b;
+I          
+-----------
+1956       
+ij> -- select *
+select * from t;
+I          |S     
+------------------
+1956       |475   
+ij> -- select * and constants and columns 
+select *, 10, i from t;
+ERROR 42X01: Syntax error: Encountered "," at line 2, column 9.
+ij> -- select correlation name dot star
+select b.* from t b;
+I          |S     
+------------------
+1956       |475   
+ij> -- select table name dot star
+select t.* from t;
+I          |S     
+------------------
+1956       |475   
+ij> -- believe it or not, the next query is valid
+(select * from t);
+I          |S     
+------------------
+1956       |475   
+ij> -- negative testing
+-- non-boolean where clause
+-- (only put here due to small size of this test)
+select * from t where i;
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
+ij> -- invalid correlation name for "*"
+select asdf.* from t;
+ERROR 42X10: 'ASDF' is not an exposed table name in the scope in which it appears.
+ij> -- cleanup
+drop table t;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5019.  We had a failure in V5.1.20.
+CREATE SCHEMA CONTENT;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE CONTENT.CONTENT (ID INTEGER NOT NULL, CREATOR VARCHAR(128) NOT NULL, CREATION_DATE DATE NOT NULL, URL VARCHAR(256) NOT NULL, TITLE VARCHAR(128) NOT NULL, DESCRIPTION VARCHAR(512) NOT NULL, HEIGHT INTEGER NOT NULL, WIDTH INTEGER NOT NULL);
+0 rows inserted/updated/deleted
+ij> ALTER TABLE CONTENT.CONTENT ADD CONSTRAINT CONTENT_ID PRIMARY KEY (ID);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE CONTENT.STYLE (ID INTEGER NOT NULL,DESCRIPTION VARCHAR(128) NOT NULL);
+0 rows inserted/updated/deleted
+ij> ALTER TABLE CONTENT.STYLE ADD CONSTRAINT STYLE_ID PRIMARY KEY (ID);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE CONTENT.CONTENT_STYLE  (CONTENT_ID INTEGER NOT NULL, STYLE_ID INTEGER NOT NULL);
+0 rows inserted/updated/deleted
+ij> ALTER TABLE CONTENT.CONTENT_STYLE ADD CONSTRAINT CONTENTSTYLEID PRIMARY KEY (CONTENT_ID, STYLE_ID);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE CONTENT.KEYGEN (KEYVAL INTEGER NOT NULL, KEYNAME VARCHAR(256) NOT NULL);
+0 rows inserted/updated/deleted
+ij> ALTER TABLE CONTENT.KEYGEN  ADD CONSTRAINT PK_KEYGEN PRIMARY KEY (KEYNAME);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE CONTENT.RATING  (ID INTEGER NOT NULL,RATING DOUBLE PRECISION NOT NULL,ENTRIES DOUBLE PRECISION NOT NULL);
+0 rows inserted/updated/deleted
+ij> ALTER TABLE CONTENT.RATING ADD CONSTRAINT PK_RATING PRIMARY KEY (ID);
+0 rows inserted/updated/deleted
+ij> INSERT INTO CONTENT.STYLE VALUES (1, 'BIRD');
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.STYLE VALUES (2, 'CAR');
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.STYLE VALUES (3, 'BUILDING');
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.STYLE VALUES (4, 'PERSON');
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT values(1, 'djd', CURRENT DATE, 'http://url.1', 'title1', 'desc1', 100, 100);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT values(2, 'djd', CURRENT DATE, 'http://url.2', 'title2', 'desc2', 100, 100);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT values(3, 'djd', CURRENT DATE, 'http://url.3', 'title3', 'desc3', 100, 100);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT values(4, 'djd', CURRENT DATE, 'http://url.4', 'title4', 'desc4', 100, 100);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT values(5, 'djd', CURRENT DATE, 'http://url.5', 'title5', 'desc5', 100, 100);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(1,1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(1,2);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(2,1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(2,4);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(3,3);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(3,4);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(3,1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(4,4);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.CONTENT_STYLE VALUES(5,1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.RATING VALUES(1, 4.5, 1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.RATING VALUES(2, 4.0, 1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.RATING VALUES(3, 3.9, 1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.RATING VALUES(4, 4.1, 1);
+1 row inserted/updated/deleted
+ij> INSERT INTO CONTENT.RATING VALUES(5, 4.0, 1);
+1 row inserted/updated/deleted
+ij> select S.DESCRIPTION, FAV.MAXRATE, C.TITLE, C.URL FROM CONTENT.RATING R, CONTENT.CONTENT C, CONTENT.STYLE S, CONTENT.CONTENT_STYLE CS, (select S.ID, max(rating) from CONTENT.RATING R, CONTENT.CONTENT C, CONTENT.STYLE S, CONTENT.CONTENT_STYLE CS group by S.ID) AS FAV(FID,MAXRATE) where R.ID = C.ID AND C.ID = CS.CONTENT_ID AND CS.STYLE_ID = FAV.FID AND FAV.FID = S.ID AND FAV.MAXRATE = R.RATING;
+DESCRIPTION                                                                                                                     |MAXRATE               |TITLE                                                                                                                           |URL                                                                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+BIRD                                                                                                                            |4.5                   |title1                                                                                                                          |http://url.1                                                                                                                    
+CAR                                                                                                                             |4.5                   |title1                                                                                                                          |http://url.1                                                                                                                    
+ij> drop table content.rating;
+0 rows inserted/updated/deleted
+ij> drop table content.content_style;
+0 rows inserted/updated/deleted
+ij> drop table content.content;
+0 rows inserted/updated/deleted
+ij> drop table content.style;
+0 rows inserted/updated/deleted
+ij> drop table content.keygen;
+0 rows inserted/updated/deleted
+ij> drop schema content restrict;
+0 rows inserted/updated/deleted
+ij> 

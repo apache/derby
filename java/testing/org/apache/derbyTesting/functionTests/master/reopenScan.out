@@ -1,0 +1,226 @@
+ij> --
+-- Test reopening scans.  A in subquery generates
+-- a lot of reopen requests to the underlying scan.
+-- We are used to having to reopen something like a
+-- base table scan, but we need to be careful reopening
+-- things like join nodes.  This test is to ensure
+-- that we don't leave around any state when reopening
+-- various complex nodes.
+drop table x;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'X' because it does not exist.
+ij> drop table y;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'Y' because it does not exist.
+ij> drop table z;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'Z' because it does not exist.
+ij> create table x (x int);
+0 rows inserted/updated/deleted
+ij> create table y (x int);
+0 rows inserted/updated/deleted
+ij> create table z (x int);
+0 rows inserted/updated/deleted
+ij> insert into x values 1,2,3;
+3 rows inserted/updated/deleted
+ij> insert into y values 1,2,3;
+3 rows inserted/updated/deleted
+ij> insert into z values 3,2,3,2;
+4 rows inserted/updated/deleted
+ij> select x from y where x in (select x from x);
+X          
+-----------
+1          
+2          
+3          
+ij> select x from z where x in (1,2,3);
+X          
+-----------
+3          
+2          
+3          
+2          
+ij> --
+-- nested loop
+--
+-- one row right side
+select x from z where x in (select x from y where x in (select x from x));
+X          
+-----------
+3          
+2          
+3          
+2          
+ij> -- not one row right side
+select x from z where x in (select x.x from x,y where x.x=y.x);
+X          
+-----------
+3          
+2          
+3          
+2          
+ij> --
+-- hash join
+--
+select x from z where x in (select x.x from x,y where x.x=y.x);
+X          
+-----------
+3          
+2          
+3          
+2          
+ij> --
+-- outer join
+--
+select x from z where x in (select x.x from x left outer join y on (y.x=x.x));
+X          
+-----------
+3          
+2          
+3          
+2          
+ij> delete from y;
+3 rows inserted/updated/deleted
+ij> insert into y values 0,1,5,2,2;
+5 rows inserted/updated/deleted
+ij> select x.x from x left outer join y on (y.x=x.x);
+X          
+-----------
+1          
+2          
+2          
+3          
+ij> select x from z where x in (select x.x from x left outer join y on (y.x=x.x));
+X          
+-----------
+3          
+2          
+3          
+2          
+ij> delete from x;
+3 rows inserted/updated/deleted
+ij> insert into x values 0,1,5,2,2;
+5 rows inserted/updated/deleted
+ij> delete from y;
+5 rows inserted/updated/deleted
+ij> insert into y values 1,2,3;
+3 rows inserted/updated/deleted
+ij> select x.x from x left outer join y on (y.x=x.x);
+X          
+-----------
+0          
+1          
+5          
+2          
+2          
+ij> select x from z where x in (select x.x from x left outer join y on (y.x=x.x));
+X          
+-----------
+2          
+2          
+ij> insert into z values 1,5;
+2 rows inserted/updated/deleted
+ij> select x from z where x in (select x.x from x left outer join y on (y.x=x.x));
+X          
+-----------
+2          
+2          
+1          
+5          
+ij> --
+-- aggregate result set
+--
+delete from x;
+5 rows inserted/updated/deleted
+ij> delete from y;
+3 rows inserted/updated/deleted
+ij> delete from z;
+6 rows inserted/updated/deleted
+ij> insert into x values 1,2,3;
+3 rows inserted/updated/deleted
+ij> insert into y values 1,2,3;
+3 rows inserted/updated/deleted
+ij> insert into z values 3,2,666,3,2,null,2;
+7 rows inserted/updated/deleted
+ij> select x from z where x in (select x from x group by x);
+X          
+-----------
+3          
+2          
+3          
+2          
+2          
+ij> select x from z where x in (select max(x) from x group by x);
+X          
+-----------
+3          
+2          
+3          
+2          
+2          
+ij> select x from z where x in (select max(x) from x);
+X          
+-----------
+3          
+3          
+ij> select x from z where x in (select sum(distinct x) from x group by x);
+X          
+-----------
+3          
+2          
+3          
+2          
+2          
+ij> insert into x values 1,1,2,2,2,5,5,null,6;
+9 rows inserted/updated/deleted
+ij> select x from z where x in (select sum(distinct x) from x group by x);
+X          
+-----------
+3          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+2          
+3          
+2          
+2          
+ij> --
+-- union
+--
+delete from x;
+12 rows inserted/updated/deleted
+ij> delete from y;
+3 rows inserted/updated/deleted
+ij> delete from z;
+7 rows inserted/updated/deleted
+ij> insert into x values null,2,3;
+3 rows inserted/updated/deleted
+ij> insert into y values 1,2,null;
+3 rows inserted/updated/deleted
+ij> insert into z values 3,2,666,3,2,null,2;
+7 rows inserted/updated/deleted
+ij> select x from z where x in (select x from x union select x from y);
+X          
+-----------
+3          
+2          
+3          
+2          
+2          
+ij> --
+-- normalize
+--
+delete from x;
+3 rows inserted/updated/deleted
+ij> delete from y;
+3 rows inserted/updated/deleted
+ij> delete from z;
+7 rows inserted/updated/deleted
+ij> create table n (x smallint);
+0 rows inserted/updated/deleted
+ij> insert into n values 1,2,3;
+3 rows inserted/updated/deleted
+ij> insert into x values 1,2,3;
+3 rows inserted/updated/deleted
+ij> select * from x where x in (select x from n);
+X          
+-----------
+1          
+2          
+3          
+ij> 

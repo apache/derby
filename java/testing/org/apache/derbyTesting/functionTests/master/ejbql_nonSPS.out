@@ -1,0 +1,63 @@
+ij> -- this file contains any ejbql tests which produce an error which
+-- includes a column number. The column number will change for SPS tests
+-- so these tests can't be included in allAsSPS
+-- absolute is not a reserved word any more
+create table absolute( a int );
+0 rows inserted/updated/deleted
+ij> values{ fn abs( NULL ) };
+ERROR 42X01: Syntax error: Encountered "NULL" at line 1, column 17.
+ij> values{ fn abs( null ) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 17.
+ij> values{ fn abs( ) };
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 17.
+ij> -- Error
+values{ fn concat( ) };
+ERROR 42X01: Syntax error: Encountered ")" at line 2, column 20.
+ij> values{ fn concat( 'error0' ) };
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 29.
+ij> values  fn concat( 'syntax', ' error1' );
+ERROR 42X01: Syntax error: Encountered "concat" at line 1, column 12.
+ij> values{ fn concat { 'syntax', ' error2' }};
+ERROR 42X01: Syntax error: Encountered "{" at line 1, column 19.
+ij> values{ fn concat( 'syntax', ' error3' });
+ERROR 42X01: Syntax error: Encountered "}" at line 1, column 40.
+ij> values{ fn concat( fn concat( 'nested', ' not ' ), ' allowed!' ) };
+ERROR 42X01: Syntax error: Encountered "concat" at line 1, column 23.
+ij> values{ fn concat( values{ fn concat( 'nested', ' not ' ) }, ' allowed!' ) };
+ERROR 42X01: Syntax error: Encountered "values" at line 1, column 20.
+ij> values{ fn locate( null, null ) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 20.
+ij> values{ fn locate( null, ''   ) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 20.
+ij> values{ fn locate( '', null   ) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 24.
+ij> values{ fn locate( null, null,1) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 20.
+ij> values{ fn locate( null, ''  ,1) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 20.
+ij> values{ fn locate( '', null  ,1) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 24.
+ij> values{ fn sqrt( NULL ) };
+ERROR 42X01: Syntax error: Encountered "NULL" at line 1, column 18.
+ij> values{ fn sqrt( null ) };
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 18.
+ij> values{ fn sqrt( ) };
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 18.
+ij> -- Substring tests. Valid only as escaped function
+values substring('asdf', 1);
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> values substring(X'101101', 3);
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> values substring('asdf', 1, 2);
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> values {fn substring('asdf', 1)};
+1   
+----
+asdf
+ij> values {fn substring(X'101101', 3)};
+ERROR 42X25: The 'SUBSTR' function is not allowed on the 'CHAR () FOR BIT DATA' type.
+ij> values {fn substring('asdf', 1, 2)};
+1   
+----
+as  
+ij> 

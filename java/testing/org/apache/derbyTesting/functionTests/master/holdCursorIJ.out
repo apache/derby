@@ -1,0 +1,300 @@
+ij> -- create a table
+create table t1(c11 int, c12 int);
+0 rows inserted/updated/deleted
+ij> -- insert data into tables
+insert into t1 values(1,1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2,2);
+1 row inserted/updated/deleted
+ij> -- set autocommit off
+autocommit off;
+ij> -- first test - make sure that only cursors created with holdability true
+-- have open resultsets after commit
+-- declare 3 different kind of cursors one for each jdbc release so far
+get with nohold cursor jdk1 as 'SELECT * FROM t1';
+ij> get scroll insensitive with nohold cursor jdk2 as 'SELECT * FROM t1';
+ij> get with hold cursor jdk4 as 'SELECT * FROM t1';
+ij> -- do fetches from these cursors
+next jdk1;
+C11        |C12        
+-----------------------
+1          |1          
+ij> next jdk2;
+C11        |C12        
+-----------------------
+1          |1          
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> --commit
+commit;
+ij> -- now try the fetch on cursors again after commit
+-- cursors jdk1 and jdk2 will give errors
+next jdk1;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> next jdk2;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> next jdk4;
+C11        |C12        
+-----------------------
+2          |2          
+ij> -- end of resultset for jdk4, but try next again
+next jdk4;
+No current row
+ij> close jdk4;
+ij> next jdk4;
+IJ ERROR: Unable to establish cursor
+ij> -- second test - make sure that all the cursors (including holdability true)
+-- have their resultsets closed after rollback.
+-- declare the cursors again, this time, try with rollback
+get with nohold cursor jdk1 as 'SELECT * FROM t1';
+ij> get scroll insensitive with nohold cursor jdk2 as 'SELECT * FROM t1';
+ij> get with hold cursor jdk4 as 'SELECT * FROM t1';
+ij> -- do fetches from these cursors
+next jdk1;
+C11        |C12        
+-----------------------
+1          |1          
+ij> next jdk2;
+C11        |C12        
+-----------------------
+1          |1          
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> --rollback
+rollback;
+ij> -- now try the fetch on cursors again after rollback
+-- all the cursors will give errors
+next jdk1;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> next jdk2;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> next jdk4;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> -- third test - Define a hold cursor on a table. Shouldn't be able to drop that
+-- table before & after commit. Have to close the cursor before table can be dropped.
+get with nohold cursor jdk1 as 'SELECT * FROM t1';
+ij> get with hold cursor jdk4 as 'SELECT * FROM t1';
+ij> next jdk1;
+C11        |C12        
+-----------------------
+1          |1          
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> -- wont' be able to drop table because of cursors jdk1 and jdk4
+drop table t1;
+ERROR X0X95: Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+ij> commit;
+ij> -- drop table still won't work because jdk4 is still open after commit
+drop table t1;
+ERROR X0X95: Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+ij> -- close cursor jdk4 and try then deleting the table
+close jdk4;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- recreate and populate the table for next test
+create table t1(c11 int, c12 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1,1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2,2);
+1 row inserted/updated/deleted
+ij> -- fourth test - try to change the isolation level while there are
+-- held cursors
+get with nohold cursor jdk1 as 'SELECT * FROM t1';
+ij> get with hold cursor jdk4 as 'SELECT * FROM t1';
+ij> next jdk1;
+C11        |C12        
+-----------------------
+1          |1          
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> -- try to change the isolation level. will give error because of jdk1 and jdk4
+set current isolation RR;
+ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
+ij> commit;
+ij> -- attempt to change isolation level should give error because of jdk4 hold cursor
+set isolation = REPEATABLE READ;
+ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
+ij> -- close jdk4 and then should be able to change isolation
+close jdk4;
+ij> set isolation to serializable;
+0 rows inserted/updated/deleted
+ij> -- fifth test - try isolation level change alongwith changing the isolation
+-- level of just one statement
+get with hold cursor jdk4 as 'SELECT * FROM t1';
+ij> get with nohold cursor jdk1 as 'SELECT * FROM t1 WITH CS';
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> next jdk1;
+C11        |C12        
+-----------------------
+1          |1          
+ij> -- following should fail because of cursor jdk4
+set isolation RS;
+ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
+ij> -- following should fail because of cursor jdk4
+set isolation UR;
+ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
+ij> close jdk4;
+ij> -- should be able to change the isolation now
+set isolation READ UNCOMMITTED;
+0 rows inserted/updated/deleted
+ij> set isolation RS;
+0 rows inserted/updated/deleted
+ij> -- sixth test - try positioned update with hold cursor
+get with hold cursor jdk4 as 'SELECT * FROM t1 FOR UPDATE';
+ij> -- following should give error because cursor is not positioned on any row
+update t1 set c12=12 where current of jdk4;
+ERROR XCL08: Cursor 'JDK4' is not on a row.
+ij> select * from t1;
+C11        |C12        
+-----------------------
+1          |1          
+2          |2          
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> update t1 set c12=12 where current of jdk4;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C11        |C12        
+-----------------------
+1          |12         
+2          |2          
+ij> commit;
+ij> -- after commit, the next transaction should do a fetch again before doing
+-- any positioned update
+update t1 set c12=123 where current of jdk4;
+ERROR 24000: Invalid cursor state - no current row.
+ij> select * from t1;
+C11        |C12        
+-----------------------
+1          |12         
+2          |2          
+ij> next jdk4;
+C11        |C12        
+-----------------------
+2          |2          
+ij> update t1 set c12=23 where current of jdk4;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C11        |C12        
+-----------------------
+1          |12         
+2          |23         
+ij> close jdk4;
+ij> update t1 set c12=234 where current of jdk4;
+ERROR 42X30: Cursor 'JDK4' not found. Verify that autocommit is OFF.
+ij> select * from t1;
+C11        |C12        
+-----------------------
+1          |12         
+2          |23         
+ij> -- seventh test - try positioned delete with hold cursor
+get with hold cursor jdk4 as 'SELECT * FROM t1 FOR UPDATE';
+ij> -- following should give error because cursor is not positioned on any row
+delete from t1 where current of jdk4;
+ERROR XCL08: Cursor 'JDK4' is not on a row.
+ij> select * from t1;
+C11        |C12        
+-----------------------
+1          |12         
+2          |23         
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |12         
+ij> delete from  t1 where current of jdk4;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C11        |C12        
+-----------------------
+2          |23         
+ij> commit;
+ij> -- after commit, the next transaction should do a fetch again before doing
+-- any positioned delete
+delete from t1 where current of jdk4;
+ERROR 24000: Invalid cursor state - no current row.
+ij> select * from t1;
+C11        |C12        
+-----------------------
+2          |23         
+ij> next jdk4;
+C11        |C12        
+-----------------------
+2          |23         
+ij> delete from t1 where current of jdk4;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C11        |C12        
+-----------------------
+ij> close jdk4;
+ij> delete from t1 where current of jdk4;
+ERROR XCL07: Cursor 'JDK4' is closed. Verify that autocommit is OFF.
+ij> select * from t1;
+C11        |C12        
+-----------------------
+ij> -- populate the table for next test
+insert into t1 values(1,1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2,2);
+1 row inserted/updated/deleted
+ij> -- eighth test - scrollable cursors
+get scroll insensitive with hold cursor jdk4 as 'SELECT * FROM t1';
+ij> commit;
+ij> previous jdk4;
+No current row
+ij> after last jdk4;
+No current row
+ij> before first jdk4;
+No current row
+ij> first jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> last jdk4;
+C11        |C12        
+-----------------------
+2          |2          
+ij> next jdk4;
+No current row
+ij> previous jdk4;
+C11        |C12        
+-----------------------
+2          |2          
+ij> next jdk4;
+No current row
+ij> close jdk4;
+ij> first jdk4;
+IJ ERROR: Unable to establish cursor
+ij> -- ninth test - close the updateable holdable cursor after commit
+-- we get npe
+get with hold cursor jdk4 as 'SELECT * FROM T1 FOR UPDATE';
+ij> next jdk4;
+C11        |C12        
+-----------------------
+1          |1          
+ij> commit;
+ij> close jdk4;
+ij> -- tenth test - bug 4515 - have a more useful message
+-- update where current of fails in autocommit=true, held open cursor
+autocommit on;
+ij> get with hold cursor scrollCursor as 'select * from t1 for update of c12';
+ij> next scrollCursor;
+C11        |C12        
+-----------------------
+1          |1          
+ij> update t1 set c12=c12+1 where current of scrollCursor;
+ERROR 24000: Invalid cursor state - no current row.
+ij> 

@@ -1,0 +1,817 @@
+ij> --
+-- Test the builtin type 'bit'
+-- Specifically the base-16, hex bit literal
+-- stupid test of literals
+values(X'aAff');
+1   
+----
+aaff
+ij> -- casting to a for bit data type
+values (cast (x'ee' as char(2) for bit data));
+1   
+----
+ee20
+ij> values x'aAff' || (cast (x'ee' as char(2) for bit data));
+1       
+--------
+aaffee20
+ij> -- are the search conditions true?
+create table tab1 (c1 char(25));
+0 rows inserted/updated/deleted
+ij> insert into tab1 values 'search condition is true';
+1 row inserted/updated/deleted
+ij> select * from tab1 where ((X'1010' || X'0011' || X'0100') = X'101000110100');
+C1                       
+-------------------------
+search condition is true 
+ij> select * From tab1 where ((X'1010' || X'0011' || X'0100') = X'101000110100');
+C1                       
+-------------------------
+search condition is true 
+ij> select * from tab1 where (X'1100' > X'0011');
+C1                       
+-------------------------
+search condition is true 
+ij> drop table tab1;
+0 rows inserted/updated/deleted
+ij> -- simple negative test
+values(X'gg');
+ERROR 42X01: Syntax error: Encountered "\'gg\'" at line 2, column 9.
+ij> values(X'z');
+ERROR 42X01: Syntax error: Encountered "\'z\'" at line 1, column 9.
+ij> values(X'zz');
+ERROR 42X01: Syntax error: Encountered "\'zz\'" at line 1, column 9.
+ij> -- fails after bug 5742 is fixed
+values(X'9');
+ERROR 42606: An invalid hexadecimal constant starting with 'X'9'' has been detected.
+ij> -- some quick tests of the length function
+-- # bits in a string expression
+values({fn length(X'ab')} * 8);
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> values({fn length(X'11')} * 8);
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> -- # characters in a string expression
+values({fn length(X'ab')});
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> values({fn length(X'11')});
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> -- # octets in a string expression
+values({fn length(X'ab')});
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> values({fn length(X'11')});
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> -- stupid test for syntax
+create table t1 (b1 char for bit data, b2 char(2) for bit data, b3 varchar(2) for bit data, b4 LONG VARCHAR FOR BIT DATA,
+				b5 LONG VARCHAR FOR BIT DATA, b6 LONG VARCHAR FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (b1 char for bit data, b2 char(1) for bit data not null, b3 varchar(1) for bit data not null,
+				b4 LONG VARCHAR FOR BIT DATA not null, b5 LONG VARCHAR FOR BIT DATA not null,
+				b6 LONG VARCHAR FOR BIT DATA not null);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t (i int, s smallint, c char(10), v varchar(50),
+	d double precision, r real, b char (2) for bit data, bv varchar(8) for bit data,
+	lbv LONG VARCHAR FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> -- explicit null
+insert into t values (null, null, null, null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> -- implicit null
+insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> select b, bv, lbv from t;
+B   |BV              |LBV                                                                                                                             
+------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL|NULL            |NULL                                                                                                                            
+NULL|NULL            |NULL                                                                                                                            
+ij> -- sample data
+insert into t values (0, 100, 'hello', 'everyone is here', 200.0e0, 200.0e0, 
+			X'12af', X'0000111100001111', X'abc123');
+1 row inserted/updated/deleted
+ij> insert into t values (-1, -100, 'goodbye', 'everyone is there', -200.0e0, -200.0e0,
+			X'0000', X'', X'10101010');
+1 row inserted/updated/deleted
+ij> -- truncation -- should get an error
+insert into t (b, bv) values (X'ffffffff', X'ffffffff');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'ffffffff' to length 2.
+ij> select b, bv, lbv from t;
+B   |BV              |LBV                                                                                                                             
+------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL|NULL            |NULL                                                                                                                            
+NULL|NULL            |NULL                                                                                                                            
+12af|0000111100001111|abc123                                                                                                                          
+0000|                |10101010                                                                                                                        
+ij> -- padding -- will be warning, some day (not now)
+insert into t (b, bv) values (X'01', X'01');
+1 row inserted/updated/deleted
+ij> insert into t (b, bv) values (X'', X'');
+1 row inserted/updated/deleted
+ij> select b, bv from t;
+B   |BV              
+---------------------
+NULL|NULL            
+NULL|NULL            
+12af|0000111100001111
+0000|                
+0120|01              
+2020|                
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> --
+-- simple comparisons
+-- returns 1 if the search conditions are true
+-- 
+create table nulltab (b char(1) for bit data);
+0 rows inserted/updated/deleted
+ij> insert into nulltab values (null);
+1 row inserted/updated/deleted
+ij> select 1 from nulltab where X'0001' > X'0000';
+1          
+-----------
+1          
+ij> select 1 from nulltab where X'0100' > X'0001';
+1          
+-----------
+1          
+ij> select 1 from nulltab where X'ff00' > X'00ff';
+1          
+-----------
+1          
+ij> select 1 from nulltab where X'0100' > X'0100';
+1          
+-----------
+ij> select 1 from nulltab where X'0100' > b;
+1          
+-----------
+ij> select 1 from nulltab where X'0001' >= X'0000';
+1          
+-----------
+1          
+ij> select 1 from nulltab where X'0100' >= X'0001';
+1          
+-----------
+1          
+ij> select 1 from nulltab where X'ff00' >= X'00ff';
+1          
+-----------
+1          
+ij> select 1 from nulltab where X'0100' >= b;
+1          
+-----------
+ij> select 1 from nulltab where X'0001' < X'0000';
+1          
+-----------
+ij> select 1 from nulltab where X'0100' < X'0001';
+1          
+-----------
+ij> select 1 from nulltab where X'ff00' < X'00ff';
+1          
+-----------
+ij> select 1 from nulltab where X'0100' < b;
+1          
+-----------
+ij> select 1 from nulltab where X'0001' <= X'0000';
+1          
+-----------
+ij> select 1 from nulltab where X'0100' <= X'0001';
+1          
+-----------
+ij> select 1 from nulltab where X'ff00' <= X'00ff';
+1          
+-----------
+ij> select 1 from nulltab where X'0100' <= b;
+1          
+-----------
+ij> drop table nulltab;
+0 rows inserted/updated/deleted
+ij> --
+-- select comparisons
+--
+create table t (b10 char(20) for bit data, vb10 varchar(20) for bit data, b16 char(2) for bit data, vb16 varchar(2) for bit data, lbv LONG VARCHAR FOR BIT DATA, c20 char(20), cv20 varchar(20));
+0 rows inserted/updated/deleted
+ij> insert into t values (null, null, null, null, null, 'null', 'null columns');
+1 row inserted/updated/deleted
+ij> insert into t values (X'',  X'',  X'',  X'', X'', '0', 'zero length column');
+1 row inserted/updated/deleted
+ij> insert into t values (X'0000000001', X'0000000001', X'01', X'01', X'0000000001', '1', '1');
+1 row inserted/updated/deleted
+ij> insert into t values (X'0000000011', X'0000000011', X'03', X'03', X'03', '3', '3');
+1 row inserted/updated/deleted
+ij> insert into t values (X'1111111111', X'1111111111', X'ff', X'ff', X'1111111111', 'ff', 'ff');
+1 row inserted/updated/deleted
+ij> insert into t values (X'11', X'11', X'aa', X'aa', X'aa', 'aa', 'aa');
+1 row inserted/updated/deleted
+ij> -- make sure built-in functions work ok on binary types,
+-- it is a little special since it maps to an
+-- array.  use length to make sure it wont
+-- diff from run to run
+select {fn length(cast(b10 as char(10)))} from t where b10 is not null;
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+ij> select {fn length(cast(vb10 as char(10)))} from t where vb10 is not null;
+ERROR 42846: Cannot convert types 'VARCHAR () FOR BIT DATA' to 'CHAR'.
+ij> select {fn length(cast(lbv as char(10)))} from t where vb10 is not null;
+ERROR 42846: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'CHAR'.
+ij> select b10, c20, cv20 from t order by b10 asc;
+B10                                     |C20                 |CV20                
+----------------------------------------------------------------------------------
+0000000001202020202020202020202020202020|1                   |1                   
+0000000011202020202020202020202020202020|3                   |3                   
+1111111111202020202020202020202020202020|ff                  |ff                  
+1120202020202020202020202020202020202020|aa                  |aa                  
+2020202020202020202020202020202020202020|0                   |zero length column  
+NULL                                    |null                |null columns        
+ij> select b10, c20, cv20 from t order by b10 desc;
+B10                                     |C20                 |CV20                
+----------------------------------------------------------------------------------
+NULL                                    |null                |null columns        
+2020202020202020202020202020202020202020|0                   |zero length column  
+1120202020202020202020202020202020202020|aa                  |aa                  
+1111111111202020202020202020202020202020|ff                  |ff                  
+0000000011202020202020202020202020202020|3                   |3                   
+0000000001202020202020202020202020202020|1                   |1                   
+ij> select vb10, c20, cv20 from t order by vb10;
+VB10                                    |C20                 |CV20                
+----------------------------------------------------------------------------------
+                                        |0                   |zero length column  
+0000000001                              |1                   |1                   
+0000000011                              |3                   |3                   
+11                                      |aa                  |aa                  
+1111111111                              |ff                  |ff                  
+NULL                                    |null                |null columns        
+ij> select b16, c20, cv20 from t order by b16;
+B16 |C20                 |CV20                
+----------------------------------------------
+0120|1                   |1                   
+0320|3                   |3                   
+2020|0                   |zero length column  
+aa20|aa                  |aa                  
+ff20|ff                  |ff                  
+NULL|null                |null columns        
+ij> select vb16, c20, cv20 from t order by vb16;
+VB16|C20                 |CV20                
+----------------------------------------------
+    |0                   |zero length column  
+01  |1                   |1                   
+03  |3                   |3                   
+aa  |aa                  |aa                  
+ff  |ff                  |ff                  
+NULL|null                |null columns        
+ij> select vb16, c20, cv20, lbv from t order by lbv;
+VB16|C20                 |CV20                |LBV                                                                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    |0                   |zero length column  |                                                                                                                                
+01  |1                   |1                   |0000000001                                                                                                                      
+03  |3                   |3                   |03                                                                                                                              
+ff  |ff                  |ff                  |1111111111                                                                                                                      
+aa  |aa                  |aa                  |aa                                                                                                                              
+NULL|null                |null columns        |NULL                                                                                                                            
+ij> select b10 from t where b10 > X'0000000010';
+B10                                     
+----------------------------------------
+2020202020202020202020202020202020202020
+0000000011202020202020202020202020202020
+1111111111202020202020202020202020202020
+1120202020202020202020202020202020202020
+ij> select b10 from t where b10 < X'0000000010';
+B10                                     
+----------------------------------------
+0000000001202020202020202020202020202020
+ij> select b10 from t where b10 <= X'0000000011';
+B10                                     
+----------------------------------------
+0000000001202020202020202020202020202020
+0000000011202020202020202020202020202020
+ij> select b10 from t where b10 >= X'0000000011';
+B10                                     
+----------------------------------------
+2020202020202020202020202020202020202020
+0000000011202020202020202020202020202020
+1111111111202020202020202020202020202020
+1120202020202020202020202020202020202020
+ij> select b10 from t where b10 <> X'0000000011';
+B10                                     
+----------------------------------------
+2020202020202020202020202020202020202020
+0000000001202020202020202020202020202020
+1111111111202020202020202020202020202020
+1120202020202020202020202020202020202020
+ij> select vb10 from t where vb10 > X'0000000010';
+VB10                                    
+----------------------------------------
+0000000011                              
+1111111111                              
+11                                      
+ij> select vb10 from t where vb10 < X'0000000010';
+VB10                                    
+----------------------------------------
+0000000001                              
+ij> select vb10 from t where vb10 <= X'0000000011';
+VB10                                    
+----------------------------------------
+0000000001                              
+0000000011                              
+ij> select vb10 from t where vb10 >= X'0000000011';
+VB10                                    
+----------------------------------------
+0000000011                              
+1111111111                              
+11                                      
+ij> select vb10 from t where vb10 <> X'0000000011';
+VB10                                    
+----------------------------------------
+0000000001                              
+1111111111                              
+11                                      
+ij> select b16 from t where b16 > X'0000000010';
+B16 
+----
+2020
+0120
+0320
+ff20
+aa20
+ij> select b16 from t where b16 < X'0000000010';
+B16 
+----
+ij> select b16 from t where b16 <= X'0000000011';
+B16 
+----
+ij> select b16 from t where b16 >= X'0000000011';
+B16 
+----
+2020
+0120
+0320
+ff20
+aa20
+ij> select b16 from t where b16 <> X'0000000011';
+B16 
+----
+2020
+0120
+0320
+ff20
+aa20
+ij> select vb16 from t where vb16 > X'0000000010';
+VB16
+----
+01  
+03  
+ff  
+aa  
+ij> select vb16 from t where vb16 < X'0000000010';
+VB16
+----
+ij> select vb16 from t where vb16 <= X'0000000011';
+VB16
+----
+ij> select vb16 from t where vb16 >= X'0000000011';
+VB16
+----
+01  
+03  
+ff  
+aa  
+ij> select vb16 from t where vb16 <> X'0000000011';
+VB16
+----
+01  
+03  
+ff  
+aa  
+ij> select lbv from t where lbv > X'0000000010';
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CHAR () FOR BIT DATA' are not supported.
+ij> select lbv from t where lbv < X'0000000010';
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CHAR () FOR BIT DATA' are not supported.
+ij> select lbv from t where lbv <= X'0000000011';
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CHAR () FOR BIT DATA' are not supported.
+ij> select lbv from t where lbv >= X'0000000011';
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CHAR () FOR BIT DATA' are not supported.
+ij> select lbv from t where lbv <> X'0000000011';
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CHAR () FOR BIT DATA' are not supported.
+ij> select b10, vb10||X'11' from t where vb10||X'11' > b10;
+B10                                     |2                                         
+-----------------------------------------------------------------------------------
+ij> select b10, X'11'||vb10 from t where X'11'||vb10 > b10;
+B10                                     |2                                         
+-----------------------------------------------------------------------------------
+0000000001202020202020202020202020202020|110000000001                              
+0000000011202020202020202020202020202020|110000000011                              
+ij> select b16, vb16||X'11' from t where vb16||X'11' > b16;
+B16 |2     
+-----------
+ij> select b10 || vb10 from t;
+1                                                                               
+--------------------------------------------------------------------------------
+NULL                                                                            
+2020202020202020202020202020202020202020                                        
+00000000012020202020202020202020202020200000000001                              
+00000000112020202020202020202020202020200000000011                              
+11111111112020202020202020202020202020201111111111                              
+112020202020202020202020202020202020202011                                      
+ij> select lbv || b10 from t;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+2020202020202020202020202020202020202020                                                                                        
+00000000010000000001202020202020202020202020202020                                                                              
+030000000011202020202020202020202020202020                                                                                      
+11111111111111111111202020202020202020202020202020                                                                              
+aa1120202020202020202020202020202020202020                                                                                      
+ij> select b10 || lbv from t;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+2020202020202020202020202020202020202020                                                                                        
+00000000012020202020202020202020202020200000000001                                                                              
+000000001120202020202020202020202020202003                                                                                      
+11111111112020202020202020202020202020201111111111                                                                              
+1120202020202020202020202020202020202020aa                                                                                      
+ij> select lbv || vb10 from t;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+00000000010000000001                                                                                                            
+030000000011                                                                                                                    
+11111111111111111111                                                                                                            
+aa11                                                                                                                            
+ij> select vb10 || lbv from t;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+00000000010000000001                                                                                                            
+000000001103                                                                                                                    
+11111111111111111111                                                                                                            
+11aa                                                                                                                            
+ij> select t1.b10 from t t1, t t2 where t1.b10 > t2.b10;
+B10                                     
+----------------------------------------
+2020202020202020202020202020202020202020
+2020202020202020202020202020202020202020
+2020202020202020202020202020202020202020
+2020202020202020202020202020202020202020
+0000000011202020202020202020202020202020
+1111111111202020202020202020202020202020
+1111111111202020202020202020202020202020
+1120202020202020202020202020202020202020
+1120202020202020202020202020202020202020
+1120202020202020202020202020202020202020
+ij> -- FUNCTIONS
+-- some length functions
+select {fn length(b10)} from t;
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> select {fn length(vb10)} from t;
+ERROR 42846: Cannot convert types 'VARCHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> select {fn length(lbv)} from t;
+ERROR 42846: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'VARCHAR'.
+ij> select {fn length(c20)} from t;
+1          
+-----------
+4          
+1          
+1          
+1          
+2          
+2          
+ij> select {fn length(cv20)} from t;
+1          
+-----------
+12         
+18         
+1          
+1          
+2          
+2          
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -----------------------
+-- test normalization
+-----------------------
+create table t1 (c1 char(2) for bit data);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (X'0001');
+1 row inserted/updated/deleted
+ij> insert into t1 values (X'0010');
+1 row inserted/updated/deleted
+ij> insert into t1 values (X'0011');
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1  
+----
+0001
+0010
+0011
+ij> -- now insert something that needs to be expanded
+insert into t1 values (X'11');
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1  
+----
+0001
+0010
+0011
+1120
+ij> -- insert select, expand 1 byte
+create table t2 (c1 char(3) for bit data);
+0 rows inserted/updated/deleted
+ij> insert into t2 select c1 from t1;
+4 rows inserted/updated/deleted
+ij> select * from t2;
+C1    
+------
+000120
+001020
+001120
+112020
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- insert select, expand many bytes
+create table t2 (c1 char(20) for bit data);
+0 rows inserted/updated/deleted
+ij> insert into t2 select c1 from t1;
+4 rows inserted/updated/deleted
+ij> select * from t2;
+C1                                      
+----------------------------------------
+0001202020202020202020202020202020202020
+0010202020202020202020202020202020202020
+0011202020202020202020202020202020202020
+1120202020202020202020202020202020202020
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --
+-- some extra tests for truncation.  in 2.0
+create table t1 (b1 char(1) for bit data);
+0 rows inserted/updated/deleted
+ij> -- ok
+insert into t1 values (X'11');
+1 row inserted/updated/deleted
+ij> -- valid length
+insert into t1 values (X'10');
+1 row inserted/updated/deleted
+ij> insert into t1 values (X'11');
+1 row inserted/updated/deleted
+ij> -- truncation errors
+insert into t1 values (X'1000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '1000' to length 1.
+ij> insert into t1 values (X'100000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '100000' to length 1.
+ij> insert into t1 values (X'10000000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '10000000' to length 1.
+ij> insert into t1 values (X'1000000000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '1000000000' to length 1.
+ij> insert into t1 values (X'100001');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '100001' to length 1.
+ij> insert into t1 values (X'0001');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '0001' to length 1.
+ij> insert into t1 values (X'8001');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '8001' to length 1.
+ij> insert into t1 values (X'8000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '8000' to length 1.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (b9 char(2) for bit data);
+0 rows inserted/updated/deleted
+ij> -- ok
+insert into t1 values (X'1111');
+1 row inserted/updated/deleted
+ij> -- truncation errors
+insert into t1 values (X'111100');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '111100' to length 2.
+ij> insert into t1 values (X'11110000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '11110000' to length 2.
+ij> insert into t1 values (X'1111000000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '1111000000' to length 2.
+ij> insert into t1 values (X'1111111100000000');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '1111111100000000' to length 2.
+ij> insert into t1 values (X'1111111111');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '1111111111' to length 2.
+ij> insert into t1 values (X'11111111100001');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '11111111100001' to length 2.
+ij> insert into t1 values (X'0001');
+1 row inserted/updated/deleted
+ij> insert into t1 values (X'8001');
+1 row inserted/updated/deleted
+ij> insert into t1 values (X'8000');
+1 row inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- a few other conditions
+create table t1 (b3 char(2) for bit data, b7 char(4) for bit data, b8 char (5) for bit data, b15 char(8) for bit data, b16 char(9) for bit data);
+0 rows inserted/updated/deleted
+ij> -- ok
+insert into t1 values
+(
+		X'1111',
+		X'11111111',
+		X'1111111111',
+		X'1111111111111111',
+		X'111111111111111111'
+);
+1 row inserted/updated/deleted
+ij> -- ok
+insert into t1 values
+(
+		X'1110',
+		X'11111110',
+		X'11111111',
+		X'1111111111111110',
+		X'1111111111111111'
+);
+1 row inserted/updated/deleted
+ij> -- bad
+-- truncation error for column b8
+insert into t1 values
+(
+		null,
+		null,
+		X'111111111110',
+		null,
+		null
+);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '111111111110' to length 5.
+ij> -- truncation error for column b7
+insert into t1 values
+(
+		null,
+		X'1111111100',
+		null,
+		null,
+		null
+);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '1111111100' to length 4.
+ij> -- truncation error for column b7
+insert into t1 values
+(
+		null,
+		X'1111111111',
+		null,
+		null,
+		null
+);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '1111111111' to length 4.
+ij> -- truncation error for column b15
+insert into t1 values
+(
+		null,
+		null,
+		null,
+		X'111111111111111100',
+		null
+);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '111111111111111100' to length 8.
+ij> -- truncation error for column b15
+insert into t1 values
+(
+		null,
+		null,
+		null,
+		X'111111111111111111',
+		null
+);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '111111111111111111' to length 8.
+ij> -- truncation error for column b16
+insert into t1 values
+(
+		null,
+		null,
+		null,
+		null,
+		X'11111111111111111110'
+);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '11111111111111111110' to length 9.
+ij> AUTOCOMMIT OFF;
+ij> -- bug 5160 - incorrect typing of VALUES table constructor on an insert;
+create table iv (id int, vc varchar(12));
+0 rows inserted/updated/deleted
+ij> insert into iv values (1, 'abc'), (2, 'defghijk'), (3, 'lmnopqrstcc');
+3 rows inserted/updated/deleted
+ij> insert into iv values (4, null), (5, 'null ok?'), (6, '2blanks  ');
+3 rows inserted/updated/deleted
+ij> insert into iv values (7, 'dddd'), (8, '0123456789123'), (9, 'too long');
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR '0123456789123' to length 12.
+ij> select id, vc, {fn length(vc)} AS LEN from iv order by 1;
+ID         |VC          |LEN        
+------------------------------------
+1          |abc         |3          
+2          |defghijk    |8          
+3          |lmnopqrstcc |11         
+4          |NULL        |NULL       
+5          |null ok?    |8          
+6          |2blanks     |7          
+ij> -- the inner values must not be changed to VARCHAR as it is not the table constructor
+insert into iv select * from (values (10, 'pad'), (11, 'pad me'), (12, 'anakin jedi')) as t(i, c);
+3 rows inserted/updated/deleted
+ij> select id, vc, {fn length(vc)} AS LEN from iv order by 1;
+ID         |VC          |LEN        
+------------------------------------
+1          |abc         |3          
+2          |defghijk    |8          
+3          |lmnopqrstcc |11         
+4          |NULL        |NULL       
+5          |null ok?    |8          
+6          |2blanks     |7          
+10         |pad         |3          
+11         |pad me      |6          
+12         |anakin jedi |11         
+ij> -- check values outside of table constructors retain their CHARness
+select c, {fn length(c)} AS LEN from (values (1, 'abc'), (2, 'defghijk'), (3, 'lmnopqrstcc')) as t(i, c);
+C          |LEN        
+-----------------------
+abc        |3          
+defghijk   |8          
+lmnopqrstcc|11         
+ij> drop table iv;
+0 rows inserted/updated/deleted
+ij> create table bv (id int, vb varchar(16) for bit data);
+0 rows inserted/updated/deleted
+ij> insert into bv values (1, X'1a'), (2, X'cafebabe'), (3, null);
+3 rows inserted/updated/deleted
+ij> select id, vb, {fn length(vb)} AS LEN from bv order by 1;
+ERROR 42846: Cannot convert types 'VARCHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> drop table bv;
+0 rows inserted/updated/deleted
+ij> create table dv (id int, vc varchar(12));
+0 rows inserted/updated/deleted
+ij> -- beetle 5568
+-- should fail because DB2 doesn't allow this implicit casting to string
+insert into dv values (1, 1.2), (2, 34.5639), (3, null);
+ERROR 42X61: Types 'DECIMAL' and 'VARCHAR' are not UNION compatible.
+ij> -- should pass
+insert into dv values (1, '1.2'), (2, '34.5639'), (3, null);
+3 rows inserted/updated/deleted
+ij> select id, vc from dv order by 1;
+ID         |VC          
+------------------------
+1          |1.2         
+2          |34.5639     
+3          |NULL        
+ij> drop table dv;
+0 rows inserted/updated/deleted
+ij> -- bug 5306 -- incorrect padding of VALUES table constructor on an insert,
+-- when implicit casting (bit->char or char->bit) is used.
+-- 5306: Char -> For Bit Data Types
+create table bitTable (id int, bv LONG VARCHAR FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> insert into bitTable values (1, X'031'), (2, X'032'), (3, X'');
+ERROR 42606: An invalid hexadecimal constant starting with 'X'031'' has been detected.
+ij> insert into bitTable values (4, null), (5, X'033'), (6, X'2020');
+ERROR 42606: An invalid hexadecimal constant starting with 'X'033'' has been detected.
+ij> select id, bv, {fn length(bv)} as LEN from bitTable order by 1;
+ERROR 42846: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'VARCHAR'.
+ij> -- the inner values must not be changed to varying, as it is not the table constructor
+insert into bitTable select * from (values (10, 'pad'), (11, 'pad me'), (12, 'anakin jedi')) as t(i, c);
+ERROR 42821: Columns of type 'LONG VARCHAR FOR BIT DATA' cannot hold values of type 'CHAR'. 
+ij> select id, bv, {fn length(bv)} AS LEN from bitTable order by 1;
+ERROR 42846: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'VARCHAR'.
+ij> drop table bitTable;
+0 rows inserted/updated/deleted
+ij> -- 5306: Bit -> Char
+create table charTable (id int, cv long varchar);
+0 rows inserted/updated/deleted
+ij> insert into charTable values (1, x'0101'), (2, x'00101100101001'), (3, x'');
+ERROR 42821: Columns of type 'LONG VARCHAR' cannot hold values of type 'LONG VARCHAR FOR BIT DATA'. 
+ij> insert into charTable values (4, null), (5, x'1010101111'), (6, x'1000');
+ERROR 42X61: Types 'LONG VARCHAR' and 'LONG VARCHAR FOR BIT DATA' are not UNION compatible.
+ij> select id, cv, {fn length(cv)} as LEN from charTable order by 1;
+ID         |CV                                                                                                                              |LEN        
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- the inner values must not be changed to varying, as it is not the table constructor
+insert into charTable select * from (values (10, x'001010'), (11, x'01011010101111'), (12, x'0101010101000010100101110101')) as t(i, c);
+ERROR 42821: Columns of type 'LONG VARCHAR' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+ij> select id, cv, {fn length(cv)} AS LEN from charTable order by 1;
+ID         |CV                                                                                                                              |LEN        
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> drop table charTable;
+0 rows inserted/updated/deleted
+ij> -- Verify that 5306 still works with Union.
+create table pt5 (b5 char(2) for bit data);
+0 rows inserted/updated/deleted
+ij> create table pt10 (b10 char (4) for bit data);
+0 rows inserted/updated/deleted
+ij> insert into pt10 values (x'01000110');
+1 row inserted/updated/deleted
+ij> insert into pt5 values (x'1010');
+1 row inserted/updated/deleted
+ij> select {fn length(CM)} from (select b5 from pt5 union all select b10 from pt10) as t(CM);
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> drop table pt5;
+0 rows inserted/updated/deleted
+ij> drop table pt10;
+0 rows inserted/updated/deleted
+ij> -- beetle 5612
+create table t5612 (c1 char(10), c2 varchar(10), c3 long  varchar);
+0 rows inserted/updated/deleted
+ij> insert into t5612 values (X'00680069', X'00680069', X'00680069');
+ERROR 42821: Columns of type 'CHAR' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+ij> select * from t5612;
+C1        |C2        |C3                                                                                                                              
+------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> values cast(X'00680069' as char(30)), cast(X'00680069' as varchar(30)), cast(X'00680069' as long varchar);
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+ij> 

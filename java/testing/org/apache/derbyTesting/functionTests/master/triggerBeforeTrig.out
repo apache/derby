@@ -1,0 +1,103 @@
+ij> --
+-- Consolidated BEFORE trigger tests from all trigger tests.
+-- The following tests moved from TriggerValidate.sql to here.
+create table x (x int, constraint ck check (x > 0));
+0 rows inserted/updated/deleted
+ij> create table unrelated (x int, constraint ckunrelated check (x > 0));
+0 rows inserted/updated/deleted
+ij> create index x on x(x);
+0 rows inserted/updated/deleted
+ij> ------------------------------------
+-- DDL
+------------------------------------
+create trigger tbad NO CASCADE before insert on x for each statement mode db2sql drop table x;
+ERROR 42X01: Syntax error: Encountered "drop" at line 4, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql drop index x;
+ERROR 42X01: Syntax error: Encountered "drop" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql alter table x add column y int;
+ERROR 42X01: Syntax error: Encountered "alter" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql alter table x add constraint ck2 check(x > 0);
+ERROR 42X01: Syntax error: Encountered "alter" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql alter table x drop constraint ck;
+ERROR 42X01: Syntax error: Encountered "alter" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql create index x2 on x (x);
+ERROR 42X01: Syntax error: Encountered "create" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql create index xunrelated on unrelated(x);
+ERROR 42X01: Syntax error: Encountered "create" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql drop index xunrelated;
+ERROR 42X01: Syntax error: Encountered "drop" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql drop trigger tbad;
+ERROR 42X01: Syntax error: Encountered "drop" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql 
+	create trigger tbad2 NO CASCADE before insert on x for each statement mode db2sql values 1;
+ERROR 42X01: Syntax error: Encountered "create" at line 2, column 9.
+ij> create trigger tokv1 NO CASCADE before insert on x for each statement mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> insert into x values 1;
+1 row inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+1          
+ij> drop trigger tokv1;
+0 rows inserted/updated/deleted
+ij> ------------------------------------
+-- MISC
+------------------------------------
+create trigger tbad NO CASCADE before insert on x for each statement mode db2sql set isolation to rr;
+ERROR 42X01: Syntax error: Encountered "set" at line 4, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql lock table x in share mode;
+ERROR 42X01: Syntax error: Encountered "lock" at line 1, column 82.
+ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql 
+	call APP.SOMEPROC();
+ERROR 42X01: Syntax error: Encountered "call" at line 2, column 9.
+ij> ------------------------------------
+-- DML, cannot perform dml on same
+-- table for before trigger, of for
+-- after
+------------------------------------
+-- before
+create trigger tbadX NO CASCADE before insert on x for each statement mode db2sql insert into x values 1;
+ERROR 42Z9D: 'INSERT' statements are not allowed in 'BEFORE' triggers.
+ij> create trigger tbadX NO CASCADE before insert on x for each statement mode db2sql delete from x;
+ERROR 42Z9D: 'DELETE' statements are not allowed in 'BEFORE' triggers.
+ij> create trigger tbadX NO CASCADE before insert on x for each statement mode db2sql update x set x = x;
+ERROR 42Z9D: 'UPDATE' statements are not allowed in 'BEFORE' triggers.
+ij> -- Following tests moved here from triggerRefClause, since these use BEFORE triggers
+-- syntax
+create trigger t1 NO CASCADE before update on x referencing badtoken as oldtable for each row mode db2sql values 1;
+ERROR 42X01: Syntax error: Encountered "badtoken" at line 3, column 61.
+ij> create trigger t1 NO CASCADE before update on x referencing old as oldrow new for each row mode db2sql values 1;
+ERROR 42X01: Syntax error: Encountered "for" at line 1, column 79.
+ij> -- dup names
+create trigger t1 NO CASCADE before update on x referencing old as oldrow new as newrow old as oldrow2 
+	for each row mode db2sql values 1;
+ERROR 42Y93: Illegal REFERENCING clause: only one name is permitted for each type of transition variable/table.
+ij> create trigger t1 NO CASCADE before update on x referencing new as newrow new as newrow2 old as oldrow2 
+	for each row mode db2sql values 1;
+ERROR 42Y93: Illegal REFERENCING clause: only one name is permitted for each type of transition variable/table.
+ij> -- mismatch: row->for each statement mode db2sql, table->for each row
+create trigger t1 NO CASCADE before update on x referencing new_table as newtab for each row mode db2sql values 1;
+ERROR 42Y92: ROW triggers may only reference row transition variables/tables.
+ij> create trigger t1 NO CASCADE before update on x referencing new as newrow for each statement mode db2sql values 1;
+ERROR 42Y92: STATEMENT triggers may only reference table transition variables/tables.
+ij> -- same as above, but using old
+create trigger t1 NO CASCADE before update on x referencing old_table as old for each row mode db2sql select * from old;
+ERROR 42Y92: ROW triggers may only reference row transition variables/tables.
+ij> create trigger t1 NO CASCADE before update on x referencing old_table as old for each statement mode db2sql values old.x;
+ERROR 42Y92: BEFORE triggers may only reference row transition variables/tables.
+ij> -- old and new cannot be used once they have been redefined
+create trigger t1 NO CASCADE before update on x referencing old_table as oldtable for each statement mode db2sql select * from old;
+ERROR 42Y92: BEFORE triggers may only reference row transition variables/tables.
+ij> create trigger t1 NO CASCADE before update on x referencing old as oldtable for each row mode db2sql values old.x;
+ERROR 42X04: Column 'OLD.X' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLD.X' is not a column in the target table.
+ij> -- try some other likely uses
+create table y (x int);
+0 rows inserted/updated/deleted
+ij> create trigger t1 NO CASCADE before insert on x referencing new_table as newrowtab for each statement mode db2sql insert into y select x from newrowtab;
+ERROR 42Z9D: 'INSERT' statements are not allowed in 'BEFORE' triggers.
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> 

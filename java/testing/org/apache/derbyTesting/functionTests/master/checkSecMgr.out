@@ -1,0 +1,4 @@
+testIllegalPropertySet
+execute the procedure setting illegal property
+Expected Security Exception
+ERROR 38000: The exception 'java.security.AccessControlException: access denied (java.util.PropertyPermission notAllowed write)' was thrown while evaluating an expression. SQLSTATE: XJ001: Java exception: 'access denied (java.util.PropertyPermission notAllowed write): java.security.AccessControlException'.

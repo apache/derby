@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+
+<!-- ==================================================================== -->
+<!--                       Cloudscape build file                          -->
+<!-- ==================================================================== -->
+
+<project default="testing" basedir="../..">
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <property name="properties.dir" value="tools/ant/properties"/>
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <property file="${properties.dir}/parser.properties"/>
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="testing" 
+          description="Build Derby testing files">
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbcapi"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/tools"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/derbynet"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/master"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.suites.dir}"/> 
+  </target>
+
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
+</project>
+

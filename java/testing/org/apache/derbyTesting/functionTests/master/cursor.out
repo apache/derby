@@ -1,0 +1,58 @@
+Test cursor starting
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 1 row
+PASS: expected and got 1 row
+PASS: expected and got 1 row
+PASS: expected and got 1 row
+PASS: setup complete
+PASS: expected and got true
+Row: 1956,hello world                                       
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+Row: 1956,hello world                                       
+Row: 456,hi yourself                                       
+Row: 180,rubber ducky                                      
+Row: 3,you are the one                                   
+No current row
+PASS: cursor test complete
+PASS: expected and got true
+Row: 1956,hello world                                       
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+PASS: Attempt to get next on closed cursor caught
+PASS: cursor name set
+No current row
+PASS: cursor test complete
+Test cursor name for select * from t Cursor name = null
+cursor name = null
+Test cursor name for select * from t for update Cursor name = null
+cursor name = SQLCUR0
+Test cursor name for select * from t for update of i Cursor name = null
+cursor name = SQLCUR1
+Test cursor name for select * from t Cursor name = myselect
+cursor name = myselect
+Test cursor name for select * from t for update Cursor name = myselect
+cursor name = myselect
+Test cursor name for select * from t for update of i Cursor name = myselect
+cursor name = myselect
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: teardown complete
+PASS
+Test cursor finished

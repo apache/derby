@@ -1,0 +1,645 @@
+ij> --
+-- Test the arithmetic operators
+--
+create table t (i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into t values (null, null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 101);
+1 row inserted/updated/deleted
+ij> insert into t values (-2, -102);
+1 row inserted/updated/deleted
+ij> select i + j from t;
+1          
+-----------
+NULL       
+100        
+102        
+-104       
+ij> select i, i + 10 + 20, j, j + 100 + 200 from t;
+I          |2          |J          |4          
+-----------------------------------------------
+NULL       |NULL       |NULL       |NULL       
+0          |30         |100        |400        
+1          |31         |101        |401        
+-2         |28         |-102       |198        
+ij> select i - j, j - i from t;
+1          |2          
+-----------------------
+NULL       |NULL       
+-100       |100        
+-100       |100        
+100        |-100       
+ij> select i, i - 10 - 20, 20 - 10 - i, j, j - 100 - 200, 200 - 100 - j from t;
+I          |2          |3          |J          |5          |6          
+-----------------------------------------------------------------------
+NULL       |NULL       |NULL       |NULL       |NULL       |NULL       
+0          |-30        |10         |100        |-200       |0          
+1          |-29        |9          |101        |-199       |-1         
+-2         |-32        |12         |-102       |-402       |202        
+ij> select i, j, i * j, j * i from t;
+I          |J          |3          |4          
+-----------------------------------------------
+NULL       |NULL       |NULL       |NULL       
+0          |100        |0          |0          
+1          |101        |101        |101        
+-2         |-102       |204        |204        
+ij> select i, j, i * 10 * -20, j * 100 * -200 from t;
+I          |J          |3          |4          
+-----------------------------------------------
+NULL       |NULL       |NULL       |NULL       
+0          |100        |0          |-2000000   
+1          |101        |-200       |-2020000   
+-2         |-102       |400        |2040000    
+ij> -- try unary minus on some expressions
+select -i, -j, -(i * 10 * -20), -(j * 100 * -200) from t;
+1          |2          |3          |4          
+-----------------------------------------------
+NULL       |NULL       |NULL       |NULL       
+0          |-100       |0          |2000000    
+-1         |-101       |200        |2020000    
+2          |102        |-400       |-2040000   
+ij> -- unary plus doesn't do anything
+select +i, +j, +(+i * +10 * -20), +(+j * +100 * -200) from t;
+1          |2          |3          |4          
+-----------------------------------------------
+NULL       |NULL       |NULL       |NULL       
+0          |100        |0          |-2000000   
+1          |101        |-200       |-2020000   
+-2         |-102       |400        |2040000    
+ij> -- test null/null, constant/null, null/constant
+select i, j, i / j, 10 / j, j / 10 from t;
+I          |J          |3          |4          |5          
+-----------------------------------------------------------
+NULL       |NULL       |NULL       |NULL       |NULL       
+0          |100        |0          |0          |10         
+1          |101        |0          |0          |10         
+-2         |-102       |0          |0          |-10        
+ij> -- test for divide by 0
+select j / i from t;
+1          
+-----------
+NULL       
+ERROR 22012: Attempt to divide by zero.
+ij> select (j - 1) / (i + 4), 20 / 5 / 4, 20 / 4 / 5 from t;
+1          |2          |3          
+-----------------------------------
+NULL       |1          |1          
+24         |1          |1          
+20         |1          |1          
+-51        |1          |1          
+ij> -- test positive/negative, negative/positive and negative/negative
+select j, j / (0 - j), (0 - j) / j, (0 - j) / (0 - j) from t;
+J          |2          |3          |4          
+-----------------------------------------------
+NULL       |NULL       |NULL       |NULL       
+100        |-1         |-1         |1          
+101        |-1         |-1         |1          
+-102       |-1         |-1         |1          
+ij> -- test some "more complex" expressions
+select i, i + 10, i - (10 - 20), i - 10, i - (20 - 10) from t;
+I          |2          |3          |4          |5          
+-----------------------------------------------------------
+NULL       |NULL       |NULL       |NULL       |NULL       
+0          |10         |10         |-10        |-10        
+1          |11         |11         |-9         |-9         
+-2         |8          |8          |-12        |-12        
+ij> select 'The next 2 columns should agree', 2 + 3 * 4 + 5, 2 + (3 * 4) + 5 from t;
+1                              |2          |3          
+-------------------------------------------------------
+The next 2 columns should agree|19         |19         
+The next 2 columns should agree|19         |19         
+The next 2 columns should agree|19         |19         
+The next 2 columns should agree|19         |19         
+ij> select 'The next column should be 45', (2 + 3) * (4 + 5) from t;
+1                           |2          
+----------------------------------------
+The next column should be 45|45         
+The next column should be 45|45         
+The next column should be 45|45         
+The next column should be 45|45         
+ij> -- test overflow
+delete from t;
+4 rows inserted/updated/deleted
+ij> insert into t values (null, null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 101);
+1 row inserted/updated/deleted
+ij> select i + 2147483647 from t;
+1          
+-----------
+NULL       
+2147483647 
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> select i - 2147483647 - 1, 'This query should work' from t;
+1          |2                     
+----------------------------------
+NULL       |This query should work
+-2147483648|This query should work
+-2147483647|This query should work
+ij> select i - 2147483647 - 2, 'This query should fail' from t;
+1          |2                     
+----------------------------------
+NULL       |This query should fail
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> select j * 2147483647 from t;
+1          
+-----------
+NULL       
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> select j * -2147483647 from t;
+1          
+-----------
+NULL       
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> insert into t values (-2147483648, 0);
+1 row inserted/updated/deleted
+ij> select -i from t;
+1          
+-----------
+NULL       
+0          
+-1         
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> -- test the arithmetic operators on a type we know they don't work on
+create table s (x char(10), y char(10));
+0 rows inserted/updated/deleted
+ij> select x + y from s;
+ERROR 42Y95: The '+' operator with a left operand type of 'CHAR' and a right operand type of 'CHAR' is not supported.
+ij> select x - y from s;
+ERROR 42Y95: The '-' operator with a left operand type of 'CHAR' and a right operand type of 'CHAR' is not supported.
+ij> select x * y from s;
+ERROR 42Y95: The '*' operator with a left operand type of 'CHAR' and a right operand type of 'CHAR' is not supported.
+ij> select x / y from s;
+ERROR 42Y95: The '/' operator with a left operand type of 'CHAR' and a right operand type of 'CHAR' is not supported.
+ij> select -x from s;
+ERROR 42X37: The unary '-' operator is not allowed on the 'CHAR' type.
+ij> -- do the same thing with smallints
+-- except that integer constants are ints!
+create table smallint_t (i smallint, j smallint);
+0 rows inserted/updated/deleted
+ij> create table smallint_s (i smallint, j smallint);
+0 rows inserted/updated/deleted
+ij> insert into smallint_t values (null, null);
+1 row inserted/updated/deleted
+ij> insert into smallint_t values (0, 100);
+1 row inserted/updated/deleted
+ij> insert into smallint_t values (1, 101);
+1 row inserted/updated/deleted
+ij> insert into smallint_t values (-2, -102);
+1 row inserted/updated/deleted
+ij> select i + j from smallint_t;
+1     
+------
+NULL  
+100   
+102   
+-104  
+ij> select i, j, i + i + j, j + j + i from smallint_t;
+I     |J     |3     |4     
+---------------------------
+NULL  |NULL  |NULL  |NULL  
+0     |100   |100   |200   
+1     |101   |103   |203   
+-2    |-102  |-106  |-206  
+ij> select i - j, j - i from smallint_t;
+1     |2     
+-------------
+NULL  |NULL  
+-100  |100   
+-100  |100   
+100   |-100  
+ij> select i, i - j - j, j - j - i, j, j - i - i, i - i - j from smallint_t;
+I     |2     |3     |J     |5     |6     
+-----------------------------------------
+NULL  |NULL  |NULL  |NULL  |NULL  |NULL  
+0     |-200  |0     |100   |100   |-100  
+1     |-201  |-1    |101   |99    |-101  
+-2    |202   |2     |-102  |-98   |102   
+ij> select i, j, i * j, j * i from smallint_t;
+I     |J     |3     |4     
+---------------------------
+NULL  |NULL  |NULL  |NULL  
+0     |100   |0     |0     
+1     |101   |101   |101   
+-2    |-102  |204   |204   
+ij> select i, j, i * i * (i - j), j * i * (i - j) from smallint_t;
+I     |J     |3     |4     
+---------------------------
+NULL  |NULL  |NULL  |NULL  
+0     |100   |0     |0     
+1     |101   |-100  |-10100
+-2    |-102  |400   |20400 
+ij> select -i, -j, -(i * i * (i - j)), -(j * i * (i - j)) from smallint_t;
+1     |2     |3     |4     
+---------------------------
+NULL  |NULL  |NULL  |NULL  
+0     |-100  |0     |0     
+-1    |-101  |100   |10100 
+2     |102   |-400  |-20400
+ij> -- test for divide by 0
+select j / i from smallint_t;
+1     
+------
+NULL  
+ERROR 22012: Attempt to divide by zero.
+ij> -- test for overflow
+insert into smallint_s values (1, 32767);
+1 row inserted/updated/deleted
+ij> select i + j from smallint_s;
+1     
+------
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> select i - j - j from smallint_s;
+1     
+------
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> select j + j from smallint_s;
+1     
+------
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> select j * j from smallint_s;
+1     
+------
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> insert into smallint_s values (-32768, 0);
+1 row inserted/updated/deleted
+ij> select -i from smallint_s;
+1     
+------
+-1    
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> -- test mixed types: int and smallint
+create table smallint_r (y smallint);
+0 rows inserted/updated/deleted
+ij> insert into smallint_r values (2);
+1 row inserted/updated/deleted
+ij> select 65535 + y from smallint_r;
+1          
+-----------
+65537      
+ij> select y + 65535 from smallint_r;
+1          
+-----------
+65537      
+ij> select 65535 - y from smallint_r;
+1          
+-----------
+65533      
+ij> select y - 65535 from smallint_r;
+1          
+-----------
+-65533     
+ij> select 65535 * y from smallint_r;
+1          
+-----------
+131070     
+ij> select y * 65535 from smallint_r;
+1          
+-----------
+131070     
+ij> select 65535 / y from smallint_r;
+1          
+-----------
+32767      
+ij> select y / 65535 from smallint_r;
+1          
+-----------
+0          
+ij> -- do the same thing with bigints
+create table bigint_t (i bigint, j bigint);
+0 rows inserted/updated/deleted
+ij> create table bigint_s (i bigint, j bigint);
+0 rows inserted/updated/deleted
+ij> insert into bigint_t values (null, null);
+1 row inserted/updated/deleted
+ij> insert into bigint_t values (0, 100);
+1 row inserted/updated/deleted
+ij> insert into bigint_t values (1, 101);
+1 row inserted/updated/deleted
+ij> insert into bigint_t values (-2, -102);
+1 row inserted/updated/deleted
+ij> select i + j from bigint_t;
+1                   
+--------------------
+NULL                
+100                 
+102                 
+-104                
+ij> select i, j, i + i + j, j + j + i from bigint_t;
+I                   |J                   |3                   |4                   
+-----------------------------------------------------------------------------------
+NULL                |NULL                |NULL                |NULL                
+0                   |100                 |100                 |200                 
+1                   |101                 |103                 |203                 
+-2                  |-102                |-106                |-206                
+ij> select i - j, j - i from bigint_t;
+1                   |2                   
+-----------------------------------------
+NULL                |NULL                
+-100                |100                 
+-100                |100                 
+100                 |-100                
+ij> select i, i - j - j, j - j - i, j, j - i - i, i - i - j from bigint_t;
+I                   |2                   |3                   |J                   |5                   |6                   
+-----------------------------------------------------------------------------------------------------------------------------
+NULL                |NULL                |NULL                |NULL                |NULL                |NULL                
+0                   |-200                |0                   |100                 |100                 |-100                
+1                   |-201                |-1                  |101                 |99                  |-101                
+-2                  |202                 |2                   |-102                |-98                 |102                 
+ij> select i, j, i * j, j * i from bigint_t;
+I                   |J                   |3                   |4                   
+-----------------------------------------------------------------------------------
+NULL                |NULL                |NULL                |NULL                
+0                   |100                 |0                   |0                   
+1                   |101                 |101                 |101                 
+-2                  |-102                |204                 |204                 
+ij> select i, j, i * i * (i - j), j * i * (i - j) from bigint_t;
+I                   |J                   |3                   |4                   
+-----------------------------------------------------------------------------------
+NULL                |NULL                |NULL                |NULL                
+0                   |100                 |0                   |0                   
+1                   |101                 |-100                |-10100              
+-2                  |-102                |400                 |20400               
+ij> select -i, -j, -(i * i * (i - j)), -(j * i * (i - j)) from bigint_t;
+1                   |2                   |3                   |4                   
+-----------------------------------------------------------------------------------
+NULL                |NULL                |NULL                |NULL                
+0                   |-100                |0                   |0                   
+-1                  |-101                |100                 |10100               
+2                   |102                 |-400                |-20400              
+ij> -- test for divide by 0
+select j / i from bigint_t;
+1                   
+--------------------
+NULL                
+ERROR 22012: Attempt to divide by zero.
+ij> -- test for overflow
+insert into bigint_s values (1, 9223372036854775807);
+1 row inserted/updated/deleted
+ij> select i + j from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select i - j - j from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select j + j from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select j * j from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select 2 * (9223372036854775807 / 2 + 1) from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select -2 * (9223372036854775807 / 2 + 2) from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select 2 * (-9223372036854775808 / 2 - 1) from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select -2 * (-9223372036854775808 / 2 - 1) from bigint_s;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> insert into bigint_s values (-9223372036854775808, 0);
+1 row inserted/updated/deleted
+ij> select -i from bigint_s;
+1                   
+--------------------
+-1                  
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select -j from bigint_s;
+1                   
+--------------------
+-9223372036854775807
+0                   
+ij> select i / 2 * 2 + 1 from bigint_s;
+1                   
+--------------------
+1                   
+-9223372036854775807
+ij> select j / 2 * 2 from bigint_s;
+1                   
+--------------------
+9223372036854775806 
+0                   
+ij> -- test mixed types: int and bigint
+create table bigint_r (y bigint);
+0 rows inserted/updated/deleted
+ij> insert into bigint_r values (2);
+1 row inserted/updated/deleted
+ij> select 2147483647 + y from bigint_r;
+1                   
+--------------------
+2147483649          
+ij> select y + 2147483647 from bigint_r;
+1                   
+--------------------
+2147483649          
+ij> select 2147483647 - y from bigint_r;
+1                   
+--------------------
+2147483645          
+ij> select y - 2147483647 from bigint_r;
+1                   
+--------------------
+-2147483645         
+ij> select 2147483647 * y from bigint_r;
+1                   
+--------------------
+4294967294          
+ij> select y * 2147483647 from bigint_r;
+1                   
+--------------------
+4294967294          
+ij> select 2147483647 / y from bigint_r;
+1                   
+--------------------
+1073741823          
+ij> select y / 2147483647 from bigint_r;
+1                   
+--------------------
+0                   
+ij> -- test precedence and associativity
+create table r (x int);
+0 rows inserted/updated/deleted
+ij> insert into r values (1);
+1 row inserted/updated/deleted
+ij> select 2 + 3 * 4 from r;
+1          
+-----------
+14         
+ij> select (2 + 3) * 4 from r;
+1          
+-----------
+20         
+ij> select 3 * 4 + 2 from r;
+1          
+-----------
+14         
+ij> select 3 * (4 + 2) from r;
+1          
+-----------
+18         
+ij> select 2 - 3 * 4 from r;
+1          
+-----------
+-10        
+ij> select (2 - 3) * 4 from r;
+1          
+-----------
+-4         
+ij> select 3 * 4 - 2 from r;
+1          
+-----------
+10         
+ij> select 3 * (4 - 2) from r;
+1          
+-----------
+6          
+ij> select 4 + 3 / 2 from r;
+1          
+-----------
+5          
+ij> select (4 + 3) / 2 from r;
+1          
+-----------
+3          
+ij> select 3 / 2 + 4 from r;
+1          
+-----------
+5          
+ij> select 3 / (2 + 4) from r;
+1          
+-----------
+0          
+ij> select 4 - 3 / 2 from r;
+1          
+-----------
+3          
+ij> select (4 - 3) / 2 from r;
+1          
+-----------
+0          
+ij> -- + and - are of equal precedence, so they should be evaluated left to right
+-- The result is the same regardless of order of evaluation, so test it
+-- by causing an overflow.  The first test should get an overflow, and the
+-- second one shouldn't.
+select 1 + 2147483647 - 2 from r;
+1          
+-----------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> select 1 + (2147483647 - 2) from r;
+1          
+-----------
+2147483646 
+ij> select 4 * 3 / 2 from r;
+1          
+-----------
+6          
+ij> select 4 * (3 / 2) from r;
+1          
+-----------
+4          
+ij> -- Test associativity of unary - versus the binary operators
+select -1 + 2 from r;
+1          
+-----------
+1          
+ij> select -(1 + 2) from r;
+1          
+-----------
+-3         
+ij> select -1 - 2 from r;
+1          
+-----------
+-3         
+ij> select -(1 - 2) from r;
+1          
+-----------
+1          
+ij> -- The test the associativity of unary - with respect to binary *, we must
+-- use a trick.  The value -1073741824 is the minimum integer divided by 2.
+-- So, 1073741824 * 2 will overflow, but (-1073741824) * 2 will not (because
+-- of two's complement arithmetic.
+select -1073741824 * 2 from r;
+1          
+-----------
+-2147483648
+ij> select -(1073741824 * 2) from r;
+1          
+-----------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> -- This should not get an overflow
+select -2147483648 / 2 from r;
+1          
+-----------
+-1073741824
+ij> -- arithmetic on a numeric data type
+create table u (c1 int, c2 char(10));
+0 rows inserted/updated/deleted
+ij> insert into u (c2) values 'asdf';
+1 row inserted/updated/deleted
+ij> insert into u (c1) values null;
+1 row inserted/updated/deleted
+ij> insert into u (c1) values 1;
+1 row inserted/updated/deleted
+ij> insert into u (c1) values null;
+1 row inserted/updated/deleted
+ij> insert into u (c1) values 2;
+1 row inserted/updated/deleted
+ij> select c1 + c1 from u;
+1          
+-----------
+NULL       
+NULL       
+2          
+NULL       
+4          
+ij> select c1 / c1 from u;
+1          
+-----------
+NULL       
+NULL       
+1          
+NULL       
+1          
+ij> -- arithmetic between a numeric and a string data type fails
+select c1 + c2 from u;
+1          
+-----------
+ERROR 22018: Invalid character string format for type INTEGER.
+ij> -- clean up after ourselves
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> drop table r;
+0 rows inserted/updated/deleted
+ij> drop table u;
+0 rows inserted/updated/deleted
+ij> drop table smallint_t;
+0 rows inserted/updated/deleted
+ij> drop table smallint_s;
+0 rows inserted/updated/deleted
+ij> drop table smallint_r;
+0 rows inserted/updated/deleted
+ij> drop table bigint_t;
+0 rows inserted/updated/deleted
+ij> drop table bigint_s;
+0 rows inserted/updated/deleted
+ij> drop table bigint_r;
+0 rows inserted/updated/deleted
+ij> 

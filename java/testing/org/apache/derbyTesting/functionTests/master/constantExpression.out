@@ -1,0 +1,87 @@
+ij> -- tests for constant expression evaluation
+autocommit off;
+ij> -- create and populate a table
+create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1, 2, 3;
+3 rows inserted/updated/deleted
+ij> -- false constant expressions
+select * from t1 where 1 <> 1;
+C1         
+-----------
+ij> select * from t1 where 1 = 1 and 1 = 0;
+C1         
+-----------
+ij> select * from t1 where 1 = (2 + 3 - 2);
+C1         
+-----------
+ij> select * from t1 where (case when 1 = 1 then 0 else 1 end) = 1;
+C1         
+-----------
+ij> select * from t1 where 1 in (2, 3, 4);
+C1         
+-----------
+ij> select * from t1 where 1 between 2 and 3;
+C1         
+-----------
+ij> prepare p1 as 'select * from t1 where ? = 1';
+ij> prepare p2 as 'select * from t1 where cast(? as int) = 1';
+ij> execute p1 using 'values 0';
+C1         
+-----------
+ij> execute p2 using 'values 0';
+C1         
+-----------
+ij> -- true constant expressions
+select * from t1 where 1 = 1;
+C1         
+-----------
+1          
+2          
+3          
+ij> select * from t1 where 1 = 0 or 1 = 1;
+C1         
+-----------
+1          
+2          
+3          
+ij> select * from t1 where 1 + 2 = (2 + 3 - 2);
+C1         
+-----------
+1          
+2          
+3          
+ij> select * from t1 where (case when 1 = 1 then 1 else 0 end) = 1;
+C1         
+-----------
+1          
+2          
+3          
+ij> select * from t1 where 1 in (2, 3, 4, 4, 3, 2, 1);
+C1         
+-----------
+1          
+2          
+3          
+ij> select * from t1 where 1 + 1 between 0 and 3;
+C1         
+-----------
+1          
+2          
+3          
+ij> execute p1 using 'values 1';
+C1         
+-----------
+1          
+2          
+3          
+ij> execute p2 using 'values 1';
+C1         
+-----------
+1          
+2          
+3          
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> 

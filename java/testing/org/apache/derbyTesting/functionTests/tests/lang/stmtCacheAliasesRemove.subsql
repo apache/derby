@@ -1,0 +1,8 @@
+
+--
+-- this script de-registers the various consistency checks for
+-- statement caching
+--
+
+drop view SC_CONTENTS;
+

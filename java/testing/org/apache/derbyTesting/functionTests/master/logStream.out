@@ -1,0 +1,11 @@
+Start logStream
+derby.log exists ?       true
+derby.log is directory ? false
+derby.log has content ?  true
+SHUTDOWN Cloudscape
+SHUTDOWN :Derby system shutdown.
+derby.log exists ?       true
+derby.log is directory ? false
+derby.log has content ?  true
+deleted derby.log ?     true
+End logStream

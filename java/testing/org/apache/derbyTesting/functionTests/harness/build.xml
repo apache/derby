@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+
+<!-- ==================================================================== -->
+<!--                       Cloudscape build file                          -->
+<!-- ==================================================================== -->
+
+<project default="FTharness" basedir="../../../../../../.." >
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="${basedir}/tools/ant/properties" />
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <property file="${properties.dir}/parser.properties"/>
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+  <!-- derby testing specific properties files -->
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/harness"/>
+
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="FTharness" depends="init,compile,copyfiles"/>
+
+  <target name="init">
+    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/harness"/>
+  </target>
+
+  <target name="compile">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement location="${oro}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+        <include name="${this.dir}/*.java"/> 
+    </javac>
+  </target>
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/harness">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness/copyfiles.ant"/> 
+    </copy>
+  </target> 
+
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
+</project>
+

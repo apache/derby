@@ -1,0 +1,24 @@
+Creating table...
+done creating table and inserting data.
+Start holdable cursor after commit test
+do next() before commit
+look at first column's value: 1
+After commit, look at first column's value: 1
+do next() after commit. Should be at the end of resultset
+one more next() here will give no more rows
+Holdable cursor after commit test over
+Start hold cursor for prepared statements test
+do next() before commit
+look at first column's value: 1
+After commit, look at first column's value: 1
+do next() after commit. Should be at the end of resultset
+one more next() here will give no more rows
+Holdable cursor after commit for prepared statements test over
+Expected Exception:Table 'T1NOTTHERE' does not exist.
+Start hold cursor for callable statements test
+do next() before commit
+look at first column's value: 1
+After commit, look at first column's value: 1
+do next() after commit. Should be at the end of resultset
+one more next() here will give no more rows
+Holdable cursor after commit for callable statements test over

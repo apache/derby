@@ -1,0 +1,32 @@
+ij> driver 'org.apache.derby.jdbc.EmbeddedDriver';
+ij> connect 'jdbc:derby:wombat;create=true';
+ij> -- can we run a simple query?
+values 1;
+1          
+-----------
+1          
+ij> -- can we disconnect?
+disconnect;
+ij> -- can we reconnect?
+connect 'jdbc:derby:wombat;create=true';
+WARNING 01J01: Database 'wombat' not created, connection made to existing database instead.
+ij> -- can we run a simple query?
+values 1;
+1          
+-----------
+1          
+ij> disconnect;
+ij> -- do we get a non-internal error when we try to create
+-- over an existing directory? (T#674)
+connect 'jdbc:derby:wombat/seg0;create=true';
+ERROR XJ041: Failed to create database 'wombat/seg0', see the next exception for details.
+ERROR XBM0J: Directory DBLOCATION/seg0 already exists.
+ij> -- check to ensure an empty database name is taken
+-- as the name, over any connection attribute.
+-- this should fail.
+connect 'jdbc:derby: ;databaseName=wombat';
+ERROR XJ004: Database '' not found.
+ij> -- and this should succeed (no database name in URL)
+connect 'jdbc:derby:;databaseName=wombat';
+ij> disconnect;
+ij> 

@@ -1,0 +1,404 @@
+ij> -- This tests that SQL92 formally reserved words are now unreserved
+--
+-- INTERVAL
+create table interval(interval int);
+0 rows inserted/updated/deleted
+ij> prepare interval as 'select * from interval';
+ij> execute interval;
+INTERVAL   
+-----------
+ij> create index interval on interval(interval);
+0 rows inserted/updated/deleted
+ij> drop table interval;
+0 rows inserted/updated/deleted
+ij> remove interval;
+ij> -- MODULE
+create table module(module int);
+0 rows inserted/updated/deleted
+ij> prepare module as 'select * from module';
+ij> execute module;
+MODULE     
+-----------
+ij> create index module on module(module);
+0 rows inserted/updated/deleted
+ij> drop table module;
+0 rows inserted/updated/deleted
+ij> remove module;
+ij> -- NAMES
+create table names(names int);
+0 rows inserted/updated/deleted
+ij> prepare names as 'select * from names';
+ij> execute names;
+NAMES      
+-----------
+ij> create index names on names(names);
+0 rows inserted/updated/deleted
+ij> drop table names;
+0 rows inserted/updated/deleted
+ij> remove names;
+ij> -- PRECISION
+create table precision(precision int);
+0 rows inserted/updated/deleted
+ij> prepare precision as 'select * from precision';
+ij> execute precision;
+PRECISION  
+-----------
+ij> create index precision on precision(precision);
+0 rows inserted/updated/deleted
+ij> drop table precision;
+0 rows inserted/updated/deleted
+ij> remove precision;
+ij> -- POSITION
+create table position(position int);
+0 rows inserted/updated/deleted
+ij> prepare position as 'select * from position';
+ij> execute position;
+POSITION   
+-----------
+ij> create index position on position(position);
+0 rows inserted/updated/deleted
+ij> drop table position;
+0 rows inserted/updated/deleted
+ij> remove position;
+ij> -- SECTION
+create table section(section int);
+0 rows inserted/updated/deleted
+ij> prepare section as 'select * from section';
+ij> execute section;
+SECTION    
+-----------
+ij> create index section on section(section);
+0 rows inserted/updated/deleted
+ij> drop table section;
+0 rows inserted/updated/deleted
+ij> remove section;
+ij> -- VALUE
+create table value(value int);
+0 rows inserted/updated/deleted
+ij> prepare value as 'select * from value';
+ij> execute value;
+VALUE      
+-----------
+ij> create index value on value(value);
+0 rows inserted/updated/deleted
+ij> drop table value;
+0 rows inserted/updated/deleted
+ij> remove value;
+ij> -- DATE
+create table date (date date);
+0 rows inserted/updated/deleted
+ij> insert into date(date) values (date('2001-01-01'));
+1 row inserted/updated/deleted
+ij> select date from date;
+DATE      
+----------
+2001-01-01
+ij> select date( '2001-02-02'), date "2001-02-02" from date;
+1         |2001-02-02
+---------------------
+2001-02-02|2001-01-01
+ij> select date date from date;
+DATE      
+----------
+2001-01-01
+ij> select date as date from date;
+DATE      
+----------
+2001-01-01
+ij> select date.date as date from date date;
+DATE      
+----------
+2001-01-01
+ij> select date.date as date from date as date;
+DATE      
+----------
+2001-01-01
+ij> delete from date where date = date('2001-01-01');
+1 row inserted/updated/deleted
+ij> create index date on date(date);
+0 rows inserted/updated/deleted
+ij> drop table date;
+0 rows inserted/updated/deleted
+ij> remove date;
+IJ ERROR: Unable to establish prepared statement DATE
+ij> -- TIME
+create table time (time time);
+0 rows inserted/updated/deleted
+ij> insert into time(time) values (time('01:01:01'));
+1 row inserted/updated/deleted
+ij> select time from time;
+TIME    
+--------
+01:01:01
+ij> select time( '02:02:02'), time "02:02:02" from time;
+1       |02:02:02
+-----------------
+02:02:02|01:01:01
+ij> select time time from time;
+TIME    
+--------
+01:01:01
+ij> select time as time from time;
+TIME    
+--------
+01:01:01
+ij> select time.time as time from time time;
+TIME    
+--------
+01:01:01
+ij> select time.time as time from time as time;
+TIME    
+--------
+01:01:01
+ij> delete from time where time = time('01:01:01');
+1 row inserted/updated/deleted
+ij> create index time on time(time);
+0 rows inserted/updated/deleted
+ij> drop table time;
+0 rows inserted/updated/deleted
+ij> remove time;
+IJ ERROR: Unable to establish prepared statement TIME
+ij> -- TIMESTAMP
+create table timestamp (timestamp timestamp);
+0 rows inserted/updated/deleted
+ij> insert into timestamp(timestamp) values (timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx'));
+1 row inserted/updated/deleted
+ij> select timestamp from timestamp;
+TIMESTAMP                 
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select timestamp( 'xxxxxxFILTERED-TIMESTAMPxxxxx'), timestamp "xxxxxxFILTERED-TIMESTAMPxxxxx" from timestamp;
+1                         |xxxxxxFILTERED-TIMESTAMPxxxxx
+-----------------------------------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx|xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select timestamp timestamp from timestamp;
+TIMESTAMP                 
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select timestamp as timestamp from timestamp;
+TIMESTAMP                 
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select timestamp.timestamp as timestamp from timestamp timestamp;
+TIMESTAMP                 
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select timestamp.timestamp as timestamp from timestamp as timestamp;
+TIMESTAMP                 
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> delete from timestamp where timestamp = timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx');
+1 row inserted/updated/deleted
+ij> create index timestamp on timestamp(timestamp);
+0 rows inserted/updated/deleted
+ij> drop table timestamp;
+0 rows inserted/updated/deleted
+ij> remove timestamp;
+IJ ERROR: Unable to establish prepared statement TIMESTAMP
+ij> -- 
+create table DOMAIN (domain int);
+0 rows inserted/updated/deleted
+ij> insert into domain values (1);
+1 row inserted/updated/deleted
+ij> select domain from domain where domain > 0;
+DOMAIN     
+-----------
+1          
+ij> select domain from domain domain where domain > 0;
+DOMAIN     
+-----------
+1          
+ij> select domain.domain from domain domain where domain.domain > 0;
+DOMAIN     
+-----------
+1          
+ij> prepare domain as 'select * from domain';
+ij> execute domain;
+DOMAIN     
+-----------
+1          
+ij> create index domain on domain(domain);
+0 rows inserted/updated/deleted
+ij> drop table DOMAIN;
+0 rows inserted/updated/deleted
+ij> remove domain;
+ij> create table CATALOG (catalog int);
+0 rows inserted/updated/deleted
+ij> insert into catalog values (1);
+1 row inserted/updated/deleted
+ij> select catalog from catalog where catalog > 0;
+CATALOG    
+-----------
+1          
+ij> select catalog from catalog catalog where catalog > 0;
+CATALOG    
+-----------
+1          
+ij> prepare catalog as 'select * from catalog';
+ij> execute catalog;
+CATALOG    
+-----------
+1          
+ij> create index catalog on catalog(catalog);
+0 rows inserted/updated/deleted
+ij> drop table CATALOG;
+0 rows inserted/updated/deleted
+ij> remove catalog;
+ij> create table TIME (time int);
+0 rows inserted/updated/deleted
+ij> insert into time values (1);
+1 row inserted/updated/deleted
+ij> select time from time where time > 0;
+TIME       
+-----------
+1          
+ij> select time from time time where time > 0;
+TIME       
+-----------
+1          
+ij> prepare time as 'select * from time';
+ij> execute time;
+TIME       
+-----------
+1          
+ij> create index time on time(time);
+0 rows inserted/updated/deleted
+ij> drop table TIME;
+0 rows inserted/updated/deleted
+ij> remove time;
+ij> create table ACTION (action int);
+0 rows inserted/updated/deleted
+ij> insert into action values (1);
+1 row inserted/updated/deleted
+ij> select action from action where action > 0;
+ACTION     
+-----------
+1          
+ij> select action from action action where action > 0;
+ACTION     
+-----------
+1          
+ij> prepare action as 'select * from action';
+ij> create index action on action(action);
+0 rows inserted/updated/deleted
+ij> drop table ACTION;
+0 rows inserted/updated/deleted
+ij> create table DAY (day int);
+0 rows inserted/updated/deleted
+ij> insert into day values (1);
+1 row inserted/updated/deleted
+ij> select day from day where day > 0;
+DAY        
+-----------
+1          
+ij> select day from day day where day > 0;
+DAY        
+-----------
+1          
+ij> prepare day as 'select * from day';
+ij> create index day on day(day);
+0 rows inserted/updated/deleted
+ij> drop table DAY;
+0 rows inserted/updated/deleted
+ij> create table MONTH (month int);
+0 rows inserted/updated/deleted
+ij> insert into month values (1);
+1 row inserted/updated/deleted
+ij> select month from month where month > 0;
+MONTH      
+-----------
+1          
+ij> select month from month month where month > 0;
+MONTH      
+-----------
+1          
+ij> select month.month from month month where month.month > 0;
+MONTH      
+-----------
+1          
+ij> prepare month as 'select * from month';
+ij> execute month;
+MONTH      
+-----------
+1          
+ij> create index month on month(month);
+0 rows inserted/updated/deleted
+ij> drop table MONTH;
+0 rows inserted/updated/deleted
+ij> remove month;
+ij> create table USAGE (usage int);
+0 rows inserted/updated/deleted
+ij> insert into usage values (1);
+1 row inserted/updated/deleted
+ij> select usage from usage where usage > 0;
+USAGE      
+-----------
+1          
+ij> select usage from usage usage where usage > 0;
+USAGE      
+-----------
+1          
+ij> select usage.usage from usage usage where usage.usage > 0;
+USAGE      
+-----------
+1          
+ij> prepare usage as 'select * from usage';
+ij> create index usage on usage(usage);
+0 rows inserted/updated/deleted
+ij> drop table USAGE;
+0 rows inserted/updated/deleted
+ij> remove usage;
+ij> create table LANGUAGE (language int);
+0 rows inserted/updated/deleted
+ij> insert into language values (1);
+1 row inserted/updated/deleted
+ij> select language from language where language > 0;
+LANGUAGE   
+-----------
+1          
+ij> select language from language language where language > 0;
+LANGUAGE   
+-----------
+1          
+ij> select language.language from language language where language.language > 0;
+LANGUAGE   
+-----------
+1          
+ij> prepare language as 'select * from language';
+ij> create index language on language(language);
+0 rows inserted/updated/deleted
+ij> drop table LANGUAGE;
+0 rows inserted/updated/deleted
+ij> remove language;
+ij> -- making LOCKS keyword nonreserved as fix for Derby-38
+create table LOCKS (c11 int);
+0 rows inserted/updated/deleted
+ij> drop table LOCKS;
+0 rows inserted/updated/deleted
+ij> create table t1 (LOCKS int);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table LOCKS (locks int);
+0 rows inserted/updated/deleted
+ij> insert into locks values (1);
+1 row inserted/updated/deleted
+ij> select locks from locks where locks > 0;
+LOCKS      
+-----------
+1          
+ij> select locks from locks locks where locks > 0;
+LOCKS      
+-----------
+1          
+ij> select locks.locks from locks locks where locks.locks > 0;
+LOCKS      
+-----------
+1          
+ij> prepare locks as 'select * from locks';
+ij> create index locks on locks(locks);
+0 rows inserted/updated/deleted
+ij> drop table LOCKS;
+0 rows inserted/updated/deleted
+ij> remove locks;
+ij> 

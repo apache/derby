@@ -1,0 +1,899 @@
+ij> -- order by tests
+-- in V52, we allow "select a from t order by b" where the ORDERBY column doesn't necessarily appear in the SELECT list.
+autocommit off;
+ij> -- . order by on values
+values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 1,2,3;
+1          |2          |3          
+-----------------------------------
+0          |0          |1          
+0          |1          |0          
+1          |0          |0          
+1          |0          |1          
+ij> values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 1,3;
+1          |2          |3          
+-----------------------------------
+0          |1          |0          
+0          |0          |1          
+1          |0          |0          
+1          |0          |1          
+ij> values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 2,1;
+1          |2          |3          
+-----------------------------------
+0          |0          |1          
+1          |0          |0          
+1          |0          |1          
+0          |1          |0          
+ij> values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 2;
+1          |2          |3          
+-----------------------------------
+0          |0          |1          
+1          |0          |0          
+1          |0          |1          
+0          |1          |0          
+ij> -- . order by on position < 1, > range (error)
+values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 0;
+ERROR 42X77: Column position '0' is out of range for the query expression.
+ij> values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 4;
+ERROR 42X77: Column position '4' is out of range for the query expression.
+ij> -- . order by doesn't see generated names
+values (1,0,1),(1,0,0),(0,0,1),(0,1,0);
+1          |2          |3          
+-----------------------------------
+1          |0          |1          
+1          |0          |0          
+0          |0          |1          
+0          |1          |0          
+ij> values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by "SQLCol1";
+ERROR 42X78: Column 'SQLCol1' is not in the result of the query expression.
+ij> values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by "SQLCol2";
+ERROR 42X78: Column 'SQLCol2' is not in the result of the query expression.
+ij> values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 1,1,2,3;
+1          |2          |3          
+-----------------------------------
+0          |0          |1          
+0          |1          |0          
+1          |0          |0          
+1          |0          |1          
+ij> -- rollback should release the prepared statements
+rollback;
+ij> -- . order by on select
+-- . order by with duplicate rows in source
+set schema app;
+0 rows inserted/updated/deleted
+ij> create table obt (i int, v varchar(40));
+0 rows inserted/updated/deleted
+ij> insert into obt (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into obt values (1, 'hello');
+1 row inserted/updated/deleted
+ij> insert into obt values (2, 'planet');
+1 row inserted/updated/deleted
+ij> insert into obt values (1, 'world');
+1 row inserted/updated/deleted
+ij> insert into obt values (3, 'hello');
+1 row inserted/updated/deleted
+ij> -- save the data we've created
+commit;
+ij> select * from obt order by i;
+I          |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> select * from obt order by v;
+I          |V                                       
+----------------------------------------------------
+3          |hello                                   
+1          |hello                                   
+2          |planet                                  
+1          |world                                   
+NULL       |NULL                                    
+ij> -- . order by all select columns
+select * from obt order by i,v;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+1          |world                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> select * from obt order by v,i;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+3          |hello                                   
+2          |planet                                  
+1          |world                                   
+NULL       |NULL                                    
+ij> -- . order by asc/desc mix
+select * from obt order by v desc, i asc;
+I          |V                                       
+----------------------------------------------------
+NULL       |NULL                                    
+1          |world                                   
+2          |planet                                  
+1          |hello                                   
+3          |hello                                   
+ij> -- reverse prior order
+select * from obt order by i asc, v desc;
+I          |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> -- . order by with duplicates but different asc/desc attributes (ok)
+select * from obt order by i asc, i desc;
+I          |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> select * from obt order by i, v, i;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+1          |world                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> select v from obt order by i, v, i;
+V                                       
+----------------------------------------
+hello                                   
+world                                   
+planet                                  
+hello                                   
+NULL                                    
+ij> select v from obt order by i desc, v, i;
+V                                       
+----------------------------------------
+NULL                                    
+hello                                   
+planet                                  
+hello                                   
+world                                   
+ij> -- . order by on position < 1, > range (error)
+select * from obt order by 1, 0;
+ERROR 42X77: Column position '0' is out of range for the query expression.
+ij> select * from obt order by 1,2,3,4,5,6,7,8,9;
+ERROR 42X77: Column position '3' is out of range for the query expression.
+ij> select * from obt order by 32767;
+ERROR 42X77: Column position '32767' is out of range for the query expression.
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- . order by on union all
+create table obt2 (i2 int, v varchar(40));
+0 rows inserted/updated/deleted
+ij> insert into obt2 values (3, 'hello'), (4, 'planet'), (1, 'shoe'), (3, 'planet');
+4 rows inserted/updated/deleted
+ij> -- save the data we've created
+commit ;
+ij> select * from obt union all select * from obt2 order by v;
+1          |V                                       
+----------------------------------------------------
+3          |hello                                   
+3          |hello                                   
+1          |hello                                   
+3          |planet                                  
+4          |planet                                  
+2          |planet                                  
+1          |shoe                                    
+1          |world                                   
+NULL       |NULL                                    
+ij> select * from obt union all select * from obt order by i;
+I          |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+2          |planet                                  
+3          |hello                                   
+3          |hello                                   
+NULL       |NULL                                    
+NULL       |NULL                                    
+ij> select * from obt union all select * from obt order by i, i;
+I          |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+2          |planet                                  
+3          |hello                                   
+3          |hello                                   
+NULL       |NULL                                    
+NULL       |NULL                                    
+ij> -- . order by on union with differing column names on sources. Error
+select * from obt union all select * from obt2 order by i;
+ERROR 42X78: Column 'I' is not in the result of the query expression.
+ij> select * from obt union all values (1,'hello') order by i;
+ERROR 42X78: Column 'I' is not in the result of the query expression.
+ij> values (1,'hello') union all select * from obt order by i;
+ERROR 42X78: Column 'I' is not in the result of the query expression.
+ij> -- . order by can not see generated names, though OK by position
+values (1,'hello') union all select * from obt;
+1          |2                                       
+----------------------------------------------------
+1          |hello                                   
+NULL       |NULL                                    
+1          |hello                                   
+2          |planet                                  
+1          |world                                   
+3          |hello                                   
+ij> values (1,'hello') union all select * from obt order by "SQLCol1";
+ERROR 42X78: Column 'SQLCol1' is not in the result of the query expression.
+ij> values (1,'hello') union all select * from obt order by 1;
+1          |2                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> values (1,'hello') union all select * from obt order by 1, 1;
+1          |2                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> select i from obt union all values (1) order by 1;
+1          
+-----------
+1          
+1          
+1          
+2          
+3          
+NULL       
+ij> -- sees noname on both sides although second side is named
+values (1) union all select i from obt order by i;
+ERROR 42X78: Column 'I' is not in the result of the query expression.
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- i2's name is hidden by obt, fails
+select * from obt union all select * from obt2 order by i2;
+ERROR 42X78: Column 'I2' is not in the result of the query expression.
+ij> -- . order by position/name mix
+select * from obt order by 1,i;
+I          |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> select * from obt order by 1,v;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+1          |world                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> -- . order by with duplicate positions
+select * from obt order by 1,2,1;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+1          |world                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> -- . order by with duplicate names
+select * from obt order by v,i,v;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+3          |hello                                   
+2          |planet                                  
+1          |world                                   
+NULL       |NULL                                    
+ij> -- . order by name gets select name, not underlying name
+select i as i2, v from obt order by i2;
+I2         |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> -- error, i is not seen by order by
+select i as i2, v from obt order by i;
+I2         |V                                       
+----------------------------------------------------
+1          |world                                   
+1          |hello                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- . order without by (error)
+select i, v from obt order i;
+ERROR 42X01: Syntax error: Encountered "i" at line 2, column 28.
+ij> select i, v from obt by i;
+ERROR 42X01: Syntax error: Encountered "by" at line 1, column 22.
+ij> -- . show order, by are reserved keywords
+select order from obt;
+ERROR 42X01: Syntax error: Encountered "order" at line 2, column 8.
+ij> select by from obt;
+ERROR 42X01: Syntax error: Encountered "by" at line 1, column 8.
+ij> -- . order by on column not in query (error)
+select i from obt order by c;
+ERROR 42X04: Column 'C' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C' is not a column in the target table.
+ij> -- . order by on column not in select, in table (error)
+select i from obt order by v;
+I          
+-----------
+3          
+1          
+2          
+1          
+NULL       
+ij> -- . order by on expression (not allowed)
+select i from obt order by i+1;
+ERROR 42X01: Syntax error: Encountered "+" at line 2, column 29.
+ij> -- . order by on qualified column name, incorrect correlation name (not allowed)
+select i from obt t order by obt.i;
+ERROR 42X04: Column 'OBT.I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OBT.I' is not a column in the target table.
+ij> -- . order by on qualified column name, incorrect column name (not allowed)
+select i from obt t order by obt.notexists;
+ERROR 42X04: Column 'OBT.NOTEXISTS' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OBT.NOTEXISTS' is not a column in the target table.
+ij> -- . order by on qualified column name
+create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t2(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t3(c3 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 2, 1;
+2 rows inserted/updated/deleted
+ij> insert into t2 values 4, 3;
+2 rows inserted/updated/deleted
+ij> insert into t3 values 6, 5;
+2 rows inserted/updated/deleted
+ij> select t1.c1, t2.c1 from t1, t2 order by t1.c1;
+C1         |C1         
+-----------------------
+1          |3          
+1          |4          
+2          |3          
+2          |4          
+ij> select t1.c1, t2.c1 from t1, t2 order by t2.c1;
+C1         |C1         
+-----------------------
+1          |3          
+2          |3          
+1          |4          
+2          |4          
+ij> select t1.c1, t2.c1 from t1, t1 t2 order by t2.c1;
+C1         |C1         
+-----------------------
+1          |1          
+2          |1          
+1          |2          
+2          |2          
+ij> select t1.c1, t2.c1 from t1, t1 t2 order by t1.c1;
+C1         |C1         
+-----------------------
+1          |1          
+1          |2          
+2          |1          
+2          |2          
+ij> -- bug 5716 - qualified column name not allowed in order by when union/union all is used - following 4 test cases for that
+select c1 from t1 union select c3 as c1 from t3 order by t1.c1;
+ERROR 42877: A qualified column name 'T1.C1' is not allowed in the ORDER BY clause.
+ij> select * from obt union all select * from obt2 order by obt.v;
+ERROR 42877: A qualified column name 'OBT.V' is not allowed in the ORDER BY clause.
+ij> select * from obt union all select * from obt2 order by obt2.v;
+ERROR 42877: A qualified column name 'OBT2.V' is not allowed in the ORDER BY clause.
+ij> select * from obt union all select * from obt2 order by abc.v;
+ERROR 42877: A qualified column name 'ABC.V' is not allowed in the ORDER BY clause.
+ij> select * from t1 inner join t2 on 1=1 order by t1.c1;
+C1         |C1         
+-----------------------
+1          |3          
+1          |4          
+2          |3          
+2          |4          
+ij> select * from t1 inner join t2 on 1=1 order by t2.c1;
+C1         |C1         
+-----------------------
+1          |3          
+2          |3          
+1          |4          
+2          |4          
+ij> select c1 from t1 order by app.t1.c1;
+C1         
+-----------
+1          
+2          
+ij> select c1 from app.t1 order by app.t1.c1;
+C1         
+-----------
+1          
+2          
+ij> select c1 from app.t1 order by t1.c1;
+C1         
+-----------
+1          
+2          
+ij> select c1 from app.t1 order by c1;
+C1         
+-----------
+1          
+2          
+ij> select c1 from app.t1 c order by c1;
+C1         
+-----------
+1          
+2          
+ij> select c1 from app.t1 c order by c.c1;
+C1         
+-----------
+1          
+2          
+ij> select c1 from t1 order by c1;
+C1         
+-----------
+1          
+2          
+ij> -- negative
+-- shouldn't find exposed name
+select c1 from t1 union select c3 from t3 order by t3.c3;
+ERROR 42877: A qualified column name 'T3.C3' is not allowed in the ORDER BY clause.
+ij> select c1 from t1 union select c3 from t3 order by asdf.c3;
+ERROR 42877: A qualified column name 'ASDF.C3' is not allowed in the ORDER BY clause.
+ij> select c1 from t1 order by sys.t1.c1;
+ERROR 42X10: 'SYS.T1' is not an exposed table name in the scope in which it appears.
+ij> select c1 from app.t1 order by sys.t1.c1;
+ERROR 42X04: Column 'SYS.T1.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SYS.T1.C1' is not a column in the target table.
+ij> select c1 from t1 c order by app.c.c1;
+ERROR 42X10: 'APP.C' is not an exposed table name in the scope in which it appears.
+ij> select c1 from app.t1 c order by app.t1.c1;
+ERROR 42X04: Column 'APP.T1.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'APP.T1.C1' is not a column in the target table.
+ij> -- a is not a column in t1
+select 1 as a from t1 order by t1.a;
+ERROR 42X04: Column 'T1.A' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T1.A' is not a column in the target table.
+ij> -- t3.c1 does not exist
+select * from t1, t3 order by t3.c1;
+ERROR 42X04: Column 'T3.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T3.C1' is not a column in the target table.
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- . order by on join
+select obt.i, obt2.i2+1, obt2.v from obt, obt2 order by 2, 3;
+I          |2          |V                                       
+----------------------------------------------------------------
+3          |2          |shoe                                    
+1          |2          |shoe                                    
+2          |2          |shoe                                    
+1          |2          |shoe                                    
+NULL       |2          |shoe                                    
+3          |4          |hello                                   
+1          |4          |hello                                   
+2          |4          |hello                                   
+1          |4          |hello                                   
+NULL       |4          |hello                                   
+3          |4          |planet                                  
+1          |4          |planet                                  
+2          |4          |planet                                  
+1          |4          |planet                                  
+NULL       |4          |planet                                  
+3          |5          |planet                                  
+1          |5          |planet                                  
+2          |5          |planet                                  
+1          |5          |planet                                  
+NULL       |5          |planet                                  
+ij> select obt.i, obt2.i2+1, obt2.v from obt2, obt where obt.i=obt2.i2 order by 2, 3;
+I          |2          |V                                       
+----------------------------------------------------------------
+1          |2          |shoe                                    
+1          |2          |shoe                                    
+3          |4          |hello                                   
+3          |4          |planet                                  
+ij> -- . order by with spaces at end of values
+values 'hello ', 'hello    ', 'hello  ', 'hello' order by 1;
+1        
+---------
+hello    
+hello    
+hello    
+hello    
+ij> -- . order by on select items that are expressions
+select i+1, v, {fn length(v)} from obt order by 2, 1 desc, 3;
+1          |V                                       |3          
+----------------------------------------------------------------
+4          |hello                                   |5          
+2          |hello                                   |5          
+3          |planet                                  |6          
+2          |world                                   |5          
+NULL       |NULL                                    |NULL       
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- . redundant order by on distinct, ?non-redundant (different ordering)
+select distinct i from obt order by i;
+I          
+-----------
+1          
+2          
+3          
+NULL       
+ij> select distinct i,v from obt order by v;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+3          |hello                                   
+2          |planet                                  
+1          |world                                   
+NULL       |NULL                                    
+ij> select distinct i,v from obt order by v desc, i desc, v desc;
+I          |V                                       
+----------------------------------------------------
+NULL       |NULL                                    
+1          |world                                   
+2          |planet                                  
+3          |hello                                   
+1          |hello                                   
+ij> -- . redundant order by on distinct, redundant (subset/prefix)
+select distinct i,v from obt order by i;
+I          |V                                       
+----------------------------------------------------
+1          |hello                                   
+1          |world                                   
+2          |planet                                  
+3          |hello                                   
+NULL       |NULL                                    
+ij> -- . redundant order by on index scan (later)
+-- rollback should release the prepared statements
+rollback ;
+ij> -- . order by with empty source, nulls in source, etc.
+delete from obt;
+5 rows inserted/updated/deleted
+ij> select * from obt order by 1;
+I          |V                                       
+----------------------------------------------------
+ij> select * from obt order by v;
+I          |V                                       
+----------------------------------------------------
+ij> rollback ;
+ij> -- . order by with close values (doubles)
+create table d (d double precision);
+0 rows inserted/updated/deleted
+ij> insert into d values 1e-300,2e-300;
+2 rows inserted/updated/deleted
+ij> select d,d/1e5 as dd from d order by dd,d;
+D                     |DD                    
+---------------------------------------------
+1.0E-300              |1.0E-305              
+2.0E-300              |2.0E-305              
+ij> rollback ;
+ij> -- . order by with long values (varchars)
+create table v (v varchar(1200));
+0 rows inserted/updated/deleted
+ij> insert into v values 'itsastart';
+1 row inserted/updated/deleted
+ij> insert into v values 'hereandt';
+1 row inserted/updated/deleted
+ij> update v set v = v || v || v;
+2 rows inserted/updated/deleted
+ij> update v set v = v || v || v;
+2 rows inserted/updated/deleted
+ij> update v set v = v || v;
+2 rows inserted/updated/deleted
+ij> update v set v = v || v;
+2 rows inserted/updated/deleted
+ij> update v set v = v || v;
+2 rows inserted/updated/deleted
+ij> update v set v = v || v;
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR 'itsastartitsastartitsastartitsastartitsastartitsastartitsast&' to length 1200.
+ij> update v set v = v || v;
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR 'itsastartitsastartitsastartitsastartitsastartitsastartitsast&' to length 1200.
+ij> select v from v order by v desc;
+V                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+itsastartitsastartitsastartitsastartitsastartitsastartitsastartitsastartitsastartitsastartitsastartitsastartitsastartitsastarti&
+hereandthereandthereandthereandthereandthereandthereandthereandthereandthereandthereandthereandthereandthereandthereandthereand&
+ij> rollback ;
+ij> drop table v;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'V' because it does not exist.
+ij> -- . order by on all data types
+create table missed (s smallint, r real, d date, t time, ts timestamp, c char(10), l bigint);
+0 rows inserted/updated/deleted
+ij> insert into missed values (1,1.2e4, '1992-01-01','23:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'theend', 2222222222222);
+1 row inserted/updated/deleted
+ij> insert into missed values (1,1.2e4, '1992-01-01', '23:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'theend', 3333333333333);
+1 row inserted/updated/deleted
+ij> insert into missed values (2,1.0e4, '1992-01-01', '20:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'theend', 4444444444444);
+1 row inserted/updated/deleted
+ij> insert into missed values (2,1.0e4, '1992-01-01', '20:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', null,     2222222222222);
+1 row inserted/updated/deleted
+ij> select s from missed order by s;
+S     
+------
+1     
+1     
+2     
+2     
+ij> select r from missed order by r;
+R            
+-------------
+10000.0      
+10000.0      
+12000.0      
+12000.0      
+ij> select d,c from missed order by c,d;
+D         |C         
+---------------------
+1992-01-01|theend    
+1992-01-01|theend    
+1992-01-01|theend    
+1992-01-01|NULL      
+ij> select ts,t from missed order by ts desc, t;
+TS                        |T       
+-----------------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx|20:01:01
+xxxxxxFILTERED-TIMESTAMPxxxxx|20:01:01
+xxxxxxFILTERED-TIMESTAMPxxxxx|23:01:01
+xxxxxxFILTERED-TIMESTAMPxxxxx|23:01:01
+ij> select l from missed order by l;
+L                   
+--------------------
+2222222222222       
+2222222222222       
+3333333333333       
+4444444444444       
+ij> select l from missed order by l desc;
+L                   
+--------------------
+4444444444444       
+3333333333333       
+2222222222222       
+2222222222222       
+ij> rollback ;
+ij> -- . order by on char column
+create table ut (u char(10));
+0 rows inserted/updated/deleted
+ij> insert into ut values (null);
+1 row inserted/updated/deleted
+ij> insert into ut values (cast ('hello' as char(10)));
+1 row inserted/updated/deleted
+ij> insert into ut values ('world');
+1 row inserted/updated/deleted
+ij> insert into ut values ('hello');
+1 row inserted/updated/deleted
+ij> insert into ut values ('world  ');
+1 row inserted/updated/deleted
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- . order by and explicit for update (no, some cols)
+get cursor c1 as 'select i from obt order by i for update of v';
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- . order by and explicit read only (ok)
+get cursor c1 as 'select i from obt order by i for read only';
+ij> next c1;
+I          
+-----------
+1          
+ij> close c1;
+ij> -- . order by is implicitly read only
+get cursor c1 as 'select i from obt order by i';
+ij> next c1;
+I          
+-----------
+1          
+ij> -- error
+update obt set v='newval' where current of c1;
+ERROR 42X23: Cursor C1 is not updatable.
+ij> close c1;
+ij> -- no rows
+select v from obt where v='newval';
+V                                       
+----------------------------------------
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- . order by only allowed on cursor spec, not subquerys (error) 
+select v from obt where i in (select i from obt2 order by i);
+ERROR 42X01: Syntax error: Encountered "order" at line 2, column 50.
+ij> select v from obt where i = (select i from obt2 order by i);
+ERROR 42X01: Syntax error: Encountered "order" at line 1, column 49.
+ij> select v from (select i,v from obt2 order by i);
+ERROR 42X01: Syntax error: Encountered "order" at line 1, column 37.
+ij> -- rollback should release the prepared statements
+rollback ;
+ij> -- order by allowed on datatypes, 
+-- but not non-mapped user types
+-- bit maps to Byte[], so can't test for now
+create table tab1 (
+				i integer, 
+				tn integer, 
+				s integer, 
+				l integer,
+				c char(10), 
+				v char(10),
+				lvc char(10),
+				d double precision,
+				r real,
+				dt date,
+				t time,
+				ts timestamp,
+				dc decimal(2,1));
+0 rows inserted/updated/deleted
+ij> insert into tab1 values (1, cast(1 as int), cast(1 as smallint), cast(1 as bigint), '1', '1', '1', cast(1.1 as double precision), cast(1.1 as real), '1996-01-01', '11:11:11','xxxxxxFILTERED-TIMESTAMPxxxxx', cast(1.1 as decimal(2,1)));
+1 row inserted/updated/deleted
+ij> insert into tab1 values (2, cast(2 as int), cast(2 as smallint), cast(2 as bigint), '2', '2', '2', cast(2.2 as double precision), cast(2.2 as real), '1995-02-02', '12:12:12', 'xxxxxxFILTERED-TIMESTAMPxxxxx', cast(2.2 as decimal(2,1)));
+1 row inserted/updated/deleted
+ij> select * from tab1 order by 1;
+I          |TN         |S          |L          |C         |V         |LVC       |D                     |R            |DT        |T       |TS                        |DC   
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |1          |1          |1          |1         |1         |1         |1.1                   |1.1          |1996-01-01|11:11:11|xxxxxxFILTERED-TIMESTAMPxxxxx|1.1  
+2          |2          |2          |2          |2         |2         |2         |2.2                   |2.2          |1995-02-02|12:12:12|xxxxxxFILTERED-TIMESTAMPxxxxx|2.2  
+ij> rollback;
+ij> -- bug 2769 (correlation columns, group by and order by)
+create table bug2769(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into bug2769 values (1, 1), (1, 2), (3, 2), (3, 3);
+4 rows inserted/updated/deleted
+ij> select a.c1, sum(a.c1) from bug2769 a group by a.c1 order by a.c1;
+C1         |2          
+-----------------------
+1          |2          
+3          |6          
+ij> rollback;
+ij> -- reset autocommit
+autocommit on;
+ij> -- cleanup
+drop table obt;
+0 rows inserted/updated/deleted
+ij> drop table obt2;
+0 rows inserted/updated/deleted
+ij> create table t (a int, b int, c int);
+0 rows inserted/updated/deleted
+ij> insert into t values (1, 2, null), (2, 3, null), (3, 0, null), (1, 3, null);
+4 rows inserted/updated/deleted
+ij> select * from t order by a;
+A          |B          |C          
+-----------------------------------
+1          |3          |NULL       
+1          |2          |NULL       
+2          |3          |NULL       
+3          |0          |NULL       
+ij> select * from t order by a, a;
+A          |B          |C          
+-----------------------------------
+1          |3          |NULL       
+1          |2          |NULL       
+2          |3          |NULL       
+3          |0          |NULL       
+ij> select * from t order by a, a, a;
+A          |B          |C          
+-----------------------------------
+1          |3          |NULL       
+1          |2          |NULL       
+2          |3          |NULL       
+3          |0          |NULL       
+ij> select * from t order by a, b;
+A          |B          |C          
+-----------------------------------
+1          |2          |NULL       
+1          |3          |NULL       
+2          |3          |NULL       
+3          |0          |NULL       
+ij> select a, b, c from t order by a, a;
+A          |B          |C          
+-----------------------------------
+1          |3          |NULL       
+1          |2          |NULL       
+2          |3          |NULL       
+3          |0          |NULL       
+ij> select a, b, c from t order by a, b;
+A          |B          |C          
+-----------------------------------
+1          |2          |NULL       
+1          |3          |NULL       
+2          |3          |NULL       
+3          |0          |NULL       
+ij> select a, c from t order by b;
+A          |C          
+-----------------------
+3          |NULL       
+1          |NULL       
+1          |NULL       
+2          |NULL       
+ij> select a, c from t order by b, b;
+A          |C          
+-----------------------
+3          |NULL       
+1          |NULL       
+1          |NULL       
+2          |NULL       
+ij> select a, b, c from t order by b;
+A          |B          |C          
+-----------------------------------
+3          |0          |NULL       
+1          |2          |NULL       
+1          |3          |NULL       
+2          |3          |NULL       
+ij> select a from t order by b, c;
+A          
+-----------
+3          
+1          
+1          
+2          
+ij> select a, c from t order by b, c;
+A          |C          
+-----------------------
+3          |NULL       
+1          |NULL       
+1          |NULL       
+2          |NULL       
+ij> select a, c from t order by b, c, b, c;
+A          |C          
+-----------------------
+3          |NULL       
+1          |NULL       
+1          |NULL       
+2          |NULL       
+ij> select a, b, c from t order by b, c;
+A          |B          |C          
+-----------------------------------
+3          |0          |NULL       
+1          |2          |NULL       
+1          |3          |NULL       
+2          |3          |NULL       
+ij> select b, c from t order by app.t.a;
+B          |C          
+-----------------------
+3          |NULL       
+2          |NULL       
+3          |NULL       
+0          |NULL       
+ij> -- error case
+select * from t order by d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select t.* from t order by d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select t.* from t order by t.d;
+ERROR 42X04: Column 'T.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T.D' is not a column in the target table.
+ij> select s.* from t s order by s.d;
+ERROR 42X04: Column 'S.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.D' is not a column in the target table.
+ij> select *, d from t order by d;
+ERROR 42X01: Syntax error: Encountered "," at line 1, column 9.
+ij> select t.*, d from t order by d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select t.*, d from t order by t.d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select t.*, d from t order by app.t.d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select s.*, d from t s order by s.d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select t.*, t.d from t order by t.d;
+ERROR 42X04: Column 'T.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T.D' is not a column in the target table.
+ij> select s.*, s.d from t s order by s.d;
+ERROR 42X04: Column 'S.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.D' is not a column in the target table.
+ij> select a, b, c from t order by d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select a from t order by d;
+ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ij> select t.a from t order by t.d;
+ERROR 42X04: Column 'T.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T.D' is not a column in the target table.
+ij> select s.a from t s order by s.d;
+ERROR 42X04: Column 'S.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.D' is not a column in the target table.
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,377 @@
+ij> -- tests for check constraints
+autocommit off;
+ij> -- negative
+-- The following are not allowed in check constraints:
+--	?, subquery, datetime functions
+create table neg1(c1 int check(?));
+ERROR 42Y39: '?' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.
+ij> create table neg1(c1 int check(c1 in (select c1 from neg1)));
+ERROR 42Y39: 'subquery' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.
+ij> create table neg1(c1 int check(CURRENT_DATE = CURRENT_DATE));
+ERROR 42Y39: 'CURRENT DATE' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.
+ij> create table neg1(c1 int check(CURRENT_TIME = CURRENT_TIME));
+ERROR 42Y39: 'CURRENT TIME' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.
+ij> create table neg1(c1 int check(CURRENT_TIMESTAMP = CURRENT_TIMESTAMP));
+ERROR 42Y39: 'CURRENT TIMSTAMP' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.
+ij> -- The check constraint definition must evaluate to a boolean
+create table neg1(c1 int check(c1));
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
+ij> create table neg1(c1 int check(1));
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
+ij> create table neg1(c1 int check(c1+c1));
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
+ij> -- All column references are to target table
+create table neg1(c1 int check((c2 = 1)));
+ERROR 42X04: Column 'C2' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C2' is not a column in the target table.
+ij> -- verify that a check constraint can't be used as an optimizer override
+create table t1(c1 int constraint asdf check(c1 = 1));
+0 rows inserted/updated/deleted
+ij> select * from t1 properties constraint = asdf;
+ERROR 42X01: Syntax error: PROPERTIES.
+ij> -- alter table t1 drop constraint asdf;
+rollback;
+ij> -- alter table t1 drop constraint asdf;
+-- forward references should fail
+create table neg1(c1 int check(c2 = 1), c2 int);
+ERROR 42621: A check constraint or generated column that is defined with 'C1' is invalid.
+ij> create table neg2(c1 int constraint asdf check(c2 = 1), c2 int);
+ERROR 42621: A check constraint or generated column that is defined with 'C1' is invalid.
+ij> rollback;
+ij> -- positive
+-- multiple check constraints on same table
+create table pos1(c1 int check(c1 > 0), constraint asdf check(c1 < 10));
+0 rows inserted/updated/deleted
+ij> -- verify both constraints are enforced
+insert into pos1 values 0;
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ij> insert into pos1 values 1;
+1 row inserted/updated/deleted
+ij> insert into pos1 values 9;
+1 row inserted/updated/deleted
+ij> insert into pos1 values 10;
+ERROR 23513: The check constraint 'ASDF' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ij> select * from pos1;
+C1         
+-----------
+1          
+9          
+ij> -- verify constraint violation rolls back entire statement
+update pos1 set c1 = c1 + 1;
+ERROR 23513: The check constraint 'ASDF' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ij> select * from pos1;
+C1         
+-----------
+1          
+9          
+ij> update pos1 set c1 = c1 - 1;
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ij> select * from pos1;
+C1         
+-----------
+1          
+9          
+ij> rollback;
+ij> -- conflicting constraints, should fail
+create table negcks(c1 int constraint ck1st check(c1 > 4), c2 int constraint ck2nd check(c2 > 2), c3 int, constraint ckLast check(c2 > c1));
+0 rows inserted/updated/deleted
+ij> -- constraint ck1st fails
+insert into negcks values (1, 3, 3);
+ERROR 23513: The check constraint 'CK1ST' was violated while performing an INSERT or UPDATE on table 'APP.NEGCKS'.
+ij> -- constraint ckLast fails (ck2nd fails too)
+insert into negcks values (5, 1, 3);
+ERROR 23513: The check constraint 'CKLAST' was violated while performing an INSERT or UPDATE on table 'APP.NEGCKS'.
+ij> -- constraint ck1st fails (ckLast fails too)
+insert into negcks values (2, 3, 3);
+ERROR 23513: The check constraint 'CK1ST' was violated while performing an INSERT or UPDATE on table 'APP.NEGCKS'.
+ij> rollback;
+ij> -- same source and target tables
+create table pos1(c1 int, c2 int, constraint ck1 check (c1 < c2));
+0 rows inserted/updated/deleted
+ij> insert into pos1 values (1, 2), (2, 3), (3, 4);
+3 rows inserted/updated/deleted
+ij> commit;
+ij> -- these should work
+insert into pos1 select * from pos1;
+3 rows inserted/updated/deleted
+ij> select count(*) from pos1;
+1          
+-----------
+6          
+ij> update pos1 set c2 = (select max(c1) from pos1),
+				c1 = (select min(c2) from pos1);
+6 rows inserted/updated/deleted
+ij> select * from pos1;
+C1         |C2         
+-----------------------
+2          |3          
+2          |3          
+2          |3          
+2          |3          
+2          |3          
+2          |3          
+ij> rollback;
+ij> -- these should fail
+insert into pos1 select c2, c1 from pos1;
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ij> select count(*) from pos1;
+1          
+-----------
+3          
+ij> update pos1 set c2 = (select min(c1) from pos1),
+				c1 = (select max(c2) from pos1);
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ij> select * from pos1;
+C1         |C2         
+-----------------------
+1          |2          
+2          |3          
+3          |4          
+ij> drop table pos1;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- union under insert
+create table t1(c1 int, c2 int, constraint ck1 check(c1 = c2));
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1), (2, 1);
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij> select * from t1;
+C1         |C2         
+-----------------------
+ij> -- normalize result set under insert/update
+insert into t1 values (1.0, 1);
+1 row inserted/updated/deleted
+ij> insert into t1 values (2.0, 1);
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |1          
+ij> update t1 set c2 = 1.0;
+1 row inserted/updated/deleted
+ij> update t1 set c2 = 2.0;
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |1          
+ij> update t1 set c1 = 3.0, c2 = 3.0;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         
+-----------------------
+3          |3          
+ij> rollback;
+ij> -- positioned update
+create table t1(c1 int, c2 int, constraint ck1 check(c1 = c2), constraint ck2 check(c2=c1));
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1), (2, 2), (3, 3), (4, 4);
+4 rows inserted/updated/deleted
+ij> create index i1 on t1(c1);
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select * from t1 where c2 = 2 for update of c1';
+ij> next c1;
+C1         |C2         
+-----------------------
+2          |2          
+ij> -- this update should succeed
+update t1 set c1 = c1 where current of c1;
+1 row inserted/updated/deleted
+ij> -- this update should fail
+update t1 set c1 = c1 + 1 where current of c1;
+ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij> close c1;
+ij> get cursor c2 as 'select * from t1 where c1 = 2 for update of c2';
+ij> next c2;
+C1         |C2         
+-----------------------
+2          |2          
+ij> -- this update should succeed
+update t1 set c2 = c2 where current of c2;
+1 row inserted/updated/deleted
+ij> -- this update should fail
+update t1 set c2 = c2 + 1 where current of c2;
+ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij> close c2;
+ij> get cursor c3 as 'select * from t1 where c1 = 2 for update of c1, c2';
+ij> next c3;
+C1         |C2         
+-----------------------
+2          |2          
+ij> -- this update should succeed
+update t1 set c2 = c1, c1 = c2 where current of c3;
+1 row inserted/updated/deleted
+ij> -- this update should fail
+update t1 set c2 = c2 + 1, c1 = c1 + 3 where current of c3;
+ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij> -- this update should succeed
+update t1 set c2 = c1 + 3, c1 = c2 + 3 where current of c3;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |1          
+5          |5          
+3          |3          
+4          |4          
+ij> close c3;
+ij> rollback;
+ij> -- complex expressions
+create table t1(c1 int check((c1 + c1) = (c1 * c1) or 
+							 (c1 + c1)/2 = (c1 * c1)), c2 int);
+0 rows inserted/updated/deleted
+ij> -- this insert should succeed
+insert into t1 values (1, 9), (2, 10);
+2 rows inserted/updated/deleted
+ij> -- these updates should succeed
+update t1 set c2 = c2 * c2;
+2 rows inserted/updated/deleted
+ij> update t1 set c1 = 2 where c1 = 1;
+1 row inserted/updated/deleted
+ij> update t1 set c1 = 1 where c1 = 2;
+2 rows inserted/updated/deleted
+ij> -- this update should fail
+update t1 set c1 = c2;
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |81         
+1          |100        
+ij> rollback;
+ij> -- built-in functions in a check constraint
+create table charTab (c1 char(4) check(CHAR(c1) = c1));
+0 rows inserted/updated/deleted
+ij> insert into charTab values 'asdf';
+1 row inserted/updated/deleted
+ij> insert into charTab values 'fdsa';
+1 row inserted/updated/deleted
+ij> -- beetle 5805 - support built-in function INT
+-- should fail until beetle 5805 is implemented
+create table intTab (c1 int check(INT(1) = c1));
+ERROR 42X01: Syntax error: Encountered "INT" at line 3, column 35.
+ij> insert into intTab values 1;
+ERROR 42X05: Table 'INTTAB' does not exist.
+ij> -- this insert should fail, does not satisfy check constraint
+insert into intTab values 2;
+ERROR 42X05: Table 'INTTAB' does not exist.
+ij> create table maxIntTab (c1 int check(INT(2147483647) > c1));
+ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 38.
+ij> insert into maxIntTab values 1;
+ERROR 42X05: Table 'MAXINTTAB' does not exist.
+ij> -- this insert should fail, does not satisfy check constraint
+insert into maxIntTab values 2147483647;
+ERROR 42X05: Table 'MAXINTTAB' does not exist.
+ij> rollback;
+ij> -- verify that inserts, updates and statements with forced constraints are
+-- indeed dependent on the constraints
+create table t1(c1 int not null constraint asdf primary key);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1, 2, 3, 4, 5;
+5 rows inserted/updated/deleted
+ij> commit;
+ij> prepare p1 as 'insert into t1 values 1';
+ij> prepare p2 as 'update t1 set c1 = 3 where c1 = 4';
+ij> prepare p3 as 'select * from t1';
+ij> -- the insert and update should fail, select should succeed
+execute p1;
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'ASDF' defined on 'T1'.
+ij> execute p2;
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'ASDF' defined on 'T1'.
+ij> execute p3;
+C1         
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> alter table t1 drop constraint asdf;
+0 rows inserted/updated/deleted
+ij> -- rollback and verify that constraints are enforced and select succeeds
+rollback;
+ij> execute p1;
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'ASDF' defined on 'T1'.
+ij> execute p2;
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'ASDF' defined on 'T1'.
+ij> execute p3;
+C1         
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> remove p1;
+ij> remove p2;
+ij> remove p3;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- check constraints with parameters
+create table t1(c1 int constraint asdf check(c1 = 1));
+0 rows inserted/updated/deleted
+ij> prepare p1 as 'insert into t1 values (?)';
+ij> execute p1 using 'values (1)';
+1 row inserted/updated/deleted
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1(active_flag char(2) check(active_flag IN ('Y', 'N')), araccount_active_flag char(2) check(araccount_active_flag IN ('Y', 'N')), automatic_refill_flag char(2) check(automatic_refill_flag IN ('Y', 'N')), call_when_ready_flag char(2) check(call_when_ready_flag IN ('Y', 'N')), compliance_flag char(2) check(compliance_flag IN ('Y', 'N')), delivery_flag char(2) check(delivery_flag IN ('Y', 'N')), double_count_flag char(2) check(double_count_flag IN ('Y', 'N')), gender_ind char(2) check(gender_ind IN ('M', 'F', 'U')), geriatric_flag char(2) check(geriatric_flag IN ('Y', 'N')), refuse_inquiry_flag char(2) check(refuse_inquiry_flag IN ('Y', 'N')), animal_flag char(2) check(animal_flag IN ('Y', 'N')), terminal_flag char(2) check(terminal_flag IN ('Y', 'N')), unit_flag char(2) check(unit_flag IN ('Y', 'N')), VIP_flag char(2) check(VIP_flag IN ('Y', 'N')), snap_cap_flag char(2) check(snap_cap_flag IN ('Y', 'N')), consent_on_file_flag char(2) check(consent_on_file_flag IN ('Y', 'N')), enlarged_SIG_flag char(2) check(enlarged_SIG_flag IN ('Y', 'N')),aquired_patient_flag char(2) check(aquired_patient_flag IN ('Y', 'N')));
+0 rows inserted/updated/deleted
+ij> -- bug 5622 - internal generated constraint names are re-worked to match db2's naming convention.
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (c1 int not null primary key, c2 int not null unique, c3 int check (c3>=0));
+0 rows inserted/updated/deleted
+ij> alter table t1 add column c4 int not null default 1;
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c4_unique UNIQUE(c4);
+0 rows inserted/updated/deleted
+ij> alter table t1 add column c5 int check(c5 >= 0);
+0 rows inserted/updated/deleted
+ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t where c.tableid = t.tableid and tablename='T1';
+CONSTRAINTNAME                                                                                                                  |&
+----------------------------------------------------------------------------------------------------------------------------------
+xxxxGENERATED-IDxxxx                                                                                                              |P
+xxxxGENERATED-IDxxxx                                                                                                              |U
+xxxxGENERATED-IDxxxx                                                                                                              |C
+C4_UNIQUE                                                                                                                       |U
+xxxxGENERATED-IDxxxx                                                                                                              |C
+ij> drop table t2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> create table t2 (c21 int references t1);
+0 rows inserted/updated/deleted
+ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t where c.tableid = t.tableid and tablename='T2';
+CONSTRAINTNAME                                                                                                                  |&
+----------------------------------------------------------------------------------------------------------------------------------
+xxxxGENERATED-IDxxxx                                                                                                              |F
+ij> drop table t3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T3' because it does not exist.
+ij> create table t3 (c1 int check (c1 >= 0), c2 int check (c2 >= 0), c3 int check (c3 >= 0), c4 int check (c4 >= 0), c5 int check (c5 >= 0), 
+c6 int check (c6 >= 0), c7 int check (c7 >= 0), c8 int check (c8 >= 0), c9 int check (c9 >= 0), c10 int check (c10 >= 0), 
+c11 int check (c11 >= 0), c12 int check (c12 >= 0), c13 int check (c13 >= 0));
+0 rows inserted/updated/deleted
+ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t where c.tableid = t.tableid and tablename='T3';
+CONSTRAINTNAME                                                                                                                  |&
+----------------------------------------------------------------------------------------------------------------------------------
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+xxxxGENERATED-IDxxxx                                                                                                              |C
+ij> drop table t4;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T4' because it does not exist.
+ij> create table t4(c11 int not null, c12 int not null, primary key (c11, c12));
+0 rows inserted/updated/deleted
+ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t where c.tableid = t.tableid and tablename='T4';
+CONSTRAINTNAME                                                                                                                  |&
+----------------------------------------------------------------------------------------------------------------------------------
+xxxxGENERATED-IDxxxx                                                                                                              |P
+ij> 

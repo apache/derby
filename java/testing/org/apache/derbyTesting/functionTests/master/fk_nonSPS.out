@@ -1,0 +1,937 @@
+ij> -- ** insert fkBulkInsert.sql
+--
+-- test foreign key checking.  first
+-- check that we do proper checking.
+-- then make sure that dependencies interact
+-- correctly with foreign keys
+CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> create table p (c1 char(1), y int not null, c2 char(1), x int not null, constraint pk primary key (x,y));
+0 rows inserted/updated/deleted
+ij> create table f (x int not null, s smallint, y int not null, constraint fk foreign key (x,y) references p);
+0 rows inserted/updated/deleted
+ij> insert into p values ('1',1,'1',1);
+1 row inserted/updated/deleted
+ij> -- should pass, foreign key constraint satisfied
+insert into f 
+values 
+	(1,1,1),
+	(1,1,1),
+	(1,1,1),	
+	(1,1,1),
+	(1, 0, 1),
+	(1,1,1),
+	(1,0,1),
+	(1, 0, 1);
+8 rows inserted/updated/deleted
+ij> -- should FAIL, foreign key constraint violated
+delete from f;
+8 rows inserted/updated/deleted
+ij> insert into f 
+values 
+	(1,1,1),
+	(1,1,1),
+	(1,1,1),	
+	(1,1,1),
+	(1, 1, 1),
+	(2,1,666),
+	(1,1,0),
+	(0, 1, 0);
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'FK' for key (2,666).  The statement has been rolled back.
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- make sure boundary conditions are ok, null insert set
+create table f (c1 char(1), y int, c2 char(1), x int, constraint fk foreign key (x,y) references p);
+0 rows inserted/updated/deleted
+ij> insert into f 
+	select * from p where 1 = 2;
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> drop table p;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- self referencing
+create table s (x int not null primary key, y int references s, z int references s);
+0 rows inserted/updated/deleted
+ij> -- ok
+insert into s 
+values 
+	(1,1,1),
+	(2,1,1),
+	(10,2,1),	
+	(11,1,2),
+	(12,4,4),
+	(4,1,1),
+	(13,null,null),
+	(14,1,2),
+	(15,null, 1);
+9 rows inserted/updated/deleted
+ij> delete from s;
+9 rows inserted/updated/deleted
+ij> -- bad
+insert into s 
+values 
+	(1,1,1),
+	(2,1,1),
+	(10,2,1),	
+	(11,1,2),
+	(12,4,4),
+	(4,1,1),
+	(13,null,null),
+	(14,1,2),
+	(15,666, 1);
+ERROR 23503: INSERT on table 'S' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (666).  The statement has been rolled back.
+ij> -- now a test for depenencies.
+-- the insert will create new index conglomerate numbers,
+-- so we want to test that a statement with a constraint
+-- check that is dependent on the conglomerate number that
+-- is being changed is invalidated
+create table x (x int not null, y int, constraint pk primary key (x));
+0 rows inserted/updated/deleted
+ij> create table y (x int , y int, constraint fk foreign key (x) references x);
+0 rows inserted/updated/deleted
+ij> prepare ix as 
+	'insert into x 
+	values
+		(0,0),
+		(1,1),
+		(2,2)';
+ij> prepare ix2 as 
+	'insert into x 
+	values
+		(3,3),
+		(4,4)';
+ij> prepare iy as 
+	'insert into y 
+	values
+		(0,0),
+		(1,1),
+		(2,2)';
+ij> prepare dy as 'delete from y where x = 1';
+ij> prepare dx as 'delete from x where x = 1';
+ij> execute ix;
+3 rows inserted/updated/deleted
+ij> autocommit off;
+ij> commit;
+ij> -- ok
+execute dy;
+0 rows inserted/updated/deleted
+ij> -- ok
+execute dx;
+1 row inserted/updated/deleted
+ij> -- will fail, no key 1 in x
+execute iy;
+ERROR 23503: INSERT on table 'Y' caused a violation of foreign key constraint 'FK' for key (1).  The statement has been rolled back.
+ij> rollback;
+ij> commit;
+ij> execute iy;
+3 rows inserted/updated/deleted
+ij> execute dy;
+1 row inserted/updated/deleted
+ij> execute dx;
+1 row inserted/updated/deleted
+ij> remove ix;
+ij> remove ix2;
+ij> remove iy;
+ij> remove dy;
+ij> remove dx;
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> autocommit on;
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- ** insert fkddl.sql
+-- simple syntax checks
+-- column constraint
+create table p1 (x int not null, constraint pk1 primary key(x));
+0 rows inserted/updated/deleted
+ij> create table u1 (x int not null unique);
+0 rows inserted/updated/deleted
+ij> -- table constraint
+create table p2 (x int not null, y dec(5,2) not null, constraint pk2 primary key (x,y));
+0 rows inserted/updated/deleted
+ij> create table u2 (x int not null, y dec(5,2) not null, constraint uk2 unique (x,y));
+0 rows inserted/updated/deleted
+ij> create table p3 (x char(10) not null, constraint pk3 primary key (x));
+0 rows inserted/updated/deleted
+ij> -- for future use
+create schema otherschema;
+0 rows inserted/updated/deleted
+ij> create table otherschema.p1 (x int not null primary key);
+0 rows inserted/updated/deleted
+ij> -- 
+-- Negative test cases for foreign key TABLE
+-- constraints
+--
+-- negative: fk table, no table
+create table f (x int, constraint fk foreign key (x) references notthere);
+ERROR X0Y46: Constraint 'FK' is invalid: referenced table NOTTHERE does not exist.
+ij> -- negative: fk table, bad column
+create table f (x int, constraint fk foreign key (x) references p1(notthere));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ij> -- negative: fk table, no constraint
+create table f (x int, constraint fk foreign key (x) references p2(y));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> -- negative: fk table, wrong type
+create table f (x smallint, constraint fk foreign key (x) references p1(x));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ij> -- negative: cannot reference a system table
+create table f (x char(36), constraint fk foreign key (x) references sys.sysforeignkeys(constraintid));
+ERROR 42Y08: Foreign key constraints are not allowed on system tables.
+ij> -- negative: bad schema
+create table f (x char(36), constraint fk foreign key (x) references badschema.x);
+ERROR 42Y07: Schema 'BADSCHEMA' does not exist
+ij> -- negative: bad column list
+create table f (x dec(5,2), y int, constraint fk foreign key (x,z) references p2(x,y));
+ERROR 42X93: Table 'F' contains a constraint definition with column 'Z' which is not in the table.
+ij> -- negative: wrong number of columns
+create table f (x dec(5,2), y int, constraint fk foreign key (x) references p2(x,y));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> create table f (x dec(5,2), y int, constraint fk foreign key (x,y) references p2(x));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> -- 
+-- Negative test cases for foreign key COLUMN
+-- constraints
+--
+-- negative: fk column, no table
+create table f (x int references notthere);
+ERROR X0Y46: Constraint 'xxxxGENERATED-IDxxxx' is invalid: referenced table NOTTHERE does not exist.
+ij> -- negative: fk column, bad column
+create table f (x int references p1(notthere));
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ij> -- negative: fk column, no constraint
+create table f (x int references p2(y));
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> -- negative: fk column, wrong type
+create table f (x smallint references p1(x));
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ij> -- negative: cannot reference a system table
+create table f (x char(36) references sys.sysforeignkeys(constraintid));
+ERROR 42Y08: Foreign key constraints are not allowed on system tables.
+ij> -- negative: bad schema
+create table f (x char(36) references badschema.x);
+ERROR 42Y07: Schema 'BADSCHEMA' does not exist
+ij> --
+-- Some type checks.  Types must match exactly
+--
+-- ok
+create table f (d dec(5,2), i int, constraint fk foreign key (i,d) references p2(x,y));
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> create table f (i int, d dec(5,2), constraint fk foreign key (i,d) references p2(x,y));
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> create table f (d dec(5,2), i int, constraint fk foreign key (i,d) references u2(x,y));
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> create table f (i int, d dec(5,2), constraint fk foreign key (i,d) references u2(x,y));
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> create table f (c char(10) references p3(x));
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- type mismatch
+create table f (i int, d dec(5,1), constraint fk foreign key (i,d) references p2(x,y));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> create table f (i int, d dec(4,2), constraint fk foreign key (i,d) references p2(x,y));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> create table f (i int, d dec(4,2), constraint fk foreign key (i,d) references p2(x,y));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> create table f (i int, d numeric(5,2), constraint fk foreign key (i,d) references p2(x,y));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> create table f (c char(11) references p3(x));
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P3' that matches the number and types of the columns in the foreign key.
+ij> create table f (c varchar(10) references p3(x));
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P3' that matches the number and types of the columns in the foreign key.
+ij> -- wrong order
+create table f (d dec(5,2), i int, constraint fk foreign key (d,i) references p2(x,y));
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ij> -- check system tables 
+create table f (x int, constraint fk foreign key (x) references p1);
+0 rows inserted/updated/deleted
+ij> select constraintname, referencecount 
+	from sys.sysconstraints c, sys.sysforeignkeys fk
+	where fk.keyconstraintid = c.constraintid order by constraintname;
+CONSTRAINTNAME                                                                                                                  |REFERENCEC&
+--------------------------------------------------------------------------------------------------------------------------------------------
+PK1                                                                                                                             |1          
+ij> create table f2 (x int, constraint fk2 foreign key (x) references p1(x));
+0 rows inserted/updated/deleted
+ij> create table f3 (x int, constraint fk3 foreign key (x) references p1(x));
+0 rows inserted/updated/deleted
+ij> create table f4 (x int, constraint fk4 foreign key (x) references p1(x));
+0 rows inserted/updated/deleted
+ij> select distinct constraintname, referencecount 
+	from sys.sysconstraints c, sys.sysforeignkeys fk
+	where fk.keyconstraintid = c.constraintid order by constraintname;
+CONSTRAINTNAME                                                                                                                  |REFERENCEC&
+--------------------------------------------------------------------------------------------------------------------------------------------
+PK1                                                                                                                             |4          
+ij> select constraintname 
+	from sys.sysconstraints c, sys.sysforeignkeys fk
+	where fk.constraintid = c.constraintid
+	order by 1;
+CONSTRAINTNAME                                                                                                                  
+--------------------------------------------------------------------------------------------------------------------------------
+FK                                                                                                                              
+FK2                                                                                                                             
+FK3                                                                                                                             
+FK4                                                                                                                             
+ij> -- we should not be able to drop the primary key 
+alter table p1 drop constraint pk1;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK' is dependent on that object.
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK2' is dependent on that object.
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK3' is dependent on that object.
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK4' is dependent on that object.
+ij> drop table p1;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK' is dependent on that object.
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK2' is dependent on that object.
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK3' is dependent on that object.
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK1' because CONSTRAINT 'FK4' is dependent on that object.
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- now lets drop the foreign keys and try again
+drop table f2;
+0 rows inserted/updated/deleted
+ij> drop table f3;
+0 rows inserted/updated/deleted
+ij> drop table f4;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> select constraintname, referencecount 
+	from sys.sysconstraints c, sys.sysforeignkeys fk
+	where fk.keyconstraintid = c.constraintid order by constraintname;
+CONSTRAINTNAME                                                                                                                  |REFERENCEC&
+--------------------------------------------------------------------------------------------------------------------------------------------
+PK1                                                                                                                             |1          
+ij> alter table f drop constraint fk;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- ok
+alter table p1 drop constraint pk1;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- we shouldn't be able to add an fk on p1 now
+alter table f add constraint fk foreign key (x) references p1;
+ERROR X0Y41: Constraint 'FK' is invalid: referenced table APP.P1 has no primary key.  Either add a primary key to APP.P1 or explicity specify the columns of a unique constraint that this foreign key references.
+ij> -- add the constraint and try again
+alter table p1 add constraint pk1 primary key (x);
+0 rows inserted/updated/deleted
+ij> create table f2 (x int, constraint fk2 foreign key (x) references p1(x));
+0 rows inserted/updated/deleted
+ij> create table f3 (x int, constraint fk3 foreign key (x) references p1(x));
+0 rows inserted/updated/deleted
+ij> create table f4 (x int, constraint fk4 foreign key (x) references p1(x));
+0 rows inserted/updated/deleted
+ij> -- drop constraint
+alter table f4 drop constraint fk4;
+0 rows inserted/updated/deleted
+ij> alter table f3 drop constraint fk3;
+0 rows inserted/updated/deleted
+ij> alter table f2 drop constraint fk2;
+0 rows inserted/updated/deleted
+ij> alter table p1 drop constraint pk1;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- all fks are gone, right?
+select constraintname 
+	from sys.sysconstraints c, sys.sysforeignkeys fk
+	where fk.constraintid = c.constraintid order by constraintname;
+CONSTRAINTNAME                                                                                                                  
+--------------------------------------------------------------------------------------------------------------------------------
+ij> -- cleanup what we have done so far
+drop table p1;
+0 rows inserted/updated/deleted
+ij> drop table p2;
+0 rows inserted/updated/deleted
+ij> drop table u1;
+0 rows inserted/updated/deleted
+ij> drop table u2;
+0 rows inserted/updated/deleted
+ij> drop table otherschema.p1;
+0 rows inserted/updated/deleted
+ij> drop schema otherschema restrict;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- will return dependencies for SPS metadata queries now created by default 
+-- database is created.
+create table default_sysdepends_count(a int);
+0 rows inserted/updated/deleted
+ij> insert into default_sysdepends_count select count(*) from sys.sysdepends;
+1 row inserted/updated/deleted
+ij> select * from default_sysdepends_count;
+A          
+-----------
+0          
+ij> -- 
+-- now we are going to do some self referencing
+-- tests.
+-- 
+create table selfref (p char(10) not null primary key, 
+		f char(10) references selfref);
+0 rows inserted/updated/deleted
+ij> drop table selfref;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- ok
+create table selfref (p char(10) not null, 
+		f char(10) references selfref, 
+		constraint pk primary key (p));
+0 rows inserted/updated/deleted
+ij> drop table selfref;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- ok
+create table selfref (p char(10) not null, f char(10), 
+		constraint f foreign key (f) references selfref(p), 
+		constraint pk primary key (p));
+0 rows inserted/updated/deleted
+ij> -- should fail
+alter table selfref drop constraint pk;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'PK' because CONSTRAINT 'F' is dependent on that object.
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- ok
+alter table selfref drop constraint f;
+0 rows inserted/updated/deleted
+ij> alter table selfref drop constraint pk;
+0 rows inserted/updated/deleted
+ij> drop table selfref;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- what if a pk references another pk?  should just
+-- drop the direct references (nothing special, really)
+create table pr1(x int not null, 
+		constraint pkr1 primary key (x));
+0 rows inserted/updated/deleted
+ij> create table pr2(x int not null, 
+		constraint pkr2 primary key(x), 
+		constraint fpkr2 foreign key (x) references pr1);
+0 rows inserted/updated/deleted
+ij> create table pr3(x int not null, 
+		constraint pkr3 primary key(x), 
+		constraint fpkr3 foreign key (x) references pr2);
+0 rows inserted/updated/deleted
+ij> select constraintname, referencecount from sys.sysconstraints order by constraintname;
+CONSTRAINTNAME                                                                                                                  |REFERENCEC&
+--------------------------------------------------------------------------------------------------------------------------------------------
+FPKR2                                                                                                                           |0          
+FPKR3                                                                                                                           |0          
+PK3                                                                                                                             |0          
+PKR1                                                                                                                            |1          
+PKR2                                                                                                                            |1          
+PKR3                                                                                                                            |0          
+ij> -- now drop constraint pkr1
+alter table pr2 drop constraint fpkr2;
+0 rows inserted/updated/deleted
+ij> alter table pr1 drop constraint pkr1;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- pkr1 and pfkr2 are gone
+select constraintname, referencecount from sys.sysconstraints order by constraintname;
+CONSTRAINTNAME                                                                                                                  |REFERENCEC&
+--------------------------------------------------------------------------------------------------------------------------------------------
+FPKR3                                                                                                                           |0          
+PK3                                                                                                                             |0          
+PKR2                                                                                                                            |1          
+PKR3                                                                                                                            |0          
+ij> -- cleanup
+drop table pr3;
+0 rows inserted/updated/deleted
+ij> drop table pr2;
+0 rows inserted/updated/deleted
+ij> drop table pr1;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- should return 0, confirm no unexpected dependencies
+-- verify that all rows in sys.sysdepends got dropped 
+-- apart from sps dependencies
+create table default_sysdepends_count2(a int);
+0 rows inserted/updated/deleted
+ij> insert into default_sysdepends_count2 select count(*) from sys.sysdepends;
+1 row inserted/updated/deleted
+ij> select default_sysdepends_count2.a - default_sysdepends_count.a
+    from default_sysdepends_count2, default_sysdepends_count;
+1          
+-----------
+0          
+ij> -- dependencies and spses
+create table x (x int not null primary key, y int, constraint xfk foreign key (y) references x);
+0 rows inserted/updated/deleted
+ij> create table y (x int, constraint yfk foreign key (x) references x);
+0 rows inserted/updated/deleted
+ij> prepare ss as 'select * from x';
+ij> prepare si as 'insert into x values (1,1)';
+ij> prepare su as 'update x set x = x+1, y=y+1';
+ij> alter table x drop constraint xfk;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- drop the referenced fk, should force su to be recompiled
+-- since it no longer has to check the foreign key table
+alter table y drop constraint yfk;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- ok
+drop table x;
+0 rows inserted/updated/deleted
+ij> remove ss;
+ij> remove si;
+ij> remove su;
+ij> drop table f3;
+0 rows inserted/updated/deleted
+ij> drop table f2;
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> -- verify that all rows in sys.sysdepends got dropped 
+-- apart from sps dependencies
+-- Since, with beetle 5352; we create metadata SPS for network server at database bootup time
+-- so the dependencies for SPS are there.
+create table default_sysdepends_count3(a int);
+0 rows inserted/updated/deleted
+ij> insert into default_sysdepends_count3 select count(*) from sys.sysdepends;
+1 row inserted/updated/deleted
+ij> select default_sysdepends_count3.a - default_sysdepends_count.a
+    from default_sysdepends_count3, default_sysdepends_count;
+1          
+-----------
+0          
+ij> -- ** insert fkdml.sql
+autocommit on;
+ij> --
+-- DML and foreign keys
+--
+drop table s;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'S' because it does not exist.
+ij> drop table f3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'F3' because it does not exist.
+ij> drop table f2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'F2' because it does not exist.
+ij> drop table f;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'F' because it does not exist.
+ij> drop table p;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'P' because it does not exist.
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> create table p (x int not null, y int not null, constraint pk primary key (x,y));
+0 rows inserted/updated/deleted
+ij> create table f (x int, y int, constraint fk foreign key (x,y) references p);
+0 rows inserted/updated/deleted
+ij> insert into p values (1,1);
+1 row inserted/updated/deleted
+ij> -- ok
+insert into f values (1,1);
+1 row inserted/updated/deleted
+ij> -- fail
+insert into f values (2,1);
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'FK' for key (2,1).  The statement has been rolled back.
+ij> insert into f values (1,2);
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'FK' for key (1,2).  The statement has been rolled back.
+ij> -- nulls are ok
+insert into f values (1,null);
+1 row inserted/updated/deleted
+ij> insert into f values (null,null);
+1 row inserted/updated/deleted
+ij> insert into f values (1,null);
+1 row inserted/updated/deleted
+ij> -- update on pk, fail
+update p set x = 2;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> update p set y = 2;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> update p set x = 1, y = 2;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> update p set x = 2, y = 1;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> update p set x = 2, y = 2;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> -- ok
+update p set x = 1, y = 1;
+1 row inserted/updated/deleted
+ij> -- delete pk, fail
+delete from p;
+ERROR 23503: DELETE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> -- delete fk, ok
+delete from f;
+4 rows inserted/updated/deleted
+ij> insert into f values (1,1);
+1 row inserted/updated/deleted
+ij> -- update fk, fail
+update f set x = 2;
+ERROR 23503: UPDATE on table 'F' caused a violation of foreign key constraint 'FK' for key (2,1).  The statement has been rolled back.
+ij> update f set y = 2;
+ERROR 23503: UPDATE on table 'F' caused a violation of foreign key constraint 'FK' for key (1,2).  The statement has been rolled back.
+ij> update f set x = 1, y = 2;
+ERROR 23503: UPDATE on table 'F' caused a violation of foreign key constraint 'FK' for key (1,2).  The statement has been rolled back.
+ij> update f set x = 2, y = 1;
+ERROR 23503: UPDATE on table 'F' caused a violation of foreign key constraint 'FK' for key (2,1).  The statement has been rolled back.
+ij> -- update fk, ok
+update f set x = 1, y = 1;
+1 row inserted/updated/deleted
+ij> -- nulls ok
+update f set x = null, y = 1;
+1 row inserted/updated/deleted
+ij> update f set x = 1, y = null;
+1 row inserted/updated/deleted
+ij> update f set x = null, y = null;
+1 row inserted/updated/deleted
+ij> delete from f;
+1 row inserted/updated/deleted
+ij> insert into f values (1,1);
+1 row inserted/updated/deleted
+ij> insert into p values (2,2);
+1 row inserted/updated/deleted
+ij> -- ok
+update f set x = x+1, y = y+1;
+1 row inserted/updated/deleted
+ij> select * from f;
+X          |Y          
+-----------------------
+2          |2          
+ij> select * from p;
+X          |Y          
+-----------------------
+1          |1          
+2          |2          
+ij> -- ok
+update p set x = x+1, y = y+1;
+2 rows inserted/updated/deleted
+ij> -- fail
+update p set x = x+1, y = y+1;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (2,2).  The statement has been rolled back.
+ij> -- 
+-- BOUNDARY CONDITIONS
+--
+delete from f;
+1 row inserted/updated/deleted
+ij> delete from p;
+2 rows inserted/updated/deleted
+ij> insert into f select * from f;
+0 rows inserted/updated/deleted
+ij> delete from p where x = 9999;
+0 rows inserted/updated/deleted
+ij> update p set x = x+1, y=y+1 where x = 999;
+0 rows inserted/updated/deleted
+ij> insert into p values (1,1);
+1 row inserted/updated/deleted
+ij> insert into f values (1,1);
+1 row inserted/updated/deleted
+ij> update p set x = x+1, y=y+1 where x = 999;
+0 rows inserted/updated/deleted
+ij> delete from p where x = 9999;
+0 rows inserted/updated/deleted
+ij> insert into f select * from f;
+1 row inserted/updated/deleted
+ij> --
+-- test a CURSOR
+--
+delete from f;
+2 rows inserted/updated/deleted
+ij> delete from p;
+1 row inserted/updated/deleted
+ij> insert into p values (1,1);
+1 row inserted/updated/deleted
+ij> insert into f values (1,1);
+1 row inserted/updated/deleted
+ij> autocommit off;
+ij> get cursor  c as 'select * from p for update of x';
+ij> next c;
+X          |Y          
+-----------------------
+1          |1          
+ij> -- fail
+update p set x = 666 where current of c;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> close c;
+ij> get cursor  c as 'select * from f for update of x';
+ij> next c;
+X          |Y          
+-----------------------
+1          |1          
+ij> -- fail
+update f set x = 666 where current of c;
+ERROR 23503: UPDATE on table 'F' caused a violation of foreign key constraint 'FK' for key (666,1).  The statement has been rolled back.
+ij> close c;
+ij> commit;
+ij> autocommit on;
+ij> delete from f;
+1 row inserted/updated/deleted
+ij> delete from p;
+1 row inserted/updated/deleted
+ij> insert into p values (0,0), (1,1), (2,2), (3,3), (4,4);
+5 rows inserted/updated/deleted
+ij> insert into f values (1,1);
+1 row inserted/updated/deleted
+ij> -- lets add some additional foreign keys to the mix
+create table f2 (x int, y int, constraint fk2 foreign key (x,y) references p);
+0 rows inserted/updated/deleted
+ij> insert into f2 values (2,2);
+1 row inserted/updated/deleted
+ij> create table f3 (x int, y int, constraint fk3 foreign key (x,y) references p);
+0 rows inserted/updated/deleted
+ij> insert into f3 values (3,3);
+1 row inserted/updated/deleted
+ij> -- ok
+update p set x = x+1, y = y+1;
+5 rows inserted/updated/deleted
+ij> -- error, fk1
+update p set x = x+1;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> update p set y = y+1;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> update p set x = x+1, y = y+1;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> -- fail of fk3
+update p set y = 666 where y = 3;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK3' for key (3,3).  The statement has been rolled back.
+ij> -- fail of fk2
+update p set x = 666 where x = 2;
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK2' for key (2,2).  The statement has been rolled back.
+ij> -- cleanup
+drop table f;
+0 rows inserted/updated/deleted
+ij> drop table f2;
+0 rows inserted/updated/deleted
+ij> drop table f3;
+0 rows inserted/updated/deleted
+ij> drop table p;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> --
+-- SELF REFERENCING
+--
+create table s (x int not null primary key, y int references s, z int references s);
+0 rows inserted/updated/deleted
+ij> -- ok
+insert into s values (1,null,null);
+1 row inserted/updated/deleted
+ij> -- ok
+update s set y = 1;
+1 row inserted/updated/deleted
+ij> -- fail
+update s set z = 2;
+ERROR 23503: UPDATE on table 'S' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (2).  The statement has been rolled back.
+ij> -- ok
+update s set z = 1;
+1 row inserted/updated/deleted
+ij> -- ok
+insert into s values (2, 1, 1);
+1 row inserted/updated/deleted
+ij> -- ok
+update s set x = 666 where x = 2;
+1 row inserted/updated/deleted
+ij> -- ok
+update s set x = x+1, y = y+1, z = z+1;
+2 rows inserted/updated/deleted
+ij> delete from s;
+2 rows inserted/updated/deleted
+ij> -- ok
+insert into s values (1,null,null);
+1 row inserted/updated/deleted
+ij> -- ok
+insert into s values (2,null,null);
+1 row inserted/updated/deleted
+ij> -- ok
+update s set y = 2 where x = 1;
+1 row inserted/updated/deleted
+ij> -- ok
+update s set z = 1 where x = 2;
+1 row inserted/updated/deleted
+ij> select * from s;
+X          |Y          |Z          
+-----------------------------------
+1          |2          |NULL       
+2          |NULL       |1          
+ij> -- fail 
+update s set x = 0 where x = 1;
+ERROR 23503: UPDATE on table 'S' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> --
+-- Now we are going to do a short but sweet
+-- check to make sure we are actually hitting
+-- the correct columns
+--
+create table p (c1 char(1), y int not null, c2 char(1), x int not null, constraint pk primary key (x,y));
+0 rows inserted/updated/deleted
+ij> create table f (x int, s smallint, y int, constraint fk foreign key (x,y) references p);
+0 rows inserted/updated/deleted
+ij> insert into p values ('1',1,'1',1);
+1 row inserted/updated/deleted
+ij> -- ok
+insert into f values (1,1,1);
+1 row inserted/updated/deleted
+ij> insert into p values ('0',0,'0',0);
+1 row inserted/updated/deleted
+ij> -- ok
+update p set x = x+1, y=y+1;
+2 rows inserted/updated/deleted
+ij> -- fail
+delete from p where y = 1;
+ERROR 23503: DELETE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> -- fail
+insert into f values (1,1,4);
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'FK' for key (1,4).  The statement has been rolled back.
+ij> delete from f;
+1 row inserted/updated/deleted
+ij> delete from p;
+2 rows inserted/updated/deleted
+ij> --
+-- Lets make sure we don't interact poorly with
+-- 'normal' deferred dml
+insert into p values ('1',1,'1',1);
+1 row inserted/updated/deleted
+ij> insert into f values (1,1,1);
+1 row inserted/updated/deleted
+ij> insert into p values ('0',0,'0',0);
+1 row inserted/updated/deleted
+ij> -- ok
+update p set x = x+1, y=y+1 where x < (select max(x)+10000 from p);
+2 rows inserted/updated/deleted
+ij> -- fail
+delete from p where y = 1 and y in (select y from p);
+ERROR 23503: DELETE on table 'P' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+ij> -- inserts
+create table f2 (x int, t smallint, y int);
+0 rows inserted/updated/deleted
+ij> insert into f2 values (1,1,4);
+1 row inserted/updated/deleted
+ij> -- fail
+insert into f select * from f2;
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'FK' for key (1,4).  The statement has been rolled back.
+ij> -- ok
+insert into f2 values (1,1,1);
+1 row inserted/updated/deleted
+ij> insert into f select * from f2 where y = 1;
+1 row inserted/updated/deleted
+ij> drop table f2;
+0 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> drop table p;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> --
+-- PREPARED STATEMENTS
+--
+drop table f;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'F' because it does not exist.
+ij> drop table p;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'P' because it does not exist.
+ij> --the reason for this wait call is to wait unitil system tables row deletes
+--are completed other wise we will get different order fk checks
+--that will lead different error messages depending on when post commit thread runs
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> prepare s as 
+	'create table p (w int not null primary key, x int references p, y int not null, z int not null, constraint uyz unique (y,z))';
+ij> execute s;
+0 rows inserted/updated/deleted
+ij> remove s;
+ij> prepare s as 
+	'create table f (w int references p, x int, y int, z int, constraint fk foreign key (y,z) references p (y,z))';
+ij> execute s;
+0 rows inserted/updated/deleted
+ij> remove s;
+ij> prepare s as 
+	'alter table f drop constraint fk';
+ij> execute s;
+0 rows inserted/updated/deleted
+ij> remove s;
+ij> --the reason for this wait call is to wait unitil system tables row deletes
+--are completed other wise we will get different order fk checks
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> prepare s as 
+	'alter table f add constraint fk foreign key (y,z) references p (y,z)';
+ij> execute s;
+0 rows inserted/updated/deleted
+ij> remove s;
+ij> prepare sf as 
+	'insert into f values (1,1,1,1)';
+ij> prepare sp as 
+	'insert into p values (1,1,1,1)';
+ij> -- fail
+execute sf;
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> -- ok
+execute sp;
+1 row inserted/updated/deleted
+ij> execute sf;
+1 row inserted/updated/deleted
+ij> insert into p values (2,2,2,2);
+1 row inserted/updated/deleted
+ij> remove sf;
+ij> prepare sf as 
+	'update f set w=w+1, x = x+1, y=y+1, z=z+1';
+ij> -- ok
+execute sf;
+1 row inserted/updated/deleted
+ij> remove sp;
+ij> prepare sp as 
+	'update p set w=w+1, x = x+1, y=y+1, z=z+1';
+ij> -- ok
+execute sp;
+2 rows inserted/updated/deleted
+ij> remove sp;
+ij> prepare sp as 
+	'delete from p where x =1';
+ij> -- ok
+execute sp;
+0 rows inserted/updated/deleted
+ij> remove sp;
+ij> remove sf;
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> drop table p;
+0 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> drop procedure WAIT_FOR_POST_COMMIT;
+0 rows inserted/updated/deleted
+ij> 

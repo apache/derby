@@ -1,0 +1,33 @@
+----- listing properties --
+derby.drda.maxThreads=0
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=false
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=false
+Properties with tracing on
+----- listing properties --
+derby.drda.maxThreads=0
+derby.drda.trace.3=true
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=false
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=false
+Properties with tracing on
+----- listing properties --
+derby.drda.maxThreads=0
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=false
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=true

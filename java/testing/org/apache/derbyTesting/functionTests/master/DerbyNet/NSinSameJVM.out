@@ -1,0 +1,9 @@
+main-NSinSameJVM: Cloudscape drivers loaded
+Server is ready to accept connections on port 20000.
+Connection number: 1.
+main-NSinSameJVM: NetworkServer started
+Connection number: 2.
+main-NSinSameJVM: Connected to database NSinSameJVMTestDB;create=true
+getting ready to shutdown
+Connection number: 3.
+Shutdown successful.

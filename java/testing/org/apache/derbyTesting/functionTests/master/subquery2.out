@@ -1,0 +1,1023 @@
+ij> --
+-- subquery tests (ANY and ALL subqueries)
+--
+CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> autocommit off;
+ij> -- create the all type tables
+create table s (i int, s smallint, c char(30), vc char(30), b bigint);
+0 rows inserted/updated/deleted
+ij> create table t (i int, s smallint, c char(30), vc char(30), b bigint);
+0 rows inserted/updated/deleted
+ij> create table tt (ii int, ss smallint, cc char(30), vcvc char(30), b bigint);
+0 rows inserted/updated/deleted
+ij> create table ttt (iii int, sss smallint, ccc char(30), vcvcvc char(30));
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into s values (null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into s values (0, 0, '0', '0', 0);
+1 row inserted/updated/deleted
+ij> insert into s values (1, 1, '1', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into t values (null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 0, '0', '0', 0);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 1, '1', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 1, '1', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into t values (2, 2, '2', '2', 1);
+1 row inserted/updated/deleted
+ij> insert into tt values (null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into tt values (0, 0, '0', '0', 0);
+1 row inserted/updated/deleted
+ij> insert into tt values (1, 1, '1', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into tt values (1, 1, '1', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into tt values (2, 2, '2', '2', 1);
+1 row inserted/updated/deleted
+ij> insert into ttt values (null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into ttt values (11, 11, '11', '11');
+1 row inserted/updated/deleted
+ij> insert into ttt values (11, 11, '11', '11');
+1 row inserted/updated/deleted
+ij> insert into ttt values (22, 22, '22', '22');
+1 row inserted/updated/deleted
+ij> -- ANY subqueries
+-- negative tests
+-- select * subquery
+select * from s where s = ANY (select * from s);
+ERROR 42X38: 'SELECT *' only allowed in EXISTS and NOT EXISTS subqueries.
+ij> -- incompatable types
+select * from s where s >= ANY (select b from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> -- invalid operator
+select * from s where s * ANY (select c from t);
+ERROR 42X01: Syntax error: Encountered "ANY" at line 2, column 27.
+ij> -- ? in select list of subquery
+select * from s where s = ANY (select ? from s);
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> -- positive tests
+-- constants on left side of subquery
+select * from s where 1 = ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where -1 = ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where '1' = ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 = ANY (select b from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 1 <> ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where -1 <> ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where '1' <> ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 <> ANY (select b from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 1 >= ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where -1 >= ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where '1' >= ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 >= ANY (select b from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 1 > ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where -1 > ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where '1' > ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 > ANY (select b from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where 1 <= ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where -1 <= ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where '1' <= ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 <= ANY (select b from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 1 < ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where -1 < ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where '1' < ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 < ANY (select b from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> -- Try a ? parameter on the LHS of a subquery.
+prepare subq1 as 'select * from s where ? = ANY (select s from t)';
+ij> execute subq1 using 'values (1)';
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> remove subq1;
+ij> -- constants in subquery select list
+select * from s where i = ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i = ANY (select -1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where c = ANY (select '1' from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where b = ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i <> ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+ij> select * from s where i <> ANY (select -1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c <> ANY (select '1' from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+ij> select * from s where b <> ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+ij> select * from s where i >= ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i >= ANY (select -1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c >= ANY (select '1' from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where b >= ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i > ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where i > ANY (select -1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c > ANY (select '1' from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where b > ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where i <= ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i <= ANY (select -1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where c <= ANY (select '1' from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where b <= ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i < ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+ij> select * from s where i < ANY (select -1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where c < ANY (select '1' from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+ij> select * from s where b < ANY (select 1 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+ij> -- constants on both sides
+select * from s where 1 = ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where 0 = ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 1 <> ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 <> ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where 1 >= ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 >= ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 1 > ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 0 > ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where 1 <= ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where 0 <= ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where 1 < ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where 0 < ANY (select 0 from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> -- compatable types
+select * from s where c = ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where vc = ANY (select c from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i = ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where s = ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c <> ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where vc <> ANY (select c from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i <> ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where s <> ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c >= ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where vc >= ANY (select c from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i >= ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where s >= ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c > ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where vc > ANY (select c from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i > ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where s > ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c <= ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where vc <= ANY (select c from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i <= ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where s <= ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where c < ANY (select vc from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where vc < ANY (select c from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i < ANY (select s from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where s < ANY (select i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> -- empty subquery result set
+select * from s where i = ANY (select i from t where 1 = 0);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where i <> ANY (select i from t where 1 = 0);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where i >= ANY (select i from t where 1 = 0);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where i > ANY (select i from t where 1 = 0);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where i <= ANY (select i from t where 1 = 0);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> select * from s where i < ANY (select i from t where 1 = 0);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+ij> -- subquery under an or
+select i from s where i = -1 or i = ANY (select i from t);
+I          
+-----------
+0          
+1          
+ij> select i from s where i = 0 or i = ANY (select i from t where i = -1);
+I          
+-----------
+0          
+ij> select i from s where i = -1 or i = ANY (select i from t where i = -1 or i = 1);
+I          
+-----------
+1          
+ij> select i from s where i = -1 or i <> ANY (select i from t);
+I          
+-----------
+0          
+1          
+ij> select i from s where i = 0 or i >= ANY (select i from t where i = -1);
+I          
+-----------
+0          
+ij> select i from s where i = -1 or i < ANY (select i from t where i = -1 or i = 1);
+I          
+-----------
+0          
+ij> select i from s where i = -1 or i >= ANY (select i from t);
+I          
+-----------
+0          
+1          
+ij> select i from s where i = 0 or i > ANY (select i from t where i = -1);
+I          
+-----------
+0          
+ij> select i from s where i = -1 or i <> ANY (select i from t where i = -1 or i = 1);
+I          
+-----------
+0          
+ij> -- correlated subqueries
+select * from s where i > ANY (select i from t where s.s > t.s);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i >= ANY (select i from t where s.s >= t.s);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i < ANY (select i from t where s.s < t.s);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i <= ANY (select i from t where s.s <= t.s);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i = ANY (select i from t where s.s = t.s);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where i <> ANY (select i from t where s.s <> t.s);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> -- ALL/NOT IN and NOTs
+-- create tables
+create table s_3rows (i int);
+0 rows inserted/updated/deleted
+ij> create table t_1 (i int);
+0 rows inserted/updated/deleted
+ij> create table u_null (i int);
+0 rows inserted/updated/deleted
+ij> create table v_empty (i int);
+0 rows inserted/updated/deleted
+ij> create table w_2 (i int);
+0 rows inserted/updated/deleted
+ij> -- populate tables
+insert into s_3rows values(NULL);
+1 row inserted/updated/deleted
+ij> insert into s_3rows values(1);
+1 row inserted/updated/deleted
+ij> insert into s_3rows values(2);
+1 row inserted/updated/deleted
+ij> insert into u_null values(NULL);
+1 row inserted/updated/deleted
+ij> insert into t_1 values(1);
+1 row inserted/updated/deleted
+ij> insert into w_2 values(2);
+1 row inserted/updated/deleted
+ij> -- test ALLs
+select * from s_3rows where s_3rows.i not in (select i from t_1);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i <> ALL (select i from t_1);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i >= ALL (select i from t_1);
+I          
+-----------
+1          
+2          
+ij> select * from s_3rows where s_3rows.i > ALL (select i from t_1);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i <= ALL (select i from t_1);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i < ALL (select i from t_1);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i = ALL (select i from t_1);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i not in (select i from u_null);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i <> ALL (select i from u_null);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i >= ALL (select i from u_null);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i > ALL (select i from u_null);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i <= ALL (select i from u_null);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i < ALL (select i from u_null);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i = ALL (select i from u_null);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i not in (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i <> ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i >= ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i > ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i <= ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i < ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i = ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i not in (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i <> ALL (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i >= ALL (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i > ALL (select i from w_2);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i <= ALL (select i from w_2);
+I          
+-----------
+1          
+2          
+ij> select * from s_3rows where s_3rows.i < ALL (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i = ALL (select i from w_2);
+I          
+-----------
+2          
+ij> select * from w_2 where w_2.i = ALL (select i from w_2);
+I          
+-----------
+2          
+ij> -- NOT = ANY <=> <> ALL
+select * from s_3rows where NOT s_3rows.i = ANY (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i <> ALL (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where NOT s_3rows.i = ANY (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i <> ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> -- NOT <> ANY <=> = ALL
+select * from s_3rows where NOT s_3rows.i <> ANY (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i = ALL (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where NOT s_3rows.i <> ANY (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i = ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> -- NOT >= ANY <=> < ALL
+select * from s_3rows where NOT s_3rows.i >= ANY (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i < ALL (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where NOT s_3rows.i >= ANY (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i < ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> -- NOT > ANY <=> <= ALL
+select * from s_3rows where NOT s_3rows.i > ANY (select i from w_2);
+I          
+-----------
+1          
+2          
+ij> select * from s_3rows where s_3rows.i <= ALL (select i from w_2);
+I          
+-----------
+1          
+2          
+ij> select * from s_3rows where NOT s_3rows.i > ANY (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i <= ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> -- NOT <= ANY <=> > ALL
+select * from s_3rows where NOT s_3rows.i <= ANY (select i from w_2);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i > ALL (select i from w_2);
+I          
+-----------
+ij> select * from s_3rows where NOT s_3rows.i <= ANY (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i > ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> -- NOT < ANY <=> >= ALL
+select * from s_3rows where NOT s_3rows.i < ANY (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i >= ALL (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where NOT s_3rows.i < ANY (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select * from s_3rows where s_3rows.i >= ALL (select i from v_empty);
+I          
+-----------
+NULL       
+1          
+2          
+ij> -- NOT = ALL <=> <> ANY
+select * from s_3rows where NOT s_3rows.i = ALL (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i <> ANY (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where NOT s_3rows.i = ALL (select i from v_empty);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i <> ANY (select i from v_empty);
+I          
+-----------
+ij> -- NOT <> ALL <=> = ANY
+select * from s_3rows where NOT s_3rows.i <> ALL (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i = ANY (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where NOT s_3rows.i <> ALL (select i from v_empty);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i = ANY (select i from v_empty);
+I          
+-----------
+ij> -- NOT >= ALL <=> < ANY
+select * from s_3rows where NOT s_3rows.i >= ALL (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where s_3rows.i < ANY (select i from w_2);
+I          
+-----------
+1          
+ij> select * from s_3rows where NOT s_3rows.i >= ALL (select i from v_empty);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i < ANY (select i from v_empty);
+I          
+-----------
+ij> -- NOT > ALL <=> <= ANY
+select * from s_3rows where NOT s_3rows.i > ALL (select i from w_2);
+I          
+-----------
+1          
+2          
+ij> select * from s_3rows where s_3rows.i <= ANY (select i from w_2);
+I          
+-----------
+1          
+2          
+ij> select * from s_3rows where NOT s_3rows.i > ALL (select i from v_empty);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i <= ANY (select i from v_empty);
+I          
+-----------
+ij> -- NOT <= ALL <=> > ANY
+select * from s_3rows where NOT s_3rows.i <= ALL (select i from w_2);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i > ANY (select i from w_2);
+I          
+-----------
+ij> select * from s_3rows where NOT s_3rows.i <= ALL (select i from v_empty);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i > ANY (select i from v_empty);
+I          
+-----------
+ij> -- NOT < ALL <=> >= ANY
+select * from s_3rows where NOT s_3rows.i < ALL (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where s_3rows.i >= ANY (select i from w_2);
+I          
+-----------
+2          
+ij> select * from s_3rows where NOT s_3rows.i < ALL (select i from v_empty);
+I          
+-----------
+ij> select * from s_3rows where s_3rows.i >= ANY (select i from v_empty);
+I          
+-----------
+ij> -- test skipping of generating is null predicates for non-nullable columns
+create table t1 (c1 int not null, c2 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int not null, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(0, 3);
+1 row inserted/updated/deleted
+ij> select * from t1 where c1 not in (select c2 from t2);
+C1         |C2         
+-----------------------
+1          |2          
+ij> select * from t1 where c2 not in (select c1 from t2);
+C1         |C2         
+-----------------------
+1          |2          
+ij> select * from t1 where c1 not in (select c1 from t2);
+C1         |C2         
+-----------------------
+1          |2          
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- update
+create table u (i int, s smallint, c char(30), vc char(30), b bigint);
+0 rows inserted/updated/deleted
+ij> insert into u select * from s;
+3 rows inserted/updated/deleted
+ij> select * from u;
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> -- exists returns a boolean value and hence it can not be used to set a value. Exists can only be used in where clause
+update u set b = exists (select * from t)
+where vc < ANY (select vc from s);
+ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 18.
+ij> select * from u;
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> delete from u;
+3 rows inserted/updated/deleted
+ij> insert into u select * from s;
+3 rows inserted/updated/deleted
+ij> -- delete
+delete from u where c < ANY (select c from t);
+2 rows inserted/updated/deleted
+ij> select * from u;
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> -- reset autocommit
+autocommit on;
+ij> -- drop the tables
+drop table s;
+0 rows inserted/updated/deleted
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> drop table tt;
+0 rows inserted/updated/deleted
+ij> drop table ttt;
+0 rows inserted/updated/deleted
+ij> drop table u;
+0 rows inserted/updated/deleted
+ij> drop table s_3rows;
+0 rows inserted/updated/deleted
+ij> drop table t_1;
+0 rows inserted/updated/deleted
+ij> drop table u_null;
+0 rows inserted/updated/deleted
+ij> drop table v_empty;
+0 rows inserted/updated/deleted
+ij> drop table w_2;
+0 rows inserted/updated/deleted
+ij> 

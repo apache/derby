@@ -1,0 +1,657 @@
+ij> --
+-- Test partial row access for update and delete
+--
+maximumdisplaywidth 2000;
+ij> drop function getScanCols;
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'GETSCANCOLS' because it does not exist.
+ij> drop table basic;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'BASIC' because it does not exist.
+ij> drop table p;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'P' because it does not exist.
+ij> CREATE FUNCTION getScanCols(value VARCHAR(32672)) 
+       RETURNS VARCHAR (32672) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.StatParser.getScanCols' 
+       LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL;
+0 rows inserted/updated/deleted
+ij> create table p (ccharForBitData char(1) for bit data not null, cdec dec(6,2) not null, unindexed smallint, cchar char(10) not null, 
+		constraint pk1 primary key (cchar, ccharForBitData), constraint pk2 unique (cdec));
+0 rows inserted/updated/deleted
+ij> insert into p values (x'00', 0.0, 11, '00');
+1 row inserted/updated/deleted
+ij> insert into p values (x'11', 1.1, 22, '11');
+1 row inserted/updated/deleted
+ij> insert into p values (x'22', 2.2, 33, '22');
+1 row inserted/updated/deleted
+ij> insert into p values (x'33', 3.3, 44, '33');
+1 row inserted/updated/deleted
+ij> create table basic (cint int, cchar char(10), 
+		ctime time, cdec dec(6,2), 
+		ccharForBitData char(1) for bit data, unindexed int);
+0 rows inserted/updated/deleted
+ij> create index b1 on basic (cchar, ccharForBitData, cint);
+0 rows inserted/updated/deleted
+ij> create index b2 on basic (ctime);
+0 rows inserted/updated/deleted
+ij> create index b3 on basic (ctime, cint);
+0 rows inserted/updated/deleted
+ij> create index b4 on basic (cint);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 200;
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> -- the extra 33s are so we can ensure we'll use an index when looking for the others
+insert into basic values (11, '11', TIME('11:11:11'), 1.1, x'11', 11);
+1 row inserted/updated/deleted
+ij> insert into basic values (22, '22', TIME('22:22:22'), 2.2, x'22', 22);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> insert into basic values (33, '33', TIME('03:33:33'), 3.3, x'33', 33);
+1 row inserted/updated/deleted
+ij> -- simple update of each column
+update basic set cint = cint;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4}
+ij> update basic set cchar = cchar;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2, 3}
+ij> update basic set ctime = ctime;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B3 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2}
+ij> update basic set cdec = cdec;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={3}
+ij> update basic set ccharForBitData = ccharForBitData;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2, 3}
+ij> update basic set unindexed = unindexed;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={5}
+ij> -- confirm the table is ok
+select ccharForBitData, ctime, cdec, cint, cchar from basic;
+CCH&|CTIME   |CDEC     |CINT       |CCHAR     
+----------------------------------------------
+11  |11:11:11|1.10     |11         |11        
+22  |22:22:22|2.20     |22         |22        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'BASIC'));
+1          
+-----------
+1          
+ij> update basic set cint = cint where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> update basic set cchar = cchar where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> update basic set ctime = ctime where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> update basic set ctime = ctime where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> update basic set cdec = cdec where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> update basic set ccharForBitData = ccharForBitData where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> -- confirm the table is ok
+select ccharForBitData, ctime, cdec, cint, cchar from basic;
+CCH&|CTIME   |CDEC     |CINT       |CCHAR     
+----------------------------------------------
+11  |11:11:11|1.10     |11         |11        
+22  |22:22:22|2.20     |22         |22        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'BASIC'));
+1          
+-----------
+1          
+ij> update basic set cint = cint where ccharForBitData = x'11';
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4}
+ij> update basic set cchar = cchar where ccharForBitData = x'11';
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2, 3}
+ij> update basic set ctime = ctime where ccharForBitData = x'11';
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 2, 4}
+ij> update basic set cdec = cdec where ccharForBitData = x'11';
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={3, 4}
+ij> update basic set ccharForBitData = ccharForBitData where ccharForBitData = x'11';
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2, 3}
+ij> -- confirm the table is ok
+select ccharForBitData, ctime, cdec, cint, cchar from basic;
+CCH&|CTIME   |CDEC     |CINT       |CCHAR     
+----------------------------------------------
+11  |11:11:11|1.10     |11         |11        
+22  |22:22:22|2.20     |22         |22        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'BASIC'));
+1          
+-----------
+1          
+ij> autocommit off;
+ij> update basic set cdec = cint;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 3}
+ij> -- confirm the table is ok
+select ccharForBitData, ctime, cdec, cint, cchar from basic;
+CCH&|CTIME   |CDEC     |CINT       |CCHAR     
+----------------------------------------------
+11  |11:11:11|11.00    |11         |11        
+22  |22:22:22|22.00    |22         |22        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+33  |03:33:33|33.00    |33         |33        
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'BASIC'));
+1          
+-----------
+1          
+ij> rollback;
+ij> update basic set cchar = cchar where cdec = 3.3 and ctime = TIME('03:33:33');
+10 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 3, 4}
+ij> update basic set ctime = ctime, cchar = cchar, cint = cint, cdec = cdec, ccharForBitData = ccharForBitData;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 3, 4}
+ij> -- confirm the table is ok
+select ccharForBitData, ctime, cdec, cint, cchar from basic;
+CCH&|CTIME   |CDEC     |CINT       |CCHAR     
+----------------------------------------------
+11  |11:11:11|1.10     |11         |11        
+22  |22:22:22|2.20     |22         |22        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+33  |03:33:33|3.30     |33         |33        
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'BASIC'));
+1          
+-----------
+1          
+ij> --------------------------------------------------------------------------
+-- deletes
+--------------------------------------------------------------------------
+--
+-- index scans
+--
+delete from basic where cchar = '22';
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> delete from basic where cint = 22;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> delete from basic where ctime = TIME('22:22:22');
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B2 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> delete from basic where ccharForBitData = x'22';
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4}
+ij> rollback;
+ij> delete from basic where cdec = 2.2;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 3, 4}
+ij> rollback;
+ij> --
+-- index row to base row 
+--
+delete from basic where cchar = '22' and unindexed = 22;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> delete from basic where cint = 22 and unindexed = 22;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> delete from basic where ctime = TIME('22:22:22') and unindexed = 22;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B2 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> delete from basic where ccharForBitData = x'22' and unindexed = 22;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4, 5}
+ij> rollback;
+ij> delete from basic where cdec = 2.2 and unindexed = 22;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> --
+-- table scans
+--
+delete from basic where cchar > '00';
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4}
+ij> rollback;
+ij> delete from basic where cint > 1;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4}
+ij> rollback;
+ij> delete from basic where ctime > TIME('00:00:01');
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4}
+ij> rollback;
+ij> delete from basic where ccharForBitData > x'11';
+11 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4}
+ij> rollback;
+ij> delete from basic where cdec > 2;
+11 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 3, 4}
+ij> rollback;
+ij> delete from basic where unindexed = 22;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 4, 5}
+ij> rollback;
+ij> --
+-- some checks on deferred deletes
+--
+delete from basic where unindexed = (select min(cint) from basic);
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Bit set of columns fetched={2}
+Bit set of columns fetched&
+ij> rollback;
+ij> delete from basic where cint = (select min(cint) from basic);
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Bit set of columns fetched={2}
+Bit set of columns fetched&
+ij> rollback;
+ij> delete from basic where cdec = (select min(cdec) from basic);
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={3}
+Bit set of columns fetched={0, 1, 2, 3, 4}
+ij> rollback;
+ij> delete from basic where cdec = 1.1 and cchar = (select min(cchar) from basic);
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using share row locking chosen by the optimizer
+Bit set of columns fetched={0}
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> --
+-- quickly confirm that we get all columns for updateable cursors
+--
+get cursor c as 'select cint from basic for update';
+ij> next c;
+CINT       
+-----------
+11         
+ij> ----------------------------------------------------------------- 
+-- now lets try some constraints
+----------------------------------------------------------------- 
+--
+-- check constraints
+--
+alter table basic add constraint ck check (unindexed > cdec);
+ERROR X0X95: Operation 'ALTER TABLE' cannot be performed on object 'BASIC' because there is an open ResultSet dependent on that object.
+ij> commit;
+ij> update basic set unindexed = unindexed where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> update basic set unindexed = unindexed;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={5}
+ij> rollback;
+ij> update basic set cdec = cdec where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> delete from basic where cint = 11;
+1 row inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B4 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched=All
+	
+ij> rollback;
+ij> -- one that isn't affected by contstraint
+update basic set ctime = ctime;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B3 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2}
+ij> rollback;
+ij> -- confirm it is working ok
+update basic set unindexed = 0;
+12 rows inserted/updated/deleted
+ij> rollback;
+ij> --
+-- foreign keys
+--
+alter table basic add constraint fk1 foreign key (cchar, ccharForBitData) references p;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> update basic set cchar = cchar, ccharForBitData = ccharForBitData;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2, 3}
+ij> update basic set cchar = cchar;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2, 3}
+ij> update basic set ccharForBitData = ccharForBitData;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for BASIC using index B1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2, 3}
+ij> rollback;
+ij> --pk update
+-- only this update should fail, does not satisfy fk1
+update p set ccharForBitData = x'22', cchar = CAST(unindexed as CHAR(10));
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK1' for key (11        ,11).  The statement has been rolled back.
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 2, 3}
+ij> rollback;
+ij> update p set cdec = cdec + 1.1;
+4 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for P using constraint PK2 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1}
+ij> rollback;
+ij> update p set unindexed = 666, cchar = 'fail';
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK1' for key (11        ,11).  The statement has been rolled back.
+ij> rollback;
+ij> -- only this update should fail, does not satisfy fk1
+update p set ccharForBitData = x'66' where ccharForBitData = x'22';
+ERROR 23503: UPDATE on table 'P' caused a violation of foreign key constraint 'FK1' for key (22        ,22).  The statement has been rolled back.
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for P using constraint PK1 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1, 2}
+ij> rollback;
+ij> alter table basic add constraint fk2 foreign key (cdec) references p(cdec);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> update p set cdec = cdec + 1.1;
+4 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index Scan ResultSet for P using constraint PK2 at read committed isolation level using exclusive row locking chosen by the optimizer
+Bit set of columns fetched={0, 1}
+ij> rollback;
+ij> update basic set cdec = cdec, cint = cint, ccharForBitData = ccharForBitData, cchar = cchar;
+12 rows inserted/updated/deleted
+ij> values getScanCols(SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS());
+1                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TableScan
+Bit set of columns fetched={0, 1, 2, 3, 4}
+ij> rollback;
+ij> update basic set cdec = cdec+1.1, cint = cint, ccharForBitData = ccharForBitData, cchar = cchar;
+ERROR 23503: UPDATE on table 'BASIC' caused a violation of foreign key constraint 'FK2' for key (4.40).  The statement has been rolled back.
+ij> rollback;
+ij> delete from p where cdec = 1.1;
+ERROR 23503: DELETE on table 'P' caused a violation of foreign key constraint 'FK1' for key (11        ,11).  The statement has been rolled back.
+ij> rollback;
+ij> -- clean up
+drop function getScanCols;
+0 rows inserted/updated/deleted
+ij> drop table basic;
+0 rows inserted/updated/deleted
+ij> drop table p;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,8 @@
+default_app.properties
+default_derby.properties
+metadata_app.properties
+metadata_derby.properties
+metadata_sed.properties
+savepointJdbc30_app.properties
+savepointJdbc30_derby.properties
+parameterMetaDataJdbc30_app.properties

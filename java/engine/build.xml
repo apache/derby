@@ -47,6 +47,7 @@
     <ant dir="${derby.engine.dir}/osgi"/>
     <ant dir="${derby.engine.dir}/catalog"/>
     <ant dir="${derby.engine.dir}/diag"/>
+    <ant dir="${derby.engine.dir}/vti"/>
 
     <copy todir="${out.dir}/${derby.dir}">
       <fileset dir="${derby.engine.dir}">

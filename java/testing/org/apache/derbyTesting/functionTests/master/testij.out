@@ -1,0 +1,38 @@
+Testing various ij connections and comments in front of selects
+org.apache.derby.tools.ij extin/testij.sql 
+ij> driver 'com.ibm.db2.jcc.DB2Driver';
+ij> --Bug 4632  Make the db italian to make sure string selects  are working
+connect 'jdbc:derby:net://localhost:1527/wombat;create=true;territory=it:retrieveMessagesFromServerOnGetMessage=true;' USER 'dbadmin' PASSWORD 'dbadmin';
+ij> connect 'jdbc:derby:net://localhost:1527/wombat' USER 'dbadmin' PASSWORD 'dbadbmin';
+ij(CONNECTION1)> -- this is a comment, a comment in front of a select should not cause an error
+select * from sys.systables where 1=0;
+TABLEID |TABLENAME |& |SCHEMAID |&
+-----
+0 rows selected
+ij(CONNECTION1)> -- this is a comment, a comment in front of a values clauses should not cause an error
+values(1);
+1          
+-----
+1          
+1 row selected
+ij(CONNECTION1)> -- Try some URL attributes
+disconnect all;
+ij> connect 'jdbc:derby:net://localhost:1527/junk;create=true:retrieveMessagesFromServerOnGetMessage=true;' USER 'dbadmin' PASSWORD 'dbadbmin';
+ij> select * from APP.notthere;
+ERROR 42X05: Table 'APP.NOTTHERE' does not exist.
+ij> -- examples from the docs
+connect 'jdbc:derby:net://localhost:1527/wombat;create=true:user=judy;password=judy;retrieveMessagesFromServerOnGetMessage=true;';
+ij(CONNECTION1)> connect 'jdbc:derby:net://localhost:1527/"./wombat":user=judy;password=judy;retrieveMessagesFromServerOnGetMessage=true;';
+ij(CONNECTION2)> connect 'jdbc:derby:net://localhost:1527/toursDB:retrieveMessagesFromServerOnGetMessage=true;';
+ERROR (no SQLState): null userid not supported
+ij(CONNECTION2)> connect 'jdbc:derby:net://localhost:1527/toursDB:retrieveMessagesFromServerOnGetMessage=true;' USER 'dbadmin' PASSWORD 'dbadbmin';
+ERROR 08004: The application server rejected establishment of the connection.  An attempt was made to access a database, toursDB, which was not found.
+ij(CONNECTION2)> connect 'jdbc:derby:net://localhost:1527/wombat' USER 'APP' PASSWORD 'APP';
+ij(CONNECTION3)> connect  'jdbc:derby:net://localhost:1527/my-db-name;create=true:user=usr;password=pwd;retrieveMessagesFromServerOnGetMessage=true;';
+ij(CONNECTION4)> connect 'jdbc:derby:net://localhost:1527/my-db-name;upgrade=true:user=usr;password=pwd;retrieveMessagesFromServerOnGetMessage=true;';
+ij(CONNECTION5)> connect 'jdbc:derby:net://localhost:1527/my-db-name;shutdown=true:user=usr;password=pwd;'
+----- Quoted db and attributes
+connect 'jdbc:derby:net://localhost:1527/"./my-dbname;create=true":user=usr;password=pwd;';
+ERROR 08006: DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: my-db-name08006.DDatabase 'my-db-name' shutdown.((server log XXX)
+ij(CONNECTION5)> connect 'jdbc:derby:net://localhost:1527/"./my-dbname;create=true":user=usr;password=pwd;retrieveMessagesFromServerOnGetMessage=true;';
+ij(CONNECTION6)> 

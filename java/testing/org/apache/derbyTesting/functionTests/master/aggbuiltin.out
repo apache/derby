@@ -1,0 +1,2773 @@
+ij> -- Note that bug 5704 occurs throughout this test
+-- Decimal results may be outside the range of valid types in Cloudscape
+-- ** insert avg.sql
+-- create an all types tables
+create table t (i int, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, lbv long varchar for bit data,
+				dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- empty table
+create table empty (i int, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, lbv long varchar for bit data,
+				dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- populate tables
+insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', x'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 200, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 2000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 222.22);
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> insert into t values (0, 100, 1000000,
+					  'goodbye', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'noone is here', 'jimmie noone was here',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  100.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 100.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'ffff', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'1111111111111111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> --------------------------------------
+-- NEGATIVE TESTS
+--------------------------------------
+-- cannot aggregate datatypes that don't support NumberDataValue
+select avg(c) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type CHAR.
+ij> select avg(v) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type VARCHAR.
+ij> select avg(lvc) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type LONG VARCHAR.
+ij> select avg(dt) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type DATE.
+ij> select avg(t) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type TIME.
+ij> select avg(ts) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type TIMESTAMP.
+ij> select avg(b) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type CHAR () FOR BIT DATA.
+ij> select avg(bv) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type VARCHAR () FOR BIT DATA.
+ij> select avg(lbv) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type LONG VARCHAR FOR BIT DATA.
+ij> select avg(c) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type CHAR.
+ij> select avg(v) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type VARCHAR.
+ij> select avg(lvc) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type LONG VARCHAR.
+ij> select avg(dt) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type DATE.
+ij> select avg(t) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type TIME.
+ij> select avg(ts) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type TIMESTAMP.
+ij> select avg(b) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type CHAR () FOR BIT DATA.
+ij> select avg(bv) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type VARCHAR () FOR BIT DATA.
+ij> select avg(lbv) from t group by c;
+ERROR 42Y22: Aggregate AVG cannot operate on type LONG VARCHAR FOR BIT DATA.
+ij> -- long varchar datatypes too
+create table t1 (c1 long varchar);
+0 rows inserted/updated/deleted
+ij> select avg(c1) from t1;
+ERROR 42Y22: Aggregate AVG cannot operate on type LONG VARCHAR.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- constants
+select avg('hello') from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type CHAR.
+ij> select avg(X'11') from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type CHAR () FOR BIT DATA.
+ij> select avg(date('1999-06-06')) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type DATE.
+ij> select avg(time('12:30:30')) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type TIME.
+ij> select avg(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+ERROR 42Y22: Aggregate AVG cannot operate on type TIMESTAMP.
+ij> ---------------------------
+-- NULL AGGREGATION
+---------------------------
+-- scalar
+select avg(i) from empty;
+1          
+-----------
+NULL       
+ij> select avg(s) from empty;
+1     
+------
+NULL  
+ij> select avg(d) from empty;
+1                     
+----------------------
+NULL                  
+ij> select avg(l) from empty;
+1                   
+--------------------
+NULL                
+ij> select avg(r) from empty;
+1            
+-------------
+NULL         
+ij> select avg(dc) from empty;
+1          
+-----------
+NULL       
+ij> -- variations
+select avg(i), avg(s), avg(r), avg(l) from empty;
+1          |2     |3            |4                   
+-----------------------------------------------------
+NULL       |NULL  |NULL         |NULL                
+ij> select avg(i+1) from empty;
+1          
+-----------
+NULL       
+ij> -- vector
+select avg(i) from empty group by i;
+1          
+-----------
+ij> select avg(s) from empty group by s;
+1     
+------
+ij> select avg(d) from empty group by d;
+1                     
+----------------------
+ij> select avg(l) from empty group by l;
+1                   
+--------------------
+ij> select avg(r) from empty group by r;
+1            
+-------------
+ij> select avg(dc) from empty group by dc;
+1          
+-----------
+ij> --------------------------------
+-- BASIC ACCEPTANCE TESTS
+--------------------------------
+select avg(i) from t;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(s) from t;
+1     
+------
+107   
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(d) from t;
+1                     
+----------------------
+192.85714285714286    
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(l) from t;
+1                   
+--------------------
+1000000             
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(r) from t;
+1            
+-------------
+192.85715    
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(dc) from t;
+1          
+-----------
+119.0464   
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(i) from t group by i;
+1          
+-----------
+0          
+1          
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(s) from t group by s;
+1     
+------
+100   
+200   
+NULL  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(d) from t group by d;
+1                     
+----------------------
+100.0                 
+200.0                 
+NULL                  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(l) from t group by l;
+1                   
+--------------------
+1000000             
+NULL                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(r) from t group by r;
+1            
+-------------
+100.0        
+200.0        
+NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select avg(dc), sum(dc), count(dc) from t group by dc;
+1          |2          |3          
+-----------------------------------
+111.1100   |1444.43    |13         
+222.2200   |222.22     |1          
+NULL       |NULL       |0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- constants
+select avg(1) from t;
+1          
+-----------
+1          
+ij> select avg(1.1) from t;
+1        
+---------
+1.1000   
+ij> select avg(1e1) from t;
+1                     
+----------------------
+10.0                  
+ij> select avg(1) from t group by i;
+1          
+-----------
+1          
+1          
+1          
+ij> select avg(1.1) from t group by r;
+1        
+---------
+1.1000   
+1.1000   
+1.1000   
+ij> select avg(1e1) from t group by r;
+1                     
+----------------------
+10.0                  
+10.0                  
+10.0                  
+ij> -- multicolumn grouping
+select avg(i), avg(l), avg(r) from t group by i, dt, b;
+1          |2                   |3            
+----------------------------------------------
+0          |1000000             |190.90909    
+0          |1000000             |200.0        
+0          |1000000             |200.0        
+1          |1000000             |200.0        
+NULL       |NULL                |NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select i, dt, avg(i), avg(r), avg(l), l from t group by i, dt, b, l;
+I          |DT        |3          |4            |5                   |L                   
+------------------------------------------------------------------------------------------
+0          |1992-01-01|0          |190.90909    |1000000             |1000000             
+0          |1992-01-01|0          |200.0        |1000000             |1000000             
+0          |1992-09-09|0          |200.0        |1000000             |1000000             
+1          |1992-01-01|1          |200.0        |1000000             |1000000             
+NULL       |NULL      |NULL       |NULL         |NULL                |NULL                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- group by expression
+select avg(expr1), avg(expr2)
+from (select i * s, r * 2 from t) t (expr1, expr2) group by expr2, expr1;
+1          |2            
+-------------------------
+0          |200.0        
+0          |400.0        
+100        |400.0        
+NULL       |NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- distinct and group by
+select distinct avg(i) from t group by i, dt;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+1          
+NULL       
+ij> -- insert select
+create table tmp (x int, y smallint);
+0 rows inserted/updated/deleted
+ij> insert into tmp (x, y) select avg(i), avg(s) from t;
+1 row inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+0          |107   
+ij> insert into tmp (x, y) select avg(i), avg(s) from t group by b;
+3 rows inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+0          |107   
+0          |107   
+0          |100   
+NULL       |NULL  
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- some accuracy tests
+create table tmp (x int);
+0 rows inserted/updated/deleted
+ij> insert into tmp values (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647);
+22 rows inserted/updated/deleted
+ij> values(2147483647);
+1          
+-----------
+2147483647 
+ij> select avg(x) from tmp;
+1          
+-----------
+2147483647 
+ij> select avg(-(x - 1)) from tmp;
+1          
+-----------
+-2147483646
+ij> select avg(x) from tmp group by x;
+1          
+-----------
+2147483647 
+ij> select avg(-(x - 1)) from tmp group by x;
+1          
+-----------
+-2147483646
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- now lets try some simple averages to see what
+-- type of accuracy we get
+create table tmp(x double precision, y int);
+0 rows inserted/updated/deleted
+ij> prepare scalar as 'select avg(x) from tmp';
+ij> prepare vector as 'select avg(x) from tmp group by y';
+ij> insert into tmp values (1,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+1.0                   
+ij> execute vector;
+1                     
+----------------------
+1.0                   
+ij> insert into tmp values (2,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+1.5                   
+ij> execute vector;
+1                     
+----------------------
+1.5                   
+ij> insert into tmp values (3,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+2.0                   
+ij> execute vector;
+1                     
+----------------------
+2.0                   
+ij> insert into tmp values (4,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+2.5                   
+ij> execute vector;
+1                     
+----------------------
+2.5                   
+ij> insert into tmp values (5,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+3.0                   
+ij> execute vector;
+1                     
+----------------------
+3.0                   
+ij> insert into tmp values (6,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+3.5                   
+ij> execute vector;
+1                     
+----------------------
+3.5                   
+ij> insert into tmp values (7,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+4.0                   
+ij> execute vector;
+1                     
+----------------------
+4.0                   
+ij> insert into tmp values (10000,1);
+1 row inserted/updated/deleted
+ij> execute scalar;
+1                     
+----------------------
+1253.5                
+ij> execute vector;
+1                     
+----------------------
+1253.5                
+ij> remove vector;
+ij> remove scalar;
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- drop tables
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table empty;
+0 rows inserted/updated/deleted
+ij> -- ** insert count.sql
+-- create an all types tables
+create table t (i int, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, lbv long varchar for bit data,
+				dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- empty table
+create table empty (i int, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, lbv long varchar for bit data,
+				dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- bit maps to Byte[], so can't test for now
+-- populate tables
+insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 200, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 2000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'goodbye', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'noone is here', 'jimmie noone was here',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  100.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 100.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'ffff', X'0000111100001111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'1111111111111111', X'1234', 111.11);
+1 row inserted/updated/deleted
+ij> ---------------------------
+-- NULL AGGREGATION
+---------------------------
+-- scalar
+select count(i) from empty;
+1          
+-----------
+0          
+ij> select count(s) from empty;
+1          
+-----------
+0          
+ij> select count(l) from empty;
+1          
+-----------
+0          
+ij> select count(c) from empty;
+1          
+-----------
+0          
+ij> select count(v) from empty;
+1          
+-----------
+0          
+ij> select count(lvc) from empty;
+1          
+-----------
+0          
+ij> select count(d) from empty;
+1          
+-----------
+0          
+ij> select count(r) from empty;
+1          
+-----------
+0          
+ij> select count(dt) from empty;
+1          
+-----------
+0          
+ij> select count(t) from empty;
+1          
+-----------
+0          
+ij> select count(ts) from empty;
+1          
+-----------
+0          
+ij> select count(b) from empty;
+1          
+-----------
+0          
+ij> select count(bv) from empty;
+1          
+-----------
+0          
+ij> -- bug: should fail in db2 mode
+-- after for bit data is completely implemented
+select count(lbv) from empty;
+1          
+-----------
+0          
+ij> select count(dc) from empty;
+1          
+-----------
+0          
+ij> -- variations
+select count(i), count(b), count(i), count(s) from empty;
+1          |2          |3          |4          
+-----------------------------------------------
+0          |0          |0          |0          
+ij> select count(i+1) from empty;
+1          
+-----------
+0          
+ij> -- vector
+select count(i) from empty group by i;
+1          
+-----------
+ij> select count(s) from empty group by s;
+1          
+-----------
+ij> select count(l) from empty group by l;
+1          
+-----------
+ij> select count(c) from empty group by c;
+1          
+-----------
+ij> select count(v) from empty group by v;
+1          
+-----------
+ij> select count(d) from empty group by d;
+1          
+-----------
+ij> select count(r) from empty group by r;
+1          
+-----------
+ij> select count(dt) from empty group by dt;
+1          
+-----------
+ij> select count(t) from empty group by t;
+1          
+-----------
+ij> select count(ts) from empty group by ts;
+1          
+-----------
+ij> select count(b) from empty group by b;
+1          
+-----------
+ij> select count(bv) from empty group by bv;
+1          
+-----------
+ij> select count(lbv) from empty group by lbv;
+1          
+-----------
+ij> select count(dc) from empty group by dc;
+1          
+-----------
+ij> --------------------------------
+-- BASIC ACCEPTANCE TESTS
+--------------------------------
+select count(i) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(s) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(l) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(c) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(v) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(lvc) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(d) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(r) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(dt) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(t) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(ts) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(b) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(bv) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(lbv) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(dc) from t;
+1          
+-----------
+15         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(i) from t group by i;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(s) from t group by s;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(l) from t group by l;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(c) from t group by c;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(v) from t group by v;
+1          
+-----------
+1          
+14         
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(d) from t group by d;
+1          
+-----------
+1          
+14         
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(r) from t group by r;
+1          
+-----------
+1          
+14         
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(dt) from t group by dt;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(t) from t group by t;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(ts) from t group by ts;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(b) from t group by b;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(bv) from t group by bv;
+1          
+-----------
+14         
+1          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(lbv) from t group by lbv;
+1          
+-----------
+15         
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select count(dc) from t group by dc;
+1          
+-----------
+13         
+2          
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- constants
+select count(1) from t;
+1          
+-----------
+17         
+ij> select count('hello') from t;
+1          
+-----------
+17         
+ij> select count(1.1) from t;
+1          
+-----------
+17         
+ij> select count(1e1) from t;
+1          
+-----------
+17         
+ij> select count(X'11') from t;
+1          
+-----------
+17         
+ij> select count(date('1999-06-06')) from t;
+1          
+-----------
+17         
+ij> select count(time('12:30:30')) from t;
+1          
+-----------
+17         
+ij> select count(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+1          
+-----------
+17         
+ij> select count(1) from t group by i;
+1          
+-----------
+14         
+1          
+2          
+ij> select count('hello') from t group by c;
+1          
+-----------
+14         
+1          
+2          
+ij> select count(1.1) from t group by dc;
+1          
+-----------
+13         
+2          
+2          
+ij> select count(1e1) from t group by r;
+1          
+-----------
+1          
+14         
+2          
+ij> select count(X'11') from t group by b;
+1          
+-----------
+14         
+1          
+2          
+ij> select count(date('1999-06-06')) from t group by dt;
+1          
+-----------
+14         
+1          
+2          
+ij> select count(time('12:30:30')) from t group by t;
+1          
+-----------
+14         
+1          
+2          
+ij> select count(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t group by ts;
+1          
+-----------
+14         
+1          
+2          
+ij> -- multicolumn grouping
+select count(i), count(dt), count(b) from t group by i, dt, b;
+1          |2          |3          
+-----------------------------------
+12         |12         |12         
+1          |1          |1          
+1          |1          |1          
+1          |1          |1          
+0          |0          |0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select l, dt, count(i), count(dt), count(b), i from t group by i, dt, b, l;
+L                   |DT        |3          |4          |5          |I          
+-------------------------------------------------------------------------------
+1000000             |1992-01-01|11         |11         |11         |0          
+2000000             |1992-01-01|1          |1          |1          |0          
+1000000             |1992-01-01|1          |1          |1          |0          
+1000000             |1992-09-09|1          |1          |1          |0          
+1000000             |1992-01-01|1          |1          |1          |1          
+NULL                |NULL      |0          |0          |0          |NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- group by expression
+select count(expr1), count(expr2)
+from (select i * s, c || v from t) t (expr1, expr2) group by expr2, expr1;
+1          |2          
+-----------------------
+1          |1          
+12         |12         
+1          |1          
+1          |1          
+0          |0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- distinct and group by
+select distinct count(i) from t group by i, dt;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+1          
+13         
+ij> -- insert select
+create table tmp (x int, y smallint);
+0 rows inserted/updated/deleted
+ij> insert into tmp (x, y) select count(i), count(c) from t;
+1 row inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+15         |15    
+ij> insert into tmp (x, y) select count(i), count(c) from t group by b;
+3 rows inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+15         |15    
+14         |14    
+1          |1     
+0          |0     
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- drop tables
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table empty;
+0 rows inserted/updated/deleted
+ij> -- ** insert countStar.sql
+-- Test the COUNT() aggregate
+-- create an all types tables
+create table t (i int, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, lbv long varchar for bit data);
+0 rows inserted/updated/deleted
+ij> -- empty table
+create table empty (i int, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, lbv long varchar for bit data);
+0 rows inserted/updated/deleted
+ij> -- populate tables
+insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (1, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 200, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 2000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'goodbye', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'noone is here', 'jimmie noone was here',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  100.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 100.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', X'ABCD');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'ffff', X'0000111100001111', X'1234');
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'1111111111111111', X'ABCD');
+1 row inserted/updated/deleted
+ij> ---------------------------
+-- NULL AGGREGATION
+---------------------------
+-- scalar
+select count(*) from empty;
+1          
+-----------
+0          
+ij> -- variations
+select count(*), count(*) from empty;
+1          |2          
+-----------------------
+0          |0          
+ij> -- vector
+select count(*) from empty group by i;
+1          
+-----------
+ij> --------------------------------
+-- BASIC ACCEPTANCE TESTS
+--------------------------------
+select count(*) from t;
+1          
+-----------
+17         
+ij> select count(*) from t group by i;
+1          
+-----------
+14         
+1          
+2          
+ij> -- multicolumn grouping
+select count(*), count(*), count(*) from t group by i, dt, b;
+1          |2          |3          
+-----------------------------------
+12         |12         |12         
+1          |1          |1          
+1          |1          |1          
+1          |1          |1          
+2          |2          |2          
+ij> -- group by expression
+select count(*), count(*)
+from (select i * s, c || v from t) t (expr1, expr2) group by expr2, expr1;
+1          |2          
+-----------------------
+1          |1          
+12         |12         
+1          |1          
+1          |1          
+2          |2          
+ij> -- distinct and group by
+select distinct count(*) from t group by i, dt;
+1          
+-----------
+1          
+2          
+13         
+ij> -- view
+create view v1 as select * from t;
+0 rows inserted/updated/deleted
+ij> select count(*) from v1;
+1          
+-----------
+17         
+ij> select count(*)+count(*) from v1;
+1          
+-----------
+34         
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> -- insert select 
+create table tmp (x int, y smallint);
+0 rows inserted/updated/deleted
+ij> insert into tmp (x, y) select count(*), count(*) from t;
+1 row inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+17         |17    
+ij> insert into tmp (x, y) select count(*), count(*) from t group by b;
+3 rows inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+17         |17    
+14         |14    
+1          |1     
+2          |2     
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- drop tables
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table empty;
+0 rows inserted/updated/deleted
+ij> -- ** insert sum.sql
+--BUGS: sum() on decimal may overflow the decimal,
+--w/o the type system knowing.  so, given dec(1,0),
+--result might be dec(2,0), but return length passed
+--to connectivity is 1 which is wrong.  if we allow
+--the decimal to grow beyond the preset type, we need
+--to all the type system to get it.  alternatively, 
+--need to cast/normalize/setWidth() the result to ensure 
+--right type.
+-- create an all types tables
+create table t (i int, s smallint, l bigint,
+				c char(10), v varchar(50), 
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- empty table
+create table empty (i int, s smallint, l bigint,
+				c char(10), v varchar(50), 
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- bit maps to Byte[], so can't test for now
+-- populate tables
+insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 200, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 2000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'goodbye', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'noone is here', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  100.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 100.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'ffff', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'1111111111111111', 111.11);
+1 row inserted/updated/deleted
+ij> -- bit maps to Byte[], so can't test for now
+--------------------------------------
+-- NEGATIVE TESTS
+--------------------------------------
+-- cannot aggregate datatypes that don't support NumberDataValue
+select sum(c) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type CHAR.
+ij> select sum(v) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type VARCHAR.
+ij> select sum(dt) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type DATE.
+ij> select sum(t) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type TIME.
+ij> select sum(ts) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type TIMESTAMP.
+ij> select sum(b) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type CHAR () FOR BIT DATA.
+ij> select sum(bv) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type VARCHAR () FOR BIT DATA.
+ij> select sum(c) from t group by c;
+ERROR 42Y22: Aggregate SUM cannot operate on type CHAR.
+ij> select sum(v) from t group by c;
+ERROR 42Y22: Aggregate SUM cannot operate on type VARCHAR.
+ij> select sum(dt) from t group by c;
+ERROR 42Y22: Aggregate SUM cannot operate on type DATE.
+ij> select sum(t) from t group by c;
+ERROR 42Y22: Aggregate SUM cannot operate on type TIME.
+ij> select sum(ts) from t group by c;
+ERROR 42Y22: Aggregate SUM cannot operate on type TIMESTAMP.
+ij> select sum(b) from t group by c;
+ERROR 42Y22: Aggregate SUM cannot operate on type CHAR () FOR BIT DATA.
+ij> select sum(bv) from t group by c;
+ERROR 42Y22: Aggregate SUM cannot operate on type VARCHAR () FOR BIT DATA.
+ij> -- long varchar datatypes too
+create table t1 (c1 long varchar);
+0 rows inserted/updated/deleted
+ij> select sum(c1) from t1;
+ERROR 42Y22: Aggregate SUM cannot operate on type LONG VARCHAR.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- constants
+select sum('hello') from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type CHAR.
+ij> select sum(X'11') from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type CHAR () FOR BIT DATA.
+ij> select sum(date('1999-06-06')) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type DATE.
+ij> select sum(time('12:30:30')) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type TIME.
+ij> select sum(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+ERROR 42Y22: Aggregate SUM cannot operate on type TIMESTAMP.
+ij> ---------------------------
+-- NULL AGGREGATION
+---------------------------
+-- scalar
+select sum(i) from empty;
+1          
+-----------
+NULL       
+ij> select sum(s) from empty;
+1     
+------
+NULL  
+ij> select sum(d) from empty;
+1                     
+----------------------
+NULL                  
+ij> select sum(l) from empty;
+1                   
+--------------------
+NULL                
+ij> select sum(r) from empty;
+1            
+-------------
+NULL         
+ij> select sum(dc) from empty;
+1          
+-----------
+NULL       
+ij> -- variations
+select sum(i), sum(s), sum(r), sum(l) from empty;
+1          |2     |3            |4                   
+-----------------------------------------------------
+NULL       |NULL  |NULL         |NULL                
+ij> select sum(i+1) from empty;
+1          
+-----------
+NULL       
+ij> -- vector
+select sum(i) from empty group by i;
+1          
+-----------
+ij> select sum(s) from empty group by s;
+1     
+------
+ij> select sum(d) from empty group by d;
+1                     
+----------------------
+ij> select sum(l) from empty group by l;
+1                   
+--------------------
+ij> select sum(r) from empty group by r;
+1            
+-------------
+ij> select sum(dc) from empty group by dc;
+1          
+-----------
+ij> --------------------------------
+-- BASIC ACCEPTANCE TESTS
+--------------------------------
+select sum(i) from t;
+1          
+-----------
+1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(s) from t;
+1     
+------
+1600  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(d) from t;
+1                     
+----------------------
+2900.0                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(l) from t;
+1                   
+--------------------
+16000000            
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(r) from t;
+1            
+-------------
+2900.0       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(dc) from t;
+1          
+-----------
+1888.87    
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(i) from t group by i;
+1          
+-----------
+0          
+1          
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(s) from t group by s;
+1     
+------
+1400  
+200   
+NULL  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(d) from t group by d;
+1                     
+----------------------
+100.0                 
+2800.0                
+NULL                  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(l) from t group by l;
+1                   
+--------------------
+14000000            
+2000000             
+NULL                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(r) from t group by r;
+1            
+-------------
+100.0        
+2800.0       
+NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select sum(dc) from t group by dc;
+1          
+-----------
+1444.43    
+444.44     
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- constants
+select sum(1) from t;
+1          
+-----------
+17         
+ij> select sum(1.1) from t;
+1     
+------
+18.7  
+ij> select sum(1e1) from t;
+1                     
+----------------------
+170.0                 
+ij> select sum(1) from t group by i;
+1          
+-----------
+14         
+1          
+2          
+ij> select sum(1.1) from t group by r;
+1     
+------
+1.1   
+15.4  
+2.2   
+ij> select sum(1e1) from t group by r;
+1                     
+----------------------
+10.0                  
+140.0                 
+20.0                  
+ij> -- multicolumn grouping
+select sum(i), sum(l), sum(r) from t group by i, dt, b;
+1          |2                   |3            
+----------------------------------------------
+0          |13000000            |2300.0       
+0          |1000000             |200.0        
+0          |1000000             |200.0        
+1          |1000000             |200.0        
+NULL       |NULL                |NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select i, dt, sum(i), sum(r), sum(l), l from t group by i, dt, b, l;
+I          |DT        |3          |4            |5                   |L                   
+------------------------------------------------------------------------------------------
+0          |1992-01-01|0          |2100.0       |11000000            |1000000             
+0          |1992-01-01|0          |200.0        |2000000             |2000000             
+0          |1992-01-01|0          |200.0        |1000000             |1000000             
+0          |1992-09-09|0          |200.0        |1000000             |1000000             
+1          |1992-01-01|1          |200.0        |1000000             |1000000             
+NULL       |NULL      |NULL       |NULL         |NULL                |NULL                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- group by expression
+select sum(expr1), sum(expr2)
+from (select i * s, r * 2 from t) t (expr1, expr2) group by expr2, expr1;
+1          |2            
+-------------------------
+0          |200.0        
+0          |5200.0       
+100        |400.0        
+NULL       |NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- distinct and group by
+select distinct sum(i) from t group by i, dt;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+1          
+NULL       
+ij> -- insert select
+create table tmp (x int, y smallint);
+0 rows inserted/updated/deleted
+ij> insert into tmp (x, y) select sum(i), sum(s) from t;
+1 row inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+1          |1600  
+ij> insert into tmp (x, y) select sum(i), sum(s) from t group by b;
+3 rows inserted/updated/deleted
+ij> select * from tmp;
+X          |Y     
+------------------
+1          |1600  
+1          |1500  
+0          |100   
+NULL       |NULL  
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- overflow
+create table tmp (x int);
+0 rows inserted/updated/deleted
+ij> insert into tmp values (2147483647),
+                     (2147483647);
+2 rows inserted/updated/deleted
+ij> select sum(x) from tmp;
+1          
+-----------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> create table tmp (x double precision);
+0 rows inserted/updated/deleted
+ij> insert into tmp values (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647),
+                     (2147483647);
+9 rows inserted/updated/deleted
+ij> select sum(x) from tmp;
+1                     
+----------------------
+1.9327352823E10       
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- drop tables
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table empty;
+0 rows inserted/updated/deleted
+ij> -- ** insert max.sql
+-- create an all types tables
+create table t (i int, s smallint, l bigint,
+				c char(10), v varchar(50), 
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- empty table
+create table empty (i int, s smallint, l bigint,
+				c char(10), v varchar(50), 
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- bit maps to Byte[], so can't test for now
+-- populate tables
+insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 200, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 2000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'goodbye', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'noone is here', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  100.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 100.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'ffff', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'1111111111111111', 111.11);
+1 row inserted/updated/deleted
+ij> --------------------------------------
+-- NEGATIVE TESTS
+--------------------------------------
+-- long varchar datatypes too
+create table t1 (c1 long varchar);
+0 rows inserted/updated/deleted
+ij> select max(c1) from t1;
+ERROR 42Y22: Aggregate MAX cannot operate on type LONG VARCHAR.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> ---------------------------
+-- NULL AGGREGATION
+---------------------------
+-- scalar
+select max(i) from empty;
+1          
+-----------
+NULL       
+ij> select max(s) from empty;
+1     
+------
+NULL  
+ij> select max(l) from empty;
+1                   
+--------------------
+NULL                
+ij> select max(c) from empty;
+1         
+----------
+NULL      
+ij> select max(v) from empty;
+1                                                 
+--------------------------------------------------
+NULL                                              
+ij> select max(d) from empty;
+1                     
+----------------------
+NULL                  
+ij> select max(r) from empty;
+1            
+-------------
+NULL         
+ij> select max(dt) from empty;
+1         
+----------
+NULL      
+ij> select max(t) from empty;
+1       
+--------
+NULL    
+ij> select max(ts) from empty;
+1                         
+--------------------------
+NULL                      
+ij> select max(b) from empty;
+1   
+----
+NULL
+ij> select max(bv) from empty;
+1               
+----------------
+NULL            
+ij> select max(dc) from empty;
+1       
+--------
+NULL    
+ij> -- variations
+select max(i), max(b), max(i), max(s) from empty;
+1          |2   |3          |4     
+-----------------------------------
+NULL       |NULL|NULL       |NULL  
+ij> select max(i+1) from empty;
+1          
+-----------
+NULL       
+ij> -- vector
+select max(i) from empty group by i;
+1          
+-----------
+ij> select max(s) from empty group by s;
+1     
+------
+ij> select max(l) from empty group by l;
+1                   
+--------------------
+ij> select max(c) from empty group by c;
+1         
+----------
+ij> select max(v) from empty group by v;
+1                                                 
+--------------------------------------------------
+ij> select max(d) from empty group by d;
+1                     
+----------------------
+ij> select max(r) from empty group by r;
+1            
+-------------
+ij> select max(dt) from empty group by dt;
+1         
+----------
+ij> select max(t) from empty group by t;
+1       
+--------
+ij> select max(ts) from empty group by ts;
+1                         
+--------------------------
+ij> select max(b) from empty group by b;
+1   
+----
+ij> select max(bv) from empty group by bv;
+1               
+----------------
+ij> select max(dc) from empty group by dc;
+1       
+--------
+ij> --------------------------------
+-- BASIC ACCEPTANCE TESTS
+--------------------------------
+select max(i) from t;
+1          
+-----------
+1          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(s) from t;
+1     
+------
+200   
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(l) from t;
+1                   
+--------------------
+2000000             
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(c) from t;
+1         
+----------
+goodbye   
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(v) from t;
+1                                                 
+--------------------------------------------------
+this is duplicated                                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(d) from t;
+1                     
+----------------------
+200.0                 
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(r) from t;
+1            
+-------------
+200.0        
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(dt) from t;
+1         
+----------
+1992-09-09
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(t) from t;
+1       
+--------
+12:55:55
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(ts) from t;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(b) from t;
+1   
+----
+ffff
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(bv) from t;
+1               
+----------------
+1111111111111111
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(dc) from t;
+1       
+--------
+222.22  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(i) from t group by i;
+1          
+-----------
+0          
+1          
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(s) from t group by s;
+1     
+------
+100   
+200   
+NULL  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(l) from t group by l;
+1                   
+--------------------
+1000000             
+2000000             
+NULL                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(c) from t group by c;
+1         
+----------
+duplicate 
+goodbye   
+NULL      
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(v) from t group by v;
+1                                                 
+--------------------------------------------------
+noone is here                                     
+this is duplicated                                
+NULL                                              
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(d) from t group by d;
+1                     
+----------------------
+100.0                 
+200.0                 
+NULL                  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(r) from t group by r;
+1            
+-------------
+100.0        
+200.0        
+NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(dt) from t group by dt;
+1         
+----------
+1992-01-01
+1992-09-09
+NULL      
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(t) from t group by t;
+1       
+--------
+12:30:30
+12:55:55
+NULL    
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(ts) from t group by ts;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+NULL                      
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(b) from t group by b;
+1   
+----
+12af
+ffff
+NULL
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(bv) from t group by bv;
+1               
+----------------
+0000111100001111
+1111111111111111
+NULL            
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select max(dc) from t group by dc;
+1       
+--------
+111.11  
+222.22  
+NULL    
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- constants
+select max(1) from t;
+1          
+-----------
+1          
+ij> select max('hello') from t;
+1    
+-----
+hello
+ij> select max(1.1) from t;
+1    
+-----
+1.1  
+ij> select max(1e1) from t;
+1                     
+----------------------
+10.0                  
+ij> select max(X'11') from t;
+1   
+----
+11  
+ij> select max(date('1999-06-06')) from t;
+1         
+----------
+1999-06-06
+ij> select max(time('12:30:30')) from t;
+1       
+--------
+12:30:30
+ij> select max(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select max(1) from t group by i;
+1          
+-----------
+1          
+1          
+1          
+ij> select max('hello') from t group by c;
+1    
+-----
+hello
+hello
+hello
+ij> select max(1.1) from t group by dc;
+1    
+-----
+1.1  
+1.1  
+1.1  
+ij> select max(1e1) from t group by d;
+1                     
+----------------------
+10.0                  
+10.0                  
+10.0                  
+ij> select max(X'11') from t group by b;
+1   
+----
+11  
+11  
+11  
+ij> select max(date('1999-06-06')) from t group by dt;
+1         
+----------
+1999-06-06
+1999-06-06
+1999-06-06
+ij> select max(time('12:30:30')) from t group by t;
+1       
+--------
+12:30:30
+12:30:30
+12:30:30
+ij> select max(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t group by ts;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- multicolumn grouping
+select max(i), max(dt), max(b) from t group by i, dt, b;
+1          |2         |3   
+---------------------------
+0          |1992-01-01|12af
+0          |1992-01-01|ffff
+0          |1992-09-09|12af
+1          |1992-01-01|12af
+NULL       |NULL      |NULL
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select l, dt, max(i), max(dt), max(b), i from t group by i, dt, b, l;
+L                   |DT        |3          |4         |5   |I          
+-----------------------------------------------------------------------
+1000000             |1992-01-01|0          |1992-01-01|12af|0          
+2000000             |1992-01-01|0          |1992-01-01|12af|0          
+1000000             |1992-01-01|0          |1992-01-01|ffff|0          
+1000000             |1992-09-09|0          |1992-09-09|12af|0          
+1000000             |1992-01-01|1          |1992-01-01|12af|1          
+NULL                |NULL      |NULL       |NULL      |NULL|NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- group by expression
+select max(expr1), max(expr2)
+from (select i * s, c || v from t) t (expr1, expr2) group by expr2, expr1;
+1          |2                                                           
+------------------------------------------------------------------------
+0          |duplicate noone is here                                     
+0          |duplicate this is duplicated                                
+100        |duplicate this is duplicated                                
+0          |goodbye   this is duplicated                                
+NULL       |NULL                                                        
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- distinct and group by
+select distinct max(i) from t group by i, dt;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+1          
+NULL       
+ij> -- insert select
+create table tmp (x int, y char(20));
+0 rows inserted/updated/deleted
+ij> insert into tmp (x, y) select max(i), max(c) from t;
+1 row inserted/updated/deleted
+ij> select * from tmp;
+X          |Y                   
+--------------------------------
+1          |goodbye             
+ij> insert into tmp (x, y) select max(i), max(c) from t group by b;
+3 rows inserted/updated/deleted
+ij> select * from tmp;
+X          |Y                   
+--------------------------------
+1          |goodbye             
+1          |goodbye             
+0          |duplicate           
+NULL       |NULL                
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- drop tables
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table empty;
+0 rows inserted/updated/deleted
+ij> -- ** insert min.sql
+-- create an all types tables
+create table t (i int, s smallint, l bigint,
+				c char(10), v varchar(50), 
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- empty table
+create table empty (i int, s smallint, l bigint,
+				c char(10), v varchar(50), 
+				d double precision, r real, 
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> -- populate tables
+insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t (i) values (null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 200, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 2000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'goodbye', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'noone is here', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  100.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 100.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'ffff', X'0000111100001111', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 1000000,
+					  'duplicate', 'this is duplicated', 
+					  200.0e0, 200.0e0, 
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'1111111111111111', 111.11);
+1 row inserted/updated/deleted
+ij> --------------------------------------
+-- NEGATIVE TESTS
+--------------------------------------
+-- long varchar datatypes too
+create table t1 (c1 long varchar);
+0 rows inserted/updated/deleted
+ij> select min(c1) from t1;
+ERROR 42Y22: Aggregate MIN cannot operate on type LONG VARCHAR.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> ---------------------------
+-- NULL AGGREGATION
+---------------------------
+-- scalar
+select min(i) from empty;
+1          
+-----------
+NULL       
+ij> select min(s) from empty;
+1     
+------
+NULL  
+ij> select min(l) from empty;
+1                   
+--------------------
+NULL                
+ij> select min(c) from empty;
+1         
+----------
+NULL      
+ij> select min(v) from empty;
+1                                                 
+--------------------------------------------------
+NULL                                              
+ij> select min(d) from empty;
+1                     
+----------------------
+NULL                  
+ij> select min(r) from empty;
+1            
+-------------
+NULL         
+ij> select min(dt) from empty;
+1         
+----------
+NULL      
+ij> select min(t) from empty;
+1       
+--------
+NULL    
+ij> select min(ts) from empty;
+1                         
+--------------------------
+NULL                      
+ij> select min(b) from empty;
+1   
+----
+NULL
+ij> select min(bv) from empty;
+1               
+----------------
+NULL            
+ij> select min(dc) from empty;
+1       
+--------
+NULL    
+ij> -- variations
+select min(i), min(b), min(i), min(s) from empty;
+1          |2   |3          |4     
+-----------------------------------
+NULL       |NULL|NULL       |NULL  
+ij> select min(i+1) from empty;
+1          
+-----------
+NULL       
+ij> -- vector
+select min(i) from empty group by i;
+1          
+-----------
+ij> select min(s) from empty group by s;
+1     
+------
+ij> select min(l) from empty group by l;
+1                   
+--------------------
+ij> select min(c) from empty group by c;
+1         
+----------
+ij> select min(v) from empty group by v;
+1                                                 
+--------------------------------------------------
+ij> select min(d) from empty group by d;
+1                     
+----------------------
+ij> select min(r) from empty group by r;
+1            
+-------------
+ij> select min(dt) from empty group by dt;
+1         
+----------
+ij> select min(t) from empty group by t;
+1       
+--------
+ij> select min(ts) from empty group by ts;
+1                         
+--------------------------
+ij> select min(b) from empty group by b;
+1   
+----
+ij> select min(bv) from empty group by bv;
+1               
+----------------
+ij> select min(dc) from empty group by dc;
+1       
+--------
+ij> --------------------------------
+-- BASIC ACCEPTANCE TESTS
+--------------------------------
+select min(i) from t;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(s) from t;
+1     
+------
+100   
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(l) from t;
+1                   
+--------------------
+1000000             
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(c) from t;
+1         
+----------
+duplicate 
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(v) from t;
+1                                                 
+--------------------------------------------------
+noone is here                                     
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(d) from t;
+1                     
+----------------------
+100.0                 
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(r) from t;
+1            
+-------------
+100.0        
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(dt) from t;
+1         
+----------
+1992-01-01
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(t) from t;
+1       
+--------
+12:30:30
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(ts) from t;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(b) from t;
+1   
+----
+12af
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(bv) from t;
+1               
+----------------
+0000111100001111
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(dc) from t;
+1       
+--------
+111.11  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(i) from t group by i;
+1          
+-----------
+0          
+1          
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(s) from t group by s;
+1     
+------
+100   
+200   
+NULL  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(l) from t group by l;
+1                   
+--------------------
+1000000             
+2000000             
+NULL                
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(c) from t group by c;
+1         
+----------
+duplicate 
+goodbye   
+NULL      
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(v) from t group by v;
+1                                                 
+--------------------------------------------------
+noone is here                                     
+this is duplicated                                
+NULL                                              
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(d) from t group by d;
+1                     
+----------------------
+100.0                 
+200.0                 
+NULL                  
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(r) from t group by r;
+1            
+-------------
+100.0        
+200.0        
+NULL         
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(dt) from t group by dt;
+1         
+----------
+1992-01-01
+1992-09-09
+NULL      
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(t) from t group by t;
+1       
+--------
+12:30:30
+12:55:55
+NULL    
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(ts) from t group by ts;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+NULL                      
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(b) from t group by b;
+1   
+----
+12af
+ffff
+NULL
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(bv) from t group by bv;
+1               
+----------------
+0000111100001111
+1111111111111111
+NULL            
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select min(dc) from t group by dc;
+1       
+--------
+111.11  
+222.22  
+NULL    
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- constants
+select min(1) from t;
+1          
+-----------
+1          
+ij> select min('hello') from t;
+1    
+-----
+hello
+ij> select min(1.1) from t;
+1    
+-----
+1.1  
+ij> select min(1e1) from t;
+1                     
+----------------------
+10.0                  
+ij> select min(X'11') from t;
+1   
+----
+11  
+ij> select min(date('1999-06-06')) from t;
+1         
+----------
+1999-06-06
+ij> select min(time('12:30:30')) from t;
+1       
+--------
+12:30:30
+ij> select min(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select min(1) from t group by i;
+1          
+-----------
+1          
+1          
+1          
+ij> select min('hello') from t group by c;
+1    
+-----
+hello
+hello
+hello
+ij> select min(1.1) from t group by dc;
+1    
+-----
+1.1  
+1.1  
+1.1  
+ij> select min(1e1) from t group by d;
+1                     
+----------------------
+10.0                  
+10.0                  
+10.0                  
+ij> select min(X'11') from t group by b;
+1   
+----
+11  
+11  
+11  
+ij> select min(date('1999-06-06')) from t group by dt;
+1         
+----------
+1999-06-06
+1999-06-06
+1999-06-06
+ij> select min(time('12:30:30')) from t group by t;
+1       
+--------
+12:30:30
+12:30:30
+12:30:30
+ij> select min(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t group by ts;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- multicolumn grouping
+select min(i), min(dt), min(b) from t group by i, dt, b;
+1          |2         |3   
+---------------------------
+0          |1992-01-01|12af
+0          |1992-01-01|ffff
+0          |1992-09-09|12af
+1          |1992-01-01|12af
+NULL       |NULL      |NULL
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> select l, dt, min(i), min(dt), min(b), i from t group by i, dt, b, l;
+L                   |DT        |3          |4         |5   |I          
+-----------------------------------------------------------------------
+1000000             |1992-01-01|0          |1992-01-01|12af|0          
+2000000             |1992-01-01|0          |1992-01-01|12af|0          
+1000000             |1992-01-01|0          |1992-01-01|ffff|0          
+1000000             |1992-09-09|0          |1992-09-09|12af|0          
+1000000             |1992-01-01|1          |1992-01-01|12af|1          
+NULL                |NULL      |NULL       |NULL      |NULL|NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- group by expression
+select min(expr1), min(expr2)
+from (select i * s, c || v from t) t (expr1, expr2) group by expr2, expr1;
+1          |2                                                           
+------------------------------------------------------------------------
+0          |duplicate noone is here                                     
+0          |duplicate this is duplicated                                
+100        |duplicate this is duplicated                                
+0          |goodbye   this is duplicated                                
+NULL       |NULL                                                        
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- distinct and group by
+select distinct min(i) from t group by i, dt;
+1          
+-----------
+0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+1          
+NULL       
+ij> -- insert select
+create table tmp (x int, y char(20));
+0 rows inserted/updated/deleted
+ij> insert into tmp (x, y) select min(i), min(c) from t;
+1 row inserted/updated/deleted
+ij> select * from tmp;
+X          |Y                   
+--------------------------------
+0          |duplicate           
+ij> insert into tmp (x, y) select min(i), min(c) from t group by b;
+3 rows inserted/updated/deleted
+ij> select * from tmp;
+X          |Y                   
+--------------------------------
+0          |duplicate           
+0          |duplicate           
+0          |duplicate           
+NULL       |NULL                
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- drop tables
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table empty;
+0 rows inserted/updated/deleted
+ij> 

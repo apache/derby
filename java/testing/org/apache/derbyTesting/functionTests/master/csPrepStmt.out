@@ -1,0 +1,69 @@
+csPrepStmt Test Starts
+executeUpdate() without parameters
+Update count is: 0
+executeUpdate() with parameters
+Update count is: 1
+execute() with parameters, no result set returned
+Update count is: 2
+executQuery() without parameters
+got row:  99 5 9
+got row:  2 6 10
+got row:  7 5 8
+end of rows
+executQuery() with parameters
+got row:  99 5 9
+got row:  7 5 8
+end of rows
+execute() with parameters with result set returned
+got row:  99 5 9
+got row:  7 5 8
+end of rows
+test different data types for input parameters of a Prepared Statement
+Update count is: 0
+Update count is: 1
+test setObject on different data types for input  parameters of a Prepared Statement
+Update count is: 1
+test setNull on different data types for input  parameters of a Prepared Statement
+Update count is: 1
+got row:   1 2 3 4 5.0 6.0 7.0 88.88 99.100 column11string       column11vcstring column12lvcstring 0123456789abcdef10111213202020 0123456789abcdef10111213 0123456789abcdef10111213 xxxxxxFILTERED-TIMESTAMPxxxxx-04-12 11:44:30.0
+Timestamp match!
+got row:   1 2 3 4 5.0 6.0 7.0 88.88 99.100 column10string       column11vcstring column12lvcstring 0123456789abcdef10111213202020 0123456789abcdef10111213 0123456789abcdef10111213 xxxxxxFILTERED-TIMESTAMPxxxxx-04-12 11:44:30.0
+Timestamp match!
+got row:   0 0 0 0 0.0 0.0 0.0 null null null null null null null null null null xxxxxxFILTERED-TIMESTAMPxxxxx
+After first Timestamp!
+end of rows
+SQLState: 07000 message: At least one parameter to the current statement is uninitialized.
+SQLState: 07000 message: At least one parameter to the current statement is uninitialized.
+insertTab ( bigtab,50)
+insertTab ( bigtab,200)
+insertTab ( bigtab,300)
+insertTab ( bigtab,500)
+insertTab ( bigtab,1000)
+select * from bigtab
+Col # 500 = null  Col 1000 = null
+Col # 500 = null  Col 1000 = null
+Col # 500 = null  Col 1000 = null
+Col # 500 = 500  Col 1000 = null
+Col # 500 = 500  Col 1000 = 1000
+Insert too many Columns
+insertTab ( bigtab,1001)
+SQLState: 42X14 message: 'C1001' is not a column in table or VTI 'CS.BIGTAB'.
+Expected Syntax error 
+insertTab ( bigtab,0)
+SQLState: 42X01 message: Syntax error: Encountered "<EOF>" at line 1, column 32.
+Expected Table does not exist 
+insertTab ( wrongtab,1000)
+SQLState: 42X05 message: Table 'WRONGTAB' does not exist.
+Minimum BigDecimal Value: 0.000000000000001
+Prepared Statement String: update Numeric_Tab set NULL_VAL=?
+Select NULL_VAL from Numeric_Tab
+Returned BigDecimal Value after Updation: 0.000000000000001
+Value returned from ctssql.stmt: 0.000000000000001
+setObject Method sets the designated parameter with the Object
+Negative test setString with Invalid Timestamp:20
+SQLState: 22007 message: The syntax of the string representation of a datetime value is incorrect.
+CLOB result.
+GOT ROW: yayorsomething
+BLOB result.
+GOT ROW: 003100300031003000310030003000300031003100300031
+csPrepStmt Test Ends

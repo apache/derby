@@ -1,0 +1,288 @@
+ij> --
+-- this test is for identifiers and delimited idenifiers
+-- identifiers get converted to upper case
+-- delimited identifiers have their surrounding double quotes removed and
+-- any pair of adjacent double quotes is converted to a single double quote
+-- max identifier length is 128
+--
+-- trailing blank not trimmed
+create table t1("       " int);
+0 rows inserted/updated/deleted
+ij> -- duplicate identifiers
+create table t1 (c1 int, C1 int);
+ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ij> -- duplicate identifier/delimited identifier
+create table t1 (c1 int, "C1" int);
+ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ij> -- duplicate delimited identifier/identifier
+create table t1 ("C1" int, C1 int);
+ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ij> -- duplicate delimited identifiers
+create table t1 ("C1" int, "C1" int);
+ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ij> -- verify preservation of spaces
+create table success1 (c1 int, " C1" int, "  C1  " int);
+0 rows inserted/updated/deleted
+ij> -- verify correct handling of case
+create table success2 ("c1" int, "C1" int);
+0 rows inserted/updated/deleted
+ij> create table success3 (c1 int, "c1" int);
+0 rows inserted/updated/deleted
+ij> -- verify correct handling of double quotes
+create table success4 ("C1""" int, "C1""""" int);
+0 rows inserted/updated/deleted
+ij> -- verify correct handling in an insert
+insert into success1 (c1, " C1", "  C1  ") 
+values (1, 2, 3);
+1 row inserted/updated/deleted
+ij> insert into success1 (C1, " C1", "  C1  ") 
+values (6, 7, 8);
+1 row inserted/updated/deleted
+ij> -- negative testing for an insert
+-- "c1 " is not in success1
+insert into success1 (c1, "c1 ", " C1", " C1 ", "  C1  ") 
+values (11, 12, 13, 14, 15);
+ERROR 42X14: 'c1 ' is not a column in table or VTI 'APP.SUCCESS1'.
+ij> -- C1 appears twice in the column list - C1 and "C1"
+insert into success1 (C1, "C1", " C1", " C1 ", "  C1  ") 
+values (16, 17, 18, 19, 20);
+ERROR 42X13: Column name 'C1' appears more than once times in the column list of an insert statement.
+ij> -- verify correct handling in a select
+select C1, " C1", " C1", "  C1  " from success1;
+C1         | C1        | C1        |  C1       
+-----------------------------------------------
+1          |2          |2          |3          
+6          |7          |7          |8          
+ij> -- following should fail for "C1 "
+select c1, "C1 ", " C1", " C1 ", "  C1  " from success1;
+ERROR 42X04: Column 'C1 ' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C1 ' is not a column in the target table.
+ij> -- negative testing for an insert
+-- "c1 " should not match
+select c1, "c1 ", " C1", " C1 ", "  C1  "  from success1;
+ERROR 42X04: Column 'c1 ' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'c1 ' is not a column in the target table.
+ij> -- negative test for max identifier width
+-- 4567890123456789012345678901234567890123456789012345678901234567890
+create table
+asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast6
+(c1 int);
+ERROR 42622: The name 'ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASLAST6' is too long. The maximum length is '128'.
+ij> create table
+"asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast7"
+(c1 int);
+ERROR 42622: The name 'asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast7' is too long. The maximum length is '128'.
+ij> -- positive test for max identifier width
+create table
+asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast
+(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into 
+asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast
+values (1);
+1 row inserted/updated/deleted
+ij> select * from 
+asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast;
+C1         
+-----------
+1          
+ij> create table
+"delimitedsdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast"
+(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into 
+"delimitedsdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast"
+values (2);
+1 row inserted/updated/deleted
+ij> select * from 
+"delimitedsdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast";
+C1         
+-----------
+2          
+ij> -- drop the tables
+drop table success1;
+0 rows inserted/updated/deleted
+ij> drop table success2;
+0 rows inserted/updated/deleted
+ij> drop table success3;
+0 rows inserted/updated/deleted
+ij> drop table success4;
+0 rows inserted/updated/deleted
+ij> drop table
+asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast;
+0 rows inserted/updated/deleted
+ij> drop table
+"delimitedsdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast";
+0 rows inserted/updated/deleted
+ij> -- xxxxxxFILTERED-TIMESTAMPxxxxx
+-- new testcases for SQL92 reserved keywords as identifiers
+CREATE TABLE WHEN (WHEN INT, A INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO WHEN (WHEN) VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO WHEN VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> SELECT * FROM WHEN;
+WHEN       |A          
+-----------------------
+1          |NULL       
+2          |2          
+ij> SELECT WHEN.WHEN, WHEN FROM WHEN;
+WHEN       |WHEN       
+-----------------------
+1          |1          
+2          |2          
+ij> SELECT WHEN.WHEN, WHEN FROM WHEN WHEN;
+WHEN       |WHEN       
+-----------------------
+1          |1          
+2          |2          
+ij> DROP TABLE WHEN;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE THEN (THEN INT, A INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO THEN (THEN) VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO THEN VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> SELECT * FROM THEN;
+THEN       |A          
+-----------------------
+1          |NULL       
+2          |2          
+ij> SELECT THEN.THEN, THEN FROM THEN;
+THEN       |THEN       
+-----------------------
+1          |1          
+2          |2          
+ij> SELECT THEN.THEN, THEN FROM THEN THEN;
+THEN       |THEN       
+-----------------------
+1          |1          
+2          |2          
+ij> DROP TABLE THEN;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE SIZE (SIZE INT, A INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO SIZE (SIZE) VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO SIZE VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> SELECT * FROM SIZE;
+SIZE       |A          
+-----------------------
+1          |NULL       
+2          |2          
+ij> SELECT SIZE.SIZE, SIZE FROM SIZE;
+SIZE       |SIZE       
+-----------------------
+1          |1          
+2          |2          
+ij> SELECT SIZE.SIZE, SIZE FROM SIZE SIZE;
+SIZE       |SIZE       
+-----------------------
+1          |1          
+2          |2          
+ij> DROP TABLE SIZE;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE LEVEL (LEVEL INT, A INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO LEVEL (LEVEL) VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO LEVEL VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> SELECT * FROM LEVEL;
+LEVEL      |A          
+-----------------------
+1          |NULL       
+2          |2          
+ij> SELECT LEVEL.LEVEL, LEVEL FROM LEVEL;
+LEVEL      |LEVEL      
+-----------------------
+1          |1          
+2          |2          
+ij> SELECT LEVEL.LEVEL, LEVEL FROM LEVEL LEVEL;
+LEVEL      |LEVEL      
+-----------------------
+1          |1          
+2          |2          
+ij> DROP TABLE LEVEL;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE DOMAIN (DOMAIN INT, A INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO DOMAIN (DOMAIN) VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO DOMAIN VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> SELECT * FROM DOMAIN;
+DOMAIN     |A          
+-----------------------
+1          |NULL       
+2          |2          
+ij> SELECT DOMAIN.DOMAIN, DOMAIN FROM DOMAIN;
+DOMAIN     |DOMAIN     
+-----------------------
+1          |1          
+2          |2          
+ij> SELECT DOMAIN.DOMAIN, DOMAIN FROM DOMAIN DOMAIN;
+DOMAIN     |DOMAIN     
+-----------------------
+1          |1          
+2          |2          
+ij> DROP TABLE DOMAIN;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE ZONE (ZONE INT, A INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO ZONE (ZONE) VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO ZONE VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> SELECT * FROM ZONE;
+ZONE       |A          
+-----------------------
+1          |NULL       
+2          |2          
+ij> SELECT ZONE.ZONE, ZONE FROM ZONE;
+ZONE       |ZONE       
+-----------------------
+1          |1          
+2          |2          
+ij> SELECT ZONE.ZONE, ZONE FROM ZONE ZONE;
+ZONE       |ZONE       
+-----------------------
+1          |1          
+2          |2          
+ij> DROP TABLE ZONE;
+0 rows inserted/updated/deleted
+ij> -- Negative tests
+-- Novera wanted 0-length delimited identifiers but for db2-compatibility, we are going to stop supporting 0-length delimited identifiers
+-- test1
+create table "" (c1 int);
+ERROR 42X01: Syntax error: Encountered "\"" at line 4, column 14.
+ij> -- test2
+create table t1111 ("" int);
+ERROR 42X01: Syntax error: Encountered "\"" at line 2, column 21.
+ij> -- test3
+create schema "";
+ERROR 42X01: Syntax error: Encountered "\"" at line 2, column 15.
+ij> -- identifiers can not start with "_"
+-- test4
+create table _t1(_c1 int);
+ERROR 42X01: Syntax error: Encountered "_" at line 3, column 14.
+ij> -- test5
+create table t1(_c1 int);
+ERROR 42X01: Syntax error: Encountered "_" at line 2, column 17.
+ij> -- test6
+create view _v1 (c1) as select * from t1;
+ERROR 42X01: Syntax error: Encountered "_" at line 2, column 13.
+ij> -- test7
+create view v1 (__c1) as select * from t1;
+ERROR 42X01: Syntax error: Encountered "_" at line 2, column 17.
+ij> -- test8
+create index _i1 on t1(c1);
+ERROR 42X01: Syntax error: Encountered "_" at line 2, column 14.
+ij> -- test9
+create table "_"."_"(c1 int);
+0 rows inserted/updated/deleted
+ij> -- test10
+create table "".""(c1 int);
+ERROR 42X01: Syntax error: Encountered "\"" at line 2, column 14.
+ij> 

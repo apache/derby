@@ -1,0 +1,262 @@
+ij> -- tests for primary/unique key
+-- most testing currently deferred since we have extensive index tests
+-- and no foreign keys yet.
+-- negative tests
+-- duplicate primary keys
+create table neg (c1 int not null primary key, c2 int, c3 int not null constraint asdf primary key);
+ERROR 42X90: More than 1 primary key constraint specified for table 'NEG'.
+ij> create table neg (c1 int not null primary key, c2 int, c3 int not null constraint asdf primary key);
+ERROR 42X90: More than 1 primary key constraint specified for table 'NEG'.
+ij> create table neg (c1 int not null primary key, c2 int not null, primary key(c1, c2));
+ERROR 42X90: More than 1 primary key constraint specified for table 'NEG'.
+ij> -- duplicate constraint names
+create table neg (c1 int not null constraint asdf primary key, c2 int, c3 int constraint asdf unique);
+ERROR 42X91: Constraint name 'ASDF' appears more than once in the create table statement.
+ij> -- duplicate column names in same constraint column list
+create table neg (c1 int not null, c2 int not null, primary key(c1, c2, c1));
+ERROR 42X92: Column name 'C1' appears more than once in a constraint's column list.
+ij> -- non-existant columns in constraint column list
+create table neg (c1 int not null, c2 int not null, primary key(c1, c2, cx));
+ERROR 42X93: Table 'NEG' contains a constraint definition with column 'CX' which is not in the table.
+ij> -- invalid constraint schema name
+create table neg (c1 int not null, c2 int not null, constraint bar.pkneg primary key(c1, c2));
+ERROR 42X85: Constraint 'BAR.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ij> create table neg (c1 int not null, c2 int not null, constraint sys.pkneg primary key(c1, c2));
+ERROR 42X85: Constraint 'SYS.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ij> create table neg (c1 int not null constraint bar.pkneg primary key, c2 int);
+ERROR 42X85: Constraint 'BAR.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ij> create table neg (c1 int not null constraint sys.pkneg primary key, c2 int);
+ERROR 42X85: Constraint 'SYS.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ij> -- constraint names must be unique within a schema
+create table neg1(c1 int not null constraint asdf primary key);
+0 rows inserted/updated/deleted
+ij> create table neg2(c1 int not null constraint asdf primary key);
+ERROR X0Y32: Constraint 'ASDF' already exists in Schema 'APP'.
+ij> drop table neg1;
+0 rows inserted/updated/deleted
+ij> create table neg2(c1 int not null constraint asdf primary key);
+0 rows inserted/updated/deleted
+ij> drop table neg2;
+0 rows inserted/updated/deleted
+ij> -- again with explict schema names, should fail
+create table neg1(c1 int not null constraint app.asdf primary key);
+0 rows inserted/updated/deleted
+ij> create table neg2(c1 int not null constraint app.asdf primary key);
+ERROR X0Y32: Constraint 'ASDF' already exists in Schema 'APP'.
+ij> create table neg2(c1 int not null constraint app.asdf primary key);
+ERROR X0Y32: Constraint 'ASDF' already exists in Schema 'APP'.
+ij> -- again with mixing schema names
+create table neg1(c1 int not null constraint asdf primary key);
+ERROR X0Y32: Table/View 'NEG1' already exists in Schema 'APP'.
+ij> create table neg2(c1 int not null constraint app.asdf primary key);
+ERROR X0Y32: Constraint 'ASDF' already exists in Schema 'APP'.
+ij> drop table neg1;
+0 rows inserted/updated/deleted
+ij> create table neg2(c1 int not null constraint app.asdf primary key);
+0 rows inserted/updated/deleted
+ij> -- primary key cannot be explicitly nullable
+create table neg2(c1 int null constraint asdf primary key);
+ERROR 42X01: Syntax error: Encountered "null" at line 2, column 26.
+ij> create table neg2(c1 int null, c2 int, constraint asdf primary key(c1, c2));
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 26.
+ij> -- verify that you can not create a primary key column with default null
+-- a primary key column can only be create if the column is explicitly not null
+create table neg1 (c1 int default null primary key);
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> create table neg1 (c1 int default null, c2 int not null, primary key(c2, c1));
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> -- test that a unique key can be not be explicitly nullable
+create table neg1(c1 int null unique);
+ERROR 42X01: Syntax error: Encountered "null" at line 2, column 26.
+ij> create table neg1(c1 int null, c2 int, constraint asdf unique(c1));
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 26.
+ij> -- positive tests
+-- verify that a unique key can not contain nulls
+create table pos1 (c1 int not null unique, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into pos1 (c1) values(null);
+ERROR 23502: Column 'C1'  cannot accept a NULL value.
+ij> insert into pos1 (c1) values(null);
+ERROR 23502: Column 'C1'  cannot accept a NULL value.
+ij> select * from pos1;
+C1         |C2         
+-----------------------
+ij> drop table pos1;
+0 rows inserted/updated/deleted
+ij> -- verify that you can combine not null and unique/primary key constraints
+create table pos1 (c1 int not null unique, c2 int not null primary key);
+0 rows inserted/updated/deleted
+ij> insert into pos1 (c1) values (null);
+ERROR 23502: Column 'C1'  cannot accept a NULL value.
+ij> insert into pos1 (c2) values (null);
+ERROR 23502: Column 'C1'  cannot accept a NULL value.
+ij> drop table pos1;
+0 rows inserted/updated/deleted
+ij> -- verify that you can combine multiple column constraints
+select count(*) from sys.sysconstraints;
+1          
+-----------
+1          
+ij> select count(*) from sys.syskeys;
+1          
+-----------
+1          
+ij> -- we will be adding 6 rows to both sysconstraints and syskeys
+create table pos1 (c1 int not null unique, c2 int not null primary key);
+0 rows inserted/updated/deleted
+ij> insert into pos1 (c1) values (null);
+ERROR 23502: Column 'C1'  cannot accept a NULL value.
+ij> insert into pos1 (c2) values (null);
+ERROR 23502: Column 'C1'  cannot accept a NULL value.
+ij> insert into pos1 values (1, 1), (1, 2);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'POS1'.
+ij> insert into pos1 values (1, 1), (2, 1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'POS1'.
+ij> select count(*) from sys.sysconstraints;
+1          
+-----------
+3          
+ij> select count(*) from sys.syskeys;
+1          
+-----------
+3          
+ij> drop table pos1;
+0 rows inserted/updated/deleted
+ij> -- verify that you can delete from a primary key
+create table pos1 (c1 int not null, c2 int not null, primary key(c2, c1));
+0 rows inserted/updated/deleted
+ij> insert into pos1 values (1, 2);
+1 row inserted/updated/deleted
+ij> select * from pos1;
+C1         |C2         
+-----------------------
+1          |2          
+ij> delete from pos1;
+1 row inserted/updated/deleted
+ij> select * from pos1;
+C1         |C2         
+-----------------------
+ij> -- create a table with lots key columns
+create table pos2 (i int not null, s smallint not null, r real not null, dp double precision not null,
+				   c30 char(30) not null, vc10 varchar(10) not null, d date not null, t time not null,
+				   ts timestamp not null,
+				   primary key(ts, t, d, vc10, c30, dp, r, s, i));
+0 rows inserted/updated/deleted
+ij> insert into pos2 values(111111, 1, 1.11, 11111.1111, 'char(30)',
+					    'vc(10)', '1999-9-9',
+					    '8:08:08', '1999-9-9 8:08:08');
+1 row inserted/updated/deleted
+ij> insert into pos2 values(111111, 1, 1.11, 11111.1111, 'char(30)',
+					    'vc(10)', '1999-9-9',
+					    '8:08:08', '1999-9-9 8:08:08');
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'POS2'.
+ij> -- verify the consistency of the indexes on the system catalogs
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
+from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+SYSCONGLOMERATES                                                                                                                |1          
+SYSTABLES                                                                                                                       |1          
+SYSCOLUMNS                                                                                                                      |1          
+SYSSCHEMAS                                                                                                                      |1          
+SYSCONSTRAINTS                                                                                                                  |1          
+SYSKEYS                                                                                                                         |1          
+SYSDEPENDS                                                                                                                      |1          
+SYSALIASES                                                                                                                      |1          
+SYSVIEWS                                                                                                                        |1          
+SYSCHECKS                                                                                                                       |1          
+SYSFOREIGNKEYS                                                                                                                  |1          
+SYSSTATEMENTS                                                                                                                   |1          
+SYSFILES                                                                                                                        |1          
+SYSTRIGGERS                                                                                                                     |1          
+SYSSTATISTICS                                                                                                                   |1          
+ij> -- drop tables
+drop table pos1;
+0 rows inserted/updated/deleted
+ij> drop table pos2;
+0 rows inserted/updated/deleted
+ij> -- verify the consistency of the indexes on the system catalogs
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
+from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+SYSCONGLOMERATES                                                                                                                |1          
+SYSTABLES                                                                                                                       |1          
+SYSCOLUMNS                                                                                                                      |1          
+SYSSCHEMAS                                                                                                                      |1          
+SYSCONSTRAINTS                                                                                                                  |1          
+SYSKEYS                                                                                                                         |1          
+SYSDEPENDS                                                                                                                      |1          
+SYSALIASES                                                                                                                      |1          
+SYSVIEWS                                                                                                                        |1          
+SYSCHECKS                                                                                                                       |1          
+SYSFOREIGNKEYS                                                                                                                  |1          
+SYSSTATEMENTS                                                                                                                   |1          
+SYSFILES                                                                                                                        |1          
+SYSTRIGGERS                                                                                                                     |1          
+SYSSTATISTICS                                                                                                                   |1          
+ij> -- test that a unique key can be explicitly not nullable
+create table pos1(c1 int not null unique);
+0 rows inserted/updated/deleted
+ij> drop table pos1;
+0 rows inserted/updated/deleted
+ij> create table pos1(c1 int not null, c2 int, constraint asdf unique(c1));
+ERROR X0Y32: Constraint 'ASDF' already exists in Schema 'APP'.
+ij> create table t1 (c1 int, c2 int, c3 int not null);
+0 rows inserted/updated/deleted
+ij> create unique index i11 on t1 (c3);
+0 rows inserted/updated/deleted
+ij> create unique index i12 on t1 (c1, c3 desc);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1,2,3);
+1 row inserted/updated/deleted
+ij> insert into t1 values (null, 4,5);
+1 row inserted/updated/deleted
+ij> create table t2 (c1 int, c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (1,2,3), (null, 4,5), (7,8,9);
+3 rows inserted/updated/deleted
+ij> create unique index i21 on t2 (c3);
+0 rows inserted/updated/deleted
+ij> create unique index i22 on t2 (c1, c3 desc);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- bug 5520 - constraint names in new schemas.
+create table B5420_1.t1 (c1 int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table B5420_2.t2 (c2 int not null constraint c2pk primary key);
+0 rows inserted/updated/deleted
+ij> -- two part constraint names are not allowed
+create table B5420_3.t3 (c3 int not null constraint B5420_3.c3pk primary key);
+0 rows inserted/updated/deleted
+ij> create table B5420_4.t4 (c4 int not null, primary key (c4));
+0 rows inserted/updated/deleted
+ij> create table B5420_5.t5 (c5 int not null, constraint c5pk primary key (c5));
+0 rows inserted/updated/deleted
+ij> -- two part constraint names are not allowed
+create table B5420_6.t6 (c6 int not null, constraint B5420_6.c6pk primary key (c6));
+0 rows inserted/updated/deleted
+ij> SELECT CAST (S.SCHEMANAME AS VARCHAR(12)), CAST (C.CONSTRAINTNAME AS VARCHAR(36)), CAST (T.TABLENAME AS VARCHAR(12)) FROM SYS.SYSCONSTRAINTS C , SYS.SYSTABLES T, SYS.SYSSCHEMAS S
+WHERE C.SCHEMAID = S.SCHEMAID AND C.TABLEID = T.TABLEID AND T.SCHEMAID = S.SCHEMAID
+AND S.SCHEMANAME LIKE 'B5420_%' ORDER BY 1,2,3;
+1           |2                                   |3           
+--------------------------------------------------------------
+B5420_1     |xxxxGENERATED-IDxxxx                  |T1          
+B5420_2     |C2PK                                |T2          
+B5420_3     |C3PK                                |T3          
+B5420_4     |xxxxGENERATED-IDxxxx                  |T4          
+B5420_5     |C5PK                                |T5          
+B5420_6     |C6PK                                |T6          
+ij> -- clean up
+drop table B5420_1.t1;
+0 rows inserted/updated/deleted
+ij> drop table B5420_2.t2;
+0 rows inserted/updated/deleted
+ij> drop table B5420_4.t4;
+0 rows inserted/updated/deleted
+ij> drop table B5420_5.t5;
+0 rows inserted/updated/deleted
+ij> 

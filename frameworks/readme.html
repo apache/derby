@@ -1,0 +1,34 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head><META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>About IBM Cloudscape's Frameworks
+</title>
+<link rel="StyleSheet" href="../demo/csfull.css" type="text/css" media="screen">
+</head>
+<body class="SmallFile">
+<h1>About IBM Cloudscape's Frameworks</h1>
+<p><a name="framework"></a>A <em> framework</em> is the environment in which Cloudscape runs. The framework in which you run Cloudscape affects how you run applications against Cloudscape.</p>
+<p>The <em>frameworks</em> directory contains subdirectories for each framework with supporting files. Depending on the framework, the subdirectory includes:
+<ul>
+	<li><p><em>bin</em> Subdirectory<br>
+	All subdirectories in this directory contain a <em>bin</em> subdirectory that has scripts that serve as examples of how to run some of the basic Cloudscape tools and utilities tailored for the particular framework. For server frameworks, start and stop scripts are also provided.
+<br>To use the scripts for a particular framework, modify the scripts as necessary and put that framework's <em>bin</em> subdirectory first in your path.</p></li>
+</ul>
+<p>For an easy-to-follow example of how to run an application in the two frameworks, see the <a href="../demo/programs/simple/example.html">simple example</a>.</p>
+<p>For more information about frameworks, see <a href="../doc/pdf/getstart.pdf"><em>Getting Started with IBM Cloudscape</em></a>.</p>
+<h2><a name="embed">Embedded Framework</a></h2>
+<p>An <em>embedded</em> <a href="#framework">framework</a> is the most basic framework. Cloudscape runs embedded in a Java application. When the application loads the local JDBC driver, it starts up the Cloudscape engine. When the application shuts down, it shuts down the Cloudscape engine. Only a single application can access a database at one time.
+<p>The <em>bin</em> subdirectory in <em>frameworks/embedded</em> contains scripts for running some of the Cloudscape tools in an embedded environment. For working in an embedded environment, put the <em>frameworks/embedded/bin</em> subdirectory first in your path.</p>
+<h2><a name="server">Server Framework</a></h2>
+<p>A server <a href="#framework">framework</a> is a continuously running Java application that allows multiple, remote JDBC applications to connect to Cloudscape.
+<ul>
+<li><a href="#network">The IBM Cloudscape Network Server framework</a>
+</ul>
+<h3><a name="network">IBM Cloudscape Network Server</a></h3>
+<p>The Cloudscape Network Server is a <a href="#server">server framework</a> that comes with Cloudscape. The Cloudscape Network Server works with the DB2 JCC JDBC driver; please read the Cloudscape documentation on the differences between this driver and the embedded driver.
+<ul>
+	<li>The subdirectories in this directory contain scripts that serve as examples for how to run Cloudscape tools and utilities as client applications to Cloudscape running inside the Cloudscape Network Server framework. It also contains scripts for starting up the framework.</li>
+</ul>
+
+</body>
+</html>

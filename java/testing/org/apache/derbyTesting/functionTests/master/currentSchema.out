@@ -1,0 +1,324 @@
+ij> -- test for CURRENT SCHEMA and optional DB2 compatible SET SCHEMA statement
+--
+-- test SET SCHEMA syntax variations
+-- syntax is SET [CURRENT] SCHEMA [=] (<identifier> | USER | ? | '<string>')
+--			 SET CURRENT SQLID [=] (<identifier> | USER | ? | '<string>')
+--
+values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema sys;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+SYS                                                                                                                             
+ij> create schema app;
+ERROR X0Y68: Schema 'APP' already exists.
+ij> set current schema app;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema =  sys;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+SYS                                                                                                                             
+ij> set current schema = app;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema sys;
+0 rows inserted/updated/deleted
+ij> -- user should use default schema if no user set
+set schema user;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> -- see what user does when there is a user
+create schema judy;
+0 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;user=judy' as judy;
+ij(JUDY)> set schema app;
+0 rows inserted/updated/deleted
+ij(JUDY)> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij(JUDY)> set schema user;
+0 rows inserted/updated/deleted
+ij(JUDY)> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+JUDY                                                                                                                            
+ij(JUDY)> disconnect;
+ij> set connection connection0;
+ij> -- check for default
+values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> -- check that current sqlid works as a synonym
+values current sqlid;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> -- check that sqlid still works as an identifer
+create table sqlid(sqlid int);
+0 rows inserted/updated/deleted
+ij> drop table sqlid;
+0 rows inserted/updated/deleted
+ij> -- check that set current sqlid works
+set current sqlid judy;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+JUDY                                                                                                                            
+ij> -- check that set sqlid doesn't work (not DB2 compatible) - should get error
+set sqlid judy;
+ERROR 42X01: Syntax error: Encountered "sqlid" at line 2, column 5.
+ij> -- change schema and make sure that the current schema is correct
+set schema sys;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+SYS                                                                                                                             
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> -- try using ? outside of a prepared statement
+set schema ?;
+ERROR 07000: At least one parameter to the current statement is uninitialized.
+ij> -- use set schema in a prepared statement
+autocommit off;
+ij> prepare p1 as 'set schema ?';
+ij> -- should get error with no parameters
+execute p1;
+ERROR 07000: At least one parameter to the current statement is uninitialized.
+ij> -- should get error if null is used
+create table t1(name varchar(128));
+0 rows inserted/updated/deleted
+ij> insert into t1 values(null);
+1 row inserted/updated/deleted
+ij> execute p1 using 'select name from t1';
+ERROR 42815: The replacement value for 'CURRENT SCHEMA' is invalid.
+ij> -- should get error if schema doesn't exist
+execute p1 using 'values(''notthere'')';
+ERROR 42Y07: Schema 'notthere' does not exist
+ij> -- should error with empty string
+execute p1 using 'values('''')';
+ERROR 42Y07: Schema '' does not exist
+ij> -- should get error if wrong case used
+execute p1 using 'values(''sys'')';
+ERROR 42Y07: Schema 'sys' does not exist
+ij> -- should get error if too many parameters
+execute p1 using 'values(''sys'',''app'')';
+ERROR XCL13: The parameter position '2' is out of range.  The number of parameters for this prepared  statement is '1'.
+ij> -- USER should return an error as it is interpreted as a string constant not an
+-- identifier
+execute p1 using 'values(''USER'')';
+ERROR 42Y07: Schema 'USER' does not exist
+ij> -- try positive test
+execute p1 using 'values(''SYS'')';
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+SYS                                                                                                                             
+ij> rollback;
+ij> autocommit on;
+ij> -- 
+-- try current schema in a number of statements types
+set schema app;
+0 rows inserted/updated/deleted
+ij> create table t1 ( a varchar(128));
+0 rows inserted/updated/deleted
+ij> -- insert
+insert into t1 values (current schema);
+1 row inserted/updated/deleted
+ij> select * from t1;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema judy;
+0 rows inserted/updated/deleted
+ij> insert into app.t1 values (current schema);
+1 row inserted/updated/deleted
+ij> select * from app.t1;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+JUDY                                                                                                                            
+ij> -- delete where clause
+delete from app.t1 where a = current schema;
+1 row inserted/updated/deleted
+ij> select * from app.t1;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set current schema app;
+0 rows inserted/updated/deleted
+ij> -- target list
+select current schema from t1;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> -- where clause
+select * from t1 where a = current schema;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> -- update statement
+delete from t1;
+1 row inserted/updated/deleted
+ij> insert into t1 values ('test');
+1 row inserted/updated/deleted
+ij> select * from t1;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+test                                                                                                                            
+ij> update t1 set a = current schema;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema judy;
+0 rows inserted/updated/deleted
+ij> update app.t1 set a = current schema;
+1 row inserted/updated/deleted
+ij> select * from app.t1;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+JUDY                                                                                                                            
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- default
+set schema APP;
+0 rows inserted/updated/deleted
+ij> create table t1 ( a int, b varchar(128) default current schema);
+0 rows inserted/updated/deleted
+ij> insert into t1 (a) values (1);
+1 row inserted/updated/deleted
+ij> set schema SYS;
+0 rows inserted/updated/deleted
+ij> insert into app.t1 (a) values (1);
+1 row inserted/updated/deleted
+ij> set schema judy;
+0 rows inserted/updated/deleted
+ij> insert into app.t1 (a) values (1);
+1 row inserted/updated/deleted
+ij> set schema APP;
+0 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------
+1          |APP                                                                                                                             
+1          |SYS                                                                                                                             
+1          |JUDY                                                                                                                            
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- check constraint - this should fail
+create table t1 ( a varchar(128), check (a = current schema));
+ERROR 42Y39: 'CURRENT SCHEMA' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.
+ij> create table t1 ( a varchar(128), check (a = current sqlid));
+ERROR 42Y39: 'CURRENT SCHEMA' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.
+ij> -- try mix case
+create schema "MiXCase";
+0 rows inserted/updated/deleted
+ij> set schema "MiXCase";
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+MiXCase                                                                                                                         
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema 'MiXCase';
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+MiXCase                                                                                                                         
+ij> -- following should get error - schema not found
+set schema 'MIXCASE';
+ERROR 42Y07: Schema 'MIXCASE' does not exist
+ij> set schema mixcase;
+ERROR 42Y07: Schema 'MIXCASE' does not exist
+ij> -- try long schema names (maximum schema identifier length has been changed to 30 as part of DB2 compatibility work)
+create schema t23456789012345678901234567890;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+MiXCase                                                                                                                         
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema t23456789012345678901234567890;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+T23456789012345678901234567890                                                                                                  
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> set schema 'T23456789012345678901234567890';
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+T23456789012345678901234567890                                                                                                  
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             
+ij> autocommit off;
+ij> prepare p1 as 'set schema ?';
+ij> execute p1 using 'values(''T23456789012345678901234567890'')';
+0 rows inserted/updated/deleted
+ij> values current schema;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+T23456789012345678901234567890                                                                                                  
+ij> -- the following should fail - 31 length
+create schema t234567890123456789012345678901;
+ERROR 42622: The name 'T234567890123456789012345678901' is too long. The maximum length is '30'.
+ij> set schema t234567890123456789012345678901;
+ERROR 42622: The name 'T234567890123456789012345678901' is too long. The maximum length is '30'.
+ij> set schema 'T234567890123456789012345678901';
+ERROR 42622: The name 'T234567890123456789012345678901' is too long. The maximum length is '30'.
+ij> execute p1 using 'values(''T234567890123456789012345678901'')';
+ERROR 42Y07: Schema 'T234567890123456789012345678901' does not exist
+ij> rollback;
+ij> autocommit on;
+ij> -- clean up
+drop schema judy restrict;
+0 rows inserted/updated/deleted
+ij> drop schema t234567890123456789012345678901 restrict;
+ERROR 42622: The name 'T234567890123456789012345678901' is too long. The maximum length is '30'.
+ij> 

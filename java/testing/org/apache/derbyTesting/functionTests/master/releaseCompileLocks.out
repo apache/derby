@@ -1,0 +1,209 @@
+ij> autocommit off;
+ij> -- move static initializer tests to front, hoping to avoid class garbage
+-- collection in jdk18.  Sometimes the static initializer in the 
+-- DMLInStaticInitializer and InsertInStaticInitializer classes gets called
+-- twice in jdk118 - causing a diff.  This can happen if for some reason the
+-- JVM decides to garbage collect the class between references to the class
+-- in the course of executing the query.
+-- static initializers.
+create table t1 (s int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> create function dmlstatic() returns INT
+parameter style java language java
+external name 'org.apache.derbyTesting.functionTests.util.StaticInitializers.DMLInStaticInitializer.getANumber'
+no sql;
+0 rows inserted/updated/deleted
+ij> create function insertstatic() returns INT
+parameter style java language java
+external name 'org.apache.derbyTesting.functionTests.util.StaticInitializers.InsertInStaticInitializer.getANumber'
+no sql;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- the static initializer in DMLInStaticInitializer will select from t1 
+-- the DML will be executed within a nested query-- however all locks 
+-- on system tables which the static initializer gets should be released.
+select 
+(dmlstatic()) 
+from sys.systables where tablename = 'SYSCONGLOMERATES';
+1          
+-----------
+Caught exception SQL Exception: The external routine is not allowed to execute SQL statements.
+ERROR 38001: The external routine is not allowed to execute SQL statements.
+1          
+ij> select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+order by 1;
+TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> commit;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (s int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> select 
+(insertstatic()) 
+from sys.systables where tablename = 'SYSCONGLOMERATES';
+1          
+-----------
+Caught exception SQL Exception: The external routine is not allowed to execute SQL statements.
+ERROR 38001: The external routine is not allowed to execute SQL statements.
+1          
+ij> -- only two locks!
+select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+order by 1;
+TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- verify that the row went into t1.
+select * from t1;
+S          
+-----------
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+order by 1;
+TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> commit;
+ij> -- some really simple tests to start off.
+create table test_tab (x int);
+0 rows inserted/updated/deleted
+ij> insert into test_tab values (1);
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- earlier we would get a bunch of locks on the system catalogs 
+-- when trying to resolve the method alias.
+select count(*) from new org.apache.derby.diag.LockTable() l;
+1          
+-----------
+0          
+ij> -- select from a system catalog.
+select count(*) from sys.sysviews;
+1          
+-----------
+0          
+ij> -- look ma, no locks.
+select count(*) from new org.apache.derby.diag.LockTable() l;
+1          
+-----------
+0          
+ij> insert into test_tab values (2);
+1 row inserted/updated/deleted
+ij> -- only see locks on test_tab, none on system catalogs
+-- 
+select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l
+order by 1;
+TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ROW  |X   |TEST_TAB                                                                                                                        |(1,8)               |GRANT
+TABLE|IX  |TEST_TAB                                                                                                                        |Tablelock           |GRANT
+ij> -- bugid 3214, atlas case: 962505
+-- selecting from a table would hold locks which would disallow creating
+-- another table.
+drop table t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> create table t1 (x int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> select * from t1;
+X          
+-----------
+ij> connect 'wombat' as conn1;
+ij(CONN1)> -- this should not time out waiting for locks.
+create table t2 (x int);
+0 rows inserted/updated/deleted
+ij(CONN1)> drop table t2;
+0 rows inserted/updated/deleted
+ij(CONN1)> set connection connection0;
+ij(CONNECTION0)> disconnect conn1;
+ij> commit;
+ij> show connections;
+CONNECTION0* - 	jdbc:derby:wombat
+* = current connection
+ij> -- create table again to force scanning system catalogs.
+drop table test_tab;
+0 rows inserted/updated/deleted
+ij> create table test_tab (x int);
+0 rows inserted/updated/deleted
+ij> insert into test_tab values (1);
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- prepare a statement-- no locks.
+prepare cursor1 as 'update test_tab set x=2 where x=?';
+ij> select count(*) from new org.apache.derby.diag.LockTable() l;
+1          
+-----------
+0          
+ij> -- now execute it-- should see locks on test_tab
+execute cursor1 using 'values (1)';
+1 row inserted/updated/deleted
+ij> select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+order by 1;
+TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ROW  |X   |TEST_TAB                                                                                                                        |(1,7)               |GRANT
+TABLE|IX  |TEST_TAB                                                                                                                        |Tablelock           |GRANT
+ij> commit;
+ij> -- problem with backing index scans.
+create table t (c1 int not null primary key, c2 int references t);
+0 rows inserted/updated/deleted
+ij> insert into t values (1,1);
+1 row inserted/updated/deleted
+ij> insert into t values (2,1);
+1 row inserted/updated/deleted
+ij> commit;
+ij> prepare ps as 'select * from t where c1 = ? and c2 = ?';
+ij> -- no locks, no locks at all.
+select * from new org.apache.derby.diag.LockTable() l;
+XID            |TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE|TABLETYPE|LOCK&|INDEXNAME                                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- clear DataDictionary cache
+create table x(c1 int);
+0 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- try inserting into the table; no locks on system catalogs.
+prepare pi as 'insert into t values (3,2)';
+ij> select * from new org.apache.derby.diag.LockTable() l;
+XID            |TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE|TABLETYPE|LOCK&|INDEXNAME                                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> commit;
+ij> -- clear DataDictionary cache
+create table x(c1 int);
+0 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- try updating the table; no locks on system catalogs.
+prepare p1 as 'update t set c2 = c1, c1 = c2';
+ij> select * from new org.apache.derby.diag.LockTable() l;
+XID            |TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE|TABLETYPE|LOCK&|INDEXNAME                                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> commit;
+ij> -- clear DataDictionary cache
+create table x(c1 int);
+0 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- try deleting from the table; no locks on system catalogs.
+prepare p1 as 'delete from t';
+ij> select * from new org.apache.derby.diag.LockTable() l;
+XID            |TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE|TABLETYPE|LOCK&|INDEXNAME                                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> commit;
+ij> -- create some triggers.
+create trigger update_of_t after update on t for each row mode db2sql values 2;
+0 rows inserted/updated/deleted
+ij> create trigger insert_of_t after insert on t for each row mode db2sql values 3;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- t has (1,1) (2,1) (3,2)
+prepare pu as 'update t set c2=2 where c1=2';
+ij> select * from new org.apache.derby.diag.LockTable() l;
+XID            |TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE|TABLETYPE|LOCK&|INDEXNAME                                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> commit;
+ij> 

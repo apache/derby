@@ -1,0 +1,151 @@
+ij> -- simple scroll cursor tests
+create table t (a int);
+0 rows inserted/updated/deleted
+ij> insert into t values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> get scroll insensitive cursor c1 as 'select * from t';
+ij> -- should be 1
+first c1;
+A          
+-----
+1          
+ij> -- should be 2
+next c1;
+A          
+-----
+2          
+ij> -- should be 1
+previous c1;
+A          
+-----
+1          
+ij> -- should be 5
+last c1;
+A          
+-----
+5          
+ij> -- should be 2
+absolute 2 c1;
+A          
+-----
+2          
+ij> -- should be 4
+relative 2 c1;
+A          
+-----
+4          
+ij> close c1;
+ij> -- since JCC gets 64 results and then scrolls within them
+----- lets try each positioning command as the first command for the cursor
+get scroll insensitive cursor c1 as 'select * from t';
+ij> -- should be 1
+next c1;
+A          
+-----
+1          
+ij> close c1;
+ij> get scroll insensitive cursor c1 as 'select * from t';
+ij> -- should be 5
+last c1;
+A          
+-----
+5          
+ij> close c1;
+ij> get scroll insensitive cursor c1 as 'select * from t';
+ij> -- should be 3
+absolute 3 c1;
+A          
+-----
+3          
+ij> -- should be 4
+next c1;
+A          
+-----
+4          
+ij> close c1;
+ij> -- let's try a table with more than 64 rows
+create table t1 (a int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10);
+10 rows inserted/updated/deleted
+ij> insert into t1 values (11),(12),(13),(14),(15),(16),(17),(18),(19),(20);
+10 rows inserted/updated/deleted
+ij> insert into t1 values (21),(22),(23),(24),(25),(26),(27),(28),(29),(30);
+10 rows inserted/updated/deleted
+ij> insert into t1 values (31),(32),(33),(34),(35),(36),(37),(38),(39),(40);
+10 rows inserted/updated/deleted
+ij> insert into t1 values (41),(42),(43),(44),(45),(46),(47),(48),(49),(50);
+10 rows inserted/updated/deleted
+ij> insert into t1 values (51),(52),(53),(54),(55),(56),(57),(58),(59),(60);
+10 rows inserted/updated/deleted
+ij> insert into t1 values (61),(62),(63),(64),(65),(66),(67),(68),(69),(70);
+10 rows inserted/updated/deleted
+ij> get scroll insensitive cursor c1 as 'select * from t1';
+ij> -- should be 1
+first c1;
+A          
+-----
+1          
+ij> -- should be 70
+last c1;
+A          
+-----
+70         
+ij> -- should be 65
+absolute 65 c1;
+A          
+-----
+65         
+ij> -- should be 70
+absolute -1 c1;
+A          
+-----
+70         
+ij> close c1;
+ij> -- try sensitive scroll cursors bug 4677
+get scroll sensitive cursor c1 as 'select * from t';
+ij> close c1;
+ij> get scroll sensitive cursor c1 as 'select * from t for update';
+ij> close c1;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- defect 5225, outer joins returning NULLs
+create table t1 (i1 bigint not null, c1 varchar(64) not null);
+0 rows inserted/updated/deleted
+ij> create table t2 (i2 bigint not null, c2 varchar(64) not null);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 'String 1');
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 'String 2');
+1 row inserted/updated/deleted
+ij> insert into t2 values (1, 'String 1');
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 'String 3');
+1 row inserted/updated/deleted
+ij> -- Outer joins can return NULLs on the non-outer side of the join
+select c1 from t1 right outer join t2 on (i1=i2);
+C1                                                              
+-----
+String 1                                                        
+NULL                                                            
+ij> select c2 from t1 right outer join t2 on (i1=i2);
+C2                                                              
+-----
+String 1                                                        
+String 3                                                        
+ij> -- Left outer join
+select c1 from t1 left outer join t2 on (i1=i2);
+C1                                                              
+-----
+String 1                                                        
+String 2                                                        
+ij> select c2 from t1 left outer join t2 on (i1=i2);
+C2                                                              
+-----
+String 1                                                        
+NULL                                                            
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,112 @@
+Test currentof starting
+PASS: expected and got 0 rowson stmt: create table t (i int, c char(50))
+PASS: expected and got 0 rowson stmt: create table s (i int, c char(50))
+PASS: expected and got 1 rowon stmt: insert into t values (1956, 'hello world')
+PASS: expected and got 1 rowon stmt: insert into t values (456, 'hi yourself')
+PASS: expected and got 1 rowon stmt: insert into t values (180, 'rubber ducky')
+PASS: expected and got 1 rowon stmt: insert into t values (3, 'you are the one')
+PASS: setup complete
+Row: 1956,hello world                                       
+Row: 456,hi yourself                                       
+Row: 180,rubber ducky                                      
+Row: 3,you are the one                                   
+Have 4 rows in table at start
+ERROR 42X28: Delete table 'S' is not target of cursor 'SQLCUR0'.
+PASS: delete table and cursor table mismatch caught
+ERROR XCL08: Cursor 'SQLCUR0' is not on a row.
+PASS: Attempt to delete cursor before first row caught
+PASS: expected and got true
+Row: 1956,hello world                                       
+PASS: expected and got 1 rowon stmt: delete, ok
+PASS: expected and got true
+Row: 456,hi yourself                                       
+PASS: expected and got true
+Row: 180,rubber ducky                                      
+PASS: expected and got 1 rowon stmt: <delete after skipping>
+PASS: expected and got true
+Row: 3,you are the one                                   
+PASS: expected and got false
+ERROR XCL08: Cursor 'SQLCUR0' is not on a row.
+PASS: Attempt to delete cursor past last row caught
+ERROR XCL07: Cursor 'SQLCUR0' is closed. Verify that autocommit is OFF.
+PASS: Attempt to delete closed cursor caught
+Row: 456,hi yourself                                       
+Row: 3,you are the one                                   
+Have 2 rows in table at end
+PASS: expected and got 2 rowson stmt: startCount-endCount
+ERROR 42X30: Cursor 'NOSUCHCURSOR' not found. Verify that autocommit is OFF.
+PASS: Attempt to delete nonexistent cursor caught
+PASS: delete test complete
+PASS: expected and got false
+PASS: expected and got 1 rowon stmt: insert into t values (1956, 'hello world')
+PASS: expected and got 1 rowon stmt: insert into t values (456, 'hi yourself')
+PASS: expected and got 1 rowon stmt: insert into t values (180, 'rubber ducky')
+PASS: expected and got 1 rowon stmt: insert into t values (3, 'you are the one')
+PASS: setup complete
+Row: 1956,hello world                                       
+Row: 456,hi yourself                                       
+Row: 180,rubber ducky                                      
+Row: 3,you are the one                                   
+Have 4 rows in table at start
+ERROR 42X31: Column 'C' is not in FOR UPDATE list of cursor 'SQLCUR1'.
+PASS: update of non-existant column caught
+PASS: update of read-only cursor caught
+PASS: update of fetch-only cursor caught
+PASS: update of union cursor caught
+PASS: update of join cursor caught
+PASS: update of derived table cursor caught
+PASS: update of values clause cursor caught
+PASS: update of subquery cursor caught
+ERROR 42X29: Update table 'S' is not target of cursor 'SQLCUR2'.
+PASS: update table and cursor table mismatch caught
+ERROR XCL08: Cursor 'SQLCUR2' is not on a row.
+PASS: Attempt to update cursor before first row caught
+PASS: expected and got true
+Row: 1956,hello world                                       
+PASS: expected and got 1 rowon stmt: update on row
+PASS: expected and got 1 rowon stmt: 2nd update on row
+PASS: expected and got true
+Row: 456,hi yourself                                       
+PASS: expected and got true
+Row: 180,rubber ducky                                      
+PASS: expected and got 1 rowon stmt: update after skipping
+PASS: expected and got true
+Row: 3,you are the one                                   
+PASS: expected and got false
+ERROR XCL08: Cursor 'SQLCUR2' is not on a row.
+PASS: Attempt to update cursor past last row caught
+ERROR 42X30: Cursor 'SQLCUR2' not found. Verify that autocommit is OFF.
+PASS: Attempt to update closed cursor caught
+ERROR 42X30: Cursor 'NOSUCHCURSOR' not found. Verify that autocommit is OFF.
+PASS: Attempt to update nonexistent cursor caught
+Row: 1976,Gumby was here                                    
+Row: 456,hi yourself                                       
+Row: 190,Gumby was here                                    
+Row: 3,you are the one                                   
+Have 4 rows in table at end
+bug4395 Cursor Name Application Defined
+PASS: expected and got true
+Row: 1976,Gumby was here                                    
+PASS: expected and got 1 rowon stmt: update: valid update
+PASS: expected and got true
+Row: 1986,Dan was here                                      
+ERROR 42X31: Column 'C' is not in FOR UPDATE list of cursor 'CS4395'.
+PASS: Attempt to update changed invalid cursor caught
+PASS: expected and got true
+Row: 1986,Dan was here                                      
+bug4395 Cursor Name System Generated
+PASS: expected and got true
+Row: 1986,Dan was here                                      
+PASS: expected and got 1 rowon stmt: update: valid update
+PASS: expected and got true
+Row: 1996,Dan was here                                      
+ERROR 42X31: Column 'C' is not in FOR UPDATE list of cursor 'SQLCUR3'.
+PASS: Attempt to update changed invalid cursor caught
+PASS: expected and got true
+Row: 1996,Dan was here                                      
+PASS: update test complete
+PASS: expected and got 0 rowson stmt: drop table t
+PASS: expected and got 0 rowson stmt: drop table s
+PASS: teardown complete
+PASS
+Test currentof finished

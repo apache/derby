@@ -1,0 +1,352 @@
+ij> --
+-- Small trigger stream test.  Make sure we can
+-- read streams ok from the context of a row or
+-- statement trigger.
+--
+create function getAsciiColumn( whichRS int, colNumber int, value varchar(128)) returns int
+  PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.StreamUtil.getAsciiColumn';
+0 rows inserted/updated/deleted
+ij> create procedure insertAsciiColumn( stmtText varchar( 256), colNumber int, value varchar(128), length int)
+  PARAMETER STYLE JAVA LANGUAGE JAVA MODIFIES SQL DATA
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.StreamUtil.insertAsciiColumn';
+0 rows inserted/updated/deleted
+ij> create function getBinaryColumn( whichRS int, colNumber int, value varchar(128)) returns int
+  PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.StreamUtil.getBinaryColumn';
+0 rows inserted/updated/deleted
+ij> create procedure insertBinaryColumn( stmtText varchar( 256), colNumber int, value varchar(128), length int)
+  PARAMETER STYLE JAVA LANGUAGE JAVA MODIFIES SQL DATA
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.StreamUtil.insertBinaryColumn';
+0 rows inserted/updated/deleted
+ij> drop table x;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'X' because it does not exist.
+ij> create table x (x int, c1 long varchar, y int, slen int);
+0 rows inserted/updated/deleted
+ij> -- this getAsciiColumn() method reads in the stream
+-- and verifies each byte and prints out the length
+-- of the column
+create trigger t1 NO CASCADE before update of x,y on x for each statement mode db2sql
+	values getAsciiColumn( 0, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after update of x,y on x for each row  mode db2sql
+	values getAsciiColumn( 1, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t3 after insert on x for each statement  mode db2sql
+	values getAsciiColumn( 1, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t4 NO CASCADE before insert on x for each row  mode db2sql
+	values getAsciiColumn( 1, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t5 NO CASCADE before delete on x for each statement  mode db2sql
+	values getAsciiColumn( 0, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t6 after delete on x for each row  mode db2sql
+	values getAsciiColumn( 0, 2, 'a');
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (1, ?, 1, ?)', 1, 'a', 1);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (2, ?, 2, ?)', 1, 'a', 10);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (3, ?, 3, ?)', 1, 'a', 100);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (4, ?, 4, ?)', 1, 'a', 1000);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (5, ?, 5, ?)', 1, 'a', 5000);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (6, ?, 6, ?)', 1, 'a', 10000);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (7, ?, 7, ?)', 1, 'a', 16500);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (8, ?, 8, ?)', 1, 'a', 32500);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (9, ?, 9, ?)', 1, 'a', 0);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> call insertAsciiColumn('insert into x values (10, ?, 10, ?)', 1, 'a', 666);
+getAsciiColumn() called
+getAsciiColumn() called
+0 rows inserted/updated/deleted
+ij> update x set x = x+1;
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+10 rows inserted/updated/deleted
+ij> update x set x = null;
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+10 rows inserted/updated/deleted
+ij> insert into x select * from x;
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+10 rows inserted/updated/deleted
+ij> delete from x;
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+getAsciiColumn() called
+20 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> create table x (x int, c1 long varchar for bit data, y int, slen int);
+0 rows inserted/updated/deleted
+ij> -- this getBinaryColumn() method reads in the stream
+-- and verifies each byte and prints out the length
+-- of the column
+create trigger t1 NO CASCADE before update of x,y on x for each statement  mode db2sql
+	values getBinaryColumn( 0, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after update of x,y on x for each row  mode db2sql
+	values getBinaryColumn( 1, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t3 after insert on x for each statement  mode db2sql
+	values getBinaryColumn( 1, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t4 NO CASCADE before insert on x for each row  mode db2sql
+	values getBinaryColumn( 1, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t5 NO CASCADE before delete on x for each statement  mode db2sql
+	values getBinaryColumn( 1, 2, 'a');
+0 rows inserted/updated/deleted
+ij> create trigger t6 after delete on x for each row  mode db2sql
+	values getBinaryColumn( 0, 2, 'a');
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (1, ?, 1, ?)', 1, 'a', 1);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (2, ?, 2, ?)', 1, 'a', 10);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (3, ?, 3, ?)', 1, 'a', 100);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (4, ?, 4, ?)', 1, 'a', 1000);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (5, ?, 5, ?)', 1, 'a', 10000);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (6, ?, 6, ?)', 1, 'a', 32700);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (7, ?, 7, ?)', 1, 'a', 32699);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (8, ?, 8, ?)', 1, 'a', 16384);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (9, ?, 9, ?)', 1, 'a', 16383);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (10, ?, 10, ?)', 1, 'a', 0);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> call insertBinaryColumn('insert into x values (11, ?, 11, ?)', 1, 'a', 666);
+getBinaryColumn() called
+getBinaryColumn() called
+0 rows inserted/updated/deleted
+ij> select x, length(c1) from x order by 1;
+X          |2          
+-----------------------
+1          |1          
+2          |10         
+3          |100        
+4          |1000       
+5          |10000      
+6          |32700      
+7          |32699      
+8          |16384      
+9          |16383      
+10         |0          
+11         |666        
+ij> update x set x = x+1;
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+11 rows inserted/updated/deleted
+ij> select x, length(c1) from x order by 1;
+X          |2          
+-----------------------
+2          |1          
+3          |10         
+4          |100        
+5          |1000       
+6          |10000      
+7          |32700      
+8          |32699      
+9          |16384      
+10         |16383      
+11         |0          
+12         |666        
+ij> update x set x = null;
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+11 rows inserted/updated/deleted
+ij> select x, length(c1) from x order by 2;
+X          |2          
+-----------------------
+NULL       |0          
+NULL       |1          
+NULL       |10         
+NULL       |100        
+NULL       |666        
+NULL       |1000       
+NULL       |10000      
+NULL       |16383      
+NULL       |16384      
+NULL       |32699      
+NULL       |32700      
+ij> insert into x select * from x;
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+11 rows inserted/updated/deleted
+ij> select x, length(c1) from x order by 2;
+X          |2          
+-----------------------
+NULL       |0          
+NULL       |0          
+NULL       |1          
+NULL       |1          
+NULL       |10         
+NULL       |10         
+NULL       |100        
+NULL       |100        
+NULL       |666        
+NULL       |666        
+NULL       |1000       
+NULL       |1000       
+NULL       |10000      
+NULL       |10000      
+NULL       |16383      
+NULL       |16383      
+NULL       |16384      
+NULL       |16384      
+NULL       |32699      
+NULL       |32699      
+NULL       |32700      
+NULL       |32700      
+ij> delete from x;
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+getBinaryColumn() called
+22 rows inserted/updated/deleted
+ij> 

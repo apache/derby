@@ -1,0 +1,1377 @@
+ij> -- Adding new testcases for DB2 syntax "GENERATED ALWAYS AS IDENTITY"
+-- We don't enhance "ALTER TABLE <T> MODIFY COLUMN" yet: DB2 uses "ALTER TABLE <T> ALTER COLUMN..."
+-- try generated  values with all types.
+-- Cloudscape specific syntax for the autoincrement clause can be found in store/bug3498.sql
+create table ai_zero (i int, a_zero int generated always as identity);
+0 rows inserted/updated/deleted
+ij> create table ai_one (i int, a_one smallint generated always as identity);
+0 rows inserted/updated/deleted
+ij> create table ai_two (i int, a_two int generated always as identity);
+0 rows inserted/updated/deleted
+ij> create table ai_three (i int, a_three int generated always as identity);
+0 rows inserted/updated/deleted
+ij> select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME in ('A_ZERO', 'A_ONE', 'A_TWO', 'A_THREE');
+COLUMNNAME                                                                                                                      |AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+A_ZERO                                                                                                                          |1                   |1                   |1                   
+A_ONE                                                                                                                           |1                   |1                   |1                   
+A_TWO                                                                                                                           |1                   |1                   |1                   
+A_THREE                                                                                                                         |1                   |1                   |1                   
+ij> drop table ai_zero;
+0 rows inserted/updated/deleted
+ij> drop table ai_one;
+0 rows inserted/updated/deleted
+ij> drop table ai_two;
+0 rows inserted/updated/deleted
+ij> drop table ai_three;
+0 rows inserted/updated/deleted
+ij> -- try a generated column spec with initial and start values.
+create table ai (i  int, autoinc int generated always as identity (start with 100));
+0 rows inserted/updated/deleted
+ij> select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'AUTOINC';
+AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+--------------------------------------------------------------
+100                 |100                 |1                   
+ij> drop table ai;
+0 rows inserted/updated/deleted
+ij> create table ai (i int, autoinc int generated always as identity (increment by 100));
+0 rows inserted/updated/deleted
+ij> select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'AUTOINC';
+AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+--------------------------------------------------------------
+1                   |1                   |100                 
+ij> drop table ai;
+0 rows inserted/updated/deleted
+ij> create table ai (i int, 
+				 autoinc int generated always as identity (start with 101, increment by 100));
+0 rows inserted/updated/deleted
+ij> select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'AUTOINC';
+AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+--------------------------------------------------------------
+101                 |101                 |100                 
+ij> drop table ai;
+0 rows inserted/updated/deleted
+ij> -- try -ive numbers.
+create table ai1 (i int, 
+				  a1 int generated always as identity (start with  0, increment by -1));
+0 rows inserted/updated/deleted
+ij> create table ai2 (i int, 
+				  a2 int generated always as identity (start with  +0, increment by -1));
+0 rows inserted/updated/deleted
+ij> create table ai3 (i int, 
+				  a3 int generated always as identity (start with  -1, increment by -1));
+0 rows inserted/updated/deleted
+ij> create table ai4 (i int, 
+				  a4 int generated always as identity (start with  -11, increment by +100));
+0 rows inserted/updated/deleted
+ij> select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'A1';
+AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+--------------------------------------------------------------
+0                   |0                   |-1                  
+ij> select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'A2';
+AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+--------------------------------------------------------------
+0                   |0                   |-1                  
+ij> select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'A3';
+AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+--------------------------------------------------------------
+-1                  |-1                  |-1                  
+ij> select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'A4';
+AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+--------------------------------------------------------------
+-11                 |-11                 |100                 
+ij> drop table ai1;
+0 rows inserted/updated/deleted
+ij> drop table ai2;
+0 rows inserted/updated/deleted
+ij> drop table ai3;
+0 rows inserted/updated/deleted
+ij> drop table ai4;
+0 rows inserted/updated/deleted
+ij> -- **** simple increment tests.
+create table ai_short (i int, 
+				       ais smallint generated always as identity (start with 0, increment by 2));
+0 rows inserted/updated/deleted
+ij> insert into ai_short (i) values (0);
+1 row inserted/updated/deleted
+ij> insert into ai_short (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_short (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into ai_short (i) values (3);
+1 row inserted/updated/deleted
+ij> select * from ai_short;
+I          |AIS   
+------------------
+0          |0     
+1          |2     
+2          |4     
+3          |6     
+ij> select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
+from sys.syscolumns where COLUMNNAME = 'AIS';
+COLUMNNAME                                                                                                                      |AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+AIS                                                                                                                             |8                   |0                   |2                   
+ij> drop table ai_short;
+0 rows inserted/updated/deleted
+ij> -- table with more than one generated column spec should fail
+create table ai_multiple (i int, 
+						  a0 int generated always as identity (start with  -1,
+												    increment by -1),
+						  a1 smallint generated always as identity,
+						  a2 int generated always as identity (start with  0),
+						  a3 bigint generated always as identity (start with  -100,
+													increment by 10));
+ERROR 428C1: Only one identity column is allowed in a table.
+ij> -- table with one generated column spec should succeed
+create table ai_single1 (i int, a0 int generated always as identity 
+									(start with  -1, increment by -1));
+0 rows inserted/updated/deleted
+ij> create table ai_single2 (i int, a1 smallint generated always as identity);
+0 rows inserted/updated/deleted
+ij> create table ai_single3 (i int, a2 int generated always as identity 
+									(start with 0));
+0 rows inserted/updated/deleted
+ij> create table ai_single4 (i int, a3 bigint generated always as identity 
+								        (start with  -100, increment by 10));
+0 rows inserted/updated/deleted
+ij> insert into ai_single1 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (3);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (4);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (5);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (6);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (7);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (8);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (9);
+1 row inserted/updated/deleted
+ij> insert into ai_single1 (i) values (10);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (3);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (4);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (5);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (6);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (7);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (8);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (9);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (10);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (3);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (4);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (5);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (6);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (7);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (8);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (9);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (10);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (3);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (4);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (5);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (6);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (7);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (8);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (9);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (10);
+1 row inserted/updated/deleted
+ij> select a.i, a0, a1, a2, a3 from ai_single1 a 
+       join ai_single2 b on a.i = b.i 
+       join ai_single3 c on a.i = c.i 
+       join ai_single4 d on a.i = d.i;
+I          |A0         |A1    |A2         |A3                  
+---------------------------------------------------------------
+1          |-1         |1     |0          |-100                
+2          |-2         |2     |1          |-90                 
+3          |-3         |3     |2          |-80                 
+4          |-4         |4     |3          |-70                 
+5          |-5         |5     |4          |-60                 
+6          |-6         |6     |5          |-50                 
+7          |-7         |7     |6          |-40                 
+8          |-8         |8     |7          |-30                 
+9          |-9         |9     |8          |-20                 
+10         |-10        |10    |9          |-10                 
+ij> delete from ai_single1;
+10 rows inserted/updated/deleted
+ij> delete from ai_single2;
+10 rows inserted/updated/deleted
+ij> delete from ai_single3;
+10 rows inserted/updated/deleted
+ij> delete from ai_single4;
+10 rows inserted/updated/deleted
+ij> insert into ai_single1 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_single2 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_single3 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai_single4 (i) values (1);
+1 row inserted/updated/deleted
+ij> select a.i, a0, a1, a2, a3 from ai_single1 a 
+       join ai_single2 b on a.i = b.i 
+       join ai_single3 c on a.i = c.i 
+       join ai_single4 d on a.i = d.i;
+I          |A0         |A1    |A2         |A3                  
+---------------------------------------------------------------
+1          |-11        |11    |10         |0                   
+ij> -- clean up
+drop table ai_single1;
+0 rows inserted/updated/deleted
+ij> drop table ai_single2;
+0 rows inserted/updated/deleted
+ij> drop table ai_single3;
+0 rows inserted/updated/deleted
+ij> drop table ai_single4;
+0 rows inserted/updated/deleted
+ij> -- **** connection info tests {basic ones}
+create table ai_test (x int generated always as identity (start with 2, increment by 2),
+					  y int);
+0 rows inserted/updated/deleted
+ij> insert into ai_test (y) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10);
+10 rows inserted/updated/deleted
+ij> -- should see 20.
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+0                              
+ij> insert into ai_test (y) select y+10 from ai_test;
+10 rows inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+0                              
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+0                              
+ij> -- try some more connection info tests
+create table ai_single1 (c char(100), a_odd int generated always as identity (start with 1, increment by 2));
+0 rows inserted/updated/deleted
+ij> create table ai_single2 (c char(100), a_even int generated always as identity (start with 0, increment by 2));
+0 rows inserted/updated/deleted
+ij> create table ai_single3 (c char(100), a_sum bigint generated always as identity (start with 1, increment by 2));
+0 rows inserted/updated/deleted
+ij> insert into ai_single1 (c) values ('a');
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+1                              
+ij> insert into ai_single2 (c) values ('a');
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+0                              
+ij> insert into ai_single3 (c) values ('a');
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+1                              
+ij> insert into ai_single1 (c) values ('b');
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+3                              
+ij> insert into ai_single2 (c) values ('b');
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> insert into ai_single3 (c) values ('b');
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+3                              
+ij> drop table ai_single1;
+0 rows inserted/updated/deleted
+ij> drop table ai_single2;
+0 rows inserted/updated/deleted
+ij> drop table ai_single3;
+0 rows inserted/updated/deleted
+ij> drop table ai_test;
+0 rows inserted/updated/deleted
+ij> -- nested, nested, nested stuff.
+-- t1 --> trigger --> insert into t2 
+-- insert row into t1.
+-- I can get lastAutoincrementValue for t1 but not t2.
+create table t1 (c1 int generated always as identity, name char(32));
+0 rows inserted/updated/deleted
+ij> create table t2 (c2 int generated always as identity, name char(32));
+0 rows inserted/updated/deleted
+ij> create trigger insert_trigger after insert on t1 for each row mode db2sql
+	   insert into t2 (name) values ('Bob Finocchio');
+0 rows inserted/updated/deleted
+ij> insert into t1 (name) values ('Phil White');
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         |NAME                            
+--------------------------------------------
+1          |Phil White                      
+ij> select * from t2;
+C2         |NAME                            
+--------------------------------------------
+1          |Bob Finocchio                   
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+1                              
+ij> insert into t2 (name) values ('Jean-Yves Dexemier');
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> -- insert into multiple tables in different schema names with same tablename,column names
+-- make sure 
+-- lastAutoincrementValue shouldn't get confused.....
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- APP.TAB1.A1 ==> -1,-2,-3
+-- APP.TAB1.A2 ==> 1,2,3
+-- APP.TAB2.A1 ==> 0,-2,-4
+-- APP.TAB3.A2 ==> 0,2,4
+create table tab1 (i int, a1 int generated always as identity (start with -1, increment by -1));
+0 rows inserted/updated/deleted
+ij> create table tab2 (i int, a2 smallint generated always as identity (start with 1, increment by +1));
+0 rows inserted/updated/deleted
+ij> create table tab3 (i int, a1 int generated always as identity (start with 0, increment by -2));
+0 rows inserted/updated/deleted
+ij> create table tab4 (i int, a2 bigint generated always as identity (start with 0, increment by 2));
+0 rows inserted/updated/deleted
+ij> create schema BPP;
+0 rows inserted/updated/deleted
+ij> set schema BPP;
+0 rows inserted/updated/deleted
+ij> -- BPP.TAB1.A1 ==> 100,101,102
+-- BPP.TAB2.A2 ==> 100,99,98
+-- BPP.TAB3.A1 ==> 100,102,104
+-- BPP.TAB4.A2 ==> 100,98,96
+create table tab1 (i int, a1 int generated always as identity (start with 100, increment by 1));
+0 rows inserted/updated/deleted
+ij> create table tab2 (i int, a2 bigint generated always as identity (start with 100, increment by -1));
+0 rows inserted/updated/deleted
+ij> create table tab3 (i int, a1 int generated always as identity (start with 100, increment by 2));
+0 rows inserted/updated/deleted
+ij> create table tab4 (i int, a2 smallint generated always as identity (start with 100, increment by -2));
+0 rows inserted/updated/deleted
+ij> insert into APP.tab1 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into APP.tab2 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into APP.tab3 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into APP.tab4 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into tab1 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into tab1 (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into tab2 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into tab2 (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into tab3 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into tab3 (i) values (2);
+1 row inserted/updated/deleted
+ij> insert into tab4 (i) values (1);
+1 row inserted/updated/deleted
+ij> insert into tab4 (i) values (2);
+1 row inserted/updated/deleted
+ij> select a.i, a1, a2 from app.tab1 a join app.tab2 b on a.i = b.i;
+I          |A1         |A2    
+------------------------------
+1          |-1         |1     
+ij> select a.i, a1, a2 from app.tab3 a join app.tab4 b on a.i = b.i;
+I          |A1         |A2                  
+--------------------------------------------
+1          |0          |0                   
+ij> select a.i, a1, a2 from tab1 a join tab2 b on a.i = b.i;
+I          |A1         |A2                  
+--------------------------------------------
+1          |100        |100                 
+2          |101        |99                  
+ij> select a1, a2, a.i from tab3 a join tab4 b on a.i = b.i;
+A1         |A2    |I          
+------------------------------
+100        |100   |1          
+102        |98    |2          
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+98                             
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> drop table bpp.tab1;
+0 rows inserted/updated/deleted
+ij> drop table bpp.tab2;
+0 rows inserted/updated/deleted
+ij> drop table bpp.tab3;
+0 rows inserted/updated/deleted
+ij> drop table bpp.tab4;
+0 rows inserted/updated/deleted
+ij> drop schema bpp restrict;
+0 rows inserted/updated/deleted
+ij> drop table tab1;
+0 rows inserted/updated/deleted
+ij> drop table tab2;
+0 rows inserted/updated/deleted
+ij> drop table tab3;
+0 rows inserted/updated/deleted
+ij> drop table tab4;
+0 rows inserted/updated/deleted
+ij> -- trigger, 
+-- insert into t2
+--         ==> fires trigger which inserts into t1.
+--                      
+create table tab1 (s1 int generated always as identity, 
+				   lvl int);
+0 rows inserted/updated/deleted
+ij> create table tab3 (c1 int);
+0 rows inserted/updated/deleted
+ij> create trigger tab1_after1 after insert on tab3 referencing new as newrow for each row mode db2sql insert into tab1 (lvl) values 1,2,3;
+0 rows inserted/updated/deleted
+ij> insert into tab3 values null;
+1 row inserted/updated/deleted
+ij> select * from tab1;
+S1         |LVL        
+-----------------------
+1          |1          
+2          |2          
+3          |3          
+ij> select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB1';
+TABLENAME                                                                                                                       |AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TAB1                                                                                                                            |4                   |1                   |1                   
+ij> create table tab2 (lvl int, s1  bigint generated always as identity);
+0 rows inserted/updated/deleted
+ij> create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row mode db2sql insert into tab2 (lvl) values 1,2,3;
+0 rows inserted/updated/deleted
+ij> insert into tab3 values null;
+1 row inserted/updated/deleted
+ij> select * from tab2;
+LVL        |S1                  
+--------------------------------
+1          |1                   
+2          |2                   
+3          |3                   
+ij> select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB2';
+TABLENAME                                                                                                                       |AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TAB2                                                                                                                            |4                   |1                   |1                   
+ij> -- clean up
+drop trigger tab1_after1;
+0 rows inserted/updated/deleted
+ij> drop trigger tab1_after2;
+0 rows inserted/updated/deleted
+ij> drop table tab1;
+0 rows inserted/updated/deleted
+ij> drop table tab2;
+0 rows inserted/updated/deleted
+ij> drop table tab3;
+0 rows inserted/updated/deleted
+ij> -- some more variations of lastAutoincrementValue....
+-- make sure we don't lose values from previous inserts.
+create table t1 (x int, s1 int generated always as identity);
+0 rows inserted/updated/deleted
+ij> create table t2 (x smallint, s2 int generated always as identity (start with 0));
+0 rows inserted/updated/deleted
+ij> insert into t1 (x) values (1);
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+1                              
+ij> insert into t1 (x) values (2);
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> insert into t2 (x) values (1);
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+0                              
+ij> -- alter table tests.
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t1 (s1 int generated always as identity);
+0 rows inserted/updated/deleted
+ij> alter table t1 add column x int;
+0 rows inserted/updated/deleted
+ij> insert into t1 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> create table t2 (s2 int generated always as identity (start with 2));
+0 rows inserted/updated/deleted
+ij> alter table t2 add column x int;
+0 rows inserted/updated/deleted
+ij> insert into t2 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> create table t3 (s0 int generated always as identity (start with 0));
+0 rows inserted/updated/deleted
+ij> alter table t3 add column x int;
+0 rows inserted/updated/deleted
+ij> insert into t3 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> select a.x, s1, s2, s0 from t1 a join t2 b on a.x = b.x join t3 c on a.x = c.x;
+X          |S1         |S2         |S0         
+-----------------------------------------------
+1          |1          |2          |0          
+2          |2          |3          |1          
+3          |3          |4          |2          
+4          |4          |5          |3          
+5          |5          |6          |4          
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+0                              
+ij> -- test some more generated column specs
+create table trigtest (s1 smallint generated always as identity, lvl int);
+0 rows inserted/updated/deleted
+ij> insert into trigtest (lvl) values (0);
+1 row inserted/updated/deleted
+ij> insert into trigtest (lvl) values (1),(2);
+2 rows inserted/updated/deleted
+ij> insert into trigtest (lvl) values (3),(4);
+2 rows inserted/updated/deleted
+ij> insert into trigtest (lvl) values (5),(6);
+2 rows inserted/updated/deleted
+ij> insert into trigtest (lvl) values (7),(8);
+2 rows inserted/updated/deleted
+ij> select * from trigtest;
+S1    |LVL        
+------------------
+1     |0          
+2     |1          
+3     |2          
+4     |3          
+5     |4          
+6     |5          
+7     |6          
+8     |7          
+9     |8          
+ij> drop table trigtest;
+0 rows inserted/updated/deleted
+ij> select count(*) from t1;
+1          
+-----------
+5          
+ij> select a.x, s1, s2, s0 from t1 a join t2 b on a.x = b.x join t3 c on a.x = c.x;
+X          |S1         |S2         |S0         
+-----------------------------------------------
+1          |1          |2          |0          
+2          |2          |3          |1          
+3          |3          |4          |2          
+4          |4          |5          |3          
+5          |5          |6          |4          
+ij> delete from t1;
+5 rows inserted/updated/deleted
+ij> delete from t2;
+5 rows inserted/updated/deleted
+ij> delete from t3;
+5 rows inserted/updated/deleted
+ij> insert into t1 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> insert into t2 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> insert into t3 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> -- should have started from after the values in t1 due to alter.
+select a.x, s1, s2, s0 from t1 a join t2 b on a.x = b.x join t3 c on a.x = c.x;
+X          |S1         |S2         |S0         
+-----------------------------------------------
+1          |6          |7          |5          
+2          |7          |8          |6          
+3          |8          |9          |7          
+4          |9          |10         |8          
+5          |10         |11         |9          
+ij> insert into t1 (x) values (6);
+1 row inserted/updated/deleted
+ij> insert into t2 (x) values (6);
+1 row inserted/updated/deleted
+ij> insert into t3 (x) values (6);
+1 row inserted/updated/deleted
+ij> select a.x, s1, s2, s0 from t1 a join t2 b on a.x = b.x join t3 c on a.x = c.x;
+X          |S1         |S2         |S0         
+-----------------------------------------------
+1          |6          |7          |5          
+2          |7          |8          |6          
+3          |8          |9          |7          
+4          |9          |10         |8          
+5          |10         |11         |9          
+6          |11         |12         |10         
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+10                             
+ij> delete from t1;
+6 rows inserted/updated/deleted
+ij> delete from t2;
+6 rows inserted/updated/deleted
+ij> delete from t3;
+6 rows inserted/updated/deleted
+ij> insert into t1 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> insert into t2 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> insert into t3 (x) values (1),(2),(3),(4),(5);
+5 rows inserted/updated/deleted
+ij> select a.x, s1, s2, s0 from t1 a join t2 b on a.x = b.x join t3 c on a.x = c.x;
+X          |S1         |S2         |S0         
+-----------------------------------------------
+1          |12         |13         |11         
+2          |13         |14         |12         
+3          |14         |15         |13         
+4          |15         |16         |14         
+5          |16         |17         |15         
+ij> insert into t1 (x) values (6);
+1 row inserted/updated/deleted
+ij> insert into t2 (x) values (6);
+1 row inserted/updated/deleted
+ij> insert into t3 (x) values (6);
+1 row inserted/updated/deleted
+ij> select a.x, s1, s2, s0 from t1 a join t2 b on a.x = b.x join t3 c on a.x = c.x;
+X          |S1         |S2         |S0         
+-----------------------------------------------
+1          |12         |13         |11         
+2          |13         |14         |12         
+3          |14         |15         |13         
+4          |15         |16         |14         
+5          |16         |17         |15         
+6          |17         |18         |16         
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+16                             
+ij> -- make sure we're doing nested xactions to update ai values.
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> create table t1 (x int, yyy int generated always as identity (start with  0));
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> insert into t1 (x) values (1);
+1 row inserted/updated/deleted
+ij> insert into t1 (x) values (2);
+1 row inserted/updated/deleted
+ij> select * from t1;
+X          |YYY        
+-----------------------
+1          |0          
+2          |1          
+ij> -- should see only locks on t1, no locks on system catalogs.
+select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+TYPE |TABLENAME                                                                                                                       |MODE
+-------------------------------------------------------------------------------------------------------------------------------------------
+ROW  |T1                                                                                                                              |X   
+ROW  |T1                                                                                                                              |X   
+TABLE|T1                                                                                                                              |IX  
+ij> delete from t1;
+2 rows inserted/updated/deleted
+ij> commit;
+ij> -- locks should be gone now.
+select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+TYPE |TABLENAME                                                                                                                       |MODE
+-------------------------------------------------------------------------------------------------------------------------------------------
+ij> set isolation serializable;
+0 rows inserted/updated/deleted
+ij> -- this will get a share  lock on syscolumns
+select columnname, autoincrementvalue
+ from sys.syscolumns where columnname = 'YYY';
+COLUMNNAME                                                                                                                      |AUTOINCREMENTVALUE  
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+YYY                                                                                                                             |2                   
+ij> select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+TYPE |TABLENAME                                                                                                                       |MODE
+-------------------------------------------------------------------------------------------------------------------------------------------
+TABLE|SYSCOLUMNS                                                                                                                      |S   
+ij> insert into t1 (x) values (3);
+1 row inserted/updated/deleted
+ij> select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+TYPE |TABLENAME                                                                                                                       |MODE
+-------------------------------------------------------------------------------------------------------------------------------------------
+ROW  |SYSCOLUMNS                                                                                                                      |X   
+TABLE|SYSCOLUMNS                                                                                                                      |IX  
+TABLE|SYSCOLUMNS                                                                                                                      |S   
+ROW  |T1                                                                                                                              |X   
+TABLE|T1                                                                                                                              |IX  
+ij> commit;
+ij> -- try using default keyword with ai.
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (x char(2) default 'yy', y bigint generated always as identity);
+0 rows inserted/updated/deleted
+ij> insert into t1 (x, y) values ('aa', default);
+1 row inserted/updated/deleted
+ij> insert into t1 values ('bb', default);
+1 row inserted/updated/deleted
+ij> insert into t1 (x) values default;
+1 row inserted/updated/deleted
+ij> insert into t1 (x) values null;
+1 row inserted/updated/deleted
+ij> -- switch the order of the columns
+insert into t1 (y, x) values (default, 'cc');
+1 row inserted/updated/deleted
+ij> select * from t1;
+X   |Y                   
+-------------------------
+aa  |1                   
+bb  |2                   
+yy  |3                   
+NULL|4                   
+cc  |5                   
+ij> -- bug 3450.
+autocommit off;
+ij> create table testme (text varchar(10), autonum int generated always as identity);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> prepare autoprepare as 'insert into testme (text) values ?';
+ij> execute autoprepare using 'values (''one'')';
+1 row inserted/updated/deleted
+ij> execute autoprepare using 'values (''two'')';
+1 row inserted/updated/deleted
+ij> execute autoprepare using 'values (''three'')';
+1 row inserted/updated/deleted
+ij> select * from testme;
+TEXT      |AUTONUM    
+----------------------
+one       |1          
+two       |2          
+three     |3          
+ij> -- give exact query and make sure that the statment cache doesn't
+-- mess up things.
+insert into testme (text) values ('four');
+1 row inserted/updated/deleted
+ij> insert into testme (text) values ('four');
+1 row inserted/updated/deleted
+ij> select * from testme;
+TEXT      |AUTONUM    
+----------------------
+one       |1          
+two       |2          
+three     |3          
+four      |4          
+four      |5          
+ij> drop table testme;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- go back to our commiting ways.
+autocommit on;
+ij> -- negative tests from autoincrementNegative.sql
+-- negative bind tests.
+-- invalid types 
+create table ni (x int, y char(1) generated always as identity);
+ERROR 42Z22: Invalid type specified for identity column 'Y'. The only valid types for identity columns are BIGINT, INT and SMALLINT.
+ij> create table ni (x int, y decimal(5,2) generated always as identity);
+ERROR 42Z22: Invalid type specified for identity column 'Y'. The only valid types for identity columns are BIGINT, INT and SMALLINT.
+ij> create table ni (x int, y float generated always as identity (start with 1, increment by 1));
+ERROR 42Z22: Invalid type specified for identity column 'Y'. The only valid types for identity columns are BIGINT, INT and SMALLINT.
+ij> create table ni (s int, y varchar(10) generated always as identity);
+ERROR 42Z22: Invalid type specified for identity column 'Y'. The only valid types for identity columns are BIGINT, INT and SMALLINT.
+ij> -- 0 increment 
+-- pass in DB2 UDB
+-- fail in DB2 CS
+create table ni (x int, y int generated always as identity (increment by 0));
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ij> create table ni (x int, y int generated always as identity (start with 0, increment by 0));
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ij> create table ni (x int, y smallint generated always as identity (increment by 0));
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ij> create table ni (x int, y smallint generated always as identity (start with 0, increment by 0));
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ij> create table ni (x int, y int generated always as identity (increment by 0);
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 75.
+ij> create table ni (x int, y int generated always as identity (start with 0, increment by 0));
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ij> create table ni (x int, y bigint generated always as identity (increment by 0));
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ij> create table ni (x int, y bigint generated always as identity (start with 0, increment by 0));
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ij> -- out of range start 
+-- actually the first few are valid
+create table ni (x int, y int generated always as identity (start with 127, increment by -1));
+0 rows inserted/updated/deleted
+ij> drop table ni;
+0 rows inserted/updated/deleted
+ij> create table ni (x int, y int generated always as identity (start with -128));
+0 rows inserted/updated/deleted
+ij> drop table ni;
+0 rows inserted/updated/deleted
+ij> --  now go through this exercise for all types!
+create table ni (x int, y smallint generated always as identity (start with 32768));
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> create table ni (x int, y smallint generated always as identity (start with -32769));
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> create table ni (x int, y int generated always as identity (start with  2147483648));
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> create table ni (x int, y int generated always as identity (start with  -2147483649));
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> create table ni (x int, y bigint  
+				 generated always as identity (start with  9223372036854775808));
+ERROR 42X49: Value '9223372036854775808' is not a valid integer literal.
+ij> create table ni (x int, y bigint 
+				 generated always as identity (start with  -9223372036854775809));
+ERROR 42X49: Value '9223372036854775809' is not a valid integer literal.
+ij> -- attempt to update or insert into autoincrement columns.
+create table ai (x smallint generated always as identity, y int);
+0 rows inserted/updated/deleted
+ij> insert into ai (y) values (0),(1),(2),(3),(4),(5),(6),(7),(8),(9),(10);
+11 rows inserted/updated/deleted
+ij> select * from ai;
+X     |Y          
+------------------
+1     |0          
+2     |1          
+3     |2          
+4     |3          
+5     |4          
+6     |5          
+7     |6          
+8     |7          
+9     |8          
+10    |9          
+11    |10         
+ij> delete from ai where y=8 OR y=4;
+2 rows inserted/updated/deleted
+ij> insert into ai (y) values (11),(13),(14),(15),(17),(18),(19);
+7 rows inserted/updated/deleted
+ij> select * from ai;
+X     |Y          
+------------------
+1     |0          
+2     |1          
+3     |2          
+4     |3          
+6     |5          
+7     |6          
+8     |7          
+10    |9          
+11    |10         
+12    |11         
+13    |13         
+14    |14         
+15    |15         
+16    |17         
+17    |18         
+18    |19         
+ij> -- valid updates.
+update ai set y=-y;
+16 rows inserted/updated/deleted
+ij> select * from ai order by x;
+X     |Y          
+------------------
+1     |0          
+2     |-1         
+3     |-2         
+4     |-3         
+6     |-5         
+7     |-6         
+8     |-7         
+10    |-9         
+11    |-10        
+12    |-11        
+13    |-13        
+14    |-14        
+15    |-15        
+16    |-17        
+17    |-18        
+18    |-19        
+ij> update ai set y=-y;
+16 rows inserted/updated/deleted
+ij> select * from ai order by x;
+X     |Y          
+------------------
+1     |0          
+2     |1          
+3     |2          
+4     |3          
+6     |5          
+7     |6          
+8     |7          
+10    |9          
+11    |10         
+12    |11         
+13    |13         
+14    |14         
+15    |15         
+16    |17         
+17    |18         
+18    |19         
+ij> update ai set y=4 where y=3;
+1 row inserted/updated/deleted
+ij> select * from ai order by x;
+X     |Y          
+------------------
+1     |0          
+2     |1          
+3     |2          
+4     |4          
+6     |5          
+7     |6          
+8     |7          
+10    |9          
+11    |10         
+12    |11         
+13    |13         
+14    |14         
+15    |15         
+16    |17         
+17    |18         
+18    |19         
+ij> update ai set y=4 where x=3;
+1 row inserted/updated/deleted
+ij> select * from ai order by x;
+X     |Y          
+------------------
+1     |0          
+2     |1          
+3     |4          
+4     |4          
+6     |5          
+7     |6          
+8     |7          
+10    |9          
+11    |10         
+12    |11         
+13    |13         
+14    |14         
+15    |15         
+16    |17         
+17    |18         
+18    |19         
+ij> -- error, error!
+update ai set x=4 where y=3;
+ERROR 42Z23: Attempt to modify an identity column 'X'. 
+ij> insert into ai values (1,2);
+ERROR 42Z23: Attempt to modify an identity column 'X'. 
+ij> -- overflow.
+drop table ai;
+0 rows inserted/updated/deleted
+ij> create table ai (x int, y int generated always as identity (increment by 200000000));
+0 rows inserted/updated/deleted
+ij> insert into ai (x) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19);
+ERROR 42Z24: Overflow occurred in identity value for column 'Y' in table 'AI'.
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> -- should have been rolled back.
+select * from ai;
+X          |Y          
+-----------------------
+ij> -- but the entry in syscolumns has been updated! still can't do inserts.
+insert into ai (x) values (1);
+ERROR 42Z24: Overflow occurred in identity value for column 'Y' in table 'AI'.
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> -- more overflow.
+drop table ai;
+0 rows inserted/updated/deleted
+ij> create table ai (x int, y smallint generated always as identity (start with  -32760, increment by -1));
+0 rows inserted/updated/deleted
+ij> insert into ai (x) values (1),(2),(3),(4),(5),(6),(7),(8);
+8 rows inserted/updated/deleted
+ij> insert into ai (x) values (9),(10);
+ERROR 42Z24: Overflow occurred in identity value for column 'Y' in table 'AI'.
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> select * from ai;
+X          |Y     
+------------------
+1          |-32760
+2          |-32761
+3          |-32762
+4          |-32763
+5          |-32764
+6          |-32765
+7          |-32766
+8          |-32767
+ij> -- try overflow with int and bigint.
+drop table ai;
+0 rows inserted/updated/deleted
+ij> create table ai (x int, y int generated always as identity (start with  2147483646));
+0 rows inserted/updated/deleted
+ij> insert into ai (x) values (1);
+1 row inserted/updated/deleted
+ij> insert into ai (x) values (2);
+1 row inserted/updated/deleted
+ij> select * from ai;
+X          |Y          
+-----------------------
+1          |2147483646 
+2          |2147483647 
+ij> insert into ai (x) select x from ai;
+ERROR 42Z24: Overflow occurred in identity value for column 'Y' in table 'AI'.
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> drop table ai;
+0 rows inserted/updated/deleted
+ij> -- for bigint we don't go to the end-- stop one value before....
+create table ai (x int, y bigint generated always as identity 
+				   (start with     9223372036854775805));
+0 rows inserted/updated/deleted
+ij> insert into ai (x) values (1),(2);
+2 rows inserted/updated/deleted
+ij> insert into ai (x) values (3);
+ERROR 42Z24: Overflow occurred in identity value for column 'Y' in table 'AI'.
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select * from ai;
+X          |Y                   
+--------------------------------
+1          |9223372036854775805 
+2          |9223372036854775806 
+ij> -- clean up
+drop table ai;
+0 rows inserted/updated/deleted
+ij> --- alter table...
+create table base (x int);
+0 rows inserted/updated/deleted
+ij> insert into base values (1),(2),(3),(4),(5),(6);
+6 rows inserted/updated/deleted
+ij> select * from base;
+X          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+ij> -- should fail because alter table add generated column is not supported
+alter table base add column y smallint generated always as identity (start with  10);
+ERROR 42601: ALTER TABLE statement can not add an IDENTITY column to a table. 
+ij> alter table base add column y int generated always as identity (start with  10);
+ERROR 42601: ALTER TABLE statement can not add an IDENTITY column to a table. 
+ij> alter table base add column y bigint generated always as identity (start with  10);
+ERROR 42601: ALTER TABLE statement can not add an IDENTITY column to a table. 
+ij> -- make sure alter table failures above rolled themselves back 
+select * from base;
+X          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+ij> drop table base;
+0 rows inserted/updated/deleted
+ij> -- testing non-reserved keywords: generated, start, always
+-- should be successful
+create table always (a int);
+0 rows inserted/updated/deleted
+ij> create table start (a int);
+0 rows inserted/updated/deleted
+ij> create table generated (a int);
+0 rows inserted/updated/deleted
+ij> drop table always;
+0 rows inserted/updated/deleted
+ij> drop table start;
+0 rows inserted/updated/deleted
+ij> drop table generated;
+0 rows inserted/updated/deleted
+ij> -- IDENTITY_VAL_LOCAL function, same as DB2, beetle 5354
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1(c1 int generated always as identity, c2 int);
+0 rows inserted/updated/deleted
+ij> -- start
+insert into t1(c2) values (8);
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+1                              
+ij> select IDENTITY_VAL_LOCAL()+1, IDENTITY_VAL_LOCAL()-1 from t1;
+1                               |2                               
+-----------------------------------------------------------------
+2                               |0                               
+ij> insert into t1(c2) values (IDENTITY_VAL_LOCAL());
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |8          
+2          |1          
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> select IDENTITY_VAL_LOCAL()+1, IDENTITY_VAL_LOCAL()-1 from t1;
+1                               |2                               
+-----------------------------------------------------------------
+3                               |1                               
+3                               |1                               
+ij> insert into t1(c2) values (8), (9);
+2 rows inserted/updated/deleted
+ij> -- multi-values insert, return value of the function should not change, same as DB2
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |8          
+2          |1          
+3          |8          
+4          |9          
+ij> insert into t1(c2) select c1 from t1;
+4 rows inserted/updated/deleted
+ij> -- insert with sub-select, return value should not change
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |8          
+2          |1          
+3          |8          
+4          |9          
+5          |1          
+6          |2          
+7          |3          
+8          |4          
+ij> delete from t1;
+8 rows inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> insert into t1(c2) select c1 from t1;
+0 rows inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+2                              
+ij> -- end of practice, back to start...
+insert into t1(c2) values (8);
+1 row inserted/updated/deleted
+ij> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+9                              
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- test cases for beetle 5404: inserting multiple rows of defaults into autoincrement column.
+create table t1(c1 int generated always as identity);
+0 rows inserted/updated/deleted
+ij> -- this is okay
+insert into t1 values (default);
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> -- should fail
+insert into t1 values (1), (1);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> -- this returns the right error
+insert into t1 values (1), (default);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t1 values (default), (1);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t1 values (default), (default), (default), (2);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t1 values (default), (default), (2);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t1 values (default), (default), (2), (default);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> -- this returns NPE
+insert into t1 values (default), (default);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+1          
+2          
+3          
+ij> insert into t1 values (default), (default), (default);
+3 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+ij> insert into t1 values (default), (default), (default), (default);
+4 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+10         
+ij> create table t2 (a int, b int generated always as identity);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (1, default), (2, default);
+2 rows inserted/updated/deleted
+ij> select * from t2;
+A          |B          
+-----------------------
+1          |1          
+2          |2          
+ij> insert into t2 values (1, default), (2, 2);
+ERROR 42Z23: Attempt to modify an identity column 'B'. 
+ij> insert into t2 values (1, default), (2, default), (2, 2);
+ERROR 42Z23: Attempt to modify an identity column 'B'. 
+ij> insert into t2 values (1, 2), (2, default), (2, default);
+ERROR 42Z23: Attempt to modify an identity column 'B'. 
+ij> create table t3(c1 int generated always as identity (increment by 3));
+0 rows inserted/updated/deleted
+ij> -- succeeded
+insert into t3 values (default);
+1 row inserted/updated/deleted
+ij> select * from t3;
+C1         
+-----------
+1          
+ij> insert into t3 values (default);
+1 row inserted/updated/deleted
+ij> select * from t3;
+C1         
+-----------
+1          
+4          
+ij> -- should fail
+insert into t3 values (1), (1);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> select * from t3;
+C1         
+-----------
+1          
+4          
+ij> -- this returns the right error
+insert into t3 values (1), (default);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t3 values (default), (1);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t3 values (default), (default), (default), (2);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t3 values (default), (default), (2);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t3 values (default), (default), (2), (default);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t3 select * from t1;
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t3 select * from table (values (1)) as q(a);
+ERROR 42Z23: Attempt to modify an identity column 'C1'. 
+ij> insert into t3 select * from table (values (default)) as q(a);
+ERROR 42Y85: The DEFAULT keyword is only allowed in a VALUES clause when the VALUES clause appears within an INSERT statement.
+ij> -- this returns NPE
+insert into t3 values (default), (default);
+2 rows inserted/updated/deleted
+ij> select * from t3;
+C1         
+-----------
+1          
+4          
+7          
+10         
+ij> insert into t3 values (default), (default), (default);
+3 rows inserted/updated/deleted
+ij> select * from t3;
+C1         
+-----------
+1          
+4          
+7          
+10         
+13         
+16         
+19         
+ij> insert into t3 values (default), (default), (default), (default);
+4 rows inserted/updated/deleted
+ij> select * from t3;
+C1         
+-----------
+1          
+4          
+7          
+10         
+13         
+16         
+19         
+22         
+25         
+28         
+31         
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> 

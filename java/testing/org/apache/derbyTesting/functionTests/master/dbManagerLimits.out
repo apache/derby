@@ -1,0 +1,62 @@
+Test - maximum length of character constant is 32672 and that of hex constant is 16336
+First testing less than maximum constant lengths through insert statement
+Next testing less than maximum constant lengths through values
+Next testing maximum constant lengths through insert statement
+Next testing maximum constant lengths through values
+Next testing maximum constant lengths + 1 through insert statement
+expected exception A string constant starting with ''aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+expected exception A string constant starting with 'X'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+Next testing maximum constant lengths + 1 through values
+expected exception A string constant starting with ''aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+expected exception A string constant starting with 'X'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+Next testing maximum constant lengths + n through insert statement
+expected exception A string constant starting with ''aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+expected exception A string constant starting with 'X'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+Next testing maximum constant lengths + n through values
+expected exception A string constant starting with ''aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+expected exception A string constant starting with 'X'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' is too long.
+Next testing odd number of hex digits in a hex constant through insert statement
+expected exception An invalid hexadecimal constant starting with 'X'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' has been detected.
+And finally testing odd number of hex digits in a hex constant through values statement
+expected exception An invalid hexadecimal constant starting with 'X'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&' has been detected.
+Test - most columns allowed in a table
+First create a table with one column less than maximum allowed number of columns
+  Try alter table on it to have table with maximum allowed number of columns
+  Try another alter table to have table with one column more than maximum allowed number of columns
+expected exception Too many columns (1013) were specified for  table or view T1. The limit is 1012.
+Next create a table with maximum allowed number of columns
+  Try alter table to have table with more columns than maximum allowed number of columns
+expected exception Too many columns (1013) were specified for  table or view T1. The limit is 1012.
+Found 1012 columns/parameters through meta data
+Next create a table with one column more than maximum allowed number of columns
+expected exception Too many columns (1013) were specified for  table or view T1. The limit is 1012.
+Finally, create a table with 2 columns more than maximum allowed number of columns
+expected exception Too many columns (1014) were specified for  table or view T1. The limit is 1012.
+Test - most columns allowed in a view
+First create a view with one column less than maximum allowed number of columns
+Next create a view with maximum allowed number of columns
+Found 5000 columns/parameters through meta data
+Next create a view with one column more than that maximum allowed number of columns
+expected exception Too many columns (5001) were specified for  table or view V1. The limit is 5000.
+And finally create a view with 2 columns that maximum allowed number of columns
+expected exception Too many columns (5002) were specified for  table or view V1. The limit is 5000.
+Test - most elements allowed in a select list
+First try a select with one column less than maximum allowed number of columns
+Next try a select with maximum allowed number of columns
+Next try a select with one column more than maximum allowed number of columns
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+Next try a select with 2 more columns than maximum allowed number of columns
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+Test - most columns allowed in a ORDER BY clause
+First try order by with one column less than maximum allowed number of columns
+Next try an order by with maximum allowed number of columns
+Next try an order by with one column more than maximum allowed number of columns
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+And finally try an order by with 2 more columns than maximum allowed number of columns
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+Test - most parameters allowed for a stored procedure
+First create a procedure with one parameter less than maximum allowed number of parameters
+Next create a procedure with maximum allowed number of parameters
+Found 90 columns/parameters through meta data
+And finally create a procedure with more parameters that maximum allowed number of parameters
+expected exception The limit for the number of parameters for a procedure has been exceeded. Limit is 90 and number of parameters for procedure P3 are 91.

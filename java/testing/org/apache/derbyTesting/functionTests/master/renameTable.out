@@ -1,0 +1,164 @@
+ij> -- rename table tests
+-- create some database objects
+create table t1(c11 int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(c21 int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t3(c31 int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t4(c41 int not null primary key);
+0 rows inserted/updated/deleted
+ij> -- create table with foreign key constraint
+create table t5 (c51 int, constraint fk foreign key(c51) references t4);
+0 rows inserted/updated/deleted
+ij> create view v1 as select * from t1;
+0 rows inserted/updated/deleted
+ij> -- bug 5685
+create index i1_t3 on t3(c31);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+ij> -- do some population
+insert into t1 values 11;
+1 row inserted/updated/deleted
+ij> insert into t2 values 21;
+1 row inserted/updated/deleted
+ij> insert into t2 values 22;
+1 row inserted/updated/deleted
+ij> insert into t3 values 31;
+1 row inserted/updated/deleted
+ij> insert into t3 values 32;
+1 row inserted/updated/deleted
+ij> insert into t3 values 33;
+1 row inserted/updated/deleted
+ij> autocommit off;
+ij> -- negative tests
+-- rename a non-existing table
+rename table notexists to notexists1;
+ERROR 42Y55: 'RENAME TABLE' cannot be performed on 'NOTEXISTS' because it does not exist.
+ij> -- the new table name for rename already exists
+rename table t1 to t2;
+ERROR X0Y32: Table/View 'T2' already exists in Schema 'APP'.
+ij> -- rename a system table
+rename table sys.systables to fake;
+ERROR 42X62: 'RENAME TABLE' is not allowed in the 'SYS' schema.
+ij> -- rename a view
+rename table v1 to fake;
+ERROR 42Y62: 'RENAME TABLE' is not allowed on 'APP.V1' because it is a view.
+ij> -- cannot rename a table when there is an open cursor on it
+get cursor c1 as 'select * from t2';
+ij> rename table t2 to fake;
+ERROR X0X95: Operation 'RENAME' cannot be performed on object 'T2' because there is an open ResultSet dependent on that object.
+ij> close c1;
+ij> -- cannot rename a table when there is a view on it
+rename table t1 to fake;
+ERROR X0Y23: Operation 'RENAME' cannot be performed on object 'T1' because VIEW 'V1' is dependent on that object.
+ij> -- cannot rename because t5's foreign key depends on t4
+rename table t4 to fake;
+ERROR X0Y25: Operation 'RENAME' cannot be performed on object 'xxxxGENERATED-IDxxxx' because CONSTRAINT 'FK' is dependent on that object.
+ij> -- only dropping the fk constraint can allow the table to be renamed
+alter table t5 drop constraint fk;
+0 rows inserted/updated/deleted
+ij> -- this statement should not fail
+rename table t4 to realTab;
+0 rows inserted/updated/deleted
+ij> -- positive tests
+select * from t3;
+C31        
+-----------
+31         
+32         
+33         
+ij> -- can rename a table when there is an index defined on it
+rename table t3 to t3r;
+0 rows inserted/updated/deleted
+ij> select * from t3r;
+C31        
+-----------
+31         
+32         
+33         
+ij> -- creating a prepared statement on a table
+autocommit off;
+ij> prepare p3 as 'select * from t3r where c31 > ?';
+ij> execute p3 using 'values (30)';
+C31        
+-----------
+31         
+32         
+33         
+ij> -- can rename with no errors
+rename table t3r to t3;
+0 rows inserted/updated/deleted
+ij> -- but the execute statement will fail
+execute p3 using 'values (30)';
+ERROR 42X05: Table 'T3R' does not exist.
+ij> remove p3;
+ij> autocommit on;
+ij> -- creating a table with triggers defined on it
+create table t6 (c61 int default 1);
+0 rows inserted/updated/deleted
+ij> create table t7(c71 int);
+0 rows inserted/updated/deleted
+ij> -- bug 5684
+create trigger t7insert after insert on t7 referencing new as NEWROW for each row mode db2sql insert into t6 values(NEWROW.c71);
+0 rows inserted/updated/deleted
+ij> insert into t7 values(1);
+1 row inserted/updated/deleted
+ij> -- bug 5683. Should fail
+rename table t7 to t7r;
+ERROR X0Y25: Operation 'RENAME' cannot be performed on object 'T7' because TRIGGER 'T7INSERT' is dependent on that object.
+ij> select * from t7r;
+ERROR 42X05: Table 'T7R' does not exist.
+ij> select * from t7;
+C71        
+-----------
+1          
+ij> rename table t6 to t6r;
+0 rows inserted/updated/deleted
+ij> insert into t7 values(3);
+ERROR 42X05: Table 'T6' does not exist.
+ij> select * from t6r;
+C61        
+-----------
+1          
+ij> select * from t7r;
+ERROR 42X05: Table 'T7R' does not exist.
+ij> -- Rename should fail if there is a check constraint
+create table tcheck (i int check(i>5));
+0 rows inserted/updated/deleted
+ij> rename table tcheck to tcheck1;
+ERROR X0Y25: Operation 'RENAME' cannot be performed on object 'TCHECK' because CONSTRAINT 'xxxxGENERATED-IDxxxx' is dependent on that object.
+ij> drop table tcheck;
+0 rows inserted/updated/deleted
+ij> -- Rename should pass after dropping the check constriant
+create table tcheck (i int, j int, constraint tcon check (i+j>2));
+0 rows inserted/updated/deleted
+ij> rename table tcheck to tcheck1;
+ERROR X0Y25: Operation 'RENAME' cannot be performed on object 'TCHECK' because CONSTRAINT 'TCON' is dependent on that object.
+ij> alter table tcheck drop constraint tcon;
+0 rows inserted/updated/deleted
+ij> rename table tcheck to tcheck1;
+0 rows inserted/updated/deleted
+ij> select * from tcheck1;
+I          |J          
+-----------------------
+ij> drop table tcheck1;
+0 rows inserted/updated/deleted
+ij> -- clean up
+drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table realTab;
+0 rows inserted/updated/deleted
+ij> drop table t5;
+0 rows inserted/updated/deleted
+ij> drop table t6r;
+0 rows inserted/updated/deleted
+ij> drop table t7r;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T7R' because it does not exist.
+ij> 

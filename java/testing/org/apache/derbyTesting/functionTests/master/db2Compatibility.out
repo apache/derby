@@ -1,0 +1,1769 @@
+ij> -- With DB2 current schema is equal to the user name on login.
+CREATE TABLE DST.DEF_SCHEMA_TEST(NAME_USER VARCHAR(128), NAME_SCHEMA VARCHAR(128));
+0 rows inserted/updated/deleted
+ij> INSERT INTO DST.DEF_SCHEMA_TEST VALUES(USER, CURRENT SCHEMA);
+1 row inserted/updated/deleted
+ij> SELECT COUNT(*) FROM DST.DEF_SCHEMA_TEST WHERE NAME_USER = NAME_SCHEMA;
+1          
+-----------
+1          
+ij> SET SCHEMA DILBERT;
+ERROR 42Y07: Schema 'DILBERT' does not exist
+ij> connect 'jdbc:derby:wombat;user=dilbert';
+ij(CONNECTION1)> INSERT INTO DST.DEF_SCHEMA_TEST VALUES(USER, CURRENT SCHEMA);
+1 row inserted/updated/deleted
+ij(CONNECTION1)> SELECT COUNT(*) FROM DST.DEF_SCHEMA_TEST WHERE NAME_USER = NAME_SCHEMA;
+1          
+-----------
+2          
+ij(CONNECTION1)> VALUES CURRENT SCHEMA;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+DILBERT                                                                                                                         
+ij(CONNECTION1)> disconnect;
+ij> SET CONNECTION CONNECTION0;
+ij> -- still should not be created
+SET SCHEMA DILBERT;
+ERROR 42Y07: Schema 'DILBERT' does not exist
+ij> connect 'jdbc:derby:wombat;user=dilbert';
+ij(CONNECTION1)> INSERT INTO DST.DEF_SCHEMA_TEST VALUES(USER, CURRENT SCHEMA);
+1 row inserted/updated/deleted
+ij(CONNECTION1)> SELECT COUNT(*) FROM DST.DEF_SCHEMA_TEST WHERE NAME_USER = NAME_SCHEMA;
+1          
+-----------
+3          
+ij(CONNECTION1)> VALUES CURRENT SCHEMA;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+DILBERT                                                                                                                         
+ij(CONNECTION1)> CREATE TABLE SCOTT(i int);
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> insert into SCOTT VALUES(4);
+1 row inserted/updated/deleted
+ij(CONNECTION1)> disconnect;
+ij> SET CONNECTION CONNECTION0;
+ij> SELECT * FROM DILBERT.SCOTT;
+I          
+-----------
+4          
+ij> DROP TABLE DILBERT.SCOTT;
+0 rows inserted/updated/deleted
+ij> DROP TABLE DST.DEF_SCHEMA_TEST;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA DST RESTRICT;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA DILBERT RESTRICT;
+0 rows inserted/updated/deleted
+ij> -- Simple Cloudscape specific features.
+-- CLASS ALIAS;
+create class alias MyMath for java.lang.Math;
+ERROR 42X01: Syntax error: Encountered "class" at line 5, column 8.
+ij> drop class alias MyMath;
+ERROR 42X01: Syntax error: Encountered "class" at line 1, column 6.
+ij> create class alias for java.lang.Math;
+ERROR 42X01: Syntax error: Encountered "class" at line 1, column 8.
+ij> drop class alias Math;
+ERROR 42X01: Syntax error: Encountered "class" at line 1, column 6.
+ij> -- METHOD ALIAS;
+create method alias myabs for java.lang.Math.abs;
+ERROR 42X01: Syntax error: Encountered "method" at line 3, column 8.
+ij> drop method alias myabs;
+ERROR 42X01: Syntax error: Encountered "method" at line 1, column 6.
+ij> -- STORED PREPARED STATEMENTS 
+-- create statement no more supported both in db2 and cloudscpae mode. -ve test for that
+create statement s1 as values 1,2;
+ERROR 42X01: Syntax error: Encountered "statement" at line 3, column 8.
+ij> -- alter, drop and execute statements are still supported for existing stored prepared statements for customers
+alter statement recompile all;
+ERROR 42X01: Syntax error: Encountered "statement" at line 2, column 7.
+ij> -- following will give error because there is no stored prepared statement s1 in the database
+drop statement s1;
+ERROR 42Y55: 'DROP STATEMENT' cannot be performed on 'S1' because it does not exist.
+ij> -- clean up
+DROP TABLE t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> DROP TABLE t2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> DROP CLASS ALIAS ExternalInsert;
+ERROR 42X01: Syntax error: Encountered "CLASS" at line 1, column 6.
+ij> DROP STATEMENT insert1;
+ERROR 42Y55: 'DROP STATEMENT' cannot be performed on 'INSERT1' because it does not exist.
+ij> -- Primary key constraint, DB2 requires NOT null on the columns.
+create table customer (id int primary key, name char(100));
+ERROR 42831: 'ID' cannot be a column of a primary key or unique key because it can contain null values.
+ij> drop table customer;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CUSTOMER' because it does not exist.
+ij> create table customer (id  int NOT NULL, id2 int, name char(100), primary key (id, id2));
+ERROR 42831: 'ID2' cannot be a column of a primary key or unique key because it can contain null values.
+ij> drop table customer;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CUSTOMER' because it does not exist.
+ij> -- Unique key constraint, DB2 requires NOT null on the columns.
+create table customer (id int unique, name char(100));
+ERROR 42831: 'ID' cannot be a column of a primary key or unique key because it can contain null values.
+ij> create table customer (id  int NOT NULL, id2 int, constraint custCon unique(id, id2));
+ERROR 42831: 'ID2' cannot be a column of a primary key or unique key because it can contain null values.
+ij> -- check they actually work!
+create table customer (id int NOT NULL primary key, name char(100));
+0 rows inserted/updated/deleted
+ij> drop table customer;
+0 rows inserted/updated/deleted
+ij> create table customer (id  int NOT NULL, id2 int NOT NULL, name char(100), primary key (id, id2));
+0 rows inserted/updated/deleted
+ij> drop table customer;
+0 rows inserted/updated/deleted
+ij> -- drop schema requires restrict
+create schema fred;
+0 rows inserted/updated/deleted
+ij> drop schema fred;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 16.
+ij> drop schema fred restrict;
+0 rows inserted/updated/deleted
+ij> -- create schema not supported for schemas that start with SYS
+create schema SYS;
+ERROR 42939: An object cannot be created with the schema name 'SYS'.
+ij> create schema SYSDJD;
+ERROR 42939: An object cannot be created with the schema name 'SYSDJD'.
+ij> create schema "SYSNO";
+ERROR 42939: An object cannot be created with the schema name 'SYSNO'.
+ij> create schema "sys";
+0 rows inserted/updated/deleted
+ij> create schema "sysok";
+0 rows inserted/updated/deleted
+ij> drop schema "sys" restrict;
+0 rows inserted/updated/deleted
+ij> drop schema "sysok" restrict;
+0 rows inserted/updated/deleted
+ij> -- data types not supported
+create table NOTYPE(i int, b BOOLEAN);
+ERROR 42X01: Syntax error: BOOLEAN.
+ij> create table NOTYPE(i int, b TINYINT);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 30.
+ij> create table NOTYPE(i int, b java.lang.String);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 30.
+ij> create table NOTYPE(i int, b com.acme.Address);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 30.
+ij> create table NOTYPE(i int, b org.apache.derby.vti.VTIEnvironment);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 30.
+ij> -- VTI in the DELETE statement
+-- beetle 5234
+CREATE TABLE testCS (col1 int, col2 char(30), col3 int);
+0 rows inserted/updated/deleted
+ij> INSERT INTO testCS VALUES (100, 'asdf', 732);
+1 row inserted/updated/deleted
+ij> DELETE FROM NEW org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable('jdbc:derby:wombat', 'testCS') WHERE col1 = 100 and col3 = 732;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable.
+ij> -- VTI in the INSERT statement
+-- beetle 5234
+INSERT INTO NEW org.apache.derbyTesting.functionTests.util.serializabletypes.ExternalTable('jdbc:derby:wombat', 'testCS') VALUES (100, 'asdf', 732);
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.serializabletypes.ExternalTable.
+ij> -- VTI in the SELECT statement
+-- beetle 5234
+select * from testCS, new org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI(col1, 1) a;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI.
+ij> select * from new com.acme.myVTI() as T;
+ERROR 42X01: Syntax error: com.acme.myVTI.
+ij> select * from new org.apache.derbyTesting.not.myVTI() as T;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.not.myVTI.
+ij> select * from new org.apache.derby.diag.LockTable() as T;
+XID            |TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE|TABLETYPE|LOCK&|INDEXNAME                                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- VTI in CREATE TRIGGER statement
+-- beetle 5234
+CREATE TABLE tb1(a int);
+0 rows inserted/updated/deleted
+ij> CREATE TRIGGER testtrig1 AFTER DELETE ON tb1 FOR EACH ROW MODE DB2SQL INSERT INTO NEW org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable('jdbc:derby:wombat', 'testCS') VALUES (1000);
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable.
+ij> -- VTI in CREATE TRIGGER statement
+-- beetle 5234
+CREATE TRIGGER testtrig2 AFTER DELETE ON tb1 FOR EACH ROW MODE DB2SQL DELETE FROM NEW org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable('jdbc:derby:wombat', 'testCS') WHERE col1 = 100 and col3 = 732;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable.
+ij> -- VTI in CREATE TRIGGER statement
+-- beetle 5234
+CREATE TRIGGER testtrig3 AFTER DELETE ON tb1 FOR EACH ROW MODE DB2SQL SELECT * FROM testCS, NEW org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI(col1, 1) a;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI.
+ij> -- clean up
+DROP TABLE tb1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE testCS;
+0 rows inserted/updated/deleted
+ij> -- PROPERTIES in DB2 mode
+create table maps (country_ISO_code char(2)) PROPERTIES derby.storage.pageSize=262144;
+ERROR 42X01: Syntax error: PROPERTIES.
+ij> -- PROPERTIES in DB2 mode
+-- beetle 5177
+create table maps2 (country_ISO_code char(2));
+0 rows inserted/updated/deleted
+ij> create index map_idx1 on maps2(country_ISO_code) properties derby.storage.pageSize = 2048;
+ERROR 42X01: Syntax error: PROPERTIES.
+ij> -- BTREE not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error in DB2 mode
+create btree index map_idx2 on maps2(country_ISO_code);
+ERROR 42X01: Syntax error: Encountered "btree" at line 2, column 8.
+ij> create unique btree index map_idx2 on maps2(country_ISO_code);
+ERROR 42X01: Syntax error: Encountered "btree" at line 1, column 15.
+ij> drop table maps2;
+0 rows inserted/updated/deleted
+ij> -- SET LOCKING clause in DB2 mode
+-- beetle 5208
+create table maps1 (country_ISO_code char(2)) set locking = table;
+ERROR 42X01: Syntax error: Encountered "set" at line 3, column 47.
+ij> create table maps2 (country_ISO_code char(2)) set locking = row;
+ERROR 42X01: Syntax error: Encountered "set" at line 1, column 47.
+ij> drop table maps1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'MAPS1' because it does not exist.
+ij> drop table maps2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'MAPS2' because it does not exist.
+ij> -- ALTER TABLE statement
+-- beetle 5201
+-- Locking syntax
+-- negative tests
+create table tb1 (country_ISO_code char(2));
+0 rows inserted/updated/deleted
+ij> alter table tb1 set locking = table;
+ERROR 42X01: Syntax error: Encountered "set" at line 1, column 17.
+ij> alter table tb1 set locking = row;
+ERROR 42X01: Syntax error: Encountered "set" at line 1, column 17.
+ij> -- Locking syntax 
+-- positive tests
+-- beetle 5201
+create table tb2 (country_ISO_code char(2));
+0 rows inserted/updated/deleted
+ij> alter table tb2 locksize table;
+0 rows inserted/updated/deleted
+ij> alter table tb2 locksize row;
+0 rows inserted/updated/deleted
+ij> -- clean up
+drop table tb1;
+0 rows inserted/updated/deleted
+ij> drop table tb2;
+0 rows inserted/updated/deleted
+ij> -- VTI in the DELETE statement
+-- beetle 5234
+CREATE TABLE testCS (col1 int, col2 char(30), col3 int);
+0 rows inserted/updated/deleted
+ij> INSERT INTO testCS VALUES (100, 'asdf', 732);
+1 row inserted/updated/deleted
+ij> DELETE FROM NEW org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable('jdbc:derby:wombat', 'testCS') WHERE col1 = 100 and col3 = 732;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable.
+ij> -- VTI in the INSERT statement
+-- beetle 5234
+INSERT INTO NEW org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable('jdbc:derby:wombat', 'testCS') VALUES (100, 'asdf', 732);
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable.
+ij> -- VTI in the SELECT statement
+-- beetle 5234
+select * from testCS, new org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI(col1, 1) a;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI.
+ij> -- VTI in CREATE TRIGGER statement
+-- beetle 5234
+CREATE TABLE tb1(a int);
+0 rows inserted/updated/deleted
+ij> CREATE TRIGGER testtrig1 AFTER DELETE ON tb1 FOR EACH ROW MODE DB2SQL INSERT INTO NEW org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable('jdbc:derby:wombat', 'testCS') VALUES (1000);
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable.
+ij> -- VTI in CREATE TRIGGER statement
+-- beetle 5234
+CREATE TRIGGER testtrig2 AFTER DELETE ON tb1 FOR EACH ROW MODE DB2SQL DELETE FROM NEW org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable('jdbc:derby:wombat', 'testCS') WHERE col1 = 100 and col3 = 732;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.ExternalTable.
+ij> -- VTI in CREATE TRIGGER statement
+-- beetle 5234
+CREATE TRIGGER testtrig3 AFTER DELETE ON tb1 FOR EACH ROW MODE DB2SQL SELECT * FROM testCS, NEW org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI(col1, 1) a;
+ERROR 42X01: Syntax error: org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI.
+ij> -- clean up
+DROP TABLE tb1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE testCS;
+0 rows inserted/updated/deleted
+ij> -- RENAME/DROP COLUMN
+-- ALTER RENAME TABLE/COLUMN
+-- beetle 5205
+create table table tt (a int, b int, c int);
+ERROR 42X01: Syntax error: Encountered "table" at line 4, column 14.
+ij> alter table tt drop column b;
+ERROR 42X01: Syntax error: Encountered "drop" at line 1, column 16.
+ij> alter table tt rename to ttnew;
+ERROR 42X01: Syntax error: Encountered "rename" at line 1, column 16.
+ij> alter table tt rename c to d;
+ERROR 42X01: Syntax error: Encountered "rename" at line 1, column 16.
+ij> rename column tt.c to tt.d;
+ERROR 42X01: Syntax error: Encountered "column" at line 1, column 8.
+ij> drop table tt;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TT' because it does not exist.
+ij> -- CASCADE/RESTRICT on DROP CONSTRAINT
+-- beetle 5204
+ALTER TABLE TT DROP CONSTRAINT ABC CASCADE;
+ERROR 42X01: Syntax error: Encountered "CASCADE" at line 3, column 36.
+ij> ALTER TABLE TT DROP CONSTRAINT ABC2 RESTRICT;
+ERROR 42X01: Syntax error: Encountered "RESTRICT" at line 1, column 37.
+ij> -- CASCADE/RESTRICT on DROP TABLE
+-- beetle 5206
+DROP TABLE TT CASCADE;
+ERROR 42X01: Syntax error: Encountered "CASCADE" at line 3, column 15.
+ij> DROP TABLE TT RESTRICT;
+ERROR 42X01: Syntax error: Encountered "RESTRICT" at line 1, column 15.
+ij> -- beetle 5216
+-- there should only be one autoincrement column per table 
+CREATE TABLE T1 (C1 INT GENERATED ALWAYS AS IDENTITY 
+(START WITH 1, INCREMENT BY 1));
+0 rows inserted/updated/deleted
+ij> -- this statement should raise an error because it has more than one auto increment column in a table
+CREATE TABLE T2 (C1 INT GENERATED ALWAYS AS IDENTITY 
+(START WITH 1, INCREMENT BY 1), C2 INT GENERATED ALWAYS AS 
+IDENTITY (START WITH 1, INCREMENT BY 1));
+ERROR 428C1: Only one identity column is allowed in a table.
+ij> -- clean up
+DROP TABLE t1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE t2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> -- limit to 16 columns in an index key
+-- beetle 5181
+-- this create index statement should be successful in db2 compat mode because ix2 specifies 16 columns
+create table testindex1 (a int,b int,c int,d int ,e int ,f int,g int,h int,i int,j int,k int,l int,m int,n int,o int,p int);
+0 rows inserted/updated/deleted
+ij> create unique index ix1 on testindex1(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p);
+0 rows inserted/updated/deleted
+ij> -- this create index statement should fail in db2 compat mode because ix2 specifies more than 16 columns
+create table testindex2 (a int,b int,c int,d int ,e int ,f int,g int,h int,i int,j int,k int,l int,m int,n int,o int,p int,q int);
+0 rows inserted/updated/deleted
+ij> create unique index ix2 on testindex2(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q);
+ERROR 54008: The CREATE INDEX statement specifies too many columns (16 is the maximum).
+ij> --clean up
+drop table testindex1;
+0 rows inserted/updated/deleted
+ij> drop table testindex2;
+0 rows inserted/updated/deleted
+ij> -- insert into a lob column using explicit cast
+-- positive test
+-- beetle 5221
+CREATE TABLE testblob(col1 BLOB(1M));
+0 rows inserted/updated/deleted
+ij> INSERT INTO testblob (col1) VALUES cast(X'11' as blob(1M));
+1 row inserted/updated/deleted
+ij> CREATE TABLE testclob(col1 CLOB(1M));
+0 rows inserted/updated/deleted
+ij> INSERT INTO testclob (col1) VALUES cast('asdf' as clob(1M));
+1 row inserted/updated/deleted
+ij> -- ALTER INDEX
+-- beetle 5222
+CREATE TABLE TT (A INT);
+0 rows inserted/updated/deleted
+ij> CREATE INDEX TTIDX ON TT(A);
+0 rows inserted/updated/deleted
+ij> ALTER INDEX TTIDX RENAME TTIDXNEW;
+ERROR 42X01: Syntax error: Encountered "INDEX" at line 1, column 7.
+ij> -- clean up
+drop table tt;
+0 rows inserted/updated/deleted
+ij> -- CREATE and DROP AGGREGATE
+-- beetle 5222
+CREATE AGGREGATE STDEV FOR org.apache.derbyTesting.functionTests.util.aggregates.StandardDeviation;
+ERROR 42X01: Syntax error: Encountered "AGGREGATE" at line 3, column 8.
+ij> DROP AGGREGATE STDEV;
+ERROR 42X01: Syntax error: Encountered "AGGREGATE" at line 1, column 6.
+ij> CREATE AGGREGATE MAXBUTONE FOR org.apache.derbyTesting.functionTests.util.aggregates.MaxButOneDef;
+ERROR 42X01: Syntax error: Encountered "AGGREGATE" at line 1, column 8.
+ij> DROP AGGREGATE MAXBUTONE;
+ERROR 42X01: Syntax error: Encountered "AGGREGATE" at line 1, column 6.
+ij> -- CREATE and DROP CLASS ALIAS
+-- beetle 5222
+create class alias for java.util.Hashtable;
+ERROR 42X01: Syntax error: Encountered "class" at line 3, column 8.
+ij> drop class alias Hashtable;
+ERROR 42X01: Syntax error: Encountered "class" at line 1, column 6.
+ij> -- CREATE and DROP METHOD ALIAS
+-- beetle 5222
+create method alias hashtable for java.lang.Math.sin;
+ERROR 42X01: Syntax error: Encountered "method" at line 3, column 8.
+ij> drop method alias hashtable;
+ERROR 42X01: Syntax error: Encountered "method" at line 1, column 6.
+ij> -- RENAME COLUMN
+-- beetle 5222
+create table TT(col1 int, col2 int);
+0 rows inserted/updated/deleted
+ij> rename column TT.col2 to newcolumn2;
+ERROR 42X01: Syntax error: Encountered "column" at line 1, column 8.
+ij> drop table TT;
+0 rows inserted/updated/deleted
+ij> -- SET TRIGGERS
+-- beetle 5222
+CREATE TABLE tb1 (col1 int, col2 int, col3 int, constraint chk1 check (col1 > 0));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE tb2 (col1 char(30), c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> CREATE TRIGGER testtrig2 AFTER UPDATE on tb1
+REFERENCING OLD as oldtable FOR EACH ROW MODE DB2SQL INSERT INTO tb2 VALUES ('tb', oldtable.col1, oldtable.col2);
+0 rows inserted/updated/deleted
+ij> SET TRIGGERS FOR tb1 ENABLED;
+ERROR 42X01: Syntax error: Encountered "TRIGGERS" at line 1, column 5.
+ij> SET TRIGGERS FOR tb1 DISABLED;
+ERROR 42X01: Syntax error: Encountered "TRIGGERS" at line 1, column 5.
+ij> SET TRIGGERS testtrig2 ENABLED;
+ERROR 42X01: Syntax error: Encountered "TRIGGERS" at line 1, column 5.
+ij> SET TRIGGERS testtrig2 DISABLED;
+ERROR 42X01: Syntax error: Encountered "TRIGGERS" at line 1, column 5.
+ij> -- clean up
+DROP TRIGGER testtrig1;
+ERROR 42X94: TRIGGER 'TESTTRIG1' does not exist.
+ij> DROP TRIGGER testtrig2;
+0 rows inserted/updated/deleted
+ij> DROP TRIGGER testtrig3;
+ERROR 42X94: TRIGGER 'TESTTRIG3' does not exist.
+ij> DROP TABLE tb1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE tb2;
+0 rows inserted/updated/deleted
+ij> -- INSTANCEOF in where clause of select, delete, update,
+-- beetle 5224
+create table t1 (i int, s smallint, c10 char(10), vc30 varchar(30), b boolean);
+ERROR 42X01: Syntax error: BOOLEAN.
+ij> create table mm (x org.apache.derbyTesting.functionTests.util.ManyMethods);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 20.
+ij> create table sc (x org.apache.derbyTesting.functionTests.util.SubClass);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 20.
+ij> select i from t1 where i instanceof java.lang.Integer;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 26.
+ij> select i from t1 where i instanceof java.lang.Number;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 26.
+ij> select i from t1 where i instanceof java.lang.Object;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 26.
+ij> select s from t1 where s instanceof java.lang.Integer;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 26.
+ij> select b from t1 where b instanceof java.lang.Boolean;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 26.
+ij> select c10 from t1 where c10 instanceof java.lang.String;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 30.
+ij> select vc30 from t1 where vc30 instanceof java.lang.String;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 32.
+ij> -- following are negative test cases because boolean values disallowed in select clause
+select x instanceof org.apache.derbyTesting.functionTests.util.ManyMethods from mm;
+ERROR 42X01: Syntax error: Encountered "org" at line 2, column 21.
+ij> select x instanceof org.apache.derbyTesting.functionTests.util.SubClass from mm;
+ERROR 42X01: Syntax error: Encountered "org" at line 1, column 21.
+ij> select x instanceof org.apache.derbyTesting.functionTests.util.SubSubClass from mm;
+ERROR 42X01: Syntax error: Encountered "org" at line 1, column 21.
+ij> select (i + i) instanceof java.lang.Integer from t1;
+ERROR 42X01: Syntax error: Encountered "java" at line 1, column 27.
+ij> select (i instanceof java.lang.Integer) = true from t1;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 1, column 11.
+ij> DELETE FROM t1 where i INSTANCEOF 
+org.apache.derbyTesting.functionTests.util.serializabletypes.City;
+ERROR 42X01: Syntax error: Encountered "INSTANCEOF" at line 1, column 24.
+ij> UPDATE t1 SET s = NULL WHERE i INSTANCEOF 
+org.apache.derbyTesting.functionTests.util.serializabletypes.City;
+ERROR 42X01: Syntax error: Encountered "INSTANCEOF" at line 1, column 32.
+ij> -- clean up
+drop table t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> drop table mm;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'MM' because it does not exist.
+ij> drop table sc;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'SC' because it does not exist.
+ij> -- datatypes
+-- beetle 5233
+create table testtype1(col1 bit);
+ERROR 42X01: Syntax error: Encountered "bit" at line 3, column 29.
+ij> create table testtype2(col1 bit varying(10));
+ERROR 42X01: Syntax error: Encountered "bit" at line 1, column 29.
+ij> -- boolean datatype already disabled
+create table testtype3(col1 boolean);
+ERROR 42X01: Syntax error: BOOLEAN.
+ij> create table testtype4(col1 LONG NVARCHAR);
+ERROR 0A000: Feature not implemented: LONG NVARCHAR.
+ij> create table testtype5(col1 LONG VARBINARY);
+ERROR 42X01: Syntax error: Encountered "VARBINARY" at line 1, column 34.
+ij> create table testtype6(col1 LONG BIT VARYING);
+ERROR 42X01: Syntax error: Encountered "BIT" at line 1, column 34.
+ij> create table testtype7(col1 LONG BINARY);
+ERROR 42X01: Syntax error: Encountered "BINARY" at line 1, column 34.
+ij> create table testtype8(col1 NCHAR);
+ERROR 0A000: Feature not implemented: NATIONAL CHAR.
+ij> create table testtype9(col1 NVARCHAR(10));
+ERROR 0A000: Feature not implemented: NATIONAL CHAR VARYING.
+ij> -- tinyint datatype already disabled
+create table testtype10(col1 TINYINT);
+ERROR 42X01: Syntax error: Encountered "" at line 2, column 30.
+ij> create table testtype11 (a national character large object (1000));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij> -- beetle5426
+-- disable nclob
+create table beetle5426 (a nclob (1M));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij> create table testtype12 (a national char(100));
+ERROR 0A000: Feature not implemented: NATIONAL CHAR.
+ij> CREATE CLASS ALIAS FOR org.apache.derbyTesting.functionTests.util.serializabletypes.Tour;
+ERROR 42X01: Syntax error: Encountered "CLASS" at line 1, column 8.
+ij> create table testtype13 (a Tour);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 28.
+ij> -- clean up
+drop table testtype1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE1' because it does not exist.
+ij> drop table testtype2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE2' because it does not exist.
+ij> drop table testtype3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE3' because it does not exist.
+ij> drop table testtype4;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE4' because it does not exist.
+ij> drop table testtype5;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE5' because it does not exist.
+ij> drop table testtype6;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE6' because it does not exist.
+ij> drop table testtype7;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE7' because it does not exist.
+ij> drop table testtype8;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE8' because it does not exist.
+ij> drop table testtype9;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE9' because it does not exist.
+ij> drop table testtype10;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE10' because it does not exist.
+ij> drop table testtype11;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE11' because it does not exist.
+ij> drop table beetle5426;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'BEETLE5426' because it does not exist.
+ij> drop table testtype12;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE12' because it does not exist.
+ij> drop class alias Tours;
+ERROR 42X01: Syntax error: Encountered "class" at line 1, column 6.
+ij> drop table testtype13;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE13' because it does not exist.
+ij> -- limit char to 254 and varchar to 32672 columns in db2 mode
+-- beetle 5552
+-- following will fail because char length > 254
+create table test1(col1 char(255));
+ERROR 42611: The length, precision, or scale attribute for column, or type mapping 'CHAR(255)' is not valid. 
+ij> -- following will pass because char length <= 254
+create table test1(col1 char(254), col2 char(23));
+0 rows inserted/updated/deleted
+ij> -- try truncation error with the 2 chars
+-- the trailing blanks will not give error
+insert into test1 values('a','abcdefghijklmnopqrstuvw   ');
+1 row inserted/updated/deleted
+ij> -- the trailing non-blank characters will give error
+insert into test1 values('a','abcdefghijklmnopqrstuvwxyz');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR 'abcdefghijklmnopqrstuvwxyz' to length 23.
+ij> insert into test1 values('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890','a');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '123456789012345678901234567890123456789012345678901234567890&' to length 254.
+ij> drop table test1;
+0 rows inserted/updated/deleted
+ij> -- following will fail because varchar length > 32672
+create table test1(col1 varchar(32673));
+ERROR 42611: The length, precision, or scale attribute for column, or type mapping 'VARCHAR(32673)' is not valid. 
+ij> -- following will pass because varchar length <= 32672
+create table test1(col1 varchar(32672), col2 varchar(1234));
+0 rows inserted/updated/deleted
+ij> drop table test1;
+0 rows inserted/updated/deleted
+ij> -- SET CONSTRAINTS statement
+-- beetle 5251
+CREATE TABLE testsetconst1 (col1 CHAR(7) NOT NULL, PRIMARY KEY(col1));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE testsetconst2 (col1 char(7) NOT NULL, CONSTRAINT fk FOREIGN KEY(col1) REFERENCES testsetconst1(col1));
+0 rows inserted/updated/deleted
+ij> SET CONSTRAINTS fk DISABLED;
+ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ij> SELECT STATE FROM SYS.SYSCONSTRAINTS;
+&
+-
+E
+E
+ij> SET CONSTRAINTS fk ENABLED;
+ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ij> SELECT STATE FROM SYS.SYSCONSTRAINTS;
+&
+-
+E
+E
+ij> SET CONSTRAINTS ALL DISABLED;
+ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ij> SELECT STATE FROM SYS.SYSCONSTRAINTS;
+&
+-
+E
+E
+ij> SET CONSTRAINTS FOR testsetconst1 ENABLED;
+ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ij> SELECT STATE FROM SYS.SYSCONSTRAINTS;
+&
+-
+E
+E
+ij> -- clean up
+DROP TABLE testsetconst1;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'xxxxGENERATED-IDxxxx' because CONSTRAINT 'FK' is dependent on that object.
+ij> DROP TABLE testsetconst2;
+0 rows inserted/updated/deleted
+ij> -- CALL statement
+-- beetle 5252
+call org.apache.derby.iapi.db.Factory::getDatabaseOfConnection().dropAllJDBCMetaDataSPSes();
+ERROR 42X01: Syntax error: org.apache.derby.iapi.db.Factory::getDatabaseOfConnection.
+ij> -- Beetle 5203: DB2 restricts what can be used for default clauses, and enforces
+-- constraints on the default clause that Cloudscape does not.
+-- Following should be okay:
+create table deftest1 (i int default 1);
+0 rows inserted/updated/deleted
+ij> create table deftest2 (vc varchar(30) default 'howdy');
+0 rows inserted/updated/deleted
+ij> create table deftest21 (vc clob(10) default 'okie');
+0 rows inserted/updated/deleted
+ij> create table deftest3 (d date default current date);
+0 rows inserted/updated/deleted
+ij> create table deftest31 (d date default '2004-02-08');
+0 rows inserted/updated/deleted
+ij> create table deftest5 (vc char(130) default current schema);
+0 rows inserted/updated/deleted
+ij> create table deftest4 (c char(130) default user);
+0 rows inserted/updated/deleted
+ij> create table deftest6 (d decimal(5,2) default null);
+0 rows inserted/updated/deleted
+ij> create table deftest7 (d decimal(5,2) default 123.450);
+0 rows inserted/updated/deleted
+ij> create table deftest8 (f float default 1.234);
+0 rows inserted/updated/deleted
+ij> -- make sure they actually work @ insertion.
+insert into deftest1 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest2 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest21 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest3 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest31 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest4 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest5 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest6 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest7 values (default);
+1 row inserted/updated/deleted
+ij> insert into deftest8 values (default);
+1 row inserted/updated/deleted
+ij> -- cleanup.
+drop table deftest1;
+0 rows inserted/updated/deleted
+ij> drop table deftest2;
+0 rows inserted/updated/deleted
+ij> drop table deftest21;
+0 rows inserted/updated/deleted
+ij> drop table deftest3;
+0 rows inserted/updated/deleted
+ij> drop table deftest31;
+0 rows inserted/updated/deleted
+ij> drop table deftest4;
+0 rows inserted/updated/deleted
+ij> drop table deftest5;
+0 rows inserted/updated/deleted
+ij> drop table deftest6;
+0 rows inserted/updated/deleted
+ij> drop table deftest7;
+0 rows inserted/updated/deleted
+ij> drop table deftest8;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5203, con't: following should all fail (though they'd pass in Cloudscape mode).
+-- expressions:
+create table deftest1 (vc varchar(30) default java.lang.Integer::toBinaryString(3));
+ERROR 42X01: Syntax error: Encountered "java" at line 3, column 47.
+ij> create table deftest2 (i int default 3+4);
+ERROR 42X01: Syntax error: Encountered "+" at line 1, column 39.
+ij> -- floating point assignment to non-float column.
+create table deftest3 (i int default 1.234);
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'I'.
+ij> -- decimal value with too much precision.
+create table deftest4 (d decimal(5,2) default 1.2234);
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'D'.
+ij> -- char constant longer than 254.
+create table deftest5 (vc varchar(300) default 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'VC'.
+ij> -- function calls (built-in and other) should fail with error 42894 (NOT with 42X01), to match DB2.
+create table t1 (i int default abs(0));
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'I'.
+ij> create table t1 (i int default someFunc('hi'));
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'I'.
+ij> -- Type mismatches should fail with 42894 (NOT with 42821), to match DB2.
+create table t1 (i int default 'hi');
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'I'.
+ij> -- Beetle 5281: <cast-function> for a default.
+-- Date-time functions (DATE, TIME, and TIMESTAMP)
+create table t1a (d date default date(current date));
+0 rows inserted/updated/deleted
+ij> create table t1b (d date default date('1978-03-22'));
+0 rows inserted/updated/deleted
+ij> create table t2a (t time default time(current time));
+0 rows inserted/updated/deleted
+ij> create table t2b (t time default time('08:28:08'));
+0 rows inserted/updated/deleted
+ij> create table t3a (ch timestamp default timestamp(current timestamp));
+0 rows inserted/updated/deleted
+ij> create table t3b (ts timestamp default timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx'));
+0 rows inserted/updated/deleted
+ij> -- BLOB function (not yet supported).
+create table t4 (b blob default blob('nope'));
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'B'.
+ij> -- cleanup.
+drop table t1a;
+0 rows inserted/updated/deleted
+ij> drop table t1b;
+0 rows inserted/updated/deleted
+ij> drop table t2a;
+0 rows inserted/updated/deleted
+ij> drop table t2b;
+0 rows inserted/updated/deleted
+ij> drop table t3a;
+0 rows inserted/updated/deleted
+ij> drop table t3b;
+0 rows inserted/updated/deleted
+ij> -- DROP constraint syntax that should be supported in db2 compat mode:
+-- beetle 5204
+CREATE TABLE testconst1 (col1 CHAR(7) NOT NULL, col2 int CONSTRAINT cc CHECK(col2 > 1), PRIMARY KEY(col1));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE testconst2 (col1 char(7) NOT NULL, col2 char(7) NOT NULL, col3 int, CONSTRAINT fk FOREIGN KEY(col1) REFERENCES testconst1(col1), CONSTRAINT uk UNIQUE (col2));
+0 rows inserted/updated/deleted
+ij> -- DROP FOREIGN KEY syntax should be supported in DB2 compat mode
+insert into testconst1( col1, col2) values( 'a', 2);
+1 row inserted/updated/deleted
+ij> insert into testconst1( col1, col2) values( 'a', 2);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'TESTCONST1'.
+ij> insert into testconst1( col1, col2) values( 'b', 0);
+ERROR 23513: The check constraint 'CC' was violated while performing an INSERT or UPDATE on table 'APP.TESTCONST1'.
+ij> insert into testconst2( col1, col2, col3) values( 'a', 'a', 1);
+1 row inserted/updated/deleted
+ij> insert into testconst2( col1, col2, col3) values( 'z', 'b', 1);
+ERROR 23503: INSERT on table 'TESTCONST2' caused a violation of foreign key constraint 'FK' for key (z      ).  The statement has been rolled back.
+ij> insert into testconst2( col1, col2, col3) values( 'a', 'a', 1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'UK' defined on 'TESTCONST2'.
+ij> -- beetle 5204
+ALTER TABLE testconst1 DROP FOREIGN KEY cc;
+ERROR 42Z9E: Constraint 'CC' is not a FOREIGN KEY constraint.
+ij> ALTER TABLE testconst2 DROP UNIQUE fk;
+ERROR 42Z9E: Constraint 'FK' is not a UNIQUE constraint.
+ij> ALTER TABLE testconst2 DROP CHECK fk;
+ERROR 42Z9E: Constraint 'FK' is not a CHECK constraint.
+ij> ALTER TABLE testconst2 DROP FOREIGN KEY fk;
+0 rows inserted/updated/deleted
+ij> -- DROP PRIMARY KEY syntax should be supported in DB2 compat mode
+-- beetle 5204
+ALTER TABLE testconst1 DROP PRIMARY KEY;
+0 rows inserted/updated/deleted
+ij> -- DROP UNIQUE KEY syntax should be supported in DB2 compat mode
+-- beetle 5204
+ALTER TABLE testconst2 DROP UNIQUE uk;
+0 rows inserted/updated/deleted
+ij> -- DROP CHECK condition syntax should be supported in DB2 compat mode
+-- beetle 5204
+ALTER TABLE testconst1 DROP CHECK cc;
+0 rows inserted/updated/deleted
+ij> insert into testconst1( col1, col2) values( 'a', 2);
+1 row inserted/updated/deleted
+ij> insert into testconst1( col1, col2) values( 'b', 0);
+1 row inserted/updated/deleted
+ij> insert into testconst2( col1, col2, col3) values( 'z', 'b', 1);
+1 row inserted/updated/deleted
+ij> insert into testconst2( col1, col2, col3) values( 'a', 'a', 1);
+1 row inserted/updated/deleted
+ij> ALTER TABLE testconst2 DROP FOREIGN KEY noSuchConstraint;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'.
+ij> ALTER TABLE testconst2 DROP CHECK noSuchConstraint;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'.
+ij> ALTER TABLE testconst2 DROP UNIQUE noSuchConstraint;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'.
+ij> ALTER TABLE testconst1 DROP PRIMARY KEY;
+ERROR 42X86: ALTER table failed. There is no constraint 'PRIMARY KEY' on table 'APP.TESTCONST1'.
+ij> -- clean up
+DROP TABLE testconst1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE testconst2;
+0 rows inserted/updated/deleted
+ij> -- CREATE TRIGGERS
+-- beetle 5253
+CREATE TABLE tb1 (col1 int, col2 int, col3 int, constraint chk1 check (col1 > 0));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE tb2 (col1 char(30), c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> -- change syntax of before to "NO CASCADE BEFORE"
+CREATE TRIGGER testtrig1 NO CASCADE BEFORE UPDATE OF col1,col2 on tb1 FOR EACH ROW MODE DB2SQL VALUES 1;
+0 rows inserted/updated/deleted
+ij> CREATE TRIGGER testtrig2 AFTER UPDATE on tb1
+REFERENCING OLD as oldtable FOR EACH ROW MODE DB2SQL INSERT INTO tb2 VALUES ('tb', oldtable.col1, oldtable.col2);
+0 rows inserted/updated/deleted
+ij> CREATE TRIGGER testtrig3 AFTER UPDATE on tb1
+REFERENCING OLD as oldtable FOR EACH ROW MODE DB2SQL INSERT INTO tb2 VALUES ('tb', oldtable.col1, oldtable.col2);
+0 rows inserted/updated/deleted
+ij> -- clean up
+DROP TRIGGER testtrig1;
+0 rows inserted/updated/deleted
+ij> DROP TRIGGER testtrig2;
+0 rows inserted/updated/deleted
+ij> DROP TRIGGER testtrig3;
+0 rows inserted/updated/deleted
+ij> DROP TABLE tb1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE tb2;
+0 rows inserted/updated/deleted
+ij> -- SET TRANSACTION ISOLATION LEVEL
+-- beetle 5254
+-- these SET TRANSACTION ISOLATION statements fail in db2 compat mode because it has cloudscape specific syntax
+create table t1(c1 int not null constraint asdf primary key);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+ERROR 42X01: Syntax error: Encountered "TRANSACTION" at line 1, column 5.
+ij> SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+ERROR 42X01: Syntax error: Encountered "TRANSACTION" at line 1, column 5.
+ij> SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+ERROR 42X01: Syntax error: Encountered "TRANSACTION" at line 1, column 5.
+ij> SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+ERROR 42X01: Syntax error: Encountered "TRANSACTION" at line 1, column 5.
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- statements should pass in db2 compat mode
+-- beetle 5260
+autocommit off;
+ij> create table t1(c1 int not null constraint asdf primary key);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> -- verify SET TRANSACTION ISOLATION commits and changes isolation level
+set isolation serializable;
+0 rows inserted/updated/deleted
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- verify SET TRANSACTION ISOLATION commits and changes isolation level
+set isolation read committed;
+0 rows inserted/updated/deleted
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- verify SET TRANSACTION ISOLATION commits and changes isolation level
+set isolation repeatable read;
+0 rows inserted/updated/deleted
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- verify SET TRANSACTION ISOLATION commits and changes isolation level
+set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- SET ISOLATION statement
+-- beetle 5260
+-- set isolation statement that are supported in db2
+create table t1(c1 int not null constraint asdf primary key);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> set isolation serializable;
+0 rows inserted/updated/deleted
+ij> set isolation read committed;
+0 rows inserted/updated/deleted
+ij> set isolation repeatable read;
+0 rows inserted/updated/deleted
+ij> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- SELECT statement testing
+-- beetle 5255
+CREATE TABLE t1(col1 int, col2 int);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE t2(col1 int, col2 int);
+0 rows inserted/updated/deleted
+ij> INSERT INTO t1 VALUES(3,4);
+1 row inserted/updated/deleted
+ij> INSERT INTO t2 VALUES(3,4);
+1 row inserted/updated/deleted
+ij> -- CROSS JOIN not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error
+-- (1) CROSS JOIN should be disabled in FROM clause of SELECT statement
+SELECT * FROM t1 CROSS JOIN t2;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 3, column 30.
+ij> -- (2) USING should be disabled in INNER JOIN of SELECT statement
+SELECT * FROM t1 INNER JOIN t2 USING (col1);
+ERROR 42X01: Syntax error: Encountered "USING" at line 2, column 32.
+ij> -- (3) USING should be disabled in INNER JOIN of SELECT statement
+SELECT * FROM t1 LEFT OUTER JOIN t2 USING (col1);
+ERROR 42X01: Syntax error: Encountered "USING" at line 2, column 37.
+ij> -- (4) USING should be disabled in INNER JOIN of SELECT statement
+SELECT * FROM t1 RIGHT OUTER JOIN t2 USING (col1);
+ERROR 42X01: Syntax error: Encountered "USING" at line 2, column 38.
+ij> -- (5) TRUE and FALSE constants should be disabled in WHERE clause of SELECT statement
+SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE true;
+ERROR 42X01: Syntax error: true.
+ij> SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE false;
+ERROR 42X01: Syntax error: false.
+ij> -- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
+DELETE FROM t1 where true;
+ERROR 42X01: Syntax error: true.
+ij> DELETE FROM t1 where false;
+ERROR 42X01: Syntax error: false.
+ij> -- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
+UPDATE t2 SET col1 = NULL WHERE true;
+ERROR 42X01: Syntax error: true.
+ij> UPDATE t2 SET col1 = NULL WHERE false;
+ERROR 42X01: Syntax error: false.
+ij> -- (6) AT ISOLATION clause should be disabled in SELECT statement
+-- AT ISOLATION not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error
+SELECT * FROM t1 AT ISOLATION READ UNCOMMITTED;
+ERROR 42X01: Syntax error: Encountered "AT" at line 3, column 18.
+ij> SELECT * FROM t1 AT ISOLATION READ COMMITTED;
+ERROR 42X01: Syntax error: Encountered "AT" at line 1, column 18.
+ij> SELECT * FROM t1 AT ISOLATION SERIALIZABLE;
+ERROR 42X01: Syntax error: Encountered "AT" at line 1, column 18.
+ij> SELECT * FROM t1 AT ISOLATION REPEATABLE READ;
+ERROR 42X01: Syntax error: Encountered "AT" at line 1, column 18.
+ij> -- clean up
+DROP TABLE t1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE t2;
+0 rows inserted/updated/deleted
+ij> -- DEFAULT CAST not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error
+create table testuser(col1 BLOB(3K) default cast(user as blob(3k)));
+ERROR 42X01: Syntax error: Encountered "cast" at line 2, column 45.
+ij> create table testsessionuser(col1 BLOB(3K) default cast(session_user as blob(3k)));
+ERROR 42X01: Syntax error: Encountered "cast" at line 1, column 52.
+ij> create table testcurrentuser(col1 BLOB(3K) default cast(current_user as blob(3k)));
+ERROR 42X01: Syntax error: Encountered "cast" at line 1, column 52.
+ij> create table testschema(col1 BLOB(3K) default cast(current schema as blob(3k)));
+ERROR 42X01: Syntax error: Encountered "cast" at line 1, column 47.
+ij> -- alter table syntax that should be supported in db2 compat mode
+-- beetle 5267
+create table testmodify (col1 varchar(30), col2 int generated always as identity);
+0 rows inserted/updated/deleted
+ij> -- increasing the length of the varchar column
+alter table testmodify alter col1 set data type varchar(60);
+0 rows inserted/updated/deleted
+ij> -- specifying the interval between consecutive values of col2, the identity column 
+alter table testmodify alter col2 set increment by 2;
+0 rows inserted/updated/deleted
+ij> -- clean up
+drop table testmodify;
+0 rows inserted/updated/deleted
+ij> -- (1) adding more than one column 
+-- beetle 5268
+-- db2 compat mode should support the following statements
+create table testaddcol (col1 int);
+0 rows inserted/updated/deleted
+ij> alter table testaddcol add column col2 int add col3 int;
+ERROR 42X01: Syntax error: Encountered "add" at line 1, column 44.
+ij> drop table testaddcol;
+0 rows inserted/updated/deleted
+ij> -- (2) adding more than one unique, referential, or check constraint 
+-- beetle 5268
+-- db2 compat mode should support the following statements
+create table testaddconst1 (col1 int not null primary key, col2 int not null unique);
+0 rows inserted/updated/deleted
+ij> create table testaddconst2 (col1 int not null primary key, col2 int not null unique);
+0 rows inserted/updated/deleted
+ij> create table testaddconst3 (col1 int not null, col2 int not null, col3 int not null, col4 int not null, col5 int, col6 int);
+0 rows inserted/updated/deleted
+ij> create table testaddconst4 (col1 int not null, col2 int not null, col3 int not null, col4 int not null, col5 int, col6 int);
+0 rows inserted/updated/deleted
+ij> -- adding more than one unique-constraint 
+alter table testaddconst3 add primary key (col1) add unique (col2);
+ERROR 42X01: Syntax error: Encountered "add" at line 2, column 50.
+ij> alter table testaddconst3 add unique (col3) add unique (col4);
+ERROR 42X01: Syntax error: Encountered "add" at line 1, column 45.
+ij> -- adding more than one referential-constraint 
+alter table testaddconst3 add foreign key (col1) references testaddconst1(col1) add foreign key (col2) references testaddconst2(col2);
+ERROR 42X01: Syntax error: Encountered "add" at line 2, column 81.
+ij> -- adding more than one check-constraint 
+alter table testaddconst3 add check (col5 is null) add check (col6 is null);
+ERROR 42X01: Syntax error: Encountered "add" at line 2, column 52.
+ij> -- adding a primary, unique, foreign key, and  check-constraint 
+alter table testaddconst4 add primary key(col1) add unique(col2) add foreign key (col1) references testaddconst1(col1) add check (col2 is null);
+ERROR 42X01: Syntax error: Encountered "add" at line 2, column 49.
+ij> -- clean up
+drop table testaddconst1;
+0 rows inserted/updated/deleted
+ij> drop table testaddconst2;
+0 rows inserted/updated/deleted
+ij> drop table testaddconst3;
+0 rows inserted/updated/deleted
+ij> drop table testaddconst4;
+0 rows inserted/updated/deleted
+ij> -- (3) adding more than one unique, referential, or check constraints 
+-- beetle 5268
+-- syntax that will be supported in db2 compat mode (beetle 5204)
+CREATE TABLE testdropconst1 (col1 CHAR(7) NOT NULL, col2 int not null CONSTRAINT uk1 UNIQUE , PRIMARY KEY(col1));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE testdropconst2 (col1 CHAR(7) NOT NULL, col2 int not null CONSTRAINT uk2 UNIQUE, col3 CHAR(5) not null CONSTRAINT uk3 UNIQUE, PRIMARY KEY(col1));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE testdropconst3 (col1 CHAR(7) NOT NULL, col2 int not null CONSTRAINT uk4 UNIQUE , PRIMARY KEY(col1));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE testdropconst4 (col1 CHAR(7) NOT NULL, col2 int not null CONSTRAINT uk5 UNIQUE , PRIMARY KEY(col1));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE testdropconst5 (col1 CHAR(7) NOT NULL, col2 int, col3 CHAR(5) not null, CONSTRAINT fk1 FOREIGN KEY (col1) REFERENCES testdropconst3(col1), CONSTRAINT fk2 FOREIGN KEY (col1) REFERENCES testdropconst4(col1));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE testdropconst6 (col1 CHAR(7) CONSTRAINT ck1 CHECK (col1 is null), col2 int CONSTRAINT ck2 CHECK (col2 is null));
+0 rows inserted/updated/deleted
+ij> -- dropping more than one unique-constraint 
+alter table testdropconst1 drop primary key drop constraint uk1;
+ERROR 42X01: Syntax error: Encountered "drop" at line 2, column 45.
+ij> alter table testdropconst2 drop primary key drop constraint uk2 drop constraint uk3;
+ERROR 42X01: Syntax error: Encountered "drop" at line 1, column 45.
+ij> -- dropping more than one foreign key constraint
+alter table testdropconst5 drop constraint fk1 drop constraint fk2;
+ERROR 42X01: Syntax error: Encountered "drop" at line 2, column 48.
+ij> -- dropping more than one check constraint
+alter table testdropconst6 drop constraint ck1 drop constraint ck2;
+ERROR 42X01: Syntax error: Encountered "drop" at line 2, column 48.
+ij> --clean up
+drop table testdropconst1;
+0 rows inserted/updated/deleted
+ij> drop table testdropconst2;
+0 rows inserted/updated/deleted
+ij> drop table testdropconst3;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'xxxxGENERATED-IDxxxx' because CONSTRAINT 'FK1' is dependent on that object.
+ij> drop table testdropconst4;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'xxxxGENERATED-IDxxxx' because CONSTRAINT 'FK2' is dependent on that object.
+ij> drop table testdropconst5;
+0 rows inserted/updated/deleted
+ij> drop table testdropconst6;
+0 rows inserted/updated/deleted
+ij> -- (4) altering more than one column
+-- beetle 5268
+-- syntax that will be supported in db2 compat mode (beetle 5267)
+-- db2 compat mode should support 
+create table testmodify (col1 varchar(30), col2 varchar(30));
+0 rows inserted/updated/deleted
+ij> alter table testmodify alter col1 set data type varchar(60) alter col2 set data type varchar(60);
+ERROR 42X01: Syntax error: Encountered "alter" at line 1, column 61.
+ij> -- clean up
+drop table testmodify;
+0 rows inserted/updated/deleted
+ij> -- number of values assigned in an INSERT statement should be the same as the number of specified or implied columns 
+-- beetle 5269
+create table t1(a int, b int, c char(10));
+0 rows inserted/updated/deleted
+ij> -- this statement should throw an error in db2 compat mode, but it does not
+insert into t1 values(1);
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- beetle 5281
+-- These statements are successful in DB2 UDB v8, but not in Cloudscape
+-- Cloudscape does not support cast-functions such as blob, timestamp, time, and date
+-- DB2 does support cast functions such as these below:
+create table t1 (ch blob(10));
+0 rows inserted/updated/deleted
+ij> insert into t1 values (blob('hmm'));
+ERROR 42Y03: 'BLOB' is not recognized as a function or procedure.
+ij> create table t2 (ch timestamp);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (timestamp(current timestamp));
+1 row inserted/updated/deleted
+ij> create table t3 (ch time);
+0 rows inserted/updated/deleted
+ij> insert into t3 values (time(current time));
+1 row inserted/updated/deleted
+ij> create table t4 (ch date);
+0 rows inserted/updated/deleted
+ij> insert into t4 values (date(current date));
+1 row inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> -- test operands
+-- beetle 5282
+-- <,> =, !=, <=, >= operands are not supported in db2 but supported in cloudscape
+CREATE TABLE testoperatorclob (colone clob(1K));
+0 rows inserted/updated/deleted
+ij> INSERT INTO testoperatorclob VALUES (CAST('50' AS CLOB(1K)));
+1 row inserted/updated/deleted
+ij> select * from testoperatorclob;
+COLONE                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+50                                                                                                                              
+ij> -- these select statements should raise an error but are successful in cloudscape
+select * from testoperatorclob where colone > 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorclob where colone < 70;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorclob where colone = 50;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorclob where colone != 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorclob where colone <= 70;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorclob where colone >= 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorclob where colone <> 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> drop table testoperatorclob;
+0 rows inserted/updated/deleted
+ij> -- beetle 5282
+CREATE TABLE testoperatorblob (colone clob(1K));
+0 rows inserted/updated/deleted
+ij> INSERT INTO testoperatorblob VALUES (CAST('50' AS BLOB(1K)));
+ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
+ij> select * from testoperatorblob;
+COLONE                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+ij> -- these select statements should raise an error but are successful in cloudscape
+select * from testoperatorblob where colone > 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorblob where colone < 999999;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorblob where colone = 00350030;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorblob where colone != 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorblob where colone <= 999999;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorblob where colone >= 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> select * from testoperatorblob where colone <> 10;
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ij> drop table testoperatorblob;
+0 rows inserted/updated/deleted
+ij> -- beetle 5283
+-- casting using "X" for hex constant, "B" literal is not allowed in DB2
+-- db2 raises ERROR 56098, cloudscape should raise error msg?a
+values cast(B'1' as char(100));
+ERROR 42X01: Syntax error: Encountered "\'1\'" at line 4, column 14.
+ij> values cast(B'1' as clob(1M));
+ERROR 42X01: Syntax error: Encountered "\'1\'" at line 1, column 14.
+ij> values cast(B'1' as blob(1M));
+ERROR 42X01: Syntax error: Encountered "\'1\'" at line 1, column 14.
+ij> values cast(X'11' as char(100));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+ij> values cast(X'11' as clob(1M));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+ij> values cast(X'11' as blob(1M));
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+11                                                                                                                              
+ij> -- beetle 5284
+-- minor difference in outputs when casting to blob in Cloudscape and DB2. 
+values cast('   ' as blob(1M));
+ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
+ij> values cast('a' as blob(1M));
+ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
+ij> -- beetle 5294
+-- diable column names in the characterExpression and escape clause of a LIKE predicate
+create table likeable (match_me varchar(10), pattern varchar(10), esc varchar(1));
+0 rows inserted/updated/deleted
+ij> insert into likeable values ('foo%bar3', 'fooZ%bar3', 'Z');
+1 row inserted/updated/deleted
+ij> select match_me from likeable where match_me like pattern escape esc;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> select match_me from likeable where match_me like pattern escape 'Z';
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> drop table likeable;
+0 rows inserted/updated/deleted
+ij> -- beetle 5298 
+-- disable Field Access
+VALUES java.lang.Integer::MAX_VALUE;
+ERROR 42X01: Syntax error: java.lang.Integer::MAX_VALUE.
+ij> VALUES (1)->noSuchField;
+ERROR 42X01: Syntax error: Encountered "->" at line 1, column 11.
+ij> -- beetle 5299
+-- disable Method Invocations 
+VALUES (1)->toString();
+ERROR 42X01: Syntax error: java.lang.Integer.toString.
+ij> VALUES 1.->toString();
+ERROR 42X01: Syntax error: java.math.BigDecimal.toString.
+ij> VALUES 1..getClass()->toString();
+ERROR 42X01: Syntax error: Encountered "1." at line 1, column 8.
+ij> create table m5299 (i int, s varchar(10));
+0 rows inserted/updated/deleted
+ij> insert into m5299 values(1, 'hello');
+1 row inserted/updated/deleted
+ij> select i.hashCode(), s.indexOf('ll') from m5299;
+ERROR 42Y07: Schema 'I' does not exist
+ij> select s.indexOf('ll') from m5299;
+ERROR 42Y07: Schema 'S' does not exist
+ij> drop table m5299;
+0 rows inserted/updated/deleted
+ij> -- beetle 5307
+-- scale of the resulting data type for division 
+values(11.0/1111.33);
+1                                 
+----------------------------------
+0.009898050084133425715134118     
+ij> values (11111111111111111111111111111.10/1.11);
+1                               
+--------------------------------
+10010010010010010010010010010   
+ij> values (11111111111111111111111111111.10/1.1);
+1                                 
+----------------------------------
+10101010101010101010101010101.0   
+ij> -- beetle 5346
+-- positive test
+-- NULLs sort low in Cloudscape, but sort high in DB2 
+create table testOrderBy(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into testOrderBy values (1);
+1 row inserted/updated/deleted
+ij> insert into testOrderBy values (2);
+1 row inserted/updated/deleted
+ij> insert into testOrderBy values (null);
+1 row inserted/updated/deleted
+ij> select * from testOrderBy order by c1;
+C1         
+-----------
+1          
+2          
+NULL       
+ij> drop table testOrderBy;
+0 rows inserted/updated/deleted
+ij> create table likeable (match_me varchar(10), pattern varchar(10), esc varchar(1), e varchar(1));
+0 rows inserted/updated/deleted
+ij> insert into likeable values ('foo%bar3', 'fooZ%bar3', 'Z', 'Z');
+1 row inserted/updated/deleted
+ij> select match_me from likeable where match_me like 'fooZ%bar3' escape 'Z';
+MATCH_ME  
+----------
+foo%bar3  
+ij> select match_me from likeable where 'foo%bar3' like 'fooZ%bar3' escape 'Z';
+MATCH_ME  
+----------
+foo%bar3  
+ij> select match_me from likeable where 'foo%bar3' like 'foo%';
+MATCH_ME  
+----------
+foo%bar3  
+ij> -- SQLSTATE=42824
+select match_me from likeable where match_me like pattern escape esc;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> select match_me from likeable where match_me like pattern escape e;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> select match_me from likeable where match_me like pattern escape 'Z';
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> select match_me from likeable where match_me like pattern;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> select match_me from likeable where match_me like e;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> -- SQLSTATE=22019
+select match_me from likeable where match_me like 'fooZ%bar3' escape esc;
+ERROR 22019: Invalid escape sequence, 'ESC'. The escape string must be exactly one character. It can not be a null or more than one character.
+ij> select match_me from likeable where match_me like 'fooZ%bar3' escape e;
+ERROR 22019: Invalid escape sequence, 'E'. The escape string must be exactly one character. It can not be a null or more than one character.
+ij> -- SQLSTATE=42884
+select match_me from likeable where match_me like 'fooZ%bar3' escape 1;
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> select match_me from likeable where match_me like 'fooZ%bar3' escape 1;
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> select match_me from likeable where 'foo%bar3' like 1;
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> select match_me from likeable where 1 like 1;
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> select match_me from likeable where match_me like 1;
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> -- beetle 5845
+select match_me from likeable where match_me like CURRENT_DATE;
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> create table likes (dt date, tm time, ts timestamp);
+0 rows inserted/updated/deleted
+ij> insert into likes values (current_date, current_time, current_timestamp);
+1 row inserted/updated/deleted
+ij> insert into likes values ('2004-03-03', current_time, current_timestamp);
+1 row inserted/updated/deleted
+ij> select * from likes where dt like '2004-03-0_';
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> select * from likes where tm like '_8:%:1%';
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> select * from likes where ts like '2004-04-09 08:5%';
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> drop table likeable;
+0 rows inserted/updated/deleted
+ij> drop table likes;
+0 rows inserted/updated/deleted
+ij> -- no schema names in constraint names (beetle 5143)
+CREATE TABLE S5143.T5143_1 (C1 int CONSTRAINT S5143.CPK1 PRIMARY KEY);
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> CREATE TABLE S5143.T5143_2 (C1 int, C2 int, CONSTRAINT S5143.CPK1  PRIMARY KEY(C1,C2));
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> CREATE TABLE S5143.T5143_3 (C1 int, C2 int, CONSTRAINT S5143.C3 CHECK(C1 > C2));
+0 rows inserted/updated/deleted
+ij> -- READ ONLY not allowed in "FOR" clause of a select.
+create table roTable (i int);
+0 rows inserted/updated/deleted
+ij> insert into roTable values (8);
+1 row inserted/updated/deleted
+ij> select * from roTable for update;
+I          
+-----------
+8          
+ij> select * from roTable for update of i;
+I          
+-----------
+8          
+ij> select * from roTable for fetch only;
+I          
+-----------
+8          
+ij> select * from roTable for read only;
+I          
+-----------
+8          
+ij> drop table roTable;
+0 rows inserted/updated/deleted
+ij> -- No support for Java types in CAST statements;
+values CAST (NULL AS CLASS java.lang.Integer);
+ERROR 42X01: Syntax error: Encountered "" at line 3, column 22.
+ij> values CAST (NULL AS CLASS com.acme.SomeClass);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ij> values CAST (NULL AS CLASS java.sql.Date);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ij> values CAST (NULL AS java.lang.Integer);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ij> values CAST (NULL AS com.acme.SomeClass);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ij> values CAST (NULL AS java.sql.Date);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ij> values CAST (? AS CLASS java.lang.Integer);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ij> values CAST (? AS CLASS com.acme.SomeClass);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ij> values CAST (? AS CLASS java.sql.Date);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ij> values CAST (? AS java.lang.Integer);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ij> values CAST (? AS com.acme.SomeClass);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ij> values CAST (? AS java.sql.Date);
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ij> -- No support for BIT_LENGTH, OCTET_LENGTH, TRIP and SUBSTRING in DB2 compatibility mode
+values BIT_LENGTH(X'55');
+ERROR 42Y03: 'BIT_LENGTH' is not recognized as a function or procedure.
+ij> values OCTET_LENGTH('asdfasdfasdf');
+ERROR 42Y03: 'OCTET_LENGTH' is not recognized as a function or procedure.
+ij> values TRIM('x' FROM 'xasdf x');
+ERROR 42X01: Syntax error: Encountered "FROM" at line 1, column 17.
+ij> values SUBSTRING('12345' FROM 3 FOR 2);
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> -- Tests for explicit nulls. Not allowed in DB2, defect 5589 
+-- Should fail.
+create table t1 ( i int null);
+ERROR 42X01: Syntax error: Encountered "null" at line 3, column 25.
+ij> -- Should pass.
+create table t1 (i int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values null;
+1 row inserted/updated/deleted
+ij> -- Alter table add explict null column should also fail.
+alter table t1 add column j int null;
+ERROR 42X01: Syntax error: Encountered "null" at line 2, column 33.
+ij> -- Should pass
+alter table t1 add column j int;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (null, null);
+1 row inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5538: Match DB2 trigger restrictions.
+-- Part I) SQL-Procedure-Statement restrictions:
+-- 1) BEFORE triggers: can't have CALL, INSERT, UPDATE, or DELETE as action; when beetle 5253 is resolved, thsese should be changed to "no cascade before", instead of just "before".
+create table t1 (i int, j int);
+0 rows inserted/updated/deleted
+ij> create table t2 (i int);
+0 rows inserted/updated/deleted
+ij> create trigger trig1a NO CASCADE before insert on t1 for each row mode db2sql insert into t2 values(1);
+ERROR 42Z9D: 'INSERT' statements are not allowed in 'BEFORE' triggers.
+ij> create trigger trig1b NO CASCADE before insert on t1 for each row mode db2sql update t2 set i=1 where i=2;
+ERROR 42Z9D: 'UPDATE' statements are not allowed in 'BEFORE' triggers.
+ij> create trigger trig1c NO CASCADE before insert on t1 for each row mode db2sql delete from t2 where i=8;
+ERROR 42Z9D: 'DELETE' statements are not allowed in 'BEFORE' triggers.
+ij> create trigger trig1d NO CASCADE before insert on t1 for each row mode db2sql call procOne();
+ERROR 42X01: Syntax error: Encountered "call" at line 1, column 79.
+ij> -- 2) AFTER triggers: can't have CALL as action, but others should still work.
+create trigger trig2 after insert on t1 for each row mode db2sql call procOne();
+ERROR 42X01: Syntax error: Encountered "call" at line 2, column 66.
+ij> create trigger trig2a after insert on t1 for each row mode db2sql insert into t2 values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig2b after insert on t1 for each row mode db2sql update t2 set i=1 where i=2;
+0 rows inserted/updated/deleted
+ij> create trigger trig2c after insert on t1 for each row mode db2sql delete from t2 where i=8;
+0 rows inserted/updated/deleted
+ij> -- Part II) Verify applicable restrictions on the "REFERENCES" clause (should be the same as in DB2).
+-- 3) NEW, NEW_TABLE only valid with insert and update triggers; OLD, OLD_TABLE
+--  only valid with delete and update triggers.
+-- Next 8 should succeed.
+create trigger trig3a after insert on t1 referencing new as ooga for each row mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig3b after update on t1 referencing old as ooga for each row mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig3c after update on t1 referencing new as ooga for each row mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig3d after delete on t1 referencing old as ooga for each row mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig3e after insert on t1 referencing new_table as ooga for each statement mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig3f after update on t1 referencing old_table as ooga for each statement mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig3g after update on t1 referencing new_table as ooga for each statement mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> create trigger trig3h after delete on t1 referencing old_table as ooga for each statement mode db2sql values(1);
+0 rows inserted/updated/deleted
+ij> -- Next 4 should fail.
+create trigger trig3i after insert on t1 referencing old as ooga for each row mode db2sql values(1);
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger trig3j after delete on t1 referencing new as ooga for each row mode db2sql values(1);
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> create trigger trig3k after insert on t1 referencing old_table as ooga for each statement mode db2sql values(1);
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger trig3m after delete on t1 referencing new_table as ooga for each statement mode db2sql values(1);
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> -- 4) NEW_TABLE, OLD_TABLE not valid with BEFORE triggers (these will throw syntax errors until beetle 5253 is resolved).
+create trigger trig4a no cascade before update on t1 referencing old_table as ooga for each statement mode db2sql values(1);
+ERROR 42Y92: BEFORE triggers may only reference row transition variables/tables.
+ij> create trigger trig4b no cascade before update on t1 referencing new_table as ooga for each statement mode db2sql values(1);
+ERROR 42Y92: BEFORE triggers may only reference row transition variables/tables.
+ij> -- 5) OLD, NEW not valid with FOR EACH STATEMENT.
+create trigger trig5a after update on t1 referencing old as ooga for each statement mode db2sql values(1);
+ERROR 42Y92: STATEMENT triggers may only reference table transition variables/tables.
+ij> create trigger trig5b after update on t1 referencing new as ooga for each statement mode db2sql values(1);
+ERROR 42Y92: STATEMENT triggers may only reference table transition variables/tables.
+ij> -- cleanup for 5538:
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5637: Require FOR EACH clause in DB2 mode. Optional in Cloudscape mode. 
+create table t1(i int);
+0 rows inserted/updated/deleted
+ij> -- Should fail
+create trigger trig1 after insert on t1 mode db2sql values (8);
+ERROR 42X01: Syntax error: Encountered "mode" at line 2, column 41.
+ij> -- Should pass
+create trigger trig1 after insert on t1 for each row mode db2sql values (8);
+0 rows inserted/updated/deleted
+ij> create trigger trig2 after insert on t1 for each statement mode db2sql values (8);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- match SUBSTR builtin function out of range handling (5570).
+create table x1 (c char(10));
+0 rows inserted/updated/deleted
+ij> insert into x1 values ('foo');
+1 row inserted/updated/deleted
+ij> -- DB2: Raises ERROR 22011: out of range, Cloudscape doesn't
+select substr('foo', -2,1) from x1;
+1   
+----
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- DB2: Raises ERROR 22011: out of range, Cloudscape return NULL
+select substr('foo', 1,-1) from x1;
+1              
+---------------
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> select substr('foo', 2,-1) from x1;
+1              
+---------------
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> select substr('foo', 3,-2) from x1;
+1              
+---------------
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> select substr('foo', -2,-3) from x1;
+1              
+---------------
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- DB2: ERROR 22011 out of range, Cloudscape returns empty string
+select substr('foo', 5) from x1;
+1   
+----
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> select substr('foo', 6,3) from x1;
+1   
+----
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- DB2: Raises ERROR 22011: out of range, Cloudscape returns 'f'
+select substr('foo', 0,1) from x1;
+1   
+----
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- DB2: ERROR 22011 out of range, Cloudscape return 'foo'
+select substr('foo', 1,4) from x1;
+1   
+----
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- DB2: ERROR 22011 out of range, Cloudscape return 'foo'
+select substr('foo', -5) from x1;
+1   
+----
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- DB2: ERROR 22011 out of range
+select substr('foo', -6,3) from x1;
+1   
+----
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- DB2: Returns an empty value, Cloudscape returns NULL
+select substr('foo', 1,0) from x1;
+1              
+---------------
+ij> select substr('foo', 2,0) from x1;
+1              
+---------------
+ij> select substr('foo', 3,0) from x1;
+1              
+---------------
+ij> -- DB2: Raises ERROR 22011: out of range, Cloudscape returns NULL
+select substr('foo', 4,0) from x1;
+1              
+---------------
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> select substr('foo', 5,0) from x1;
+1              
+---------------
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> select substr('foo', 6,0) from x1;
+1              
+---------------
+ERROR 22011: The second or third argument of the SUBSTR function is out of range.
+ij> -- Beetle 5630: A column check constraint can only refer to that column in DB2
+create table t1(c1 int, c2 int check (c1 > 5));
+ERROR 42621: A check constraint or generated column that is defined with 'C2' is invalid.
+ij> -- check constraint ck1 in the column-definition of c2 can not refer to column c1
+create table t1(c1 int, c2 int constraint ck1 check(c1 > c2));
+ERROR 42621: A check constraint or generated column that is defined with 'C2' is invalid.
+ij> -- Same test with alter table
+create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> alter table t1 add column c2 int constraint ck2 check(c2 > c1);
+ERROR 42621: A check constraint or generated column that is defined with 'C2' is invalid.
+ij> -- These should pass, uses table constraints
+create table t2(c1 int, c2 int, check (c1 > 5));
+0 rows inserted/updated/deleted
+ij> create table t3(i int, j int, check (j > 5));
+0 rows inserted/updated/deleted
+ij> alter table t1 add column c2 int;
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint t1con check(c2 > c1);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5638: DB2 requires matching target and result columns for insert
+create table t1 ( i int, j int);
+0 rows inserted/updated/deleted
+ij> create table t2 ( i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t2 values (2, 2);
+1 row inserted/updated/deleted
+ij> -- negative tests, mismatch of columns
+insert into t1 select i from t2;
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> insert into t1(i) select * from t2;
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> insert into t1(i, j) select j from t2;
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> insert into t1 select * from t2 union select i from t2;
+ERROR 42X58: The number of columns on the left and right sides of the UNION must be the same.
+ij> insert into t1 select j from t2 union select j from t2;
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> insert into t1(i) select * from t2 union all select * from t2;
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> insert into t1(i, j) select i, j from t2 union all i from t2;
+ERROR 42X01: Syntax error: Encountered "i" at line 1, column 52.
+ij> -- positive cases
+insert into t1 select * from t2;
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |J          
+-----------------------
+1          |1          
+2          |2          
+ij> insert into t1(i,j) select * from t2 union select i, j from t2;
+1 row inserted/updated/deleted
+ij> insert into t1(i) select i from t2 union all select j from t2;
+2 rows inserted/updated/deleted
+ij> select * from t1;
+I          |J          
+-----------------------
+1          |1          
+2          |2          
+2          |2          
+2          |NULL       
+2          |NULL       
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5667: DB2 requires non-nullable columns to have a default in ALTER TABLE
+create table t1( i int);
+0 rows inserted/updated/deleted
+ij> -- Negative cases
+alter table t1 add column j int not null;
+ERROR 42601: In an ALTER TABLE statement, the column 'J' has been specified as NOT NULL and either the DEFAULT clause was not specified or was specified as DEFAULT NULL.
+ij> alter table t1 add column j int not null default null;
+ERROR 42601: In an ALTER TABLE statement, the column 'J' has been specified as NOT NULL and either the DEFAULT clause was not specified or was specified as DEFAULT NULL.
+ij> -- positive cases
+alter table t1 add column j int;
+0 rows inserted/updated/deleted
+ij> alter table t1 add column k int not null default 5;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- IS [NOT] TRUE/FALSE/UNKNOWN not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error
+-- 
+create table t1( i int);
+0 rows inserted/updated/deleted
+ij> select * from t1 where ((1=1) IS TRUE);
+ERROR 42X01: Syntax error: Encountered "TRUE" at line 1, column 34.
+ij> select * from t1 where ((1=1) IS NOT TRUE);
+ERROR 42X01: Syntax error: Encountered "TRUE" at line 1, column 38.
+ij> select * from t1 where ((1=0) IS FALSE);
+ERROR 42X01: Syntax error: Encountered "FALSE" at line 1, column 34.
+ij> select * from t1 where ((1=0) IS NOT FALSE);
+ERROR 42X01: Syntax error: Encountered "FALSE" at line 1, column 38.
+ij> select * from t1 where (null IS UNKNOWN);
+ERROR 42X01: Syntax error: Encountered "null" at line 1, column 25.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5635, 5645 and 5633: Generated column name issues
+create table t1(i int, j int);
+0 rows inserted/updated/deleted
+ij> create table t2(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t2 values (2, 2);
+1 row inserted/updated/deleted
+ij> -- Cloudscape should generate column names when both sides of union don't match
+select i,j from t1
+union all
+select c1,c2 from t2
+order by 1;
+1          |2          
+-----------------------
+1          |1          
+2          |2          
+ij> select i as c1, j as c2 from t1
+union all
+select c1, c2 from t2
+order by 1;
+C1         |C2         
+-----------------------
+1          |1          
+2          |2          
+ij> -- Prevent Cloudscape from using generated column names for ordering
+select i+1 from t1 order by "SQLCol1";
+ERROR 42X04: Column 'SQLCol1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SQLCol1' is not a column in the target table.
+ij> select i+1 from t1 order by SQLCol1;
+ERROR 42X04: Column 'SQLCOL1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SQLCOL1' is not a column in the target table.
+ij> values (1,2,3),(4,5,6),(7,8,9) order by "SQLCol1";
+ERROR 42X78: Column 'SQLCol1' is not in the result of the query expression.
+ij> -- Column names for a CREATE VIEW should be specified when result table has unnamed columns. 
+create view v1 as values 1;
+ERROR 42908: The CREATE VIEW statement does not include a column list.
+ij> create view v1 as select i+1 from t1;
+ERROR 42908: The CREATE VIEW statement does not include a column list.
+ij> create view v1 as select i+1 as i from t1;
+0 rows inserted/updated/deleted
+ij> create view v2(c) as select i+1 from t1;
+0 rows inserted/updated/deleted
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop view v2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- ALTER TABLE COMPRESS statement is cloudscape specific, disable in db2 mode
+-- beetle 5553
+--   TODO - not working yet
+-- negative tests
+create table tb1 (country_ISO_code char(2));
+0 rows inserted/updated/deleted
+ij> alter table tb1 compress;
+ERROR 42X01: Syntax error: COMPRESS.
+ij> alter table tb1 compress sequential;
+ERROR 42X01: Syntax error: COMPRESS.
+ij> -- clean up
+drop table tb1;
+0 rows inserted/updated/deleted
+ij> -- Beetle 5717: Disable adding primary or unique constraints on non-nullable columns
+-- negative tests
+create table t1 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint pk1 primary key (c1);
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> alter table t1 add constraint uc1 unique (c2);
+ERROR 42831: 'C2' cannot be a column of a primary key or unique key because it can contain null values.
+ij> -- positive tests
+create table t2 (c1 int not null, c2 char(10) not null);
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint pk2 primary key (c1);
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint uc2 unique (c2);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- SET STATISTICS TIMING ON stmt is cloudscape specific, disabled in db2 mode
+-- Once we have rewritten our functions to not use following sql, SET STATISTICS TIMING can be completely removed from the parser.
+set statistics timing on;
+ERROR 42X01: Syntax error: Encountered "statistics" at line 3, column 5.
+ij> -- SET RUNTIMESTATISTICS ON stmt is cloudscape specific, disabled in db2 mode
+-- Once we have rewritten our functions to not use following sql, SET RUNTIMESTATISTICS can be completely removed from the parser.
+set runtimestatistics on;
+ERROR 42X01: Syntax error: Encountered "runtimestatistics" at line 3, column 5.
+ij> -- following runtime statistics related sql will fail in db2 mode but will run fine in Cloudscape mode
+create table t1 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         
+-----------------------
+ij> values runtimestatistics()->getScanStatisticsText();
+ERROR 42Y03: 'RUNTIMESTATISTICS' is not recognized as a function or procedure.
+ij> values runtimestatistics()->toString();
+ERROR 42Y03: 'RUNTIMESTATISTICS' is not recognized as a function or procedure.
+ij> -- following runtime statistics related sql is not supported anymore and will not run in any mode
+UPDATE STATISTICS FOR TABLE T1;
+ERROR 42X01: Syntax error: Encountered "FOR" at line 2, column 19.
+ij> DROP STATISTICS FOR TABLE T1;
+ERROR 42X01: Syntax error: Encountered "STATISTICS" at line 1, column 6.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> 

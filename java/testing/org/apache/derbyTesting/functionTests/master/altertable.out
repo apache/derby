@@ -1,0 +1,867 @@
+ij> -- alter table tests
+-- add column
+-- (add constraint & drop constraint to be added)
+-- create some database objects
+create table t0(c1 int not null constraint p1 primary key);
+0 rows inserted/updated/deleted
+ij> create table t0_1(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t0_2(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t0_3(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t1_1(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t2(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t3(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t4(c1 int not null);
+0 rows inserted/updated/deleted
+ij> create view v1 as select * from t2;
+0 rows inserted/updated/deleted
+ij> create view v2 as select c1 from t2;
+0 rows inserted/updated/deleted
+ij> create index i0_1 on t0_1(c1);
+0 rows inserted/updated/deleted
+ij> create index i0_2 on t0_2(c1);
+0 rows inserted/updated/deleted
+ij> -- do some population
+insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> insert into t1_1 values 1;
+1 row inserted/updated/deleted
+ij> insert into t2 values 1;
+1 row inserted/updated/deleted
+ij> insert into t2 values 2;
+1 row inserted/updated/deleted
+ij> insert into t3 values 1;
+1 row inserted/updated/deleted
+ij> insert into t3 values 2;
+1 row inserted/updated/deleted
+ij> insert into t3 values 3;
+1 row inserted/updated/deleted
+ij> insert into t4 values 1, 2, 3, 1;
+4 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- add column
+-- negative tests
+-- alter a non-existing table
+alter table notexists add column c1 int;
+ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'NOTEXISTS' because it does not exist.
+ij> -- add a column that already exists
+alter table t0 add column c1 int;
+ERROR X0Y32: Column 'C1' already exists in Table/View 'APP.T0'.
+ij> -- alter a system table
+alter table sys.systables add column c1 int;
+ERROR 42X62: 'ALTER TABLE' is not allowed in the 'SYS' schema.
+ij> -- alter table on a view
+alter table v2 add column c2 int;
+ERROR 42Y62: 'ALTER TABLE' is not allowed on 'APP.V2' because it is a view.
+ij> -- add a primary key column to a table which already has one
+-- this will produce an error
+alter table t0 add column c2 int not null default 0 primary key;
+ERROR X0Y58: Attempt to add a primary key constraint to table 'APP.T0' failed because the table already has a constraint of that type.  A table can only have a single primary key constraint.
+ij> -- add a unique column constraint to a table with > 1 row
+alter table t3 add column c2 int not null default 0 unique;
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T3'.
+ij> -- cannot alter a table when there is an open cursor on it
+get cursor c1 as 'select * from t1';
+ij> alter table t1 add column c2 int;
+ERROR X0X95: Operation 'ALTER TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+ij> close c1;
+ij> -- positive tests
+-- add a non-nullable column to a non-empty table
+alter table t1 add column c2 int not null default 0;
+0 rows inserted/updated/deleted
+ij> -- add a primary key column to a non-empty table
+alter table t1 add column c3 int not null default 0 primary key;
+0 rows inserted/updated/deleted
+ij> -- add a column with a check constraint to a non-empty column
+alter table t1 add column c4 int check(c4 = 1);
+0 rows inserted/updated/deleted
+ij> select * from v1;
+C1         
+-----------
+1          
+2          
+ij> prepare p1 as 'select * from t2';
+ij> execute p1;
+C1         
+-----------
+1          
+2          
+ij> alter table t2 add column c2 int;
+0 rows inserted/updated/deleted
+ij> -- select * views don't see added columns after alter table
+select * from v1;
+C1         
+-----------
+1          
+2          
+ij> -- select * prepared statements do see added columns after alter table
+execute p1;
+C1         |C2         
+-----------------------
+1          |NULL       
+2          |NULL       
+ij> -- rollback and recheck
+rollback;
+ij> select * from v1;
+C1         
+-----------
+1          
+2          
+ij> execute p1;
+C1         
+-----------
+1          
+2          
+ij> remove p1;
+ij> -- add non-nullable column to 0 row table and verify
+alter table t0 add column c2 int not null default 0;
+0 rows inserted/updated/deleted
+ij> insert into t0 values (1, default);
+1 row inserted/updated/deleted
+ij> select * from t0;
+C1         |C2         
+-----------------------
+1          |0          
+ij> drop table t0;
+0 rows inserted/updated/deleted
+ij> rollback;
+ij> select  * from t0;
+C1         
+-----------
+ij> -- add primary key to 0 row table and verify
+alter table t0_1 add column c2 int not null primary key default 0;
+0 rows inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T0_1'.
+ij> select * from t0_1;
+C1         |C2         
+-----------------------
+1          |1          
+ij> rollback;
+ij> -- add unique constraint to 0 and 1 row tables and verify 
+ alter table t0_1 add column c2 int not null unique default 0;
+0 rows inserted/updated/deleted
+ij> insert into t0_1 values (1, default);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (2, default);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T0_1'.
+ij> insert into t0_1 values (3, 1);
+1 row inserted/updated/deleted
+ij> delete from t1;
+1 row inserted/updated/deleted
+ij> alter table t1 add column c2 int not null unique default 0;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (2, 2);
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, 1);
+1 row inserted/updated/deleted
+ij> -- verify the consistency of the indexes on the user tables
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', tablename)
+from sys.systables where tabletype = 'T';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+T0                                                                                                                              |1          
+T0_1                                                                                                                            |1          
+T0_2                                                                                                                            |1          
+T0_3                                                                                                                            |1          
+T1                                                                                                                              |1          
+T1_1                                                                                                                            |1          
+T2                                                                                                                              |1          
+T3                                                                                                                              |1          
+T4                                                                                                                              |1          
+ij> rollback;
+ij> create function countopens() returns varchar(128)
+language java parameter style java
+external name 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.countOpens';
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- do consistency check on scans, etc.
+values countopens();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+ij> -- some typical data
+create table tab1 (c1 int, c2 int not null constraint tab1pk primary key, c3 double, c4 int);
+0 rows inserted/updated/deleted
+ij> create index i11 on tab1 (c1);
+0 rows inserted/updated/deleted
+ij> create unique index i12 on tab1 (c1);
+0 rows inserted/updated/deleted
+ij> create index i13 on tab1 (c3, c1, c4);
+0 rows inserted/updated/deleted
+ij> create unique index i14 on tab1 (c3, c1);
+0 rows inserted/updated/deleted
+ij> insert into tab1 values (6, 5, 4.5, 90);
+1 row inserted/updated/deleted
+ij> insert into tab1 values (10, 3, 8.9, -5);
+1 row inserted/updated/deleted
+ij> insert into tab1 values (100, 15, 4.5, 9);
+1 row inserted/updated/deleted
+ij> insert into tab1 values (2, 8, 4.4, 8);
+1 row inserted/updated/deleted
+ij> insert into tab1 values (11, 9, 2.5, 88);
+1 row inserted/updated/deleted
+ij> insert into tab1 values(null,10, 3.5, 99);
+1 row inserted/updated/deleted
+ij> create view vw1 (col_sum, col_diff) as select c1+c4, c1-c4 from tab1;
+0 rows inserted/updated/deleted
+ij> create view vw2 (c1) as select c3 from tab1;
+0 rows inserted/updated/deleted
+ij> create table tab2 (c1 int not null unique, c2 double, c3 int, c4 int not null constraint c4_PK primary key, c5 int, constraint t2ck check (c2+c3<100.0));
+0 rows inserted/updated/deleted
+ij> create table tab3 (c1 int, c2 int, c3 int, c4 int, constraint t3fk foreign key (c2) references tab2(c1), constraint t3ck check (c2-c3<80));
+0 rows inserted/updated/deleted
+ij> create view vw3 (c1, c2) as select c5, tab3.c4 from tab2, tab3 where tab3.c1 > 0;
+0 rows inserted/updated/deleted
+ij> create view vw4 (c1) as select c4 from tab3 where c2 > 8;
+0 rows inserted/updated/deleted
+ij> create table tab4 (c1 int, c2 int, c3 int, c4 int);
+0 rows inserted/updated/deleted
+ij> create table tab5 (c1 int);
+0 rows inserted/updated/deleted
+ij> insert into tab4 values (1,2,3,4);
+1 row inserted/updated/deleted
+ij> create trigger tr1 after update of c2, c3, c4 on tab4 for each row mode db2sql insert into tab5 values (1);
+0 rows inserted/updated/deleted
+ij> create trigger tr2 after update of c3, c4 on tab4 for each row mode db2sql insert into tab5 values (2);
+0 rows inserted/updated/deleted
+ij> -- tr1 is dropped, tr2 still OK
+drop trigger tr1;
+0 rows inserted/updated/deleted
+ij> select * from tab5;
+C1         
+-----------
+ij> -- fire tr2 only
+update tab4 set c3 = 33;
+1 row inserted/updated/deleted
+ij> update tab4 set c4 = 44;
+1 row inserted/updated/deleted
+ij> select * from tab5;
+C1         
+-----------
+2          
+2          
+ij> -- drop tr2
+drop trigger tr2;
+0 rows inserted/updated/deleted
+ij> update tab4 set c4 = 444;
+1 row inserted/updated/deleted
+ij> select * from tab2;
+C1         |C2                    |C3         |C4         |C5         
+----------------------------------------------------------------------
+ij> drop view vw2;
+0 rows inserted/updated/deleted
+ij> create view vw2 (c1) as select c3 from tab1;
+0 rows inserted/updated/deleted
+ij> -- vw1 should be dropped
+drop view vw1;
+0 rows inserted/updated/deleted
+ij> select * from vw1;
+ERROR 42X05: Table 'VW1' does not exist.
+ij> -- do the indexes still exist?
+-- the create index statements should fail
+create index i13 on tab1 (c3, c1, c4);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I13.
+ij> create unique index i14 on tab1 (c3, c1);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I14.
+ij> create unique index i12 on tab1 (c1);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I12.
+ij> select c2, c3, c4 from tab1 order by c3;
+C2         |C3                    |C4         
+----------------------------------------------
+9          |2.5                   |88         
+10         |3.5                   |99         
+8          |4.4                   |8          
+15         |4.5                   |9          
+5          |4.5                   |90         
+3          |8.9                   |-5         
+ij> drop index i12;
+0 rows inserted/updated/deleted
+ij> drop index i13;
+0 rows inserted/updated/deleted
+ij> drop index i14;
+0 rows inserted/updated/deleted
+ij> -- more data
+insert into tab1 (c2, c3, c4) values (22, 8.9, 5);
+1 row inserted/updated/deleted
+ij> insert into tab1 (c2, c3, c4) values (11, 4.5, 67);
+1 row inserted/updated/deleted
+ij> select c2 from tab1;
+C2         
+-----------
+3          
+5          
+8          
+9          
+10         
+11         
+15         
+22         
+ij> -- add a new column
+alter table tab1 add column c5 double;
+0 rows inserted/updated/deleted
+ij> -- drop view vw2 so can create a new one, with where clause
+drop view vw2;
+0 rows inserted/updated/deleted
+ij> create view vw2 (c1) as select c5 from tab1 where c2 > 5;
+0 rows inserted/updated/deleted
+ij> -- drop vw2 as well
+drop view vw2;
+0 rows inserted/updated/deleted
+ij> alter table tab1 drop constraint tab1pk;
+0 rows inserted/updated/deleted
+ij> -- any surviving index? 
+-- creating the index should not fail
+select c4 from tab1 order by 1;
+C4         
+-----------
+-5         
+5          
+8          
+9          
+67         
+88         
+90         
+99         
+ij> create index i13 on tab1 (c3, c1, c4);
+0 rows inserted/updated/deleted
+ij> -- should drop t2ck
+alter table tab2 drop constraint t2ck;
+0 rows inserted/updated/deleted
+ij> -- this should drop t3fk, unique constraint and backing index
+alter table tab3 drop constraint t3fk;
+0 rows inserted/updated/deleted
+ij> alter table tab2 drop constraint c4_PK;
+0 rows inserted/updated/deleted
+ij> insert into tab3 values (1,2,3,4);
+1 row inserted/updated/deleted
+ij> -- drop view vw3
+drop view vw3;
+0 rows inserted/updated/deleted
+ij> -- violates t3ck
+insert into tab3 (c1, c2, c3) values (81, 1, 2);
+1 row inserted/updated/deleted
+ij> insert into tab3 (c1, c2, c3) values (81, 2, 2);
+1 row inserted/updated/deleted
+ij> -- this should drop t3ck, vw4
+alter table tab3 drop constraint t3ck;
+0 rows inserted/updated/deleted
+ij> drop view vw4;
+0 rows inserted/updated/deleted
+ij> insert into tab3 (c2, c3) values (-82, 9);
+1 row inserted/updated/deleted
+ij> create view vw4 (c1) as select c3 from tab3 where c3+5>c4;
+0 rows inserted/updated/deleted
+ij> -- drop view vw4
+drop view vw4;
+0 rows inserted/updated/deleted
+ij> rollback;
+ij> -- check that dropping a column will drop backing index on referencing
+-- table
+create table tt1(a int, b int not null constraint tt1uc unique);
+0 rows inserted/updated/deleted
+ij> create table reftt1(a int constraint reftt1rc references tt1(b));
+0 rows inserted/updated/deleted
+ij> -- count should be 2
+select count(*) 
+from sys.sysconglomerates c, sys.systables t 
+where t.tableid = c.tableid
+and t.tablename = 'REFTT1';
+1          
+-----------
+2          
+ij> alter table reftt1 drop constraint reftt1rc;
+0 rows inserted/updated/deleted
+ij> alter table tt1 drop constraint tt1uc;
+0 rows inserted/updated/deleted
+ij> -- count should be 1
+select count(*) 
+from sys.sysconglomerates c, sys.systables t 
+where t.tableid = c.tableid
+and t.tablename = 'REFTT1';
+1          
+-----------
+1          
+ij> rollback;
+ij> -- add constraint
+-- negative tests
+-- add primary key to table which already has one
+alter table t0 add column c3 int;
+0 rows inserted/updated/deleted
+ij> alter table t0 add constraint cons1 primary key(c3);
+ERROR 42831: 'C3' cannot be a column of a primary key or unique key because it can contain null values.
+ij> alter table t0 add primary key(c3);
+ERROR 42831: 'C3' cannot be a column of a primary key or unique key because it can contain null values.
+ij> -- add constraint references non-existant column
+alter table t4 add constraint t4pk primary key("c1");
+ERROR 42X14: 'c1' is not a column in table or VTI 'T4'.
+ij> alter table t4 add constraint t4uq unique("c1");
+ERROR 42X14: 'c1' is not a column in table or VTI 'T4'.
+ij> alter table t4 add constraint t4fk foreign key ("c1") references t0;
+ERROR 42X14: 'c1' is not a column in table or VTI 'T4'.
+ij> alter table t4 add constraint t4ck check ("c1" <> 4);
+ERROR 42X04: Column 'c1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'c1' is not a column in the target table.
+ij> -- add primary key to non-empty table with duplicates
+alter table t4 add primary key(c1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T4'.
+ij> -- positive tests
+-- add primary key to 0 row table and verify
+alter table t0_1 add column c2 int not null constraint p2 primary key default 0;
+0 rows inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'P2' defined on 'T0_1'.
+ij> select * from t0_1;
+C1         |C2         
+-----------------------
+1          |1          
+ij> rollback;
+ij> -- add check constraint to 0 row table and verify
+alter table t0_1 add column c2 int check(c2 != 3);
+0 rows inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (1, 3);
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ij> insert into t0_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> select * from t0_1;
+C1         |C2         
+-----------------------
+1          |1          
+1          |1          
+ij> rollback;
+ij> -- add check constraint to table with rows that are ok
+alter table t0_1 add column c2 int;
+0 rows inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (2, 2);
+1 row inserted/updated/deleted
+ij> alter table t0_1 add constraint ck1 check(c2 = c1);
+0 rows inserted/updated/deleted
+ij> select * from t0_1;
+C1         |C2         
+-----------------------
+1          |1          
+2          |2          
+ij> -- verify constraint has been added, the following should fail
+insert into t0_1 values (1, 3);
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ij> rollback;
+ij> -- add check constraint to table with rows w/ 3 failures
+alter table t0_1 add column c2 int;
+0 rows inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (2, 2);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (2, 2);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (666, 2);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (2, 2);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (3, 3);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (666, 3);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (666, 3);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (3, 3);
+1 row inserted/updated/deleted
+ij> alter table t0_1 add constraint ck1 check(c2 = c1);
+ERROR X0Y59: Attempt to add or enable constraint(s) on table 'APP.T0_1' failed because the table contains 3 row(s) that violate the following check constraint(s): CK1.
+ij> -- verify constraint has NOT been added, the following should succeed
+insert into t0_1 values (1, 3);
+1 row inserted/updated/deleted
+ij> select * from t0_1;
+C1         |C2         
+-----------------------
+1          |1          
+2          |2          
+2          |2          
+666        |2          
+2          |2          
+3          |3          
+666        |3          
+666        |3          
+3          |3          
+1          |3          
+ij> rollback;
+ij> -- check and primary key constraints on same table and enforced
+alter table t0_1 add column c2 int not null constraint p2 primary key default 0;
+0 rows inserted/updated/deleted
+ij> alter table t0_1 add check(c2 = c1);
+0 rows inserted/updated/deleted
+ij> insert into t0_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (1, 2);
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ij> insert into t0_1 values (1, 1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'P2' defined on 'T0_1'.
+ij> insert into t0_1 values (2, 1);
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ij> insert into t0_1 values (2, 2);
+1 row inserted/updated/deleted
+ij> select * from t0_1;
+C1         |C2         
+-----------------------
+1          |1          
+2          |2          
+ij> rollback;
+ij> -- add primary key constraint to table with > 1 row
+alter table t3 add column c3 int;
+0 rows inserted/updated/deleted
+ij> alter table t3 add unique(c3);
+ERROR 42831: 'C3' cannot be a column of a primary key or unique key because it can contain null values.
+ij> -- add unique constraint to 0 and 1 row tables and verify 
+alter table t0_2 add column c2 int not null unique default 0;
+0 rows inserted/updated/deleted
+ij> insert into t0_2 values (1, default);
+1 row inserted/updated/deleted
+ij> insert into t0_2 values (1, 1);
+1 row inserted/updated/deleted
+ij> delete from t1_1;
+1 row inserted/updated/deleted
+ij> alter table t1_1 add column c2 int not null unique default 0;
+0 rows inserted/updated/deleted
+ij> insert into t1_1 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t1_1 values (1, 2);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1_1'.
+ij> insert into t1_1 values (1, 1);
+1 row inserted/updated/deleted
+ij> -- add unique constraint to table with > 1 row
+alter table t3 add unique(c1);
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> -- verify prepared alter table dependent on underlying table
+prepare p1 as 'alter table xxx add check(c2 = 1)';
+ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'XXX' because it does not exist.
+ij> create table xxx(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> prepare p1 as 'alter table xxx add check(c2 = 1)';
+ij> execute p1;
+0 rows inserted/updated/deleted
+ij> drop table xxx;
+0 rows inserted/updated/deleted
+ij> create table xxx(c1 int);
+0 rows inserted/updated/deleted
+ij> execute p1;
+ERROR 42X04: Column 'C2' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C2' is not a column in the target table.
+ij> alter table xxx add column c2 int;
+0 rows inserted/updated/deleted
+ij> execute p1;
+0 rows inserted/updated/deleted
+ij> drop table xxx;
+0 rows inserted/updated/deleted
+ij> -- verify the consistency of the indexes on the user tables
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', tablename)
+from sys.systables where tabletype = 'T';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+T0                                                                                                                              |1          
+T0_1                                                                                                                            |1          
+T0_2                                                                                                                            |1          
+T0_3                                                                                                                            |1          
+T1                                                                                                                              |1          
+T1_1                                                                                                                            |1          
+T2                                                                                                                              |1          
+T3                                                                                                                              |1          
+T4                                                                                                                              |1          
+ij> -- drop constraint
+-- negative tests
+-- drop non-existent constraint
+alter table t0 drop constraint notexists;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOTEXISTS' on table 'APP.T0'.
+ij> -- constraint/table mismatch
+alter table t1 drop constraint p1;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.P1' on table 'APP.T1'.
+ij> -- In DB2 compatibility mode, we cann't add a nullable primary key
+alter table t0_1 add constraint p2 primary key(c1);
+ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ij> alter table t0_1 drop constraint p2;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.P2' on table 'APP.T0_1'.
+ij> -- positive tests
+-- verify that we can add/drop/add/drop/... constraints
+alter table t0_1 add column c2 int not null constraint p2 primary key default 0;
+0 rows inserted/updated/deleted
+ij> delete from t0_1;
+0 rows inserted/updated/deleted
+ij> alter table t0_1 drop constraint p2;
+0 rows inserted/updated/deleted
+ij> alter table t0_1 add constraint p2 primary key(c2);
+0 rows inserted/updated/deleted
+ij> alter table t0_1 drop constraint p2;
+0 rows inserted/updated/deleted
+ij> alter table t0_1 add constraint p2 primary key(c2);
+0 rows inserted/updated/deleted
+ij> -- verify that constraint is still enforced
+insert into t0_1 values (1,1);
+1 row inserted/updated/deleted
+ij> insert into t0_1 values (1,1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'P2' defined on 'T0_1'.
+ij> -- verify the consistency of the indexes on the user tables
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', tablename)
+from sys.systables where tabletype = 'T' and tablename = 'T0_1';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+T0_1                                                                                                                            |1          
+ij> -- verify that alter table works after drop/recreate of table
+prepare p1 as 'alter table t0_1 drop constraint p2';
+ij> execute p1;
+0 rows inserted/updated/deleted
+ij> drop table t0_1;
+0 rows inserted/updated/deleted
+ij> create table t0_1 (c1 int, c2 int not null constraint p2 primary key);
+0 rows inserted/updated/deleted
+ij> execute p1;
+0 rows inserted/updated/deleted
+ij> -- do consistency check on scans, etc.
+-- values (org.apache.derbyTesting.functionTests.util.ConsistencyChecker::countOpens());
+-- verify the consistency of the indexes on the system catalogs
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
+from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+SYSCONGLOMERATES                                                                                                                |1          
+SYSTABLES                                                                                                                       |1          
+SYSCOLUMNS                                                                                                                      |1          
+SYSSCHEMAS                                                                                                                      |1          
+SYSCONSTRAINTS                                                                                                                  |1          
+SYSKEYS                                                                                                                         |1          
+SYSDEPENDS                                                                                                                      |1          
+SYSALIASES                                                                                                                      |1          
+SYSVIEWS                                                                                                                        |1          
+SYSCHECKS                                                                                                                       |1          
+SYSFOREIGNKEYS                                                                                                                  |1          
+SYSSTATEMENTS                                                                                                                   |1          
+SYSFILES                                                                                                                        |1          
+SYSTRIGGERS                                                                                                                     |1          
+SYSSTATISTICS                                                                                                                   |1          
+ij> -- verify the consistency of the indexes on the user tables
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', tablename)
+from sys.systables where tabletype = 'T';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+T0                                                                                                                              |1          
+T0_2                                                                                                                            |1          
+T0_3                                                                                                                            |1          
+T1                                                                                                                              |1          
+T1_1                                                                                                                            |1          
+T2                                                                                                                              |1          
+T3                                                                                                                              |1          
+T4                                                                                                                              |1          
+T0_1                                                                                                                            |1          
+ij> -- bugs 793
+create table b793 (pn1 int not null constraint named_primary primary key, 
+				   pn2 int constraint named_pn2 check (pn2 > 3));
+0 rows inserted/updated/deleted
+ij> alter table b793 drop constraint named_primary;
+0 rows inserted/updated/deleted
+ij> drop table b793;
+0 rows inserted/updated/deleted
+ij> -- test that drop constraint removes backing indexes
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1(a int not null constraint t1_pri primary key);
+0 rows inserted/updated/deleted
+ij> create table reft1(a int constraint t1_ref references t1(a));
+0 rows inserted/updated/deleted
+ij> -- count should be 2
+select count(*) 
+from sys.sysconglomerates c, sys.systables t
+where c.tableid = t.tableid and
+t.tablename = 'REFT1';
+1          
+-----------
+2          
+ij> alter table reft1 drop constraint t1_ref;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint t1_pri;
+0 rows inserted/updated/deleted
+ij> -- count should be 1
+select count(*) 
+from sys.sysconglomerates c, sys.systables t
+where c.tableid = t.tableid and
+t.tablename = 'REFT1';
+1          
+-----------
+1          
+ij> drop table reft1;
+0 rows inserted/updated/deleted
+ij> -- clean up
+drop view v2;
+0 rows inserted/updated/deleted
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table t0;
+0 rows inserted/updated/deleted
+ij> drop table t0_1;
+0 rows inserted/updated/deleted
+ij> drop table t0_2;
+0 rows inserted/updated/deleted
+ij> drop table t0_3;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t1_1;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> ------------------------------------------------------
+--
+-- special funky schema tests
+--
+------------------------------------------------------
+create schema newschema;
+0 rows inserted/updated/deleted
+ij> drop table x;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'X' because it does not exist.
+ij> create table x (x int not null, y int not null);
+0 rows inserted/updated/deleted
+ij> alter table x add constraint newcons primary key (x);
+0 rows inserted/updated/deleted
+ij> -- schemaname should be app
+select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1;
+SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |NEWCONS                                                                                                                         
+ij> insert into x values (1,1),(1,1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'NEWCONS' defined on 'X'.
+ij> alter table x drop constraint app.newcons;
+0 rows inserted/updated/deleted
+ij> alter table x add constraint newcons primary key (x);
+0 rows inserted/updated/deleted
+ij> -- schemaname should be app
+select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1;
+SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |NEWCONS                                                                                                                         
+ij> -- fail
+alter table x drop constraint badschema.newcons;
+ERROR 42Y07: Schema 'BADSCHEMA' does not exist
+ij> -- fail
+alter table x drop constraint newschema.newcons;
+ERROR 42X86: ALTER table failed. There is no constraint 'NEWSCHEMA.NEWCONS' on table 'APP.X'.
+ij> -- ok
+alter table x drop constraint app.newcons;
+0 rows inserted/updated/deleted
+ij> -- bad schema name
+alter table x add constraint badschema.newcons primary key (x);
+ERROR 42X85: Constraint 'BADSCHEMA.NEWCONS'is required to be in the same schema as table 'APP.X'.
+ij> -- two constriants, same name, different schema (second will fail)
+drop table x;
+0 rows inserted/updated/deleted
+ij> create table x (x int not null, y int not null);
+0 rows inserted/updated/deleted
+ij> alter table x add constraint con check (x > 1);
+0 rows inserted/updated/deleted
+ij> alter table x add constraint newschema.con check (x > 1);
+ERROR 42X85: Constraint 'NEWSCHEMA.CON'is required to be in the same schema as table 'APP.X'.
+ij> select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1;
+SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |CON                                                                                                                             
+ij> create schema emptyschema;
+0 rows inserted/updated/deleted
+ij> set schema emptyschema;
+0 rows inserted/updated/deleted
+ij> -- fail, cannot find emptyschema.conn
+alter table app.x drop constraint emptyschema.con;
+ERROR 42X86: ALTER table failed. There is no constraint 'EMPTYSCHEMA.CON' on table 'APP.X'.
+ij> select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1;
+SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |CON                                                                                                                             
+ij> set schema newschema;
+0 rows inserted/updated/deleted
+ij> -- add constraint, default to table schema
+alter table app.x add constraint con2 check (x > 1);
+0 rows inserted/updated/deleted
+ij> -- added constraint in APP (defaults to table's schema)
+select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1,2;
+SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |CON                                                                                                                             
+APP                                                                                                                             |CON2                                                                                                                            
+ij> drop table app.x;
+0 rows inserted/updated/deleted
+ij> drop schema newschema restrict;
+0 rows inserted/updated/deleted
+ij> -- some temporary table tests
+-- declare temp table with no explicit on commit behavior.
+declare global temporary table session.t1 (c11 int) not logged;
+0 rows inserted/updated/deleted
+ij> declare global temporary table session.t2 (c21 int) on commit delete rows not logged;
+0 rows inserted/updated/deleted
+ij> declare global temporary table session.t3 (c31 int) on commit preserve rows not logged;
+0 rows inserted/updated/deleted
+ij> drop table session.t1;
+0 rows inserted/updated/deleted
+ij> drop table session.t2;
+0 rows inserted/updated/deleted
+ij> drop table session.t3;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> create table t1(c1 int, c2 int not null primary key);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t1 values (1, 1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
+ij> alter table t1 drop primary key;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1);
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         
+-----------------------
+1          |1          
+1          |1          
+ij> alter table t1 drop primary key;
+ERROR 42X86: ALTER table failed. There is no constraint 'PRIMARY KEY' on table 'APP.T1'.
+ij> alter table t1 drop constraint emptyschema.C1;
+ERROR 42X86: ALTER table failed. There is no constraint 'EMPTYSCHEMA.C1' on table 'APP.T1'.
+ij> alter table t1 drop constraint nosuchschema.C2;
+ERROR 42Y07: Schema 'NOSUCHSCHEMA' does not exist
+ij> alter table t1 add constraint emptyschema.C1_PLUS_C2 check ((c1 + c2) < 100);
+ERROR 42X85: Constraint 'EMPTYSCHEMA.C1_PLUS_C2'is required to be in the same schema as table 'APP.T1'.
+ij> alter table t1 add constraint C1_PLUS_C2 check ((c1 + c2) < 100);
+0 rows inserted/updated/deleted
+ij> prepare alplus as 'alter table t1 drop constraint C1_PLUS_C2';
+ij> alter table APP.t1 drop constraint APP.C1_PLUS_C2;
+0 rows inserted/updated/deleted
+ij> execute alplus;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C1_PLUS_C2' on table 'APP.T1'.
+ij> remove alplus;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- bug 5817 - make LOGGED non-reserved keyword. following test cases for that
+create table LOGGED(c11 int);
+0 rows inserted/updated/deleted
+ij> drop table LOGGED;
+0 rows inserted/updated/deleted
+ij> create table logged(logged int);
+0 rows inserted/updated/deleted
+ij> drop table logged;
+0 rows inserted/updated/deleted
+ij> declare global temporary table session.logged(logged int) on commit delete rows not logged;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,34 @@
+Testing maxthreads
+org.apache.derby.drda.NetworkServerControl maxthreads 0 
+Max threads changed to 0.
+PASS - max threads value, 0 is correct
+org.apache.derby.drda.NetworkServerControl maxthreads -1 -h localhost -p 1527 
+Max threads changed to 0.
+PASS - max threads value, 0 is correct
+org.apache.derby.drda.NetworkServerControl maxthreads -12 
+Invalid value, -12, for maxthreads.
+Usage: NetworkServerControl <commands> 
+Commands:
+start [-h <host>] [-p <portnumber>]
+shutdown [-h <host>][-p <portnumber>]
+ping [-h <host>][-p <portnumber>]
+sysinfo [-h <host>][-p <portnumber>]
+runtimeinfo [-h <host>][-p <portnumber>]
+logconnections {on |off}[-h <host>][-p <portnumber>]
+maxthreads <max>[-h <host>][-p <portnumber>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>]
+trace {on |off} [-s <session id>][-h <host>][-p <portnumber>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+PASS - max threads value, 0 is correct
+org.apache.derby.drda.NetworkServerControl maxthreads 2147483647 
+Max threads changed to 2147483647.
+PASS - max threads value, 2147483647 is correct
+org.apache.derby.drda.NetworkServerControl maxthreads 9000 
+Max threads changed to 9000.
+PASS - max threads value, 9000 is correct
+PASS - max threads value, 0 is correct
+PASS - max threads value, 0 is correct
+DRDA_InvalidValue.U:Invalid value, -2, for maxthreads.
+PASS - max threads value, 2147483647 is correct
+PASS - max threads value, 9000 is correct
+End test

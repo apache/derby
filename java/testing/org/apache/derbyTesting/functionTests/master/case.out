@@ -1,0 +1,26 @@
+ij> --
+-- this test is for keyword case insensitivity
+--
+-- Try some of the keywords with mixed case. Don't do all of the keywords, as
+-- that would be overkill (either that, or I'm too lazy).
+cReAtE tAbLe T (x InT);
+0 rows inserted/updated/deleted
+ij> CrEaTe TaBlE s (X iNt);
+0 rows inserted/updated/deleted
+ij> iNsErT iNtO t VaLuEs (1);
+1 row inserted/updated/deleted
+ij> InSeRt InTo S vAlUeS (2);
+1 row inserted/updated/deleted
+ij> sElEcT * fRoM t;
+X          
+-----------
+1          
+ij> SeLeCt * FrOm s;
+X          
+-----------
+2          
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> 

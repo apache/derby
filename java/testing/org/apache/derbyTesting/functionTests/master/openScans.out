@@ -1,0 +1,85 @@
+ij> -- minimal testing to verify no scans left open
+CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> autocommit off;
+ij> create table t1(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> insert into t1 values (1, 1);
+1 row inserted/updated/deleted
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> create index i1 on t1(c1);
+0 rows inserted/updated/deleted
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> create index i2 on t1(c2);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (2, 2);
+1 row inserted/updated/deleted
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> -- scan heap
+select * from t1;
+C1         |C2         
+-----------------------
+1          |1          
+2          |2          
+ij> -- scan covering index
+select c1 from t1;
+C1         
+-----------
+1          
+2          
+ij> -- index to base row
+select * from t1;
+C1         |C2         
+-----------------------
+1          |1          
+2          |2          
+ij> select * from t1 where c1 = 1;
+C1         |C2         
+-----------------------
+1          |1          
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> commit;
+ij> -- test cursor which doesn't get drained
+get cursor c1 as 'select c1 + c2 from t1 order by 1';
+ij> next c1;
+1          
+-----------
+2          
+ij> close c1;
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> commit;
+ij> 

@@ -1,0 +1,309 @@
+Test1 - CHAR, VARCHAR, LONGVARCHAR and CLOB concatenation tests
+Test1a - CHAR concatenations will give result type of CHAR when concatenated string < 255
+datatype of concatenated string is : CHAR
+precision of concatenated string is : 254
+Successful CHAR read of 254 characters
+Successful CHAR read of 254 characters
+Test1b boundary test - CHAR concatenations will give result type of VARCHAR when concatenated string = 255
+datatype of concatenated string is : VARCHAR
+precision of concatenated string is : 255
+Successful VARCHAR read of 255 characters
+Successful VARCHAR read of 255 characters
+Test1b - CHAR concatenations will give result type of VARCHAR when concatenated string > 254
+datatype of concatenated string is : VARCHAR
+precision of concatenated string is : 264
+Successful VARCHAR read of 264 characters
+Successful VARCHAR read of 264 characters
+Test1c - CHAR and VARCHAR concatenations will give result type of VARCHAR when concatenated string < 4001
+datatype of concatenated string is : VARCHAR
+precision of concatenated string is : 4000
+Successful VARCHAR read of 4000 characters
+Successful VARCHAR read of 4000 characters
+Successful LONG VARCHAR read of 4000 characters
+Test1d - VARCHAR and CHAR concatenations will give result type of VARCHAR when concatenated string < 4001
+datatype of concatenated string is : VARCHAR
+precision of concatenated string is : 4000
+Successful VARCHAR read of 4000 characters
+Successful VARCHAR read of 4000 characters
+Successful LONG VARCHAR read of 4000 characters
+Test1e boundary test - CHAR and VARCHAR concatenations will give result type of LONG VARCHAR when concatenated string = 4001
+datatype of concatenated string is : LONG VARCHAR
+precision of concatenated string is : 32700
+Successful LONG VARCHAR read of 4001 characters
+Successful LONG VARCHAR read of 4001 characters
+Test1f boundary test - VARCHAR and CHAR concatenations will give result type of LONG VARCHAR when concatenated string = 4001
+datatype of concatenated string is : LONG VARCHAR
+precision of concatenated string is : 32700
+Successful LONG VARCHAR read of 4001 characters
+Successful LONG VARCHAR read of 4001 characters
+Test1g - CHAR and LONG VARCHAR concatenations will give result type of LONG VARCHAR
+datatype of concatenated string is : LONG VARCHAR
+precision of concatenated string is : 32700
+Successful LONG VARCHAR read of 4002 characters
+Successful LONG VARCHAR read of 4002 characters
+Test1h - VARCHAR and LONG VARCHAR concatenations will give result type of LONG VARCHAR
+datatype of concatenated string is : LONG VARCHAR
+precision of concatenated string is : 32700
+Successful LONG VARCHAR read of 4266 characters
+Successful LONG VARCHAR read of 4266 characters
+Test1i - VARCHAR and VARCHAR concatenations will give result type of VARCHAR when concatenated string < 4001
+datatype of concatenated string is : VARCHAR
+precision of concatenated string is : 528
+Successful VARCHAR read of 528 characters
+Successful LONG VARCHAR read of 528 characters
+Test1j boundary test - VARCHAR and VARCHAR concatenations will give result type of LONG VARCHAR when concatenated string = 4001
+datatype of concatenated string is : LONG VARCHAR
+precision of concatenated string is : 32700
+Successful LONG VARCHAR read of 4001 characters
+Successful LONG VARCHAR read of 4001 characters
+Test1j - VARCHAR and VARCHAR concatenations will give result type of LONG VARCHAR when concatenated string > 4000
+datatype of concatenated string is : LONG VARCHAR
+precision of concatenated string is : 32700
+Successful LONG VARCHAR read of 4264 characters
+Successful LONG VARCHAR read of 4264 characters
+Test1k - LONG VARCHAR and LONG VARCHAR concatenations will give result type of LONG VARCHAR
+datatype of concatenated string is : LONG VARCHAR
+precision of concatenated string is : 32700
+Successful LONG VARCHAR read of 8528 characters
+Successful LONG VARCHAR read of 8528 characters
+Test1l - CHAR and LONGVARCHAR concatenation resulting in concatenated string > 32700 will give error
+expected exception The length resulting from CONCAT operation is greater than 32700.
+expected exception The length resulting from CONCAT operation is greater than 32700.
+Test1m - VARCHAR and LONGVARCHAR concatenation resulting in concatenated string > 32700 will give error
+expected exception The length resulting from CONCAT operation is greater than 32700.
+expected exception The length resulting from CONCAT operation is greater than 32700.
+Test1n - LONGVARCHAR and LONGVARCHAR concatenation resulting in concatenated string > 32700 will give error
+expected exception The length resulting from CONCAT operation is greater than 32700.
+expected exception The length resulting from CONCAT operation is greater than 32700.
+Test1o - CHAR(A) and CLOB(B) concatenations will give result type of CLOB(A+B) when A+B<2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 266
+Successful CLOB read of 37 characters
+Successful CLOB read of 37 characters
+Test1p - CLOB(A) and CHAR(B) concatenations will give result type of CLOB(A+B) when A+B<2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 266
+Successful CLOB read of 47 characters
+Successful CLOB read of 47 characters
+Test1q - CHAR(A) and CLOB(B) concatenations will give result type of CLOB(2G) when A+B>2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 2147483647
+Successful CLOB read of 25 characters
+Successful CLOB read of 25 characters
+Test1r - CLOB(A) and CHAR(B) concatenations will give result type of CLOB(2G) when A+B>2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 2147483647
+Successful CLOB read of 35 characters
+Successful CLOB read of 35 characters
+Test1s - VARCHAR(A) and CLOB(B) concatenations will give result type of CLOB(A+B) when A+B<2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 356
+Successful CLOB read of 62 characters
+Successful CLOB read of 62 characters
+Test1t - CLOB(A) and VARCHAR(B) concatenations will give result type of CLOB(A+B) when A+B<2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 356
+Successful CLOB read of 77 characters
+Successful CLOB read of 77 characters
+Test1u - VARCHAR(A) and CLOB(B) concatenations will give result type of CLOB(2G) when A+B>2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 2147483647
+Successful CLOB read of 50 characters
+Successful CLOB read of 50 characters
+Test1v - CLOB(A) and VARCHAR(B) concatenations will give result type of CLOB(2G) when A+B>2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 2147483647
+Successful CLOB read of 65 characters
+Successful CLOB read of 65 characters
+Test1w - LONG VARCHAR and CLOB(A) concatenations will give result type of CLOB(A+32K) when A+32K<2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 33024
+Successful CLOB read of 97 characters
+Successful CLOB read of 97 characters
+Test1x - CLOB(A) and LONG VARCHAR concatenations will give result type of CLOB(A+32K) when A+32K<2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 33024
+Successful CLOB read of 117 characters
+Successful CLOB read of 117 characters
+Test1y - LONG VARCHAR and CLOB(B) concatenations will give result type of CLOB(2G) when A+32K>2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 2147483647
+Successful CLOB read of 85 characters
+Successful CLOB read of 85 characters
+Test1z - CLOB(A) and LONG VARCHAR concatenations will give result type of CLOB(2G) when A+32K>2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 2147483647
+Successful CLOB read of 105 characters
+Successful CLOB read of 105 characters
+Test11a - CLOB(A) and CLOB(B) concatenations will give result type of CLOB(A+B) when A+B<2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 1048832
+Successful CLOB read of 132 characters
+Successful CLOB read of 132 characters
+Test11b - CLOB(A) and CLOB(B) concatenations will give result type of CLOB(2G) when A+B>2G
+datatype of concatenated string is : CLOB
+precision of concatenated string is : 2147483647
+Successful CLOB read of 237 characters
+Successful CLOB read of 237 characters
+Test12 - try 2 empty string concatenation and verify that length comes back as 0 for the result
+datatype of concatenated string is : CHAR
+precision of concatenated string is : 0
+Successful CHAR read of 0 characters
+Test1 finished - CHAR, VARCHAR, LONGVARCHAR and CLOB concatenation tests
+Test2 - CHAR FOR BIT DATA, VARCHAR FOR BIT DATA, LONGVARCHAR FOR BIT DATA and BLOB concatenation tests
+Test2a - CHAR FOR BIT DATA concatenations will give result type of CHAR FOR BIT DATA when concatenated string < 255
+datatype of concatenated string is : CHAR () FOR BIT DATA
+precision of concatenated string is : 254
+Successful CHAR () FOR BIT DATA read of 254 bytes
+Successful CHAR () FOR BIT DATA read of 254 bytes
+Test2b boundary test - CHAR FOR BIT DATA concatenations will give result type of VARCHAR FOR BIT DATA when concatenated string = 255
+datatype of concatenated string is : VARCHAR () FOR BIT DATA
+precision of concatenated string is : 255
+Successful VARCHAR () FOR BIT DATA read of 255 bytes
+Successful VARCHAR () FOR BIT DATA read of 255 bytes
+Test2b - CHAR FOR BIT DATA concatenations will give result type of VARCHAR FOR BIT DATA when concatenated string > 254
+datatype of concatenated string is : VARCHAR () FOR BIT DATA
+precision of concatenated string is : 264
+Successful VARCHAR () FOR BIT DATA read of 264 bytes
+Successful VARCHAR () FOR BIT DATA read of 264 bytes
+Test2c - CHAR FOR BIT DATA and VARCHAR FOR BIT DATA concatenations will give result type of VARCHAR FOR BIT DATA when concatenated string < 4001
+datatype of concatenated string is : VARCHAR () FOR BIT DATA
+precision of concatenated string is : 4000
+Successful VARCHAR () FOR BIT DATA read of 4000 bytes
+Successful VARCHAR () FOR BIT DATA read of 4000 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4000 bytes
+Test2d - VARCHAR FOR BIT DATA and CHAR FOR BIT DATA concatenations will give result type of VARCHAR FOR BIT DATA when concatenated string < 4001
+datatype of concatenated string is : VARCHAR () FOR BIT DATA
+precision of concatenated string is : 4000
+Successful VARCHAR () FOR BIT DATA read of 4000 bytes
+Successful VARCHAR () FOR BIT DATA read of 4000 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4000 bytes
+Test2e boundary test - CHAR FOR BIT DATA and VARCHAR FOR BIT DATA concatenations will give result type of LONG VARCHAR FOR BIT DATA when concatenated string > 4000
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 4001 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4001 bytes
+Test2f boundary test - VARCHAR FOR BIT DATA and CHAR FOR BIT DATA concatenations will give result type of LONG VARCHAR FOR BIT DATA when concatenated string > 4000
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 4001 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4001 bytes
+Test2g - CHAR FOR BIT DATA and LONG VARCHAR FOR BIT DATA concatenations will give result type of LONG VARCHAR FOR BIT DATA
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 4002 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4002 bytes
+Test2h - VARCHAR FOR BIT DATA and LONG VARCHAR FOR BIT DATA concatenations will give result type of LONG VARCHAR FOR BIT DATA
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 4266 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4266 bytes
+Test2i - VARCHAR FOR BIT DATA and VARCHAR FOR BIT DATA concatenations will give result type of VARCHAR FOR BIT DATA when concatenated string < 4001
+datatype of concatenated string is : VARCHAR () FOR BIT DATA
+precision of concatenated string is : 528
+Successful VARCHAR () FOR BIT DATA read of 528 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 528 bytes
+Test2j boundary test - VARCHAR FOR BIT DATA and VARCHAR FOR BIT DATA concatenations will give result type of LONG VARCHAR FOR BIT DATA when concatenated string = 4001
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 4001 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4001 bytes
+Test2j - VARCHAR FOR BIT DATA and VARCHAR FOR BIT DATA concatenations will give result type of LONG VARCHAR FOR BIT DATA when concatenated string > 4000
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 4264 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 4264 bytes
+Test2k - LONG VARCHAR FOR BIT DATA and LONG VARCHAR FOR BIT DATA concatenations will give result type of LONG VARCHAR FOR BIT DATA
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 8528 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 8528 bytes
+Test2l - CHAR FOR BIT DATA and LONGVARCHAR FOR BIT DATA concatenation resulting in concatenated string > 32700
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 32738 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 32738 bytes
+Test2m - VARCHAR FOR BIT DATA and LONGVARCHAR FOR BIT DATA concatenation resulting in concatenated string > 32700
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 33002 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 33002 bytes
+Test2n - LONGVARCHAR FOR BIT DATA and LONGVARCHAR FOR BIT DATA concatenation resulting in concatenated string > 32700
+datatype of concatenated string is : LONG VARCHAR FOR BIT DATA
+precision of concatenated string is : 32700
+Successful LONG VARCHAR FOR BIT DATA read of 41530 bytes
+Successful LONG VARCHAR FOR BIT DATA read of 41530 bytes
+Test2o - CHAR(A) FOR BIT DATA and BLOB(B) concatenations will give result type of BLOB(A+B) when A+B<2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 266
+Successful BLOB read of 20 bytes
+Successful BLOB read of 20 bytes
+Test2p - BLOB(A) and CHAR(B) FOR BIT DATA concatenations will give result type of BLOB(A+B) when A+B<2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 266
+Successful BLOB read of 30 bytes
+Successful BLOB read of 30 bytes
+Test2q - CHAR(A) FOR BIT DATA and BLOB(B) concatenations will give result type of BLOB(2G) when A+B>2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 2147483647
+Successful BLOB read of 20 bytes
+Successful BLOB read of 20 bytes
+Test2r - BLOB(A) and CHAR(B) FOR BIT DATA concatenations will give result type of BLOB(2G) when A+B>2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 2147483647
+Successful BLOB read of 30 bytes
+Successful BLOB read of 30 bytes
+Test2s - VARCHAR(A) FOR BIT DATA and BLOB(B) concatenations will give result type of BLOB(A+B) when A+B<2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 356
+Successful BLOB read of 40 bytes
+Successful BLOB read of 40 bytes
+Test2t - BLOB(A) and VARCHAR(B) FOR BIT DATA concatenations will give result type of BLOB(A+B) when A+B<2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 356
+Successful BLOB read of 50 bytes
+Successful BLOB read of 50 bytes
+Test2u - VARCHAR(A) FOR BIT DATA and BLOB(B) concatenations will give result type of BLOB(2G) when A+B>2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 2147483647
+Successful BLOB read of 40 bytes
+Successful BLOB read of 40 bytes
+Test2v - BLOB(A) and VARCHAR(B) FOR BIT DATA concatenations will give result type of BLOB(2G) when A+B>2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 2147483647
+Successful BLOB read of 50 bytes
+Successful BLOB read of 50 bytes
+Test2w - LONG VARCHAR FOR BIT DATA and BLOB(A) concatenations will give result type of BLOB(A+32K) when A+32K<2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 33024
+Successful BLOB read of 60 bytes
+Successful BLOB read of 60 bytes
+Test2x - BLOB(A) and LONG VARCHAR FOR BIT DATA concatenations will give result type of BLOB(A+32K) when A+32K<2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 33024
+Successful BLOB read of 70 bytes
+Successful BLOB read of 70 bytes
+Test2y - LONG VARCHAR FOR BIT DATA and BLOB(B) concatenations will give result type of BLOB(2G) when A+32K>2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 2147483647
+Successful BLOB read of 60 bytes
+Successful BLOB read of 60 bytes
+Test2z - BLOB(A) and LONG VARCHAR FOR BIT DATA concatenations will give result type of BLOB(2G) when A+32K>2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 2147483647
+Successful BLOB read of 70 bytes
+Successful BLOB read of 70 bytes
+Test21a - BLOB(A) and BLOB(B) concatenations will give result type of BLOB(A+B) when A+B<2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 1048832
+Successful BLOB read of 80 bytes
+Successful BLOB read of 80 bytes
+Test21b - BLOB(A) and BLOB(B) concatenations will give result type of BLOB(2G) when A+B>2G
+datatype of concatenated string is : BLOB
+precision of concatenated string is : 2147483647
+Successful BLOB read of 150 bytes
+Successful BLOB read of 150 bytes
+Test22 - try 2 empty char for bit data concatenation and verify that length comes back as 0 for the result
+datatype of concatenated string is : CHAR () FOR BIT DATA
+precision of concatenated string is : 0
+Test2 finished - CHAR FOR BIT DATA, VARCHAR FOR BIT DATA, LONGVARCHAR FOR BIT DATA and BLOB concatenation tests

@@ -1,0 +1,77 @@
+Test savepointJdbc30 starting
+Tests common to DRDA and embedded Cloudscape
+Test1 - no unnamed savepoints allowed if autocommit is true
+Expected Exception is Cannot set savepoint when in auto-commit mode.
+Test1a - no named savepoints allowed if autocommit is true
+Expected Exception is Cannot set savepoint when in auto-commit mode.
+Test2 - Release and reuse a savepoint name
+Test3 - null name not allowed for named savepoints
+Expected Exception is Named savepoint needs a none-null name.
+Test4 - Verify names/ids of named/unnamed savepoints
+Expected Exception is This is an un-named savepoint.
+Expected Exception is This is a named savepoint.
+Test5a - create two savepoints in two different transactions and release the first one in the subsequent transaction
+Expected Exception is SAVEPOINT, s1 does not  exist or is not active in the current transaction.
+Test5b - create two savepoints in two different transactions and rollback the first one in the subsequent transaction
+Expected Exception is SAVEPOINT, s1 does not  exist or is not active in the current transaction.
+Test6a - create a savepoint, release it, create another with same name and release the first one
+Expected Exception is SAVEPOINT, s1 does not  exist or is not active in the current transaction.
+Test6b - create a savepoint, release it, create another with same name and rollback the first one
+Expected Exception is SAVEPOINT, s1 does not  exist or is not active in the current transaction.
+Test6c - Try to use a savepoint from another connection for release
+Expected Exception is Cannot release a savepoint that was not created by this connection.
+Test7a - swap savepoints across connections with release
+Expected Exception is Cannot release a savepoint that was not created by this connection.
+Test7b - swap savepoints across connections with rollback
+Expected Exception is Rollback to a savepoint not created by this connection.
+Test 9 test savepoint name
+Test 10 test savepoint name case sensitivity
+Test 11 rolling back a savepoint multiple times - should work
+Test 12 releasing a savepoint multiple times - should not work
+Expected Exception is SAVEPOINT, MyName does not  exist or is not active in the current transaction.
+Test 13 shouldn't be able to use a savepoint from earlier transaction after setting autocommit on and off
+Expected Exception is SAVEPOINT, MyName does not  exist or is not active in the current transaction.
+Test 14 A non-user initiated transaction rollback should release the internal savepoint array
+Expected Exception is A lock could not be obtained within the time requested
+Expected Exception is SAVEPOINT, MyName does not  exist or is not active in the current transaction.
+Test 15 check savepoints in batch
+Test 16 grammar check for savepoint sq1
+Expected Exception is Syntax error: MISSING ON ROLLBACK RETAIN CURSORS.
+Expected Exception is Multiple or conflicting keywords involving the 'ON ROLLBACK RETAIN CURSORS' clause are present.
+Expected Exception is Multiple or conflicting keywords involving the 'ON ROLLBACK RETAIN LOCKS' clause are present.
+Expected Exception is Multiple or conflicting keywords involving the 'UNIQUE' clause are present.
+Test 17 No nested savepoints allowed when using SQL to set savepoints. This is to match DB2 LUW behavior
+Test 17a Test with UNIQUE clause.
+Expected Exception is The maximum number of savepoints has been reached. 
+Test 17b Test without UNIQUE clause.
+Since no nesting is allowed, skipping UNIQUE still gives error for trying to define another savepoint
+Expected Exception is The maximum number of savepoints has been reached. 
+Test 18 No nested SQL savepoints allowed inside JDBC savepoint.
+This is to match DB2 LUW behavior
+Following SQL savepoint will fail because we are trying to nest it inside JDBC savepoint
+Expected Exception is The maximum number of savepoints has been reached. 
+Test 19 No nested SQL savepoints allowed inside SQL savepoint.
+This is to match DB2 LUW behavior
+Following SQL savepoint will fail because we are trying to nest it inside SQL savepoint
+Expected Exception is The maximum number of savepoints has been reached. 
+Test 20 Rollback of SQL savepoint works same as rollback of JDBC savepoint.
+Test 21 After releasing the SQL savepoint, rollback the transaction and should see everything undone.
+Test 22 Should not be able to create a SQL savepoint starting with name SYS
+Expected Exception is An object cannot be created with the schema name 'SYS'.
+Test 23 Should be able to use non-reserved keywords savepoint and release as identifiers
+Create table with savepoint and release as identifiers
+Create a savepoint with name savepoint
+Release the savepoint with name savepoint
+Create a savepoint with name release
+Rollback to the savepoint with name release
+Release the savepoint with name release
+Test 24 Savepoint name can't exceed 128 characters
+Expected Exception is The name 'MyName1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890' is too long. The maximum length is '128'.
+Test 25 Should not be able to create a SQL savepoint starting with name SYS through jdbc
+Expected Exception is An object cannot be created with the schema name 'SYS'.
+Test 26a rollback of null savepoint
+Expected Exception is Cannot rollback to a null savepoint.
+Test 26b release  of null savepoint
+Expected Exception is Cannot release a null savepoint.
+Next try non-DRDA tests
+Test savepointJdbc30 finished

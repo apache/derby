@@ -1,0 +1,514 @@
+ij> --
+----- tests for the for update/read only and updatable specifications parts
+----- of cursors and positioned statements.
+-----
+----- for positioned update/delete see positionedUpdate.jsql and
+----- positionedDelete.jsql.
+-----
+----- note that comments that begin '-- .' are test cases from the test plan
+----- assumed available in queries at time of initial writing:
+----- subqueries.  Additional tests will be needed once we have:
+----- union (all), order by, group by, having, aggregates, distinct, views ...
+----- setup some tables for use in the tests
+create table t1 ( i int, v varchar(10), d double precision, t time );
+0 rows inserted/updated/deleted
+ij> create table t2 ( s smallint, c char(10), r real, ts timestamp );
+0 rows inserted/updated/deleted
+ij> -- we need to turn autocommit off so that cursors aren't closed before
+----- the positioned statements against them.
+autocommit off;
+ij> -- . leave out some keywords (for, update, read, only)
+----- results: all of these should get syntax errors for missing/inappropriate keywords
+select i, v from t1 for;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 23.
+ij> select i, v from t1 for read;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 28.
+ij> select i, v from t1 for only;
+ERROR 42X01: Syntax error: Encountered "only" at line 1, column 25.
+ij> select i, v from t1 for update of;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 33.
+ij> select i, v from t1 update;
+ERROR 42X01: Syntax error: Encountered "update" at line 1, column 21.
+ij> select i, v from t1 only;
+ERROR 42X01: Syntax error: Encountered "only" at line 1, column 21.
+ij> select i, v from t1 read;
+ERROR 42X01: Syntax error: Encountered "read" at line 1, column 21.
+ij> -- . for update no columns listed
+----- should not complain
+select i, v from t1 for update;
+I |V         
+-----
+ij> -- . implicit update test for read only spec
+----- this will end up being read only; we know because the delete is refused
+----- with a 'cursor not updatable' message
+get cursor c as 'select i, v from t1, t2';
+ij> delete from t1 where current of c;
+ERROR 42X23: Cursor SQL_CURSH200C1 is not updatable.
+ij> --  cursor with same name already exists
+get cursor c as 'select i, v from t1, t2';
+ERROR (no SQLState): Duplicate cursor names are not allowed.
+ij> close c;
+ij> -- . implicit update test for updatable spec
+----- this will end up being read only; we know because the delete is refused
+get cursor c1 as 'select i, v from t1 where i is not null';
+ij> next c1;
+No current row
+ij> -- the delete will get a 'cursor not updatable' execution error, but won't get
+----- a compile time error
+delete from t1 where current of c1;
+ERROR (no SQLState): Invalid cursor name "C1" in the Update/Delete statement.
+ij> close c1;
+ij> -- . read only for read only cursor spec
+----- we know because the delete is refused with a 'cursor not updatable' message
+get cursor c2 as 'select i, v from t1, t2 for read only';
+ij> delete from t1 where current of c2;
+ERROR 42X23: Cursor SQL_CURSH200C1 is not updatable.
+ij> close c2;
+ij> -- . read only for updatable cursor spec
+----- we know because the delete is refused with a 'cursor not updatable' message
+get cursor c3 as 'select i, v from t1 where i is not null for read only';
+ij> delete from t1 where current of c3;
+ERROR 42X23: Cursor SQL_CURSH200C1 is not updatable.
+ij> close c3;
+ij> -- . for update col not in select list
+----- this is allowed:
+select i, v from t1 for update of t;
+I |V         
+-----
+ij> -- . for update col in select list
+----- this is allowed:
+select i, v from t1 for update of i;
+I |V         
+-----
+ij> -- . for update col not in sel list or in table
+----- this gets a 'no such column' error
+select i, v from t1 for update of g;
+ERROR 42X04: Column 'G' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'G' is not a column in the target table.
+ij> -- . for update col in select not in table (generated col)
+----- this gets a 'no such column' error
+select i+10 as iPlus10, v from t1 for update of iPlus10;
+ERROR 42X04: Column 'IPLUS10' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'IPLUS10' is not a column in the target table.
+ij> -- . for update on read only spec, variety of reasons 
+----- these will get cursor not updatable errors:
+----- join is not updatable
+select i from t1, t2 for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- no subqueries are updatable
+select i from t1 where i=(select i from t1) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> select i from t1 where i in (select i from t1) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> select i from t1 where exists (select i from t1) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> select i from t1 where exists (select s from t2) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> select i from t1 where exists (select s from t2 where i=s) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- note subquery in select expr is not updatable
+select (select s from t2) from t1 where exists (select i from t1) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> select (select s from t2 where i=s) from t1 where exists (select i from t1) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> select * from (select i, d from t1) a for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> select * from (select i+10, d from t1) a for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- constant table not updatable
+select * from (values (1, 2, 3)) a for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> values (1, 2, 3) for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- unions are not updatable
+select * from t1 union all select * from t1 for update;
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- . table with/without correlation name
+----- the idea is that the delete is against the table name, not the correlation name
+----- we've already seen the without correlation name case in previous tests
+get cursor c4 as 'select i from t1 s1 for update';
+ij> next c4;
+No current row
+ij> -- this will get a target table mismatch error, it uses the correlation name:
+delete from s1 where current of c4;
+ERROR (no SQLState): Invalid cursor name "C4" in the Update/Delete statement.
+ij> -- this will compile and get a 'no current row' error, it uses the table name:
+delete from t1 where current of c4;
+ERROR (no SQLState): Invalid cursor name "C4" in the Update/Delete statement.
+ij> close c4;
+ij> -- . list columns in order same/different from appearance in table
+----- the columns are 'found' regardless of their order.
+----- none of these should get errors:
+select i from t1 for update of i, v, d, t;
+I          
+-----
+ij> select i from t1 for update of v, i, t, d;
+I          
+-----
+ij> -- . list some, not all, columns in table, not contiguous
+----- the columns are 'found' regardless of their order or contiguity
+----- none of these should get errors:
+select i from t1 for update of i, d;
+I          
+-----
+ij> select i from t1 for update of t, v;
+I          
+-----
+ij> select i from t1 for update of d;
+I          
+-----
+ij> -- . use column as named in as clause of select v. as named in base table
+----- the column name must be the table's column name, not the select list name
+select i as z from t1 for update of z;
+ERROR 42X04: Column 'Z' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'Z' is not a column in the target table.
+ij> -- . use column as named in as clause that matches underlying column name
+----- this uses the select list name which *is* an underlying column name
+----- note that the column updated is the underlying column, *not* the
+----- selected column (we can see this from the type error)
+get cursor c5 as 'select i as v from t1 for update of v';
+ij> -- i (renamed v in the select) is an integer; but v is still the
+----- varchar column, so this compiles (gets a no current row error):
+update t1 set v='hello' where current of c5;
+ERROR XCL08: Cursor 'SQL_CURSH200C1' is not on a row.
+ij> close c5;
+ij> -- . include duplicate column name
+----- expect an error:
+select i from t1 for update of i, v, v, t;
+I          
+-----
+ij> -- . try using qualified column name
+----- expect an error, only unqualified names are expected (SQL92 spec):
+select i from t1 for update of t1.v, t1.i, t1.d;
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 34.
+ij> -- . for update when select list has expressions and correlation name in use,
+-----   and column is repeated
+----- this is allowed:
+select a.i+10, d, d from t1 a for update;
+1 |D |D                     
+-----
+ij> -- for update is used by applications to control locking behaviour
+----- without ever doing a positioned update. We test here to see
+----- that is some situations we can use an index even when no
+----- columns are specified in the for update case.
+create table t3 (i int not null constraint t3pk primary key, b char(10));
+0 rows inserted/updated/deleted
+ij> create index t3bi on t3(b);
+0 rows inserted/updated/deleted
+ij> insert into t3 values (1, 'hhhh'), (2, 'uuuu'), (3, 'yyyy'), (4, 'aaaa'), (5, 'jjjj'), (6, 'rrrr');
+6 rows inserted/updated/deleted
+ij> insert into t3 values (7, 'iiii'), (8, 'wwww'), (9, 'rrrr'), (10, 'cccc'), (11, 'hhhh'), (12, 'rrrr');
+6 rows inserted/updated/deleted
+ij> commit;
+ij> maximumdisplaywidth 5000;
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+Statement executed.
+ij> select i, b from t3 FOR UPDATE;
+I |B         
+-----
+1 |hhhh      
+2 |uuuu      
+3 |yyyy      
+4 |aaaa      
+5 |jjjj      
+6 |rrrr      
+7 |iiii      
+8 |wwww      
+9 |rrrr      
+10 |cccc      
+11 |hhhh      
+12 |rrrr      
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select i, b from t3 FOR UPDATE
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for T3 at read committed isolation level using exclusive row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 12
+Rows filtered = 0
+Fetch Size = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=2
+	Number of pages visited=1
+	Number of rows qualified=12
+	Number of rows visited=12
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> commit;
+ij> prepare T3PK as 'select i, b from t3  where i = ? FOR UPDATE';
+ij> execute T3PK using 'values (7)';
+I |B         
+-----
+7 |iiii      
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select i, b from t3  where i = ? FOR UPDATE
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T3:
+Number of opens = 1
+Rows seen = 1
+Columns accessed from heap = {0, 1}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	Index Scan ResultSet for T3 using constraint T3PK at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 1
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=1
+		Number of rows visited=1
+		Scan type=btree
+		Tree height=1
+		start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+		stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+		qualifiers:
+None
+ij> remove T3PK;
+ij> commit;
+ij> prepare T3PKFORCE as 'select i, b from t3 where i = ? FOR UPDATE';
+ij> prepare T3PK as 'select i, b from t3 where i < ? FOR UPDATE';
+ij> execute T3PK using 'values (7)';
+I |B         
+-----
+1 |hhhh      
+2 |uuuu      
+3 |yyyy      
+4 |aaaa      
+5 |jjjj      
+6 |rrrr      
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C3
+Statement Text: 
+	select i, b from t3 where i < ? FOR UPDATE
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T3:
+Number of opens = 1
+Rows seen = 6
+Columns accessed from heap = {0, 1}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	Index Scan ResultSet for T3 using constraint T3PK at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 6
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=6
+		Number of rows visited=7
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+		qualifiers:
+None
+ij> remove T3PK;
+ij> commit;
+ij> -- non-unique index
+prepare T3BI as 'select i, b from t3  where b = ? FOR UPDATE';
+ij> execute T3BI using 'values (''cccc'')';
+I |B         
+-----
+10 |cccc      
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C3
+Statement Text: 
+	select i, b from t3  where b = ? FOR UPDATE
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T3:
+Number of opens = 1
+Rows seen = 1
+Columns accessed from heap = {0, 1}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	Index Scan ResultSet for T3 using index T3BI at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 1
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=1
+		Number of rows visited=2
+		Scan type=btree
+		Tree height=1
+		start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+		stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+		qualifiers:
+None
+ij> remove T3BI;
+ij> commit;
+ij> prepare T3BIFORCE as 'select i, b from t3 where b = ? FOR UPDATE';
+ij> commit;
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+Statement executed.
+ij> -- see what happens to a cursor that updates the primary key.
+----- first case - no update;
+get cursor T3C1 as 'select i,b from t3 where i = 4 for update';
+ij> next T3C1;
+I |B         
+-----
+4 |aaaa      
+ij> next T3C1;
+No current row
+ij> close T3C1;
+ij> commit;
+ij> -- second case - simple update;
+get cursor T3C1 as 'select i,b from t3 where i = 4 for update';
+ij> next T3C1;
+I |B         
+-----
+4 |aaaa      
+ij> update t3 set i = 13 where current of T3C1;
+1 row inserted/updated/deleted
+ij> next T3C1;
+No current row
+ij> close T3C1;
+ij> commit;
+ij> -- third (evil) case - update to change key value and insert a new value;
+get cursor T3C1 as 'select i,b from t3 where i = 6 for update';
+ij> next T3C1;
+I |B         
+-----
+6 |rrrr      
+ij> update t3 set i = 14 where current of T3C1;
+1 row inserted/updated/deleted
+ij> insert into t3 values (6, 'new!');
+1 row inserted/updated/deleted
+ij> -- We will not see the newly inserted row because we are now using index scan on the
+----- updateable cursor and we already get a row with that key from the unique index.
+----- We would get the new row if the index were not unique.  Beetle 3865.
+next T3C1;
+No current row
+ij> close T3C1;
+ij> commit;
+ij> -- reset autocomiit
+autocommit on;
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- bug 5643
+----- JCC throws NPE when trying to execute a cursor after the resultset is closed
+autocommit off;
+ij> create table t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 (c1) values (1),(2),(3);
+3 rows inserted/updated/deleted
+ij> get cursor curs1 as 'select * from t1 for update of c1';
+ij> prepare curs1 as 'update t1 set c1=c1 where current of curs1';
+ij> next curs1;
+C1         
+-----
+1          
+ij> close curs1;
+ij> execute curs1;
+ERROR (no SQLState): ResultSet for cursor CURS1 is closed.
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> 

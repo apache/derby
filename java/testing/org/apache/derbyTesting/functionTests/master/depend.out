@@ -1,0 +1,226 @@
+ij> --
+-- this test shows the dependency system in action;
+--
+autocommit off;
+ij> create table t(i int);
+0 rows inserted/updated/deleted
+ij> create table s(i int);
+0 rows inserted/updated/deleted
+ij> prepare ins as 'insert into t (i) values (1956)';
+ij> prepare ins_s as 'insert into s (i) values (1956)';
+ij> prepare sel as 'select i from t';
+ij> prepare sel2 as 'select i from (select i from t) a';
+ij> prepare sel_s as 'select i from s where i = (select i from t)';
+ij> prepare upd as 'update t set i = 666 where i = 1956';
+ij> prepare del as 'delete from t where i = 666';
+ij> prepare ins_sel as 'insert into t select * from s';
+ij> execute ins;
+1 row inserted/updated/deleted
+ij> execute ins_s;
+1 row inserted/updated/deleted
+ij> execute sel;
+I          
+-----------
+1956       
+ij> execute sel2;
+I          
+-----------
+1956       
+ij> execute sel_s;
+I          
+-----------
+1956       
+ij> execute upd;
+1 row inserted/updated/deleted
+ij> execute sel;
+I          
+-----------
+666        
+ij> execute del;
+1 row inserted/updated/deleted
+ij> execute sel;
+I          
+-----------
+ij> execute ins_sel;
+1 row inserted/updated/deleted
+ij> execute sel;
+I          
+-----------
+1956       
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- these should fail, can't find table
+execute ins;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel2;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute upd;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute del;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel_s;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute ins_sel;
+ERROR 42X05: Table 'T' does not exist.
+ij> create table t(i int);
+0 rows inserted/updated/deleted
+ij> -- these should recompile and work, table now found
+execute ins;
+1 row inserted/updated/deleted
+ij> -- expect one row only
+execute sel;
+I          
+-----------
+1956       
+ij> execute sel2;
+I          
+-----------
+1956       
+ij> execute sel_s;
+I          
+-----------
+1956       
+ij> execute upd;
+1 row inserted/updated/deleted
+ij> -- test update
+execute sel;
+I          
+-----------
+666        
+ij> execute del;
+1 row inserted/updated/deleted
+ij> -- test delete
+execute sel;
+I          
+-----------
+ij> execute ins_sel;
+1 row inserted/updated/deleted
+ij> execute sel;
+I          
+-----------
+1956       
+ij> rollback;
+ij> -- these should fail, the table will disappear at the rollback
+execute ins;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel2;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel_s;
+ERROR 42X05: Table 'S' does not exist.
+ij> execute upd;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute del;
+ERROR 42X05: Table 'T' does not exist.
+ij> -- recreate t again
+create table t(i int);
+0 rows inserted/updated/deleted
+ij> -- these should recompile and work, table now found
+execute ins;
+1 row inserted/updated/deleted
+ij> -- open a cursor on t
+get cursor c1 as 'select * from t';
+ij> -- dropping t should fail, due to open cursor
+drop table t;
+ERROR X0X95: Operation 'DROP TABLE' cannot be performed on object 'T' because there is an open ResultSet dependent on that object.
+ij> -- insert should still succeed, since table not dropped
+execute ins;
+1 row inserted/updated/deleted
+ij> -- close cursor
+close c1;
+ij> -- drop table should succeed
+drop table t;
+0 rows inserted/updated/deleted
+ij> -- verify that invalidate worked this time
+execute ins;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute sel2;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute upd;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute del;
+ERROR 42X05: Table 'T' does not exist.
+ij> execute ins_sel;
+ERROR 42X05: Table 'S' does not exist.
+ij> -- cleanup, roll everything back to the beginning
+rollback;
+ij> -- verify that cascading invalidations work
+create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1, 2;
+2 rows inserted/updated/deleted
+ij> get cursor c1 as 'select c1 from t1 for update of c1';
+ij> -- positioned update dependent on cursor c1
+prepare u1 as 'update t1 set c1 = c1 + 1 where current of c1';
+ij> next c1;
+C1         
+-----------
+1          
+ij> close c1;
+ij> execute u1;
+ERROR 42X30: Cursor 'C1' not found. Verify that autocommit is OFF.
+ij> -- cleanup, roll everything back to the beginning
+rollback;
+ij> -- verify that create index invalidates based on table and
+-- drop index invalidates based on the index
+create table t1(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1,1), (2, 1), (3,3);
+3 rows inserted/updated/deleted
+ij> create index i1 on t1(c1);
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select c1 from t1 where c2 = 1 for update of c1';
+ij> next c1;
+C1         
+-----------
+1          
+ij> prepare u1 as 'update  t1 set c1 = c1 + 1 ';
+ij> prepare i1 as 'insert into t1 values (4, 4)';
+ij> prepare d1 as 'delete from t1 where c2 = 3';
+ij> drop index i1;
+0 rows inserted/updated/deleted
+ij> -- u1 should be recompiled succesfully
+execute u1;
+3 rows inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         
+-----------------------
+2          |1          
+3          |1          
+4          |3          
+ij> -- recreate index i1, this time on c2
+create index i1 on t1(c2);
+0 rows inserted/updated/deleted
+ij> next c1;
+C1         
+-----------
+3          
+ij> close c1;
+ij> -- i1 and d1 should have been invalidated and recompiled
+execute i1;
+1 row inserted/updated/deleted
+ij> -- check the state of the index
+select * from t1 where c2 > 0;
+C1         |C2         
+-----------------------
+2          |1          
+3          |1          
+4          |3          
+4          |4          
+ij> execute d1;
+1 row inserted/updated/deleted
+ij> -- check the state of the index
+select * from t1 where c2 > 0;
+C1         |C2         
+-----------------------
+2          |1          
+3          |1          
+4          |4          
+ij> -- cleanup, roll everything back to the beginning
+rollback;
+ij> 

@@ -1,0 +1,35 @@
+Testing timeslice
+org.apache.derby.drda.NetworkServerControl timeslice 0 
+Time slice changed to 0.
+PASS - time slice value, 0 is correct
+org.apache.derby.drda.NetworkServerControl timeslice -1 -h localhost -p 1527 
+Time slice changed to 0.
+PASS - time slice value, 0 is correct
+org.apache.derby.drda.NetworkServerControl timeslice -12 
+Invalid value, -12, for timeslice.
+Usage: NetworkServerControl <commands> 
+Commands:
+start [-h <host>] [-p <portnumber>]
+shutdown [-h <host>][-p <portnumber>]
+ping [-h <host>][-p <portnumber>]
+sysinfo [-h <host>][-p <portnumber>]
+runtimeinfo [-h <host>][-p <portnumber>]
+logconnections {on |off}[-h <host>][-p <portnumber>]
+maxthreads <max>[-h <host>][-p <portnumber>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>]
+trace {on |off} [-s <session id>][-h <host>][-p <portnumber>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+PASS - time slice value, 0 is correct
+org.apache.derby.drda.NetworkServerControl timeslice 2147483647 
+Time slice changed to 2147483647.
+PASS - time slice value, 2147483647 is correct
+org.apache.derby.drda.NetworkServerControl timeslice 9000 
+Time slice changed to 9000.
+PASS - time slice value, 9000 is correct
+PASS - time slice value, 0 is correct
+PASS - time slice value, 0 is correct
+Expecting exception:DRDA_InvalidValue.U:Invalid value, -2, for timeslice.
+PASS - time slice value, 0 is correct
+PASS - time slice value, 2147483647 is correct
+PASS - time slice value, 9000 is correct
+End test

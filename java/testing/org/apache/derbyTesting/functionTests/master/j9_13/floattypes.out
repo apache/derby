@@ -1,0 +1,2422 @@
+ij> -- ** insert decimal.sql
+--
+-- Test DECIMAL and NUMERIC.  Note that we
+-- know that DECIMAL and NUMERIC are pretty much the
+-- same thing, so we don't do much testing with
+-- the two types other than to make sure the 
+-- syntax is the same.
+-- test some of the meta data
+drop table tmp;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TMP' because it does not exist.
+ij> create table tmp (tmpcoldecimal dec(8,4), tmpcolnumeric numeric);
+0 rows inserted/updated/deleted
+ij> select columndatatype 
+	from sys.syscolumns 
+	where columnname like 'TMPCOL%';
+COLUMNDATATYPE 
+---------------
+DECIMAL(8,4)   
+NUMERIC(5,0)   
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- Negative tests, bad precision/scale
+create table bad (d decimal(11,12));
+ERROR 42Y43: Scale '12' is not a valid scale with precision of '11'.
+ij> create table bad (d decimal(0,0));
+ERROR 42X48: Value '0' is not a valid precision for DECIMAL.
+ij> create table bad (d decimal(0));
+ERROR 42X48: Value '0' is not a valid precision for DECIMAL.
+ij> create table bade(d decimal(32));
+ERROR 42X48: Value '32' is not a valid precision for DECIMAL.
+ij> create table bade(d decimal(31,32));
+ERROR 42Y42: Scale '32' is not a valid scale for a DECIMAL.
+ij> create table bade(d decimal(32,32));
+ERROR 42X48: Value '32' is not a valid precision for DECIMAL.
+ij> -- Simple acceptance test
+values cast (1 as dec);
+1     
+------
+1     
+ij> values cast (1 as decimal);
+1     
+------
+1     
+ij> values cast (1 as decimal(5));
+1     
+------
+1     
+ij> values cast (1 as dec(5));
+1     
+------
+1     
+ij> values cast (1.1 as dec(5,3));
+1       
+--------
+1.100   
+ij> values cast (1.1 as numeric(5,3));
+1       
+--------
+1.100   
+ij> -- cast to all valid types
+values cast (1.1 as int);
+1          
+-----------
+1          
+ij> values cast (1.1 as bigint);
+1                   
+--------------------
+1                   
+ij> values cast (1.1 as smallint);
+1     
+------
+1     
+ij> values cast (1.1 as real);
+1            
+-------------
+1.1          
+ij> values cast (1.1 as float);
+1                     
+----------------------
+1.1                   
+ij> values cast (1.1 as char(10));
+1         
+----------
+1.1       
+ij> -- cast all valid types to dec
+values cast ((cast (1 as int)) as dec);
+1     
+------
+1     
+ij> values cast ((cast (1 as bigint)) as dec);
+1     
+------
+1     
+ij> values cast ((cast (1 as smallint)) as dec);
+1     
+------
+1     
+ij> values cast ((cast (1 as real)) as dec);
+1     
+------
+1     
+ij> values cast ((cast (1 as float)) as dec);
+1     
+------
+1     
+ij> values cast ((cast (1 as char(10))) as dec);
+1     
+------
+1     
+ij> -- cast overflow,
+-- make a number bigger than everything but 
+-- decimal, and then try to cast it
+drop table tmp;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TMP' because it does not exist.
+ij> create table tmp(d decimal(31 ,0));
+0 rows inserted/updated/deleted
+ij> insert into tmp values (cast (
+'100000000000000000000000000000' as dec(31,0)));
+1 row inserted/updated/deleted
+ij> update tmp set d = d * d;
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(31,0).
+ij> select cast(d as int) from tmp;
+1          
+-----------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> select cast(d as smallint) from tmp;
+1     
+------
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> select cast(d as bigint) from tmp;
+1                   
+--------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> select cast(d as float) from tmp;
+1                     
+----------------------
+1.0E29                
+ij> select cast(d as real) from tmp;
+1            
+-------------
+1.0E29       
+ij> select cast(d as double precision) from tmp;
+1                     
+----------------------
+1.0E29                
+ij> -- test alternative syntax
+select cast(d as double) from tmp;
+1                     
+----------------------
+1.0E29                
+ij> insert into tmp values (+1.79769E+308);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(31,0).
+ij> select * from tmp;
+D                               
+--------------------------------
+100000000000000000000000000000  
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- try inserting various types into decimal.
+-- we expect silent truncation of the fraction
+drop table tmp;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TMP' because it does not exist.
+ij> create table tmp (d decimal(5,2));
+0 rows inserted/updated/deleted
+ij> insert into tmp values (100);
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (100 as smallint));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (100 as bigint));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (100 as real));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (100 as double precision));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (100.999 as real));
+1 row inserted/updated/deleted
+ij> insert into tmp values (100.999e0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (100.999);
+1 row inserted/updated/deleted
+ij> --too big
+insert into tmp values (1000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (cast (1000 as smallint));
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (cast (1000 as bigint));
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (cast (1000 as real));
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (cast (1000 as double precision));
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (cast (1000.999 as real));
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (1000.999e0);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (1000.999);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> --try a few values that hit borders in how java.lang.Double work
+--(this is really tied to some details in the internals of
+-- SQLDecimal)
+insert into tmp values (1000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (10000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (100000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (1000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (10000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (100000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (1000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (10000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (100000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (1000000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (10000000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (100000000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-1000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-10000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-100000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-1000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-10000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-100000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-1000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-10000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-100000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-1000000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-10000000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> insert into tmp values (-100000000000000);
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(5,2).
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> create table tmp(d dec(1,1));
+0 rows inserted/updated/deleted
+ij> insert into tmp values (0.0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-0.0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (0.1);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-0.1);
+1 row inserted/updated/deleted
+ij> insert into tmp values (0.1e0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-0.1e0);
+1 row inserted/updated/deleted
+ij> select * from tmp;
+D   
+----
+0.0 
+0.0 
+0.1 
+-0.1
+0.1 
+-0.1
+ij> delete from tmp;
+6 rows inserted/updated/deleted
+ij> insert into tmp values (0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (0.0e0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (0.0e10);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-0.0e0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-0.0e10);
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (0 as smallint));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (0 as bigint));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (0 as real));
+1 row inserted/updated/deleted
+ij> select * from tmp;
+D   
+----
+0.0 
+0.0 
+0.0 
+0.0 
+0.0 
+0.0 
+0.0 
+0.0 
+0.0 
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> create table tmp(d dec(1,0));
+0 rows inserted/updated/deleted
+ij> insert into tmp values (1.0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (1);
+1 row inserted/updated/deleted
+ij> insert into tmp values (1.0e0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-1.0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-1);
+1 row inserted/updated/deleted
+ij> insert into tmp values (-1.0e0);
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (1 as smallint));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (1 as bigint));
+1 row inserted/updated/deleted
+ij> insert into tmp values (cast (1 as real));
+1 row inserted/updated/deleted
+ij> select * from tmp;
+D   
+----
+1   
+1   
+1   
+-1  
+-1  
+-1  
+1   
+1   
+1   
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- Using the DOUBLE built-in function
+-- test that double maps to the double data type
+-- all of the following should work if DOUBLE appears in the COLUMNDATATYPE column
+create table tmp (x double);
+0 rows inserted/updated/deleted
+ij> insert into tmp values (1);
+1 row inserted/updated/deleted
+ij> select columnname, columndatatype 
+       from sys.syscolumns c, sys.systables t 
+       where c.referenceid = t .tableid and t.tablename='TMP';
+COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
+------------------------------------------------------------------------------------------------------------------------------------------------
+X                                                                                                                               |DOUBLE         
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> -- cast dec as as a numeric type in a select list
+create table tmp (d decimal);
+0 rows inserted/updated/deleted
+ij> insert into tmp values (1.1);
+1 row inserted/updated/deleted
+ij> --should all pass
+insert into tmp values (1);
+1 row inserted/updated/deleted
+ij> select cast(d as int) from tmp;
+1          
+-----------
+1          
+1          
+ij> select cast(d as smallint) from tmp;
+1     
+------
+1     
+1     
+ij> select cast(d as bigint) from tmp;
+1                   
+--------------------
+1                   
+1                   
+ij> select cast(d as float) from tmp;
+1                     
+----------------------
+1.0                   
+1.0                   
+ij> select cast(d as real) from tmp;
+1            
+-------------
+1.0          
+1.0          
+ij> select cast(d as double precision) from tmp;
+1                     
+----------------------
+1.0                   
+1.0                   
+ij> select cast(d as dec(10,2)) from tmp;
+1            
+-------------
+1.00         
+1.00         
+ij> select cast(d as dec(10,8)) from tmp;
+1            
+-------------
+1.00000000   
+1.00000000   
+ij> drop table tmp;
+0 rows inserted/updated/deleted
+ij> drop table t;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T' because it does not exist.
+ij> create table t (i int, 
+				l bigint,
+				s smallint, 
+				d double precision,
+				r real,
+				dc decimal(10,2));
+0 rows inserted/updated/deleted
+ij> insert into t values (null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t values (10,		-- int
+						10,		-- bigint
+						10,		-- smallint	
+						10,		-- double
+						10,		-- real
+						10		-- decimal(10,2)		
+						 );
+1 row inserted/updated/deleted
+ij> insert into t values (-10,		-- int
+						-10,	-- bigint
+						-10,	-- smallint	
+						-10,	-- double
+						-10,	-- real
+						-10		-- decimal(10,2)		
+						 );
+1 row inserted/updated/deleted
+ij> insert into t values (0,		-- int
+						0,		-- bigint
+						0,		-- smallint	
+						0,		-- double
+						0,		-- real
+						0		-- decimal(10,2)		
+						 );
+1 row inserted/updated/deleted
+ij> select dc from t;
+DC           
+-------------
+NULL         
+10.00        
+-10.00       
+0.00         
+ij> select dc + i, dc + s, dc + r, dc + dc from t;
+1               |2             |3            |4             
+------------------------------------------------------------
+NULL            |NULL          |NULL         |NULL          
+20.00           |20.00         |20.0         |20.00         
+-20.00          |-20.00        |-20.0        |-20.00        
+0.00            |0.00          |0.0          |0.00          
+ij> select dc - i, dc - s, dc - r, dc - dc from t;
+1               |2             |3            |4             
+------------------------------------------------------------
+NULL            |NULL          |NULL         |NULL          
+0.00            |0.00          |0.0          |0.00          
+0.00            |0.00          |0.0          |0.00          
+0.00            |0.00          |0.0          |0.00          
+ij> select dc * i, dc * s, dc * r, dc * dc from t;
+1                      |2                 |3            |4                      
+--------------------------------------------------------------------------------
+NULL                   |NULL              |NULL         |NULL                   
+100.00                 |100.00            |100.0        |100.0000               
+100.00                 |100.00            |100.0        |100.0000               
+0.00                   |0.00              |0.0          |0.0000                 
+ij> select dc / i, dc / s, dc / r, dc / dc from t;
+1                                 |2                                 |3            |4                                 
+----------------------------------------------------------------------------------------------------------------------
+NULL                              |NULL                              |NULL         |NULL                              
+1.00000000000000000000000         |1.00000000000000000000000         |1.0          |1.000000000000000000000           
+1.00000000000000000000000         |1.00000000000000000000000         |1.0          |1.000000000000000000000           
+ERROR 22012: Attempt to divide by zero.
+ij> -- try unary minus, plus
+select -(dc * 100 / 100e0 ), +(dc * 100e0 / 100 ) from t;
+1                     |2                     
+---------------------------------------------
+NULL                  |NULL                  
+-10.0                 |10.0                  
+10.0                  |-10.0                 
+0.0                   |0.0                   
+ij> -- test null/null, constant/null, null/constant
+select dc, i / dc, 10 / dc, dc / 10e0 from t;
+DC           |2                                 |3                                 |4                     
+----------------------------------------------------------------------------------------------------------
+NULL         |NULL                              |NULL                              |NULL                  
+10.00        |1.0000000000000000000             |1.0000000000000000000             |1.0                   
+-10.00       |1.0000000000000000000             |-1.0000000000000000000            |-1.0                  
+ERROR 22012: Attempt to divide by zero.
+ij> -- test for divide by 0
+select dc / i from t;
+1                                 
+----------------------------------
+NULL                              
+1.00000000000000000000000         
+1.00000000000000000000000         
+ERROR 22012: Attempt to divide by zero.
+ij> select 20e0 / 5e0 / 4e0, 20e0 / 4e0 / 5 from t;
+1                     |2                     
+---------------------------------------------
+1.0                   |1.0                   
+1.0                   |1.0                   
+1.0                   |1.0                   
+1.0                   |1.0                   
+ij> -- test positive/negative, negative/positive and negative/negative
+select dc, dc / -dc, (-dc) / dc, (-dc) / -dc from t;
+DC           |2                                 |3                                 |4                                 
+----------------------------------------------------------------------------------------------------------------------
+NULL         |NULL                              |NULL                              |NULL                              
+10.00        |-1.000000000000000000000          |-1.000000000000000000000          |1.000000000000000000000           
+-10.00       |-1.000000000000000000000          |-1.000000000000000000000          |1.000000000000000000000           
+ERROR 22012: Attempt to divide by zero.
+ij> -- test some "more complex" expressions
+select dc, dc + 10e0, dc - (10 - 20e0), dc - 10, dc - (20 - 10) from t;
+DC           |2                     |3                     |4               |5               
+---------------------------------------------------------------------------------------------
+NULL         |NULL                  |NULL                  |NULL            |NULL            
+10.00        |20.0                  |20.0                  |0.00            |0.00            
+-10.00       |0.0                   |0.0                   |-20.00          |-20.00          
+0.00         |10.0                  |10.0                  |-10.00          |-10.00          
+ij> -- make sure we get the right scale/precision during arithmetic
+values (9.0 + 9.0);
+1     
+------
+18.0  
+ij> values (9.9 + 9.9);
+1     
+------
+19.8  
+ij> values (-9.0 - 9.0);
+1     
+------
+-18.0 
+ij> values (-9.9 - 9.9);
+1     
+------
+-19.8 
+ij> values (9.0 * 9.0);
+1      
+-------
+81.00  
+ij> values (9.9 * 9.9);
+1      
+-------
+98.01  
+ij> values (0.9 * 0.9);
+1    
+-----
+0.81 
+ij> values (0.9999 * 0.9);
+1       
+--------
+0.89991 
+ij> values (0.9 * 0.9999);
+1       
+--------
+0.89991 
+ij> values (0.9999 * 0.9999);
+1          
+-----------
+0.99980001 
+ij> values (1.0 / 3.0);
+1                                 
+----------------------------------
+0.33333333333333333333333333333   
+ij> values (1.0 / 0.3);
+1                                 
+----------------------------------
+3.33333333333333333333333333333   
+ij> values (1.0 / 0.03);
+1                                 
+----------------------------------
+33.3333333333333333333333333333   
+ij> values (1.0 / 0.000003);
+1                                 
+----------------------------------
+333333.333333333333333333333333   
+ij> values (10000.0 / 0.000003);
+1                                 
+----------------------------------
+3333333333.33333333333333333333   
+ij> values (0.0001 / 0.0003);
+1                                 
+----------------------------------
+0.333333333333333333333333333     
+ij> values (0.1 / 3.0);
+1                                 
+----------------------------------
+0.033333333333333333333333333333  
+ij> -- huge number
+values (
+		cast(1.7e3 as dec(31)) *
+		cast(1.7e3 as dec(31)) *
+		cast(1.7e3 as dec(31)) *
+		cast(1.7e3 as dec(31)) *
+		cast(1.7e3 as dec(31)) *
+		cast(1.7e3 as dec(31)) *
+		cast(1.7e3 as dec(31)) *
+		cast(1.7e3 as dec(31)));
+1                               
+--------------------------------
+69757574410000000000000000      
+ij> values cast(1.7e30 as dec(31));
+1                               
+--------------------------------
+1700000000000000000000000000000 
+ij> --try a tiny number 
+-- the following seems to be asking a bit
+-- too much of poor old biginteger, so try
+-- something smaller
+--values (cast(1.7e-307 as dec(2147483647,2147483640)) /
+--		(cast(1.7e308 as dec(2147483647)) *
+--		 cast(1.7e308 as dec(2147483647)) *
+--		 cast(1.7e308 as dec(2147483647)) *
+--		 cast(1.7e308 as dec(2147483647)) *
+--		 cast(1.7e308 as dec(2147483647)) *
+--		 cast(1.7e308 as dec(2147483647)) *
+--		 cast(1.7e308 as dec(2147483647))));
+--
+values cast(1 as dec(31, 20));
+1                                 
+----------------------------------
+1.00000000000000000000            
+ij> -- test the arithmetic operators on a type we know they don't work on
+create table w (x dec, y long varchar);
+0 rows inserted/updated/deleted
+ij> select x + y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DECIMAL'.
+ij> select x - y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DECIMAL'.
+ij> select x * y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DECIMAL'.
+ij> select x / y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DECIMAL'.
+ij> -- clean up after ourselves
+drop table w;
+0 rows inserted/updated/deleted
+ij> --
+-- comparisons
+--
+insert into t values (123,			-- int
+						123,		-- bigint
+						123,		-- smallint	
+						1234.56,	-- double
+						1234.56,	-- real
+						1234.56		-- decimal(10,2)		
+						 );
+1 row inserted/updated/deleted
+ij> -- test =
+select dc from t where dc is null;
+DC           
+-------------
+NULL         
+ij> select dc from t where dc = 10;
+DC           
+-------------
+10.00        
+ij> select dc from t where dc = -10;
+DC           
+-------------
+-10.00       
+ij> select dc from t where dc = 0;
+DC           
+-------------
+0.00         
+ij> select dc from t where dc = 1234.45;
+DC           
+-------------
+ij> select dc from t where dc = i;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc = l;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc = s;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc = r;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc = d;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc = dc;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> -- test >
+select dc from t where dc > 10;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc > -10;
+DC           
+-------------
+10.00        
+0.00         
+1234.56      
+ij> select dc from t where dc > 0;
+DC           
+-------------
+10.00        
+1234.56      
+ij> select dc from t where dc > 1234.45;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc > i;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc > l;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc > s;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc > r;
+DC           
+-------------
+ij> select dc from t where dc > d;
+DC           
+-------------
+ij> select dc from t where dc > dc;
+DC           
+-------------
+ij> -- test >=
+select dc from t where dc >= 10;
+DC           
+-------------
+10.00        
+1234.56      
+ij> select dc from t where dc >= -10;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc >= 0;
+DC           
+-------------
+10.00        
+0.00         
+1234.56      
+ij> select dc from t where dc >= 1234.45;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc >= i;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc >= l;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc >= s;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc >= r;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc >= d;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc >= dc;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> -- test <
+select dc from t where dc < 10;
+DC           
+-------------
+-10.00       
+0.00         
+ij> select dc from t where dc < -10;
+DC           
+-------------
+ij> select dc from t where dc < 0;
+DC           
+-------------
+-10.00       
+ij> select dc from t where dc < 1234.45;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc < i;
+DC           
+-------------
+ij> select dc from t where dc < l;
+DC           
+-------------
+ij> select dc from t where dc < s;
+DC           
+-------------
+ij> select dc from t where dc < r;
+DC           
+-------------
+ij> select dc from t where dc < d;
+DC           
+-------------
+ij> select dc from t where dc < dc;
+DC           
+-------------
+ij> -- test <=
+select dc from t where dc <= 10;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc <= -10;
+DC           
+-------------
+-10.00       
+ij> select dc from t where dc <= 0;
+DC           
+-------------
+-10.00       
+0.00         
+ij> select dc from t where dc <= 1234.45;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc <= i;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc <= l;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc <= s;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+ij> select dc from t where dc <= r;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc <= d;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc <= dc;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> -- test <>
+select dc from t where dc <> 10;
+DC           
+-------------
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc <> -10;
+DC           
+-------------
+10.00        
+0.00         
+1234.56      
+ij> select dc from t where dc <> 0;
+DC           
+-------------
+10.00        
+-10.00       
+1234.56      
+ij> select dc from t where dc <> 1234.45;
+DC           
+-------------
+10.00        
+-10.00       
+0.00         
+1234.56      
+ij> select dc from t where dc <> i;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc <> l;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc <> s;
+DC           
+-------------
+1234.56      
+ij> select dc from t where dc <> r;
+DC           
+-------------
+ij> select dc from t where dc <> d;
+DC           
+-------------
+ij> select dc from t where dc <> dc;
+DC           
+-------------
+ij> --
+-- test a variety of inserts and updates
+--
+drop table t2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> create table t2 (i int, 
+				l bigint,
+				s smallint, 
+				d double precision,
+				r real,
+				dc decimal(10,2));
+0 rows inserted/updated/deleted
+ij> insert into t2 select * from t;
+5 rows inserted/updated/deleted
+ij> -- add a few indexes
+create index dcindex on t2(dc);
+0 rows inserted/updated/deleted
+ij> create unique index dcuniqueindex on t2(dc);
+0 rows inserted/updated/deleted
+ij> -- now do updates and confirm they are ok
+update t2 set dc = dc + 1.1;
+5 rows inserted/updated/deleted
+ij> select dc from t2;
+DC           
+-------------
+-8.90        
+1.10         
+11.10        
+1235.66      
+NULL         
+ij> update t2 set dc = dc - 1.1;
+5 rows inserted/updated/deleted
+ij> select dc from t2;
+DC           
+-------------
+-10.00       
+0.00         
+10.00        
+1234.56      
+NULL         
+ij> update t2 set dc = dc / 1.1;
+5 rows inserted/updated/deleted
+ij> select dc from t2;
+DC           
+-------------
+-9.09        
+0.00         
+9.09         
+1122.32      
+NULL         
+ij> update t2 set dc = dc * 1.1;
+5 rows inserted/updated/deleted
+ij> select dc from t2;
+DC           
+-------------
+-9.99        
+0.00         
+9.99         
+1234.55      
+NULL         
+ij> -- try some deletes
+delete from t2 where dc > 0;
+2 rows inserted/updated/deleted
+ij> select dc from t2;
+DC           
+-------------
+-9.99        
+0.00         
+NULL         
+ij> delete from t2 where dc = 0;
+1 row inserted/updated/deleted
+ij> select dc from t2;
+DC           
+-------------
+-9.99        
+NULL         
+ij> delete from t2 where dc < 0;
+1 row inserted/updated/deleted
+ij> select dc from t2;
+DC           
+-------------
+NULL         
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- test that we recycle values correctly
+-- when reading from a decimal table with
+-- variable length byte arrays stored
+-- via write external
+create table t (c1 char(1), d dec(20,4), c2 char(1));
+0 rows inserted/updated/deleted
+ij> create unique index tu on t(d);
+0 rows inserted/updated/deleted
+ij> insert into t values ('a', 1.123, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 11111.123, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 11111111.123, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 6.123, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 666.123, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', .6, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 0, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 666666.123, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 99999999999999.123, 'Z');
+1 row inserted/updated/deleted
+ij> insert into t values ('a', 9.123, 'Z');
+1 row inserted/updated/deleted
+ij> select * from t;
+C1  |D                      |C2  
+---------------------------------
+a   |1.1230                 |Z   
+a   |11111.1230             |Z   
+a   |11111111.1230          |Z   
+a   |6.1230                 |Z   
+a   |666.1230               |Z   
+a   |0.6000                 |Z   
+a   |0.0000                 |Z   
+a   |666666.1230            |Z   
+a   |99999999999999.1230    |Z   
+a   |9.1230                 |Z   
+ij> update t set d = d + .0007;
+10 rows inserted/updated/deleted
+ij> select * from t;
+C1  |D                      |C2  
+---------------------------------
+a   |1.1237                 |Z   
+a   |11111.1237             |Z   
+a   |11111111.1237          |Z   
+a   |6.1237                 |Z   
+a   |666.1237               |Z   
+a   |0.6007                 |Z   
+a   |0.0007                 |Z   
+a   |666666.1237            |Z   
+a   |99999999999999.1237    |Z   
+a   |9.1237                 |Z   
+ij> drop table tmp;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TMP' because it does not exist.
+ij> drop table bad;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'BAD' because it does not exist.
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- ** insert double.sql
+--
+-- Test the builtin type 'double precision'
+-- assumes these builtin types exist:
+--	int, smallint, char, varchar
+--
+-- other things we might test:
+-- show how doubles lose precision on computations
+--
+-- Test the arithmetic operators
+--
+create table t (i int, s smallint, c char(10), v varchar(50),
+	d double precision);
+0 rows inserted/updated/deleted
+ij> insert into t values (null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 'hello', 'everyone is here', 200.0e0);
+1 row inserted/updated/deleted
+ij> insert into t values (-1, -100, 'goodbye', 'everyone is there', -200.0e0);
+1 row inserted/updated/deleted
+ij> select d + d, i + d, s + d from t;
+1                     |2                     |3                     
+--------------------------------------------------------------------
+NULL                  |NULL                  |NULL                  
+400.0                 |200.0                 |300.0                 
+-400.0                |-201.0                |-300.0                
+ij> select d + d + d, d + 100 + 432e0 from t;
+1                     |2                     
+---------------------------------------------
+NULL                  |NULL                  
+600.0                 |732.0                 
+-600.0                |332.0                 
+ij> select d - i, i - d, d - s, s - d from t;
+1                     |2                     |3                     |4                     
+-------------------------------------------------------------------------------------------
+NULL                  |NULL                  |NULL                  |NULL                  
+200.0                 |-200.0                |100.0                 |-100.0                
+-199.0                |199.0                 |-100.0                |100.0                 
+ij> select d - d - d, d - 100 - 432e0 from t;
+1                     |2                     
+---------------------------------------------
+NULL                  |NULL                  
+-200.0                |-332.0                
+200.0                 |-732.0                
+ij> select i, d, i * d, d * i, d * d, d * 2, d * 2.0e0 from t;
+I          |D                     |3                     |4                     |5                     |6                     |7                     
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL                  |NULL                  |NULL                  |NULL                  |NULL                  |NULL                  
+0          |200.0                 |0.0                   |0.0                   |40000.0               |400.0                 |400.0                 
+-1         |-200.0                |200.0                 |200.0                 |40000.0               |-400.0                |-400.0                
+ij> -- try unary minus, plus
+select -(d * 100 / 100e0 ), +(d * 100e0 / 100 ) from t;
+1                     |2                     
+---------------------------------------------
+NULL                  |NULL                  
+-200.0                |200.0                 
+200.0                 |-200.0                
+ij> -- test null/null, constant/null, null/constant
+select i, d, i / d, 10 / d, d / 10e0 from t;
+I          |D                     |3                     |4                     |5                     
+-------------------------------------------------------------------------------------------------------
+NULL       |NULL                  |NULL                  |NULL                  |NULL                  
+0          |200.0                 |0.0                   |0.05                  |20.0                  
+-1         |-200.0                |0.005                 |-0.05                 |-20.0                 
+ij> -- test for divide by 0
+select d / i from t;
+1                     
+----------------------
+NULL                  
+ERROR 22012: Attempt to divide by zero.
+ij> select 20e0 / 5e0 / 4e0, 20e0 / 4e0 / 5 from t;
+1                     |2                     
+---------------------------------------------
+1.0                   |1.0                   
+1.0                   |1.0                   
+1.0                   |1.0                   
+ij> -- test positive/negative, negative/positive and negative/negative
+select d, d / -d, (-d) / d, (-d) / -d from t;
+D                     |2                     |3                     |4                     
+-------------------------------------------------------------------------------------------
+NULL                  |NULL                  |NULL                  |NULL                  
+200.0                 |-1.0                  |-1.0                  |1.0                   
+-200.0                |-1.0                  |-1.0                  |1.0                   
+ij> -- test some "more complex" expressions
+select d, d + 10e0, d - (10 - 20e0), d - 10, d - (20 - 10) from t;
+D                     |2                     |3                     |4                     |5                     
+------------------------------------------------------------------------------------------------------------------
+NULL                  |NULL                  |NULL                  |NULL                  |NULL                  
+200.0                 |210.0                 |210.0                 |190.0                 |190.0                 
+-200.0                |-190.0                |-190.0                |-210.0                |-210.0                
+ij> -- show that decimals will go into doubles:
+select d+1.1 from t;
+1                     
+----------------------
+NULL                  
+201.1                 
+-198.9                
+ij> insert into t (d) values(1.1);
+1 row inserted/updated/deleted
+ij> select d from t where d=1.1;
+D                     
+----------------------
+1.1                   
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- test overflow
+create table s (d double precision, p double);
+0 rows inserted/updated/deleted
+ij> insert into s values (null, null);
+1 row inserted/updated/deleted
+ij> insert into s values (0, 100);
+1 row inserted/updated/deleted
+ij> insert into s values (1, 101);
+1 row inserted/updated/deleted
+ij> select d + 1.7e+308 from s;
+1                     
+----------------------
+NULL                  
+1.7E308               
+1.7E308               
+ij> -- these are close enough to the infinities to overflow
+-- the null row will still get returned
+select 1.798e+308, - 1.798e+308, 'This query should not work' from s;
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> select 1.8e+1000, - 1.8e+1000, 'This query should not work' from s;
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- these are far enough from the infinities to work
+select 1.797e+308, - 1.797e+308, 'This query should work' from s;
+1                     |2                     |3                     
+--------------------------------------------------------------------
+1.797E308             |-1.797E308            |This query should work
+1.797E308             |-1.797E308            |This query should work
+1.797E308             |-1.797E308            |This query should work
+ij> select 1.6e+308, - 1.6e+308, 'This query should work' from s;
+1                     |2                     |3                     
+--------------------------------------------------------------------
+1.6E308               |-1.6E308              |This query should work
+1.6E308               |-1.6E308              |This query should work
+1.6E308               |-1.6E308              |This query should work
+ij> -- the null row will still get returned
+select d - 1.6e+308 - 0, 'This query should work' from s;
+1                     |2                     
+---------------------------------------------
+NULL                  |This query should work
+-1.6E308              |This query should work
+-1.6E308              |This query should work
+ij> select d - 1.6e+308 - 1.6e+308, 'This query should fail' from s;
+1                     |2                     
+---------------------------------------------
+NULL                  |This query should fail
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- these should fail
+select p * 1.6e+308 from s;
+1                     
+----------------------
+NULL                  
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> select p * -1.6e+308 from s;
+1                     
+----------------------
+NULL                  
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- these work
+insert into s values (-1.6e+308, 0);
+1 row inserted/updated/deleted
+ij> insert into s values (-1.797e+308, 0);
+1 row inserted/updated/deleted
+ij> -- these don't work
+insert into s values (-1.798e+308, 0);
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> insert into s values (-1.8e+308, 0);
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- see two more rows
+select -d from s;
+1                     
+----------------------
+NULL                  
+0.0                   
+-1.0                  
+1.6E308               
+1.797E308             
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> -- test the arithmetic operators on a type we know they don't work on
+create table w (x double precision, y long varchar);
+0 rows inserted/updated/deleted
+ij> select x + y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DOUBLE'.
+ij> select x - y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DOUBLE'.
+ij> select x * y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DOUBLE'.
+ij> select x / y from w;
+ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'DOUBLE'.
+ij> -- clean up after ourselves
+drop table w;
+0 rows inserted/updated/deleted
+ij> --
+-- comparisons
+--
+create table c (i int, s smallint, d double precision, p double precision);
+0 rows inserted/updated/deleted
+ij> -- insert some values
+insert into c values (0, 0, 0e0, 0e0);
+1 row inserted/updated/deleted
+ij> insert into c values (null, null, 5e0, null);
+1 row inserted/updated/deleted
+ij> insert into c values (1, 1, 1e0, 2e0);
+1 row inserted/updated/deleted
+ij> insert into c values (1956475, 1956, 1956475e0, 1956475e0);
+1 row inserted/updated/deleted
+ij> -- select each one in turn
+select d from c where d = 0e0;
+D                     
+----------------------
+0.0                   
+ij> select d from c where d = 1e0;
+D                     
+----------------------
+1.0                   
+ij> select d from c where d = 1956475e0;
+D                     
+----------------------
+1956475.0             
+ij> -- now look for a value that isn't in the table
+select d from c where p = 2e0;
+D                     
+----------------------
+1.0                   
+ij> -- now test null = null semantics
+select d from c where d = d;
+D                     
+----------------------
+0.0                   
+5.0                   
+1.0                   
+1956475.0             
+ij> -- now test <>, <, >
+select d from c where d <> 0e0;
+D                     
+----------------------
+5.0                   
+1.0                   
+1956475.0             
+ij> select d from c where d <> 1e0;
+D                     
+----------------------
+0.0                   
+5.0                   
+1956475.0             
+ij> select d from c where d < 1956475e0;
+D                     
+----------------------
+0.0                   
+5.0                   
+1.0                   
+ij> select d from c where d < 2e0;
+D                     
+----------------------
+0.0                   
+1.0                   
+ij> select d from c where d > d;
+D                     
+----------------------
+ij> select d from c where d > p;
+D                     
+----------------------
+ij> -- now test <=, >=
+select d from c where d <= 0e0;
+D                     
+----------------------
+0.0                   
+ij> select d from c where d <= 1e0;
+D                     
+----------------------
+0.0                   
+1.0                   
+ij> select d from c where d <= 2e0;
+D                     
+----------------------
+0.0                   
+1.0                   
+ij> select d from c where d >= 1956475e0;
+D                     
+----------------------
+1956475.0             
+ij> select d from c where d >= d;
+D                     
+----------------------
+0.0                   
+5.0                   
+1.0                   
+1956475.0             
+ij> select d from c where d >= p;
+D                     
+----------------------
+0.0                   
+1956475.0             
+ij> -- test comparisons with int and smallint
+select d from c where d <= i;
+D                     
+----------------------
+0.0                   
+1.0                   
+1956475.0             
+ij> select d from c where d < s;
+D                     
+----------------------
+ij> select d from c where d > i;
+D                     
+----------------------
+ij> select d from c where d >= s;
+D                     
+----------------------
+0.0                   
+1.0                   
+1956475.0             
+ij> select d from c where d <> i;
+D                     
+----------------------
+ij> select d from c where d = s;
+D                     
+----------------------
+0.0                   
+1.0                   
+ij> -- test that the smallint gets promoted to double, and not vice versa.  65537
+-- when converted to short becomes 1
+select d from c where s = 65537e0;
+D                     
+----------------------
+ij> -- test =SQ
+-- this gets cardinality error
+select d from c where d = (select d from c);
+ERROR 21000: Scalar subquery is only allowed to return a single row.
+ij> -- this works
+select d from c where d = (select d from c where d=5);
+D                     
+----------------------
+5.0                   
+ij> -- show that double is comparable to real
+create table o (c char(10), v varchar(30), dc decimal);
+0 rows inserted/updated/deleted
+ij> select d from c,o where d <> dc;
+D                     
+----------------------
+ij> -- clean up
+drop table c;
+0 rows inserted/updated/deleted
+ij> drop table o;
+0 rows inserted/updated/deleted
+ij> --
+-- test alternate syntax: just double will work for DB2 compatibility
+--
+create table db2version (d double);
+0 rows inserted/updated/deleted
+ij> drop table db2version;
+0 rows inserted/updated/deleted
+ij> --
+-- test a variety of inserts and updates
+--
+create table source (i int, s smallint, c char(10), v varchar(50),
+	d double precision);
+0 rows inserted/updated/deleted
+ij> create table target (p double precision not null);
+0 rows inserted/updated/deleted
+ij> -- we have already tested inserting integer and double literals.
+insert into source values (1, 2, '3', '4', 5);
+1 row inserted/updated/deleted
+ij> -- these will all work:
+insert into target select i from source;
+1 row inserted/updated/deleted
+ij> insert into target select s from source;
+1 row inserted/updated/deleted
+ij> insert into target select d from source;
+1 row inserted/updated/deleted
+ij> -- these will all fail:
+delete from source;
+1 row inserted/updated/deleted
+ij> insert into source values (null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> -- these fail because the target won't take a null -- of any type
+insert into target values(null);
+ERROR 23502: Column 'P'  cannot accept a NULL value.
+ij> insert into target select i from source;
+ERROR 23502: Column 'P'  cannot accept a NULL value.
+ij> insert into target select s from source;
+ERROR 23502: Column 'P'  cannot accept a NULL value.
+ij> insert into target select d from source;
+ERROR 23502: Column 'P'  cannot accept a NULL value.
+ij> -- expect 4 rows in target: 1, 2, 5, and 1:
+select * from target;
+P                     
+----------------------
+1.0                   
+2.0                   
+5.0                   
+ij> update target set p = p + 1;
+3 rows inserted/updated/deleted
+ij> select * from target;
+P                     
+----------------------
+2.0                   
+3.0                   
+6.0                   
+ij> update target set p = p - 1;
+3 rows inserted/updated/deleted
+ij> select * from target;
+P                     
+----------------------
+1.0                   
+2.0                   
+5.0                   
+ij> update target set p = p / 10;
+3 rows inserted/updated/deleted
+ij> select * from target;
+P                     
+----------------------
+0.1                   
+0.2                   
+0.5                   
+ij> update target set p = p * 10;
+3 rows inserted/updated/deleted
+ij> select * from target;
+P                     
+----------------------
+1.0                   
+2.0                   
+5.0                   
+ij> -- these should work
+update source set i = 1.4e8;
+1 row inserted/updated/deleted
+ij> update source set s = 1.4e4;
+1 row inserted/updated/deleted
+ij> select i, s from source where i=1.4e8 or s=1.4e4;
+I          |S     
+------------------
+140000000  |14000 
+ij> -- these should get overflow
+update source set i = 1.4e12;
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> update source set s = 1.4e12;
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> drop table source;
+0 rows inserted/updated/deleted
+ij> drop table target;
+0 rows inserted/updated/deleted
+ij> create table abcfloat (numtest float(20));
+0 rows inserted/updated/deleted
+ij> insert into abcfloat values (1.23456789);
+1 row inserted/updated/deleted
+ij> insert into abcfloat values (.123456789);
+1 row inserted/updated/deleted
+ij> insert into abcfloat values (-.123456789);
+1 row inserted/updated/deleted
+ij> insert into abcfloat values (0.223456789);
+1 row inserted/updated/deleted
+ij> insert into abcfloat values (-0.223456789);
+1 row inserted/updated/deleted
+ij> insert into abcfloat values (12345678.9);
+1 row inserted/updated/deleted
+ij> select * from abcfloat;
+NUMTEST      
+-------------
+1.2345679    
+0.12345679   
+-0.12345679  
+0.22345679   
+-0.22345679  
+1.2345679E7  
+ij> drop table abcfloat;
+0 rows inserted/updated/deleted
+ij> -- ** insert float.sql
+--
+-- Test the builtin type 'float'
+-- Float is a synonym for double or real, depending on
+-- the precision specified; so all we need to do is
+-- show the mapping here; the double and real tests
+-- show how well those types behave.
+--
+-- this shows several working versions of float, the default
+-- and all of the boundary values:
+create table t (d double precision, r real, f float, f1 float(1),
+	f23 float(23), f24 float(24), f53 float(52));
+0 rows inserted/updated/deleted
+ij> select columnname, columndatatype 
+from sys.syscolumns c, sys.systables t
+where c.referenceid = t.tableid and t.tablename='T';
+COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
+------------------------------------------------------------------------------------------------------------------------------------------------
+D                                                                                                                               |DOUBLE         
+F                                                                                                                               |DOUBLE         
+F1                                                                                                                              |REAL           
+F23                                                                                                                             |REAL           
+F24                                                                                                                             |DOUBLE         
+F53                                                                                                                             |DOUBLE         
+R                                                                                                                               |REAL           
+ij> -- invalid float values
+insert into t(r) values 'NaN';
+ERROR 42821: Columns of type 'REAL' cannot hold values of type 'CHAR'. 
+ij> insert into t(r) values +3.4021E+38;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into t(r) values -3.4021E+38;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> create table tt(c char(254));
+0 rows inserted/updated/deleted
+ij> insert into tt values -3.402E+38;
+ERROR 42821: Columns of type 'CHAR' cannot hold values of type 'DOUBLE'. 
+ij> insert into t(r) select * from tt;
+ERROR 42821: Columns of type 'REAL' cannot hold values of type 'CHAR'. 
+ij> insert into t(r) values '1.0';
+ERROR 42821: Columns of type 'REAL' cannot hold values of type 'CHAR'. 
+ij> update t set r = NaN;
+ERROR 42X04: Column 'NAN' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'NAN' is not a column in the target table.
+ij> update t set r = +3.4021E+38;
+0 rows inserted/updated/deleted
+ij> update t set r = -3.4021E+38;
+0 rows inserted/updated/deleted
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> drop table tt;
+0 rows inserted/updated/deleted
+ij> -- these get errors for invalid precision values:
+create table t1 (d double precision, r real, f float(-10));
+ERROR 42X01: Syntax error: Encountered "-" at line 2, column 54.
+ij> --
+create table t2 (d double precision, r real, f float(-1));
+ERROR 42X01: Syntax error: Encountered "-" at line 2, column 54.
+ij> create table t3 (d double precision, r real, f float(0));
+ERROR 42X48: Value '0' is not a valid precision for FLOAT.
+ij> create table t4 (d double precision, r real, f float(100));
+ERROR 42X48: Value '100' is not a valid precision for FLOAT.
+ij> create table t5 (d double precision, r real, f float(53));
+ERROR 42X48: Value '53' is not a valid precision for FLOAT.
+ij> create table t6 (d double precision, r real, f float(12.3));
+ERROR 42X49: Value '12.3' is not a valid integer literal.
+ij> -- ** insert real.sql
+--
+-- Test the builtin type 'real'
+-- assumes these builtin types exist:
+--	int, smallint, char, varchar, double precision
+--
+-- other things we might test:
+-- show how reals lose precision on computations
+--
+-- Test the arithmetic operators
+--
+create table t (i int, s smallint, c char(10), v varchar(50),
+	d double precision, r real);
+0 rows inserted/updated/deleted
+ij> insert into t values (null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 'hello', 'everyone is here', 200.0e0, 200.0e0);
+1 row inserted/updated/deleted
+ij> insert into t values (-1, -100, 'goodbye', 'everyone is there', -200.0e0, -200.0e0);
+1 row inserted/updated/deleted
+ij> select r + r, d + r, i + r, s + r, r + i from t;
+1            |2                     |3            |4            |5            
+------------------------------------------------------------------------------
+NULL         |NULL                  |NULL         |NULL         |NULL         
+400.0        |400.0                 |200.0        |300.0        |200.0        
+-400.0       |-400.0                |-201.0       |-300.0       |-201.0       
+ij> select r + r + r, r + 100 + 432e0 from t;
+1            |2                     
+------------------------------------
+NULL         |NULL                  
+600.0        |732.0                 
+-600.0       |332.0                 
+ij> select r - r, r - d, d - r, r - i, i - r, r - s, s - r from t;
+1            |2                     |3                     |4            |5            |6            |7            
+-------------------------------------------------------------------------------------------------------------------
+NULL         |NULL                  |NULL                  |NULL         |NULL         |NULL         |NULL         
+0.0          |0.0                   |0.0                   |200.0        |-200.0       |100.0        |-100.0       
+0.0          |0.0                   |0.0                   |-199.0       |199.0        |-100.0       |100.0        
+ij> select r - r - r, r - 100 - 432e0 from t;
+1            |2                     
+------------------------------------
+NULL         |NULL                  
+-200.0       |-332.0                
+200.0        |-732.0                
+ij> select i, d, s, r, i * r, r * i, s * r, d * r, r * r, r * 2, r * 2.0e0 from t;
+I          |D                     |S     |R            |5            |6            |7            |8                     |9            |10           |11                    
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL                  |NULL  |NULL         |NULL         |NULL         |NULL         |NULL                  |NULL         |NULL         |NULL                  
+0          |200.0                 |100   |200.0        |0.0          |0.0          |20000.0      |40000.0               |40000.0      |400.0        |400.0                 
+-1         |-200.0                |-100  |-200.0       |200.0        |200.0        |20000.0      |40000.0               |40000.0      |-400.0       |-400.0                
+ij> -- try unary minus, plus
+select -(r * 100 / 100e0 ), +(r * 100e0 / 100 ) from t;
+1                     |2                     
+---------------------------------------------
+NULL                  |NULL                  
+-200.0                |200.0                 
+200.0                 |-200.0                
+ij> -- test null/null, constant/null, null/constant
+select i, d, r, d / r, i / r, 10 / r, r / d, r / 10e0 from t;
+I          |D                     |R            |4                     |5            |6            |7                     |8                     
+-------------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL                  |NULL         |NULL                  |NULL         |NULL         |NULL                  |NULL                  
+0          |200.0                 |200.0        |1.0                   |0.0          |0.05         |1.0                   |20.0                  
+-1         |-200.0                |-200.0       |1.0                   |0.005        |-0.05        |1.0                   |-20.0                 
+ij> -- test for divide by 0
+select r / i from t;
+1            
+-------------
+NULL         
+ERROR 22012: Attempt to divide by zero.
+ij> -- test positive/negative, negative/positive and negative/negative
+select r, r / -r, (-r) / r, (-r) / -r from t;
+R            |2            |3            |4            
+-------------------------------------------------------
+NULL         |NULL         |NULL         |NULL         
+200.0        |-1.0         |-1.0         |1.0          
+-200.0       |-1.0         |-1.0         |1.0          
+ij> -- test some "more complex" expressions
+select r, r + 10e0, r - (10 - 20e0), r - 10, r - (20 - 10) from t;
+R            |2                     |3                     |4            |5            
+---------------------------------------------------------------------------------------
+NULL         |NULL                  |NULL                  |NULL         |NULL         
+200.0        |210.0                 |210.0                 |190.0        |190.0        
+-200.0       |-190.0                |-190.0                |-210.0       |-210.0       
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- test overflow
+create table s (d real, p real);
+0 rows inserted/updated/deleted
+ij> insert into s values (null, null);
+1 row inserted/updated/deleted
+ij> insert into s values (0, 100);
+1 row inserted/updated/deleted
+ij> insert into s values (1, 101);
+1 row inserted/updated/deleted
+ij> select d + 3.4e+38 from s;
+1                     
+----------------------
+NULL                  
+3.4E38                
+3.4E38                
+ij> -- these are close enough to the infinities to overflow
+-- Can't test simple select of literal because literals are doubles
+insert into s values(3.403e+38, 3.403e+38);
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into s values(- 3.403e+38, - 3.403e+38);
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into s values(1.8e+100, 1.8e+100);
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into s values(- 1.8e+100, - 1.8e+100);
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select * from s;
+D            |P            
+---------------------------
+NULL         |NULL         
+0.0          |100.0        
+1.0          |101.0        
+ij> -- these are far enough from the infinities to work
+insert into s values(3.402e+38, - 3.402e+38);
+1 row inserted/updated/deleted
+ij> insert into s values(3.3e+38, - 3.3e+38);
+1 row inserted/updated/deleted
+ij> -- these show that math is promoted to double because of the double
+-- literals. If it was real math, it would fail
+select d - 3.3e+38 - 3.3e+38, p * 3.3e+38, p * -3.3e+38 from s;
+1                     |2                     |3                     
+--------------------------------------------------------------------
+NULL                  |NULL                  |NULL                  
+-6.6E38               |3.3E40                |-3.3E40               
+-6.6E38               |3.333E40              |-3.333E40             
+-3.1979999994446195E38|-1.1226600001832754E77|1.1226600001832754E77 
+-3.300000034517288E38 |-1.088999988609295E77 |1.088999988609295E77  
+ij> -- see two more rows
+select -d from s;
+1            
+-------------
+NULL         
+0.0          
+-1.0         
+-3.402E38    
+-3.3E38      
+ij> -- to do the math as reals, we have to keep it in the columns
+delete from s;
+5 rows inserted/updated/deleted
+ij> insert into s values (1,3.3e+38);
+1 row inserted/updated/deleted
+ij> -- these will fail, because the math is done as reals
+select d - p - p from s;
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select p * p from s;
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select p * -p from s;
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> delete from s;
+1 row inserted/updated/deleted
+ij> -- select values between 0 and 1
+insert into s values (.111, 1e-1);
+1 row inserted/updated/deleted
+ij> insert into s values (0.222, 0.222);
+1 row inserted/updated/deleted
+ij> select * from s;
+D            |P            
+---------------------------
+0.111        |0.1          
+0.222        |0.222        
+ij> delete from s;
+2 rows inserted/updated/deleted
+ij> insert into s values (10, 1e-10);
+1 row inserted/updated/deleted
+ij> -- underflow calculation doesn't round off, gives error.
+update s set d=d*1.4e-55, p=p*1.4e-45;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select d, p from s;
+D            |P            
+---------------------------
+10.0         |1.0E-10      
+ij> update s set d=d + 1.4e-46;
+1 row inserted/updated/deleted
+ij> select d from s;
+D            
+-------------
+10.0         
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> -- test the arithmetic operators on a type we know they don't work on
+create table w (x real, y char);
+0 rows inserted/updated/deleted
+ij> select x + y from w;
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> select x - y from w;
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> select x * y from w;
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> select x / y from w;
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> -- clean up after ourselves
+drop table w;
+0 rows inserted/updated/deleted
+ij> --
+-- comparisons
+--
+create table c (i int, s smallint, d double precision, r real, l real);
+0 rows inserted/updated/deleted
+ij> -- insert some values
+insert into c values (0, 0, 0e0, 0e0, 0e0);
+1 row inserted/updated/deleted
+ij> insert into c values (null, null, 5e0, null, null);
+1 row inserted/updated/deleted
+ij> insert into c values (1, 1, 1e0, 2e0, 3e0);
+1 row inserted/updated/deleted
+ij> insert into c values (1956475, 1956, 1956475e0, 1956475e0, 1956475e0);
+1 row inserted/updated/deleted
+ij> -- select each one in turn
+select r from c where r = 0e0;
+R            
+-------------
+0.0          
+ij> select r from c where r = 1e0;
+R            
+-------------
+ij> select r from c where r = 1956475e0;
+R            
+-------------
+1956475.0    
+ij> -- now look for a value that isn't in the table
+select r from c where l = 2e0;
+R            
+-------------
+ij> -- now test null = null semantics
+select r from c where r = r;
+R            
+-------------
+0.0          
+2.0          
+1956475.0    
+ij> -- now test <>, <, >, <=, >=
+select r from c where r <> 0e0;
+R            
+-------------
+2.0          
+1956475.0    
+ij> select r from c where r <> 1e0;
+R            
+-------------
+0.0          
+2.0          
+1956475.0    
+ij> select r from c where r < 1956475e0;
+R            
+-------------
+0.0          
+2.0          
+ij> select r from c where r < 2e0;
+R            
+-------------
+0.0          
+ij> select r from c where r > d;
+R            
+-------------
+2.0          
+ij> select r from c where r <= l;
+R            
+-------------
+0.0          
+2.0          
+1956475.0    
+ij> select r from c where r >= r;
+R            
+-------------
+0.0          
+2.0          
+1956475.0    
+ij> -- test comparisons with int and smallint and double
+select r from c where r <= i;
+R            
+-------------
+0.0          
+1956475.0    
+ij> select r from c where r < s;
+R            
+-------------
+ij> select r from c where r > i;
+R            
+-------------
+2.0          
+ij> select r from c where r >= s;
+R            
+-------------
+0.0          
+2.0          
+1956475.0    
+ij> select r from c where r <> i;
+R            
+-------------
+2.0          
+ij> select r from c where r = s;
+R            
+-------------
+0.0          
+ij> select r from c where r = d;
+R            
+-------------
+0.0          
+1956475.0    
+ij> select r from c where r >= d;
+R            
+-------------
+0.0          
+2.0          
+1956475.0    
+ij> -- show that real is comparable to decimal
+create table o (c char(10), v varchar(30), dc decimal);
+0 rows inserted/updated/deleted
+ij> select r from c,o where r <> dc;
+R            
+-------------
+ij> -- clean up
+drop table c;
+0 rows inserted/updated/deleted
+ij> drop table o;
+0 rows inserted/updated/deleted
+ij> --
+-- test a variety of inserts and updates
+--
+create table source (i int, s smallint, c char(10), v varchar(50),
+	d double precision, r real);
+0 rows inserted/updated/deleted
+ij> create table target (t real not null);
+0 rows inserted/updated/deleted
+ij> -- we have already tested inserting integer and double literals.
+insert into source values (1, 2, '3', '4', 5, 6);
+1 row inserted/updated/deleted
+ij> -- these will all work:
+insert into target select i from source;
+1 row inserted/updated/deleted
+ij> insert into target select s from source;
+1 row inserted/updated/deleted
+ij> insert into target select d from source;
+1 row inserted/updated/deleted
+ij> insert into target select r from source;
+1 row inserted/updated/deleted
+ij> delete from source;
+1 row inserted/updated/deleted
+ij> insert into source values (null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into source values (1, 2, '3', '4', 5, 6);
+1 row inserted/updated/deleted
+ij> -- these fail because the target won't take a null -- of any type
+insert into target values(null);
+ERROR 23502: Column 'T'  cannot accept a NULL value.
+ij> insert into target select i from source;
+ERROR 23502: Column 'T'  cannot accept a NULL value.
+ij> insert into target select s from source;
+ERROR 23502: Column 'T'  cannot accept a NULL value.
+ij> insert into target select d from source;
+ERROR 23502: Column 'T'  cannot accept a NULL value.
+ij> insert into target select r from source;
+ERROR 23502: Column 'T'  cannot accept a NULL value.
+ij> -- expect 5 rows in target: 1, 2, 5, 6, and 1:
+select * from target;
+T            
+-------------
+1.0          
+2.0          
+5.0          
+6.0          
+ij> update target set t = t + 1;
+4 rows inserted/updated/deleted
+ij> select * from target;
+T            
+-------------
+2.0          
+3.0          
+6.0          
+7.0          
+ij> update target set t = t - 1;
+4 rows inserted/updated/deleted
+ij> select * from target;
+T            
+-------------
+1.0          
+2.0          
+5.0          
+6.0          
+ij> update target set t = t / 10;
+4 rows inserted/updated/deleted
+ij> select * from target;
+T            
+-------------
+0.1          
+0.2          
+0.5          
+0.6          
+ij> update target set t = t * 10;
+4 rows inserted/updated/deleted
+ij> select * from target;
+T            
+-------------
+1.0          
+2.0          
+5.0          
+6.0          
+ij> -- these should work
+update source set r = 1.4e4;
+2 rows inserted/updated/deleted
+ij> update source set i = r, s=r, d=r;
+2 rows inserted/updated/deleted
+ij> select i, s, d from source where i=1.4e4 or s=1.4e4 or d=1.4e4;
+I          |S     |D                     
+-----------------------------------------
+14000      |14000 |14000.0               
+14000      |14000 |14000.0               
+ij> -- just curious, do columns see the before or after values, and
+-- does it matter if they are before or after the changed value?
+update source set i = r, r = 0, s = r;
+2 rows inserted/updated/deleted
+ij> select i, r, s from source where r = 0;
+I          |R            |S     
+--------------------------------
+14000      |0.0          |14000 
+14000      |0.0          |14000 
+ij> -- these should get overflow
+update source set r = 1.4e12;
+2 rows inserted/updated/deleted
+ij> update source set i = r;
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> update source set s = r;
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> drop table source;
+0 rows inserted/updated/deleted
+ij> drop table target;
+0 rows inserted/updated/deleted
+ij> -- ============================================================
+--          TESTS FOR DB2 FLOAT/DOUBLEs LIMITS
+-- ============================================================
+create table fake(r real);
+0 rows inserted/updated/deleted
+ij> -- ============================================================
+-- different errmsg for DB2: "value of of range", CS: "NumberFormatException"
+values 5e-325;
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values 5e-324;
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- --- TEST SPECIAL VALUES
+-- DB2 (should succed)
+insert into fake values( -3.402E+38 );
+1 row inserted/updated/deleted
+ij> insert into fake values( +3.402E+38 );
+1 row inserted/updated/deleted
+ij> insert into fake values -1;
+1 row inserted/updated/deleted
+ij> insert into fake values( -1.175E-37 );
+1 row inserted/updated/deleted
+ij> insert into fake values( +1.175E-37 );
+1 row inserted/updated/deleted
+ij> insert into fake values -2;
+1 row inserted/updated/deleted
+ij> -- CS (should fail)
+insert into fake values( -3.4028235E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +3.4028235E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -3;
+1 row inserted/updated/deleted
+ij> insert into fake values( -1.4E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +1.4E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -4;
+1 row inserted/updated/deleted
+ij> -- ============================================================
+-- variants of ZERO
+insert into fake values (+0);
+1 row inserted/updated/deleted
+ij> insert into fake values (+0.0);
+1 row inserted/updated/deleted
+ij> insert into fake values (+0.0E-37);
+1 row inserted/updated/deleted
+ij> insert into fake values (+0.0E-38);
+1 row inserted/updated/deleted
+ij> insert into fake values (+0.0E-500);
+1 row inserted/updated/deleted
+ij> values (+0.0E-500);
+1                     
+----------------------
+0.0                   
+ij> values (+1.0E-300);
+1                     
+----------------------
+1.0E-300              
+ij> -- approx ZERO (java rounds to zero, but not DB2)
+insert into fake values (+1.0E-300);
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values (+1.0E-900);
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> insert into fake values (cast(+1.0E-900 as real));
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values (cast(+1.0E-300 as real));
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values (+1.0E-900);
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values (cast(+1.0E-900 as real));
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> insert into fake values -11;
+1 row inserted/updated/deleted
+ij> -- ============================================================
+-- DB2 MAX_VALUES (first succeed, second fail)
+insert into fake values( -3.4019E+38 );
+1 row inserted/updated/deleted
+ij> insert into fake values( -3.4021E+38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -21;
+1 row inserted/updated/deleted
+ij> insert into fake values( +3.4019E+38 );
+1 row inserted/updated/deleted
+ij> insert into fake values( +3.4021E+38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -22;
+1 row inserted/updated/deleted
+ij> -- DB2 MIN_VALUES (first fail, second succeed)
+insert into fake values( -1.1749E-37 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( -1.1751E-37 );
+1 row inserted/updated/deleted
+ij> insert into fake values -23;
+1 row inserted/updated/deleted
+ij> insert into fake values( +1.1749E-37 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +1.1751E-37 );
+1 row inserted/updated/deleted
+ij> insert into fake values -24;
+1 row inserted/updated/deleted
+ij> -- CS (fail)
+insert into fake values( -3.4028234E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( -3.40282349E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( -3.40282351E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( -3.4028236E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -25;
+1 row inserted/updated/deleted
+ij> insert into fake values( +3.4028234E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +3.40282349E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +3.40282351E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +3.4028236E38 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -26;
+1 row inserted/updated/deleted
+ij> insert into fake values( -1.39E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( -1.399E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( -1.401E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( -1.41E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -27;
+1 row inserted/updated/deleted
+ij> insert into fake values( +1.39E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +1.399E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +1.401E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values( +1.41E-45 );
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values -28;
+1 row inserted/updated/deleted
+ij> -- checkpoint
+select * from fake;
+R            
+-------------
+-3.402E38    
+3.402E38     
+-1.0         
+-1.175E-37   
+1.175E-37    
+-2.0         
+-3.0         
+-4.0         
+0.0          
+0.0          
+0.0          
+0.0          
+0.0          
+-11.0        
+-3.4019E38   
+-21.0        
+3.4019E38    
+-22.0        
+-1.1751E-37  
+-23.0        
+1.1751E-37   
+-24.0        
+-25.0        
+-26.0        
+-27.0        
+-28.0        
+ij> drop table fake;
+0 rows inserted/updated/deleted
+ij> create table fake(r real);
+0 rows inserted/updated/deleted
+ij> -- ============================================================
+-- ---underflow aritmetic
+-- underflow to small real but / makes double!=0, so we catch
+-- ok
+values cast(5e-37/1e0 as real);
+1            
+-------------
+5.0E-37      
+ij> -- fail
+values cast(5e-37/1e1 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values cast(5e-37/1e300 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values cast(5e-37 as real)/cast(1e10 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> -- ok
+insert into fake values 5e-37/1e0;
+1 row inserted/updated/deleted
+ij> -- fail
+insert into fake values 5e-37/1e1;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into fake values 5e-37/1e300;
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> insert into fake values cast(5e-37 as real)/cast(1e10 as real);
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> drop table fake;
+0 rows inserted/updated/deleted
+ij> -- makes double to small, so java double rounds to 0. need to catch (fail)
+values 5e-37 / 1e300;
+1                     
+----------------------
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values cast(5e-37 / 1e300 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- ok, zero result (succeed)
+values cast(cast(0.0e0 as real) - cast(0.0e0 as real) as real);
+1            
+-------------
+0.0          
+ij> values cast(cast(1.0e-30 as real) - cast(1.0e-30 as real) as real);
+1            
+-------------
+0.0          
+ij> -- java (and CS previously) rounded result to zero, but now gives errors like DB2 (fail)
+values cast(cast(5e-37 as real) - cast(4e-37 as real) as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values cast(5e-37 - 4e-37 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values cast(5e-37 - 4.99e-37 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values cast(5e-308 - 4e-308 as real);
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values cast(5e-37 + -4e-37 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values cast(5e-324 - 4e-324 as real);
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values cast(5e-37 * 4e-37 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values cast(cast(5e-37 as real) * cast(4e-37 as real) as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> -- double trouble, underflow detection (fail)
+values cast(5e-300 * 4e-300 as real);
+1            
+-------------
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- underflow aritmetic DOUBLE (fail)
+values -3e-305/1e100;
+1                     
+----------------------
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> values -3e-305/1e100;
+1                     
+----------------------
+ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> -- negative zeros not allowed (succeed)
+values 0.0e5/-1;
+1                     
+----------------------
+0.0                   
+ij> -- 30 characters limit to be enforced ) (first fail, second ok)
+values 01234567890123456789012345678e1;
+ERROR 42820: The floating point literal '01234567890123456789012345678e1' contains more than 30 characters.
+ij> values 0123456789012345678901234567e1;
+1                     
+----------------------
+1.2345678901234569E27 
+ij> -- ============================================================
+--- Marks tests
+-- Examples in Cloudscape 5.2:
+-- these 2 insert statements should raise error msgs in compat mode because 
+-- the values are between the -mpv and +mpv (fail)
+create table t1 (c1 real);
+0 rows inserted/updated/deleted
+ij> insert into t1 values -1.40129846432481700e-46;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into t1 values +1.40129846432481700e-46;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select * from t1;
+C1           
+-------------
+ij> -- these 2 insert statements should raise an error msg in compat mode
+-- because the values are greater db2's limits (fail)
+insert into t1 values 3.40282346638528860e+38;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into t1 values -3.40282346638528860e+38;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select * from t1;
+C1           
+-------------
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- Examples in DB2 UDB for LUW 8.1.4:
+-- these 2 insert statements raise ERROR 22003 because
+-- the values are between the -mpv and +mpv (fail)
+create table t1 (c1 real);
+0 rows inserted/updated/deleted
+ij> insert into t1 values -1.40129846432481700e-46;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into t1 values +1.40129846432481700e-46;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select * from t1;
+C1           
+-------------
+ij> -- these 2 insert statements raise ERROR 22003 because
+-- the values are greater db2's limits (fail)
+insert into t1 values 3.40282346638528860e+38;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> insert into t1 values -3.40282346638528860e+38;
+ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> select * from t1;
+C1           
+-------------
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- ============================================================
+-- bug 5704 - make sure we catch the overflow correctly for multiplication operator
+values cast(1e30 as decimal(31))*cast(1e30 as decimal(31));
+1                               
+--------------------------------
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(31,0).
+ij> values cast('1e30' as decimal(31))*cast('1e30' as decimal(31));
+1                               
+--------------------------------
+ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(31,0).
+ij> 

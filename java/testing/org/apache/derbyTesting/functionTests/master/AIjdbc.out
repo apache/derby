@@ -1,0 +1,6 @@
+Test AIjdbc starting
+Test AIjdbc:creating objects
+Test AIjdbc:select from base table
+Test AIjdbc:select from view
+PASS
+Test AIjdbc finished

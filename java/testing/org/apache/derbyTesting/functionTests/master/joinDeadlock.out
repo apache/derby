@@ -1,0 +1,46 @@
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;user=U1' AS C1;
+ij> autocommit off;
+ij> connect 'jdbc:derby:wombat;user=U2' AS C2;
+ij(C2)> autocommit off;
+ij(C2)> set connection C1;
+ij(C1)> -- user 1 for bug 1573
+-- a deadlock when reopening a join gets an assertion
+-- violation in close()
+create table outer1(c1 int);
+0 rows inserted/updated/deleted
+ij(C1)> create index o1_i1 on outer1(c1);
+0 rows inserted/updated/deleted
+ij(C1)> insert into outer1 (c1) values 1, 2;
+2 rows inserted/updated/deleted
+ij(C1)> commit;
+ij(C1)> create table inner1(c1 int, c2 char(254));
+0 rows inserted/updated/deleted
+ij(C1)> create index i1_i1 on inner1(c1);
+0 rows inserted/updated/deleted
+ij(C1)> insert into inner1 (c1) values 1, 2;
+2 rows inserted/updated/deleted
+ij(C1)> commit;
+ij(C1)> create table inner2(c1 int, c2 char(254));
+0 rows inserted/updated/deleted
+ij(C1)> create index i2_i1 on inner2(c1);
+0 rows inserted/updated/deleted
+ij(C1)> insert into inner2 (c1) values 1, 2;
+2 rows inserted/updated/deleted
+ij(C1)> commit;
+ij(C1)> -- this user will get lock timeout in subquery on 2nd next
+get cursor c1 as 'select * from outer1 where c1 <= (select count(*) from inner1, inner2 where outer1.c1 = outer1.c1)';
+ij(C1)> next c1;
+C1         
+-----------
+1          
+ij(C1)> set connection C2;
+ij(C2)> update u1.inner1 set c1 = c1 where c1 = 1;
+1 row inserted/updated/deleted
+ij(C2)> set connection C1;
+ij(C1)> next c1;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(C1)> disconnect;
+ij> set connection C2;
+ij> disconnect;
+ij> 

@@ -1,0 +1,334 @@
+ij> --
+-- Test the REFERENCING clause for a trigger
+-- as well as a general test that using the
+-- OLD and NEW transition variables work ok
+--
+drop table x;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'X' because it does not exist.
+ij> create table x (x int, y int, z int);
+0 rows inserted/updated/deleted
+ij> --
+-- negative tests
+--
+-- syntax
+-- mismatch: insert->old, delete->new
+create trigger t1 after insert on x referencing old as oldrow for each row mode db2sql values 1;
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger t1 after insert on x referencing old_table as oldtab for each statement mode db2sql values 1;
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger t1 after insert on x referencing old_table as oldtab for each statement mode db2sql values 1;
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger t1 after delete on x referencing new as newrow for each row mode db2sql values 1;
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> create trigger t1 after delete on x referencing new_table as newtab for each statement mode db2sql values 1;
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> create trigger t1 after delete on x referencing new_table as newtab for each statement mode db2sql values 1;
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> -- same as above, bug using old/new
+create trigger t1 after insert on x referencing old as old for each row mode db2sql values old.x;
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger t1 after insert on x referencing old_table as old for each statement mode db2sql select * from old;
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger t1 after insert on x referencing old_table as old for each statement mode db2sql select * from old;
+ERROR 42Y92: INSERT triggers may only reference new transition variables/tables.
+ij> create trigger t1 after delete on x referencing new as new for each row mode db2sql values new.x;
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> create trigger t1 after delete on x referencing new_table as new for each statement mode db2sql select * from new;
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> create trigger t1 after delete on x referencing new_table as new for each statement mode db2sql select * from new;
+ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
+ij> -- cannot reference columns that don't exist, not bound as normal stmts
+create trigger t1 after delete on x referencing old as old for each row mode db2sql values old.badcol;
+ERROR 42X04: Column 'OLD.BADCOL' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLD.BADCOL' is not a column in the target table.
+ij> create trigger t1 after delete on x referencing old as old for each row mode db2sql values old;
+ERROR 42X04: Column 'OLD' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLD' is not a column in the target table.
+ij> create trigger t1 after delete on x referencing old as oldrow for each row mode db2sql values oldrow.badcol;
+ERROR 42X04: Column 'OLDROW.BADCOL' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLDROW.BADCOL' is not a column in the target table.
+ij> create trigger t1 after delete on x referencing old as oldrow for each row mode db2sql values oldrow;
+ERROR 42X04: Column 'OLDROW' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLDROW' is not a column in the target table.
+ij> -- lets try some basics with old/new table
+create table y (x int);
+0 rows inserted/updated/deleted
+ij> insert into y values 1, 2, 666, 2, 2, 1;
+6 rows inserted/updated/deleted
+ij> insert into x values (1, null, null), (2, null, null);
+2 rows inserted/updated/deleted
+ij> create trigger t1 after delete on x referencing old as old for each row mode db2sql delete from y where x = old.x;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> delete from x;
+2 rows inserted/updated/deleted
+ij> select * from y;
+X          
+-----------
+666        
+ij> rollback;
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> create trigger t1 after delete on x referencing old_table as old for each statement mode db2sql delete from y where x in (select x from old);
+0 rows inserted/updated/deleted
+ij> delete from x;
+2 rows inserted/updated/deleted
+ij> select * from y;
+X          
+-----------
+666        
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> rollback;
+ij> delete from x;
+2 rows inserted/updated/deleted
+ij> select * from y;
+X          
+-----------
+1          
+2          
+666        
+2          
+2          
+1          
+ij> rollback;
+ij> delete from x;
+2 rows inserted/updated/deleted
+ij> delete from y;
+6 rows inserted/updated/deleted
+ij> -- test all types and row triggers since they do explicit type mapping
+create table allTypes1 (i int, tn smallint, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, f float,
+				dt date, t time, ts timestamp,
+				b CHAR(2) FOR BIT DATA, bv VARCHAR(2) FOR BIT DATA, lbv LONG VARCHAR FOR BIT DATA,
+				dc decimal(5,2), n numeric(8,4));
+0 rows inserted/updated/deleted
+ij> create table allTypes2 (i int, tn smallint, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				d double precision, r real, f float,
+				dt date, t time, ts timestamp,
+				b  CHAR(2) FOR BIT DATA, bv VARCHAR(2) FOR BIT DATA, lbv LONG VARCHAR FOR BIT DATA,
+				dc decimal(5,2), n numeric(8,4));
+0 rows inserted/updated/deleted
+ij> create trigger t1 after insert on allTypes1 referencing new as newrowtab for each row mode db2sql
+	insert into allTypes2 
+	values (newrowtab.i, newrowtab.tn, newrowtab.s, newrowtab.l,
+		newrowtab.c, newrowtab.v, newrowtab.lvc,
+		newrowtab.d, newrowtab.r, newrowtab.f,   newrowtab.dt,  
+		newrowtab.t, newrowtab.ts, newrowtab.b, newrowtab.bv, 
+		newrowtab.lbv, newrowtab.dc, newrowtab.n);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into allTypes1 values (0, 10, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 200.0e0,
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0F0F', X'1234', 111.11, 222.2);
+1 row inserted/updated/deleted
+ij> select * from allTypes1;
+I          |TN    |S     |L                   |C         |V                                                 |LVC                                                                                                                             |D                     |R            |F                     |DT        |T       |TS                        |B   |BV  |LBV                                                                                                                             |DC      |N          
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |10    |100   |1000000             |duplicate |this is duplicated                                |also duplicated                                                                                                                 |200.0                 |200.0        |200.0                 |1992-01-01|12:30:30|xxxxxxFILTERED-TIMESTAMPxxxxx|12af|0f0f|1234                                                                                                                            |111.11  |222.2000   
+ij> select * from allTypes2;
+I          |TN    |S     |L                   |C         |V                                                 |LVC                                                                                                                             |D                     |R            |F                     |DT        |T       |TS                        |B   |BV  |LBV                                                                                                                             |DC      |N          
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |10    |100   |1000000             |duplicate |this is duplicated                                |also duplicated                                                                                                                 |200.0                 |200.0        |200.0                 |1992-01-01|12:30:30|xxxxxxFILTERED-TIMESTAMPxxxxx|12af|0f0f|1234                                                                                                                            |111.11  |222.2000   
+ij> commit;
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> insert into allTypes1 values (0, 10, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 200.0e0,
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0F0F', X'1234', 111.11, 222.2);
+1 row inserted/updated/deleted
+ij> delete from alltypes1;
+2 rows inserted/updated/deleted
+ij> drop trigger t1;
+ERROR 42X94: TRIGGER 'T1' does not exist.
+ij> insert into allTypes1 values (0, 10, 100, 1000000,
+					  'duplicate', 'this is duplicated', 'also duplicated',
+					  200.0e0, 200.0e0, 200.0e0,
+					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  X'12af', X'0F0F', X'1234', 111.11, 222.2);
+1 row inserted/updated/deleted
+ij> drop table allTypes1;
+0 rows inserted/updated/deleted
+ij> drop table allTypes2;
+0 rows inserted/updated/deleted
+ij> -- do a join to find changed values just because i can
+drop table x;
+0 rows inserted/updated/deleted
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> create table x (x int);
+0 rows inserted/updated/deleted
+ij> create table removed (x int);
+0 rows inserted/updated/deleted
+ij> -- create trigger t1 after update of x on x referencing old_table as old new_table as new
+-- 	 for each statement mode db2sql
+-- 	 insert into removed select * from old where x not in (select x from new where x < 10);
+insert into x values 1,3,4,5,6,9,666,667,668;
+9 rows inserted/updated/deleted
+ij> update x set x = x+1;
+9 rows inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+2          
+4          
+5          
+6          
+7          
+10         
+667        
+668        
+669        
+ij> select * from removed;
+X          
+-----------
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> drop table removed;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> create table x (x int, y int);
+0 rows inserted/updated/deleted
+ij> create table y (x int, y int);
+0 rows inserted/updated/deleted
+ij> create trigger t1 after insert on x referencing new_table as newtab for each statement mode db2sql
+	insert into y select newtab.x, y+newtab.y from newtab;
+0 rows inserted/updated/deleted
+ij> insert into x values (1,1);
+1 row inserted/updated/deleted
+ij> select * from y;
+X          |Y          
+-----------------------
+1          |2          
+ij> delete from y;
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> -- how about a correlation of a transition variable
+create trigger t1 after insert on x referencing new_table as newtab for each statement mode db2sql
+	insert into y select newtab2.x, y+newtab2.y from newtab newtab2;
+0 rows inserted/updated/deleted
+ij> insert into x values (1,1);
+1 row inserted/updated/deleted
+ij> select * from y;
+X          |Y          
+-----------------------
+1          |2          
+ij> -- lets prove that we are getting object types from row transition
+-- variables.  this is only an issue with row triggers because
+-- they are doing some funky stuff under the covers to make
+-- a column appear just like a normal table column
+drop table x;
+0 rows inserted/updated/deleted
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> create table val (x int);
+0 rows inserted/updated/deleted
+ij> create table x (b char(5) FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> create table y (b char(5) FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> create trigger t1 after insert on x referencing new as new for each row mode db2sql insert into y values (new.b || X'80');
+0 rows inserted/updated/deleted
+ij> insert into x values (X'E0');
+ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'e02020202080' to length 5.
+ij> select * from y;
+B         
+----------
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> create trigger t1 after insert on x referencing new as new for each row mode db2sql insert into y values new.b;
+0 rows inserted/updated/deleted
+ij> insert into x values null;
+1 row inserted/updated/deleted
+ij> select * from y;
+B         
+----------
+NULL      
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> create trigger t1 after insert on x referencing new as new for each row mode db2sql insert into val values length(new.b);
+0 rows inserted/updated/deleted
+ij> insert into x values X'FFE0';
+1 row inserted/updated/deleted
+ij> select * from val;
+X          
+-----------
+5          
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> drop table val;
+0 rows inserted/updated/deleted
+ij> create table x (x dec(7,3));
+0 rows inserted/updated/deleted
+ij> create table y (x dec(8,4));
+0 rows inserted/updated/deleted
+ij> insert into x values 1234.1234, null, 1234.123;
+3 rows inserted/updated/deleted
+ij> select * from x;
+X         
+----------
+1234.123  
+NULL      
+1234.123  
+ij> select * from y;
+X          
+-----------
+ij> create table t1 (col1 int not null primary key, col2 char(20));
+0 rows inserted/updated/deleted
+ij> create table s_t1(col1 int not null primary key, chgType char(20));
+0 rows inserted/updated/deleted
+ij> -- should work
+create trigger trig_delete_2 after delete on t1 referencing OLD_TABLE as OLD for each statement mode db2sql 
+	insert into s_t1 (select col1, 'D'
+	from OLD  where OLD.col1 <> ALL
+	(select col1 from s_t1 where  OLD.col1 = s_t1.col1));
+0 rows inserted/updated/deleted
+ij> drop trigger trig_delete_2;
+0 rows inserted/updated/deleted
+ij> -- should work
+create trigger trig_delete_2 after delete on t1 referencing old_table as OLD for each statement mode db2sql 
+	insert into s_t1 (select col1, 'D'
+	from OLD where OLD.col1 <> ALL
+	(select s_t1.col1 from s_t1, OLD where  OLD.col1 = s_t1.col1));
+0 rows inserted/updated/deleted
+ij> insert into t1 values (5, 'first row'), (3, 'second row'), (9, 'third row'),
+			(4, 'forth row');
+4 rows inserted/updated/deleted
+ij> select * from s_t1;
+COL1       |CHGTYPE             
+--------------------------------
+ij> delete from t1 where col1 = 3 or col1 = 9;
+2 rows inserted/updated/deleted
+ij> select * from s_t1;
+COL1       |CHGTYPE             
+--------------------------------
+3          |D                   
+9          |D                   
+ij> insert into t1 values (9, 'third row'), (3, 'second row'), (7, 'fifth row');
+3 rows inserted/updated/deleted
+ij> delete from t1 where col1 = 3 or col1 = 7;
+2 rows inserted/updated/deleted
+ij> select * from s_t1;
+COL1       |CHGTYPE             
+--------------------------------
+3          |D                   
+9          |D                   
+7          |D                   
+ij> delete from t1;
+3 rows inserted/updated/deleted
+ij> select * from s_t1;
+COL1       |CHGTYPE             
+--------------------------------
+3          |D                   
+9          |D                   
+7          |D                   
+5          |D                   
+4          |D                   
+ij> rollback;
+ij> 

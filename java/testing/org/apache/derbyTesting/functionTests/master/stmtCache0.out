@@ -1,0 +1,50 @@
+ij> --
+-- testing a cache size of 0
+--
+-- see that it starts out empty; 
+select count(*) from new org.apache.derby.diag.StatementCache() as SC;
+1          
+-----------
+0          
+ij> CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> autocommit off;
+ij> -- set up aliases
+run resource 'stmtCacheAliases.subsql';
+ij> --
+-- this script registers the various consistency checks for
+-- statement caching as simple aliases for ease of scripting
+--
+create view SC_CONTENTS as select CAST (SUBSTR (CAST (SQL_TEXT as char(200)), 1, 30) AS CHAR(30)) AS SQL_TEXT from new org.apache.derby.diag.StatementCache() as SCVD;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- see that it starts out empty; 
+select count(*) from SC_CONTENTS;
+1          
+-----------
+0          
+ij> -- see that it stays empty; 
+select count(*) from SC_CONTENTS;
+1          
+-----------
+0          
+ij> -- expect everything to be okay
+values consistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> commit;
+ij> -- clear aliases
+run resource 'stmtCacheAliasesRemove.subsql';
+ij> --
+-- this script de-registers the various consistency checks for
+-- statement caching
+--
+drop view SC_CONTENTS;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> 

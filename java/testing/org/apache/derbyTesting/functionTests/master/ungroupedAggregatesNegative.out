@@ -1,0 +1,30 @@
+ij> -- negative tests for ungrouped aggregates
+-- create a table
+create table t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values 1,2,3;
+3 rows inserted/updated/deleted
+ij> -- mix aggregate and non-aggregate expressions in the select list
+select c1, max(c1) from t1;
+ERROR 42Y35: Column reference 'C1' is invalid. When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ij> select c1 * max(c1) from t1;
+ERROR 42Y35: Column reference 'C1' is invalid. When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ij> -- aggregate in where clause
+select c1 from t1 where max(c1) = 1;
+ERROR 42903: Invalid use of an aggregate function.
+ij> -- aggregate in ON clause of inner join
+select * from t1 join t1 as t2 on avg(t2.c1) > 10;
+ERROR 42Z07: Aggregates are not permitted in the ON clause.
+ij> -- correlated subquery in select list
+select max(c1), (select t2.c1 from t2 where t1.c1 = t2.c1) from t1;
+ERROR 42Y29: The SELECT list of a non-grouped query contains at least 1 invalid expression.  When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ij> -- noncorrelated subquery that returns more than 1 row
+select max(c1), (select t2.c1 from t2) from t1;
+ERROR 21000: Scalar subquery is only allowed to return a single row.
+ij> -- drop the table
+drop table t1
+;
+0 rows inserted/updated/deleted
+ij> 

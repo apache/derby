@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="GENERATOR" content="Quadralay WebWorks Publisher 5.0.4">
+<meta name="TEMPLATEBASE" content="Dynamic HTML">
+<meta name="LASTUPDATED" content="06/25/02 12:10:42">
+<link rel="StyleSheet" href="../../csfull.css" type="text/css" media="screen">
+<title>Simple JDBC Application</title>
+
+<script language="JavaScript">
+<!--
+var isNav, isIE, inFrame;
+
+if (parseInt(navigator.appVersion) >= 4) {
+    if (navigator.appName == "Netscape") {
+	isNav = true
+	} else {
+	isIE = true
+	}
+}
+if (parent.frames.length > 0)
+    inFrame = true;
+else
+	inFrame = false;
+
+
+
+
+//-->
+</script>
+
+
+
+</head>
+<body>
+
+
+
+
+
+<h1 class="Title">
+  <a name="811209"> </a>Simple JDBC Application
+</h1>
+ 
+
+<ul class="ChapterTOC">  <li class="ChapterTOC"><a name="820053"> </a>  <a href="#820067">Overview</a>
+  <li class="ChapterTOC"><a name="820061"> </a>  <a href="#816689">What's Included?</a>
+  <li class="ChapterTOC"><a name="820065"> </a>  <a href="#816722">How to Run This Sample Application in an Embedded Environment</a>
+</ul>
+<h2 class="Heading2"><a name="820067"> </a>Overview
+</h2>
+ <p class="Body">
+  <a name="820012"> </a>This example program is a very minimal JDBC application. JDBC is the primary API for interacting with IBM Cloudscape. This program accomplishes the following tasks:
+</p><ul class="Normal">  <li class="Normal"><a name="817266"> </a>starts up the  Cloudscape engine, if necessary
+  <li class="Normal"><a name="817275"> </a>creates and connects to a database
+  <li class="Normal"><a name="817276"> </a>creates a table
+  <li class="Normal"><a name="817277"> </a>inserts data
+  <li class="Normal"><a name="817278"> </a>updates data
+  <li class="Normal"><a name="817279"> </a>selects data
+  <li class="Normal"><a name="817280"> </a>drops a table
+  <li class="Normal"><a name="817281"> </a>disconnects
+  <li class="Normal"><a name="817282"> </a>shuts down Cloudscape, if necessary
+</ul>
+<p class="Body">
+  <a name="817267"> </a>The application runs in an embedded environment. This is the simplest Cloudscape environment. The application starts up an instance of Cloudscape within the current JVM and shuts down the instance before it completes. No network access is involved. In an embedded environment, only one application at a time can access a database.
+</p><h2 class="Heading2"><a name="816689"> </a>What's Included?
+</h2>
+ <p class="Body">
+  <a name="816691"> </a>Before running this demo, you should see the following files and directories in the <em class="fileName">/demo/programs/simple</em> directory:
+</p><ul class="Normal">  <li class="Normal"><a name="816694"> </a><em class="fileName">example.html</em>
+
+ 
+
+<p class="BodyRelative">
+  <a name="816695"> </a>This file.
+</p>
+  <li class="Normal"><a name="816696"> </a><em class="fileName">
+<a href="SimpleApp.java" target="_top">SimpleApp.java</a></em>
+
+ 
+
+<p class="BodyRelative">
+  <a name="816697"> </a>Source code for the example program that starts up Cloudscape, creates a database, does some inserts and updates, and then shuts down Cloudscape. <em class="Emphasis">Examine this file to see how the application behaves in the various environments</em>.
+</p>
+  <li class="Normal"><a name="816699"> </a><em class="fileName">
+<a href="derby.properties" target="_top">derby.properties</a></em>
+
+ 
+
+<p class="BodyRelative">
+  <a name="816700"> </a>Properties file for the Cloudscape system.
+</p>
+  <li class="Normal"><a name="816701"> </a><em class="fileName">SimpleApp.class</em>
+
+ 
+
+<p class="BodyRelative">
+  <a name="816702"> </a>The compiled class file.
+</p>
+</ul>
+<p class="Body">
+  <a name="816704"> </a>After running the demo, you will see some new files and directories:
+</p><ul class="Normal">  <li class="Normal"><a name="816706"> </a><em class="fileName">derbyDB</em> (directory)
+
+ 
+
+<p class="BodyRelative">
+  <a name="816707"> </a>The directory that makes up the <em class="fileName">derbyDB</em> database. You must not modify anything in this directory, or you will corrupt the database. The directory was created when the application connected with Cloudscape, using the attribute <em class="Emphasis">create=true</em> in the database connection URL. The database name, <em class="Emphasis">derbyDB</em>, was also set in the database connection URL. 
+</p>
+  <li class="Normal"><a name="816712"> </a><em class="fileName">derbyDB\log</em> (directory)
+
+ 
+
+<p class="BodyRelative">
+  <a name="816713"> </a>The directory that holds the database log for the <em class="fileName">derbyDB</em> database. 
+</p>
+  <li class="Normal"><a name="816714"> </a><em class="fileName">derbyDB\seg0</em> (directory)
+
+ 
+
+<p class="BodyRelative">
+  <a name="816715"> </a>The directory that holds the data for the <em class="fileName">derbyDB</em> database.
+</p>
+  <li class="Normal"><a name="816716"> </a><em class="fileName">derbyDB\service.properties</em>
+
+ 
+
+<p class="BodyRelative">
+  <a name="816717"> </a>An internal file that holds boot-time configuration parameters for the <em class="fileName">derbyDB</em> database; do not edit.
+</p>
+  <li class="Normal"><a name="816719"> </a><em class="fileName">derby.LOG</em>
+
+ 
+
+<p class="BodyRelative">
+  <a name="816720"> </a>The log file with Cloudscape progress and error messages.
+</p>
+</ul>
+<h2 class="Heading2"><a name="816722"> </a>How to Run This Sample Application in an Embedded Environment
+</h2>
+ <ol type="1">  <li class="Normal" value="1"><a name="816724"> </a>Open a command window and change directories to the <em class="fileName">/demo/programs/simple</em> directory.
+  <li class="Normal" value="2"><a name="816726"> </a>If you haven't set it already on a system-wide basis, set the CLOUDSCAPE_INSTALL environment variable to the location of the directory where you installed the Cloudscape software in the current command window.
+  <li class="Normal" value="3"><a name="819207"> </a>In the command window, set CLASSPATH as follows:<p><table border="4" cellspacing="0" cellpadding="5" bgcolor="#FAF0E6">
+  <caption class="TableTitle"></caption>
+  <tr valign="bottom">
+    <th><a name="819182"> </a><p class="CellHeading">Library or Directory</p></th>
+    <th><a name="819184"> </a><p class="CellHeading">Path to Library or Directory</p></th>
+  </tr>
+  <tr valign="top">
+    <td class="DefaultTable"><a name="821049"> </a><p class="CellBody">main Cloudscape library for the product:</p>
+<a name="819190"> </a><p class="CellBody"><em class="fileName">derby.jar</em></p>
+</td>
+    <td class="DefaultTable"><a name="819195"> </a><p class="CellBody"><em class="fileName">%CLOUDSCAPE_INSTALL%/lib/derby.jar</em></p>
+</td>
+  </tr>
+  <tr valign="top">
+    <td class="DefaultTable"><a name="819204"> </a><p class="CellBody">current directory</p>
+</td>
+    <td class="DefaultTable"><a name="819206"> </a><p class="CellBody">.</p>
+</td>
+  </tr>
+</table>
+
+
+</p>
+
+
+ 
+
+<p class="BodyRelative">
+  <a name="819218"> </a><p><table border="0" cellpadding="3" cellspacing="2" bgcolor="Silver">
+  <tr valign="top">
+    <td class="BoxTable"><h3 class="BoxHead">
+  <a name="819210"> </a>A Note on Setting Class Path for an Embedded Environment
+</h3>
+<a name="819214"> </a><p class="CellBody">Cloudscape provides a script to help you get started setting class path in <br> <em class="fileName">%CLOUDSCAPE_INSTALL%/frameworks/embedded/bin</em>. This script is called<em class="fileName"> setEmbeddedCP </em>and comes in two flavors: one for Windows environment (this file ends with <em class="fileName">.bat</em>) and one for UNIX environments (this file ends with <em class="fileName">.ksh</em>). For users working in those environments, copying the commands in this file will help you get started setting the class path. </p>
+</td>
+  </tr>
+</table>
+</p>
+
+</p>
+  <li class="Normal" value="4"><a name="819222"> </a>Run Cloudscape's utility for testing the class path for an embedded environment. You will provide the arguments <em class="Emphasis">embedded</em> to indicate an embedded environment and <em class="Emphasis">SimpleApp.class</em> to test for the presence of the <em class="javaObject">SimpleApp</em> class.
+
+ 
+
+<p class="BodyRelative">
+  <a name="818908"> </a>You run the utility like this:
+</p>
+<p class="CommandLine"><a name="818909">java org.apache.derby.tools.sysinfo -cp <em class="Emphasis">arguments</em></a></p>
+ 
+
+<p class="BodyRelative">
+  <a name="818907"> </a>So for the arguments you need here, run it like this (all on one line):
+</p>
+<p class="CommandLine"><a name="818910">java org.apache.derby.tools.sysinfo -cp embedded SimpleApp.class</a></p>
+ 
+
+<p class="BodyRelative">
+  <a name="820871"> </a>If your environment is set up correctly, the utility shows output indicating success. It looks like this:
+</p>
+<p class="OutputRelative"><a name="820884"> </a>FOUND IN CLASS PATH:</p>
+<p class="OutputRelative"><a name="820886"> </a>  Cloudscape embedded engine library (derby.jar)</p>
+<p class="OutputRelative"><a name="820887"> </a></p>
+<p class="OutputRelative"><a name="820893"> </a>   user-specified class (SimpleApp)</p>
+<p class="OutputRelative"><a name="820896"> </a>SUCCESS: All Cloudscape-Related classes for embedded environment found in class path.</p>
+
+ 
+
+<p class="BodyRelative">
+  <a name="820878"> </a>If something is missing from your class path environment, the utility indicates what is missing. For example, if you neglected to add the directory containing the SimpleApp class to your class path, the utility would indicate as such:
+</p>
+<p class="OutputRelative"><a name="820925"> </a>Testing for presence of Cloudscape-related libraries for embedded environment.</p>
+<p class="OutputRelative"><a name="820927"> </a>FOUND IN CLASS PATH:</p>
+<p class="OutputRelative"><a name="820956"> </a></p>
+<p class="OutputRelative"><a name="820929"> </a>   Cloudscape embedded engine library (derby.jar)</p>
+<p class="OutputRelative"><a name="820934"> </a></p>
+<p class="OutputRelative"><a name="820937"> </a>NOT FOUND IN CLASS PATH:</p>
+<p class="OutputRelative"><a name="820958"> </a>   user-specified class (SimpleApp)</p>
+<p class="OutputRelative"><a name="820940"> </a>    (SimpleApp not found.)</p>
+  <li class="Normal" value="5"><a name="818903"> </a>Once you have your environment set up correctly, execute the application from the same directory (<em class="fileName">/demo/programs/simple</em>): 
+<p class="CommandLine"><a name="816737">java SimpleApp</a></p></ol>
+<p class="Body">
+  <a name="818687"> </a>A successful run produces the following output: 
+</p><p class="Output"><a name="820970"> </a>SimpleApp starting in embedded mode.
+<br>
+<a name="820971"> </a>Loaded the appropriate driver.
+<br>
+<a name="820972"> </a>Connected to and created database derbyDB
+<br>
+<a name="820973"> </a>Created table derbyDB
+<br>
+<a name="820974"> </a>Inserted 1956 Webster
+<br>
+<a name="820975"> </a>Inserted 1910 Union
+<br>
+<a name="820976"> </a>Updated 1956 Webster to 180 Grand
+<br>
+<a name="820977"> </a>Updated 180 Grand to 300 Lakeshore
+<br>
+<a name="820978"> </a>Verified the rows
+<br>
+<a name="820979"> </a>Dropped table derbyDB
+<br>
+<a name="820980"> </a>Closed result set and statement
+<br>
+<a name="820981"> </a>Committed transaction and closed connection
+<br>
+<a name="820982"> </a>Database shut down normally
+<br>
+<a name="818289"> </a>SimpleApp finished
+<br>
+</p>
+<a href="http://www.ibm.com" target="_top"><img src="../../images/IBMLOGO.gif" border="0" width="180" vspace="12"></a><br>
+
+
+<p class="NavBarVersion">IBM Cloudscape Version 10</p>
+
+<address class="Footer"><br>
+Copyright(c) INTERNATIONAL BUSINESS MACHINES CORPORATION, 1999, 2004 ALL RIGHTS RESERVED.
+</address>
+
+</body>
+</html>

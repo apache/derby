@@ -1,0 +1,510 @@
+Test declaredGlobalTempTableJava starting
+TEST1 : Test declared temporary table with ON COMMIT DELETE ROWS and holdable cursors
+Temp table t1 with held open cursors on it. Data should be preserved in t1 at commit time
+	 1
+	 -
+	{2}
+Temp tables t2 & t3 with one held open cursor on them together. Data should be preserved in t2 & t3 at commit time
+	 1
+	 -
+	{2}
+	 1
+	 -
+	{2}
+Temp table t4 with one held cursor but it is closed before commit. Data should be deleted from t4 at commit time
+	 1
+	 -
+	{2}
+After commit, verify all the 4 tables
+Temp table t1 will have the data intact after commit
+	 1
+	 -
+	{2}
+Temp table t2 will have the data intact after commit
+	 1
+	 -
+	{2}
+Temp table t3 will have the data intact after commit
+	 1
+	 -
+	{2}
+Temp table t4 will have no data after commit
+	 1
+	 -
+	{0}
+TEST1 PASSED
+TEST1a : Test declared temporary table with ON COMMIT DELETE ROWS and holdable cursors on prepared statement
+Temp table t1 with held open cursors on it. Data should be preserved in t1 at commit time
+	 1
+	 -
+	{2}
+Temp table t2 with one held cursor but it is closed before commit. Data should be deleted from t2 at commit time
+	 1
+	 -
+	{2}
+After commit, verify both the tables
+Temp table t1 will have the data intact after commit
+	 1
+	 -
+	{2}
+Temp table t2 will have no data after commit
+	 1
+	 -
+	{0}
+TEST1a PASSED
+TEST2 : Declare a temporary table with ON COMMIT PRESERVE ROWS and various combinations of holdability
+Temp table t1 with held open cursors on it. Data should be preserved, holdability shouldn't matter
+	 1
+	 -
+	{2}
+After commit, verify the table
+Temp table t1 will have data after commit
+	 1
+	 -
+	{2}
+TEST2 PASSED
+TEST3A : Savepoint and Rollback behavior
+ In the transaction:
+  Create savepoint1 and declare temp table t1
+	 C11,C12
+	 --- ---
+	{11,1}
+  Create savepoint 2, drop temp table t1, rollback savepoint 2
+Expected message: Table 'SESSION.T1' does not exist.
+  select should pass, rollback savepoint 1, select should fail
+	 C11,C12
+	 --- ---
+Expected message: Table 'SESSION.T1' does not exist.
+TEST3A PASSED
+TEST3B : Savepoint and Rollback behavior
+ In the transaction:
+  Create savepoint1 and declare temp table t1
+  Create savepoint2 and declare temp table t2
+  Release savepoint 1 and select from temp table t1 & t2
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+  Drop temp table t2(explicit drop), rollback transaction(implicit drop of t1)
+  Select from temp table t1 and t2 will fail
+Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table 'SESSION.T2' does not exist.
+TEST3B PASSED
+TEST3C : Savepoint and Rollback behavior
+ In the transaction:
+  Create savepoint1 and declare temp table t1
+  Create savepoint2 and declare temp table t2
+  Release savepoint 1 and select from temp table t1 and t2
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+  Create savepoint3 and rollback savepoint3(should not touch t1 and t2)
+  select from temp tables t1 and t2 should pass
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+  Rollback transaction and select from temp tables t1 and t2 should fail
+Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table 'SESSION.T2' does not exist.
+TEST3C PASSED
+TEST3D : Savepoint and Rollback behavior
+ In the transaction:
+  Create savepoint1 and declare temp table t1
+  Create savepoint2 and drop temp table t1
+  Rollback savepoint2 and select temp table t1
+	 C11,C12
+	 --- ---
+ Commit transaction and select temp table t1
+	 C11,C12
+	 --- ---
+TEST3D PASSED
+TEST3E : Savepoint and Rollback behavior
+ In the transaction:
+  Create savepoint1 and declare temp table t1
+  Create savepoint2 and drop temp table t1
+  Rollback savepoint 1 and select from temp table t1 should fail
+Expected message: Table 'SESSION.T1' does not exist.
+TEST3E PASSED
+TEST3F : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 and drop temp table t1
+	 C11,C12
+	 --- ---
+  rollback, select on t1 should fail
+Expected message: Table 'SESSION.T1' does not exist.
+TEST3F PASSED
+TEST3G : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 and commit
+	 C11,C12
+	 --- ---
+ In the transaction:
+  drop temp table t1 and rollback, select on t1 should pass
+	 C11,C12
+	 --- ---
+TEST3G PASSED
+TEST3H : Savepoint and commit behavior
+ In the transaction:
+  declare temp table t1 and commit
+	 C11,C12
+	 --- ---
+ In the transaction:
+  drop temp table t1 and commit, select on t1 should fail
+Expected message: Table 'SESSION.T1' does not exist.
+TEST3H PASSED
+TEST3I : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 and rollback
+	 C11,C12
+	 --- ---
+Expected message: Table 'SESSION.T1' does not exist.
+TEST3I PASSED
+TEST3J : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 with 2 columns and commit
+	 C11,C12
+	 --- ---
+	{11,11}
+  Create savepoint1 and drop temp table t1 with 2 columns
+  declare temp table t1 but this time with 3 columns
+	 C11,C12,C13
+	 --- --- ---
+	{22,22,22}
+  Create savepoint2 and drop temp table t1 with 3 columns
+  select from temp table t1 here should have 2 columns
+	 C11,C12
+	 --- ---
+TEST3J PASSED
+TEST3K : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 & t2, insert few rows and commit
+	 C11,C12
+	 --- ---
+	{11,1}
+	 C21,C22
+	 --- ---
+	{21,1}
+ In the next transaction, insert couple more rows in t1 & t2 and 
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+  Create savepoint1 and update some rows in t1 and inspect the data
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,3}
+  update t2 with where clause such that no rows get modified in t2 and inspect the data
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+  Rollback to savepoint1 and we should loose all the rows in t1
+	 C11,C12
+	 --- ---
+  temp table t2 should also have no rows because attempt was made to modify it (even though nothing actually got modified in t2 in the savepoint)
+	 C21,C22
+	 --- ---
+  Commit the transaction and should see no data in t1 and t2
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+TEST3K PASSED
+TEST3L : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 & t2, insert few rows and commit
+	 C11,C12
+	 --- ---
+	{11,1}
+	 C21,C22
+	 --- ---
+	{21,1}
+ In the next transaction, insert couple more rows in t1 & t2 and 
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+  Create savepoint1 and update some rows in t1 and inspect the data
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,3}
+  update t2 with where clause such that no rows get modified in t2 and inspect the data
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+  Rollback to savepoint1 and we should loose all the rows in t1
+	 C11,C12
+	 --- ---
+  temp table t2 should also have no rows because attempt was made to modfiy it (even though nothing actually got modified in t2 in the savepoint)
+	 C21,C22
+	 --- ---
+  Rollback the transaction and should see no data in t1 and t2
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+TEST3L PASSED
+TEST3M : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 & t2 & t3 & t4, insert few rows and commit
+	 C11,C12
+	 --- ---
+	{11,1}
+	 C21,C22
+	 --- ---
+	{21,1}
+	 C31,C32
+	 --- ---
+	{31,1}
+	 C41,C42
+	 --- ---
+	{41,1}
+ In the next transaction, insert couple more rows in t1 & t2 & t3 and 
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	 C31,C32
+	 --- ---
+	{31,1}
+	{32,2}
+  Create savepoint1 and delete some rows from t1 and inspect the data in t1
+	 C11,C12
+	 --- ---
+	{11,1}
+  Create savepoint2 and delete some rows from t2 this time and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+  Release savepoint2 and now savepoint1 should keep track of changes made to t1 and t2, inspect the data in t1 & t2
+	 C11,C12
+	 --- ---
+	{11,1}
+	 C21,C22
+	 --- ---
+	{21,1}
+  Rollback savepoint1 and should see no data in t1 and t2, inspect the data
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+  Should see data in t3 since it was not touched in the savepoint that was rolled back
+	 C31,C32
+	 --- ---
+	{31,1}
+	{32,2}
+  Rollback the transaction and should see no data in t1 and t2 and t3
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+	 C31,C32
+	 --- ---
+  Should see data in t4 since it was not touched in the transaction that was rolled back
+	 C41,C42
+	 --- ---
+	{41,1}
+TEST3M PASSED
+TEST3N : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 & t2 & t3 & t4, insert few rows and commit
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	 C31,C32
+	 --- ---
+	{31,1}
+	 C41,C42
+	 --- ---
+	{41,1}
+ In the next transaction, insert couple more rows in t3 
+	 C31,C32
+	 --- ---
+	{31,1}
+	{31,2}
+  Create savepoint1 and delete some rows from t1 and inspect the data in t1
+	 C11,C12
+	 --- ---
+	{11,1}
+  delete from t2 with where clause such that no rows are deleted from t2 and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+  Create savepoint2 and delete some rows from t2 this time and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+  Rollback the transaction and should see no data in t1 and t2 and t3
+	 C11,C12
+	 --- ---
+	 C21,C22
+	 --- ---
+	 C31,C32
+	 --- ---
+  Should see data in t4 since it was not touched in the transaction that was rolled back
+	 C41,C42
+	 --- ---
+	{41,1}
+TEST3N PASSED
+TEST3O : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1 & t2, insert few rows and commit
+	 C11,C12
+	 --- ---
+	{11,1}
+	 C21,C22
+	 --- ---
+	{21,1}
+ In the next transaction, insert couple more rows in t1 
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+  Create savepoint1 and insert one row in t2 and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+  Rollback savepoint1 and should see no data in t2 but t1 should have data, inspect the data
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+	 C21,C22
+	 --- ---
+  Commit the transaction and should see no data in t2 but t1 should have data
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+	 C21,C22
+	 --- ---
+TEST3O PASSED
+TEST3P : Savepoint and Rollback behavior
+ In the transaction:
+  declare temp table t1, insert few rows and commit
+ In the transaction:
+  Create savepoint1 and insert some rows into t1 and inspect the data in t1
+  Release savepoint1 and now transaction should keep track of changes made to t1, inspect the data in t1
+	 C11,C12
+	 --- ---
+	{11,1}
+	{12,2}
+	{13,3}
+  Rollback the transaction and should still see no data in t1
+	 C11,C12
+	 --- ---
+TEST3P PASSED
+TEST3Q : Prepared statement test - DML and rollback behavior
+ In the transaction:
+  Declare temp table t2, insert / update / delete data using various prepared statements and commit
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+ In the next transaction:
+  Create savepoint1 and insert some rows into t2 using prepared statement and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	{23,2}
+  Create savepoint2 and update row inserted in savepoint1 using prepared statement and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	{23,3}
+  rollback savepoint2 and should loose all the data from t2
+	 C21,C22
+	 --- ---
+  Create savepoint3 and insert some rows into t2 using prepared statement and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	{23,333}
+  Create savepoint4 and update row inserted in savepoint3 using prepared statement and inspect the data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	{23,3}
+  Release savepoint4 and inspect the data in t2, then delete a row from t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+	{23,3}
+  Commit transaction and should see data data in t2
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,2}
+TEST3Q PASSED
+TEST4 : Test declared temporary table with ON COMMIT DELETE ROWS and holdable cursors and temp table as part of subquery
+Temp table t1 with no direct held cursor open on it. Data should be deleted from t1 at commit time
+	 1
+	 -
+	{2}
+	 1
+	 -
+	{0}
+Insert into real table using temporary table data on a statement with holdability set to true
+After commit, verify both the tables
+Temp table t1 will have no data after commit
+	 1
+	 -
+	{0}
+Physical table t1 will have 2 rows after commit
+	 1
+	 -
+	{2}
+TEST4 PASSED
+TEST5 : Temporary tables declared in a pooled connection should get dropped when that pooled connection is closed
+ In the first connection handle to the pooled connection, create physical session schema, create table t1 in it
+ Insert some rows in physical SESSION.t1 table. Inspect the data.
+	 C21
+	 ---
+	{11}
+	{12}
+	{13}
+ Next declare a temp table with same name as physical table in SESSION schema.
+ Insert some rows in temporary table SESSION.t1. Inspect the data
+	 C11,C12
+	 --- ---
+	{11,1}
+ Now close the connection handle to the pooled connection
+ Do another getConnection() to get a new connection handle to the pooled connection
+ In this new handle, a select * from SESSION.t1 should be looking at the physical session table
+	 C21
+	 ---
+	{11}
+	{12}
+	{13}
+TEST5 PASSED
+PASS
+Test declaredGlobalTempTable finished

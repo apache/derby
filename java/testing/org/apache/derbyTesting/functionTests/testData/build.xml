@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<project default="testdata" basedir="../../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+
+  <!-- derby testing specific properties files -->
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+
+<!-- Targets -->
+  <target name="testdata" depends="copyfiles"/>
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/v1">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v1"
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v1/copyfiles.ant"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/v2">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v2"
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v2/copyfiles.ant"/>
+    </copy>
+  </target>
+
+</project>
+

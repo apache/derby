@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<project default="suites" basedir=".">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/> 
+  <property file="${properties.dir}/compilepath.properties"/> 
+
+<!-- Targets -->
+  <target name="suites" depends="copyfiles"/>
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.suites.dir}">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/suites" includes="*.runall,*.properties"/>
+    </copy>
+  </target>
+
+</project>
+

@@ -1,0 +1,2961 @@
+ij> --no cascade delete , just default check
+create table t1(a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(b int references t1(a));
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> delete from t1;
+ERROR 23503: DELETE on table 'T1' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --simple cascade delete
+create table t2(b int references t1(a) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> delete from t1 where a =2 ;
+1 row inserted/updated/deleted
+ij> select * from t2;
+B          
+-----------
+1          
+3          
+4          
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t2;
+B          
+-----------
+ij> --multiple rows in the dependent table for a single row in the parent
+insert into t1 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> delete from t1 where a = 3 ;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+4          
+ij> delete from t1;
+3 rows inserted/updated/deleted
+ij> select * from t2;
+B          
+-----------
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --chain of cascade delete 
+--every table has one depedent table referencing it
+create table t1 (a int not null primary key ) ;
+0 rows inserted/updated/deleted
+ij> create table t2 (b int not null primary key  references t1(a) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> create table t3 (c int not null primary key  references t2(b) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create table t4 (d int not null primary key  references t3(c) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create table t5 (e int not null primary key  references t4(d) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t2  values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t4 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t5 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> delete from t1 where a = 5;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t3;
+C          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t4;
+D          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t5;
+E          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> delete from t1 ;
+7 rows inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+ij> select * from t2;
+B          
+-----------
+ij> select * from t3;
+C          
+-----------
+ij> select * from t4;
+D          
+-----------
+ij> select * from t5;
+E          
+-----------
+ij> --check the prepared statement cascade delete
+insert into t1 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t2  values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t4 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t5 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?';
+ij> execute sdelete using 'values (2)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t3;
+C          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t4;
+D          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t5;
+E          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> prepare sdelete1 as 'delete from t2 where b = ?';
+ij> execute sdelete1 using 'values (3)';
+1 row inserted/updated/deleted
+ij> --Make sure the ps recompile on a DDL action
+drop table t5 ;
+0 rows inserted/updated/deleted
+ij> execute sdelete using 'values (5)';
+1 row inserted/updated/deleted
+ij> execute sdelete1 using 'values (6)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+4          
+7          
+8          
+ij> select * from t3;
+C          
+-----------
+1          
+4          
+7          
+8          
+ij> select * from t4;
+D          
+-----------
+1          
+4          
+7          
+8          
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3 ;
+0 rows inserted/updated/deleted
+ij> execute sdelete using 'values (7)';
+1 row inserted/updated/deleted
+ij> execute sdelete1 using 'values (8)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+3          
+4          
+6          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+4          
+ij> remove sdelete;
+ij> remove sdelete1;
+ij> autocommit on;
+ij> delete from t1 ;
+5 rows inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+ij> select * from t2;
+B          
+-----------
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --two foreign keys and less number of columns on the dependent table.
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t1(a) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
+3 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9) ;
+3 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (4) , (7) ;
+3 rows inserted/updated/deleted
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          |C          
+-----------------------------------
+ij> select * from t2;
+X          
+-----------
+ij> select * from t3;
+Y          
+-----------
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --triggers on the  dependen tables 
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t1(a) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create table t4(z int , op char(2));
+0 rows inserted/updated/deleted
+ij> --create triggers such a way that the all deleted row
+--in t2 are inserted into t4
+create trigger trig_delete after DELETE on t2
+referencing old as deletedrow
+for each row mode db2sql
+insert into t4 values(deletedrow.x , 'bd');
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
+3 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9) ;
+3 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (4) , (7) ;
+3 rows inserted/updated/deleted
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t4;
+Z          |OP  
+----------------
+3          |bd  
+6          |bd  
+9          |bd  
+ij> select * from t1;
+A          |B          |C          
+-----------------------------------
+ij> select * from t2;
+X          
+-----------
+ij> select * from t3;
+Y          
+-----------
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --test for multiple fkeys on the same table referrring to
+--different columns on the parent table.
+create table  t1(a int not null unique , b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table  t2(x int references t1(a) ON DELETE CASCADE ,
+y int references t1(b) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1 , 4) , (2,3) , (3, 2) , (4, 1);
+4 rows inserted/updated/deleted
+ij> insert into t2 values(1 , 4) , (2,3) , (3, 2) , (4, 1);
+4 rows inserted/updated/deleted
+ij> delete from t1;
+4 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+ij> select * from t2;
+X          |Y          
+-----------------------
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --check for the unique nulls case
+--check for sefl referencing
+---ON DELETE SET NULL TEST CASES
+--simple cascade delete set to null
+create table t1(a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(b int references t1(a) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> delete from t1 where a =2 ;
+1 row inserted/updated/deleted
+ij> select * from t2;
+B          
+-----------
+1          
+3          
+4          
+NULL       
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t2;
+B          
+-----------
+NULL       
+NULL       
+NULL       
+NULL       
+ij> --multiple rows in the dependent table for a single row in the parent
+insert into t1 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> delete from t1 where a = 3 ;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+4          
+ij> delete from t1;
+3 rows inserted/updated/deleted
+ij> select * from t2;
+B          
+-----------
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --chain of cascade delete 
+--every table has one depedent table referencing it
+create table t1 (a int not null primary key ) ;
+0 rows inserted/updated/deleted
+ij> create table t2 (b int not null primary key  references t1(a) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> create table t3 (c int not null primary key  references t2(b) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create table t4 (d int not null primary key  references t3(c) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create table t5 (e int references t4(d) ON DELETE SET NULL) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t2  values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t4 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t5 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> delete from t1 where a = 5;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t3;
+C          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t4;
+D          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t5;
+E          
+-----------
+1          
+2          
+3          
+4          
+6          
+7          
+8          
+NULL       
+ij> delete from t1 ;
+7 rows inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+ij> select * from t2;
+B          
+-----------
+ij> select * from t3;
+C          
+-----------
+ij> select * from t4;
+D          
+-----------
+ij> select * from t5;
+E          
+-----------
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+ij> --check the prepared statement cascade delete
+insert into t1 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t2  values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t4 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t5 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?';
+ij> execute sdelete using 'values (2)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t3;
+C          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t4;
+D          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> select * from t5;
+E          
+-----------
+1          
+3          
+4          
+5          
+6          
+7          
+8          
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+ij> prepare sdelete1 as 'delete from t2 where b = ?';
+ij> execute sdelete1 using 'values (3)';
+1 row inserted/updated/deleted
+ij> --Make sure the ps recompile on a DDL action
+drop table t5 ;
+0 rows inserted/updated/deleted
+ij> execute sdelete using 'values (5)';
+1 row inserted/updated/deleted
+ij> execute sdelete1 using 'values (6)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+3          
+4          
+6          
+7          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+4          
+7          
+8          
+ij> select * from t3;
+C          
+-----------
+1          
+4          
+7          
+8          
+ij> select * from t4;
+D          
+-----------
+1          
+4          
+7          
+8          
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3 ;
+0 rows inserted/updated/deleted
+ij> execute sdelete using 'values (7)';
+1 row inserted/updated/deleted
+ij> execute sdelete1 using 'values (8)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+3          
+4          
+6          
+8          
+ij> select * from t2;
+B          
+-----------
+1          
+4          
+ij> remove sdelete;
+ij> remove sdelete1;
+ij> autocommit on;
+ij> delete from t1 ;
+5 rows inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+ij> select * from t2;
+B          
+-----------
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --two foreign keys and less number of columns on the dependent table.
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t1(a) ON DELETE SET NULL ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
+3 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9) ;
+3 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (4) , (7) ;
+3 rows inserted/updated/deleted
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          |C          
+-----------------------------------
+ij> select * from t2;
+X          
+-----------
+ij> select * from t3;
+Y          
+-----------
+NULL       
+NULL       
+NULL       
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --triggers on the  dependen tables 
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int references t1(c) ON DELETE SET NULL ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t1(a) ON DELETE SET NULL) ;
+0 rows inserted/updated/deleted
+ij> create table t4(z int , op char(2));
+0 rows inserted/updated/deleted
+ij> --create triggers such a way that the all deleted row
+--in t2 are inserted into t4
+create trigger trig_update after UPDATE on t2
+referencing old as updatedrow
+for each row mode db2sql
+insert into t4 values(updatedrow.x , 'bu');
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
+3 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9) ;
+3 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (4) , (7) ;
+3 rows inserted/updated/deleted
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t4;
+Z          |OP  
+----------------
+3          |bu  
+6          |bu  
+9          |bu  
+ij> select * from t1;
+A          |B          |C          
+-----------------------------------
+ij> select * from t2;
+X          
+-----------
+NULL       
+NULL       
+NULL       
+ij> select * from t3;
+Y          
+-----------
+NULL       
+NULL       
+NULL       
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --test for multiple fkeys on the same table referrring to
+--different columns on the parent table.
+create table  t1(a int not null unique , b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table  t2(x int references t1(a) ON DELETE SET NULL ,
+y int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1 , 4) , (2,3) , (3, 2) , (4, 1);
+4 rows inserted/updated/deleted
+ij> insert into t2 values(1 , 4) , (2,3) , (3, 2) , (4, 1);
+4 rows inserted/updated/deleted
+ij> delete from t1;
+4 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+ij> select * from t2;
+X          |Y          
+-----------------------
+NULL       |4          
+NULL       |3          
+NULL       |2          
+NULL       |1          
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table  t1(a int not null unique , b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table  t2(x int references t1(a) ON DELETE SET NULL ,
+y int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1 , 4) , (2,3) , (3, 2) , (4, 1);
+4 rows inserted/updated/deleted
+ij> insert into t2 values(1 , 3) , (2,3) , (3, 4) , (4, 1);
+4 rows inserted/updated/deleted
+ij> delete from t1 where a =1 ;
+1 row inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --following is ACTAULL CASCADE DELETE CASE
+create table  t1(a int not null unique , b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table  t2(x int references t1(a) ON DELETE CASCADE ,
+y int references t1(b) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1 , 4) , (2,3) , (3, 2) , (4, 1);
+4 rows inserted/updated/deleted
+ij> insert into t2 values(1 , 3) , (2,3) , (3, 4) , (4, 1);
+4 rows inserted/updated/deleted
+ij> delete from t1 where a =1 ;
+1 row inserted/updated/deleted
+ij> --Above delete should delete two rows.
+drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (a int not null primary key ) ;
+0 rows inserted/updated/deleted
+ij> create table t2 (b int not null primary key  references t1(a) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> insert into t2  values (1) , (2) , (3) , (4) , (5) , (6) , (7) , (8) ;
+8 rows inserted/updated/deleted
+ij> delete from t1;
+ERROR 23503: DELETE on table 'T1' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> select * from t2;
+B          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --test for DELETE RESTRICT
+--first check with an after trigger and NO ACTION
+create table t1(a int not null unique, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE NO ACTION , y int);
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete after DELETE on t1
+referencing old as deletedrow
+for each row mode db2sql
+delete from t2 where x = deletedrow.a;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1 , 2);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2 , 3);
+1 row inserted/updated/deleted
+ij> insert into t2 values(1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2, 3);
+1 row inserted/updated/deleted
+ij> -- should fail
+-- parent row can not be deleted because of a dependent relationship from another table
+delete from t1 where a =1;
+ERROR 23503: DELETE on table 'T1' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --do the same case as above with RESTRICT
+--we should get error, because RESTRICT rules are checked before firing triggers
+create table t2(x int references t1(a) ON DELETE RESTRICT , y int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values(1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2, 3);
+1 row inserted/updated/deleted
+ij> --following delete should throw constraint violations error
+delete from t1 where a =1;
+ERROR 23503: DELETE on table 'T1' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --test for ON UPDATE RESTRICT
+--first check with a trigger and NO ACTION
+autocommit off ;
+ij> create table t1(a int not null unique, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON UPDATE NO ACTION , y int);
+0 rows inserted/updated/deleted
+ij> create trigger trig_update after UPDATE on t1
+referencing old as old for each  row mode db2sql
+update t2 set x = 2 where x = old.a;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1 , 2);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2 , 3);
+1 row inserted/updated/deleted
+ij> insert into t2 values(1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2, 3);
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- this update should fail
+-- parent row can not be deleted because of a dependent relationship from another table
+update t1 set a = 7 where a =1;
+ERROR 23503: UPDATE on table 'T1' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> -- should pass because no foreign key constraints are violated
+update t1 set b = 7 where a =1;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          |B          
+-----------------------
+1          |7          
+2          |3          
+ij> select * from t2 ;
+X          |Y          
+-----------------------
+2          |2          
+2          |3          
+ij> rollback;
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> --do the same case as above with RESTRICT
+--we should get error, because RESTRICT is check before firing triggers
+create table t2(x int references t1(a) ON UPDATE RESTRICT , y int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values(1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2, 3);
+1 row inserted/updated/deleted
+ij> commit;
+ij> --following update should throw an error
+update t1 set a = 7 where a =1;
+ERROR 23503: UPDATE on table 'T1' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (1).  The statement has been rolled back.
+ij> select * from t1 ;
+A          |B          
+-----------------------
+1          |2          
+2          |3          
+ij> select * from t2;
+X          |Y          
+-----------------------
+1          |2          
+2          |3          
+ij> autocommit on;
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --After ROW triggers on the  dependen tables
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t1(a) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create table t4(z int , op char(2));
+0 rows inserted/updated/deleted
+ij> --create triggers such a way that the all deleted row
+--in t2 are inserted into t4
+create trigger trig_delete after DELETE on t2
+referencing old as deletedrow
+for each row mode db2sql
+insert into t4 values(deletedrow.x , 'ad');
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
+3 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9) ;
+3 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (4) , (7) ;
+3 rows inserted/updated/deleted
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t4;
+Z          |OP  
+----------------
+3          |ad  
+6          |ad  
+9          |ad  
+ij> select * from t1;
+A          |B          |C          
+-----------------------------------
+ij> select * from t2;
+X          
+-----------
+ij> select * from t3;
+Y          
+-----------
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --After Statement triggers on the  dependen tables
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t1(a) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create table t4(z int , op char(2));
+0 rows inserted/updated/deleted
+ij> --create triggers such a way that the all deleted row
+--in t2 are inserted into t4
+create trigger trig_delete after DELETE on t2
+REFERENCING OLD_Table AS deletedrows
+for each statement mode db2sql 
+insert into t4 select x, 'ad' from deletedrows;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
+3 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9) ;
+3 rows inserted/updated/deleted
+ij> insert into t3 values (1) , (4) , (7) ;
+3 rows inserted/updated/deleted
+ij> delete from t1 ;
+3 rows inserted/updated/deleted
+ij> select * from t4;
+Z          |OP  
+----------------
+3          |ad  
+6          |ad  
+9          |ad  
+ij> select * from t1;
+A          |B          |C          
+-----------------------------------
+ij> select * from t2;
+X          
+-----------
+ij> select * from t3;
+Y          
+-----------
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --After triggers on a self referencing table
+create table emp(empno char(2) not null, mgr char(2), constraint emp primary key(empno),
+  constraint manages foreign key(mgr) references emp(empno) on delete cascade);
+0 rows inserted/updated/deleted
+ij> create table tempemp(empno char(2) , mgr char(2)  , op char(2));
+0 rows inserted/updated/deleted
+ij> insert into emp values('e1', null);
+1 row inserted/updated/deleted
+ij> insert into emp values('e2', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e3', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e4', 'e2');
+1 row inserted/updated/deleted
+ij> insert into emp values('e5', 'e4');
+1 row inserted/updated/deleted
+ij> insert into emp values('e6', 'e5');
+1 row inserted/updated/deleted
+ij> insert into emp values('e7', 'e6');
+1 row inserted/updated/deleted
+ij> insert into emp values('e8', 'e7');
+1 row inserted/updated/deleted
+ij> insert into emp values('e9', 'e8');
+1 row inserted/updated/deleted
+ij> create trigger trig_emp_delete after DELETE on emp
+REFERENCING OLD_Table AS deletedrows
+for each statement mode db2sql 
+insert into tempemp select empno, mgr,  'ad' from deletedrows;
+0 rows inserted/updated/deleted
+ij> delete from emp where empno = 'e1';
+1 row inserted/updated/deleted
+ij> select * from emp;
+E&|MGR 
+-------
+ij> select * from tempemp;
+EMP&|MGR |OP  
+--------------
+e1  |NULL|ad  
+e2  |e1  |ad  
+e3  |e1  |ad  
+e4  |e2  |ad  
+e5  |e4  |ad  
+e6  |e5  |ad  
+e7  |e6  |ad  
+e8  |e7  |ad  
+e9  |e8  |ad  
+ij> drop table emp;
+0 rows inserted/updated/deleted
+ij> drop table tempemp;
+0 rows inserted/updated/deleted
+ij> -- triggers on a self referencing table
+create table emp(empno char(2) not null, mgr char(2), constraint emp primary key(empno),
+  constraint manages foreign key(mgr) references emp(empno) on delete cascade);
+0 rows inserted/updated/deleted
+ij> create table tempemp(empno char(2) , mgr char(2)  , op char(2));
+0 rows inserted/updated/deleted
+ij> insert into emp values('e1', null);
+1 row inserted/updated/deleted
+ij> insert into emp values('e2', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e3', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e4', 'e2');
+1 row inserted/updated/deleted
+ij> insert into emp values('e5', 'e4');
+1 row inserted/updated/deleted
+ij> insert into emp values('e6', 'e5');
+1 row inserted/updated/deleted
+ij> insert into emp values('e7', 'e6');
+1 row inserted/updated/deleted
+ij> insert into emp values('e8', 'e7');
+1 row inserted/updated/deleted
+ij> insert into emp values('e9', 'e8');
+1 row inserted/updated/deleted
+ij> create trigger trig_emp_delete AFTER DELETE on emp
+REFERENCING OLD_Table AS deletedrows
+for each statement mode db2sql 
+insert into tempemp select empno, mgr,  'bd' from deletedrows;
+0 rows inserted/updated/deleted
+ij> delete from emp where empno = 'e1';
+1 row inserted/updated/deleted
+ij> select * from emp;
+E&|MGR 
+-------
+ij> select * from tempemp;
+EMP&|MGR |OP  
+--------------
+e1  |NULL|bd  
+e2  |e1  |bd  
+e3  |e1  |bd  
+e4  |e2  |bd  
+e5  |e4  |bd  
+e6  |e5  |bd  
+e7  |e6  |bd  
+e8  |e7  |bd  
+e9  |e8  |bd  
+ij> drop table emp;
+0 rows inserted/updated/deleted
+ij> drop table tempemp;
+0 rows inserted/updated/deleted
+ij> --After triggers on a cyclic referential actions
+create table t1(a int not null primary key, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null primary key, y int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t2 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t1 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t2 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t1 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t1 values (7, 6);
+1 row inserted/updated/deleted
+ij> insert into t2 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t2 values (7, 6);
+1 row inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b) 
+                             references t2(x) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y) 
+                              references t1(b) on delete cascade;
+0 rows inserted/updated/deleted
+ij> create table t1temp(l int , m int, op char(2));
+0 rows inserted/updated/deleted
+ij> create trigger trig_cyclic_del after DELETE on t1
+REFERENCING OLD_Table AS deletedrows
+for each statement mode db2sql 
+insert into t1temp  select a, b,  'ad' from deletedrows;
+0 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+1          |2          
+2          |1          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> select * from t2;
+X          |Y          
+-----------------------
+1          |2          
+2          |1          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> ---following delete should delete all the rows
+delete from t1 where a = 3;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+1          |2          
+2          |1          
+6          |7          
+7          |6          
+ij> select * from t2;
+X          |Y          
+-----------------------
+1          |2          
+2          |1          
+6          |7          
+7          |6          
+ij> select * from t1temp;
+L          |M          |OP  
+----------------------------
+3          |4          |ad  
+4          |3          |ad  
+ij> delete from t1;
+4 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+ij> select * from t2;
+X          |Y          
+-----------------------
+ij> select * from t1temp;
+L          |M          |OP  
+----------------------------
+3          |4          |ad  
+4          |3          |ad  
+1          |2          |ad  
+2          |1          |ad  
+6          |7          |ad  
+7          |6          |ad  
+ij> drop table t1temp;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- triggers on a cyclic referential actions
+create table t1(a int not null primary key, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null primary key, y int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t2 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t1 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t2 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t1 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t1 values (7, 6);
+1 row inserted/updated/deleted
+ij> insert into t2 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t2 values (7, 6);
+1 row inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b) 
+                             references t2(x) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y) 
+                              references t1(b) on delete cascade;
+0 rows inserted/updated/deleted
+ij> create table t1temp(l int , m int, op char(2));
+0 rows inserted/updated/deleted
+ij> create trigger trig_cyclic_del AFTER DELETE on t1
+REFERENCING OLD_Table AS deletedrows
+for each statement mode db2sql 
+insert into t1temp  select a, b,  'bd' from deletedrows;
+0 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+1          |2          
+2          |1          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> select * from t2;
+X          |Y          
+-----------------------
+1          |2          
+2          |1          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> ---following delete should delete all the rows
+delete from t1 where a = 3;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+1          |2          
+2          |1          
+6          |7          
+7          |6          
+ij> select * from t2;
+X          |Y          
+-----------------------
+1          |2          
+2          |1          
+6          |7          
+7          |6          
+ij> select * from t1temp;
+L          |M          |OP  
+----------------------------
+3          |4          |bd  
+4          |3          |bd  
+ij> delete from t1;
+4 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+ij> select * from t2;
+X          |Y          
+-----------------------
+ij> select * from t1temp;
+L          |M          |OP  
+----------------------------
+3          |4          |bd  
+4          |3          |bd  
+1          |2          |bd  
+2          |1          |bd  
+6          |7          |bd  
+7          |6          |bd  
+ij> drop table t1temp;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --ROW triggers on a cyclic referential actions
+create table t1(a int not null primary key, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null primary key, y int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t2 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t1 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t2 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t1 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t1 values (7, 6);
+1 row inserted/updated/deleted
+ij> insert into t2 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t2 values (7, 6);
+1 row inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b) 
+                             references t2(x) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y) 
+                              references t1(b) on delete cascade;
+0 rows inserted/updated/deleted
+ij> create table t1temp(l int , m int, op char(2));
+0 rows inserted/updated/deleted
+ij> create trigger trig_cyclic_del1 after DELETE on t1
+referencing old as deletedrow
+for each row mode db2sql
+insert into t1temp values(deletedrow.a , deletedrow.b, 'ad');
+0 rows inserted/updated/deleted
+ij> create trigger trig_cyclic_del2 AFTER DELETE on t1
+referencing old as deletedrow
+for each row mode db2sql
+insert into t1temp values(deletedrow.a , deletedrow.b, 'bd');
+0 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+1          |2          
+2          |1          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> select * from t2;
+X          |Y          
+-----------------------
+1          |2          
+2          |1          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> ---following delete should delete all the rows
+delete from t1 where a = 1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> select * from t2;
+X          |Y          
+-----------------------
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+ij> select * from t1temp;
+L          |M          |OP  
+----------------------------
+1          |2          |ad  
+2          |1          |ad  
+1          |2          |bd  
+2          |1          |bd  
+ij> delete from t1;
+4 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+ij> select * from t2;
+X          |Y          
+-----------------------
+ij> select * from t1temp;
+L          |M          |OP  
+----------------------------
+1          |2          |ad  
+2          |1          |ad  
+1          |2          |bd  
+2          |1          |bd  
+3          |4          |ad  
+4          |3          |ad  
+6          |7          |ad  
+7          |6          |ad  
+3          |4          |bd  
+4          |3          |bd  
+6          |7          |bd  
+7          |6          |bd  
+ij> drop table t1temp;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --SET NULL UPDATE  STETEMENT triggers on a self referencing table
+create table emp(empno char(2) not null, mgr char(2), constraint emp primary key(empno),
+  constraint manages foreign key(mgr) references emp(empno) on delete set null);
+0 rows inserted/updated/deleted
+ij> create table tempemp(empno char(2) , mgr char(2)  , op char(2));
+0 rows inserted/updated/deleted
+ij> insert into emp values('e1', null);
+1 row inserted/updated/deleted
+ij> insert into emp values('e2', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e3', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e4', 'e2');
+1 row inserted/updated/deleted
+ij> insert into emp values('e5', 'e4');
+1 row inserted/updated/deleted
+ij> insert into emp values('e6', 'e5');
+1 row inserted/updated/deleted
+ij> insert into emp values('e7', 'e6');
+1 row inserted/updated/deleted
+ij> insert into emp values('e8', 'e7');
+1 row inserted/updated/deleted
+ij> insert into emp values('e9', 'e8');
+1 row inserted/updated/deleted
+ij> create trigger trig_emp_delete AFTER UPDATE on emp
+REFERENCING OLD_Table AS updatedrows
+for each statement mode db2sql 
+insert into tempemp select empno, mgr,  'bu' from updatedrows;
+0 rows inserted/updated/deleted
+ij> create trigger trig_emp_delete1 AFTER UPDATE on emp
+REFERENCING NEW_Table AS updatedrows
+for each statement mode db2sql 
+insert into tempemp select empno, mgr,  'au' from updatedrows;
+0 rows inserted/updated/deleted
+ij> delete from emp where empno = 'e1';
+1 row inserted/updated/deleted
+ij> select * from emp;
+E&|MGR 
+-------
+e2|NULL
+e3|NULL
+e4|e2  
+e5|e4  
+e6|e5  
+e7|e6  
+e8|e7  
+e9|e8  
+ij> select * from tempemp;
+EMP&|MGR |OP  
+--------------
+e2  |e1  |bu  
+e3  |e1  |bu  
+e2  |NULL|au  
+e3  |NULL|au  
+ij> drop table emp;
+0 rows inserted/updated/deleted
+ij> drop table tempemp;
+0 rows inserted/updated/deleted
+ij> --SET NULL UPDATE  ROW triggers on a self referencing table
+create table emp(empno char(2) not null, mgr char(2), constraint emp primary key(empno),
+  constraint manages foreign key(mgr) references emp(empno) on delete set null);
+0 rows inserted/updated/deleted
+ij> create table tempemp(empno char(2) , mgr char(2)  , op char(2));
+0 rows inserted/updated/deleted
+ij> insert into emp values('e1', null);
+1 row inserted/updated/deleted
+ij> insert into emp values('e2', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e3', 'e1');
+1 row inserted/updated/deleted
+ij> insert into emp values('e4', 'e2');
+1 row inserted/updated/deleted
+ij> insert into emp values('e5', 'e4');
+1 row inserted/updated/deleted
+ij> insert into emp values('e6', 'e5');
+1 row inserted/updated/deleted
+ij> insert into emp values('e7', 'e6');
+1 row inserted/updated/deleted
+ij> insert into emp values('e8', 'e7');
+1 row inserted/updated/deleted
+ij> insert into emp values('e9', 'e8');
+1 row inserted/updated/deleted
+ij> create trigger trig_emp_delete after UPDATE on emp
+REFERENCING OLD AS updatedrow
+for each row mode db2sql
+insert into tempemp values(updatedrow.empno, updatedrow.mgr, 'bu');
+0 rows inserted/updated/deleted
+ij> create trigger trig_emp_delete1 AFTER UPDATE on emp
+REFERENCING NEW AS updatedrow
+for each  row mode db2sql
+insert into tempemp values(updatedrow.empno, updatedrow.mgr, 'au');
+0 rows inserted/updated/deleted
+ij> delete from emp where empno = 'e1';
+1 row inserted/updated/deleted
+ij> select * from emp;
+E&|MGR 
+-------
+e2|NULL
+e3|NULL
+e4|e2  
+e5|e4  
+e6|e5  
+e7|e6  
+e8|e7  
+e9|e8  
+ij> select * from tempemp;
+EMP&|MGR |OP  
+--------------
+e2  |e1  |bu  
+e3  |e1  |bu  
+e2  |NULL|au  
+e3  |NULL|au  
+ij> delete from emp;
+8 rows inserted/updated/deleted
+ij> select * from emp;
+E&|MGR 
+-------
+ij> select * from tempemp;
+EMP&|MGR |OP  
+--------------
+e2  |e1  |bu  
+e3  |e1  |bu  
+e2  |NULL|au  
+e3  |NULL|au  
+e4  |e2  |bu  
+e5  |e4  |bu  
+e6  |e5  |bu  
+e7  |e6  |bu  
+e8  |e7  |bu  
+e9  |e8  |bu  
+e4  |NULL|au  
+e5  |NULL|au  
+e6  |NULL|au  
+e7  |NULL|au  
+e8  |NULL|au  
+e9  |NULL|au  
+ij> drop table emp;
+0 rows inserted/updated/deleted
+ij> drop table tempemp;
+0 rows inserted/updated/deleted
+ij> -- prepared statements check like in cview
+create table t1(a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(b int references t1(a) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4) ;
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4) ;
+4 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?' ;
+ij> execute sdelete using 'values (1)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (2)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> select * from t2;
+B          
+-----------
+3          
+4          
+NULL       
+NULL       
+ij> execute sdelete using 'values (3)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (4)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> remove sdelete;
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(b int references t1(a) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4) ;
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4) ;
+4 rows inserted/updated/deleted
+ij> prepare sdelete as 'delete from t1 where a = ?' ;
+ij> execute sdelete using 'values (1)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (2)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> select * from t2;
+B          
+-----------
+3          
+4          
+ij> execute sdelete using 'values (3)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (4)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> remove sdelete;
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> autocommit on;
+ij> --make sure prepared statements are recompiled after a DDL changes works
+create table t1(a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(b int references t1(a) ON DELETE CASCADE, c int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4) ;
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1, 1) , (2, 2) , (3, 3) , (4, 4) ;
+4 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?' ;
+ij> execute sdelete using 'values (1)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (2)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> select * from t2;
+B          |C          
+-----------------------
+3          |3          
+4          |4          
+ij> create index idx1 on t2(c) ;
+0 rows inserted/updated/deleted
+ij> execute sdelete using 'values (3)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (4)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into t1 values(5);
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (5)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+ij> remove sdelete;
+ij> autocommit on;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> --do some rollbacks that involved prepared statement executtions
+create table t1(a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(b int references t1(a) ON DELETE CASCADE, c int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1) , (2) , (3) , (4) ;
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1, 1) , (2, 2) , (3, 3) , (4, 4) ;
+4 rows inserted/updated/deleted
+ij> commit;
+ij> autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?' ;
+ij> execute sdelete using 'values (1)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (2)';
+1 row inserted/updated/deleted
+ij> rollback;
+ij> select * from t2;
+B          |C          
+-----------------------
+1          |1          
+2          |2          
+3          |3          
+4          |4          
+ij> execute sdelete using 'values (3)';
+1 row inserted/updated/deleted
+ij> create index idx1 on t2(c) ;
+0 rows inserted/updated/deleted
+ij> execute sdelete using 'values (4)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+ij> select * from t2;
+B          |C          
+-----------------------
+1          |1          
+2          |2          
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> rollback;
+ij> insert into t1 values(5);
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (5)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+ij> select * from t2;
+B          |C          
+-----------------------
+1          |1          
+2          |2          
+ij> remove sdelete;
+ij> autocommit on;
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> ---UNIQUE COLUMN NOT NULL VALUE CHECKS
+--delete cascade on non-nullable unique column
+create table t1 ( a int not null unique) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(0) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(2) ;
+1 row inserted/updated/deleted
+ij> create table t2(b int references t1(a) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> insert into t2 values(null) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(null) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(null) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(null) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(null) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(null) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(null) ;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          
+-----------
+0          
+1          
+2          
+ij> select * from t2 ;
+B          
+-----------
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+ij> delete from t1 where a = 0 ;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          
+-----------
+1          
+2          
+ij> -- null values from t1 are not deleted
+select * from t2 ;
+B          
+-----------
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --self ref foreign key without null values
+create table t1( a int not null unique , b int references t1(a) 
+ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> insert into t1 values ( 1 , null) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where b is null ;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          |B          
+-----------------------
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> create table t1( a int not null unique , b int references t1(a) 
+ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> insert into t1 values ( 1 , null) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values ( 0 , 1) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where b is null ;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          |B          
+-----------------------
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> --mutiple tables
+create table parent( a int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table child1(b int not null unique references parent(a)
+ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> create table child2(c int not null unique references child1(b)
+ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> insert into parent values(0) ;
+1 row inserted/updated/deleted
+ij> insert into parent values(1) ;
+1 row inserted/updated/deleted
+ij> insert into parent values(2) ;
+1 row inserted/updated/deleted
+ij> insert into child1 values(0) ;
+1 row inserted/updated/deleted
+ij> insert into child1 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into child1 values(2) ;
+1 row inserted/updated/deleted
+ij> insert into child2 values(0) ;
+1 row inserted/updated/deleted
+ij> insert into child2 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into child2 values(2) ;
+1 row inserted/updated/deleted
+ij> select * from parent ;
+A          
+-----------
+0          
+1          
+2          
+ij> select * from child1;
+B          
+-----------
+0          
+1          
+2          
+ij> select * from child2 ;
+C          
+-----------
+0          
+1          
+2          
+ij> delete from parent where a = 1 ;
+1 row inserted/updated/deleted
+ij> select * from parent ;
+A          
+-----------
+0          
+2          
+ij> select * from child1;
+B          
+-----------
+0          
+2          
+ij> select * from child2 ;
+C          
+-----------
+0          
+2          
+ij> delete from parent where a = 0 ;
+1 row inserted/updated/deleted
+ij> select * from parent ;
+A          
+-----------
+2          
+ij> select * from child1;
+B          
+-----------
+2          
+ij> --delete all the rows
+delete from parent;
+1 row inserted/updated/deleted
+ij> drop table child2;
+0 rows inserted/updated/deleted
+ij> create table child2(c int references child1(b)
+ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> insert into parent values(0) ;
+1 row inserted/updated/deleted
+ij> insert into parent values(1) ;
+1 row inserted/updated/deleted
+ij> insert into parent values(2) ;
+1 row inserted/updated/deleted
+ij> insert into child1 values(0) ;
+1 row inserted/updated/deleted
+ij> insert into child1 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into child1 values(2) ;
+1 row inserted/updated/deleted
+ij> insert into child2 values(null) ;
+1 row inserted/updated/deleted
+ij> insert into child2 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into child2 values(2) ;
+1 row inserted/updated/deleted
+ij> select * from parent ;
+A          
+-----------
+0          
+1          
+2          
+ij> select * from child1;
+B          
+-----------
+0          
+1          
+2          
+ij> select * from child2 ;
+C          
+-----------
+1          
+2          
+NULL       
+ij> delete from parent where a = 1 ;
+1 row inserted/updated/deleted
+ij> select * from parent ;
+A          
+-----------
+0          
+2          
+ij> select * from child1;
+B          
+-----------
+0          
+2          
+ij> select * from child2;
+C          
+-----------
+2          
+NULL       
+NULL       
+ij> delete from parent where a = 0;
+1 row inserted/updated/deleted
+ij> select * from parent ;
+A          
+-----------
+2          
+ij> select * from child1;
+B          
+-----------
+2          
+ij> select * from child2;
+C          
+-----------
+2          
+NULL       
+NULL       
+ij> delete from child2 where c is null;
+2 rows inserted/updated/deleted
+ij> delete from child2 where c is not null;
+1 row inserted/updated/deleted
+ij> delete from parent where a = 2 ;
+1 row inserted/updated/deleted
+ij> select * from parent ;
+A          
+-----------
+ij> select * from child1;
+B          
+-----------
+ij> select * from child2;
+C          
+-----------
+ij> delete from parent;
+0 rows inserted/updated/deleted
+ij> delete from child1;
+0 rows inserted/updated/deleted
+ij> delete from child2;
+0 rows inserted/updated/deleted
+ij> drop table child2;
+0 rows inserted/updated/deleted
+ij> drop table child1;
+0 rows inserted/updated/deleted
+ij> drop table parent;
+0 rows inserted/updated/deleted
+ij> --foreign key on two non-nullable unique keys
+create table t1(a int not null unique , b int not null unique) ;
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c2 unique(a , b ) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x1 int , x2 int , constraint c1 foreign key (x1, x2)
+references t1(a , b ) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (0 , 1) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values (1 , 2) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values (0 , 1) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values (1 , 2) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where a = 0;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          |B          
+-----------------------
+1          |2          
+ij> select * from t2 ;
+X1         |X2         
+-----------------------
+1          |2          
+ij> insert into t1 values (0 , 0) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values (0 , 0) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where a = 0;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          |B          
+-----------------------
+1          |2          
+ij> select * from t2 ;
+X1         |X2         
+-----------------------
+1          |2          
+ij> delete from t1;
+1 row inserted/updated/deleted
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> create table t2( x1 int , x2 int , constraint c1 foreign key (x1, x2)
+references t1(a , b ) ON DELETE SET NULL ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (0 , 1) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values (1 , 2) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values (0 , 1) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values (1 , 2) ;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          |B          
+-----------------------
+0          |1          
+1          |2          
+ij> select * from t2 ;
+X1         |X2         
+-----------------------
+0          |1          
+1          |2          
+ij> delete from t1 where a = 0;
+1 row inserted/updated/deleted
+ij> select * from t1 ;
+A          |B          
+-----------------------
+1          |2          
+ij> select * from t2 ;
+X1         |X2         
+-----------------------
+1          |2          
+NULL       |NULL       
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --cyclic non-nulls case
+create table t1(a int not null unique, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int not null unique);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (0, 2);
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 0);
+1 row inserted/updated/deleted
+ij> insert into t2 values (0, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values (2, 0);
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t1 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 4);
+1 row inserted/updated/deleted
+ij> insert into t2 values (4, 3);
+1 row inserted/updated/deleted
+ij> insert into t1 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t1 values (7, 6);
+1 row inserted/updated/deleted
+ij> insert into t2 values (6, 7);
+1 row inserted/updated/deleted
+ij> insert into t2 values (7, 6);
+1 row inserted/updated/deleted
+ij> insert into t1 values (9, 10);
+1 row inserted/updated/deleted
+ij> insert into t1 values (10, 9);
+1 row inserted/updated/deleted
+ij> insert into t2 values (9, 10);
+1 row inserted/updated/deleted
+ij> insert into t2 values (10, 9);
+1 row inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b)
+			      references t2(x) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete cascade;
+0 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+0          |2          
+2          |0          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+9          |10         
+10         |9          
+ij> select * from t2;
+X          |Y          
+-----------------------
+0          |2          
+2          |0          
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+9          |10         
+10         |9          
+ij> delete from t1 where a = 0 ;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+9          |10         
+10         |9          
+ij> select * from t2;
+X          |Y          
+-----------------------
+3          |4          
+4          |3          
+6          |7          
+7          |6          
+9          |10         
+10         |9          
+ij> delete from t2 where x=3 ;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+6          |7          
+7          |6          
+9          |10         
+10         |9          
+ij> select * from t2;
+X          |Y          
+-----------------------
+6          |7          
+7          |6          
+9          |10         
+10         |9          
+ij> delete from t1 where b = 9;
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+6          |7          
+7          |6          
+ij> select * from t2;
+X          |Y          
+-----------------------
+6          |7          
+7          |6          
+ij> delete from t2;
+2 rows inserted/updated/deleted
+ij> select * from t1;
+A          |B          
+-----------------------
+ij> select * from t2;
+X          |Y          
+-----------------------
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --END OF NULL CHECK
+--BEGIN NON NULL ERROR CHECK FOR ON DELETE SET NULL
+--do not allow ON DELETE SET NULL on non nullable foreign key columns
+create table n1 ( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table n2 ( b int not null primary key references n1(a) ON DELETE SET NULL);
+ERROR 42834: SET NULL cannot be specified because FOREIGN KEY 'xxxxGENERATED-IDxxxx'  cannot contain null values.  
+ij> drop table n1;
+0 rows inserted/updated/deleted
+ij> create table n1 ( a int not null unique);
+0 rows inserted/updated/deleted
+ij> create table n2 ( b int not null references n1(a) ON DELETE SET NULL);
+ERROR 42834: SET NULL cannot be specified because FOREIGN KEY 'xxxxGENERATED-IDxxxx'  cannot contain null values.  
+ij> drop table n1;
+0 rows inserted/updated/deleted
+ij> --multi column foreign key reference
+create table n1(a int not null , b int not null);
+0 rows inserted/updated/deleted
+ij> create table n2(x int not null, y int not null) ;
+0 rows inserted/updated/deleted
+ij> alter table n1 add constraint c1 unique(a, b) ;
+0 rows inserted/updated/deleted
+ij> alter table n2 add constraint c2 foreign key(x, y) 
+references n1(a,b) ON  DELETE SET NULL ;
+ERROR 42834: SET NULL cannot be specified because FOREIGN KEY 'C2'  cannot contain null values.  
+ij> drop table n1;
+0 rows inserted/updated/deleted
+ij> drop table n2;
+0 rows inserted/updated/deleted
+ij> --just make sure we are allowing SET NULL on nullable columns
+create table n1(a int not null , b int not null);
+0 rows inserted/updated/deleted
+ij> create table n2(x int, y int) ;
+0 rows inserted/updated/deleted
+ij> alter table n1 add constraint c1 unique(a, b) ;
+0 rows inserted/updated/deleted
+ij> alter table n2 add constraint c2 foreign key(x, y) 
+references n1(a,b) ON  DELETE SET NULL ;
+0 rows inserted/updated/deleted
+ij> drop table n2;
+0 rows inserted/updated/deleted
+ij> drop table n1;
+0 rows inserted/updated/deleted
+ij> --make sure  ON DELETE CASCADE works fine
+create table n1(a int not null , b int not null);
+0 rows inserted/updated/deleted
+ij> create table n2(x int not null, y int not null) ;
+0 rows inserted/updated/deleted
+ij> alter table n1 add constraint c1 unique(a, b) ;
+0 rows inserted/updated/deleted
+ij> alter table n2 add constraint c2 foreign key(x, y) 
+references n1(a,b) ON  DELETE CASCADE;
+0 rows inserted/updated/deleted
+ij> drop table n2;
+0 rows inserted/updated/deleted
+ij> drop table n1;
+0 rows inserted/updated/deleted
+ij> --only some coulmns of foreign key are nullable
+create table n1(a int not null , b int not null, c int not null , 
+               d int not null , e int not null);
+0 rows inserted/updated/deleted
+ij> create table n2(c1 int not null, c2 int not null, c3 int , c4 int,
+                c5 int not null, c6 int ) ;
+0 rows inserted/updated/deleted
+ij> alter table n1 add constraint c1 unique(b, c, d, e) ;
+0 rows inserted/updated/deleted
+ij> alter table n2 add constraint c2 foreign key(c2, c3, c4, c5)
+references n1(b, c, d, e) ON  DELETE SET NULL ;
+0 rows inserted/updated/deleted
+ij> insert into n1 values(1 , 2, 3, 4, 5);
+1 row inserted/updated/deleted
+ij> insert into n1 values(21, 22, 23, 24, 25);
+1 row inserted/updated/deleted
+ij> insert into n1 values(6, 7 , 8, 9, 10);
+1 row inserted/updated/deleted
+ij> insert into n1 values(100 , 101, 102, 103, 104);
+1 row inserted/updated/deleted
+ij> insert into n2 values(111, 2, 3, 4, 5, 0);
+1 row inserted/updated/deleted
+ij> insert into n2 values(212, 22, 23, 24, 25, 0);
+1 row inserted/updated/deleted
+ij> insert into n2 values(6, 7 , 8, 9, 10, 0);
+1 row inserted/updated/deleted
+ij> select * from n1;
+A          |B          |C          |D          |E          
+-----------------------------------------------------------
+1          |2          |3          |4          |5          
+21         |22         |23         |24         |25         
+6          |7          |8          |9          |10         
+100        |101        |102        |103        |104        
+ij> select * from n2;
+C1         |C2         |C3         |C4         |C5         |C6         
+-----------------------------------------------------------------------
+111        |2          |3          |4          |5          |0          
+212        |22         |23         |24         |25         |0          
+6          |7          |8          |9          |10         |0          
+ij> delete from n1 where e =10;
+1 row inserted/updated/deleted
+ij> select * from n1 ;
+A          |B          |C          |D          |E          
+-----------------------------------------------------------
+1          |2          |3          |4          |5          
+21         |22         |23         |24         |25         
+100        |101        |102        |103        |104        
+ij> select * from n2;
+C1         |C2         |C3         |C4         |C5         |C6         
+-----------------------------------------------------------------------
+111        |2          |3          |4          |5          |0          
+212        |22         |23         |24         |25         |0          
+6          |7          |NULL       |NULL       |10         |0          
+ij> delete from n1 where a =1;
+1 row inserted/updated/deleted
+ij> select * from n1;
+A          |B          |C          |D          |E          
+-----------------------------------------------------------
+21         |22         |23         |24         |25         
+100        |101        |102        |103        |104        
+ij> select * from n2;
+C1         |C2         |C3         |C4         |C5         |C6         
+-----------------------------------------------------------------------
+111        |2          |NULL       |NULL       |5          |0          
+212        |22         |23         |24         |25         |0          
+6          |7          |NULL       |NULL       |10         |0          
+ij> delete from n1;
+2 rows inserted/updated/deleted
+ij> select * from n1;
+A          |B          |C          |D          |E          
+-----------------------------------------------------------
+ij> select * from n2;
+C1         |C2         |C3         |C4         |C5         |C6         
+-----------------------------------------------------------------------
+111        |2          |NULL       |NULL       |5          |0          
+212        |22         |NULL       |NULL       |25         |0          
+6          |7          |NULL       |NULL       |10         |0          
+ij> drop table n2;
+0 rows inserted/updated/deleted
+ij> drop table n1;
+0 rows inserted/updated/deleted
+ij> --END NON NULL ERROR CHECK
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int not null unique references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t2(x) ON DELETE CASCADE) ;
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete after DELETE on t1
+referencing old as deletedrow
+for each  row mode db2sql
+delete from t2;
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete1 after DELETE on t2
+referencing old as deletedrow
+for each row mode db2sql
+delete from t3;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) , (10,11,12), 
+       (13,14,15), (16,17,18), (19, 20, 21), (22, 23, 24), (25,26,27);
+9 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9), (12), (15), (18), (21), (24), (27);
+9 rows inserted/updated/deleted
+ij> insert into t3 values (3) , (6), (9), (12), (15), (18), (21), (24), (27);
+9 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?' ;
+ij> execute sdelete using 'values (1)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (4)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (7)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (10)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (13)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (16)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (19)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (22)';
+1 row inserted/updated/deleted
+ij> execute sdelete using 'values (25)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> autocommit on;
+ij> select * from t1 ;
+A          |B          |C          
+-----------------------------------
+ij> select * from t2 ;
+X          
+-----------
+ij> select * from t3;
+Y          
+-----------
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --checks for bug fix for 4743
+create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int not null unique references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t2(x) ON DELETE NO ACTION) ;
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete after DELETE on t1
+referencing old as deletedrow
+for each row mode db2sql
+delete from t2;
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete1 after DELETE on t2
+referencing old as deletedrow
+for each row mode db2sql
+delete from t3;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) , (10,11,12), 
+       (13,14,15), (16,17,18), (19, 20, 21), (22, 23, 24), (25,26,27);
+9 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9), (12), (15), (18), (21), (24), (27);
+9 rows inserted/updated/deleted
+ij> insert into t3 values (3) , (6), (9), (12), (15), (18), (21), (24), (27);
+9 rows inserted/updated/deleted
+ij> -- should fail
+-- parent row can not be deleted because of a dependent relationship from another table
+autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?' ;
+ij> execute sdelete using 'values (1)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.
+ij> execute sdelete using 'values (4)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (6).  The statement has been rolled back.
+ij> execute sdelete using 'values (7)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (9).  The statement has been rolled back.
+ij> execute sdelete using 'values (10)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (12).  The statement has been rolled back.
+ij> execute sdelete using 'values (13)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (15).  The statement has been rolled back.
+ij> execute sdelete using 'values (16)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (18).  The statement has been rolled back.
+ij> execute sdelete using 'values (19)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (21).  The statement has been rolled back.
+ij> execute sdelete using 'values (22)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (24).  The statement has been rolled back.
+ij> execute sdelete using 'values (25)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (27).  The statement has been rolled back.
+ij> commit;
+ij> autocommit on;
+ij> select * from t1 ;
+A          |B          |C          
+-----------------------------------
+1          |2          |3          
+4          |5          |6          
+7          |8          |9          
+10         |11         |12         
+13         |14         |15         
+16         |17         |18         
+19         |20         |21         
+22         |23         |24         
+25         |26         |27         
+ij> select * from t2 ;
+X          
+-----------
+3          
+6          
+9          
+12         
+15         
+18         
+21         
+24         
+27         
+ij> select * from t3;
+Y          
+-----------
+3          
+6          
+9          
+12         
+15         
+18         
+21         
+24         
+27         
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1( a int not null primary key , b int , c int not null unique) ;
+0 rows inserted/updated/deleted
+ij> create table t2( x int not null unique references t1(c) ON DELETE CASCADE ) ;
+0 rows inserted/updated/deleted
+ij> create table t3( y int references t2(x) ON DELETE NO ACTION) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) , (10,11,12), 
+       (13,14,15), (16,17,18), (19, 20, 21), (22, 23, 24), (25,26,27);
+9 rows inserted/updated/deleted
+ij> insert into t2 values (3) , (6), (9), (12), (15), (18), (21), (24), (27);
+9 rows inserted/updated/deleted
+ij> insert into t3 values (3) , (6), (9), (12), (15), (18), (21), (24), (27);
+9 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare sdelete as 'delete from t1 where a = ?' ;
+ij> execute sdelete using 'values (1)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.
+ij> execute sdelete using 'values (4)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (6).  The statement has been rolled back.
+ij> execute sdelete using 'values (7)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (9).  The statement has been rolled back.
+ij> execute sdelete using 'values (10)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (12).  The statement has been rolled back.
+ij> execute sdelete using 'values (13)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (15).  The statement has been rolled back.
+ij> execute sdelete using 'values (16)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (18).  The statement has been rolled back.
+ij> execute sdelete using 'values (19)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (21).  The statement has been rolled back.
+ij> execute sdelete using 'values (22)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (24).  The statement has been rolled back.
+ij> execute sdelete using 'values (25)';
+ERROR 23503: DELETE on table 'T2' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (27).  The statement has been rolled back.
+ij> commit;
+ij> autocommit on;
+ij> select * from t1 ;
+A          |B          |C          
+-----------------------------------
+1          |2          |3          
+4          |5          |6          
+7          |8          |9          
+10         |11         |12         
+13         |14         |15         
+16         |17         |18         
+19         |20         |21         
+22         |23         |24         
+25         |26         |27         
+ij> select * from t2 ;
+X          
+-----------
+3          
+6          
+9          
+12         
+15         
+18         
+21         
+24         
+27         
+ij> select * from t3;
+Y          
+-----------
+3          
+6          
+9          
+12         
+15         
+18         
+21         
+24         
+27         
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --bug5186; mutiple cascade paths , execute a delete where
+--one path does not qualify any rows.
+create table t1 (c1 int not null primary key ) ;
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int not null primary key  references t1(c1) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> create table t3 (c1 int references t2(c1) ON DELETE CASCADE,
+                 c2 int references t1(c1) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2);
+1 row inserted/updated/deleted
+ij> insert into t3 values(2, 1) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where c1 = 1 ;
+1 row inserted/updated/deleted
+ij> --now make sure that we havw rows in both the paths and get meged properly
+insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(3);
+1 row inserted/updated/deleted
+ij> insert into t2 values(1);
+1 row inserted/updated/deleted
+ij> insert into t3 values(2, 1) ;
+1 row inserted/updated/deleted
+ij> insert into t3 values(1, 2) ;
+1 row inserted/updated/deleted
+ij> insert into t3 values(2, 3) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where c1 = 1 ;
+1 row inserted/updated/deleted
+ij> select * from t3 ;
+C1         |C2         
+-----------------------
+2          |3          
+ij> delete from t1 ;
+2 rows inserted/updated/deleted
+ij> ---now create a statement trigger and see what happens on a empty delete.
+create table t4(c1 char (20));
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete after DELETE on t3
+for each statement mode db2sql
+insert into t4 values('ad');
+0 rows inserted/updated/deleted
+ij> delete from t1 ;
+0 rows inserted/updated/deleted
+ij> select * from t4 ;
+C1                  
+--------------------
+ij> drop trigger trig_delete;
+0 rows inserted/updated/deleted
+ij> delete from t4 ;
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete after DELETE on t3
+for each statement mode db2sql
+insert into t4 values('bd');
+0 rows inserted/updated/deleted
+ij> delete from t1 ;
+0 rows inserted/updated/deleted
+ij> delete from t1 ;
+0 rows inserted/updated/deleted
+ij> select * from t4 ;
+C1                  
+--------------------
+ij> drop trigger trig_delete;
+0 rows inserted/updated/deleted
+ij> delete from t4 ;
+0 rows inserted/updated/deleted
+ij> --row level trigger case
+drop table t4;
+0 rows inserted/updated/deleted
+ij> create table t4(z int not null primary key , op char(2));
+0 rows inserted/updated/deleted
+ij> create trigger trig_delete after DELETE on t3
+referencing old as deletedrow
+for each row mode db2sql
+insert into t4 values(deletedrow.c1 , 'bd');
+0 rows inserted/updated/deleted
+ij> delete from t1 ;
+0 rows inserted/updated/deleted
+ij> delete from t1 ;
+0 rows inserted/updated/deleted
+ij> select * from t4 ;
+Z          |OP  
+----------------
+ij> insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2);
+1 row inserted/updated/deleted
+ij> insert into t3 values(2, 1) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where c1 = 1 ;
+1 row inserted/updated/deleted
+ij> select * from t4 ;
+Z          |OP  
+----------------
+2          |bd  
+ij> delete from t4;
+1 row inserted/updated/deleted
+ij> insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(3);
+1 row inserted/updated/deleted
+ij> insert into t2 values(1);
+1 row inserted/updated/deleted
+ij> insert into t3 values(2, 1) ;
+1 row inserted/updated/deleted
+ij> insert into t3 values(1, 2) ;
+1 row inserted/updated/deleted
+ij> insert into t3 values(2, 3) ;
+1 row inserted/updated/deleted
+ij> delete from t1 where c1 = 1 ;
+1 row inserted/updated/deleted
+ij> select * from t4 ;
+Z          |OP  
+----------------
+1          |bd  
+2          |bd  
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> ---multiple foreign keys pointing to the same table and has  dependens
+-- first foreign key path has zero rows qualified(bug 5197 from webshphere)
+CREATE SCHEMA DB2ADMIN;
+0 rows inserted/updated/deleted
+ij> SET SCHEMA DB2ADMIN;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE DB2ADMIN.PAGE_INST
+   (
+      OID BIGINT NOT NULL ,
+      IS_ACTIVE CHAR(1) DEFAULT 'Y' NOT NULL ,
+      IS_SYSTEM CHAR(1) DEFAULT 'N' NOT NULL ,
+      IS_SHARED CHAR(1) DEFAULT 'N' NOT NULL ,
+      ALL_PORT_ALLOWED CHAR(1) DEFAULT 'Y' NOT NULL ,
+      PARENT_OID BIGINT,
+      CONT_PARENT_OID BIGINT,
+      SKIN_DESC_OID BIGINT,
+      THEME_DESC_OID BIGINT,
+      CREATE_TYPE CHAR(1) DEFAULT 'E' NOT NULL ,
+      TYPE INT NOT NULL ,
+      CREATED BIGINT NOT NULL ,
+      MODIFIED BIGINT NOT NULL
+   );
+0 rows inserted/updated/deleted
+ij> CREATE TABLE DB2ADMIN.PORT_WIRE
+   (
+      OID BIGINT NOT NULL ,
+      CREATED BIGINT NOT NULL ,
+      MODIFIED BIGINT NOT NULL ,
+      USER_DESC_OID BIGINT NOT NULL ,
+      ORDINAL INT NOT NULL ,
+      SRC_COMPOS_OID BIGINT NOT NULL ,
+      SRC_PORT_INST_OID BIGINT NOT NULL ,
+      SRC_PORT_PARM_OID BIGINT,
+      SRC_PORT_PROP_OID BIGINT,
+      TGT_COMPOS_OID BIGINT NOT NULL ,
+      TGT_PORT_INST_OID BIGINT NOT NULL ,
+      TGT_PORT_PARM_OID BIGINT,
+      TGT_PORT_PROP_OID BIGINT,
+      VERSION VARCHAR(255),
+      EXTRA_DATA VARCHAR(1024)
+   );
+0 rows inserted/updated/deleted
+ij> CREATE TABLE DB2ADMIN.PORT_WIRE_LOD
+   (
+      PORT_WIRE_OID BIGINT NOT NULL ,
+      LOCALE VARCHAR(64) NOT NULL ,
+      TITLE VARCHAR(255),
+      DESCRIPTION VARCHAR(1024)
+   );
+0 rows inserted/updated/deleted
+ij> ALTER TABLE DB2ADMIN.PAGE_INST
+   ADD CONSTRAINT PK280 Primary Key (
+      OID);
+0 rows inserted/updated/deleted
+ij> ALTER TABLE DB2ADMIN.PORT_WIRE
+   ADD CONSTRAINT PK930 Primary Key (
+      OID);
+0 rows inserted/updated/deleted
+ij> ALTER TABLE DB2ADMIN.PORT_WIRE
+   ADD CONSTRAINT FK930B Foreign Key (
+      SRC_COMPOS_OID)
+   REFERENCES PAGE_INST (
+      OID)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION;
+0 rows inserted/updated/deleted
+ij> ALTER TABLE DB2ADMIN.PORT_WIRE
+   ADD CONSTRAINT FK930F Foreign Key (
+      TGT_COMPOS_OID)
+   REFERENCES PAGE_INST (
+      OID)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION;
+0 rows inserted/updated/deleted
+ij> ALTER TABLE DB2ADMIN.PORT_WIRE_LOD
+   ADD CONSTRAINT FK940 Foreign Key (
+      PORT_WIRE_OID)
+   REFERENCES PORT_WIRE (
+      OID)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION;
+0 rows inserted/updated/deleted
+ij> INSERT INTO DB2ADMIN.PAGE_INST (OID, CREATED, MODIFIED, TYPE)
+    VALUES (1301, 0, 0, 5555);
+1 row inserted/updated/deleted
+ij> INSERT INTO DB2ADMIN.PAGE_INST (OID, CREATED, MODIFIED, TYPE)
+    VALUES (1302, 0, 0, 5555);
+1 row inserted/updated/deleted
+ij> INSERT INTO DB2ADMIN.PORT_WIRE (OID, CREATED, MODIFIED, 
+    USER_DESC_OID, ORDINAL, SRC_COMPOS_OID, SRC_PORT_INST_OID, 
+    TGT_COMPOS_OID, TGT_PORT_INST_OID)
+    VALUES (2001, 0, 0, 1401, 1, 1301, 1202, 1302, 1203);
+1 row inserted/updated/deleted
+ij> INSERT INTO DB2ADMIN.PORT_WIRE_LOD (PORT_WIRE_OID, 
+                        LOCALE, TITLE, DESCRIPTION)
+    VALUES (2001, 'en', 'TestPortletWire', 'blahblah');
+1 row inserted/updated/deleted
+ij> DELETE FROM DB2ADMIN.PAGE_INST WHERE OID = 1302;
+1 row inserted/updated/deleted
+ij> select * from DB2ADMIN.PAGE_INST;
+OID                 |&|&|&|&|PARENT_OID          |CONT_PARENT_OID     |SKIN_DESC_OID       |THEME_DESC_OID      |&|TYPE       |CREATED             |MODIFIED            
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1301                |Y|N|N|Y|NULL                |NULL                |NULL                |NULL                |E|5555       |0                   |0                   
+ij> select * from DB2ADMIN.PORT_WIRE;
+OID                 |CREATED             |MODIFIED            |USER_DESC_OID       |ORDINAL    |SRC_COMPOS_OID      |SRC_PORT_INST_OID   |SRC_PORT_PARM_OID   |SRC_PORT_PROP_OID   |TGT_COMPOS_OID      |TGT_PORT_INST_OID   |TGT_PORT_PARM_OID   |TGT_PORT_PROP_OID   |VERSION                                                                                                                         |EXTRA_DATA                                                                                                                      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> select * from DB2ADMIN.PORT_WIRE_LOD;
+PORT_WIRE_OID       |LOCALE                                                          |TITLE                                                                                                                           |DESCRIPTION                                                                                                                     
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> INSERT INTO DB2ADMIN.PAGE_INST (OID, CREATED, MODIFIED, TYPE)
+    VALUES (1302, 0, 0, 5555);
+1 row inserted/updated/deleted
+ij> INSERT INTO DB2ADMIN.PORT_WIRE (OID, CREATED, MODIFIED, 
+    USER_DESC_OID, ORDINAL, SRC_COMPOS_OID, SRC_PORT_INST_OID, 
+    TGT_COMPOS_OID, TGT_PORT_INST_OID)
+    VALUES (2001, 0, 0, 1401, 1, 1301, 1202, 1302, 1203);
+1 row inserted/updated/deleted
+ij> INSERT INTO DB2ADMIN.PORT_WIRE_LOD (PORT_WIRE_OID, 
+                        LOCALE, TITLE, DESCRIPTION)
+    VALUES (2001, 'en', 'TestPortletWire', 'blahblah');
+1 row inserted/updated/deleted
+ij> DELETE FROM DB2ADMIN.PAGE_INST WHERE OID = 1301;
+1 row inserted/updated/deleted
+ij> select * from DB2ADMIN.PAGE_INST;
+OID                 |&|&|&|&|PARENT_OID          |CONT_PARENT_OID     |SKIN_DESC_OID       |THEME_DESC_OID      |&|TYPE       |CREATED             |MODIFIED            
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1302                |Y|N|N|Y|NULL                |NULL                |NULL                |NULL                |E|5555       |0                   |0                   
+ij> select * from DB2ADMIN.PORT_WIRE;
+OID                 |CREATED             |MODIFIED            |USER_DESC_OID       |ORDINAL    |SRC_COMPOS_OID      |SRC_PORT_INST_OID   |SRC_PORT_PARM_OID   |SRC_PORT_PROP_OID   |TGT_COMPOS_OID      |TGT_PORT_INST_OID   |TGT_PORT_PARM_OID   |TGT_PORT_PROP_OID   |VERSION                                                                                                                         |EXTRA_DATA                                                                                                                      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> select * from DB2ADMIN.PORT_WIRE_LOD;
+PORT_WIRE_OID       |LOCALE                                                          |TITLE                                                                                                                           |DESCRIPTION                                                                                                                     
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> drop table DB2ADMIN.PORT_WIRE_LOD;
+0 rows inserted/updated/deleted
+ij> drop table DB2ADMIN.PORT_WIRE;
+0 rows inserted/updated/deleted
+ij> drop table DB2ADMIN.PAGE_INST;
+0 rows inserted/updated/deleted
+ij> drop schema DB2ADMIN restrict;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,18 @@
+Testing testconnection
+org.apache.derby.drda.NetworkServerControl ping 
+Connection obtained for host: localhost, port number 1527.
+org.apache.derby.drda.NetworkServerControl ping -h localhost -p 1527 
+Connection obtained for host: localhost, port number 1527.
+org.apache.derby.drda.NetworkServerControl ping -h notthere -p 1527 
+Unable to find host: notthere.
+org.apache.derby.drda.NetworkServerControl ping -h ihave-inmyname.com -p 1527 
+Unable to find host: ihave-inmyname.com.
+org.apache.derby.drda.NetworkServerControl ping -h localhost 
+Connection obtained for host: localhost, port number 1527.
+org.apache.derby.drda.NetworkServerControl ping -h localhost -p 9393 
+Could not connect to Derby Network Server on host localhost, port 9393.
+org.apache.derby.drda.NetworkServerControl ping -p 1527 
+Connection obtained for host: localhost, port number 1527.
+org.apache.derby.drda.NetworkServerControl ping -p 9393 
+Could not connect to Derby Network Server on host localhost, port 9393.
+End test

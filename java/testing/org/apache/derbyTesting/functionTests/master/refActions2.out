@@ -1,0 +1,1278 @@
+ij> --Unsupported cases for referential actions , some of these are not supported currently in db2 udb also.
+--SQL0632N
+--FOREIGN KEY "<name>" is not valid because the table cannot be defined as a dependent of 
+--table "<table-name>" because of del--ete rule restrictions (reason code = "<reason-code>").  
+--Explanation: A referential constraint cannot be defined because the object table of the CREATE TABLE or 
+--ALTER TABLE statement cannot be defined as a dependent of table "<table-name>" for one of the following reason codes: 
+--(01) The relationship is self-referencing and a self-referencing relationship already exists
+-- with the SET NULL delete rule. 
+--(02) The relationship forms a cycle of two or more tables that cause the table to be delete-connected 
+--to itself (all other delete rules in the cycle would be CASCADE). 
+--(03) The relationship causes the table to be delete-connected to the indicated table through 
+--multiple relationships and the delete rule of the existing relationship is SET NULL. 
+--The delete rules of the existing relationships cause an error, not the delete rule specified in 
+--the FOREIGN KEY clause of the CREATE TABLE or ALTER TABLE statement. 
+--sqlcode: -632 
+-- sqlstate: 42915 
+-- case sql0632-01
+create table t1(a int not null primary key , b int references t1(a) ON DELETE SET NULL, 
+                c int references t1(a) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.T1 because of delete rule restrictions. (The relationship is self-referencing and a self-referencing relationship already exists with the SET NULL delete rule.) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE SET NULL, 
+                  z int references tself(b) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.TSELF because of delete rule restrictions. (The relationship is self-referencing and a self-referencing relationship already exists with the SET NULL delete rule.) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE SET NULL, 
+                  z int references tself(b) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.TSELF because of delete rule restrictions. (The relationship is self-referencing and a self-referencing relationship already exists with the SET NULL delete rule.) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE SET NULL, 
+                  z int references tself(b) ON DELETE RESTRICT);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.TSELF because of delete rule restrictions. (The relationship is self-referencing and a self-referencing relationship already exists with the SET NULL delete rule.) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE SET NULL, 
+                  z int references tself(b) ON DELETE NO ACTION);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.TSELF because of delete rule restrictions. (The relationship is self-referencing and a self-referencing relationship already exists with the SET NULL delete rule.) '. 
+ij> -- case sql0632 -02 (c2 fails)
+create table t1(a int not null primary key, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null primary key, y int);
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b)
+                             references t2(x) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete set null;
+ERROR 42915: Foreign  Key 'C2' is invalid because 'The table cannot be defined as a dependent of table APP.T1 because of delete rule restrictions. (The relationship forms a cycle of two or more tables that cause the table to be delete-connected to itself (all other delete rules in the cycle would be CASCADE)).  '. 
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- constraint c4 fails
+create table t1( a int not null primary key, b int);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int not null unique , k int );
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x)
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c2 foreign key (b)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m)
+                              references t2(y) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c4 foreign key (k)
+                              references t2(y) on delete set null;
+ERROR 42915: Foreign  Key 'C4' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> create table t1( a int not null primary key, b int);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique, z int);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int not null unique , k int );
+0 rows inserted/updated/deleted
+ij> create table t4(c1 int not null unique , c2 int);
+0 rows inserted/updated/deleted
+ij> create table t5(c1 int not null unique , c2 int);
+0 rows inserted/updated/deleted
+ij> create table t6(c1 int not null unique , c2 int);
+0 rows inserted/updated/deleted
+ij> --delete connected cycle
+--different path from t2
+alter table t2 add constraint c3 foreign key (z)
+                              references t4(c1) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c2)
+                              references t5(c1) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t5 add constraint c5 foreign key (c2)
+                              references t6(c1) on delete cascade;
+0 rows inserted/updated/deleted
+ij> --cycle forming alter -- c6 should fail
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c6 foreign key (k)
+                              references t2(y) on delete SET NULL;
+ERROR 42915: Foreign  Key 'C6' is invalid because 'The table cannot be defined as a dependent of table APP.T2 because of delete rule restrictions. (The relationship forms a cycle of two or more tables that cause the table to be delete-connected to itself (all other delete rules in the cycle would be CASCADE)).  '. 
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> alter table t5 drop constraint c5;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t5;
+0 rows inserted/updated/deleted
+ij> drop table t6;
+0 rows inserted/updated/deleted
+ij> -- case sql0632 - 3 (c2 fails) 
+create table t1( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int );
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete set null;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'The table cannot be defined as a dependent of table APP.T2 because of delete rule restrictions. (The relationship causes the table to be delete-connected to the indicated table through multiple relationships and the delete rule of the existing relationship is SET NULL.).  '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> --SQL0633N The delete rule of FOREIGN KEY "<name>" must be "<delete-rule>" (reason code = "<reason-code>").  
+--Explanation: The delete rule specified in a FOREIGN KEY clause of the CREATE TABLE or ALTER TABLE 
+--statement is not valid. The indicated delete rule is required for one of the following reason codes: 
+--(01) The referential constraint is self-referencing and an existing self-referencing constraint has the
+-- indicated delete rule (NO ACTION, RESTRICT or CASCADE). 
+--(02) The referential constraint is self-referencing and the table is dependent in a relationship with
+-- a delete rule of CASCADE. 
+--(03) The relationship would cause the table to be delete-connected to the same table through multiple 
+--relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE). 
+-- case sql0633-01 (t1 creation should fail)
+create table t1(a int not null primary key , b int references t1(a) ON DELETE CASCADE, 
+                c int references t1(a) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE RESTRICT, 
+                  z int references tself(b) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "RESTRICT". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE RESTRICT, 
+                  z int references tself(b) ON DELETE NO ACTION);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "RESTRICT". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE RESTRICT, 
+                  z int references tself(b) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "RESTRICT". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE NO ACTION, 
+                  z int references tself(b) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "NO ACTION". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE NO ACTION, 
+                  z int references tself(b) ON DELETE RESTRICT);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "NO ACTION". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE NO ACTION, 
+                  z int references tself(b) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "NO ACTION". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE CASCADE, 
+                  z int references tself(b) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE CASCADE, 
+                  z int references tself(b) ON DELETE NO ACTION);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE CASCADE, 
+                  z int references tself(b) ON DELETE RESTRICT);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> --FOLLOWING CASES SHOULD PASS
+create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE NO ACTION, 
+                  z int references tself(b) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> drop table tself;
+0 rows inserted/updated/deleted
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE CASCADE, 
+                  z int references tself(b) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table tself;
+0 rows inserted/updated/deleted
+ij> create table tself( a int not null primary key, b int not null  unique,
+                  x int references tself(a) ON DELETE RESTRICT, 
+                  z int references tself(b) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table tself;
+0 rows inserted/updated/deleted
+ij> -- END PASS CASES
+-- case sql0633-02 (t2 fails)
+create table t1(a int not null primary key) ;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE CASCADE, 
+                y int not null unique, z int references t2(y) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and the table is dependent in a relationship with a delete rule of CASCADE.)'. 
+ij> create table t2(x int references t1(a) ON DELETE CASCADE, 
+                y int not null unique, z int references t2(y) ON DELETE NO ACTION);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and the table is dependent in a relationship with a delete rule of CASCADE.)'. 
+ij> create table t2(x int references t1(a) ON DELETE CASCADE, 
+                y int not null unique, z int references t2(y) ON DELETE RESTRICT);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and the table is dependent in a relationship with a delete rule of CASCADE.)'. 
+ij> --START  PASS CASES
+--These cases is to make sure we don;t throw errors for the valid cases.
+create table t2(x int references t1(a) ON DELETE CASCADE, 
+                y int not null unique, z int references t2(y) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE RESTRICT, 
+                y int not null unique, z int references t2(y) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE RESTRICT, 
+                y int not null unique, z int references t2(y) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE RESTRICT, 
+                y int not null unique, z int references t2(y) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE RESTRICT, 
+                y int not null unique, z int references t2(y) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE NO ACTION, 
+                y int not null unique, z int references t2(y) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE NO ACTION, 
+                y int not null unique, z int references t2(y) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE NO ACTION, 
+                y int not null unique, z int references t2(y) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE NO ACTION, 
+                y int not null unique, z int references t2(y) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE SET NULL, 
+                y int not null unique, z int references t2(y) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE SET NULL, 
+                y int not null unique, z int references t2(y) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE SET NULL, 
+                y int not null unique, z int references t2(y) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE SET NULL, 
+                y int not null unique, z int references t2(y) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --END PASS CASES
+-- case sql0633-03 (c3 fails)
+create table t1( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int );
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete set null;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> -- table t3 creation should fail.
+create table t1( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE CASCADE, 
+                                       y int not null constraint c1 unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int references t1(a) ON DELETE CASCADE , 
+                         m int references t2(y) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'xxxxGENERATED-IDxxxx' because CONSTRAINT 'xxxxGENERATED-IDxxxx' is dependent on that object.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- SQL0634N The delete rule of FOREIGN KEY "<name>" must not be CASCADE (reason-code = "<reason-code>").  
+-- Explanation: The CASCADE delete rule specified in the FOREIGN KEY clause of the CREATE TABLE 
+-- or ALTER TABLE statement is not valid for one of the following reason codes: 
+-- (01) A self-referencing constraint exists with a delete rule of SET NULL, NO ACTION or RESTRICT. 
+-- (02) The relationship would form a cycle that would cause a table to be delete-connected to itself. 
+-- One of the existing delete rules in the cycle is not CASCADE, so this relationship may be definable 
+-- if the delete rule is not CASCADE. 
+-- (03) The relationship would cause another table to be delete-connected to the same table through
+--  multiple paths with different delete rules or with delete rule equal to SET NULL. 
+-- case sql0634 - 01
+create table t1( a int not null primary key, b int , c int );
+ERROR X0Y32: Table/View 'T1' already exists in Schema 'APP'.
+ij> create table t2(x int, y int not null unique);
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b) 
+                             references t1(a) on delete set null;
+ERROR 42X14: 'B' is not a column in table or VTI 'T1'.
+ij> alter table t1 add constraint c2 foreign key (c) 
+                              references t2(y) on delete cascade;
+ERROR 42X14: 'C' is not a column in table or VTI 'T1'.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- t2 should fail
+create table t1(a int not null primary key) ;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE SET NULL, 
+       		                       z int references t1(a) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key can not be CASCADE. (A self-referencing constraint exists with a delete rule of SET NULL, NO ACTION or RESTRICT.) '. 
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE NO ACTION, 
+       		                       z int references t1(a) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key can not be CASCADE. (A self-referencing constraint exists with a delete rule of SET NULL, NO ACTION or RESTRICT.) '. 
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE RESTRICT, 
+       		                       z int references t1(a) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key can not be CASCADE. (A self-referencing constraint exists with a delete rule of SET NULL, NO ACTION or RESTRICT.) '. 
+ij> --START  SHOULD PASS CASES
+create table t2(x int not null unique, y int references t2(x) ON DELETE CASCADE, 
+       		                       z int references t1(a) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE CASCADE, 
+       		                       z int references t1(a) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE CASCADE, 
+       		                       z int references t1(a) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE CASCADE, 
+       		                       z int references t1(a) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE RESTRICT, 
+       		                       z int references t1(a) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE RESTRICT, 
+       		                       z int references t1(a) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE RESTRICT, 
+       		                       z int references t1(a) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE NO ACTION, 
+       		                       z int references t1(a) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE NO ACTION, 
+       		                       z int references t1(a) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null unique, y int references t2(x) ON DELETE NO ACTION, 
+       		                       z int references t1(a) ON DELETE NO ACTION);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --END PASS CASES
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- case sql0634 - 02 (c1 fails)
+create table t1(a int not null primary key, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null primary key, y int);
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b)
+                             references t2(x) on delete cascade;
+ERROR 42915: Foreign  Key 'C1' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would form a cycle that would cause a table to be delete-connected to itself. One of the existing delete rules in the cycle is not CASCADE, so this relationship may be definable if the delete rule is not CASCADE.) '. 
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- case sql0634 - 03 
+create table t1( a int not null primary key, b int);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique, z int);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int not null unique , k int );
+0 rows inserted/updated/deleted
+ij> create table t4(c1 int not null unique , c2 int);
+0 rows inserted/updated/deleted
+ij> -- error scenario 1: adding constraint c4 will make t2 get two paths from t1 with SET NULLS
+alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+ERROR 42915: Foreign  Key 'C4' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would cause another table to be delete-connected to the same table through multiple paths with different delete rules or with delete rule equal to SET NULL.) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- error scenario 2: adding constraint c4 will make t2 get two paths from t1 with a SET NULL and
+--- a CASCADE.
+alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+ERROR 42915: Foreign  Key 'C4' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would cause another table to be delete-connected to the same table through multiple paths with different delete rules or with delete rule equal to SET NULL.) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- error scenario 3: adding constraint c4 will make t2 get two paths from t1 with a NO ACTION 
+--- and a CASCADE.
+alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete NO ACTION;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+ERROR 42915: Foreign  Key 'C4' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would cause another table to be delete-connected to the same table through multiple paths with different delete rules or with delete rule equal to SET NULL.) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- error scenario 4: adding constraint c4 will make t2 get two paths from t1 with a CASCADE
+--- and a RESTRICT.
+alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete RESTRICT;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+ERROR 42915: Foreign  Key 'C4' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would cause another table to be delete-connected to the same table through multiple paths with different delete rules or with delete rule equal to SET NULL.) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> --FOLLOWING SHOULD PASS
+alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete RESTRICT;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete RESTRICT;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (x)
+                              references t1(a) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (z)
+                              references t4(c1) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (l)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (c1)
+                              references t3(m) on delete RESTRICT;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> --- END OF ACTUAL ERROR CASES
+--- MISC CASES 
+--Following should give error because of delete-rule restrictions
+create table t1( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE CASCADE, 
+                                       y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int references t1(a) ON DELETE CASCADE , 
+                         m int references t2(y) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> drop table t3 ;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T3' because it does not exist.
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --DB21034E  The command was processed as an SQL statement because it was not a
+--valid Command Line Processor command.  During SQL processing it returned:
+--SQL0633N  The delete rule of FOREIGN KEY "M..." must be "CASCADE" (reason code
+--= "3").  SQLSTATE=42915
+create table t1( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE SET NULL, 
+                                       y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int references t1(a) ON DELETE CASCADE , 
+                         m int references t2(y) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t3 ;
+0 rows inserted/updated/deleted
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> --Following should pass.
+create table t1( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t4(s int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t4(s) ON DELETE CASCADE, y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int references t1(a) ON DELETE CASCADE , 
+                         m int references t2(y) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --Following should give error because of delete-rule restrictions
+create table t1( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int );
+0 rows inserted/updated/deleted
+ij> -- all should pass
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- c3 fails: sql0633N - 3
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete set null;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C3' on table 'APP.T3'.
+ij> -- c3 fails; sql0632N - 3 
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete cascade;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'The table cannot be defined as a dependent of table APP.T2 because of delete rule restrictions. (The relationship causes the table to be delete-connected to the indicated table through multiple relationships and the delete rule of the existing relationship is SET NULL.).  '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C3' on table 'APP.T3'.
+ij> -- passes
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- succeds
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- succeds
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- passes 
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> -- c3 fails - sql0632 - 3
+alter table t2 add constraint c1 foreign key (x) 
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c2 foreign key (l) 
+                              references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m) 
+                              references t2(y) on delete set null;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'The table cannot be defined as a dependent of table APP.T2 because of delete rule restrictions. (The relationship causes the table to be delete-connected to the indicated table through multiple relationships and the delete rule of the existing relationship is SET NULL.).  '. 
+ij> alter table t2 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C3' on table 'APP.T3'.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> --cyclic case with two tables.
+create table t1(a int not null primary key, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int not null primary key, y int);
+0 rows inserted/updated/deleted
+ij> --passes
+alter table t1 add constraint c1 foreign key (b)
+                             references t2(x) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b)
+                             references t2(x) on delete NO ACTION;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete cascade;
+ERROR 42915: Foreign  Key 'C2' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would form a cycle that would cause a table to be delete-connected to itself. One of the existing delete rules in the cycle is not CASCADE, so this relationship may be definable if the delete rule is not CASCADE.) '. 
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C2' on table 'APP.T2'.
+ij> --c2 fails - sql0632N - reason code 2
+alter table t1 add constraint c1 foreign key (b)
+                             references t2(x) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete set null;
+ERROR 42915: Foreign  Key 'C2' is invalid because 'The table cannot be defined as a dependent of table APP.T1 because of delete rule restrictions. (The relationship forms a cycle of two or more tables that cause the table to be delete-connected to itself (all other delete rules in the cycle would be CASCADE)).  '. 
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C2' on table 'APP.T2'.
+ij> --c1 fails - sql0634N - reason code 2
+alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint c1 foreign key (b)
+                             references t2(x) on delete cascade;
+ERROR 42915: Foreign  Key 'C1' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would form a cycle that would cause a table to be delete-connected to itself. One of the existing delete rules in the cycle is not CASCADE, so this relationship may be definable if the delete rule is not CASCADE.) '. 
+ij> alter table t1 drop constraint c1;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C1' on table 'APP.T1'.
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> -- c1 fails : column b can not contain null values
+alter table t1 add constraint c1 foreign key (b)
+                             references t2(x) on delete NO ACTION;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (y)
+                              references t1(b) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- should pass
+create table t1(a int not null unique, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int unique not null  , y int);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE CASCADE ,
+                y int references t3(l) ON DELETE RESTRICT);
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --creating t2 should fail
+create table t1(a int not null unique, b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int unique not null  ,
+               y int references t1(b) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE CASCADE ,
+                y int references t3(l) ON DELETE RESTRICT);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> drop table t2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- cyclic references
+-- t1 refs  t3 refs t2 refs t1
+create table t1( a int not null primary key, b int);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int not null unique , k int );
+0 rows inserted/updated/deleted
+ij> insert into t1  values (1  , 1) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values ( 1 , 1) ;
+1 row inserted/updated/deleted
+ij> insert into t3 values (1 , 1, 1) ;
+1 row inserted/updated/deleted
+ij> --delete connected cycle 
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (m)
+                              references t2(y) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> --c3 should fail SQL0632N - 2
+--delete connected cycle all refactions inside the cycle should be same
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (k)
+                              references t2(y) on delete set null;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'The table cannot be defined as a dependent of table APP.T2 because of delete rule restrictions. (The relationship forms a cycle of two or more tables that cause the table to be delete-connected to itself (all other delete rules in the cycle would be CASCADE)).  '. 
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C3' on table 'APP.T3'.
+ij> --c3 should fail SQL0634N - 2 -- PROBLEMATIC CASE
+-- DELETE CONNECTED CYCLE
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (k)
+                              references t2(y) on delete cascade;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would form a cycle that would cause a table to be delete-connected to itself. One of the existing delete rules in the cycle is not CASCADE, so this relationship may be definable if the delete rule is not CASCADE.) '. 
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C3' on table 'APP.T3'.
+ij> --c3 should fail - SQL0634N - 2
+--DELETE CONNECTED CYCLE
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (k)
+                              references t2(y) on delete cascade;
+ERROR 42915: Foreign  Key 'C3' is invalid because 'the delete rule of foreign key can not be CASCADE. (The relationship would form a cycle that would cause a table to be delete-connected to itself. One of the existing delete rules in the cycle is not CASCADE, so this relationship may be definable if the delete rule is not CASCADE.) '. 
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+ERROR 42X86: ALTER table failed. There is no constraint 'APP.C3' on table 'APP.T3'.
+ij> -- passes
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (k)
+                              references t2(y) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> --passes
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (k)
+                              references t2(y) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> --passes
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c3 foreign key (k)
+                              references t2(y) on delete set null;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> drop table t3 ;
+0 rows inserted/updated/deleted
+ij> -- self referencing errors
+create table tself(a int not null primary key , 
+               b int references tself(a) ON DELETE SET NULL,  
+               c int references tself(a) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.TSELF because of delete rule restrictions. (The relationship is self-referencing and a self-referencing relationship already exists with the SET NULL delete rule.) '. 
+ij> create table tself(a int not null primary key , 
+               b int references tself(a) ON DELETE CASCADE,  
+               c int references tself(a) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tself(a int not null primary key , 
+               b int references tself(a) ON DELETE SET NULL,  
+               c int references tself(a) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.TSELF because of delete rule restrictions. (The relationship is self-referencing and a self-referencing relationship already exists with the SET NULL delete rule.) '. 
+ij> create table tself(a int not null primary key , 
+               b int references tself(a) ,  
+               c int references tself(a) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "NO ACTION". (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> create table tparent( a int not null  primary key);
+0 rows inserted/updated/deleted
+ij> --THIS ONE SHOULD PASS , but currently we are throwing ERRROR
+create table tself(a int not null primary key , 
+               b int references tparent(a) ON DELETE SET NULL ,  
+               c int references tself(a) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table tself;
+0 rows inserted/updated/deleted
+ij> --should pass
+create table tself(a int not null primary key , 
+               b int references tparent(a) ON DELETE CASCADE ,  
+               c int references tself(a) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> drop table tself;
+0 rows inserted/updated/deleted
+ij> --should throw error
+create table tself(a int not null primary key , 
+               b int references tparent(a) ON DELETE CASCADE ,  
+               c int references tself(a) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "CASCADE". (The referential constraint is self-referencing and the table is dependent in a relationship with a delete rule of CASCADE.)'. 
+ij> drop table tself;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TSELF' because it does not exist.
+ij> --should pass
+create table tself(a int not null primary key , 
+               b int references tparent(a) ON DELETE SET NULL,  
+               c int references tself(a) ON DELETE SET NULL);
+0 rows inserted/updated/deleted
+ij> drop table tself;
+0 rows inserted/updated/deleted
+ij> drop table tparent;
+0 rows inserted/updated/deleted
+ij> --two consectuvie set null  CYCLE
+create table t1( a int not null primary key, b int);
+0 rows inserted/updated/deleted
+ij> create table t2(x int, y int not null unique);
+0 rows inserted/updated/deleted
+ij> create table t3(l int, m int not null unique , k int );
+0 rows inserted/updated/deleted
+ij> create table t4(s int, t int not null unique , y int );
+0 rows inserted/updated/deleted
+ij> --all should pass
+--two consectuvie set null  CYCLE , but not a delete connected cylcle
+alter table t1 add constraint c1 foreign key (b)
+                              references t3(m) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c3 foreign key (s)
+                              references t2(y) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t3 add constraint c4 foreign key (k)
+                              references t4(t) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t1 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> --two continuos set nulls , but not a cycle
+alter table t3 add constraint c1 foreign key (l)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c3 foreign key (s)
+                              references t2(y) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (y)
+                              references t3(m) on delete cascade;
+0 rows inserted/updated/deleted
+ij> alter table t3 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c4;
+0 rows inserted/updated/deleted
+ij> --c4 fails error case NULL followed by a cascade in the path
+alter table t3 add constraint c1 foreign key (l)
+                              references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t2 add constraint c2 foreign key (x)
+                             references t1(a) on delete CASCADE;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c3 foreign key (s)
+                              references t2(y) on delete SET NULL;
+0 rows inserted/updated/deleted
+ij> alter table t4 add constraint c4 foreign key (y)
+                              references t3(m) on delete cascade;
+ERROR 42915: Foreign  Key 'C4' is invalid because 'The table cannot be defined as a dependent of table APP.T3 because of delete rule restrictions. (The relationship causes the table to be delete-connected to the indicated table through multiple relationships and the delete rule of the existing relationship is SET NULL.).  '. 
+ij> alter table t3 drop constraint c1;
+0 rows inserted/updated/deleted
+ij> alter table t2 drop constraint c2;
+0 rows inserted/updated/deleted
+ij> alter table t4 drop constraint c3;
+0 rows inserted/updated/deleted
+ij> drop table t4 ;
+0 rows inserted/updated/deleted
+ij> drop table t3 ;
+0 rows inserted/updated/deleted
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> -- t2 should fail for these 4 cases below
+create table t1( a int not null primary key, b int not null  unique);
+0 rows inserted/updated/deleted
+ij> create table t2(x int references t1(a) ON DELETE RESTRICT, 
+                y int not null unique, z int references t1(b) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'the delete rule of foreign key  must be "RESTRICT". (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) '. 
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table  t1(a int not null unique , b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table  t2(x int references t1(a) ON DELETE SET NULL ,
+y int references t1(b) ON DELETE CASCADE);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.T1 because of delete rule restrictions. (The relationship causes the table to be delete-connected to the indicated table through multiple relationships and the delete rule of the existing relationship is SET NULL.).  '. 
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table  t1(a int not null unique , b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table  t2(x int references t1(a) ON DELETE SET NULL ,
+y int references t1(b) ON DELETE SET NULL);
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.T1 because of delete rule restrictions. (The relationship causes the table to be delete-connected to the indicated table through multiple relationships and the delete rule of the existing relationship is SET NULL.).  '. 
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table  t1(a int not null unique , b int not null unique);
+0 rows inserted/updated/deleted
+ij> create table  t2(x int references t1(a) ON DELETE SET NULL ,
+y int references t1(b));
+ERROR 42915: Foreign  Key 'xxxxGENERATED-IDxxxx' is invalid because 'The table cannot be defined as a dependent of table APP.T1 because of delete rule restrictions. (The relationship causes the table to be delete-connected to the indicated table through multiple relationships and the delete rule of the existing relationship is SET NULL.).  '. 
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> 

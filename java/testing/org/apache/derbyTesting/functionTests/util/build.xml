@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<project default="util" basedir=".">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/> 
+  <!-- derby testing specific properties files -->
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/util"/>
+
+<!-- Targets -->
+  <target name="util" depends="FTpolicy,compile"/>
+  
+  <target name="FTpolicy" depends="copyfiles,compile"/>
+
+  <target name="compile">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement location="${oro}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${this.dir}/*.java"/> 
+      <include name="${this.dir}/StaticInitializers/*.java"/> 
+      <include name="${this.dir}/VTIClasses/*.java"/> 
+    </javac>
+  </target>
+
+
+  <target name="copyfiles">
+    <copy file="${derby.testing.src.dir}/${derby.testing.functest.dir}/util/nwsvr.policy"
+      todir="${out.dir}/${derby.testing.functest.dir}/util"> 
+    </copy>
+  </target>
+
+</project>
+

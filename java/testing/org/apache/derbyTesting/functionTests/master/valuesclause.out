@@ -1,0 +1,529 @@
+ij> --
+-- this test is for the values clause functionality
+--
+-- create the tables
+create table t1 (i int, j int);
+0 rows inserted/updated/deleted
+ij> create table t2 (k int, l int);
+0 rows inserted/updated/deleted
+ij> -- populate t2
+insert into t2 values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 4);
+1 row inserted/updated/deleted
+ij> -- negative tests
+values(null);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> values(1,null);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> values(null,1);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> values(null),(1);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> values(1),(null);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> select x from (values(null,1)) as x(x,y);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> select x from (values(1,null)) as x(x,y);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> select x from (values null) as x(x);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> -- empty values clause
+values();
+ERROR 42X01: Syntax error: Encountered ")" at line 2, column 8.
+ij> -- positive tests
+-- single value
+values 1;
+1          
+-----------
+1          
+ij> values (1);
+1          
+-----------
+1          
+ij> insert into t1 values (1, null);
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |J          
+-----------------------
+1          |NULL       
+ij> delete from t1;
+1 row inserted/updated/deleted
+ij> -- multiple values
+values (1, 2, 3);
+1          |2          |3          
+-----------------------------------
+1          |2          |3          
+ij> -- values in derived table
+select * from (values (1, 2, 3)) a;
+1          |2          |3          
+-----------------------------------
+1          |2          |3          
+ij> select a, b from (values (1, 2, 3)) a (a, b, c);
+A          |B          
+-----------------------
+1          |2          
+ij> select * from (values (1, 2, 3)) a, (values (4, 5, 6)) b;
+1          |2          |3          |4          |5          |6          
+-----------------------------------------------------------------------
+1          |2          |3          |4          |5          |6          
+ij> select * from t2, (values (1, 2, 3)) a;
+K          |L          |3          |4          |5          
+-----------------------------------------------------------
+1          |2          |1          |2          |3          
+3          |4          |1          |2          |3          
+ij> select * from (values (1, 2, 3)) a (a, b, c), t2 where l = b;
+A          |B          |C          |K          |L          
+-----------------------------------------------------------
+1          |2          |3          |1          |2          
+ij> -- subquery in values clause
+values (select k from t2 where k = 1);
+1          
+-----------
+1          
+ij> values (2, (select k from t2 where k = 1));
+1          |2          
+-----------------------
+2          |1          
+ij> values ((select k from t2 where k = 1), 2);
+1          |2          
+-----------------------
+1          |2          
+ij> values ((select k from t2 where k = 1), (select l from t2 where l = 4));
+1          |2          
+-----------------------
+1          |4          
+ij> insert into t1 values ((select k from t2 where k = 1), (select l from t2 where l = 4));
+1 row inserted/updated/deleted
+ij> select * from t1;
+I          |J          
+-----------------------
+1          |4          
+ij> delete from t1;
+1 row inserted/updated/deleted
+ij> -- values clause in set clause
+update t2 set k = (values 5) where l = 2;
+1 row inserted/updated/deleted
+ij> select * from t2;
+K          |L          
+-----------------------
+5          |2          
+3          |4          
+ij> -- k should be set to null
+update t2 set k = (values (select 2 from t2 where l = 5));
+2 rows inserted/updated/deleted
+ij> select * from t2;
+K          |L          
+-----------------------
+NULL       |2          
+NULL       |4          
+ij> -- table constructor tests
+-- negative tests
+-- non-matching # of elements
+values 1, (2, 3), 4;
+ERROR 42X59: The number of columns in each VALUES constructor must be the same.
+ij> values (2, 3), (4, 5, 6);
+ERROR 42X59: The number of columns in each VALUES constructor must be the same.
+ij> -- empty element
+values 1, , 2;
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> -- all ? parameters in a column position
+prepare v1 as 'values (1, ?, 2), (3, ?, 4), (5, ?, 7)';
+ERROR 42Y10: A table constructor that is not in an INSERT statement has all ? parameters in one of its columns.  For each column, at least one of the rows must have a non-parameter.
+ij> -- positive tests
+values 1, 2, 3;
+1          
+-----------
+1          
+2          
+3          
+ij> values (1, 2, 3), (4, 5, 6);
+1          |2          |3          
+-----------------------------------
+1          |2          |3          
+4          |5          |6          
+ij> prepare v2 as 'values (1, 1, ?), (1e0, ?, ''abc''), (?, 0, ''def'')';
+ij> execute v2 using 'values (''ghi'', 1, 2)';
+IJ WARNING: Autocommit may close using result set
+1                     |2          |3   
+---------------------------------------
+1.0                   |1          |ghi 
+1.0                   |1          |abc 
+2.0                   |0          |def 
+ij> execute v2 using 'values (cast(null as char(3)), cast(null as smallint), cast(null as float))';
+IJ WARNING: Autocommit may close using result set
+1                     |2          |3   
+---------------------------------------
+1.0                   |1          |NULL
+1.0                   |NULL       |abc 
+NULL                  |0          |def 
+ij> remove v2;
+ij> -- type precedence tests. tinyint not supported by DB2 Cloudscape
+values (1 = 1.2);
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (1.2 = 1);
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 13.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (1 = cast(1 as bigint));
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (1 = cast(1 as smallint));
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (cast(1 as bigint) = 1);
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (cast(1 as smallint) = 1);
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 29.
+ij> -- inserts
+create table insert_test1 (c1 int);
+0 rows inserted/updated/deleted
+ij> create table insert_test2 (i int, s smallint, d double precision, r real,
+						  c10 char(10), c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> insert into insert_test1 values 1, 2, 3;
+3 rows inserted/updated/deleted
+ij> select * from insert_test1;
+C1         
+-----------
+1          
+2          
+3          
+ij> delete from insert_test1;
+3 rows inserted/updated/deleted
+ij> insert into insert_test1 values 1, null, 3;
+3 rows inserted/updated/deleted
+ij> select * from insert_test1;
+C1         
+-----------
+1          
+NULL       
+3          
+ij> delete from insert_test1;
+3 rows inserted/updated/deleted
+ij> insert into insert_test2 values (1, 1, 1e1, 1e1, '111', '1111111111', '111', '111111111'),
+								(2, 2, 2e2, 2e2, '222', '2222222222', '222', '222222222'),
+								(3, 3, 3e3, 3e3, '333', '3333333333', '333', '333333333');
+3 rows inserted/updated/deleted
+ij> select * from insert_test2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |111       |1111111111                    |111       |111111111                     
+2          |2     |200.0                 |200.0        |222       |2222222222                    |222       |222222222                     
+3          |3     |3000.0                |3000.0       |333       |3333333333                    |333       |333333333                     
+ij> delete from insert_test2;
+3 rows inserted/updated/deleted
+ij> insert into insert_test2 values (1, 1, null, null, null, null, null, null),
+								(2, 2, null, null, null, null, null, null),
+								(3, 3, null, null, null, null, null, null);
+3 rows inserted/updated/deleted
+ij> select * from insert_test2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+2          |2     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test2;
+3 rows inserted/updated/deleted
+ij> insert into insert_test2 values (1, null, null, null, null, null, null, null),
+								(null, 2, null, null, null, null, null, null),
+								(3, null, null, null, null, null, null, null);
+3 rows inserted/updated/deleted
+ij> select * from insert_test2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+NULL       |2     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test2;
+3 rows inserted/updated/deleted
+ij> insert into insert_test2 (r, d) values (1e2, 1e1),
+									   (2e2, 2e1),
+									   (3e2, 3e1);
+3 rows inserted/updated/deleted
+ij> select * from insert_test2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |10.0                  |100.0        |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |20.0                  |200.0        |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |30.0                  |300.0        |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test2;
+3 rows inserted/updated/deleted
+ij> prepare v3 as 'insert into insert_test2 values (1, 1, ?, 1e1, ''111'', ''1111111111'', ''111'', ''111111111''),
+								(2, 2, 2e2, 2e2, ''222'', ?, ''222'', ''222222222''),
+								(3, 3, 3e3, ?, ''333'', ''3333333333'', ''333'', ''333333333'')';
+ij> execute v3 using 'values (1e1, ''2222222222'', 3e3)';
+IJ WARNING: Autocommit may close using result set
+3 rows inserted/updated/deleted
+ij> execute v3 using 'values (cast(null as float), cast(null as char(10)), cast(null as real))';
+IJ WARNING: Autocommit may close using result set
+3 rows inserted/updated/deleted
+ij> remove v3;
+ij> -- insert with a table constructor with all ?s in one column
+prepare v4 as 'insert into insert_test2 values (?, null, null, null, null, null, null, null),
+				(?, null, null, null, null, null, null, null),
+				(?, null, null, null, null, null, null, null)';
+ij> execute v4 using 'values (10, 20, 30)';
+IJ WARNING: Autocommit may close using result set
+3 rows inserted/updated/deleted
+ij> select * from insert_test2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |111       |1111111111                    |111       |111111111                     
+2          |2     |200.0                 |200.0        |222       |2222222222                    |222       |222222222                     
+3          |3     |3000.0                |3000.0       |333       |3333333333                    |333       |333333333                     
+1          |1     |NULL                  |10.0         |111       |1111111111                    |111       |111111111                     
+2          |2     |200.0                 |200.0        |222       |NULL                          |222       |222222222                     
+3          |3     |3000.0                |NULL         |333       |3333333333                    |333       |333333333                     
+10         |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+20         |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+30         |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> remove v4;
+ij> delete from insert_test2;
+9 rows inserted/updated/deleted
+ij> -- negative test - all ?s in one column
+prepare v3 as 'values (1, ?, ?, 1e1, ''111'', ''1111111111'', ''111'', ''111111111''),
+								(2, ?, 2e2, 2e2, ''222'', ?, ''222'', ''222222222''),
+								(3, ?, 3e3, ?, ''333'', ''3333333333'', ''333'', ''333333333'')';
+ERROR 42Y10: A table constructor that is not in an INSERT statement has all ? parameters in one of its columns.  For each column, at least one of the rows must have a non-parameter.
+ij> -- values clause with a subquery in a derived table (bug 2335)
+create table x(x int);
+0 rows inserted/updated/deleted
+ij> insert into x values 1, 2, 3, 4;
+4 rows inserted/updated/deleted
+ij> select * from (values (1, (select max(x) from x), 1)) c;
+1          |2          |3          
+-----------------------------------
+1          |4          |1          
+ij> select * from x, (values (1, (select max(x) from x), 1)) c(a, b, c) where x = c;
+X          |A          |B          |C          
+-----------------------------------------------
+1          |1          |4          |1          
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table insert_test1;
+0 rows inserted/updated/deleted
+ij> drop table insert_test2;
+0 rows inserted/updated/deleted
+ij> --- supporting <TABLE> in table expression.
+create table target (a int, b int);
+0 rows inserted/updated/deleted
+ij> create index idx on target(b);
+0 rows inserted/updated/deleted
+ij> insert into target values (1, 2), (2, 3), (0, 2);
+3 rows inserted/updated/deleted
+ij> create table sub (a int, b int);
+0 rows inserted/updated/deleted
+ij> insert into sub values (1, 2), (2, 3), (2, 4);
+3 rows inserted/updated/deleted
+ij> select *
+from (select b from sub) as q(b);
+B          
+-----------
+2          
+3          
+4          
+ij> select *
+from table (select b from sub) as q(b);
+B          
+-----------
+2          
+3          
+4          
+ij> select *
+from table (select * from table (select b from sub) as q(b)) as p(a);
+A          
+-----------
+2          
+3          
+4          
+ij> select *
+from table (select b from sub) as q(b), target;
+B          |A          |B          
+-----------------------------------
+2          |1          |2          
+2          |2          |3          
+2          |0          |2          
+3          |1          |2          
+3          |2          |3          
+3          |0          |2          
+4          |1          |2          
+4          |2          |3          
+4          |0          |2          
+ij> select *
+from table (select b from sub) as q(b), target where q.b = target.b;
+B          |A          |B          
+-----------------------------------
+2          |1          |2          
+2          |0          |2          
+3          |2          |3          
+ij> select *
+from target, table (select b from sub) as q(b);
+A          |B          |B          
+-----------------------------------
+1          |2          |2          
+1          |2          |3          
+1          |2          |4          
+2          |3          |2          
+2          |3          |3          
+2          |3          |4          
+0          |2          |2          
+0          |2          |3          
+0          |2          |4          
+ij> select *
+from  (values (1)) as q(a);
+A          
+-----------
+1          
+ij> select *
+from  table (values (1)) as q(a), table (values ('a'), ('b'), ('c')) as p(a);
+A          |A
+-------------
+1          |a
+1          |b
+1          |c
+ij> -- should fail because <TABLE> can appear in front of derived table
+select *
+from  table target;
+ERROR 42X01: Syntax error: Encountered "" at line 3, column 13.
+ij> select *
+from  table (target);
+ERROR 42X01: Syntax error: Encountered "" at line 2, column 13.
+ij> select *
+from  table (target as q);
+ERROR 42X01: Syntax error: Encountered "" at line 2, column 13.
+ij> drop table sub;
+0 rows inserted/updated/deleted
+ij> drop table target;
+0 rows inserted/updated/deleted
+ij> -- negative tests
+create table t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> -- boolean expression IS disallowed in values or select clause
+select nullif(c1, 1) is null from t1;
+ERROR 42X01: Syntax error: Encountered "is" at line 2, column 22.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values 1 is null;
+ERROR 42X01: Syntax error: Encountered "is" at line 2, column 10.
+ij> -- boolean expression =, >, >=, <, <= disallowed in values or select clause
+values 1 = 1;
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select 1 = 1 from t1;
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (nullif('abc','a') = 'abc');
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select (nullif('abc','a') = 'abc') from t1;
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select c11 = any (select c11 from t1) from t1;
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 12.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values 2 > 1;
+ERROR 42X01: Syntax error: Encountered ">" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select 2 > 1 from t1;
+ERROR 42X01: Syntax error: Encountered ">" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values 2 >= 1;
+ERROR 42X01: Syntax error: Encountered ">=" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select 2 >= 1 from t1;
+ERROR 42X01: Syntax error: Encountered ">=" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values 1 < 2;
+ERROR 42X01: Syntax error: Encountered "<" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select 1 < 2 from t1;
+ERROR 42X01: Syntax error: Encountered "<" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values 1 <= 2;
+ERROR 42X01: Syntax error: Encountered "<=" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select 1 <= 2 from t1;
+ERROR 42X01: Syntax error: Encountered "<=" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (1>1);
+ERROR 42X01: Syntax error: Encountered ">" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select (c1 < 2) from t1;
+ERROR 42X01: Syntax error: Encountered "<" at line 2, column 12.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values (1 between 2 and 5);
+ERROR 42X01: Syntax error: Encountered "between" at line 2, column 11.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select (c1 between 1 and 3) from t1;
+ERROR 42X01: Syntax error: Encountered "between" at line 2, column 12.
+ij> -- boolean expression LIKE disallowed in values and select clause
+prepare ll1 as 'values ''asdf'' like ?';
+ERROR 42X01: Syntax error: Encountered "like" at line 1, column 15.
+ij> prepare ll1 as 'select ''asdf'' like ? from t1';
+ERROR 42X01: Syntax error: Encountered "like" at line 1, column 15.
+ij> prepare ll15 as 'values ''%foobar'' like ''Z%foobar'' escape ?';
+ERROR 42X01: Syntax error: Encountered "like" at line 1, column 18.
+ij> prepare ll15 as 'select ''%foobar'' like ''Z%foobar'' escape ? from t1';
+ERROR 42X01: Syntax error: Encountered "like" at line 1, column 18.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values '%foobar' like '%%foobar' escape '%';
+ERROR 42X01: Syntax error: Encountered "like" at line 2, column 18.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select '_foobar' like '__foobar' escape '_' from t1;
+ERROR 42X01: Syntax error: Encountered "like" at line 2, column 18.
+ij> prepare ll4 as 'values org.apache.derbyTesting.functionTests.tests.lang.CharUTF8::getMaxDefinedCharAsString() like ?';
+ERROR 42X01: Syntax error: Encountered "like" at line 1, column 95.
+ij> -- boolean expression INSTANCEOF disallowed in values and select clause
+values 1 instanceof int;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values 1 instanceof java.lang.Integer between false and true;
+ERROR 42X01: Syntax error: Encountered "instanceof" at line 2, column 10.
+ij> -- boolean expression EXISTS disallowed in values and select clause
+select exists (values 1) from t1;
+ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 8.
+ij> values exists (values 2);
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> -- boolean expression EXISTS diallowed in update set clause too
+update t1 set c11 = exists(values 1);
+ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 21.
+ij> -- ?: not supported anymore
+values not true ? false : true;
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select not true ? false : true from t1;
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values 1 ? 2 : 3;
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 10.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select c1 is null ? true : false from t1;
+ERROR 42X01: Syntax error: Encountered "is" at line 2, column 11.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select new java.lang.Integer(c1 is null ? 0 : c1) from t1;
+ERROR 42X01: Syntax error: Encountered "is" at line 2, column 33.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select c1, (c1=1? cast(null as int) : c1) is null from t1;
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 15.
+ij> -- try few tests in cloudscape mode for boolean expressions in values or select clause
+-- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values new java.lang.String() = '';
+ERROR 42X01: Syntax error: java.lang.String.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+values new java.lang.String('asdf') = 'asdf';
+ERROR 42X01: Syntax error: java.lang.String.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select new java.lang.String() = '' from t1;
+ERROR 42X01: Syntax error: java.lang.String.
+ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
+select new java.lang.String('asdf') = 'asdf' from t1;
+ERROR 42X01: Syntax error: java.lang.String.
+ij> 

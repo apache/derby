@@ -1,0 +1,56 @@
+ij> --
+-- this test shows the error code functionality
+--
+-- specify an invalid driver
+driver 'java.lang.Integer';
+IJ ERROR: Could not locate class java.lang.Integer
+ij> -- now a valid driver
+driver 'org.apache.derby.jdbc.EmbeddedDriver';
+ij> -- specify an invalid database
+connect 'asdfasdf';
+ERROR 08001: Driver not found: asdfasdf (errorCode = 0)
+ij> -- now a valid database, but no create
+connect 'jdbc:derby:wombat';
+ERROR XJ004: Database 'wombat' not found. (errorCode = 40000)
+ij> -- now a valid database
+connect 'jdbc:derby:wombat;create=true';
+ij> -- create the table
+create table t(i int, s smallint);
+0 rows inserted/updated/deleted
+ij> -- populate the table
+insert into t values (1,2);
+1 row inserted/updated/deleted
+ij> insert into t values (null,2);
+1 row inserted/updated/deleted
+ij> -- parser error
+-- bug 5701
+create table t(i nt, s smallint);
+ERROR 42X01: Syntax error: Encountered "" at line 3, column 18. (errorCode = 30000)
+ij> -- non-boolean where clause
+select * from t where i;
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression. (errorCode = 30000)
+ij> -- invalid correlation name for "*"
+select asdf.* from t;
+ERROR 42X10: 'ASDF' is not an exposed table name in the scope in which it appears. (errorCode = 30000)
+ij> -- execution time error
+select i/0 from t;
+1          
+-----------
+ERROR 22012: Attempt to divide by zero. (errorCode = 30000)
+ij> -- test ErrorMessages VTI
+select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = '07000';
+SQL_&|MESSAGE                                                                                                                         |SEVERITY   
+--------------------------------------------------------------------------------------------------------------------------------------------------
+07000|At least one parameter to the current statement is uninitialized.                                                               |20000      
+ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = '22012';
+SQL_&|MESSAGE                                                                                                                         |SEVERITY   
+--------------------------------------------------------------------------------------------------------------------------------------------------
+22012|Attempt to divide by zero.                                                                                                      |20000      
+ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = '42X74';
+SQL_&|MESSAGE                                                                                                                         |SEVERITY   
+--------------------------------------------------------------------------------------------------------------------------------------------------
+42X74|Invalid CALL statement syntax.                                                                                                  |20000      
+ij> -- cleanup
+drop table t;
+0 rows inserted/updated/deleted
+ij> 

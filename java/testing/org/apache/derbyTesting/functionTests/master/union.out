@@ -1,0 +1,905 @@
+ij> --
+-- this test shows union functionality
+--
+-- create the tables
+create table t1 (i int, s smallint, d double precision, r real, c10 char(10),
+				c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> create table t2 (i int, s smallint, d double precision, r real, c10 char(10),
+				c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> create table dups (i int, s smallint, d double precision, r real, c10 char(10),
+				c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into t1 values (null, null, null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t1 values (1, 1, 1e1, 1e1, '11111', '11111     11', '11111',
+	'11111      11');
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 2, 2e1, 2e1, '22222', '22222     22', '22222',
+	'22222      22');
+1 row inserted/updated/deleted
+ij> insert into t2 values (null, null, null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 3, 3e1, 3e1, '33333', '33333     33', '33333',
+	'33333      33');
+1 row inserted/updated/deleted
+ij> insert into t2 values (4, 4, 4e1, 4e1, '44444', '44444     44', '44444',
+	'44444      44');
+1 row inserted/updated/deleted
+ij> insert into dups select * from t1 union all select * from t2;
+6 rows inserted/updated/deleted
+ij> -- simple cases
+values (1, 2, 3, 4) union values (5, 6, 7, 8);
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+ij> values (1, 2, 3, 4) union values (1, 2, 3, 4);
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+ij> values (1, 2, 3, 4) union values (5, 6, 7, 8) union values (9, 10, 11, 12);
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+9          |10         |11         |12         
+ij> values (1, 2, 3, 4) union values (1, 2, 3, 4) union values (1, 2, 3, 4);
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+ij> select * from t1 union select * from t2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> select * from t1 union select * from t1;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> select * from t1 union select * from t2 union select * from dups;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> select * from t1 union select i, s, d, r, c10, c30, vc10, vc30 from t2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> select * from t1 union select i, s, d, r, c10, c30, vc10, vc30 from t2
+		union select * from dups;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> -- derived tables
+select * from (values (1, 2, 3, 4) union values (5, 6, 7, 8)) a;
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+ij> select * from (values (1, 2, 3, 4) union values (5, 6, 7, 8) union
+			   values (1, 2, 3, 4)) a;
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+ij> -- mix unions and union alls
+select i from t1 union select i from t2 union all select i from dups;
+I          
+-----------
+1          
+2          
+3          
+4          
+NULL       
+NULL       
+1          
+2          
+NULL       
+3          
+4          
+ij> (select i from t1 union select i from t2) union all select i from dups;
+I          
+-----------
+1          
+2          
+3          
+4          
+NULL       
+NULL       
+1          
+2          
+NULL       
+3          
+4          
+ij> select i from t1 union (select i from t2 union all select i from dups);
+I          
+-----------
+1          
+2          
+3          
+4          
+NULL       
+ij> select i from t1 union all select i from t2 union select i from dups;
+I          
+-----------
+1          
+2          
+3          
+4          
+NULL       
+ij> (select i from t1 union all select i from t2) union select i from dups;
+I          
+-----------
+1          
+2          
+3          
+4          
+NULL       
+ij> select i from t1 union all (select i from t2 union select i from dups);
+I          
+-----------
+NULL       
+1          
+2          
+1          
+2          
+3          
+4          
+NULL       
+ij> -- joins
+select a.i, b.i from t1 a, t2 b union select b.i, a.i from t1 a, t2 b;
+I          |I          
+-----------------------
+1          |3          
+1          |4          
+1          |NULL       
+2          |3          
+2          |4          
+2          |NULL       
+3          |1          
+3          |2          
+3          |NULL       
+4          |1          
+4          |2          
+4          |NULL       
+NULL       |1          
+NULL       |2          
+NULL       |3          
+NULL       |4          
+NULL       |NULL       
+ij> values (9, 10) union 
+	select a.i, b.i from t1 a, t2 b union select b.i, a.i from t1 a, t2 b;
+1          |2          
+-----------------------
+1          |3          
+1          |4          
+1          |NULL       
+2          |3          
+2          |4          
+2          |NULL       
+3          |1          
+3          |2          
+3          |NULL       
+4          |1          
+4          |2          
+4          |NULL       
+9          |10         
+NULL       |1          
+NULL       |2          
+NULL       |3          
+NULL       |4          
+NULL       |NULL       
+ij> select a.i, b.i from t1 a, t2 b union 
+	select b.i, a.i from t1 a, t2 b union values (9, 10);
+1          |2          
+-----------------------
+1          |3          
+1          |4          
+1          |NULL       
+2          |3          
+2          |4          
+2          |NULL       
+3          |1          
+3          |2          
+3          |NULL       
+4          |1          
+4          |2          
+4          |NULL       
+9          |10         
+NULL       |1          
+NULL       |2          
+NULL       |3          
+NULL       |4          
+NULL       |NULL       
+ij> -- non-correlated subqueries
+-- positive tests
+select i from t1 where i = (values 1 union values 1);
+I          
+-----------
+1          
+ij> select i from t1 where i = (values 1 union values 1 union values 1);
+I          
+-----------
+1          
+ij> -- expression subquery
+select i from t1 where i = (select 1 from t2 union values 1);
+I          
+-----------
+1          
+ij> -- in subquery
+select i from t1 where i in (select i from t2 union values 1 union values 2);
+I          
+-----------
+1          
+2          
+ij> select i from t1 where i in 
+		(select a from (select i from t2 union values 1 union values 2) a (a));
+I          
+-----------
+1          
+2          
+ij> -- not in subquery
+select i from t1 where i not in (select i from t2 union values 1 union values 2);
+I          
+-----------
+ij> select i from t1 where i not in (select i from t2 where i is not null union 
+								 values 1 union values 22);
+I          
+-----------
+2          
+ij> select i from t1 where i not in 
+		(select a from (select i from t2 where i is not null union 
+						values 111 union values 2) a (a));
+I          
+-----------
+1          
+ij> -- correlated union subquery
+select i from t1 a where i in (select i from t2 where 1 = 0 union 
+							   select a.i from t2 where a.i < i);
+I          
+-----------
+1          
+2          
+ij> select i from t1 a where i in (select a.i from t2 where a.i < i union 
+							   select i from t2 where 1 < 0);
+I          
+-----------
+1          
+2          
+ij> -- exists subquery
+select i from t1 where exists (select * from t2 union select * from t2);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select i from t1 where exists (select 1 from t2 union select 2 from t2);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select i from t1 where exists (select 1 from t2 where 1 = 0 union 
+							   select * from t2 where t1.i < i);
+I          
+-----------
+1          
+2          
+ij> select i from t1 where exists (select i from t2 where t1.i < i union 
+							    select * from t2 where 1 = 0 union 
+							   select * from t2 where t1.i < i union 
+							    select i from t2 where 1 = 0);
+I          
+-----------
+1          
+2          
+ij> -- order by tests
+select i from t1 union select i from dups order by i desc;
+I          
+-----------
+NULL       
+4          
+3          
+2          
+1          
+ij> select i, s from t1 union select s as i, 1 as s from dups order by s desc, i;
+I          |S          
+-----------------------
+NULL       |NULL       
+2          |2          
+1          |1          
+2          |1          
+3          |1          
+4          |1          
+NULL       |1          
+ij> -- insert tests
+create table insert_test (i int, s smallint, d double precision, r real,
+	c10 char(10), c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> -- simple tests
+insert into insert_test select * from t1 union select * from dups;
+5 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test;
+5 rows inserted/updated/deleted
+ij> insert into insert_test (s, i) values (2, 1) union values (4, 3);
+2 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |2     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |4     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test;
+2 rows inserted/updated/deleted
+ij> -- test type dominance/length/nullability
+insert into insert_test (vc30) select vc10 from t1 union select c30 from t2;
+5 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |11111                         
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |22222                         
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |33333     33                  
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |44444     44                  
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test;
+5 rows inserted/updated/deleted
+ij> insert into insert_test (c30)
+	select vc10 from t1
+	union
+	select c30 from t2
+	union
+	select c10 from t1;
+5 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |11111                         |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |22222                         |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |33333     33                  |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |44444     44                  |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test;
+5 rows inserted/updated/deleted
+ij> -- test NormalizeResultSet generation
+select i, d from t1 union select d, i from t2;
+1                     |2                     
+---------------------------------------------
+1.0                   |10.0                  
+2.0                   |20.0                  
+30.0                  |3.0                   
+40.0                  |4.0                   
+NULL                  |NULL                  
+ij> select vc10, c30 from t1 union select c30, vc10 from t2;
+1                             |2                             
+-------------------------------------------------------------
+11111                         |11111     11                  
+22222                         |22222     22                  
+33333     33                  |33333                         
+44444     44                  |44444                         
+NULL                          |NULL                          
+ij> create table insert_test2 (s smallint not null, vc30 varchar(30) not null);
+0 rows inserted/updated/deleted
+ij> -- the following should fail due to null constraint
+insert into insert_test2 select s, c10 from t1 union select s, c30 from t2;
+ERROR 23502: Column 'S'  cannot accept a NULL value.
+ij> select * from insert_test2;
+S     |VC30                          
+-------------------------------------
+ij> -- negative tests
+-- ? in select list of union
+select ? from insert_test union select vc30 from insert_test;
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> select vc30 from insert_test union select ? from insert_test;
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> -- DB2 requires matching target and result column for insert
+insert into insert_test values (1, 2) union values (3, 4);
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> -- try some unions of different types.  
+-- types should be ok if comparable.
+values (1) union values (1.1);
+1             
+--------------
+1.0           
+1.1           
+ij> values (1) union values (1.1e1);
+1                     
+----------------------
+1.0                   
+11.0                  
+ij> values (1.1) union values (1);
+1             
+--------------
+1.0           
+1.1           
+ij> values (1.1e1) union values (1);
+1                     
+----------------------
+1.0                   
+11.0                  
+ij> -- negative cases
+values (x'aa') union values (1);
+ERROR 42X61: Types 'CHAR () FOR BIT DATA' and 'INTEGER' are not UNION compatible.
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table dups;
+0 rows inserted/updated/deleted
+ij> drop table insert_test;
+0 rows inserted/updated/deleted
+ij> drop table insert_test2;
+0 rows inserted/updated/deleted
+ij> --
+-- this test shows the current supported union all functionality
+--
+-- RESOLVE - whats not tested
+--	type compatability
+--  nullability of result
+--  type dominance
+--  correlated subqueries
+--  table constructors
+-- create the tables
+create table t1 (i int, s smallint, d double precision, r real, c10 char(10),
+				 c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> create table t2 (i int, s smallint, d double precision, r real, c10 char(10),
+				 c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into t1 values (null, null, null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t1 values (1, 1, 1e1, 1e1, '11111', '11111     11', '11111',
+	'11111      11');
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 2, 2e1, 2e1, '22222', '22222     22', '22222',
+	'22222      22');
+1 row inserted/updated/deleted
+ij> insert into t2 values (null, null, null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t2 values (3, 3, 3e1, 3e1, '33333', '33333     33', '33333',
+	'33333      33');
+1 row inserted/updated/deleted
+ij> insert into t2 values (4, 4, 4e1, 4e1, '44444', '44444     44', '44444',
+	'44444      44');
+1 row inserted/updated/deleted
+ij> -- negative tests
+-- non matching number of columns
+select * from t1 union all select * from t1, t2;
+ERROR 42X58: The number of columns on the left and right sides of the UNION must be the same.
+ij> select * from t1 union all values (1, 2, 3, 4);
+ERROR 42X58: The number of columns on the left and right sides of the UNION must be the same.
+ij> values (1, 2, 3, 4) union all select * from t1;
+ERROR 42X58: The number of columns on the left and right sides of the UNION must be the same.
+ij> -- simple cases
+values (1, 2, 3, 4) union all values (5, 6, 7, 8);
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+ij> values (1, 2, 3, 4) union all values (5, 6, 7, 8) union all values (9, 10, 11, 12);
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+9          |10         |11         |12         
+ij> select * from t1 union all select * from t2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+ij> select * from t1 union all select i, s, d, r, c10, c30, vc10, vc30 from t2;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+ij> -- derived tables
+select * from (values (1, 2, 3, 4) union all values (5, 6, 7, 8)) a;
+1          |2          |3          |4          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+ij> select * from (values (1, 2, 3, 4) union all values (5, 6, 7, 8)) a (a, b, c, d);
+A          |B          |C          |D          
+-----------------------------------------------
+1          |2          |3          |4          
+5          |6          |7          |8          
+ij> select b, d from (values (1, 2, 3, 4) union all values (5, 6, 7, 8)) a (a, b, c, d);
+B          |D          
+-----------------------
+2          |4          
+6          |8          
+ij> select * from (select i, s, c10, vc10 from t1 union all select i, s, c10, vc10 from t2) a;
+I          |S     |C10       |VC10      
+----------------------------------------
+NULL       |NULL  |NULL      |NULL      
+1          |1     |11111     |11111     
+2          |2     |22222     |22222     
+NULL       |NULL  |NULL      |NULL      
+3          |3     |33333     |33333     
+4          |4     |44444     |44444     
+ij> select * from (select i, s, c10, vc10 from t1 union all 
+			   select i, s, c10, vc10 from t2) a (j, k, l, m), 
+			   (select i, s, c10, vc10 from t1 union all 
+			   select i, s, c10, vc10 from t2) b (j, k, l, m)
+where a.j = b.j;
+J          |K     |L         |M         |J          |K     |L         |M         
+---------------------------------------------------------------------------------
+1          |1     |11111     |11111     |1          |1     |11111     |11111     
+2          |2     |22222     |22222     |2          |2     |22222     |22222     
+3          |3     |33333     |33333     |3          |3     |33333     |33333     
+4          |4     |44444     |44444     |4          |4     |44444     |44444     
+ij> -- joins
+select a.i, b.i from t1 a, t2 b union all select b.i, a.i from t1 a, t2 b;
+I          |I          
+-----------------------
+NULL       |NULL       
+NULL       |3          
+NULL       |4          
+1          |NULL       
+1          |3          
+1          |4          
+2          |NULL       
+2          |3          
+2          |4          
+NULL       |NULL       
+3          |NULL       
+4          |NULL       
+NULL       |1          
+3          |1          
+4          |1          
+NULL       |2          
+3          |2          
+4          |2          
+ij> values (9, 10) union all 
+	select a.i, b.i from t1 a, t2 b union all select b.i, a.i from t1 a, t2 b;
+1          |2          
+-----------------------
+9          |10         
+NULL       |NULL       
+NULL       |3          
+NULL       |4          
+1          |NULL       
+1          |3          
+1          |4          
+2          |NULL       
+2          |3          
+2          |4          
+NULL       |NULL       
+3          |NULL       
+4          |NULL       
+NULL       |1          
+3          |1          
+4          |1          
+NULL       |2          
+3          |2          
+4          |2          
+ij> select a.i, b.i from t1 a, t2 b union all 
+	select b.i, a.i from t1 a, t2 b union all values (9, 10);
+1          |2          
+-----------------------
+NULL       |NULL       
+NULL       |3          
+NULL       |4          
+1          |NULL       
+1          |3          
+1          |4          
+2          |NULL       
+2          |3          
+2          |4          
+NULL       |NULL       
+3          |NULL       
+4          |NULL       
+NULL       |1          
+3          |1          
+4          |1          
+NULL       |2          
+3          |2          
+4          |2          
+9          |10         
+ij> -- incompatible types
+select date('9999-11-11') from t1 union all select time('11:11:11') from t2;
+ERROR 42X61: Types 'DATE' and 'TIME' are not UNION compatible.
+ij> -- non-correlated subqueries
+-- negative tests
+-- select * in subquery
+select i from t1 where i = (select * from t2 union all select 1 from t1);
+ERROR 42X38: 'SELECT *' only allowed in EXISTS and NOT EXISTS subqueries.
+ij> select i from t1 where i = (select 1 from t2 union all select * from t1);
+ERROR 42X38: 'SELECT *' only allowed in EXISTS and NOT EXISTS subqueries.
+ij> -- too many columns
+select i from t1 where i = (values (1, 2, 3) union all values (1, 2, 3));
+ERROR 42X39: Subquery is only allowed to return a single column.
+ij> select i from t1 where i = (select i, s from t2 union all select i, s from t1);
+ERROR 42X39: Subquery is only allowed to return a single column.
+ij> -- cardinality violation
+select i from t1 where i = (values 1 union all values 1);
+ERROR 21000: Scalar subquery is only allowed to return a single row.
+ij> -- both sides of union have same type, which is incompatible with LHS
+select i from t1 where i in (select date('1999-02-04') from t2 union all select date('1999-03-08') from t2);
+ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported.
+ij> -- positive tests
+-- expression subquery
+select i from t1 where i = (select i from t2 where 1 = 0 union all values 1);
+I          
+-----------
+1          
+ij> -- in subquery
+select i from t1 where i in (select i from t2 union all values 1 union all values 2);
+I          
+-----------
+1          
+2          
+ij> select i from t1 where i in 
+		(select a from (select i from t2 union all values 1 union all values 2) a (a));
+I          
+-----------
+1          
+2          
+ij> -- not in subquery
+select i from t1 where i not in (select i from t2 union all values 1 union all values 2);
+I          
+-----------
+ij> select i from t1 where i not in (select i from t2 where i is not null union all 
+								 values 1 union all values 22);
+I          
+-----------
+2          
+ij> select i from t1 where i not in 
+		(select a from (select i from t2 where i is not null union all 
+						values 111 union all values 2) a (a));
+I          
+-----------
+1          
+ij> -- correlated union subquery
+select i from t1 a where i in (select i from t2 where 1 = 0 union all
+							   select a.i from t2 where a.i < i);
+I          
+-----------
+1          
+2          
+ij> select i from t1 a where i in (select a.i from t2 where a.i < i union all
+							   select i from t2 where 1 < 0);
+I          
+-----------
+1          
+2          
+ij> -- exists subquery
+select i from t1 where exists (select * from t2 union all select * from t2);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select i from t1 where exists (select 1 from t2 union all select 2 from t2);
+I          
+-----------
+NULL       
+1          
+2          
+ij> select i from t1 where exists (select 1 from t2 where 1 = 0 union all
+							   select * from t2 where t1.i < i);
+I          
+-----------
+1          
+2          
+ij> select i from t1 where exists (select i from t2 where t1.i < i union all
+							    select * from t2 where 1 = 0 union all
+							   select * from t2 where t1.i < i union all
+							    select i from t2 where 1 = 0);
+I          
+-----------
+1          
+2          
+ij> -- insert tests
+create table insert_test (i int, s smallint, d double precision, r real, c10 char(10),
+				 c30 char(30), vc10 varchar(10), vc30 varchar(30));
+0 rows inserted/updated/deleted
+ij> -- simple tests
+insert into insert_test select * from t1 union all select * from t2;
+6 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+ij> delete from insert_test;
+6 rows inserted/updated/deleted
+ij> insert into insert_test (s, i) values (2, 1) union all values (4, 3);
+2 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+1          |2     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |4     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+ij> delete from insert_test;
+2 rows inserted/updated/deleted
+ij> -- type conversions between union all and target table
+insert into insert_test select s, i, r, d, vc10, vc30, c10, c30 from t1 union all
+						select s, i, r, d, vc10, vc30, c10, vc30 from t2;
+6 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                  |10.0         |11111     |11111      11                 |11111     |11111     11                  
+2          |2     |20.0                  |20.0         |22222     |22222      22                 |22222     |22222     22                  
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                  |30.0         |33333     |33333      33                 |33333     |33333      33                 
+4          |4     |40.0                  |40.0         |44444     |44444      44                 |44444     |44444      44                 
+ij> delete from insert_test;
+6 rows inserted/updated/deleted
+ij> -- test type dominance/length/nullability
+select vc10 from t1 union all select c30 from t2;
+1                             
+------------------------------
+NULL                          
+11111                         
+22222                         
+NULL                          
+33333     33                  
+44444     44                  
+ij> insert into insert_test (vc30) select vc10 from t1 union all select c30 from t2;
+6 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |11111                         
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |22222                         
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |33333     33                  
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |44444     44                  
+ij> delete from insert_test;
+6 rows inserted/updated/deleted
+ij> insert into insert_test (c30)
+	select vc10 from t1
+	union all
+	select c30 from t2
+	union all
+	select c10 from t1;
+9 rows inserted/updated/deleted
+ij> select * from insert_test;
+I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
+-------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |11111                         |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |22222                         |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |33333     33                  |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |44444     44                  |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |11111                         |NULL      |NULL                          
+NULL       |NULL  |NULL                  |NULL         |NULL      |22222                         |NULL      |NULL                          
+ij> delete from insert_test;
+9 rows inserted/updated/deleted
+ij> -- test NormalizeResultSet generation
+select i, d from t1 union all select d, i from t2;
+1                     |2                     
+---------------------------------------------
+NULL                  |NULL                  
+1.0                   |10.0                  
+2.0                   |20.0                  
+NULL                  |NULL                  
+30.0                  |3.0                   
+40.0                  |4.0                   
+ij> select vc10, c30 from t1 union all select c30,  vc10 from t2;
+1                             |2                             
+-------------------------------------------------------------
+NULL                          |NULL                          
+11111                         |11111     11                  
+22222                         |22222     22                  
+NULL                          |NULL                          
+33333     33                  |33333                         
+44444     44                  |44444                         
+ij> create table insert_test2 (s smallint not null, vc30 varchar(30) not null);
+0 rows inserted/updated/deleted
+ij> -- the following should fail due to null constraint
+insert into insert_test2 select s, c10 from t1 union all select s, c30 from t2;
+ERROR 23502: Column 'S'  cannot accept a NULL value.
+ij> select * from insert_test2;
+S     |VC30                          
+-------------------------------------
+ij> -- negative tests
+-- ? in select list of union
+select ? from insert_test union all select vc30 from insert_test;
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> select vc30 from insert_test union all select ? from insert_test;
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> -- DB2 requires matching target and result columns
+insert into insert_test values (1, 2) union all values (3, 4);
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> -- Beetle 4454 - test multiple union alls in a subquery
+select vc10 from (select vc10 from t1 union all
+select vc10 from t1 union all
+select vc10 from t1 union all
+select vc10 from t1 union all
+select vc10 from t1 union all
+select vc10 from t1 union all
+select vc10 from t1) t;
+VC10      
+----------
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+ij> -- force union all on right side
+select vc10 from (select vc10 from t1 union all (select vc10 from t1 union all
+select vc10 from t1)) t;
+VC10      
+----------
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+NULL      
+11111     
+22222     
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table insert_test;
+0 rows inserted/updated/deleted
+ij> drop table insert_test2;
+0 rows inserted/updated/deleted
+ij> 

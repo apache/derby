@@ -1,0 +1,2584 @@
+Test updateable cursor using index starting
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: expected and got 5 rows
+PASS: setup complete
+************************************TESTING VIRTUAL MEM HEAP*********
+Notice the order in the rows we get: from 2 to 102 asc order on second column (c3)
+then from 202 down to 103 on that column; then from 203 up to 250.  The reason is
+we are using asc index on c3, all the rows updated are in the future direction of the
+index scan, so they all get filled into a hash table.  The MAX_MEMORY_PER_TABLE
+property determines max cap of hash table 100.  So from row 103 it goes into virtual
+memory heap, whose in memory part is also 100 entries.  So row 103 to 202 goes into
+the in-memory part and gets dumped out in reverse order.  Finally Row 203 to 250
+goes into file system.  Here we mean row ids.
+PASS: expected and got true
+Row: 4,2
+PASS: expected and got true
+Row: 3,3
+PASS: expected and got true
+Row: 2,4
+PASS: expected and got true
+Row: 1,5
+PASS: expected and got true
+Row: 10,6
+PASS: expected and got true
+Row: 9,7
+PASS: expected and got true
+Row: 8,8
+PASS: expected and got true
+Row: 7,9
+PASS: expected and got true
+Row: 6,10
+PASS: expected and got true
+Row: 15,11
+PASS: expected and got true
+Row: 14,12
+PASS: expected and got true
+Row: 13,13
+PASS: expected and got true
+Row: 12,14
+PASS: expected and got true
+Row: 11,15
+PASS: expected and got true
+Row: 20,16
+PASS: expected and got true
+Row: 19,17
+PASS: expected and got true
+Row: 18,18
+PASS: expected and got true
+Row: 17,19
+PASS: expected and got true
+Row: 16,20
+PASS: expected and got true
+Row: 25,21
+PASS: expected and got true
+Row: 24,22
+PASS: expected and got true
+Row: 23,23
+PASS: expected and got true
+Row: 22,24
+PASS: expected and got true
+Row: 21,25
+PASS: expected and got true
+Row: 30,26
+PASS: expected and got true
+Row: 29,27
+PASS: expected and got true
+Row: 28,28
+PASS: expected and got true
+Row: 27,29
+PASS: expected and got true
+Row: 26,30
+PASS: expected and got true
+Row: 35,31
+PASS: expected and got true
+Row: 34,32
+PASS: expected and got true
+Row: 33,33
+PASS: expected and got true
+Row: 32,34
+PASS: expected and got true
+Row: 31,35
+PASS: expected and got true
+Row: 40,36
+PASS: expected and got true
+Row: 39,37
+PASS: expected and got true
+Row: 38,38
+PASS: expected and got true
+Row: 37,39
+PASS: expected and got true
+Row: 36,40
+PASS: expected and got true
+Row: 45,41
+PASS: expected and got true
+Row: 44,42
+PASS: expected and got true
+Row: 43,43
+PASS: expected and got true
+Row: 42,44
+PASS: expected and got true
+Row: 41,45
+PASS: expected and got true
+Row: 50,46
+PASS: expected and got true
+Row: 49,47
+PASS: expected and got true
+Row: 48,48
+PASS: expected and got true
+Row: 47,49
+PASS: expected and got true
+Row: 46,50
+PASS: expected and got true
+Row: 55,51
+PASS: expected and got true
+Row: 54,52
+PASS: expected and got true
+Row: 53,53
+PASS: expected and got true
+Row: 52,54
+PASS: expected and got true
+Row: 51,55
+PASS: expected and got true
+Row: 60,56
+PASS: expected and got true
+Row: 59,57
+PASS: expected and got true
+Row: 58,58
+PASS: expected and got true
+Row: 57,59
+PASS: expected and got true
+Row: 56,60
+PASS: expected and got true
+Row: 65,61
+PASS: expected and got true
+Row: 64,62
+PASS: expected and got true
+Row: 63,63
+PASS: expected and got true
+Row: 62,64
+PASS: expected and got true
+Row: 61,65
+PASS: expected and got true
+Row: 70,66
+PASS: expected and got true
+Row: 69,67
+PASS: expected and got true
+Row: 68,68
+PASS: expected and got true
+Row: 67,69
+PASS: expected and got true
+Row: 66,70
+PASS: expected and got true
+Row: 75,71
+PASS: expected and got true
+Row: 74,72
+PASS: expected and got true
+Row: 73,73
+PASS: expected and got true
+Row: 72,74
+PASS: expected and got true
+Row: 71,75
+PASS: expected and got true
+Row: 80,76
+PASS: expected and got true
+Row: 79,77
+PASS: expected and got true
+Row: 78,78
+PASS: expected and got true
+Row: 77,79
+PASS: expected and got true
+Row: 76,80
+PASS: expected and got true
+Row: 85,81
+PASS: expected and got true
+Row: 84,82
+PASS: expected and got true
+Row: 83,83
+PASS: expected and got true
+Row: 82,84
+PASS: expected and got true
+Row: 81,85
+PASS: expected and got true
+Row: 90,86
+PASS: expected and got true
+Row: 89,87
+PASS: expected and got true
+Row: 88,88
+PASS: expected and got true
+Row: 87,89
+PASS: expected and got true
+Row: 86,90
+PASS: expected and got true
+Row: 95,91
+PASS: expected and got true
+Row: 94,92
+PASS: expected and got true
+Row: 93,93
+PASS: expected and got true
+Row: 92,94
+PASS: expected and got true
+Row: 91,95
+PASS: expected and got true
+Row: 100,96
+PASS: expected and got true
+Row: 99,97
+PASS: expected and got true
+Row: 98,98
+PASS: expected and got true
+Row: 97,99
+PASS: expected and got true
+Row: 96,100
+PASS: expected and got true
+Row: 105,101
+PASS: expected and got true
+Row: 104,102
+PASS: expected and got true
+Row: 204,202
+PASS: expected and got true
+Row: 205,201
+PASS: expected and got true
+Row: 196,200
+PASS: expected and got true
+Row: 197,199
+PASS: expected and got true
+Row: 198,198
+PASS: expected and got true
+Row: 199,197
+PASS: expected and got true
+Row: 200,196
+PASS: expected and got true
+Row: 191,195
+PASS: expected and got true
+Row: 192,194
+PASS: expected and got true
+Row: 193,193
+PASS: expected and got true
+Row: 194,192
+PASS: expected and got true
+Row: 195,191
+PASS: expected and got true
+Row: 186,190
+PASS: expected and got true
+Row: 187,189
+PASS: expected and got true
+Row: 188,188
+PASS: expected and got true
+Row: 189,187
+PASS: expected and got true
+Row: 190,186
+PASS: expected and got true
+Row: 181,185
+PASS: expected and got true
+Row: 182,184
+PASS: expected and got true
+Row: 183,183
+PASS: expected and got true
+Row: 184,182
+PASS: expected and got true
+Row: 185,181
+PASS: expected and got true
+Row: 176,180
+PASS: expected and got true
+Row: 177,179
+PASS: expected and got true
+Row: 178,178
+PASS: expected and got true
+Row: 179,177
+PASS: expected and got true
+Row: 180,176
+PASS: expected and got true
+Row: 171,175
+PASS: expected and got true
+Row: 172,174
+PASS: expected and got true
+Row: 173,173
+PASS: expected and got true
+Row: 174,172
+PASS: expected and got true
+Row: 175,171
+PASS: expected and got true
+Row: 166,170
+PASS: expected and got true
+Row: 167,169
+PASS: expected and got true
+Row: 168,168
+PASS: expected and got true
+Row: 169,167
+PASS: expected and got true
+Row: 170,166
+PASS: expected and got true
+Row: 161,165
+PASS: expected and got true
+Row: 162,164
+PASS: expected and got true
+Row: 163,163
+PASS: expected and got true
+Row: 164,162
+PASS: expected and got true
+Row: 165,161
+PASS: expected and got true
+Row: 156,160
+PASS: expected and got true
+Row: 157,159
+PASS: expected and got true
+Row: 158,158
+PASS: expected and got true
+Row: 159,157
+PASS: expected and got true
+Row: 160,156
+PASS: expected and got true
+Row: 151,155
+PASS: expected and got true
+Row: 152,154
+PASS: expected and got true
+Row: 153,153
+PASS: expected and got true
+Row: 154,152
+PASS: expected and got true
+Row: 155,151
+PASS: expected and got true
+Row: 146,150
+PASS: expected and got true
+Row: 147,149
+PASS: expected and got true
+Row: 148,148
+PASS: expected and got true
+Row: 149,147
+PASS: expected and got true
+Row: 150,146
+PASS: expected and got true
+Row: 141,145
+PASS: expected and got true
+Row: 142,144
+PASS: expected and got true
+Row: 143,143
+PASS: expected and got true
+Row: 144,142
+PASS: expected and got true
+Row: 145,141
+PASS: expected and got true
+Row: 136,140
+PASS: expected and got true
+Row: 137,139
+PASS: expected and got true
+Row: 138,138
+PASS: expected and got true
+Row: 139,137
+PASS: expected and got true
+Row: 140,136
+PASS: expected and got true
+Row: 131,135
+PASS: expected and got true
+Row: 132,134
+PASS: expected and got true
+Row: 133,133
+PASS: expected and got true
+Row: 134,132
+PASS: expected and got true
+Row: 135,131
+PASS: expected and got true
+Row: 126,130
+PASS: expected and got true
+Row: 127,129
+PASS: expected and got true
+Row: 128,128
+PASS: expected and got true
+Row: 129,127
+PASS: expected and got true
+Row: 130,126
+PASS: expected and got true
+Row: 121,125
+PASS: expected and got true
+Row: 122,124
+PASS: expected and got true
+Row: 123,123
+PASS: expected and got true
+Row: 124,122
+PASS: expected and got true
+Row: 125,121
+PASS: expected and got true
+Row: 116,120
+PASS: expected and got true
+Row: 117,119
+PASS: expected and got true
+Row: 118,118
+PASS: expected and got true
+Row: 119,117
+PASS: expected and got true
+Row: 120,116
+PASS: expected and got true
+Row: 111,115
+PASS: expected and got true
+Row: 112,114
+PASS: expected and got true
+Row: 113,113
+PASS: expected and got true
+Row: 114,112
+PASS: expected and got true
+Row: 115,111
+PASS: expected and got true
+Row: 106,110
+PASS: expected and got true
+Row: 107,109
+PASS: expected and got true
+Row: 108,108
+PASS: expected and got true
+Row: 109,107
+PASS: expected and got true
+Row: 110,106
+PASS: expected and got true
+Row: 101,105
+PASS: expected and got true
+Row: 102,104
+PASS: expected and got true
+Row: 103,103
+PASS: expected and got true
+Row: 203,203
+PASS: expected and got true
+Row: 202,204
+PASS: expected and got true
+Row: 201,205
+PASS: expected and got true
+Row: 210,206
+PASS: expected and got true
+Row: 209,207
+PASS: expected and got true
+Row: 208,208
+PASS: expected and got true
+Row: 207,209
+PASS: expected and got true
+Row: 206,210
+PASS: expected and got true
+Row: 215,211
+PASS: expected and got true
+Row: 214,212
+PASS: expected and got true
+Row: 213,213
+PASS: expected and got true
+Row: 212,214
+PASS: expected and got true
+Row: 211,215
+PASS: expected and got true
+Row: 220,216
+PASS: expected and got true
+Row: 219,217
+PASS: expected and got true
+Row: 218,218
+PASS: expected and got true
+Row: 217,219
+PASS: expected and got true
+Row: 216,220
+PASS: expected and got true
+Row: 225,221
+PASS: expected and got true
+Row: 224,222
+PASS: expected and got true
+Row: 223,223
+PASS: expected and got true
+Row: 222,224
+PASS: expected and got true
+Row: 221,225
+PASS: expected and got true
+Row: 230,226
+PASS: expected and got true
+Row: 229,227
+PASS: expected and got true
+Row: 228,228
+PASS: expected and got true
+Row: 227,229
+PASS: expected and got true
+Row: 226,230
+PASS: expected and got true
+Row: 235,231
+PASS: expected and got true
+Row: 234,232
+PASS: expected and got true
+Row: 233,233
+PASS: expected and got true
+Row: 232,234
+PASS: expected and got true
+Row: 231,235
+PASS: expected and got true
+Row: 240,236
+PASS: expected and got true
+Row: 239,237
+PASS: expected and got true
+Row: 238,238
+PASS: expected and got true
+Row: 237,239
+PASS: expected and got true
+Row: 236,240
+PASS: expected and got true
+Row: 245,241
+PASS: expected and got true
+Row: 244,242
+PASS: expected and got true
+Row: 243,243
+PASS: expected and got true
+Row: 242,244
+PASS: expected and got true
+Row: 241,245
+PASS: expected and got true
+Row: 250,246
+PASS: expected and got true
+Row: 249,247
+PASS: expected and got true
+Row: 248,248
+PASS: expected and got true
+Row: 247,249
+PASS: expected and got true
+Row: 246,250
+UPDATE WITH VIRTUAL MEM HEAP: got 249 rows
+************ See what we have in table:
+PASS: expected and got true
+Row: 5,1
+PASS: expected and got true
+Row: 4,252
+PASS: expected and got true
+Row: 3,253
+PASS: expected and got true
+Row: 2,254
+PASS: expected and got true
+Row: 1,255
+PASS: expected and got true
+Row: 10,256
+PASS: expected and got true
+Row: 9,257
+PASS: expected and got true
+Row: 8,258
+PASS: expected and got true
+Row: 7,259
+PASS: expected and got true
+Row: 6,260
+PASS: expected and got true
+Row: 15,261
+PASS: expected and got true
+Row: 14,262
+PASS: expected and got true
+Row: 13,263
+PASS: expected and got true
+Row: 12,264
+PASS: expected and got true
+Row: 11,265
+PASS: expected and got true
+Row: 20,266
+PASS: expected and got true
+Row: 19,267
+PASS: expected and got true
+Row: 18,268
+PASS: expected and got true
+Row: 17,269
+PASS: expected and got true
+Row: 16,270
+PASS: expected and got true
+Row: 25,271
+PASS: expected and got true
+Row: 24,272
+PASS: expected and got true
+Row: 23,273
+PASS: expected and got true
+Row: 22,274
+PASS: expected and got true
+Row: 21,275
+PASS: expected and got true
+Row: 30,276
+PASS: expected and got true
+Row: 29,277
+PASS: expected and got true
+Row: 28,278
+PASS: expected and got true
+Row: 27,279
+PASS: expected and got true
+Row: 26,280
+PASS: expected and got true
+Row: 35,281
+PASS: expected and got true
+Row: 34,282
+PASS: expected and got true
+Row: 33,283
+PASS: expected and got true
+Row: 32,284
+PASS: expected and got true
+Row: 31,285
+PASS: expected and got true
+Row: 40,286
+PASS: expected and got true
+Row: 39,287
+PASS: expected and got true
+Row: 38,288
+PASS: expected and got true
+Row: 37,289
+PASS: expected and got true
+Row: 36,290
+PASS: expected and got true
+Row: 45,291
+PASS: expected and got true
+Row: 44,292
+PASS: expected and got true
+Row: 43,293
+PASS: expected and got true
+Row: 42,294
+PASS: expected and got true
+Row: 41,295
+PASS: expected and got true
+Row: 50,296
+PASS: expected and got true
+Row: 49,297
+PASS: expected and got true
+Row: 48,298
+PASS: expected and got true
+Row: 47,299
+PASS: expected and got true
+Row: 46,300
+PASS: expected and got true
+Row: 55,301
+PASS: expected and got true
+Row: 54,302
+PASS: expected and got true
+Row: 53,303
+PASS: expected and got true
+Row: 52,304
+PASS: expected and got true
+Row: 51,305
+PASS: expected and got true
+Row: 60,306
+PASS: expected and got true
+Row: 59,307
+PASS: expected and got true
+Row: 58,308
+PASS: expected and got true
+Row: 57,309
+PASS: expected and got true
+Row: 56,310
+PASS: expected and got true
+Row: 65,311
+PASS: expected and got true
+Row: 64,312
+PASS: expected and got true
+Row: 63,313
+PASS: expected and got true
+Row: 62,314
+PASS: expected and got true
+Row: 61,315
+PASS: expected and got true
+Row: 70,316
+PASS: expected and got true
+Row: 69,317
+PASS: expected and got true
+Row: 68,318
+PASS: expected and got true
+Row: 67,319
+PASS: expected and got true
+Row: 66,320
+PASS: expected and got true
+Row: 75,321
+PASS: expected and got true
+Row: 74,322
+PASS: expected and got true
+Row: 73,323
+PASS: expected and got true
+Row: 72,324
+PASS: expected and got true
+Row: 71,325
+PASS: expected and got true
+Row: 80,326
+PASS: expected and got true
+Row: 79,327
+PASS: expected and got true
+Row: 78,328
+PASS: expected and got true
+Row: 77,329
+PASS: expected and got true
+Row: 76,330
+PASS: expected and got true
+Row: 85,331
+PASS: expected and got true
+Row: 84,332
+PASS: expected and got true
+Row: 83,333
+PASS: expected and got true
+Row: 82,334
+PASS: expected and got true
+Row: 81,335
+PASS: expected and got true
+Row: 90,336
+PASS: expected and got true
+Row: 89,337
+PASS: expected and got true
+Row: 88,338
+PASS: expected and got true
+Row: 87,339
+PASS: expected and got true
+Row: 86,340
+PASS: expected and got true
+Row: 95,341
+PASS: expected and got true
+Row: 94,342
+PASS: expected and got true
+Row: 93,343
+PASS: expected and got true
+Row: 92,344
+PASS: expected and got true
+Row: 91,345
+PASS: expected and got true
+Row: 100,346
+PASS: expected and got true
+Row: 99,347
+PASS: expected and got true
+Row: 98,348
+PASS: expected and got true
+Row: 97,349
+PASS: expected and got true
+Row: 96,350
+PASS: expected and got true
+Row: 105,351
+PASS: expected and got true
+Row: 104,352
+PASS: expected and got true
+Row: 103,353
+PASS: expected and got true
+Row: 102,354
+PASS: expected and got true
+Row: 101,355
+PASS: expected and got true
+Row: 110,356
+PASS: expected and got true
+Row: 109,357
+PASS: expected and got true
+Row: 108,358
+PASS: expected and got true
+Row: 107,359
+PASS: expected and got true
+Row: 106,360
+PASS: expected and got true
+Row: 115,361
+PASS: expected and got true
+Row: 114,362
+PASS: expected and got true
+Row: 113,363
+PASS: expected and got true
+Row: 112,364
+PASS: expected and got true
+Row: 111,365
+PASS: expected and got true
+Row: 120,366
+PASS: expected and got true
+Row: 119,367
+PASS: expected and got true
+Row: 118,368
+PASS: expected and got true
+Row: 117,369
+PASS: expected and got true
+Row: 116,370
+PASS: expected and got true
+Row: 125,371
+PASS: expected and got true
+Row: 124,372
+PASS: expected and got true
+Row: 123,373
+PASS: expected and got true
+Row: 122,374
+PASS: expected and got true
+Row: 121,375
+PASS: expected and got true
+Row: 130,376
+PASS: expected and got true
+Row: 129,377
+PASS: expected and got true
+Row: 128,378
+PASS: expected and got true
+Row: 127,379
+PASS: expected and got true
+Row: 126,380
+PASS: expected and got true
+Row: 135,381
+PASS: expected and got true
+Row: 134,382
+PASS: expected and got true
+Row: 133,383
+PASS: expected and got true
+Row: 132,384
+PASS: expected and got true
+Row: 131,385
+PASS: expected and got true
+Row: 140,386
+PASS: expected and got true
+Row: 139,387
+PASS: expected and got true
+Row: 138,388
+PASS: expected and got true
+Row: 137,389
+PASS: expected and got true
+Row: 136,390
+PASS: expected and got true
+Row: 145,391
+PASS: expected and got true
+Row: 144,392
+PASS: expected and got true
+Row: 143,393
+PASS: expected and got true
+Row: 142,394
+PASS: expected and got true
+Row: 141,395
+PASS: expected and got true
+Row: 150,396
+PASS: expected and got true
+Row: 149,397
+PASS: expected and got true
+Row: 148,398
+PASS: expected and got true
+Row: 147,399
+PASS: expected and got true
+Row: 146,400
+PASS: expected and got true
+Row: 155,401
+PASS: expected and got true
+Row: 154,402
+PASS: expected and got true
+Row: 153,403
+PASS: expected and got true
+Row: 152,404
+PASS: expected and got true
+Row: 151,405
+PASS: expected and got true
+Row: 160,406
+PASS: expected and got true
+Row: 159,407
+PASS: expected and got true
+Row: 158,408
+PASS: expected and got true
+Row: 157,409
+PASS: expected and got true
+Row: 156,410
+PASS: expected and got true
+Row: 165,411
+PASS: expected and got true
+Row: 164,412
+PASS: expected and got true
+Row: 163,413
+PASS: expected and got true
+Row: 162,414
+PASS: expected and got true
+Row: 161,415
+PASS: expected and got true
+Row: 170,416
+PASS: expected and got true
+Row: 169,417
+PASS: expected and got true
+Row: 168,418
+PASS: expected and got true
+Row: 167,419
+PASS: expected and got true
+Row: 166,420
+PASS: expected and got true
+Row: 175,421
+PASS: expected and got true
+Row: 174,422
+PASS: expected and got true
+Row: 173,423
+PASS: expected and got true
+Row: 172,424
+PASS: expected and got true
+Row: 171,425
+PASS: expected and got true
+Row: 180,426
+PASS: expected and got true
+Row: 179,427
+PASS: expected and got true
+Row: 178,428
+PASS: expected and got true
+Row: 177,429
+PASS: expected and got true
+Row: 176,430
+PASS: expected and got true
+Row: 185,431
+PASS: expected and got true
+Row: 184,432
+PASS: expected and got true
+Row: 183,433
+PASS: expected and got true
+Row: 182,434
+PASS: expected and got true
+Row: 181,435
+PASS: expected and got true
+Row: 190,436
+PASS: expected and got true
+Row: 189,437
+PASS: expected and got true
+Row: 188,438
+PASS: expected and got true
+Row: 187,439
+PASS: expected and got true
+Row: 186,440
+PASS: expected and got true
+Row: 195,441
+PASS: expected and got true
+Row: 194,442
+PASS: expected and got true
+Row: 193,443
+PASS: expected and got true
+Row: 192,444
+PASS: expected and got true
+Row: 191,445
+PASS: expected and got true
+Row: 200,446
+PASS: expected and got true
+Row: 199,447
+PASS: expected and got true
+Row: 198,448
+PASS: expected and got true
+Row: 197,449
+PASS: expected and got true
+Row: 196,450
+PASS: expected and got true
+Row: 205,451
+PASS: expected and got true
+Row: 204,452
+PASS: expected and got true
+Row: 203,453
+PASS: expected and got true
+Row: 202,454
+PASS: expected and got true
+Row: 201,455
+PASS: expected and got true
+Row: 210,456
+PASS: expected and got true
+Row: 209,457
+PASS: expected and got true
+Row: 208,458
+PASS: expected and got true
+Row: 207,459
+PASS: expected and got true
+Row: 206,460
+PASS: expected and got true
+Row: 215,461
+PASS: expected and got true
+Row: 214,462
+PASS: expected and got true
+Row: 213,463
+PASS: expected and got true
+Row: 212,464
+PASS: expected and got true
+Row: 211,465
+PASS: expected and got true
+Row: 220,466
+PASS: expected and got true
+Row: 219,467
+PASS: expected and got true
+Row: 218,468
+PASS: expected and got true
+Row: 217,469
+PASS: expected and got true
+Row: 216,470
+PASS: expected and got true
+Row: 225,471
+PASS: expected and got true
+Row: 224,472
+PASS: expected and got true
+Row: 223,473
+PASS: expected and got true
+Row: 222,474
+PASS: expected and got true
+Row: 221,475
+PASS: expected and got true
+Row: 230,476
+PASS: expected and got true
+Row: 229,477
+PASS: expected and got true
+Row: 228,478
+PASS: expected and got true
+Row: 227,479
+PASS: expected and got true
+Row: 226,480
+PASS: expected and got true
+Row: 235,481
+PASS: expected and got true
+Row: 234,482
+PASS: expected and got true
+Row: 233,483
+PASS: expected and got true
+Row: 232,484
+PASS: expected and got true
+Row: 231,485
+PASS: expected and got true
+Row: 240,486
+PASS: expected and got true
+Row: 239,487
+PASS: expected and got true
+Row: 238,488
+PASS: expected and got true
+Row: 237,489
+PASS: expected and got true
+Row: 236,490
+PASS: expected and got true
+Row: 245,491
+PASS: expected and got true
+Row: 244,492
+PASS: expected and got true
+Row: 243,493
+PASS: expected and got true
+Row: 242,494
+PASS: expected and got true
+Row: 241,495
+PASS: expected and got true
+Row: 250,496
+PASS: expected and got true
+Row: 249,497
+PASS: expected and got true
+Row: 248,498
+PASS: expected and got true
+Row: 247,499
+PASS: expected and got true
+Row: 246,500
+AFTER UPDATE WITH VIRTUAL MEM HEAP: got 250 rows
+************************************TESTING NONCOVERINGINDEX*********
+PASS: expected and got true
+Row: 126,126                                               
+PASS: expected and got true
+Row: 127,126                                               
+PASS: expected and got true
+Row: 128,126                                               
+PASS: expected and got true
+Row: 129,126                                               
+PASS: expected and got true
+Row: 130,126                                               
+PASS: expected and got true
+Row: 131,131                                               
+PASS: expected and got true
+Row: 132,131                                               
+PASS: expected and got true
+Row: 133,131                                               
+PASS: expected and got true
+Row: 134,131                                               
+PASS: expected and got true
+Row: 135,131                                               
+PASS: expected and got true
+Row: 136,136                                               
+PASS: expected and got true
+Row: 137,136                                               
+PASS: expected and got true
+Row: 138,136                                               
+PASS: expected and got true
+Row: 139,136                                               
+PASS: expected and got true
+Row: 140,136                                               
+PASS: expected and got true
+Row: 141,141                                               
+PASS: expected and got true
+Row: 142,141                                               
+PASS: expected and got true
+Row: 143,141                                               
+PASS: expected and got true
+Row: 144,141                                               
+PASS: expected and got true
+Row: 145,141                                               
+PASS: expected and got true
+Row: 146,146                                               
+PASS: expected and got true
+Row: 147,146                                               
+PASS: expected and got true
+Row: 148,146                                               
+PASS: expected and got true
+Row: 149,146                                               
+PASS: expected and got true
+Row: 150,146                                               
+PASS: expected and got true
+Row: 151,151                                               
+PASS: expected and got true
+Row: 152,151                                               
+PASS: expected and got true
+Row: 153,151                                               
+PASS: expected and got true
+Row: 154,151                                               
+PASS: expected and got true
+Row: 155,151                                               
+PASS: expected and got true
+Row: 156,156                                               
+PASS: expected and got true
+Row: 157,156                                               
+PASS: expected and got true
+Row: 158,156                                               
+PASS: expected and got true
+Row: 159,156                                               
+PASS: expected and got true
+Row: 160,156                                               
+PASS: expected and got true
+Row: 161,161                                               
+PASS: expected and got true
+Row: 162,161                                               
+PASS: expected and got true
+Row: 163,161                                               
+PASS: expected and got true
+Row: 164,161                                               
+PASS: expected and got true
+Row: 165,161                                               
+PASS: expected and got true
+Row: 166,166                                               
+PASS: expected and got true
+Row: 167,166                                               
+PASS: expected and got true
+Row: 168,166                                               
+PASS: expected and got true
+Row: 169,166                                               
+PASS: expected and got true
+Row: 170,166                                               
+PASS: expected and got true
+Row: 171,171                                               
+PASS: expected and got true
+Row: 172,171                                               
+PASS: expected and got true
+Row: 173,171                                               
+PASS: expected and got true
+Row: 174,171                                               
+PASS: expected and got true
+Row: 175,171                                               
+PASS: expected and got true
+Row: 176,176                                               
+PASS: expected and got true
+Row: 177,176                                               
+PASS: expected and got true
+Row: 178,176                                               
+PASS: expected and got true
+Row: 179,176                                               
+PASS: expected and got true
+Row: 180,176                                               
+PASS: expected and got true
+Row: 181,181                                               
+PASS: expected and got true
+Row: 182,181                                               
+PASS: expected and got true
+Row: 183,181                                               
+PASS: expected and got true
+Row: 184,181                                               
+PASS: expected and got true
+Row: 185,181                                               
+PASS: expected and got true
+Row: 186,186                                               
+PASS: expected and got true
+Row: 187,186                                               
+PASS: expected and got true
+Row: 188,186                                               
+PASS: expected and got true
+Row: 189,186                                               
+PASS: expected and got true
+Row: 190,186                                               
+PASS: expected and got true
+Row: 191,191                                               
+PASS: expected and got true
+Row: 192,191                                               
+PASS: expected and got true
+Row: 193,191                                               
+PASS: expected and got true
+Row: 194,191                                               
+PASS: expected and got true
+Row: 195,191                                               
+PASS: expected and got true
+Row: 196,196                                               
+PASS: expected and got true
+Row: 197,196                                               
+PASS: expected and got true
+Row: 198,196                                               
+PASS: expected and got true
+Row: 199,196                                               
+PASS: expected and got true
+Row: 200,196                                               
+PASS: expected and got true
+Row: 201,201                                               
+PASS: expected and got true
+Row: 202,201                                               
+PASS: expected and got true
+Row: 203,201                                               
+PASS: expected and got true
+Row: 204,201                                               
+PASS: expected and got true
+Row: 205,201                                               
+PASS: expected and got true
+Row: 206,206                                               
+PASS: expected and got true
+Row: 207,206                                               
+PASS: expected and got true
+Row: 208,206                                               
+PASS: expected and got true
+Row: 209,206                                               
+PASS: expected and got true
+Row: 210,206                                               
+PASS: expected and got true
+Row: 211,211                                               
+PASS: expected and got true
+Row: 212,211                                               
+PASS: expected and got true
+Row: 213,211                                               
+PASS: expected and got true
+Row: 214,211                                               
+PASS: expected and got true
+Row: 215,211                                               
+PASS: expected and got true
+Row: 216,216                                               
+PASS: expected and got true
+Row: 217,216                                               
+PASS: expected and got true
+Row: 218,216                                               
+PASS: expected and got true
+Row: 219,216                                               
+PASS: expected and got true
+Row: 220,216                                               
+PASS: expected and got true
+Row: 221,221                                               
+PASS: expected and got true
+Row: 222,221                                               
+PASS: expected and got true
+Row: 223,221                                               
+PASS: expected and got true
+Row: 224,221                                               
+PASS: expected and got true
+Row: 225,221                                               
+PASS: expected and got true
+Row: 226,226                                               
+PASS: expected and got true
+Row: 227,226                                               
+PASS: expected and got true
+Row: 228,226                                               
+PASS: expected and got true
+Row: 229,226                                               
+PASS: expected and got true
+Row: 230,226                                               
+PASS: expected and got true
+Row: 231,231                                               
+PASS: expected and got true
+Row: 232,231                                               
+PASS: expected and got true
+Row: 233,231                                               
+PASS: expected and got true
+Row: 234,231                                               
+PASS: expected and got true
+Row: 235,231                                               
+PASS: expected and got true
+Row: 236,236                                               
+PASS: expected and got true
+Row: 237,236                                               
+PASS: expected and got true
+Row: 238,236                                               
+PASS: expected and got true
+Row: 239,236                                               
+PASS: expected and got true
+Row: 240,236                                               
+PASS: expected and got true
+Row: 241,241                                               
+PASS: expected and got true
+Row: 242,241                                               
+PASS: expected and got true
+Row: 243,241                                               
+PASS: expected and got true
+Row: 244,241                                               
+PASS: expected and got true
+Row: 245,241                                               
+PASS: expected and got true
+Row: 246,246                                               
+PASS: expected and got true
+Row: 247,246                                               
+PASS: expected and got true
+Row: 248,246                                               
+PASS: expected and got true
+Row: 249,246                                               
+PASS: expected and got true
+Row: 250,246                                               
+UPDATE USING NONCOVERING INDEX: got 125 rows
+************ See what we have in table:
+PASS: expected and got true
+Row: 5,1
+PASS: expected and got true
+Row: 4,2
+PASS: expected and got true
+Row: 3,3
+PASS: expected and got true
+Row: 2,4
+PASS: expected and got true
+Row: 1,5
+PASS: expected and got true
+Row: 10,6
+PASS: expected and got true
+Row: 9,7
+PASS: expected and got true
+Row: 8,8
+PASS: expected and got true
+Row: 7,9
+PASS: expected and got true
+Row: 6,10
+PASS: expected and got true
+Row: 15,11
+PASS: expected and got true
+Row: 14,12
+PASS: expected and got true
+Row: 13,13
+PASS: expected and got true
+Row: 12,14
+PASS: expected and got true
+Row: 11,15
+PASS: expected and got true
+Row: 20,16
+PASS: expected and got true
+Row: 19,17
+PASS: expected and got true
+Row: 18,18
+PASS: expected and got true
+Row: 17,19
+PASS: expected and got true
+Row: 16,20
+PASS: expected and got true
+Row: 25,21
+PASS: expected and got true
+Row: 24,22
+PASS: expected and got true
+Row: 23,23
+PASS: expected and got true
+Row: 22,24
+PASS: expected and got true
+Row: 21,25
+PASS: expected and got true
+Row: 30,26
+PASS: expected and got true
+Row: 29,27
+PASS: expected and got true
+Row: 28,28
+PASS: expected and got true
+Row: 27,29
+PASS: expected and got true
+Row: 26,30
+PASS: expected and got true
+Row: 35,31
+PASS: expected and got true
+Row: 34,32
+PASS: expected and got true
+Row: 33,33
+PASS: expected and got true
+Row: 32,34
+PASS: expected and got true
+Row: 31,35
+PASS: expected and got true
+Row: 40,36
+PASS: expected and got true
+Row: 39,37
+PASS: expected and got true
+Row: 38,38
+PASS: expected and got true
+Row: 37,39
+PASS: expected and got true
+Row: 36,40
+PASS: expected and got true
+Row: 45,41
+PASS: expected and got true
+Row: 44,42
+PASS: expected and got true
+Row: 43,43
+PASS: expected and got true
+Row: 42,44
+PASS: expected and got true
+Row: 41,45
+PASS: expected and got true
+Row: 50,46
+PASS: expected and got true
+Row: 49,47
+PASS: expected and got true
+Row: 48,48
+PASS: expected and got true
+Row: 47,49
+PASS: expected and got true
+Row: 46,50
+PASS: expected and got true
+Row: 55,51
+PASS: expected and got true
+Row: 54,52
+PASS: expected and got true
+Row: 53,53
+PASS: expected and got true
+Row: 52,54
+PASS: expected and got true
+Row: 51,55
+PASS: expected and got true
+Row: 60,56
+PASS: expected and got true
+Row: 59,57
+PASS: expected and got true
+Row: 58,58
+PASS: expected and got true
+Row: 57,59
+PASS: expected and got true
+Row: 56,60
+PASS: expected and got true
+Row: 65,61
+PASS: expected and got true
+Row: 64,62
+PASS: expected and got true
+Row: 63,63
+PASS: expected and got true
+Row: 62,64
+PASS: expected and got true
+Row: 61,65
+PASS: expected and got true
+Row: 70,66
+PASS: expected and got true
+Row: 69,67
+PASS: expected and got true
+Row: 68,68
+PASS: expected and got true
+Row: 67,69
+PASS: expected and got true
+Row: 66,70
+PASS: expected and got true
+Row: 75,71
+PASS: expected and got true
+Row: 74,72
+PASS: expected and got true
+Row: 73,73
+PASS: expected and got true
+Row: 72,74
+PASS: expected and got true
+Row: 71,75
+PASS: expected and got true
+Row: 80,76
+PASS: expected and got true
+Row: 79,77
+PASS: expected and got true
+Row: 78,78
+PASS: expected and got true
+Row: 77,79
+PASS: expected and got true
+Row: 76,80
+PASS: expected and got true
+Row: 85,81
+PASS: expected and got true
+Row: 84,82
+PASS: expected and got true
+Row: 83,83
+PASS: expected and got true
+Row: 82,84
+PASS: expected and got true
+Row: 81,85
+PASS: expected and got true
+Row: 90,86
+PASS: expected and got true
+Row: 89,87
+PASS: expected and got true
+Row: 88,88
+PASS: expected and got true
+Row: 87,89
+PASS: expected and got true
+Row: 86,90
+PASS: expected and got true
+Row: 95,91
+PASS: expected and got true
+Row: 94,92
+PASS: expected and got true
+Row: 93,93
+PASS: expected and got true
+Row: 92,94
+PASS: expected and got true
+Row: 91,95
+PASS: expected and got true
+Row: 100,96
+PASS: expected and got true
+Row: 99,97
+PASS: expected and got true
+Row: 98,98
+PASS: expected and got true
+Row: 97,99
+PASS: expected and got true
+Row: 96,100
+PASS: expected and got true
+Row: 105,101
+PASS: expected and got true
+Row: 104,102
+PASS: expected and got true
+Row: 103,103
+PASS: expected and got true
+Row: 102,104
+PASS: expected and got true
+Row: 101,105
+PASS: expected and got true
+Row: 110,106
+PASS: expected and got true
+Row: 109,107
+PASS: expected and got true
+Row: 108,108
+PASS: expected and got true
+Row: 107,109
+PASS: expected and got true
+Row: 106,110
+PASS: expected and got true
+Row: 115,111
+PASS: expected and got true
+Row: 114,112
+PASS: expected and got true
+Row: 113,113
+PASS: expected and got true
+Row: 112,114
+PASS: expected and got true
+Row: 111,115
+PASS: expected and got true
+Row: 120,116
+PASS: expected and got true
+Row: 119,117
+PASS: expected and got true
+Row: 118,118
+PASS: expected and got true
+Row: 117,119
+PASS: expected and got true
+Row: 116,120
+PASS: expected and got true
+Row: 125,121
+PASS: expected and got true
+Row: 124,122
+PASS: expected and got true
+Row: 123,123
+PASS: expected and got true
+Row: 122,124
+PASS: expected and got true
+Row: 121,125
+PASS: expected and got true
+Row: 130,151
+PASS: expected and got true
+Row: 129,152
+PASS: expected and got true
+Row: 128,153
+PASS: expected and got true
+Row: 127,154
+PASS: expected and got true
+Row: 126,155
+PASS: expected and got true
+Row: 135,156
+PASS: expected and got true
+Row: 134,157
+PASS: expected and got true
+Row: 133,158
+PASS: expected and got true
+Row: 132,159
+PASS: expected and got true
+Row: 131,160
+PASS: expected and got true
+Row: 140,161
+PASS: expected and got true
+Row: 139,162
+PASS: expected and got true
+Row: 138,163
+PASS: expected and got true
+Row: 137,164
+PASS: expected and got true
+Row: 136,165
+PASS: expected and got true
+Row: 145,166
+PASS: expected and got true
+Row: 144,167
+PASS: expected and got true
+Row: 143,168
+PASS: expected and got true
+Row: 142,169
+PASS: expected and got true
+Row: 141,170
+PASS: expected and got true
+Row: 150,171
+PASS: expected and got true
+Row: 149,172
+PASS: expected and got true
+Row: 148,173
+PASS: expected and got true
+Row: 147,174
+PASS: expected and got true
+Row: 146,175
+PASS: expected and got true
+Row: 155,176
+PASS: expected and got true
+Row: 154,177
+PASS: expected and got true
+Row: 153,178
+PASS: expected and got true
+Row: 152,179
+PASS: expected and got true
+Row: 151,180
+PASS: expected and got true
+Row: 160,181
+PASS: expected and got true
+Row: 159,182
+PASS: expected and got true
+Row: 158,183
+PASS: expected and got true
+Row: 157,184
+PASS: expected and got true
+Row: 156,185
+PASS: expected and got true
+Row: 165,186
+PASS: expected and got true
+Row: 164,187
+PASS: expected and got true
+Row: 163,188
+PASS: expected and got true
+Row: 162,189
+PASS: expected and got true
+Row: 161,190
+PASS: expected and got true
+Row: 170,191
+PASS: expected and got true
+Row: 169,192
+PASS: expected and got true
+Row: 168,193
+PASS: expected and got true
+Row: 167,194
+PASS: expected and got true
+Row: 166,195
+PASS: expected and got true
+Row: 175,196
+PASS: expected and got true
+Row: 174,197
+PASS: expected and got true
+Row: 173,198
+PASS: expected and got true
+Row: 172,199
+PASS: expected and got true
+Row: 171,200
+PASS: expected and got true
+Row: 180,201
+PASS: expected and got true
+Row: 179,202
+PASS: expected and got true
+Row: 178,203
+PASS: expected and got true
+Row: 177,204
+PASS: expected and got true
+Row: 176,205
+PASS: expected and got true
+Row: 185,206
+PASS: expected and got true
+Row: 184,207
+PASS: expected and got true
+Row: 183,208
+PASS: expected and got true
+Row: 182,209
+PASS: expected and got true
+Row: 181,210
+PASS: expected and got true
+Row: 190,211
+PASS: expected and got true
+Row: 189,212
+PASS: expected and got true
+Row: 188,213
+PASS: expected and got true
+Row: 187,214
+PASS: expected and got true
+Row: 186,215
+PASS: expected and got true
+Row: 195,216
+PASS: expected and got true
+Row: 194,217
+PASS: expected and got true
+Row: 193,218
+PASS: expected and got true
+Row: 192,219
+PASS: expected and got true
+Row: 191,220
+PASS: expected and got true
+Row: 200,221
+PASS: expected and got true
+Row: 199,222
+PASS: expected and got true
+Row: 198,223
+PASS: expected and got true
+Row: 197,224
+PASS: expected and got true
+Row: 196,225
+PASS: expected and got true
+Row: 205,226
+PASS: expected and got true
+Row: 204,227
+PASS: expected and got true
+Row: 203,228
+PASS: expected and got true
+Row: 202,229
+PASS: expected and got true
+Row: 201,230
+PASS: expected and got true
+Row: 210,231
+PASS: expected and got true
+Row: 209,232
+PASS: expected and got true
+Row: 208,233
+PASS: expected and got true
+Row: 207,234
+PASS: expected and got true
+Row: 206,235
+PASS: expected and got true
+Row: 215,236
+PASS: expected and got true
+Row: 214,237
+PASS: expected and got true
+Row: 213,238
+PASS: expected and got true
+Row: 212,239
+PASS: expected and got true
+Row: 211,240
+PASS: expected and got true
+Row: 220,241
+PASS: expected and got true
+Row: 219,242
+PASS: expected and got true
+Row: 218,243
+PASS: expected and got true
+Row: 217,244
+PASS: expected and got true
+Row: 216,245
+PASS: expected and got true
+Row: 225,246
+PASS: expected and got true
+Row: 224,247
+PASS: expected and got true
+Row: 223,248
+PASS: expected and got true
+Row: 222,249
+PASS: expected and got true
+Row: 221,250
+PASS: expected and got true
+Row: 230,251
+PASS: expected and got true
+Row: 229,252
+PASS: expected and got true
+Row: 228,253
+PASS: expected and got true
+Row: 227,254
+PASS: expected and got true
+Row: 226,255
+PASS: expected and got true
+Row: 235,256
+PASS: expected and got true
+Row: 234,257
+PASS: expected and got true
+Row: 233,258
+PASS: expected and got true
+Row: 232,259
+PASS: expected and got true
+Row: 231,260
+PASS: expected and got true
+Row: 240,261
+PASS: expected and got true
+Row: 239,262
+PASS: expected and got true
+Row: 238,263
+PASS: expected and got true
+Row: 237,264
+PASS: expected and got true
+Row: 236,265
+PASS: expected and got true
+Row: 245,266
+PASS: expected and got true
+Row: 244,267
+PASS: expected and got true
+Row: 243,268
+PASS: expected and got true
+Row: 242,269
+PASS: expected and got true
+Row: 241,270
+PASS: expected and got true
+Row: 250,271
+PASS: expected and got true
+Row: 249,272
+PASS: expected and got true
+Row: 248,273
+PASS: expected and got true
+Row: 247,274
+PASS: expected and got true
+Row: 246,275
+AFTER UPDATE USING NONCOVERING INDEX: got 250 rows
+************************************TESTING DESC INDEX*********
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got true
+Row: 250,246
+PASS: expected and got true
+Row: 249,247
+PASS: expected and got true
+Row: 248,248
+PASS: expected and got true
+Row: 247,249
+PASS: expected and got true
+Row: 246,250
+PASS: expected and got true
+Row: 245,241
+PASS: expected and got true
+Row: 244,242
+PASS: expected and got true
+Row: 243,243
+PASS: expected and got true
+Row: 242,244
+PASS: expected and got true
+Row: 241,245
+PASS: expected and got true
+Row: 240,236
+PASS: expected and got true
+Row: 239,237
+PASS: expected and got true
+Row: 238,238
+PASS: expected and got true
+Row: 237,239
+PASS: expected and got true
+Row: 236,240
+PASS: expected and got true
+Row: 235,231
+PASS: expected and got true
+Row: 234,232
+PASS: expected and got true
+Row: 233,233
+PASS: expected and got true
+Row: 232,234
+PASS: expected and got true
+Row: 231,235
+PASS: expected and got true
+Row: 230,226
+PASS: expected and got true
+Row: 229,227
+PASS: expected and got true
+Row: 228,228
+PASS: expected and got true
+Row: 227,229
+PASS: expected and got true
+Row: 226,230
+PASS: expected and got true
+Row: 225,221
+PASS: expected and got true
+Row: 224,222
+PASS: expected and got true
+Row: 223,223
+PASS: expected and got true
+Row: 222,224
+PASS: expected and got true
+Row: 221,225
+PASS: expected and got true
+Row: 220,216
+PASS: expected and got true
+Row: 219,217
+PASS: expected and got true
+Row: 218,218
+PASS: expected and got true
+Row: 217,219
+PASS: expected and got true
+Row: 216,220
+PASS: expected and got true
+Row: 215,211
+PASS: expected and got true
+Row: 214,212
+PASS: expected and got true
+Row: 213,213
+PASS: expected and got true
+Row: 212,214
+PASS: expected and got true
+Row: 211,215
+PASS: expected and got true
+Row: 210,206
+PASS: expected and got true
+Row: 209,207
+PASS: expected and got true
+Row: 208,208
+PASS: expected and got true
+Row: 207,209
+PASS: expected and got true
+Row: 206,210
+PASS: expected and got true
+Row: 205,201
+PASS: expected and got true
+Row: 204,202
+PASS: expected and got true
+Row: 203,203
+PASS: expected and got true
+Row: 202,204
+PASS: expected and got true
+Row: 201,205
+PASS: expected and got true
+Row: 200,196
+PASS: expected and got true
+Row: 199,197
+PASS: expected and got true
+Row: 198,198
+PASS: expected and got true
+Row: 197,199
+PASS: expected and got true
+Row: 196,200
+PASS: expected and got true
+Row: 195,191
+PASS: expected and got true
+Row: 194,192
+PASS: expected and got true
+Row: 193,193
+PASS: expected and got true
+Row: 192,194
+PASS: expected and got true
+Row: 191,195
+PASS: expected and got true
+Row: 190,186
+PASS: expected and got true
+Row: 189,187
+PASS: expected and got true
+Row: 188,188
+PASS: expected and got true
+Row: 187,189
+PASS: expected and got true
+Row: 186,190
+PASS: expected and got true
+Row: 185,181
+PASS: expected and got true
+Row: 184,182
+PASS: expected and got true
+Row: 183,183
+PASS: expected and got true
+Row: 182,184
+PASS: expected and got true
+Row: 181,185
+PASS: expected and got true
+Row: 180,176
+PASS: expected and got true
+Row: 179,177
+PASS: expected and got true
+Row: 178,178
+PASS: expected and got true
+Row: 177,179
+PASS: expected and got true
+Row: 176,180
+PASS: expected and got true
+Row: 175,171
+PASS: expected and got true
+Row: 174,172
+PASS: expected and got true
+Row: 173,173
+PASS: expected and got true
+Row: 172,174
+PASS: expected and got true
+Row: 171,175
+PASS: expected and got true
+Row: 170,166
+PASS: expected and got true
+Row: 169,167
+PASS: expected and got true
+Row: 168,168
+PASS: expected and got true
+Row: 167,169
+PASS: expected and got true
+Row: 166,170
+PASS: expected and got true
+Row: 165,161
+PASS: expected and got true
+Row: 164,162
+PASS: expected and got true
+Row: 163,163
+PASS: expected and got true
+Row: 162,164
+PASS: expected and got true
+Row: 161,165
+PASS: expected and got true
+Row: 160,156
+PASS: expected and got true
+Row: 159,157
+PASS: expected and got true
+Row: 158,158
+PASS: expected and got true
+Row: 157,159
+PASS: expected and got true
+Row: 156,160
+PASS: expected and got true
+Row: 155,151
+PASS: expected and got true
+Row: 154,152
+PASS: expected and got true
+Row: 153,153
+PASS: expected and got true
+Row: 152,154
+PASS: expected and got true
+Row: 151,155
+PASS: expected and got true
+Row: 150,146
+PASS: expected and got true
+Row: 149,147
+PASS: expected and got true
+Row: 148,148
+PASS: expected and got true
+Row: 147,149
+PASS: expected and got true
+Row: 146,150
+PASS: expected and got true
+Row: 145,141
+PASS: expected and got true
+Row: 144,142
+PASS: expected and got true
+Row: 143,143
+PASS: expected and got true
+Row: 142,144
+PASS: expected and got true
+Row: 141,145
+PASS: expected and got true
+Row: 140,136
+PASS: expected and got true
+Row: 139,137
+PASS: expected and got true
+Row: 138,138
+PASS: expected and got true
+Row: 137,139
+PASS: expected and got true
+Row: 136,140
+PASS: expected and got true
+Row: 135,131
+PASS: expected and got true
+Row: 134,132
+PASS: expected and got true
+Row: 133,133
+PASS: expected and got true
+Row: 132,134
+PASS: expected and got true
+Row: 131,135
+PASS: expected and got true
+Row: 130,126
+PASS: expected and got true
+Row: 129,127
+PASS: expected and got true
+Row: 128,128
+PASS: expected and got true
+Row: 127,129
+PASS: expected and got true
+Row: 126,130
+TEST UPDATE USING DESC INDEX: got 125 rows
+************ See what we have in table:
+PASS: expected and got true
+Row: 247,246                                               
+PASS: expected and got true
+Row: 246,246                                               
+PASS: expected and got true
+Row: 249,246                                               
+PASS: expected and got true
+Row: 248,246                                               
+PASS: expected and got true
+Row: 251,246                                               
+PASS: expected and got true
+Row: 240,241                                               
+PASS: expected and got true
+Row: 243,241                                               
+PASS: expected and got true
+Row: 242,241                                               
+PASS: expected and got true
+Row: 245,241                                               
+PASS: expected and got true
+Row: 244,241                                               
+PASS: expected and got true
+Row: 237,236                                               
+PASS: expected and got true
+Row: 236,236                                               
+PASS: expected and got true
+Row: 239,236                                               
+PASS: expected and got true
+Row: 238,236                                               
+PASS: expected and got true
+Row: 241,236                                               
+PASS: expected and got true
+Row: 230,231                                               
+PASS: expected and got true
+Row: 233,231                                               
+PASS: expected and got true
+Row: 232,231                                               
+PASS: expected and got true
+Row: 235,231                                               
+PASS: expected and got true
+Row: 234,231                                               
+PASS: expected and got true
+Row: 227,226                                               
+PASS: expected and got true
+Row: 226,226                                               
+PASS: expected and got true
+Row: 229,226                                               
+PASS: expected and got true
+Row: 228,226                                               
+PASS: expected and got true
+Row: 231,226                                               
+PASS: expected and got true
+Row: 220,221                                               
+PASS: expected and got true
+Row: 223,221                                               
+PASS: expected and got true
+Row: 222,221                                               
+PASS: expected and got true
+Row: 225,221                                               
+PASS: expected and got true
+Row: 224,221                                               
+PASS: expected and got true
+Row: 217,216                                               
+PASS: expected and got true
+Row: 216,216                                               
+PASS: expected and got true
+Row: 219,216                                               
+PASS: expected and got true
+Row: 218,216                                               
+PASS: expected and got true
+Row: 221,216                                               
+PASS: expected and got true
+Row: 210,211                                               
+PASS: expected and got true
+Row: 213,211                                               
+PASS: expected and got true
+Row: 212,211                                               
+PASS: expected and got true
+Row: 215,211                                               
+PASS: expected and got true
+Row: 214,211                                               
+PASS: expected and got true
+Row: 207,206                                               
+PASS: expected and got true
+Row: 206,206                                               
+PASS: expected and got true
+Row: 209,206                                               
+PASS: expected and got true
+Row: 208,206                                               
+PASS: expected and got true
+Row: 211,206                                               
+PASS: expected and got true
+Row: 200,201                                               
+PASS: expected and got true
+Row: 203,201                                               
+PASS: expected and got true
+Row: 202,201                                               
+PASS: expected and got true
+Row: 205,201                                               
+PASS: expected and got true
+Row: 204,201                                               
+PASS: expected and got true
+Row: 197,196                                               
+PASS: expected and got true
+Row: 196,196                                               
+PASS: expected and got true
+Row: 199,196                                               
+PASS: expected and got true
+Row: 198,196                                               
+PASS: expected and got true
+Row: 201,196                                               
+PASS: expected and got true
+Row: 190,191                                               
+PASS: expected and got true
+Row: 193,191                                               
+PASS: expected and got true
+Row: 192,191                                               
+PASS: expected and got true
+Row: 195,191                                               
+PASS: expected and got true
+Row: 194,191                                               
+PASS: expected and got true
+Row: 187,186                                               
+PASS: expected and got true
+Row: 186,186                                               
+PASS: expected and got true
+Row: 189,186                                               
+PASS: expected and got true
+Row: 188,186                                               
+PASS: expected and got true
+Row: 191,186                                               
+PASS: expected and got true
+Row: 180,181                                               
+PASS: expected and got true
+Row: 183,181                                               
+PASS: expected and got true
+Row: 182,181                                               
+PASS: expected and got true
+Row: 185,181                                               
+PASS: expected and got true
+Row: 184,181                                               
+PASS: expected and got true
+Row: 177,176                                               
+PASS: expected and got true
+Row: 176,176                                               
+PASS: expected and got true
+Row: 179,176                                               
+PASS: expected and got true
+Row: 178,176                                               
+PASS: expected and got true
+Row: 181,176                                               
+PASS: expected and got true
+Row: 170,171                                               
+PASS: expected and got true
+Row: 173,171                                               
+PASS: expected and got true
+Row: 172,171                                               
+PASS: expected and got true
+Row: 175,171                                               
+PASS: expected and got true
+Row: 174,171                                               
+PASS: expected and got true
+Row: 167,166                                               
+PASS: expected and got true
+Row: 166,166                                               
+PASS: expected and got true
+Row: 169,166                                               
+PASS: expected and got true
+Row: 168,166                                               
+PASS: expected and got true
+Row: 171,166                                               
+PASS: expected and got true
+Row: 160,161                                               
+PASS: expected and got true
+Row: 163,161                                               
+PASS: expected and got true
+Row: 162,161                                               
+PASS: expected and got true
+Row: 165,161                                               
+PASS: expected and got true
+Row: 164,161                                               
+PASS: expected and got true
+Row: 157,156                                               
+PASS: expected and got true
+Row: 156,156                                               
+PASS: expected and got true
+Row: 159,156                                               
+PASS: expected and got true
+Row: 158,156                                               
+PASS: expected and got true
+Row: 161,156                                               
+PASS: expected and got true
+Row: 150,151                                               
+PASS: expected and got true
+Row: 153,151                                               
+PASS: expected and got true
+Row: 152,151                                               
+PASS: expected and got true
+Row: 155,151                                               
+PASS: expected and got true
+Row: 154,151                                               
+PASS: expected and got true
+Row: 147,146                                               
+PASS: expected and got true
+Row: 146,146                                               
+PASS: expected and got true
+Row: 149,146                                               
+PASS: expected and got true
+Row: 148,146                                               
+PASS: expected and got true
+Row: 151,146                                               
+PASS: expected and got true
+Row: 140,141                                               
+PASS: expected and got true
+Row: 143,141                                               
+PASS: expected and got true
+Row: 142,141                                               
+PASS: expected and got true
+Row: 145,141                                               
+PASS: expected and got true
+Row: 144,141                                               
+PASS: expected and got true
+Row: 137,136                                               
+PASS: expected and got true
+Row: 136,136                                               
+PASS: expected and got true
+Row: 139,136                                               
+PASS: expected and got true
+Row: 138,136                                               
+PASS: expected and got true
+Row: 141,136                                               
+PASS: expected and got true
+Row: 130,131                                               
+PASS: expected and got true
+Row: 133,131                                               
+PASS: expected and got true
+Row: 132,131                                               
+PASS: expected and got true
+Row: 135,131                                               
+PASS: expected and got true
+Row: 134,131                                               
+PASS: expected and got true
+Row: 127,126                                               
+PASS: expected and got true
+Row: 126,126                                               
+PASS: expected and got true
+Row: 129,126                                               
+PASS: expected and got true
+Row: 128,126                                               
+PASS: expected and got true
+Row: 131,126                                               
+PASS: expected and got true
+Row: 121,121                                               
+PASS: expected and got true
+Row: 122,121                                               
+PASS: expected and got true
+Row: 123,121                                               
+PASS: expected and got true
+Row: 124,121                                               
+PASS: expected and got true
+Row: 125,121                                               
+PASS: expected and got true
+Row: 116,116                                               
+PASS: expected and got true
+Row: 117,116                                               
+PASS: expected and got true
+Row: 118,116                                               
+PASS: expected and got true
+Row: 119,116                                               
+PASS: expected and got true
+Row: 120,116                                               
+PASS: expected and got true
+Row: 111,111                                               
+PASS: expected and got true
+Row: 112,111                                               
+PASS: expected and got true
+Row: 113,111                                               
+PASS: expected and got true
+Row: 114,111                                               
+PASS: expected and got true
+Row: 115,111                                               
+PASS: expected and got true
+Row: 106,106                                               
+PASS: expected and got true
+Row: 107,106                                               
+PASS: expected and got true
+Row: 108,106                                               
+PASS: expected and got true
+Row: 109,106                                               
+PASS: expected and got true
+Row: 110,106                                               
+PASS: expected and got true
+Row: 101,101                                               
+PASS: expected and got true
+Row: 102,101                                               
+PASS: expected and got true
+Row: 103,101                                               
+PASS: expected and got true
+Row: 104,101                                               
+PASS: expected and got true
+Row: 105,101                                               
+PASS: expected and got true
+Row: 96,96                                                
+PASS: expected and got true
+Row: 97,96                                                
+PASS: expected and got true
+Row: 98,96                                                
+PASS: expected and got true
+Row: 99,96                                                
+PASS: expected and got true
+Row: 100,96                                                
+PASS: expected and got true
+Row: 91,91                                                
+PASS: expected and got true
+Row: 92,91                                                
+PASS: expected and got true
+Row: 93,91                                                
+PASS: expected and got true
+Row: 94,91                                                
+PASS: expected and got true
+Row: 95,91                                                
+PASS: expected and got true
+Row: 86,86                                                
+PASS: expected and got true
+Row: 87,86                                                
+PASS: expected and got true
+Row: 88,86                                                
+PASS: expected and got true
+Row: 89,86                                                
+PASS: expected and got true
+Row: 90,86                                                
+PASS: expected and got true
+Row: 81,81                                                
+PASS: expected and got true
+Row: 82,81                                                
+PASS: expected and got true
+Row: 83,81                                                
+PASS: expected and got true
+Row: 84,81                                                
+PASS: expected and got true
+Row: 85,81                                                
+PASS: expected and got true
+Row: 76,76                                                
+PASS: expected and got true
+Row: 77,76                                                
+PASS: expected and got true
+Row: 78,76                                                
+PASS: expected and got true
+Row: 79,76                                                
+PASS: expected and got true
+Row: 80,76                                                
+PASS: expected and got true
+Row: 71,71                                                
+PASS: expected and got true
+Row: 72,71                                                
+PASS: expected and got true
+Row: 73,71                                                
+PASS: expected and got true
+Row: 74,71                                                
+PASS: expected and got true
+Row: 75,71                                                
+PASS: expected and got true
+Row: 66,66                                                
+PASS: expected and got true
+Row: 67,66                                                
+PASS: expected and got true
+Row: 68,66                                                
+PASS: expected and got true
+Row: 69,66                                                
+PASS: expected and got true
+Row: 70,66                                                
+PASS: expected and got true
+Row: 61,61                                                
+PASS: expected and got true
+Row: 62,61                                                
+PASS: expected and got true
+Row: 63,61                                                
+PASS: expected and got true
+Row: 64,61                                                
+PASS: expected and got true
+Row: 65,61                                                
+PASS: expected and got true
+Row: 56,56                                                
+PASS: expected and got true
+Row: 57,56                                                
+PASS: expected and got true
+Row: 58,56                                                
+PASS: expected and got true
+Row: 59,56                                                
+PASS: expected and got true
+Row: 60,56                                                
+PASS: expected and got true
+Row: 51,51                                                
+PASS: expected and got true
+Row: 52,51                                                
+PASS: expected and got true
+Row: 53,51                                                
+PASS: expected and got true
+Row: 54,51                                                
+PASS: expected and got true
+Row: 55,51                                                
+PASS: expected and got true
+Row: 46,46                                                
+PASS: expected and got true
+Row: 47,46                                                
+PASS: expected and got true
+Row: 48,46                                                
+PASS: expected and got true
+Row: 49,46                                                
+PASS: expected and got true
+Row: 50,46                                                
+PASS: expected and got true
+Row: 41,41                                                
+PASS: expected and got true
+Row: 42,41                                                
+PASS: expected and got true
+Row: 43,41                                                
+PASS: expected and got true
+Row: 44,41                                                
+PASS: expected and got true
+Row: 45,41                                                
+PASS: expected and got true
+Row: 36,36                                                
+PASS: expected and got true
+Row: 37,36                                                
+PASS: expected and got true
+Row: 38,36                                                
+PASS: expected and got true
+Row: 39,36                                                
+PASS: expected and got true
+Row: 40,36                                                
+PASS: expected and got true
+Row: 31,31                                                
+PASS: expected and got true
+Row: 32,31                                                
+PASS: expected and got true
+Row: 33,31                                                
+PASS: expected and got true
+Row: 34,31                                                
+PASS: expected and got true
+Row: 35,31                                                
+PASS: expected and got true
+Row: 26,26                                                
+PASS: expected and got true
+Row: 27,26                                                
+PASS: expected and got true
+Row: 28,26                                                
+PASS: expected and got true
+Row: 29,26                                                
+PASS: expected and got true
+Row: 30,26                                                
+PASS: expected and got true
+Row: 21,21                                                
+PASS: expected and got true
+Row: 22,21                                                
+PASS: expected and got true
+Row: 23,21                                                
+PASS: expected and got true
+Row: 24,21                                                
+PASS: expected and got true
+Row: 25,21                                                
+PASS: expected and got true
+Row: 16,16                                                
+PASS: expected and got true
+Row: 17,16                                                
+PASS: expected and got true
+Row: 18,16                                                
+PASS: expected and got true
+Row: 19,16                                                
+PASS: expected and got true
+Row: 20,16                                                
+PASS: expected and got true
+Row: 11,11                                                
+PASS: expected and got true
+Row: 12,11                                                
+PASS: expected and got true
+Row: 13,11                                                
+PASS: expected and got true
+Row: 14,11                                                
+PASS: expected and got true
+Row: 15,11                                                
+PASS: expected and got true
+Row: 6,6                                                 
+PASS: expected and got true
+Row: 7,6                                                 
+PASS: expected and got true
+Row: 8,6                                                 
+PASS: expected and got true
+Row: 9,6                                                 
+PASS: expected and got true
+Row: 10,6                                                 
+PASS: expected and got true
+Row: 1,1                                                 
+PASS: expected and got true
+Row: 2,1                                                 
+PASS: expected and got true
+Row: 3,1                                                 
+PASS: expected and got true
+Row: 4,1                                                 
+PASS: expected and got true
+Row: 5,1                                                 
+TEST UPDATE USING DESC INDEX: got 250 rows
+************************************TESTING UPDATE DELETE WARNING*********
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: teardown complete
+Test updateable cursor using index finished

@@ -1,0 +1,1954 @@
+ij> -- test outer joins
+-- (NO NATURAL JOIN)
+autocommit off;
+ij> -- create some tables
+create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t2(c1 int);
+0 rows inserted/updated/deleted
+ij> create table t3(c1 int);
+0 rows inserted/updated/deleted
+ij> create table tt1(c1 int, c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> create table tt2(c1 int, c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> create table tt3(c1 int, c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> create table empty_table(c1 int);
+0 rows inserted/updated/deleted
+ij> create table insert_test(c1 int, c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> -- following is verifying that oj is not a keyword
+create table oj(oj int);
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into t1 values 1, 2, 2, 3, 4;
+5 rows inserted/updated/deleted
+ij> insert into t2 values 1, 3, 3, 5, 6;
+5 rows inserted/updated/deleted
+ij> insert into t3 values 2, 3, 5, 5, 7;
+5 rows inserted/updated/deleted
+ij> insert into tt1 select c1, c1, c1 from t1;
+5 rows inserted/updated/deleted
+ij> insert into tt2 select c1, c1, c1 from t2;
+5 rows inserted/updated/deleted
+ij> insert into tt3 select c1, c1, c1 from t3;
+5 rows inserted/updated/deleted
+ij> -- verifying that oj is not a keyword
+insert into oj(oj) values (1);
+1 row inserted/updated/deleted
+ij> -- negative tests
+-- no outer join type
+select * from t1 outer join t2;
+ERROR 42X01: Syntax error: Encountered "outer" at line 4, column 18.
+ij> -- no join clause
+select * from t1 left outer join t2;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 2, column 35.
+ij> select * from t1 right outer join t2;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 36.
+ij> -- positive tests
+select t1.c1 from t1 left outer join t2 on t1.c1 = t2.c1;
+C1         
+-----------
+1          
+2          
+2          
+3          
+3          
+4          
+ij> select t2.c1 from t1 right outer join t2 on t1.c1 = t2.c1;
+C1         
+-----------
+1          
+3          
+3          
+5          
+6          
+ij> select a.x from t1 a (x) left outer join t2 b (x) on a.x = b.x;
+X          
+-----------
+1          
+2          
+2          
+3          
+3          
+4          
+ij> -- verify that selects from inner table work
+select b.* from (values 9) a left outer join t2 b on 1=1;
+C1         
+-----------
+1          
+3          
+3          
+5          
+6          
+ij> select b.* from (values 9) a left outer join t2 b on 1=0;
+C1         
+-----------
+NULL       
+ij> select b.* from (values 9) a right outer join t2 b on 1=0;
+C1         
+-----------
+1          
+3          
+3          
+5          
+6          
+ij> select a.* from (values 9) a right outer join t2 b on 1=1;
+1          
+-----------
+9          
+9          
+9          
+9          
+9          
+ij> select a.* from (values 9) a right outer join t2 b on 1=0;
+1          
+-----------
+NULL       
+NULL       
+NULL       
+NULL       
+NULL       
+ij> select a.* from ((values ('a', 'b')) a inner join (values ('c', 'd')) b on 1=1) left outer join (values ('e', 'f')) c on 1=1;
+1   |2   
+---------
+a   |b   
+ij> select b.* from ((values ('a', 'b')) a inner join (values ('c', 'd')) b on 1=1) left outer join (values ('e', 'f')) c on 1=1;
+1   |2   
+---------
+c   |d   
+ij> select c.* from ((values ('a', 'b')) a inner join (values ('c', 'd')) b on 1=1) left outer join (values ('e', 'f')) c on 1=1;
+1   |2   
+---------
+e   |f   
+ij> -- verifying that oj is not a keyword
+select * from oj where oj = 1;
+OJ         
+-----------
+1          
+ij> --verifying both regular and {oj } in 
+select * from t1 left outer join {oj t2 left outer join t3 on t2.c1=t3.c1} on t1.c1=t3.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |NULL       |NULL       
+2          |NULL       |NULL       
+2          |NULL       |NULL       
+3          |3          |3          
+3          |3          |3          
+4          |NULL       |NULL       
+ij> -- left and right outer join with an empty table
+select t1.c1 from t1 left outer join empty_table et on t1.c1 = et.c1;
+C1         
+-----------
+1          
+2          
+2          
+3          
+4          
+ij> select t1.c1 from t1 right outer join empty_table et on t1.c1 = et.c1;
+C1         
+-----------
+ij> select t1.c1 from empty_table et right outer join t1 on et.c1 = t1.c1;
+C1         
+-----------
+1          
+2          
+2          
+3          
+4          
+ij> -- this query may make no sense at all, but it's just trying to show that parser works
+-- fine with both regular tableexpression and tableexpression with {oj }
+select * from t1, {oj t2 join t3 on t2.c1=t3.c1};
+C1         |C1         |C1         
+-----------------------------------
+1          |3          |3          
+1          |3          |3          
+1          |5          |5          
+1          |5          |5          
+2          |3          |3          
+2          |3          |3          
+2          |5          |5          
+2          |5          |5          
+2          |3          |3          
+2          |3          |3          
+2          |5          |5          
+2          |5          |5          
+3          |3          |3          
+3          |3          |3          
+3          |5          |5          
+3          |5          |5          
+4          |3          |3          
+4          |3          |3          
+4          |5          |5          
+4          |5          |5          
+ij> -- parameters and join clause
+prepare asdf as 'select * from t1 left outer join t2 on 1=? and t1.c1 = t2.c1';
+ij> execute asdf using 'values 1';
+C1         |C1         
+-----------------------
+1          |1          
+2          |NULL       
+2          |NULL       
+3          |3          
+3          |3          
+4          |NULL       
+ij> remove asdf;
+ij> prepare asdf as 'select * from t1 left outer join t2 on t1.c1 = t2.c1 and t1.c1 = ?';
+ij> execute asdf using 'values 1';
+C1         |C1         
+-----------------------
+1          |1          
+2          |NULL       
+2          |NULL       
+3          |NULL       
+4          |NULL       
+ij> remove asdf;
+ij> -- additional predicates outside of the join clause
+-- egs of using {oj --} syntax
+select * from t1 left outer join t2 on t1.c1 = t2.c1 where t1.c1 = 1;
+C1         |C1         
+-----------------------
+1          |1          
+ij> select * from {oj t1 left outer join t2 on t1.c1 = t2.c1} where t1.c1 = 1;
+C1         |C1         
+-----------------------
+1          |1          
+ij> select * from t1 right outer join t2 on t1.c1 = 1 where t2.c1 = t1.c1;
+C1         |C1         
+-----------------------
+1          |1          
+ij> select * from {oj t1 right outer join t2 on t1.c1 = 1} where t2.c1 = t1.c1;
+C1         |C1         
+-----------------------
+1          |1          
+ij> -- subquery in join clause. Not allowed in the DB2 compatibility mode. ERROR.
+-- egs of using {oj --} syntax
+select * from t1 a left outer join t2 b 
+on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 = 1);
+ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ij> select * from {oj t1 a left outer join t2 b 
+on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 = 1)};
+ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ij> select * from t1 a left outer join t2 b 
+on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 <> 2);
+ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ij> select * from {oj t1 a left outer join t2 b 
+on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 <> 2)};
+ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ij> select * from t1 a right outer join t2 b 
+on a.c1 = b.c1 and a.c1 in (select c1 from t1 where a.c1 = t1.c1);
+ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ij> -- outer join in subquery
+-- egs of using {oj --} syntax
+select * from t1 a
+where exists (select * from t1 left outer join t2 on t1.c1 = t2.c1);
+C1         
+-----------
+1          
+2          
+2          
+3          
+4          
+ij> select * from t1 a
+where exists (select * from {oj t1 left outer join t2 on t1.c1 = t2.c1});
+C1         
+-----------
+1          
+2          
+2          
+3          
+4          
+ij> select * from t1 a
+where exists (select * from t1 left outer join t2 on 1=0);
+C1         
+-----------
+1          
+2          
+2          
+3          
+4          
+ij> -- nested joins
+-- egs of using {oj --} syntax
+select * from t1 left outer join t2 on t1.c1 = t2.c1 left outer join t3 on t1.c1 = t3.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+2          |NULL       |2          
+2          |NULL       |2          
+3          |3          |3          
+3          |3          |3          
+4          |NULL       |NULL       
+ij> select * from {oj t1 left outer join t2 on t1.c1 = t2.c1 left outer join t3 on t1.c1 = 
+t3.c1};
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+2          |NULL       |2          
+2          |NULL       |2          
+3          |3          |3          
+3          |3          |3          
+4          |NULL       |NULL       
+ij> select * from t1 left outer join t2 on t1.c1 = t2.c1 left outer join t3 on t2.c1 = t3.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+2          |NULL       |NULL       
+2          |NULL       |NULL       
+3          |3          |3          
+3          |3          |3          
+4          |NULL       |NULL       
+ij> select * from t3 right outer join t2 on t3.c1 = t2.c1 right outer join t1 on t1.c1 = t2.c1;
+C1         |C1         |C1         
+-----------------------------------
+NULL       |1          |1          
+NULL       |NULL       |2          
+NULL       |NULL       |2          
+3          |3          |3          
+3          |3          |3          
+NULL       |NULL       |4          
+ij> -- parens
+select * from (t1 left outer join t2 on t1.c1 = t2.c1) left outer join t3 on t1.c1 = t3.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+2          |NULL       |2          
+2          |NULL       |2          
+3          |3          |3          
+3          |3          |3          
+4          |NULL       |NULL       
+ij> select * from t1 left outer join (t2 left outer join t3 on t2.c1 = t3.c1) on t1.c1 = t2.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+2          |NULL       |NULL       
+2          |NULL       |NULL       
+3          |3          |3          
+3          |3          |3          
+4          |NULL       |NULL       
+ij> -- left/right outer join combinations
+select * from t1 a right outer join t2 b on a.c1 = b.c1 left outer join t3 c on a.c1 = b.c1 and b.c1 = c.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+3          |3          |3          
+3          |3          |3          
+NULL       |5          |NULL       
+NULL       |6          |NULL       
+ij> select * from (t1 a right outer join t2 b on a.c1 = b.c1) left outer join t3 c on a.c1 = b.c1 and b.c1 = c.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+3          |3          |3          
+3          |3          |3          
+NULL       |5          |NULL       
+NULL       |6          |NULL       
+ij> select * from t1 a left outer join t2 b on a.c1 = b.c1 right outer join t3 c on c.c1 = a.c1 where a.c1 is not null;
+C1         |C1         |C1         
+-----------------------------------
+2          |NULL       |2          
+2          |NULL       |2          
+3          |3          |3          
+3          |3          |3          
+ij> select * from (t1 a left outer join t2 b on a.c1 = b.c1) right outer join t3 c on c.c1 = a.c1 where a.c1 is not null;
+C1         |C1         |C1         
+-----------------------------------
+2          |NULL       |2          
+2          |NULL       |2          
+3          |3          |3          
+3          |3          |3          
+ij> select * from t1 a left outer join (t2 b right outer join t3 c on c.c1 = b.c1) on a.c1 = c.c1 where c.c1=b.c1;
+C1         |C1         |C1         
+-----------------------------------
+3          |3          |3          
+3          |3          |3          
+ij> -- test insert/update/delete
+insert into insert_test
+select * from t1 a left outer join t2 b on a.c1 = b.c1 left outer join t3 c on a.c1 <> c.c1;
+26 rows inserted/updated/deleted
+ij> select * from insert_test;
+C1         |C2         |C3         
+-----------------------------------
+1          |1          |2          
+1          |1          |3          
+1          |1          |5          
+1          |1          |5          
+1          |1          |7          
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+4          |NULL       |2          
+4          |NULL       |3          
+4          |NULL       |5          
+4          |NULL       |5          
+4          |NULL       |7          
+ij> update insert_test
+set c1 = (select 9 from t1 a left outer join t1 b on a.c1 = b.c1 where a.c1 = 1)
+where c1 = 1;
+5 rows inserted/updated/deleted
+ij> select * from insert_test;
+C1         |C2         |C3         
+-----------------------------------
+9          |1          |2          
+9          |1          |3          
+9          |1          |5          
+9          |1          |5          
+9          |1          |7          
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+4          |NULL       |2          
+4          |NULL       |3          
+4          |NULL       |5          
+4          |NULL       |5          
+4          |NULL       |7          
+ij> delete from insert_test
+where c1 = (select 9 from t1 a left outer join t1 b on a.c1 = b.c1 where a.c1 = 1);
+5 rows inserted/updated/deleted
+ij> select * from insert_test;
+C1         |C2         |C3         
+-----------------------------------
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+4          |NULL       |2          
+4          |NULL       |3          
+4          |NULL       |5          
+4          |NULL       |5          
+4          |NULL       |7          
+ij> delete from insert_test;
+21 rows inserted/updated/deleted
+ij> insert into insert_test
+select * from (select * from t1 a left outer join t2 b on a.c1 = b.c1 left outer join t3 c on a.c1 <> c.c1) d (c1, c2, c3);
+26 rows inserted/updated/deleted
+ij> select * from insert_test;
+C1         |C2         |C3         
+-----------------------------------
+1          |1          |2          
+1          |1          |3          
+1          |1          |5          
+1          |1          |5          
+1          |1          |7          
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+2          |NULL       |3          
+2          |NULL       |5          
+2          |NULL       |5          
+2          |NULL       |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+3          |3          |2          
+3          |3          |5          
+3          |3          |5          
+3          |3          |7          
+4          |NULL       |2          
+4          |NULL       |3          
+4          |NULL       |5          
+4          |NULL       |5          
+4          |NULL       |7          
+ij> delete from insert_test;
+26 rows inserted/updated/deleted
+ij> -- verify that right outer join xforms don't get result columns
+-- confused
+create table a (c1 int);
+0 rows inserted/updated/deleted
+ij> create table b (c2 float);
+0 rows inserted/updated/deleted
+ij> create table c (c3 char(30));
+0 rows inserted/updated/deleted
+ij> insert into a values 1;
+1 row inserted/updated/deleted
+ij> insert into b values 3.3;
+1 row inserted/updated/deleted
+ij> insert into c values 'asdf';
+1 row inserted/updated/deleted
+ij> select * from a left outer join b on 1=1 left outer join c on 1=1;
+C1         |C2                    |C3                            
+-----------------------------------------------------------------
+1          |3.3                   |asdf                          
+ij> select * from a left outer join b on 1=1 left outer join c on 1=0;
+C1         |C2                    |C3                            
+-----------------------------------------------------------------
+1          |3.3                   |NULL                          
+ij> select * from a left outer join b on 1=0 left outer join c on 1=1;
+C1         |C2                    |C3                            
+-----------------------------------------------------------------
+1          |NULL                  |asdf                          
+ij> select * from a left outer join b on 1=0 left outer join c on 1=0;
+C1         |C2                    |C3                            
+-----------------------------------------------------------------
+1          |NULL                  |NULL                          
+ij> select * from c right outer join b on 1=1 right outer join a on 1=1;
+C3                            |C2                    |C1         
+-----------------------------------------------------------------
+asdf                          |3.3                   |1          
+ij> select * from c right outer join b on 1=1 right outer join a on 1=0;
+C3                            |C2                    |C1         
+-----------------------------------------------------------------
+NULL                          |NULL                  |1          
+ij> select * from c right outer join b on 1=0 right outer join a on 1=1;
+C3                            |C2                    |C1         
+-----------------------------------------------------------------
+NULL                          |3.3                   |1          
+ij> select * from c right outer join b on 1=0 right outer join a on 1=0;
+C3                            |C2                    |C1         
+-----------------------------------------------------------------
+NULL                          |NULL                  |1          
+ij> -- multicolumn tests
+-- c1, c2, and c3 all have the same values
+select tt1.c1, tt1.c2, tt1.c3, tt2.c2, tt2.c3 from tt1 left outer join tt2 on tt1.c1 = tt2.c1;
+C1         |C2         |C3         |C2         |C3         
+-----------------------------------------------------------
+1          |1          |1          |1          |1          
+2          |2          |2          |NULL       |NULL       
+2          |2          |2          |NULL       |NULL       
+3          |3          |3          |3          |3          
+3          |3          |3          |3          |3          
+4          |4          |4          |NULL       |NULL       
+ij> select tt1.c1, tt1.c2, tt1.c3, tt2.c3 from tt1 left outer join tt2 on tt1.c1 = tt2.c1;
+C1         |C2         |C3         |C3         
+-----------------------------------------------
+1          |1          |1          |1          
+2          |2          |2          |NULL       
+2          |2          |2          |NULL       
+3          |3          |3          |3          
+3          |3          |3          |3          
+4          |4          |4          |NULL       
+ij> select tt1.c1, tt1.c2, tt1.c3 from tt1 left outer join tt2 on tt1.c1 = tt2.c1;
+C1         |C2         |C3         
+-----------------------------------
+1          |1          |1          
+2          |2          |2          
+2          |2          |2          
+3          |3          |3          
+3          |3          |3          
+4          |4          |4          
+ij> -- nested outer joins
+select tt1.c2, tt1.c1, tt1.c3, tt2.c1, tt2.c3 from t1 left outer join tt1 on t1.c1 = tt1.c1 left outer join tt2 on tt1.c2 = tt2.c2;
+C2         |C1         |C3         |C1         |C3         
+-----------------------------------------------------------
+1          |1          |1          |1          |1          
+2          |2          |2          |NULL       |NULL       
+2          |2          |2          |NULL       |NULL       
+2          |2          |2          |NULL       |NULL       
+2          |2          |2          |NULL       |NULL       
+3          |3          |3          |3          |3          
+3          |3          |3          |3          |3          
+4          |4          |4          |NULL       |NULL       
+ij> -- make sure that column reordering is working correctly 
+-- when there's an ON clause
+create table x (c1 int, c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> create table y (c3 int, c4 int, c5 int);
+0 rows inserted/updated/deleted
+ij> insert into x values (1, 2, 3), (4, 5, 6);
+2 rows inserted/updated/deleted
+ij> insert into y values (3, 4, 5), (666, 7, 8);
+2 rows inserted/updated/deleted
+ij> -- qualfied * will return all of the columns of the qualified table
+-- including join columns
+select x.* from x join y on x.c3 = y.c3;
+C1         |C2         |C3         
+-----------------------------------
+1          |2          |3          
+ij> select x.* from x left outer join y on x.c3 = y.c3;
+C1         |C2         |C3         
+-----------------------------------
+1          |2          |3          
+4          |5          |6          
+ij> select x.* from x right outer join y on x.c3 = y.c3;
+C1         |C2         |C3         
+-----------------------------------
+1          |2          |3          
+NULL       |NULL       |NULL       
+ij> select y.* from x join y on x.c3 = y.c3;
+C3         |C4         |C5         
+-----------------------------------
+3          |4          |5          
+ij> select y.* from x left outer join y on x.c3 = y.c3;
+C3         |C4         |C5         
+-----------------------------------
+3          |4          |5          
+NULL       |NULL       |NULL       
+ij> select y.* from x right outer join y on x.c3 = y.c3;
+C3         |C4         |C5         
+-----------------------------------
+3          |4          |5          
+666        |7          |8          
+ij> -- * will return all of the columns of all joined tables
+select * from x join y on x.c3 = y.c3;
+C1         |C2         |C3         |C3         |C4         |C5         
+-----------------------------------------------------------------------
+1          |2          |3          |3          |4          |5          
+ij> select * from x left outer join y on x.c3 = y.c3;
+C1         |C2         |C3         |C3         |C4         |C5         
+-----------------------------------------------------------------------
+1          |2          |3          |3          |4          |5          
+4          |5          |6          |NULL       |NULL       |NULL       
+ij> select * from x right outer join y on x.c3 = y.c3;
+C1         |C2         |C3         |C3         |C4         |C5         
+-----------------------------------------------------------------------
+1          |2          |3          |3          |4          |5          
+NULL       |NULL       |NULL       |666        |7          |8          
+ij> commit;
+ij> -- test outer join -> inner join xform
+delete from tt1;
+5 rows inserted/updated/deleted
+ij> delete from tt2;
+5 rows inserted/updated/deleted
+ij> delete from tt3;
+5 rows inserted/updated/deleted
+ij> insert into tt1 values (1, 2, 3), (2, 3, 4), (3, 4, 5);
+3 rows inserted/updated/deleted
+ij> insert into tt2 values (1, 2, 3), (2, 3, 4), (3, 4, 5);
+3 rows inserted/updated/deleted
+ij> insert into tt3 values (1, 2, 3), (2, 3, 4), (3, 4, 5);
+3 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 4500;
+ij> -- no xform, predicate on outer table
+select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt1.c1 = 3;
+C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------
+3          |4          |5          |2          |3          |4          
+ij> -- various predicates on inner table
+select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c2 = 3;
+C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------
+3          |4          |5          |2          |3          |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- various predicates on inner table
+select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c2 = 3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Nested Loop Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 1
+Rows seen from the right = 1
+Rows filtered = 0
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 1
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of pages visited=1
+		Number of rows qualified=1
+		Number of rows visited=8
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Right result set:
+	Table Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 1
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of pages visited=1
+		Number of rows qualified=1
+		Number of rows visited=8
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c1 + 1= tt2.c2;
+C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------
+2          |3          |4          |1          |2          |3          
+3          |4          |5          |2          |3          |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c1 + 1= tt2.c2
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 2
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Nested Loop Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 3
+	Rows seen from the right = 2
+	Rows filtered = 0
+	Rows returned = 2
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 0
+		restriction = true
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 3
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=3
+				Number of rows visited=8
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 3
+		Rows seen = 2
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=24
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c1 + 1= 3;
+C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------
+3          |4          |5          |2          |3          |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c1 + 1= 3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Nested Loop Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 1
+	Rows seen from the right = 1
+	Rows filtered = 0
+	Rows returned = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 2
+		restriction = true
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 3
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=3
+				Number of rows visited=8
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select * from tt2 right outer join tt1 on tt1.c1 = tt2.c2 where tt2.c1 + 1= 3;
+C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------
+2          |3          |4          |3          |4          |5          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from tt2 right outer join tt1 on tt1.c1 = tt2.c2 where tt2.c1 + 1= 3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Nested Loop Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 1
+Rows seen from the right = 1
+Rows filtered = 0
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Project-Restrict ResultSet (3):
+	Number of opens = 1
+	Rows seen = 3
+	Rows filtered = 2
+	restriction = true
+	projection = false
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Table Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=3
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+Right result set:
+	Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 1
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of pages visited=1
+		Number of rows qualified=1
+		Number of rows visited=8
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 left outer join tt3 on tt2.c2 = tt3.c3 where tt3.c3 = 3;
+C1         |C2         |C3         |C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------------------------------------------
+3          |4          |5          |2          |3          |4          |1          |2          |3          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 left outer join tt3 on tt2.c2 = tt3.c3 where tt3.c3 = 3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (7):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Nested Loop Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 1
+	Rows seen from the right = 1
+	Rows filtered = 0
+	Rows returned = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for TT3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 2
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Project-Restrict ResultSet (6):
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 2
+		restriction = true
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Hash Left Outer Join ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 3
+			Rows seen from the right = 2
+			Empty right rows returned = 0
+			Rows filtered = 0
+			Rows returned = 3
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 3
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=3
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Hash Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking: 
+				Number of opens = 3
+				Hash table size = 3
+				Hash key is column number 1
+				Rows seen = 2
+				Rows filtered = 0
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=3
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					scan qualifiers:
+Non&
+ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 left outer join tt3 on tt2.c2 = tt3.c3 where tt2.c2 = 3;
+C1         |C2         |C3         |C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------------------------------------------
+3          |4          |5          |2          |3          |4          |1          |2          |3          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 left outer join tt3 on tt2.c2 = tt3.c3 where tt2.c2 = 3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Nested Loop Left Outer Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 1
+Rows seen from the right = 1
+Empty right rows returned = 0
+Rows filtered = 0
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Hash Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 3
+	Rows seen from the right = 1
+	Rows filtered = 0
+	Rows returned = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=3
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Hash Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking: 
+		Number of opens = 3
+		Hash table size = 1
+		Hash key is column number 1
+		Rows seen = 1
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			scan qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+			next qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Right result set:
+	Table Scan ResultSet for TT3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 1
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of pages visited=1
+		Number of rows qualified=1
+		Number of rows visited=8
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
+Column[0][0] Id: 2
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- make sure predicates are null tolerant 
+select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 
+where char(tt2.c2) is null;
+C1         |C2         |C3         |C1         |C2         |C3         
+-----------------------------------------------------------------------
+1          |2          |3          |NULL       |NULL       |NULL       
+ij> -- where java.lang.Integer::toString(tt2.c2) = '2';
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- make sure predicates are null tolerant 
+select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 
+where char(tt2.c2) is null
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 3
+Rows filtered = 2
+restriction = true
+projection = false
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Left Outer Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 3
+	Rows seen from the right = 2
+	Empty right rows returned = 0
+	Rows filtered = 0
+	Rows returned = 3
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=3
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Hash Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking: 
+		Number of opens = 3
+		Hash table size = 3
+		Hash key is column number 1
+		Rows seen = 2
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=3
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			scan qualifiers:
+None
+			next qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> commit;
+ij> -- bug 2924, cross join under an outer join
+CREATE TABLE inventory(itemno INT NOT NULL PRIMARY KEY, capacity INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (1, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (3, 2);
+1 row inserted/updated/deleted
+ij> CREATE TABLE timeslots (slotno INT NOT NULL PRIMARY KEY);
+0 rows inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES(1);
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES(2);
+1 row inserted/updated/deleted
+ij> create table reservations(slotno INT CONSTRAINT timeslots_fk REFERENCES timeslots, 
+itemno INT CONSTRAINT inventory_fk REFERENCES inventory, 
+name VARCHAR(100), resdate DATE);
+0 rows inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(1, 1, 'Joe', '2000-04-14');
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(1, 1, 'Fred', '2000-04-13');
+1 row inserted/updated/deleted
+ij> -- This query used to cause a null pointer exception
+select name, resdate 
+from reservations left outer join (inventory join timeslots on inventory.itemno = timeslots.slotno)
+on inventory.itemno = reservations.itemno and timeslots.slotno = reservations.slotno
+where resdate = '2000-04-14';
+NAME                                                                                                |RESDATE   
+---------------------------------------------------------------------------------------------------------------
+Joe                                                                                                 |2000-04-14
+ij> rollback;
+ij> -- bug 2923, cross join under an outer join
+create table inventory(itemno INT NOT NULL PRIMARY KEY, capacity INT);
+0 rows inserted/updated/deleted
+ij> INSERT into inventory values (1, 4);
+1 row inserted/updated/deleted
+ij> INSERT into inventory values (2, 2);
+1 row inserted/updated/deleted
+ij> INSERT into inventory values (3, 2);
+1 row inserted/updated/deleted
+ij> CREATE TABLE timeslots (slotno INT NOT NULL PRIMARY KEY);
+0 rows inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES(1);
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES(2);
+1 row inserted/updated/deleted
+ij> create table reservations(slotno INT CONSTRAINT timeslots_fk REFERENCES timeslots,
+itemno INT CONSTRAINT inventory_fk REFERENCES inventory,
+name VARCHAR(100));
+0 rows inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(1, 1, 'Joe');
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(2, 2, 'Fred');
+1 row inserted/updated/deleted
+ij> -- This query used to get incorrect results
+-- when name is null was the 2nd predicate
+-- due to a bug in OJ->IJ xform code.
+select timeslots.slotno, inventory.itemno, capacity, name
+from inventory left outer join timeslots
+on inventory.capacity = timeslots.slotno
+left outer join reservations
+on timeslots.slotno = reservations.slotno
+where capacity > 3 and name is null;
+SLOTNO     |ITEMNO     |CAPACITY   |NAME                                                                                                
+----------------------------------------------------------------------------------------------------------------------------------------
+NULL       |1          |4          |NULL                                                                                                
+ij> select timeslots.slotno, inventory.itemno, capacity, name
+from inventory left outer join timeslots
+on inventory.capacity = timeslots.slotno
+left outer join reservations
+on timeslots.slotno = reservations.slotno
+where name is null and capacity > 3;
+SLOTNO     |ITEMNO     |CAPACITY   |NAME                                                                                                
+----------------------------------------------------------------------------------------------------------------------------------------
+NULL       |1          |4          |NULL                                                                                                
+ij> rollback;
+ij> -- bug 2930, cross join under outer join
+CREATE TABLE properties (
+	name VARCHAR(50),
+	value VARCHAR(200));
+0 rows inserted/updated/deleted
+ij> INSERT INTO properties VALUES ('businessName', 'Cloud 9 Cafe');
+1 row inserted/updated/deleted
+ij> INSERT INTO properties VALUES ('lastReservationDate', '2001-12-31');
+1 row inserted/updated/deleted
+ij> CREATE TABLE inventory (
+	itemno INT NOT NULL PRIMARY KEY,
+	capacity INT
+);
+0 rows inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (1, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (3, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (4, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (5, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (6, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (7, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (8, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (9, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (10, 4);
+1 row inserted/updated/deleted
+ij> CREATE TABLE timeslots (
+	slot TIME NOT NULL PRIMARY KEY
+);
+0 rows inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('17:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('17:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('18:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('18:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('19:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('19:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('20:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('20:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('21:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('21:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('22:00:00');
+1 row inserted/updated/deleted
+ij> CREATE TABLE reservations (
+	itemno INT CONSTRAINT inventory_fk REFERENCES inventory,
+	slot TIME CONSTRAINT timeslots_fk REFERENCES timeslots,
+	resdate DATE NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	quantity INT,
+	CONSTRAINT reservations_u UNIQUE(name, resdate));
+0 rows inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(6, '17:00:00', '2000-07-13', 'Williams', 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(7, '17:00:00', '2000-07-13', 'Johnson',  4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(8, '17:00:00', '2000-07-13', 'Allen',    3);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(9, '17:00:00', '2000-07-13', 'Dexmier',  4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(1, '17:30:00', '2000-07-13', 'Gates', 	 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(2, '17:30:00', '2000-07-13', 'McNealy',  2);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(3, '17:30:00', '2000-07-13', 'Hoffman',  1);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(4, '17:30:00', '2000-07-13', 'Sippl',    2);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(6, '17:30:00', '2000-07-13', 'Yang',     4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(7, '17:30:00', '2000-07-13', 'Meyers',   4);
+1 row inserted/updated/deleted
+ij> select max(name), max(resdate) from inventory join timeslots on inventory.capacity is not null
+left outer join reservations on inventory.itemno = reservations.itemno and reservations.slot = timeslots.slot;
+1                                                                                                   |2         
+---------------------------------------------------------------------------------------------------------------
+Yang                                                                                                |2000-07-13
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> rollback;
+ij> -- bug 2931, cross join under outer join
+CREATE TABLE properties (
+	name VARCHAR(50),
+	value VARCHAR(200));
+0 rows inserted/updated/deleted
+ij> INSERT INTO properties VALUES ('businessName', 'Cloud 9 Cafe');
+1 row inserted/updated/deleted
+ij> INSERT INTO properties VALUES ('lastReservationDate', '2001-12-31');
+1 row inserted/updated/deleted
+ij> CREATE TABLE inventory (
+	itemno INT NOT NULL PRIMARY KEY,
+	capacity INT
+);
+0 rows inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (1, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (3, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (4, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (5, 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (6, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (7, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (8, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (9, 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO inventory VALUES (10, 4);
+1 row inserted/updated/deleted
+ij> CREATE TABLE timeslots (
+	slot TIME NOT NULL PRIMARY KEY
+);
+0 rows inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('17:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('17:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('18:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('18:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('19:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('19:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('20:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('20:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('21:00:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('21:30:00');
+1 row inserted/updated/deleted
+ij> INSERT INTO timeslots VALUES('22:00:00');
+1 row inserted/updated/deleted
+ij> CREATE TABLE reservations (
+	itemno INT CONSTRAINT inventory_fk REFERENCES inventory,
+	slot TIME CONSTRAINT timeslots_fk REFERENCES timeslots,
+	resdate DATE NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	quantity INT,
+	CONSTRAINT reservations_u UNIQUE(name, resdate));
+0 rows inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(6, '17:00:00', '2000-07-13', 'Williams', 4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(7, '17:00:00', '2000-07-13', 'Johnson',  4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(8, '17:00:00', '2000-07-13', 'Allen',    3);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(9, '17:00:00', '2000-07-13', 'Dexmier',  4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(1, '17:30:00', '2000-07-13', 'Gates', 	 2);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(2, '17:30:00', '2000-07-13', 'McNealy',  2);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(3, '17:30:00', '2000-07-13', 'Hoffman',  1);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(4, '17:30:00', '2000-07-13', 'Sippl',    2);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(6, '17:30:00', '2000-07-13', 'Yang',     4);
+1 row inserted/updated/deleted
+ij> INSERT INTO reservations VALUES(7, '17:30:00', '2000-07-13', 'Meyers',   4);
+1 row inserted/updated/deleted
+ij> -- this query should return values from the 'slot' column (type date)
+-- but it seems to be returning integers!
+select max(timeslots.slot) from inventory inner join timeslots on inventory.capacity is not null
+left outer join reservations on inventory.capacity = reservations.itemno and reservations.slot = timeslots.slot;
+1       
+--------
+22:00:00
+ij> rollback;
+ij> -- bug 2897 Push join predicates from where clause
+-- to right
+select * from t1 inner join t2 on 1=1 left outer join t3 on t1.c1 = t3.c1
+where t1.c1 = t2.c1;
+C1         |C1         |C1         
+-----------------------------------
+1          |1          |NULL       
+3          |3          |3          
+3          |3          |3          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- bug 2897 Push join predicates from where clause
+-- to right
+select * from t1 inner join t2 on 1=1 left outer join t3 on t1.c1 = t3.c1
+where t1.c1 = t2.c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Nested Loop Left Outer Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 3
+Rows seen from the right = 2
+Empty right rows returned = 1
+Rows filtered = 0
+Rows returned = 3
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Hash Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 5
+	Rows seen from the right = 3
+	Rows filtered = 0
+	Rows returned = 3
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=1
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Project-Restrict ResultSet (5):
+		Number of opens = 5
+		Rows seen = 3
+		Rows filtered = 0
+		restriction = false
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Hash Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking: 
+			Number of opens = 5
+			Hash table size = 4
+			Hash key is column number 0
+			Rows seen = 3
+			Rows filtered = 0
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=1
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				scan qualifiers:
+None
+				next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Right result set:
+	Table Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 3
+	Rows seen = 2
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=1
+		Number of pages visited=1
+		Number of rows qualified=2
+		Number of rows visited=15
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- Test fix for bug 5659
+create table xxx (a int not null);
+0 rows inserted/updated/deleted
+ij> create table yyy (a int not null);
+0 rows inserted/updated/deleted
+ij> insert into xxx values (1);
+1 row inserted/updated/deleted
+ij> select * from xxx left join yyy on (xxx.a=yyy.a);
+A          |A          
+-----------------------
+1          |NULL       
+ij> insert into xxx values (null);
+ERROR 23502: Column 'A'  cannot accept a NULL value.
+ij> select * from xxx;
+A          
+-----------
+1          
+ij> drop table xxx;
+0 rows inserted/updated/deleted
+ij> drop table yyy;
+0 rows inserted/updated/deleted
+ij> -- Defect 5658. Disable querries with ambiguous references.
+create table ttab1 (a int, b int);
+0 rows inserted/updated/deleted
+ij> insert into ttab1 values (1,1),(2,2);
+2 rows inserted/updated/deleted
+ij> create table ttab2 (c int, d int);
+0 rows inserted/updated/deleted
+ij> insert into ttab2 values (1,1),(2,2);
+2 rows inserted/updated/deleted
+ij> -- this statement should raise an error because 
+-- more than one object table includes column "b"
+select cor1.*, cor2.* from ttab1 cor1 left outer join ttab2 on (b = d),
+		ttab1 left outer join ttab2 cor2 on (b = d);
+ERROR 42X03: Column name 'B' is in more than one table in the FROM list.
+ij> select cor1.*, cor2.* from ttab1 cor1 left outer join ttab2 on (b = d),
+		ttab1 left outer join ttab2 cor2 on (b = cor2.d);
+ERROR 42X03: Column name 'B' is in more than one table in the FROM list.
+ij> -- This should pass
+select cor1.*, cor2.* from ttab1 left outer join ttab2 on (b = d), 
+		ttab1 cor1 left outer join ttab2 cor2 on (cor1.b = cor2.d);
+A          |B          |C          |D          
+-----------------------------------------------
+1          |1          |1          |1          
+2          |2          |2          |2          
+1          |1          |1          |1          
+2          |2          |2          |2          
+ij> -- These should fail too
+select * from ttab1, ttab1 left outer join ttab2 on (a=c);
+ERROR 42X03: Column name 'TTAB1.A' is in more than one table in the FROM list.
+ij> select * from ttab1 cor1, ttab1 left outer join ttab2 on (cor1.a=c);
+ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ij> -- This should pass
+select * from ttab1, ttab1 cor1 left outer join ttab2 on (cor1.a=c);
+A          |B          |A          |B          |C          |D          
+-----------------------------------------------------------------------
+1          |1          |1          |1          |1          |1          
+2          |2          |1          |1          |1          |1          
+1          |1          |2          |2          |2          |2          
+2          |2          |2          |2          |2          |2          
+ij> drop table ttab1;
+0 rows inserted/updated/deleted
+ij> drop table ttab2;
+0 rows inserted/updated/deleted
+ij> -- Test 5164
+CREATE TABLE "APP"."GOVT_AGCY" ("GVA_ID" NUMERIC(20,0) NOT NULL, "GVA_ORL_ID" NUMERIC(20,0) NOT NULL, "GVA_GAC_ID" NUMERIC(20,0));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."GEO_STRC_ELMT" ("GSE_ID" NUMERIC(20,0) NOT NULL, "GSE_GSET_ID" NUMERIC(20,0) NOT NULL, "GSE_GA_ID_PRNT" NUMERIC(20,0) NOT NULL, "GSE_GA_ID_CHLD" NUMERIC(20,0) NOT NULL);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."GEO_AREA" ("GA_ID" NUMERIC(20,0) NOT NULL, "GA_GAT_ID" NUMERIC(20,0) NOT NULL, "GA_NM" VARCHAR(30) NOT NULL, "GA_ABRV_NM" VARCHAR(5));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."REG" ("REG_ID" NUMERIC(20,0) NOT NULL, "REG_NM" VARCHAR(60) NOT NULL, "REG_DESC" VARCHAR(240), "REG_ABRV_NM" VARCHAR(15), "REG_CD" NUMERIC(8,0) NOT NULL, "REG_STRT_DT" TIMESTAMP NOT NULL, "REG_END_DT" TIMESTAMP NOT NULL DEFAULT 'xxxxxxFILTERED-TIMESTAMPxxxxx, "REG_EMPR_LIAB_IND" CHAR(1) NOT NULL DEFAULT 'N', "REG_PAYR_TAX_SURG_CRTF_IND" CHAR(1) NOT NULL DEFAULT 'N', "REG_PYT_ID" NUMERIC(20,0), "REG_GA_ID" NUMERIC(20,0) NOT NULL, "REG_GVA_ID" NUMERIC(20,0) NOT NULL, "REG_REGT_ID" NUMERIC(20,0) NOT NULL, "REG_PRNT_ID" NUMERIC(20,0));
+0 rows inserted/updated/deleted
+ij> -- This should not get ArrayIndexOutofBound exception
+SELECT 1
+FROM reg
+     JOIN geo_area jrsd ON (jrsd.ga_id = reg.reg_ga_id)
+     LEFT OUTER
+JOIN geo_strc_elmt gse ON (gse.gse_ga_id_chld =
+reg.reg_ga_id)
+     LEFT OUTER
+JOIN geo_area prnt ON (prnt.ga_id =
+reg.reg_ga_id)
+     JOIN govt_agcy gva ON (reg.reg_gva_id = gva.gva_id);
+1          
+-----------
+ij> DROP TABLE "APP"."GOVT_AGCY";
+0 rows inserted/updated/deleted
+ij> DROP TABLE "APP"."GEO_STRC_ELMT";
+0 rows inserted/updated/deleted
+ij> DROP TABLE "APP"."GEO_AREA";
+0 rows inserted/updated/deleted
+ij> DROP TABLE "APP"."REG";
+0 rows inserted/updated/deleted
+ij> -- reset autocommit
+autocommit on;
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table tt1;
+0 rows inserted/updated/deleted
+ij> drop table tt2;
+0 rows inserted/updated/deleted
+ij> drop table tt3;
+0 rows inserted/updated/deleted
+ij> drop table insert_test;
+0 rows inserted/updated/deleted
+ij> drop table empty_table;
+0 rows inserted/updated/deleted
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> drop table b;
+0 rows inserted/updated/deleted
+ij> drop table c;
+0 rows inserted/updated/deleted
+ij> drop table oj;
+0 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> 

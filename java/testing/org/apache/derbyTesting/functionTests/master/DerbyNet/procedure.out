@@ -1,0 +1,912 @@
+testNegative
+create procedure asdf() language java external name 'asdfasdf' parameter style java
+EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf' because it is not a dot separated list. The expected format is <full java path>.<method name> .
+create procedure asdf() language java external name 'asdfasdf.' parameter style java
+EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf.' because it is not a dot separated list. The expected format is <full java path>.<method name> .
+create procedure a23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789() language java external name 'asdf.asdf' parameter style java
+EXPECTED SQL Exception: (42622) The name 'A23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' is too long. The maximum length is '128'.
+create procedure asdf language java external name java.lang.Thread.currentThread parameter style java
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "language" at line 1, column 23.
+CREATE PROCEDURE ASSEMBLY_PARTS (IN ASSEMBLY_NUM INTEGER, OUT NUM_PARTS INTEGER, OUT COST DOUBLE) EXTERNAL NAME 'parts!assembly' DYNAMIC RESULT SETS 1 LANGUAGE C PARAMETER STYLE GENERAL
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "C" at line 1, column 161.
+create procedure sys.proc1() language java external name 'java.lang.System.gc' parameter style java
+EXPECTED SQL Exception: (42X62) 'CREATE PROCEDURE' is not allowed in the 'SYS' schema.
+create procedure noclass() language java external name 'asdf.asdf' parameter style java language java
+EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'LANGUAGE' clause are present.
+create procedure noclass() parameter style java language java external name 'asdf.asdf' parameter style java
+EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'PARAMETER STYLE' clause are present.
+create procedure noclass() external name 'asdf.xxxx' language java external name 'asdf.asdf' parameter style java
+EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'EXTERNAL NAME' clause are present.
+create procedure noclass() parameter style java language java external name 'asdf.asdf' parameter style derby_rs_collection
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "derby_rs_collection" at line 1, column 105.
+create procedure missing01()
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "<EOF>" at line 1, column 28.
+create procedure missing02() language java
+EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+create procedure missing03() language java parameter style java
+EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+create procedure missing04() language java external name 'foo.bar'
+EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+create procedure missing05() parameter style java
+EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+create procedure missing06() parameter style java external name 'foo.bar'
+EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+create procedure missing07() external name 'goo.bar'
+EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+create procedure missing08() dynamic result sets 1
+EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+create procedure NO_BLOB(IN P1 BLOB(3k)) language java parameter style java external name 'no.blob'
+EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
+create procedure NO_CLOB(IN P1 CLOB(3k)) language java parameter style java external name 'no.clob'
+EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
+create procedure NO_LVC(IN P1 LONG VARCHAR) language java parameter style java external name 'no.lvc'
+EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
+create procedure DUP_P1(IN FRED INT, OUT RON CHAR(10), IN FRED INT) language java parameter style java external name 'no.dup1'
+EXPECTED SQL Exception: (42734) Name 'FRED' specified in context 'DUP_P1' is not unique.
+create procedure D2.DUP_P2(IN "FreD" INT, OUT RON CHAR(10), IN "FreD" INT) language java parameter style java external name 'no.dup2'
+EXPECTED SQL Exception: (42734) Name 'FreD' specified in context 'D2.DUP_P2' is not unique.
+create procedure D3.DUP_P3(IN "FRED" INT, OUT RON CHAR(10), IN fred INT) language java parameter style java external name 'no.dup3'
+EXPECTED SQL Exception: (42734) Name 'FRED' specified in context 'D3.DUP_P3' is not unique.
+CALL APP.NSP(?, ?)
+EXPECTED SQL Exception: (42Y03) 'APP.NSP' is not recognized as a function or procedure.
+call syscs_util.syscs_set_database_property("foo", "bar")
+EXPECTED SQL Exception: (42X15) Column name 'foo' appears in a statement without a FROM list.
+testDelayedClassChecking
+call noclass()
+EXPECTED SQL Exception: (42X51) The class 'asdf' does not exist or is inaccessible. This can happen if the class is not public. SQLSTATE: XJ001: Java exception: 'asdf: java.lang.ClassNotFoundException'.
+call nomethod()
+EXPECTED SQL Exception: (42X50) No method was found to be able to match method call java.lang.Integer.asdf(), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+call notstatic()
+EXPECTED SQL Exception: (42X50) No method was found to be able to match method call java.lang.Integer.equals(), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+call notvoid()
+EXPECTED SQL Exception: (42X50) No method was found to be able to match method call void java.lang.Runtime.getRuntime(), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+testDuplicates
+create procedure PROCDUP() language java external name 'failAPP.fail0' parameter style java
+EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists.
+create procedure s1.PROCDUP() language java external name 'fails1.fail0' parameter style java
+EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists.
+create procedure s2.PROCDUP() language java external name 'fails2.fail0' parameter style java
+EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists.
+DEFINED PROCEDURES FOR PROCDUP
+  APP.PROCDUP AS okAPP.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+  S1.PROCDUP AS oks1.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+  S2.PROCDUP AS oks2.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR PROCDUP
+  APP.PROCDUP AS okAPP.ok0 type procedureNoResult
+  S1.PROCDUP AS oks1.ok0 type procedureNoResult
+  S2.PROCDUP AS oks2.ok0 type procedureNoResult
+-----
+create procedure S1.NOTYET() SPECIFIC fred language java external name 'failAPP.fail0' parameter style java
+EXPECTED SQL Exception: (0A000) Feature not implemented: SPECIFIC identifier.
+ambigiousMethods
+call AMBIGIOUS01(?, ?)
+EXPECTED SQL Exception: (42X73) Method resolution for signature org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious1(int, java.lang.String, [Ljava.sql.ResultSet;) was ambiguous. (No single maximally specific method.)
+call AMBIGIOUS02(?, ?)
+EXPECTED SQL Exception: (42X50) No method was found to be able to match method call org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(int, int, java.sql.ResultSet[]), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+zeroArgProcedures
+No ResultSet or update count returned
+No ResultSet or update count returned
+No ResultSet or update count returned
+FAIL - prepareStatement call za(?)
+No ResultSet or update count returned
+No ResultSet or update count returned
+DEFINED PROCEDURES FOR ZA
+  APP.ZA AS org.apache.derbyTesting.functionTests.util.ProcedureTest.zeroArg() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR ZA
+  APP.ZA AS org.apache.derbyTesting.functionTests.util.ProcedureTest.zeroArg type procedureNoResult
+-----
+DEFINED PROCEDURES FOR ZA
+DATABASE METATDATA PROCEDURES FOR ZA
+-----
+sqlProcedures()
+DEFINED PROCEDURES FOR IR%
+  APP.IR AS org.apache.derbyTesting.functionTests.util.ProcedureTest.insertRow(IN P1 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+  APP.IR2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.insertRow(IN P1 INTEGER,IN P2 CHAR(10)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR IR%
+  APP.IR AS org.apache.derbyTesting.functionTests.util.ProcedureTest.insertRow type procedureNoResult
+    procedureColumnIn P1 INTEGER
+  APP.IR2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.insertRow type procedureNoResult
+    procedureColumnIn P1 INTEGER
+    procedureColumnIn P2 CHAR
+-----
+CALL IR()
+EXPECTED SQL Exception: (42Y03) 'IR' is not recognized as a function or procedure.
+No ResultSet or update count returned
+No ResultSet or update count returned
+EXPECTED SQL Exception: The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression. SQLSTATE: 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
+No ResultSet or update count returned
+No ResultSet or update count returned
+No ResultSet or update count returned
+No ResultSet or update count returned
+No ResultSet or update count returned
+I |B              
+-----
+1 |int            
+2 |int            
+3 |int            
+7 |int            
+4 |4              
+5 |ir2            
+6 |'012345678     
+CALL IR2(2, 'no way')
+EXPECTED SQL Exception: (38000) The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression. SQLSTATE: 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
+CALL IR2(?, 'no way')
+EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
+CALL IR2(2, ?)
+EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
+dynamicResultSets - parameter style JAVA
+create procedure DRS(p1 int) parameter style JAVA READS SQL DATA dynamic result sets -1 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows'
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "-" at line 1, column 86.
+DEFINED PROCEDURES FOR DRS
+  APP.DRS AS org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows(IN P1 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA DYNAMIC RESULT SETS 1
+DATABASE METATDATA PROCEDURES FOR DRS
+  APP.DRS AS org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows type procedureNoResult
+    procedureColumnIn P1 INTEGER
+-----
+CALL DRS()
+EXPECTED SQL Exception: (42Y03) 'DRS' is not recognized as a function or procedure.
+CALL DRS(?,?)
+EXPECTED SQL Exception: (42Y03) 'DRS' is not recognized as a function or procedure.
+I |B              
+-----
+3 |int            
+DEFINED PROCEDURES FOR DRS2
+  APP.DRS2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows(IN P1 INTEGER,IN P2 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA DYNAMIC RESULT SETS 2
+DATABASE METATDATA PROCEDURES FOR DRS2
+  APP.DRS2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows type procedureNoResult
+    procedureColumnIn P1 INTEGER
+    procedureColumnIn P2 INTEGER
+-----
+I |B              
+-----
+2 |int            
+I |B              
+-----
+6 |'012345678     
+7 |int            
+I |B              
+-----
+2 |int            
+I |B              
+-----
+2 |int            
+I |B              
+-----
+I |B              
+-----
+2 |int            
+I |B              
+-----
+6 |'012345678     
+7 |int            
+CALL IRDRS(?)
+EXPECTED SQL Exception: (42X50) No method was found to be able to match method call org.apache.derbyTesting.functionTests.util.ProcedureTest.missingDynamicParameter(int, java.sql.ResultSet[]), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+CALL rsi(?)
+EXPECTED SQL Exception: (42X50) No method was found to be able to match method call org.apache.derbyTesting.functionTests.util.ProcedureTest.badDynamicParameter(int, java.sql.ResultSet[]), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+no dynamic result sets
+No ResultSet or update count returned
+Testing too many result sets
+... too many result sets
+I |B              
+-----
+2 |int            
+... one additional closed result set
+I |B              
+-----
+2 |int            
+Stored Procedure w/ CLOB in result set.
+C                             
+-----
+yayorsomething                
+yayorsomething2               
+1          
+-----
+2          
+C                             
+-----
+yayorsomething                
+yayorsomething2               
+Stored Procedure w/ BLOB in result set.
+B                                                           
+-----
+003100300031003000310030003000300031003100300031            
+003100300031003000310030003000300031003100300031            
+parameterTypes
+DEFINED PROCEDURES FOR PT1
+  APP.PT1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.parameter1(IN A INTEGER,IN B CHAR(10),IN C VARCHAR(20)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 1
+DATABASE METATDATA PROCEDURES FOR PT1
+  APP.PT1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.parameter1 type procedureNoResult
+    procedureColumnIn A INTEGER
+    procedureColumnIn B CHAR
+    procedureColumnIn C VARCHAR
+-----
+A |B |3 |C |5          
+-----
+20 |abc |10 |efgh |4          
+A |B |3 |C |5          
+-----
+30 |abc |10 |efgh |6          
+A |B |3 |C |5          
+-----
+40 |abc |10 |efgh |20         
+A |B |3 |C |5          
+-----
+50 |0123456789 |10 |efgh |6          
+DEFINED PROCEDURES FOR PT2
+  APP.PT2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.parameter2(IN A INTEGER,IN B DECIMAL(4,0),IN C DECIMAL(7,3)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 1
+DATABASE METATDATA PROCEDURES FOR PT2
+  APP.PT2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.parameter2 type procedureNoResult
+    procedureColumnIn A INTEGER
+    procedureColumnIn B DECIMAL
+    procedureColumnIn C DECIMAL
+-----
+A |B |C                   
+-----
+60 |34 |54.100              
+A |B |C                   
+-----
+70 |831 |45.700              
+EXPECTED SQL Exception: BigDecimal conversion exception [ibm][db2][jcc][converters] Overflow occurred during numeric data type conversion of "10243".. See attached Throwable.
+A |B |C                   
+-----
+80 |993 |1234.567            
+DEFINED PROCEDURES FOR PTSMALLINT%
+  APP.PTSMALLINT2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.pSMALLINT(IN P_IN SMALLINT,INOUT P_INOUT SMALLINT,OUT P_OUT SMALLINT) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+DATABASE METATDATA PROCEDURES FOR PTSMALLINT%
+  APP.PTSMALLINT2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.pSMALLINT type procedureNoResult
+    procedureColumnIn P_IN SMALLINT
+    procedureColumnInOut P_INOUT SMALLINT
+    procedureColumnOut P_OUT SMALLINT
+-----
+EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
+EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
+p_inout 9 p_out 6
+p_inout 9 null?false p_out 6 null?false
+p_inout 9 null?false p_out 6 null?false
+outparams
+DEFINED PROCEDURES FOR OP1
+  APP.OP1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.outparams1(OUT A INTEGER,IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR OP1
+  APP.OP1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.outparams1 type procedureNoResult
+    procedureColumnOut A INTEGER
+    procedureColumnIn B INTEGER
+-----
+No ResultSet or update count returned
+OP1 14 null ? false
+DEFINED PROCEDURES FOR OP2
+  APP.OP2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams2(INOUT A INTEGER,IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR OP2
+  APP.OP2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams2 type procedureNoResult
+    procedureColumnInOut A INTEGER
+    procedureColumnIn B INTEGER
+-----
+No ResultSet or update count returned
+OP2 17 null ? false
+DEFINED PROCEDURES FOR OP3
+  APP.OP3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR OP3
+  APP.OP3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3 type procedureNoResult
+    procedureColumnInOut A CHAR
+    procedureColumnIn B INTEGER
+-----
+No ResultSet or update count returned
+OP3 >nad       < null ? false
+DEFINED PROCEDURES FOR OP4
+  APP.OP4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams4(OUT A DECIMAL(4,2),IN B VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR OP4
+  APP.OP4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams4 type procedureNoResult
+    procedureColumnOut A DECIMAL
+    procedureColumnIn B VARCHAR
+-----
+No ResultSet or update count returned
+OP4 null >null< null ? true
+No ResultSet or update count returned
+OP4 14 >31.00< null ? false
+No ResultSet or update count returned
+OP4 11.3 >28.30< null ? false
+No ResultSet or update count returned
+OP4 39.345 >56.34< null ? false
+EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2).
+No ResultSet or update count returned
+OP4 49.345 >66.34< null ? false
+EXPECTED SQL Exception: Invalid argument: parameter index 2 is not an OUT or INOUT parameter.
+EXPECTED SQL Exception: (<NULL>) Invalid operation: parameter 1 not set or registered
+DEFINED PROCEDURES FOR OP4INOUT
+  APP.OP4INOUT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams4(INOUT A DECIMAL(4,2),IN B VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR OP4INOUT
+  APP.OP4INOUT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams4 type procedureNoResult
+    procedureColumnInOut A DECIMAL
+    procedureColumnIn B VARCHAR
+-----
+No ResultSet or update count returned
+OP4INOUT null >null< null ? true
+No ResultSet or update count returned
+OP4INOUT null(2) >null< null ? true
+No ResultSet or update count returned
+OP4INOUT 14+23.5 >37.50< null ? false
+No ResultSet or update count returned
+OP4INOUT 9+23.505 >32.50< null ? false
+EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2).
+EXPECTED SQL Exception: BigDecimal conversion exception [ibm][db2][jcc][converters] Overflow occurred during numeric data type conversion of "102.33".. See attached Throwable.
+EXPECTED SQL Exception: (<NULL>) Invalid operation: parameter 1 not set or registered
+SQL Control
+CREATE PROCEDURE SQLC.SQLCONTROL1_0 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128))  PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl'
+CREATE PROCEDURE SQLC.SQLCONTROL2_0 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128))  PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2'
+CREATE PROCEDURE SQLC.SQLCONTROL3_0 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128))  PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3'
+CREATE PROCEDURE SQLC.SQLCONTROL4_0 (IN SQLC INTEGER, OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128), OUT E8 VARCHAR(128))  PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4'
+CREATE PROCEDURE SQLC.SQLCONTROL1_1 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) NO SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl'
+CREATE PROCEDURE SQLC.SQLCONTROL2_1 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) NO SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2'
+CREATE PROCEDURE SQLC.SQLCONTROL3_1 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) NO SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3'
+CREATE PROCEDURE SQLC.SQLCONTROL4_1 (IN SQLC INTEGER, OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128), OUT E8 VARCHAR(128)) NO SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4'
+CREATE PROCEDURE SQLC.SQLCONTROL1_2 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) CONTAINS SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl'
+CREATE PROCEDURE SQLC.SQLCONTROL2_2 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) CONTAINS SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2'
+CREATE PROCEDURE SQLC.SQLCONTROL3_2 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) CONTAINS SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3'
+CREATE PROCEDURE SQLC.SQLCONTROL4_2 (IN SQLC INTEGER, OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128), OUT E8 VARCHAR(128)) CONTAINS SQL PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4'
+CREATE PROCEDURE SQLC.SQLCONTROL1_3 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) READS SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl'
+CREATE PROCEDURE SQLC.SQLCONTROL2_3 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) READS SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2'
+CREATE PROCEDURE SQLC.SQLCONTROL3_3 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) READS SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3'
+CREATE PROCEDURE SQLC.SQLCONTROL4_3 (IN SQLC INTEGER, OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128), OUT E8 VARCHAR(128)) READS SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4'
+CREATE PROCEDURE SQLC.SQLCONTROL1_4 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) MODIFIES SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl'
+CREATE PROCEDURE SQLC.SQLCONTROL2_4 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) MODIFIES SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2'
+CREATE PROCEDURE SQLC.SQLCONTROL3_4 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) MODIFIES SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3'
+CREATE PROCEDURE SQLC.SQLCONTROL4_4 (IN SQLC INTEGER, OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128), OUT E8 VARCHAR(128)) MODIFIES SQL DATA PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4'
+DEFINED PROCEDURES FOR SQLCONTROL1_%
+  SQLC.SQLCONTROL1_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+  SQLC.SQLCONTROL1_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  SQLC.SQLCONTROL1_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL
+  SQLC.SQLCONTROL1_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
+  SQLC.SQLCONTROL1_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR SQLCONTROL1_%
+  SQLC.SQLCONTROL1_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL1_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL1_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL1_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL1_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+-----
+DEFINED PROCEDURES FOR SQLCONTROL2_%
+  SQLC.SQLCONTROL2_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+  SQLC.SQLCONTROL2_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  SQLC.SQLCONTROL2_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL
+  SQLC.SQLCONTROL2_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
+  SQLC.SQLCONTROL2_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR SQLCONTROL2_%
+  SQLC.SQLCONTROL2_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL2_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL2_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL2_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL2_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+-----
+DEFINED PROCEDURES FOR SQLCONTROL3_%
+  SQLC.SQLCONTROL3_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+  SQLC.SQLCONTROL3_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  SQLC.SQLCONTROL3_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL
+  SQLC.SQLCONTROL3_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
+  SQLC.SQLCONTROL3_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR SQLCONTROL3_%
+  SQLC.SQLCONTROL3_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL3_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL3_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL3_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+  SQLC.SQLCONTROL3_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl3 type procedureNoResult
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+-----
+DEFINED PROCEDURES FOR SQLCONTROL4_%
+  SQLC.SQLCONTROL4_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4(IN SQLC INTEGER,OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128),OUT E8 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+  SQLC.SQLCONTROL4_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4(IN SQLC INTEGER,OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128),OUT E8 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  SQLC.SQLCONTROL4_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4(IN SQLC INTEGER,OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128),OUT E8 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL
+  SQLC.SQLCONTROL4_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4(IN SQLC INTEGER,OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128),OUT E8 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
+  SQLC.SQLCONTROL4_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4(IN SQLC INTEGER,OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128),OUT E8 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+DATABASE METATDATA PROCEDURES FOR SQLCONTROL4_%
+  SQLC.SQLCONTROL4_0 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4 type procedureNoResult
+    procedureColumnIn SQLC INTEGER
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+    procedureColumnOut E8 VARCHAR
+  SQLC.SQLCONTROL4_1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4 type procedureNoResult
+    procedureColumnIn SQLC INTEGER
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+    procedureColumnOut E8 VARCHAR
+  SQLC.SQLCONTROL4_2 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4 type procedureNoResult
+    procedureColumnIn SQLC INTEGER
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+    procedureColumnOut E8 VARCHAR
+  SQLC.SQLCONTROL4_3 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4 type procedureNoResult
+    procedureColumnIn SQLC INTEGER
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+    procedureColumnOut E8 VARCHAR
+  SQLC.SQLCONTROL4_4 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl4 type procedureNoResult
+    procedureColumnIn SQLC INTEGER
+    procedureColumnOut E1 VARCHAR
+    procedureColumnOut E2 VARCHAR
+    procedureColumnOut E3 VARCHAR
+    procedureColumnOut E4 VARCHAR
+    procedureColumnOut E5 VARCHAR
+    procedureColumnOut E6 VARCHAR
+    procedureColumnOut E7 VARCHAR
+    procedureColumnOut E8 VARCHAR
+-----
+** SQL ** DEFAULT (MODIFIES SQL DATA)
+    CREATE TABLE SQ-UPDATE 0-EXECUTE OK
+    ALTER TABLE SQL-UPDATE 0-EXECUTE OK
+    INSERT INTO SQL-UPDATE 1-EXECUTE OK
+    UPDATE SQLC.SQL-UPDATE 2-EXECUTE OK
+    SELECT * FROM S- ROW(15)- ROW(12)-EXECUTE OK
+    DELETE FROM SQL-UPDATE 2-EXECUTE OK
+    DROP TABLE SQLC-UPDATE 0-EXECUTE OK
+    CREATE VIEW SQL-42X05
+    DROP VIEW SQLCO-X0X05
+    LOCK TABLE SQLC-42X05
+    VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+    SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+    CREATE SCHEMA S-UPDATE 0-EXECUTE OK
+    DROP SCHEMA SQL-UPDATE 0-EXECUTE OK
+    IBM CS FEATURE
+    IBM CS FEATURE
+    SET ISOLATION C-UPDATE 0-EXECUTE OK
+    SET RUNTIMESTAT-42X01
+    SET STATISTICS -42X01
+    VALUES 1- ROW(1)-EXECUTE OK
+    VALUES 1- ROW(1)-EXECUTE OK
+** SQL ** NO SQL
+    CREATE TABLE SQ-38001
+    ALTER TABLE SQL-42Y55
+    INSERT INTO SQL-42X05
+    UPDATE SQLC.SQL-42X05
+    SELECT * FROM S-42X05
+    DELETE FROM SQL-42X05
+    DROP TABLE SQLC-42Y55
+    CREATE VIEW SQL-42X05
+    DROP VIEW SQLCO-38001
+    LOCK TABLE SQLC-42X05
+    VALUES 1,2,3-38001
+    SET SCHEMA SQLC-38001
+    CREATE SCHEMA S-38001
+    DROP SCHEMA SQL-38001
+    IBM CS FEATURE
+    IBM CS FEATURE
+    SET ISOLATION C-38001
+    SET RUNTIMESTAT-42X01
+    SET STATISTICS -42X01
+    VALUES 1-38001
+    VALUES 1-38001
+** SQL ** CONTAINS SQL
+    CREATE TABLE SQ-38002
+    ALTER TABLE SQL-42Y55
+    INSERT INTO SQL-42X05
+    UPDATE SQLC.SQL-42X05
+    SELECT * FROM S-42X05
+    DELETE FROM SQL-42X05
+    DROP TABLE SQLC-42Y55
+    CREATE VIEW SQL-42X05
+    DROP VIEW SQLCO-38002
+    LOCK TABLE SQLC-42X05
+    VALUES 1,2,3-38004
+    SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+    CREATE SCHEMA S-38002
+    DROP SCHEMA SQL-38002
+    IBM CS FEATURE
+    IBM CS FEATURE
+    SET ISOLATION C-UPDATE 0-EXECUTE OK
+    SET RUNTIMESTAT-42X01
+    SET STATISTICS -42X01
+    VALUES 1-38004
+    VALUES 1-38004
+** SQL ** READS SQL DATA
+    CREATE TABLE SQ-38002
+    ALTER TABLE SQL-42Y55
+    INSERT INTO SQL-42X05
+    UPDATE SQLC.SQL-42X05
+    SELECT * FROM S-42X05
+    DELETE FROM SQL-42X05
+    DROP TABLE SQLC-42Y55
+    CREATE VIEW SQL-42X05
+    DROP VIEW SQLCO-38002
+    LOCK TABLE SQLC-42X05
+    VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+    SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+    CREATE SCHEMA S-38002
+    DROP SCHEMA SQL-38002
+    IBM CS FEATURE
+    IBM CS FEATURE
+    SET ISOLATION C-UPDATE 0-EXECUTE OK
+    SET RUNTIMESTAT-42X01
+    SET STATISTICS -42X01
+    VALUES 1- ROW(1)-EXECUTE OK
+    VALUES 1- ROW(1)-EXECUTE OK
+** SQL ** MODIFIES SQL DATA
+    CREATE TABLE SQ-UPDATE 0-EXECUTE OK
+    ALTER TABLE SQL-42Y55
+    INSERT INTO SQL-42X05
+    UPDATE SQLC.SQL-42X05
+    SELECT * FROM S-42X05
+    DELETE FROM SQL-42X05
+    DROP TABLE SQLC-42Y55
+    CREATE VIEW SQL-42X05
+    DROP VIEW SQLCO-X0X05
+    LOCK TABLE SQLC-42X05
+    VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+    SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+    CREATE SCHEMA S-UPDATE 0-EXECUTE OK
+    DROP SCHEMA SQL-UPDATE 0-EXECUTE OK
+    IBM CS FEATURE
+    IBM CS FEATURE
+    SET ISOLATION C-UPDATE 0-EXECUTE OK
+    SET RUNTIMESTAT-42X01
+    SET STATISTICS -42X01
+    VALUES 1- ROW(1)-EXECUTE OK
+    VALUES 1- ROW(1)-EXECUTE OK
+CALL ** DEFAULT (MODIFIES SQL DATA)
+    CALLLING DEFAULT (MODIFIES SQL DATA)
+         CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-UPDATE 0-EXECUTE OK
+         DROP VIEW SQLCO-UPDATE 0-EXECUTE OK
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-UPDATE 0-EXECUTE OK
+         DROP SCHEMA SQL-UPDATE 0-EXECUTE OK
+    CALLLING NO SQL
+         CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38001
+         DROP VIEW SQLCO-38001
+         LOCK TABLE SQLC-38001
+         VALUES 1,2,3-38001
+         SET SCHEMA SQLC-38001
+         CREATE SCHEMA S-38001
+         DROP SCHEMA SQL-38001
+    CALLLING CONTAINS SQL
+         CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38002
+         DROP VIEW SQLCO-38002
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3-38004
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-38002
+         DROP SCHEMA SQL-38002
+    CALLLING READS SQL DATA
+         CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38002
+         DROP VIEW SQLCO-38002
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-38002
+         DROP SCHEMA SQL-38002
+    CALLLING MODIFIES SQL DATA
+         CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-UPDATE 0-EXECUTE OK
+         DROP VIEW SQLCO-UPDATE 0-EXECUTE OK
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-UPDATE 0-EXECUTE OK
+         DROP SCHEMA SQL-UPDATE 0-EXECUTE OK
+CALL ** NO SQL
+    CALLLING DEFAULT (MODIFIES SQL DATA)
+         CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38001
+    CALLLING NO SQL
+         CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38001
+    CALLLING CONTAINS SQL
+         CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38001
+    CALLLING READS SQL DATA
+         CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38001
+    CALLLING MODIFIES SQL DATA
+         CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38001
+CALL ** CONTAINS SQL
+    CALLLING DEFAULT (MODIFIES SQL DATA)
+         CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38002
+    CALLLING NO SQL
+         CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38001
+         DROP VIEW SQLCO-38001
+         LOCK TABLE SQLC-38001
+         VALUES 1,2,3-38001
+         SET SCHEMA SQLC-38001
+         CREATE SCHEMA S-38001
+         DROP SCHEMA SQL-38001
+    CALLLING CONTAINS SQL
+         CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38002
+         DROP VIEW SQLCO-38002
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3-38004
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-38002
+         DROP SCHEMA SQL-38002
+    CALLLING READS SQL DATA
+         CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38004
+    CALLLING MODIFIES SQL DATA
+         CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38002
+CALL ** READS SQL DATA
+    CALLLING DEFAULT (MODIFIES SQL DATA)
+         CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38002
+    CALLLING NO SQL
+         CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38001
+         DROP VIEW SQLCO-38001
+         LOCK TABLE SQLC-38001
+         VALUES 1,2,3-38001
+         SET SCHEMA SQLC-38001
+         CREATE SCHEMA S-38001
+         DROP SCHEMA SQL-38001
+    CALLLING CONTAINS SQL
+         CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38002
+         DROP VIEW SQLCO-38002
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3-38004
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-38002
+         DROP SCHEMA SQL-38002
+    CALLLING READS SQL DATA
+         CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38002
+         DROP VIEW SQLCO-38002
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-38002
+         DROP SCHEMA SQL-38002
+    CALLLING MODIFIES SQL DATA
+         CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) 
+         STATE-38002
+CALL ** MODIFIES SQL DATA
+    CALLLING DEFAULT (MODIFIES SQL DATA)
+         CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-UPDATE 0-EXECUTE OK
+         DROP VIEW SQLCO-UPDATE 0-EXECUTE OK
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-UPDATE 0-EXECUTE OK
+         DROP SCHEMA SQL-UPDATE 0-EXECUTE OK
+    CALLLING NO SQL
+         CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38001
+         DROP VIEW SQLCO-38001
+         LOCK TABLE SQLC-38001
+         VALUES 1,2,3-38001
+         SET SCHEMA SQLC-38001
+         CREATE SCHEMA S-38001
+         DROP SCHEMA SQL-38001
+    CALLLING CONTAINS SQL
+         CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38002
+         DROP VIEW SQLCO-38002
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3-38004
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-38002
+         DROP SCHEMA SQL-38002
+    CALLLING READS SQL DATA
+         CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-38002
+         DROP VIEW SQLCO-38002
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-38002
+         DROP SCHEMA SQL-38002
+    CALLLING MODIFIES SQL DATA
+         CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) 
+         CREATE VIEW SQL-UPDATE 0-EXECUTE OK
+         DROP VIEW SQLCO-UPDATE 0-EXECUTE OK
+         LOCK TABLE SQLC-UPDATE 0-EXECUTE OK
+         VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK
+         SET SCHEMA SQLC-UPDATE 0-EXECUTE OK
+         CREATE SCHEMA S-UPDATE 0-EXECUTE OK
+         DROP SCHEMA SQL-UPDATE 0-EXECUTE OK
+CALL SQLCONTROL3_0 (?, ?, ?, ?, ?, ?, ?)
+EXPECTED SQL Exception: (07004) Parameter 1 is an OUT procedure parameter and must be registered with CallableStatement.registerOutParameter before execution.
+literals
+DEFINED PROCEDURES FOR TY_%
+  LITT.TY_BIGINT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 BIGINT,OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  LITT.TY_CHAR AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 CHAR(10),OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  LITT.TY_DECIMAL AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 DECIMAL(5,2),OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  LITT.TY_DOUBLE AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 DOUBLE,OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  LITT.TY_INTEGER AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 INTEGER,OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  LITT.TY_REAL AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 REAL,OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  LITT.TY_SMALLINT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 SMALLINT,OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+  LITT.TY_VARCHAR AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 VARCHAR(10),OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+DATABASE METATDATA PROCEDURES FOR TY_%
+  LITT.TY_BIGINT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 BIGINT
+    procedureColumnOut P2 VARCHAR
+  LITT.TY_CHAR AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 CHAR
+    procedureColumnOut P2 VARCHAR
+  LITT.TY_DECIMAL AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 DECIMAL
+    procedureColumnOut P2 VARCHAR
+  LITT.TY_DOUBLE AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 DOUBLE
+    procedureColumnOut P2 VARCHAR
+  LITT.TY_INTEGER AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 INTEGER
+    procedureColumnOut P2 VARCHAR
+  LITT.TY_REAL AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 REAL
+    procedureColumnOut P2 VARCHAR
+  LITT.TY_SMALLINT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 SMALLINT
+    procedureColumnOut P2 VARCHAR
+  LITT.TY_VARCHAR AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest type procedureNoResult
+    procedureColumnIn P1 VARCHAR
+    procedureColumnOut P2 VARCHAR
+-----
+CALL LITT.TY_SMALLINT (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
+CALL LITT.TY_INTEGER (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
+CALL LITT.TY_BIGINT (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'long'.
+CALL LITT.TY_REAL (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'float'.
+CALL LITT.TY_DOUBLE (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
+CALL LITT.TY_DECIMAL (null, ?)=>NULL<
+CALL LITT.TY_CHAR (null, ?)=>NULL<
+CALL LITT.TY_VARCHAR (null, ?)=>NULL<
+CALL LITT.TY_SMALLINT (12, ?)=>12<
+CALL LITT.TY_INTEGER (12, ?)=>12<
+CALL LITT.TY_BIGINT (12, ?)=>12<
+CALL LITT.TY_REAL (12, ?)=>12.0<
+CALL LITT.TY_DOUBLE (12, ?)=>12.0<
+CALL LITT.TY_DECIMAL (12, ?)=>12.00<
+CALL LITT.TY_CHAR (12, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'INTEGER'. 
+CALL LITT.TY_VARCHAR (12, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'INTEGER'. 
+CALL LITT.TY_SMALLINT (23.43e1, ?)=>234<
+CALL LITT.TY_INTEGER (23.43e1, ?)=>234<
+CALL LITT.TY_BIGINT (23.43e1, ?)=>234<
+CALL LITT.TY_REAL (23.43e1, ?)=>234.3<
+CALL LITT.TY_DOUBLE (23.43e1, ?)=>234.3<
+CALL LITT.TY_DECIMAL (23.43e1, ?)=>234.30<
+CALL LITT.TY_CHAR (23.43e1, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'DOUBLE'. 
+CALL LITT.TY_VARCHAR (23.43e1, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'DOUBLE'. 
+CALL LITT.TY_SMALLINT (176.3, ?)=>176<
+CALL LITT.TY_INTEGER (176.3, ?)=>176<
+CALL LITT.TY_BIGINT (176.3, ?)=>176<
+CALL LITT.TY_REAL (176.3, ?)=>176.3<
+CALL LITT.TY_DOUBLE (176.3, ?)=>176.3<
+CALL LITT.TY_DECIMAL (176.3, ?)=>176.30<
+CALL LITT.TY_CHAR (176.3, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'DECIMAL'. 
+CALL LITT.TY_VARCHAR (176.3, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'DECIMAL'. 
+CALL LITT.TY_SMALLINT ('12.34', ?) (42821) Columns of type 'SMALLINT' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_INTEGER ('12.34', ?) (42821) Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_BIGINT ('12.34', ?) (42821) Columns of type 'BIGINT' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_REAL ('12.34', ?) (42821) Columns of type 'REAL' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_DOUBLE ('12.34', ?) (42821) Columns of type 'DOUBLE' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_DECIMAL ('12.34', ?) (42821) Columns of type 'DECIMAL' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_CHAR ('12.34', ?)=>12.34     <
+CALL LITT.TY_VARCHAR ('12.34', ?)=>12.34<

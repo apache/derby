@@ -1,0 +1,191 @@
+ij> -- tests for column defaults
+-- negative
+-- ? in default
+create table neg(c1 int default ?);
+ERROR 42X01: Syntax error: Encountered "?" at line 6, column 33.
+ij> -- column reference in default
+create table neg(c1 int, c2 int default c1);
+ERROR 42X01: Syntax error: Encountered "c1" at line 2, column 41.
+ij> -- subquery in default
+create table neg(c1 int default (values 1));
+ERROR 42X01: Syntax error: Encountered "(" at line 2, column 33.
+ij> -- type incompatibility at compile time
+create table neg(c1 date default 1);
+ERROR 42821: Columns of type 'DATE' cannot hold values of type 'INTEGER'. 
+ij> -- type incompatibility at execution time
+-- bug 5585 - should fail at create table statement
+-- because the default value '1' is not valid
+create table neg(c1 int, c2 date default '1');
+0 rows inserted/updated/deleted
+ij> insert into neg (c1) values 1;
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> drop table neg;
+0 rows inserted/updated/deleted
+ij> -- bug 5203 - built-in functions are not be allowed in a constantExpression
+-- because DB2 UDB returns SQLSTATE 42894
+CREATE FUNCTION ASDF (DATA DOUBLE) RETURNS DOUBLE EXTERNAL NAME 'java.lang.Math.sin' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> create table neg(c1 int default asdf(0));
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'C1'.
+ij> drop table neg;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'NEG' because it does not exist.
+ij> -- DEFAULT only valid in VALUES within an insert
+values default;
+ERROR 42Y85: The DEFAULT keyword is only allowed in a VALUES clause when the VALUES clause appears within an INSERT statement.
+ij> values 1, default;
+ERROR 42Y85: The DEFAULT keyword is only allowed in a VALUES clause when the VALUES clause appears within an INSERT statement.
+ij> -- alter table modify default
+create table neg(c1 date);
+0 rows inserted/updated/deleted
+ij> alter table neg modify x default null;
+ERROR 42X01: Syntax error: Encountered "modify" at line 1, column 17.
+ij> alter table neg add column x date default 1;
+ERROR 42821: Columns of type 'DATE' cannot hold values of type 'INTEGER'. 
+ij> -- bug 5585 - should fail at alter table statement
+-- because the default value '1' is not valid
+alter table neg add column x date default '1';
+0 rows inserted/updated/deleted
+ij> insert into neg (c1) values default;
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> drop table neg;
+0 rows inserted/updated/deleted
+ij> -- too many values in values clause
+create table neg(c1 int default 10);
+0 rows inserted/updated/deleted
+ij> insert into neg values (1, default);
+ERROR 42X06: Too many result columns specified for table 'APP.NEG'.
+ij> insert into neg values (default, 1);
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> drop table neg;
+0 rows inserted/updated/deleted
+ij> -- positive
+-- create tables
+create table t1(c1 int, c2 int with default 5, c3 date default current_date, c4 int);
+0 rows inserted/updated/deleted
+ij> -- verify that defaults work
+insert into t1 (c1) values 1;
+1 row inserted/updated/deleted
+ij> insert into t1 (c4) values 4;
+1 row inserted/updated/deleted
+ij> select c1, c2, c4 from t1;
+C1         |C2         |C4         
+-----------------------------------
+1          |5          |NULL       
+NULL       |5          |4          
+ij> select c1, c2, c4 from t1 where c3 = current_date;
+C1         |C2         |C4         
+-----------------------------------
+1          |5          |NULL       
+NULL       |5          |4          
+ij> -- update
+-- default for column whose default is null
+update t1 set c1 = default;
+2 rows inserted/updated/deleted
+ij> select c1, c2, c4 from t1 where c3 = current_date;
+C1         |C2         |C4         
+-----------------------------------
+NULL       |5          |NULL       
+NULL       |5          |4          
+ij> -- default for column that has explicit default
+update t1 set c2 = 7;
+2 rows inserted/updated/deleted
+ij> select c2 from t1;
+C2         
+-----------
+7          
+7          
+ij> update t1 set c2 = default;
+2 rows inserted/updated/deleted
+ij> select c2 from t1;
+C2         
+-----------
+5          
+5          
+ij> -- insert default
+delete from t1;
+2 rows inserted/updated/deleted
+ij> insert into t1 values (5, default, '1999-09-09', default);
+1 row inserted/updated/deleted
+ij> insert into t1 values (default, 6, default, 5);
+1 row inserted/updated/deleted
+ij> insert into t1 values (default, 6, default, 5), (7, default, '1997-07-07', 3);
+2 rows inserted/updated/deleted
+ij> select c1, c2, c4 from t1 where c3 = current_date;
+C1         |C2         |C4         
+-----------------------------------
+NULL       |6          |5          
+NULL       |6          |5          
+ij> select c1, c2, c4 from t1 where c3 <> current_date;
+C1         |C2         |C4         
+-----------------------------------
+5          |5          |NULL       
+7          |5          |3          
+ij> delete from t1;
+4 rows inserted/updated/deleted
+ij> insert into t1 (c1, c3, c4) values (5, '1999-09-09', default);
+1 row inserted/updated/deleted
+ij> insert into t1 (c1, c3, c4) values (default, default, 5);
+1 row inserted/updated/deleted
+ij> insert into t1 (c1, c3, c4) values (default, default, default);
+1 row inserted/updated/deleted
+ij> insert into t1 (c1, c3, c4) values (default, default, 5), (7, '1997-07-07', 3);
+2 rows inserted/updated/deleted
+ij> select c1, c2, c4 from t1 where c3 = current_date;
+C1         |C2         |C4         
+-----------------------------------
+NULL       |5          |5          
+NULL       |5          |NULL       
+NULL       |5          |5          
+ij> select c1, c2, c4 from t1 where c3 <> current_date;
+C1         |C2         |C4         
+-----------------------------------
+5          |5          |NULL       
+7          |5          |3          
+ij> -- delimited identifiers
+-- this schema
+create table "x1" ("c1" int);
+0 rows inserted/updated/deleted
+ij> insert into "x1" values 1;
+1 row inserted/updated/deleted
+ij> alter table "x1" add column "c2" char(1) default 'x';
+0 rows inserted/updated/deleted
+ij> select * from "x1";
+c1         |c2  
+----------------
+1          |x   
+ij> -- another schema
+create schema "otherschema";
+0 rows inserted/updated/deleted
+ij> create table "otherschema"."y1" ("c11" int);
+0 rows inserted/updated/deleted
+ij> insert into "otherschema"."y1" values 2;
+1 row inserted/updated/deleted
+ij> alter table "otherschema"."y1" add column "c22" char(1) default 'y';
+0 rows inserted/updated/deleted
+ij> select * from "otherschema"."y1";
+c11        |c22 
+----------------
+2          |y   
+ij> -- bug 3433
+create table t7(c1 int default 10);
+0 rows inserted/updated/deleted
+ij> insert into t7 values (default);
+1 row inserted/updated/deleted
+ij> select * from t7;
+C1         
+-----------
+10         
+ij> -- clean up
+drop function asdf;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t7;
+0 rows inserted/updated/deleted
+ij> drop table "x1";
+0 rows inserted/updated/deleted
+ij> drop table "otherschema"."y1";
+0 rows inserted/updated/deleted
+ij> drop schema "otherschema" restrict;
+0 rows inserted/updated/deleted
+ij> 

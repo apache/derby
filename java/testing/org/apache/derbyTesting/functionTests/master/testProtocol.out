@@ -1,0 +1,283 @@
+Test invalid DSS - wrong length
+PASSED
+Test invalid DSS - missing D0 
+PASSED
+Test invalid DSS - REPLY DSS
+PASSED
+First codepoint not EXCSAT
+PASSED
+Test EXTNAM too long
+PASSED
+Test non null SPVNAM
+PASSED
+Test too big SRVNAM
+PASSED
+Test too big SRVRLSLV
+PASSED
+Test too big SRVCLSNM
+PASSED
+Repeated manager levels with different values
+PASSED
+Missing required SECMEC on ACCSEC
+PASSED
+ACCSEC doesn't follow EXCSAT
+PASSED
+Test trying security mechanism we don't support
+PASSED
+Test trying too big on SECMEC
+PASSED
+Test trying too small on SECMEC
+PASSED
+Test non null SECMGRNM
+PASSED
+Test missing RDBNAM on ACCSEC
+PASSED
+Test specifying encrypted security mechanism without a security token
+PASSED
+Test specifying unencrypted security mechanism with a security token
+PASSED
+Test SECCHK not following after ACCSEC
+PASSED
+Test doing two tries for security mechanism
+PASSED
+Test missing SECMEC on SECCHK
+PASSED
+Test different SECMEC on SECCHK than on ACCSEC
+PASSED
+Test invalid length for RDBNAM
+PASSED
+Test different RDBNAM on SECCHK than on ACCSEC
+PASSED
+Test security token on SECCHK when not required
+PASSED
+Test missing USERID on SECCHK
+PASSED
+Test missing PASSWORD on SECCHK
+PASSED
+Test ACCRDB not following SECCHK
+PASSED
+Test missing RDBACCCL from ACCRDB
+PASSED
+Test missing CRRTKN
+PASSED
+Test too small value for RDBACCCL
+PASSED
+Test too large value for RDBACCCL
+PASSED
+Test invalid value for RDBACCCL
+PASSED
+Test missing PRDID
+PASSED
+Test missing TYPDEFNAM
+PASSED
+Test missing TYPDEFOVR
+PASSED
+Test bad  TYPDEFNAM
+PASSED
+Test codepoint not allowed in TYPDEFOVR
+PASSED
+Test too small value for CCSIDSBC
+PASSED
+Test too large value for CCSIDSBC
+PASSED
+Test too small value for CCSIDMBC
+PASSED
+Test too large value for CCSIDMBC
+PASSED
+Test too small value for CCSIDDBC
+PASSED
+Test too large value for CCSIDDBC
+PASSED
+Test unsupported single byte code page
+PASSED
+Test unsupported  mixed byte code page
+PASSED
+Test unsupported double byte code page
+PASSED
+Test sending second EXCSAT
+PASSED
+Test sending second EXCSAT with same manager but different level
+PASSED
+Test invalid CRRTKN
+PASSED
+Test too big PRDID
+PASSED
+Test too big TYPDEFNAM
+PASSED
+Test invalid TYPDEFNAM
+PASSED
+Test too big RDBALWUPD
+PASSED
+Test invalid RDBALWUPD
+PASSED
+Test valid RDBALWUPD
+PASSED
+Test second valid RDBALWUPD
+PASSED
+Test too big PRTDTA
+PASSED
+Test for bad length for RDBNAM in PKGNAMCSN
+PASSED
+Test for bad length for PKGID in PKGNAMCSN
+PASSED
+Test for invalid codepoint on EXCSQLIMM
+PASSED
+Test for invalid TypDefNam in EXCSQLIMM objects
+PASSED
+Test for a changed TYPDEF in EXCSQLIMM objects
+PASSED
+Test for missing CCSID in TYPDEFOVR in EXCSQLIMM objects
+PASSED
+Test for invalid value for RDBCMTOK in EXCSQLIMM
+PASSED
+Test for valid value for RDBCMTOK in EXCSQLIMM
+PASSED
+Test for valid false value for RDBCMTOK in EXCSQLIMM
+PASSED
+Test that we only send one RDBUPRM per transaction
+PASSED
+Test for missing PKGNAMCSN on OPNQRY
+PASSED
+Test for missing QRYBLKSZ on OPNQRY
+PASSED
+Test for wrong PKGNAMCSN on OPNQRY
+PASSED
+Test for too small size for QRYBLKSZ on OPNQRY
+PASSED
+Test for too large size for QRYBLKSZ on OPNQRY
+PASSED
+Test for too small value for QRYBLKSZ on OPNQRY
+PASSED
+Test for too large value for QRYBLKSZ on OPNQRY
+PASSED
+Test invalid value for QRYBLKCTL on OPNQRY
+PASSED
+Test invalid codepoint for OPNQRY
+PASSED
+Test too small value for QRYROWSET codepoint on CNTQRY
+PASSED
+Test too large value for QRYROWSET codepoint on CNTQRY
+PASSED
+Test invalid value for QRYROWSET on OPNQRY
+PASSED
+Test too large value for QRYRFRTBL codepoint on CNTQRY
+PASSED
+Test invalid value for QRYRFRTBL codepoint on CNTQRY
+PASSED
+Test missing PKGNAMCSN on CNTQRY
+PASSED
+Test missing QRYBLKSZ on CNTQRY
+PASSED
+Test missing QRYINSID on CNTQRY
+PASSED
+Test too small value for QRYINSID codepoint on CNTQRY
+PASSED
+Test too large value for QRYINSID codepoint on CNTQRY
+PASSED
+Test too small value for QRYROWNBR codepoint on CNTQRY
+PASSED
+Test too large value for QRYROWNBR codepoint on CNTQRY
+PASSED
+Test invalid value for QRYROWSET on CNTQRY
+PASSED
+Test too large value for QRYSCRORN codepoint on CNTQRY
+PASSED
+Test invalid value for QRYSCRORN on CNTQRY
+PASSED
+Test invalid codepoint on CNTQRY
+PASSED
+Test invalid object codepoint on CNTQRY
+PASSED
+Test OUTOVR codepoint on CNTQRY
+PASSED
+Test too large value for QRYRELSCR codepoint on CNTQRY
+PASSED
+Test invalid value for QRYRELSCR codepoint on CNTQRY
+PASSED
+Test too large value for QRYROWSNS codepoint on CNTQRY
+PASSED
+Test invalid value for QRYROWSNS codepoint on CNTQRY
+PASSED
+Test too large value for QRYBLKRST codepoint on CNTQRY
+PASSED
+Test invalid value for QRYBLKRST codepoint on CNTQRY
+PASSED
+Test too large value for QRYRTNDTA codepoint on CNTQRY
+PASSED
+Test invalid value for QRYRTNDTA codepoint on CNTQRY
+PASSED
+Test invalid value for QRYRFRTBL codepoint on CNTQRY
+PASSED
+Test too small value for NBRROW codepoint on CNTQRY
+PASSED
+Test too large value for NBRROW codepoint on CNTQRY
+PASSED
+Test too small value for MAXBLKEXT codepoint on CNTQRY
+PASSED
+Test too large value for MAXBLKEXT codepoint on CNTQRY
+PASSED
+Test too large value for RTNEXTDTA codepoint on CNTQRY
+PASSED
+Test invalid value for RTNEXTDTA codepoint on CNTQRY
+PASSED
+Test missing QRYINSID from CLSQRY
+PASSED
+Test invalid PKGNAMCSN on CLSQRY
+PASSED
+Test closing an already closed statement
+Removing second close until JCC issue with sending double close is resolve
+PASSED
+Test for too large value for OUTEXP in EXCSQLSTT
+PASSED
+Test for invalid OUTEXP in EXCSQLSTT
+PASSED
+Test for too small value for NBRROW in EXCSQLSTT
+PASSED
+Test for too large value for NBRROW in EXCSQLSTT
+PASSED
+Test for invalid QRYBLKSZ in EXCSQLSTT
+PASSED
+Test for too small value for MAXRSLCNT in EXCSQLSTT
+PASSED
+Test for too large value for MAXRSLCNT in EXCSQLSTT
+PASSED
+Test for too small value for MAXBLKEXT in EXCSQLSTT
+PASSED
+Test for too large value for MAXBLKEXT in EXCSQLSTT
+PASSED
+Test for invalid value for RDBCMTOK in EXCSQLSTT
+PASSED
+Test for too large value for OUTOVROPT in EXCSQLSTT
+PASSED
+Test for invalid value for OUTOVROPT in EXCSQLSTT
+PASSED
+Test for invalid value for QRYROWSET in EXCSQLSTT
+PASSED
+Test for invalid codepoint in EXCSQLSTT
+PASSED
+Test for missing PKGNAMCSN in EXCSQLSTT
+PASSED
+Test for too large value for RTNSQLDA in PRPSQLSTT
+PASSED
+Test for invalid value for RTNSQLDA in PRPSQLSTT
+PASSED
+Test for too large value for TYPSQLDA in PRPSQLSTT
+PASSED
+Test for invalid value for TYPSQLDA in PRPSQLSTT
+PASSED
+Test for invalid codepoint in PRPSQLSTT
+PASSED
+Test for missing required SQLSTT in PRPSQLSTT
+PASSED
+Test for invalid SQLATTR in PRPSQLSTT
+PASSED
+Test for missing PKGNAMCSN in DSCSQLSTT
+PASSED
+Test for too large value for TYPSQLDA in DSCSQLSTT
+PASSED
+Test for invalid value for TYPSQLDA in DSCSQLSTT
+PASSED
+Test for invalid codepoint in DSCSQLSTT
+PASSED
+Test for non-existant prepared statement in DSCSQLSTT
+PASSED

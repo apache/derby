@@ -1,0 +1,6 @@
+--
+-- this script registers the various consistency checks for
+-- statement caching as simple aliases for ease of scripting
+--
+
+create view SC_CONTENTS as select CAST (SUBSTR (CAST (SQL_TEXT as char(200)), 1, 30) AS CHAR(30)) AS SQL_TEXT from new org.apache.derby.diag.StatementCache() as SCVD;

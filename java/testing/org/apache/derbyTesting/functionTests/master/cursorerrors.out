@@ -1,0 +1,236 @@
+ij> -- What happens when language exceptions are thrown on a next?
+-- NOTE: this test is dependent on no optimization, i.e., always getting
+-- the same access methods (table scans and join order matching the from list)
+-- create the tables
+create table t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int);
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into t1 values 1, 0, 2;
+3 rows inserted/updated/deleted
+ij> insert into t2 values 1, 0, 2;
+3 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- What happens on a fetch after a divide by 0 error?
+-- error in select list
+-- single table query
+get cursor c1 as 'select c1, c1/c1 from t1';
+ij> next c1;
+C1         |2          
+-----------------------
+1          |1          
+ij> -- divide by 0
+next c1;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c1;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c1;
+ij> -- join #1
+get cursor c2 as 
+	'select a.c1, b.c1, a.c1/a.c1 from t1 a, t1 b where a.c1 = b.c1';
+ij> next c2;
+C1         |C1         |3          
+-----------------------------------
+1          |1          |1          
+ij> -- divide by 0
+next c2;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c2;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c2;
+ij> -- join #2
+get cursor c3 as 
+	'select a.c1, b.c1, b.c1/a.c1 from t1 a, t1 b';
+ij> next c3;
+C1         |C1         |3          
+-----------------------------------
+1          |1          |1          
+ij> next c3;
+C1         |C1         |3          
+-----------------------------------
+1          |0          |0          
+ij> next c3;
+C1         |C1         |3          
+-----------------------------------
+1          |2          |2          
+ij> -- divide by 0
+next c3;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c3;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c3;
+ij> -- union all
+get cursor c4 as
+	'select c1, c1/c1 from t1 union all select c1, c1/c1 from t1';
+ij> next c4;
+C1         |2          
+-----------------------
+1          |1          
+ij> -- divide by 0 on left side
+next c4;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c4;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c4;
+ij> -- error in where clause
+-- single table
+get cursor c10 as 'select * from t1 where c1/c1 = 1';
+ij> -- (1)
+next c10;
+C1         
+-----------
+1          
+ij> -- divide by 0
+next c10;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c10;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c10;
+ij> -- join #1, error on open (1st row in left)
+-- (cursor will not exist after error on open)
+get cursor c12 as 'select * from t1 a, t1 b where a.c1 <> 1 and a.c1/a.c1 = 1';
+ERROR 22012: Attempt to divide by zero.
+ij> -- next should fail, since no cursor
+next c12;
+IJ ERROR: Unable to establish cursor
+ij> -- join #2, error on 2nd row on left
+get cursor c13 as 'select * from t1 a, t1 b where b.c1 = 1 and a.c1/a.c1 = 1';
+ij> -- (1, 1)
+next c13;
+C1         |C1         
+-----------------------
+1          |1          
+ij> -- divide by 0 from left
+next c13;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c13;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c13;
+ij> -- join #3, error on 1st row in right
+get cursor c14 as 'select * from t1 a, t1 b where b.c1 <> 1 and b.c1/b.c1 = 1';
+ij> -- divide by 0 from right
+next c14;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c14;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c14;
+ij> -- join #4, error on 2nd row in right
+get cursor c15 as 'select * from t1 a, t1 b where b.c1 <> 2 and b.c1/b.c1 = 1';
+ij> -- (1, 1)
+next c15;
+C1         |C1         
+-----------------------
+1          |1          
+ij> -- divide by 0 from right
+next c15;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c15;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c15;
+ij> -- union all
+get cursor c11 as 'select * from t1 where c1/c1 = 1 union all
+				   select * from t1 where c1/c1 = 1';
+ij> -- (1) from left
+next c11;
+C1         
+-----------
+1          
+ij> -- divide by 0 from left
+next c11;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c11;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c11;
+ij> -- error in join clause
+get cursor c5 as 'select * from t1, t2 where t1.c1/t2.c1 = 1';
+ij> -- (1, 1)
+next c5;
+C1         |C1         
+-----------------------
+1          |1          
+ij> -- (1, 0) -> divide by 0
+next c5;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c5;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c5;
+ij> -- error in subquery
+-- subquery in select list
+-- single table query
+get cursor c8 as 'select c1, (select c1/c1 from t2 where t1.c1 = c1) from t1';
+ij> -- (1, 1)
+next c8;
+C1         |2          
+-----------------------
+1          |1          
+ij> -- divide by 0
+next c8;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c8;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c8;
+ij> -- join
+get cursor c9 as 'select a.c1, (select c1/c1 from t2 where c1 = a.c1) from t1 a, t1 b
+				  where a.c1 = b.c1';
+ij> -- (1, 1)
+next c9;
+C1         |2          
+-----------------------
+1          |1          
+ij> -- divide by 0
+next c9;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c9;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c9;
+ij> -- subquery in where clause
+-- single table query
+get cursor c6 as 'select * from t1 
+				  where c1 = (select c1/c1 from t2 where t1.c1 = c1) or c1 = 2';
+ij> -- (1)
+next c6;
+C1         
+-----------
+1          
+ij> -- divide by 0
+next c6;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c6;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c6;
+ij> -- join
+get cursor c7 as 'select * from t1 a, t1 b
+				  where a.c1 = b.c1 and 
+						(a.c1 = (select c1/c1 from t2 where a.c1 = c1) or a.c1 = 2)';
+ij> -- (1, 1)
+next c7;
+C1         |C1         
+-----------------------
+1          |1          
+ij> -- divide by 0
+next c7;
+ERROR 22012: Attempt to divide by zero.
+ij> -- Verify that cursor closed on error
+next c7;
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> close c7;
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> 

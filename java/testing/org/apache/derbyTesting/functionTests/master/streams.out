@@ -1,0 +1,50 @@
+Test streams starting
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+Start testing
+setCharacterStream 8465 chars
+materialized insert: got reader stack level
+setCharacterStream 8465 chars
+materialized insert (for trigger): got reader stack level
+SUCCEED!! stack level as expected.
+setCharacterStream 8465 chars
+self ref foreign key insert(should not materialize): got reader stack level
+SUCCEED!! levels expected.
+setCharacterStream 8465 chars
+materialized for multiple row update: got reader stack level
+setCharacterStream 8465 chars
+single row update: got reader stack level
+SUCCEED!! single row update materialized stream.
+setCharacterStream 6417 chars
+setCharacterStream 5393 chars
+id = 3 longcol = aaaaabbbbbb
+id = 4 longcol = bbbbbb
+id = 2 longcol length = 5393 longcol = bbbbb...bbbbb
+id = 2 longcol length = 6417 longcol = bbbbb...bbbbb
+id = 1 longcol = ccccc
+number of rows ok
+setCharacterStream 5393 chars
+setCharacterStream 7441 chars
+t4 id = 4 t4 longcol length = 6 t5 id = 1 t5 longcol length = 6
+t4 id = 2 t4 longcol length = 5393 t5 id = 2 t5 longcol length = 5393
+Start testing long var binary
+setBinaryStream 8465 bytes
+non materialized insert: got reader stack level
+setBinaryStream 8465 bytes
+materialized insert (for trigger): got reader stack level
+SUCCEED, level difference expected.
+setBinaryStream 8465 bytes
+self ref foreign key insert(should not materialize): got reader stack level
+SUCCEED!! levels expected.
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+PASS: expected and got 0 rows
+teardown complete
+Test streams finished

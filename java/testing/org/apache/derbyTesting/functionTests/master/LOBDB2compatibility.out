@@ -1,0 +1,145 @@
+ij> connect 'jdbc:derby:jonas;create=true';
+ij(CONNECTION1)> ----- TEST TO RUN IN DB2 COMPATIBLITY MODE
+--
+create table t1(c11 int);
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> insert into t1 values(1);
+1 row inserted/updated/deleted
+ij(CONNECTION1)> -- equal tests are allowed only for BLOB==BLOB
+select c11 from t1 where cast(x'1111' as blob(5))=cast(x'1111' as blob(5));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))=cast(x'1111' as blob(7));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1110' as blob(5))=cast(x'1110' as blob(7));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))=cast(x'11100000' as blob(7));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))=cast(x'1110000000' as blob(7));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where x'11' = cast(x'11' as blob(1));
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'11' as blob(1)) = x'11';
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'11' as blob(1)) = cast(x'11' as blob(1));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where '1' = cast('1' as clob(1));
+ERROR 42818: Comparisons between 'CHAR' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('1' as clob(1)) = '1';
+ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('1' as clob(1)) = cast('1' as clob(1));
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where '1' = cast('1' as nclob(1));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('1' as nclob(1)) = '1';
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('1' as nclob(1)) = cast('1' as nclob(1));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> -- NCLOB is comparable with CLOB
+select c11 from t1 where cast('1' as nclob(10)) = cast('1' as clob(10));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('1' as clob(10)) = cast('1' as nclob(10));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> drop table b;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'B' because it does not exist.
+ij(CONNECTION1)> drop table c;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'C' because it does not exist.
+ij(CONNECTION1)> drop table n;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'N' because it does not exist.
+ij(CONNECTION1)> create table b(blob blob(3K));
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> create table c(clob clob(2M));
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> create table n(nclob nclob(1G));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> insert into b values(cast(X'0031' as blob(3K)));
+1 row inserted/updated/deleted
+ij(CONNECTION1)> insert into c values(cast('2' as clob(2M)));
+1 row inserted/updated/deleted
+ij(CONNECTION1)> insert into n values(cast('3' as nclob(1G)));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> insert into b values(cast(X'0031' as blob(3K)));
+1 row inserted/updated/deleted
+ij(CONNECTION1)> insert into c values(cast('2' as clob(2M)));
+1 row inserted/updated/deleted
+ij(CONNECTION1)> insert into n values(cast('3' as nclob(1G)));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> insert into b values(cast(X'0031' as blob(3K)));
+1 row inserted/updated/deleted
+ij(CONNECTION1)> insert into c values(cast('2' as clob(2M)));
+1 row inserted/updated/deleted
+ij(CONNECTION1)> insert into n values(cast('3' as nclob(1G)));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select blob from b;
+BLOB                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------
+0031                                                                                                                            
+0031                                                                                                                            
+0031                                                                                                                            
+ij(CONNECTION1)> select clob from c;
+CLOB                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------
+2                                                                                                                               
+2                                                                                                                               
+2                                                                                                                               
+ij(CONNECTION1)> select nclob from n;
+ERROR 42X05: Table 'N' does not exist.
+ij(CONNECTION1)> -- comparsion using tables
+select * from b as b1, b as b2 where b1.blob=b2.blob;
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select * from b as b1, b as b2 where b1.blob!=b2.blob;
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select * from b as b1, b as b2 where b1.blob=x'0001';
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported.
+ij(CONNECTION1)> select * from b as b1, b as b2 where x'0001'=b1.blob;
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ij(CONNECTION1)> select * from b as b1, b as b2 where x'0001'!=b1.blob;
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ij(CONNECTION1)> select * from b as b1, b as b2 where b1.blob=X'7575';
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported.
+ij(CONNECTION1)> select * from b as b1, b as b2 where X'7575'=b1.blob;
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c.clob from c where c.clob = '2';
+ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ij(CONNECTION1)> select n.nclob from n where n.nclob = '3';
+ERROR 42X05: Table 'N' does not exist.
+ij(CONNECTION1)> -- ORDER tests on LOB types (not allowed)
+select c11 from t1 where cast(x'1111' as blob(5))=cast(x'1111' as blob(5));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))!=cast(x'1111' as blob(5));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))<cast(x'1111' as blob(5));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))>cast(x'1111' as blob(7));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))<=cast(x'1110' as blob(7));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast(x'1111' as blob(5))>=cast(x'11100000' as blob(7));
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as clob(5))=cast('fish' as clob(5));
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as clob(5))!=cast('fish' as clob(5));
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as clob(5))<cast('fish' as clob(5));
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as clob(5))>cast('fish' as clob(7));
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as clob(5))<=cast('fish' as clob(7));
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as clob(5))>=cast('fish' as clob(7));
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as nclob(5))=cast('fish' as nclob(5));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as nclob(5))!=cast('fish' as nclob(5));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as nclob(5))<cast('fish' as nclob(5));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as nclob(5))>cast('fish' as nclob(7));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as nclob(5))<=cast('fish' as nclob(7));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> select c11 from t1 where cast('fish' as nclob(5))>=cast('fish' as nclob(7));
+ERROR 0A000: Feature not implemented: NCLOB.
+ij(CONNECTION1)> -- BIT STRING literal is not allowed in DB2
+values cast(B'1' as blob(10));
+ERROR 42X01: Syntax error: Encountered "\'1\'" at line 2, column 14.
+ij(CONNECTION1)> 

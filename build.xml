@@ -21,7 +21,8 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="init,engine,tools,drda,build,versioninfo"/>
+  <target name="buildsource" depends="init,engine,tools,drda,build,versioninfo,localeinfo"/>
+  <target name="all" depends="buildsource,demo,testing"/>
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
@@ -130,6 +131,124 @@
 
 
 <!-- ==================================================================== -->
+<!--                   Locale info writer build target                    -->
+<!-- ==================================================================== -->
+
+  <target name="buildlocaleinfo">
+    <antcall target="localeinfowriter">
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.iname" value="_${locale.iname}"/>
+      <param name="info.ename" value="${locale.ename}"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/locale_${locale.iname}.properties"/>
+    </antcall>
+  </target>
+
+  <target name="localeinfowriter">
+    <propertyfile file="${info.file}" comment="${copyright.comment}">
+      <entry key="derby.locale.version.major" value="${major}"/>
+      <entry key="derby.locale.version.minor" value="${minor}"/>
+      <entry key="derby.locale.version.maint" value="${maint}"/>
+      <entry key="derby.locale.build.number" value="${info.buildnumber}"/>
+      <entry key="derby.locale.technology.name" value="${info.iname}"/>
+      <entry key="derby.locale.external.name" value="${info.ename}"/>
+      <entry key="derby.version.beta" value="${beta}"/>
+      <entry key="derby.locale.vendor" value="${vendor}"/>
+      <entry key="derby.product.file" value="${info.productfile}"/>
+    </propertyfile>
+  </target>
+
+ 
+<!-- ==================================================================== -->
+<!--                           Build Locale info                          -->
+<!-- ==================================================================== -->
+
+  <target name="localeinfo" depends="checklocaleinfo" unless="localeinfo.available">
+
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="de_DE"/>
+      <param name="locale.ename" value="German/Germany [de_DE]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="es"/>
+      <param name="locale.ename" value="Spanish/International [es]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="fr"/>
+      <param name="locale.ename" value="French/International [fr]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="it"/>
+      <param name="locale.ename" value="Italian/International [it]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="ja_JP"/>
+      <param name="locale.ename" value="Japanese/Japan [ja_JP]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="ko_KR"/>
+      <param name="locale.ename" value="Korean/Korea [ko_KR]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="pt_BR"/>
+      <param name="locale.ename" value="Portuguese/Brazil [pt_BR]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="zh_CN"/>
+      <param name="locale.ename" value="Simplified_Chinese/PR_China [zh_CN]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="zh_TW"/>
+      <param name="locale.ename" value="Chinese/Taiwan_Traditional [zh_TW]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+  </target>
+
+  <target name="checklocaleinfo">
+    <condition property="localeinfo.available">
+      <and>
+        <available file="${out.dir}/org/apache/derby/info/locale_de_DE.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_es.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_fr.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_it.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
+      </and>
+    </condition>
+  </target>
+
+  <target name="cleanlocale">
+    <delete file="${out.dir}/org/apache/derby/info/locale_de_DE.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_es.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_fr.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_it.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
+  </target>
+
+<!-- ==================================================================== -->
 <!--                   Derby Engine build target                     -->
 <!-- ==================================================================== -->
 
@@ -148,8 +267,16 @@
     <ant dir="${derby.drda.src.dir}"/>
   </target>
 
-  <target name="build" >
+  <target name="build">
     <ant dir="${derby.build.src.dir}"/>
+  </target>
+
+  <target name="demo">
+    <ant dir="${derby.demo.src.dir}"/>
+  </target>
+
+  <target name="testing">
+    <ant dir="${derby.testing.src.dir}"/>
   </target>
 
 <!-- ==================================================================== -->
@@ -310,17 +437,17 @@
   <target name="cscuptodate">
     <condition property="csc.uptodate">
       <and>
-        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/iapi/types/DataValueDescriptor.java"
+        <uptodate srcfile="${derby.engine.dir}/iapi/types/DataValueDescriptor.java"
                   targetfile="${out.dir}/org/apache/derby/iapi/types/DataValueDescriptor.class"/>
-        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/impl/services/cache/CachedItem.java"
+        <uptodate srcfile="${derby.engine.dir}/impl/services/cache/CachedItem.java"
                   targetfile="${out.dir}/org/apache/derby/impl/services/cache/CachedItem.class"/>
-        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/impl/store/raw/data/RecordId.java"
+        <uptodate srcfile="${derby.engine.dir}/impl/store/raw/data/RecordId.java"
                   targetfile="${out.dir}/org/apache/derby/impl/store/raw/data/RecordId.class"/>
-        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/iapi/store/raw/ContainerKey.java"
+        <uptodate srcfile="${derby.engine.dir}/iapi/store/raw/ContainerKey.java"
                   targetfile="${out.dir}/org/apache/derby/iapi/store/raw/ContainerKey.class"/>
-        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.java"
+        <uptodate srcfile="${derby.engine.dir}/iapi/services/cache/SizedCacheable.java"
                   targetfile="${out.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.class"/>
-        <available file="${osengsrc.dir}/org/apache/derby/iapi/services/cache/ClassSizeCatalog.java"/>
+        <available file="${derby.engine.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
       </and>
     </condition>
   </target>
@@ -467,8 +594,8 @@
 <!--                               Jar targets                           -->
 <!-- =================================================================== -->
 
-  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar"/>
-  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar"/>
+  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar,derbylocalejars,derbytestingjar"/>
+  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar,derbylocalejars,derbytestingjar"/>
 
   <target name="initjars" depends="setsanityname,getsvnversion">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
@@ -721,11 +848,91 @@
   </target>
 
 <!-- - - - - - - - - - - - - - derby.war target - - - - - - - - - - - -->
+
  <target name="derbywar" depends="initjars">
 
     <echo message="Beginning derby.war  build"/>
     <delete file="${derby.jar.dir}/derby.war"/>
     <zip zipfile="${derby.jar.dir}/derby.war" compress="true" basedir="tools/j2ee/derby"/>
+  </target>
+
+<!-- - - - - - - - - - - - - - locale jar targets - - - - - - - - - - - -->
+
+  <target name="derbylocalejars" depends="initjars">
+
+    <!-- call localejar for each locale -->
+
+    <antcall target="localejar">
+      <param name="locale.iname" value="de_DE"/>
+      <param name="locale.ename" value="German/Germany [de_DE]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="es"/>
+      <param name="locale.ename" value="Spanish/International [es]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="fr"/>
+      <param name="locale.ename" value="French/International [fr]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="it"/>
+      <param name="locale.ename" value="Italian/International [it]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="ja_JP"/>
+      <param name="locale.ename" value="Japanese/Japan [ja_JP]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="ko_KR"/>
+      <param name="locale.ename" value="Korean/Korea [ko_KR]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="pt_BR"/>
+      <param name="locale.ename" value="Portuguese/Brazil [pt_BR]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="zh_CN"/>
+      <param name="locale.ename" value="Simplified_Chinese/PR_China [zh_CN]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="zh_TW"/>
+      <param name="locale.ename" value="Chinese/Taiwan_Traditional [zh_TW]"/>
+    </antcall>
+  </target>
+
+  <target name="localejar">
+ 
+    <echo message="Building derbyLocale_${locale.iname}.jar"/>
+
+    <!-- generate new locale property file -->
+    <antcall target="localeinfowriter">
+      <param name="info.buildnumber" value="${changenumber}"/>
+      <param name="info.iname" value="_${locale.iname}"/>
+      <param name="info.ename" value="${locale.ename}"/>
+      <param name="info.productfile" value="derbyLocale_${locale.iname}.jar"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/locale_${locale.iname}.properties"/>
+    </antcall>   
+    <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
+         compress="true"
+	 filesonly="true">
+      <fileset dir="${out.dir}"
+	       includes="org/apache/derby/info/*_${locale.iname}.properties,
+	                 org/apache/derby/loc/*_${locale.iname}.properties,
+	                 org/apache/derby/loc/drda/*_${locale.iname}.properties"/>
+    </jar>
+  </target>
+    
+<!-- - - - - - - - - - - - derby testing jar target - - - - - - - - - - -->
+
+  <target name="derbytestingjar" depends="initjars,ckderbytesting" if="derbyTesting.available">
+    <zip destfile="${derby.jar.dir}/derbyTesting.jar" filesonly="true" compress="true">
+      <fileset dir="${out.dir}" includes="org/apache/derbyTesting/functionTests/**"/>
+    </zip>
+  </target>
+
+  <target name="ckderbytesting">
+    <available file="${out.dir}/org/apache/derbyTesting"
+               property="derbyTesting.available"/>
   </target>
 
 <!-- - - - - - - - - - - -  jar build helper targets  - - - - - - - - - -->
@@ -778,16 +985,13 @@
     <!-- Build insane product jars -->
     <antcall target="clobber"/>
     <antcall target="insane"/>
-    <antcall target="buildsource"/>
-    <antcall target="buildsource"/>
+    <antcall target="all"/>
     <antcall target="jars"/>
-
 
     <!-- Build sane product jars -->
     <antcall target="clobber"/>
     <antcall target="sane"/>
-    <antcall target="buildsource"/>
-    <antcall target="buildsource"/>
+    <antcall target="all"/>
     <antcall target="jars"/>
 
     <!-- Build everything else -->

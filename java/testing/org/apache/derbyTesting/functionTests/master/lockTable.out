@@ -1,0 +1,209 @@
+ij> -- multiuser lock table tests
+disconnect;
+ij> connect 'jdbc:derby:wombat;user=U1' AS C1;
+ij> autocommit off;
+ij> connect 'jdbc:derby:wombat;user=U2' AS C2;
+ij(C2)> autocommit off;
+ij(C2)> set connection C1;
+ij(C1)> -- create a table and populate it
+create table t1 (c1 int);
+0 rows inserted/updated/deleted
+ij(C1)> insert into t1 values 1;
+1 row inserted/updated/deleted
+ij(C1)> commit;
+ij(C1)> -- test TX vs TX locks
+lock table u1.t1 in exclusive mode;
+0 rows inserted/updated/deleted
+ij(C1)> set connection C2;
+ij(C2)> lock table u1.t1 in exclusive mode;
+ERROR X0X02: Table 'U1.T1' cannot be locked in 'EXCLUSIVE' mode.
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(C2)> set connection C1;
+ij(C1)> -- verify that we still have the lock
+run resource 'LockTableQuery.subsql';
+ij(C1)> select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' 
+order by 
+    tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+U1      |UserTran|TABLE   |1   |X   |T1          |Tablelock |GRANT|ACTIVE  
+ij(C1)> -- verify that we can insert into the table
+insert into t1 values 2;
+1 row inserted/updated/deleted
+ij(C1)> select * from t1;
+C1         
+-----------
+1          
+2          
+ij(C1)> commit;
+ij(C1)> -- test TX vs TS locks
+lock table t1 in exclusive mode;
+0 rows inserted/updated/deleted
+ij(C1)> set connection C2;
+ij(C2)> lock table u1.t1 in share mode;
+ERROR X0X02: Table 'U1.T1' cannot be locked in 'SHARE' mode.
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(C2)> set connection C1;
+ij(C1)> -- verify that we still have the lock
+run resource 'LockTableQuery.subsql';
+ij(C1)> select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' 
+order by 
+    tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+U1      |UserTran|TABLE   |1   |X   |T1          |Tablelock |GRANT|ACTIVE  
+ij(C1)> -- verify that we can insert into the table
+insert into t1 values 3;
+1 row inserted/updated/deleted
+ij(C1)> select * from t1;
+C1         
+-----------
+1          
+2          
+3          
+ij(C1)> commit;
+ij(C1)> -- test TS vs TX locks
+lock table t1 in share mode;
+0 rows inserted/updated/deleted
+ij(C1)> set connection C2;
+ij(C2)> lock table u1.t1 in exclusive mode;
+ERROR X0X02: Table 'U1.T1' cannot be locked in 'EXCLUSIVE' mode.
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(C2)> set connection C1;
+ij(C1)> -- verify that we still have the lock
+run resource 'LockTableQuery.subsql';
+ij(C1)> select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' 
+order by 
+    tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+U1      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+ij(C1)> -- verify that we can insert into the table
+insert into t1 values 4;
+1 row inserted/updated/deleted
+ij(C1)> select * from t1;
+C1         
+-----------
+1          
+2          
+3          
+4          
+ij(C1)> commit;
+ij(C1)> -- test TS vs TS locks
+lock table t1 in share mode;
+0 rows inserted/updated/deleted
+ij(C1)> set connection C2;
+ij(C2)> lock table u1.t1 in share mode;
+0 rows inserted/updated/deleted
+ij(C2)> set connection C1;
+ij(C1)> -- verify that we still have the lock
+run resource 'LockTableQuery.subsql';
+ij(C1)> select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' 
+order by 
+    tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+U2      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+U1      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+ij(C1)> -- verify that we cannot insert into the table
+insert into t1 values 5;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(C1)> select * from t1;
+C1         
+-----------
+1          
+2          
+3          
+4          
+ij(C1)> commit;
+ij(C1)> set connection C2;
+ij(C2)> commit;
+ij(C2)> set connection C1;
+ij(C1)> -- create another table
+create table t2(c1 int);
+0 rows inserted/updated/deleted
+ij(C1)> commit;
+ij(C1)> -- verify that user getting error on lock table doesn't get rolled back
+lock table t1 in share mode;
+0 rows inserted/updated/deleted
+ij(C1)> set connection C2;
+ij(C2)> lock table u1.t2 in share mode;
+0 rows inserted/updated/deleted
+ij(C2)> lock table u1.t1 in exclusive mode;
+ERROR X0X02: Table 'U1.T1' cannot be locked in 'EXCLUSIVE' mode.
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(C2)> set connection C1;
+ij(C1)> -- verify that other user still has the lock
+run resource 'LockTableQuery.subsql';
+ij(C1)> select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' 
+order by 
+    tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+U1      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+U2      |UserTran|TABLE   |1   |S   |T2          |Tablelock |GRANT|ACTIVE  
+ij(C1)> commit;
+ij(C1)> disconnect;
+ij> set connection C2;
+ij> disconnect;
+ij> 

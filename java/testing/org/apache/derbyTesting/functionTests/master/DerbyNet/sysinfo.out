@@ -1,0 +1,56 @@
+Testing Sysinfo
+org.apache.derby.drda.NetworkServerControl sysinfo 
+----- Derby Network Server Information --------
+----- listing properties --
+derby.drda.maxThreads=0
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=false
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=false
+----- Derby Information --------
+-----
+----- Locale Information -----------------
+Current Locale :  [English/United States [en_US]]
+Found support for locale: [de_DE]
+Found support for locale: [es]
+Found support for locale: [fr]
+Found support for locale: [it]
+Found support for locale: [ja_JP]
+Found support for locale: [ko_KR]
+Found support for locale: [pt_BR]
+Found support for locale: [zh_CN]
+Found support for locale: [zh_TW]
+-----
+End test
+Testing Sysinfo (locale)
+-----Duser.language=err -Duser.country=DE org.apache.derby.drda.NetworkServerControl sysinfo 
+----- Derby Network Server Information --------
+----- listing properties --
+derby.drda.maxThreads=0
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=false
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=false
+----- Derby Information --------
+-----
+----- Locale Information -----------------
+Current Locale :  [English/United States [en_US]]
+Found support for locale: [de_DE]
+Found support for locale: [es]
+Found support for locale: [fr]
+Found support for locale: [it]
+Found support for locale: [ja_JP]
+Found support for locale: [ko_KR]
+Found support for locale: [pt_BR]
+Found support for locale: [zh_CN]
+Found support for locale: [zh_TW]
+-----
+End test (locale)

@@ -1,0 +1,216 @@
+ij> --
+-- this test is for basic delete functionality
+--
+-- create the table
+create table t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int);
+0 rows inserted/updated/deleted
+ij> -- negative tests
+-- table name required for positioned delete and for searched delete
+delete;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 4, column 6.
+ij> -- populate the table
+insert into t1 values (1);
+1 row inserted/updated/deleted
+ij> insert into t2 select * from t1;
+1 row inserted/updated/deleted
+ij> -- delete all the rows (only 1)
+select * from t1;
+C1         
+-----------
+1          
+ij> delete from t1;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> -- repopulate the table
+insert into t1 values(2);
+1 row inserted/updated/deleted
+ij> insert into t1 values(3);
+1 row inserted/updated/deleted
+ij> -- delete all the rows (multiple rows)
+select * from t1;
+C1         
+-----------
+2          
+3          
+ij> delete from t1;
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> -- test atomicity of multi row deletes
+create table atom_test (c1 smallint);
+0 rows inserted/updated/deleted
+ij> insert into atom_test values 1, 30000,0, 2;
+4 rows inserted/updated/deleted
+ij> -- overflow
+delete from atom_test where c1 + c1 > 0;
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> select * from atom_test;
+C1    
+------
+1     
+30000 
+0     
+2     
+ij> -- divide by 0
+delete from atom_test where c1 / c1 = 1;
+ERROR 22012: Attempt to divide by zero.
+ij> select * from atom_test;
+C1    
+------
+1     
+30000 
+0     
+2     
+ij> -- target table in source, should be done in deferred mode
+-- repopulate the tables
+insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> insert into t1 values(2);
+1 row inserted/updated/deleted
+ij> insert into t2 select * from t1;
+2 rows inserted/updated/deleted
+ij> autocommit off;
+ij> select * from t1;
+C1         
+-----------
+1          
+2          
+ij> delete from t1 where c1 <=
+	(select t1.c1
+	 from t1, t2
+	 where t1.c1 = t2.c1
+	 and t1.c1 = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> rollback;
+ij> delete from t1 where c1 >=
+	(select
+		(select c1
+		 from t1
+		 where c1 = 1)
+	 from t2
+	 where c1 = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> rollback;
+ij> delete from t1 where c1 >=
+	(select
+		(select c1
+		 from t1 a
+		 where c1 = 1)
+	 from t2
+	 where c1 = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> rollback;
+ij> -- delete 0 rows - degenerate case for deferred delete
+delete from t1 where c1 =
+	(select 1
+	 from t2
+	 where 1 =
+		(select c1
+		 from t1
+		 where c1 = 2)
+	);
+0 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+1          
+2          
+ij> rollback;
+ij> -- delete 1 row
+delete from t1
+where c1 =
+	(select c1
+	 from t1
+	 where c1 = 2)
+and c1 = 2;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> rollback;
+ij> delete from t1 where c1 <=
+	(select c1
+	 from
+		(select c1
+		 from t1) a
+	 where c1 = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> rollback;
+ij> delete from t1 where c1 <=
+	(select c1
+	 from t2
+	 where c1 = 37
+	union
+	 select c1
+	 from t1
+	 where c1 = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> rollback;
+ij> delete from t1 where c1 <=
+	(select c1
+	 from t2
+	 where c1 = 37
+	union
+	 select c1
+	 from
+		(select c1
+		from t1) a
+	 where c1 = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+C1         
+-----------
+ij> rollback;
+ij> autocommit on;
+ij> -- drop the table
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table atom_test;
+0 rows inserted/updated/deleted
+ij> --
+-- here we test extra state lying around in the
+-- deleteResultSet on a prepared statement that
+-- is executed multiple times.  if we don't
+-- get a nasty error then we are ok
+--
+create table x (x int, y int);
+0 rows inserted/updated/deleted
+ij> create index ix on x(x);
+0 rows inserted/updated/deleted
+ij> insert into x values (1,1),(2,2),(3,3);
+3 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare p as 'delete from x where x = ? and y = ?';
+ij> execute p using 'values (1,1)';
+1 row inserted/updated/deleted
+ij> execute p using 'values (2,2)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- clean up
+autocommit on;
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> 

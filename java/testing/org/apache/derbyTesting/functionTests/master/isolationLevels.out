@@ -1,0 +1,682 @@
+ij> -- single user test for the various isolation levels
+prepare getIsolation as 'values current isolation';
+ij> autocommit off;
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 2000;
+ij> -- create a table
+create table t1(c1 int not null constraint asdf primary key);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- insert a row
+insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> -- verify table scan gets row lock at read committed
+select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- verify table scan gets row lock at read committed
+select * from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- verify matching index scan gets row lock at read committed
+select * from t1 where c1 = 1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- verify matching index scan gets row lock at read committed
+select * from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at read committed isolation level using share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+	stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+	qualifiers:
+None
+ij> -- verify WITH clause works
+select * from t1 with rr;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- verify WITH clause works
+select * from t1 with rr
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at serializable isolation level using share table locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- verify SET ISOLATION commits and changes isolation level
+set isolation RR;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+RR  
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at serializable isolation level using share table locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> set isolation reset;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+ij> -- verify matching index scan gets row lock at read committed
+select * from t1 where c1 = 1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- verify matching index scan gets row lock at read committed
+select * from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at read committed isolation level using share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+	stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+	qualifiers:
+None
+ij> -- verify SET ISOLATION commits and changes isolation level
+set isolation read committed;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+CS  
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> set current isolation = reset;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+ij> -- verify SET ISOLATION commits and changes isolation level
+set current isolation = RS;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+RS  
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at repeatable read isolation level using share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> set isolation to reset;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+ij> -- verify SET ISOLATION commits and changes isolation level
+set isolation = dirty read;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+UR  
+ij> -- rollback should find nothing to undo
+rollback;
+ij> select * from t1;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at read uncommitted isolation level using share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- test WITH clause
+set isolation serializable;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+RR  
+ij> select * from t1 with cs;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1 with cs
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> set isolation cursor stability;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+CS  
+ij> select * from t1 with RR;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1 with RR
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at serializable isolation level using share table locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> set isolation serializable;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+RR  
+ij> select * from t1 with RS;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1 with RS
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at repeatable read isolation level using share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> set current isolation to read committed;
+0 rows inserted/updated/deleted
+ij> execute getIsolation;
+1   
+----
+CS  
+ij> select * from t1 with ur;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from t1 with ur
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using constraint ASDF at read uncommitted isolation level using share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0}
+	Number of columns fetched=1
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- unknown isolation level
+select * from t1 with rw;
+ERROR 42X01: Syntax error: Encountered "rw" at line 2, column 23.
+ij> -- check the db2 isolation levels can be used as identifiers
+create table db2iso(cs int, rr int, ur int, rs int);
+0 rows inserted/updated/deleted
+ij> select cs, rr, ur, rs from db2iso;
+CS         |RR         |UR         |RS         
+-----------------------------------------------
+ij> -- cleanup
+drop table t1;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,165 @@
+ij> -- rename index tests
+--
+autocommit off;
+ij> --
+-- negative tests
+--
+-- rename a non-existing index
+-- should fail because there is no index by name i1t1
+rename index i1t1 to i1rt1;
+ERROR 42X65: Index 'I1T1' does not exist.
+ij> --
+-- rename as some existing index name
+create table t1(c11 int, c12 int);
+0 rows inserted/updated/deleted
+ij> create index i1t1 on t1(c11);
+0 rows inserted/updated/deleted
+ij> create index i2t1 on t1(c12);
+0 rows inserted/updated/deleted
+ij> rename index i1t1 to i2t1;
+ERROR X0Y32: Index 'I2T1' already exists in Schema 'APP'.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --
+-- rename a system table's index
+set schema sys;
+0 rows inserted/updated/deleted
+ij> -- will fail because it is a system table
+rename index syscolumns_index1 to newName;
+ERROR X0Y56: 'RENAME INDEX' is not allowed on the System table 'SYS.SYSCOLUMNS'.
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> --
+-- rename an index when a view is on a table
+create table t1(c11 int, c12 int);
+0 rows inserted/updated/deleted
+ij> create index t1i1 on t1(c11);
+0 rows inserted/updated/deleted
+ij> create view v1 as select * from t1;
+0 rows inserted/updated/deleted
+ij> select * from v1;
+C11        |C12        
+-----------------------
+ij> -- this succeeds with no exceptions
+rename index t1i1 to t1i1r;
+0 rows inserted/updated/deleted
+ij> -- this succeeds with no exceptions
+select * from v1;
+C11        |C12        
+-----------------------
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- another test for views
+create table t1(c11 int not null primary key, c12 int);
+0 rows inserted/updated/deleted
+ij> create index i1t1 on t1(c11);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+ij> create view v1 as select * from t1;
+0 rows inserted/updated/deleted
+ij> -- following rename shouldn't fail
+rename index i1t1 to i1rt1;
+ERROR 42X65: Index 'I1T1' does not exist.
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> -- even though there is no index i1t1 it still doesn't fail
+create view v1 as select * from t1;
+0 rows inserted/updated/deleted
+ij> -- this succeeds with no exceptions
+select * from v1;
+C11        |C12        
+-----------------------
+ij> rename index i1rt1 to i1t1;
+ERROR 42X65: Index 'I1RT1' does not exist.
+ij> -- now succeeds
+select * from v1;
+C11        |C12        
+-----------------------
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --
+-- cannot rename an index when there is an open cursor on it
+create table t1(c11 int, c12 int);
+0 rows inserted/updated/deleted
+ij> create index i1 on t1(c11);
+0 rows inserted/updated/deleted
+ij> get cursor c1 as 'select * from t1';
+ij> -- following rename should fail because of the cursor c1
+rename index i1 to i1r;
+ERROR X0X95: Operation 'RENAME INDEX' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+ij> close c1;
+ij> -- following rename should pass because cursor c1 has been closed
+rename index i1 to i1r;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --
+-- creating a prepared statement on a table
+create table t1(c11 int not null primary key, c12 int);
+0 rows inserted/updated/deleted
+ij> -- bug 5685
+create index i1 on t1(c11);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+ij> autocommit off;
+ij> prepare p1 as 'select * from t1 where c11 > ?';
+ij> execute p1 using 'values (1)';
+C11        |C12        
+-----------------------
+ij> -- doesn't fail
+rename index i1 to i1r;
+ERROR 42X65: Index 'I1' does not exist.
+ij> -- statement passes
+execute p1 using 'values (1)';
+C11        |C12        
+-----------------------
+ij> remove p1;
+ij> autocommit on;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --
+-- positive tests
+-- a column with an index on it can be renamed
+create table t3(c31 int not null primary key, c32 int);
+0 rows inserted/updated/deleted
+ij> create index i1_t3 on t3(c32);
+0 rows inserted/updated/deleted
+ij> rename index i1_t3 to i1_3r;
+0 rows inserted/updated/deleted
+ij> -- make sure that i1_t3 did get renamed. Following rename should fail to prove that.
+rename index i1_t3 to i1_3r;
+ERROR 42X65: Index 'I1_T3' does not exist.
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> --
+-- creating a prepared statement on a table
+autocommit off;
+ij> create table t3(c31 int not null primary key, c32 int);
+0 rows inserted/updated/deleted
+ij> create index i1_t3 on t3(c32);
+0 rows inserted/updated/deleted
+ij> prepare p3 as 'select * from t3 where c31 > ?';
+ij> execute p3 using 'values (1)';
+C31        |C32        
+-----------------------
+ij> -- can rename with no errors
+rename index i1_t3 to i1_t3r;
+0 rows inserted/updated/deleted
+ij> execute p3 using 'values (1)';
+C31        |C32        
+-----------------------
+ij> rename index i1_t3r to i1_t3;
+0 rows inserted/updated/deleted
+ij> -- this should pass know because we restored the original index name
+execute p3 using 'values (1)';
+C31        |C32        
+-----------------------
+ij> remove p3;
+ij> autocommit on;
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> 

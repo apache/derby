@@ -1,0 +1,6 @@
+Creating tables...done.
+cursor name is aBc
+T1 contents:
+First row should have a b value of 11
+1 11
+2 2

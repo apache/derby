@@ -1,0 +1,14 @@
+-- user 1 for bug 1573
+-- a deadlock when reopening a join gets an assertion
+-- violation in close()
+create table outer1(c1 int);
+create index o1_i1 on outer1(c1);
+insert into outer1 values 1, 2;
+insert into inner1 values 1, 2;
+insert into inner2 values 1, 2;
+autocommit off;
+-- this user will get lock timeout in subquery on 2nd next
+get cursor c1 as 'select * from outer1 where c1 <= (select count(*) from inner1 properties index = i1_i1, inner2 properties index = i2_i1 where outer1.c1 = outer1.c1)';
+next c1;
+next c1;
+values 1;

@@ -29,7 +29,7 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${ostoolsrc.dir}"
+      srcdir="${derby.tools.src.dir}"
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>

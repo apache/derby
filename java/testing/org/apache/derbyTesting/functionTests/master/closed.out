@@ -1,0 +1,23 @@
+Test closed starting
+ERROR XJ012: 'Statement' already closed.
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR 08003: No current connection.
+ERROR 08003: No current connection.
+ERROR 08003: No current connection.
+ERROR 08003: No current connection.
+ERROR 08003: No current connection.
+ERROR 08003: No current connection.
+ERROR 08003: No current connection.
+ERROR 08006: Database 'wombat' shutdown.
+CALL sleep(10000) - 38000, 38000 -- InterruptedException, XJ001 -- InterruptedException
+LOCK TABLE CLOSED.LOCKME IN EXCLUSIVE MODE - 08006, 08006 -- Database 'wombat' shutdown.
+ERROR 08006: Database 'wombat' shutdown.
+Shutdown test completed jdbc:derby:wombat;shutdown=true
+ERROR 08006: Database 'wombat' shutdown.
+CALL sleep(10000) - 38000, 38000 -- InterruptedException, XJ001 -- InterruptedException
+LOCK TABLE CLOSED.LOCKME IN EXCLUSIVE MODE - 08006, 08006 -- Database 'wombat' shutdown.
+ERROR XJ015: Derby system shutdown.
+Shutdown test completed jdbc:derby:;shutdown=true
+PASS
+Test closed finished

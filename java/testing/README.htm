@@ -1,0 +1,1001 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>readme.htm</title>
+</head>
+<body>
+<h1><a class="mozTocH1" name="mozTocId934928"></a>Derby Functional Tests<br>
+</h1>
+<h2><a class="mozTocH2" name="mozTocId504000"></a>Package:
+org.apache.derbyTesting<!--mozToc h1 1 h2 2 h3 3 h4 4 h5 5 h6 6--><br>
+</h2>
+<p>
+<small>created by myrna@golux.com<br>
+last updated on 11/11/2004 by: myrna@golux.com<br>
+</small>
+</p>
+<ul>
+  <li><a href="#intro">1. Introduction</a></li>
+  <li><a href="#quickstart">2. Quickstart</a></li>
+  <li style="margin-left: 40px;"><a
+ href="#2.1_running_with_derby_classes_">2.1 running tests<br>
+    </a></li>
+  <li style="margin-left: 40px;"><a
+ href="#building_derbyTesting__running_with">2.2 building
+derbyTesting package</a><br>
+  </li>
+  <li><a href="#run">3. More details on running the derby functional
+tests</a></li>
+  <li style="margin-left: 40px;"><a href="#run1">3.1 Running 1 test</a></li>
+  <li style="margin-left: 40px;"><a href="#run2">3.2 Running suites of
+tests</a></li>
+  <li><a href="#overview">4. Harness internals for developers</a> </li>
+  <li style="margin-left: 40px;"><a href="#ov1">4.1 Test types</a></li>
+  <li style="margin-left: 40px;"><a href="#ov2">4.2 Supporting files
+for tests</a></li>
+  <li style="margin-left: 40px;"><a href="#ov3">4.3
+&lt;testname&gt;_app.properties</a></li>
+  <li style="margin-left: 40px;"><a href="#ov4">4.4
+&lt;testname&gt;_derby.properties</a></li>
+  <li style="margin-left: 40px;"><a href="#ov5">4.5 tmp files, out
+files, master files, and canons</a></li>
+  <li style="margin-left: 40px;"><a href="#ov6">4.6 Masking and
+comparing</a></li>
+  <li style="margin-left: 40px;"><a href="#Adding_a_new_test">4.7
+Adding a new test</a></li>
+  <li style="margin-left: 40px;"><a
+ href="#4.8_Suites_and_Adding_a_new_suite">4.8 Suites and adding a
+new suite</a></li>
+  <li style="margin-left: 40px;"><a href="#ov9">4.9 Running with a new
+jvm</a></li>
+  <li style="margin-left: 40px;"><a href="#skipping">4.10 Skipping a
+test</a></li>
+  <li style="margin-left: 40px;"><a href="#frameworks">4.11 Frameworks</a></li>
+  <li style="margin-left: 40px;"><a href="#props">4.12 Some test
+harness properties</a> </li>
+</ul>
+<br>
+<h2>1. <a name="intro"></a>Introduction</h2>
+<p>
+This document describes functionality of the derby
+functional testing package org.apache.derbyTesting. This package is
+based on the functional tests in use at IBM for testing the Cloudscape
+product before its contribution to ASF.</p>
+<p>In the following, instructions are geared towards a unix
+environment. For other environments, some details may need to be
+adjusted. For instance, the document may
+refer to $ANT_HOME, for DOS, this would be %ANT_HOME%.<br>
+</p>
+<p>In the following the top
+directory under which the subversion tree is placed is referred to as
+${derby.source} - see also the
+derby <a href="http://incubator.apache.org/derby/BUILDING.html">BUILDING.txt</a>.<br>
+</p>
+<p>The version of the classes and supporting files of the derbyTesting
+package have to match the version of the classes of the derby package.
+Thus you either need to build all jars yourself, or get all jar files
+from the incubator site at the same time when available. <br>
+<br>
+</p>
+<span style="font-weight: bold;">
+</span>
+<h2><a class="mozTocH2" name="mozTocId191589"></a>2. <a
+ name="quickstart"></a>QuickStart<br>
+</h2>
+<h3><a name="2.1_running_with_derby_classes_"></a>2.1 running tests</h3>
+<p>
+The derbyTesting package enables you to run 1 test or a suite of tests.
+Before you can run, you need to setup your environment:<br>
+</p>
+<ul>
+  <li>Obtain a jdk or jre (based on jdk 1.3.1 specification or higher).
+Add the bin directory to your $PATH. Currently supported are:<br>
+  </li>
+</ul>
+<table
+ style="text-align: left; width: 497px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>&nbsp;&nbsp;&nbsp; jdk131
+- Sun
+HotSpot jdk1.3.1</small><br>
+      <small>&nbsp;&nbsp;&nbsp; jdk141 - Sun HotSpot jdk1.4.1</small><br>
+      <small>&nbsp;&nbsp;&nbsp; jdk142 - Sun HotSpot jdk1.4.2</small><br>
+      <small>&nbsp;&nbsp;&nbsp; jdk15 - Sun HotSpot jdk1.5</small><br>
+      <small>&nbsp;&nbsp;&nbsp; ibm131 - IBM Classic jdk1.3.1</small><br>
+      <small>&nbsp;&nbsp;&nbsp; ibm141 - IBM Classic jdk1.4.1</small><br>
+      <small>&nbsp;&nbsp;&nbsp; ibm142 - IBM Classic jdk1.4.2</small><br>
+      <small>&nbsp;&nbsp;&nbsp; j9_13 - WCTME jvm (available with IBM
+Websphere Client Technology Micro Edition) <br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>set $CLASSPATH to include the following jars:</li>
+  <ul>
+    <li><small>jakarta-oro-2.0.8.jar</small></li>
+    <small>&nbsp;&nbsp;&nbsp; oromatcher, obtain from <a
+ href="http://jakarta.apache.org/oro/index.html">http://jakarta.apache.org/oro/index.html</a>,
+or follow this link for <a
+ href="http://apache.roweboat.net/jakarta/oro/source/jakarta-oro-2.0.8.zip">zip</a>
+file, or <a
+ href="http://apache.roweboat.net/jakarta/oro/source/jakarta-oro-2.0.8.tar.gz">tar</a>.gz)</small><li><small>derbyTesting.jar<br>
+      </small></li>
+  </ul>
+  <ul>
+    <small>&nbsp;&nbsp;&nbsp;&nbsp; test files and classes</small><li><small>derby.jar<br>
+      </small></li>
+    <small>&nbsp;&nbsp;&nbsp; main derby package classes</small><li><small>derbytools.jar<br>
+      </small></li>
+    <small>&nbsp;&nbsp;&nbsp; derby tools classes for tools like ij
+and dblook</small><li><small>derbynet.jar<br>
+      </small></li>
+    <small>&nbsp;&nbsp;&nbsp; derby network server classes</small><li><small>db2jcc.jar
+and db2jcc_license_c.jar <br>
+      </small></li>
+    <small>&nbsp;&nbsp;&nbsp; IBM Universal JDBC Driver classes. (See
+IBM <a href="http://www-106.ibm.com/developerworks/db2/downloads/jcc/">developerworks</a>
+for download)</small>
+  </ul>
+</ul>
+<p>
+For example:<br>
+</p>
+<div style="margin-left: 40px;">
+<table style="text-align: left; width: 484px; height: 32px;" border="1"
+ cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>(note that $jardir is
+only a convenience variable):<br>
+      </small><small>set jardir=/local/derbyjar<br>
+set
+CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbynet.jar:$jardir/db2jcc.jar:<br>
+$jardir/db2jcc_license_c.jar:$jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<br>
+$CLASSPATH</small><br>
+      <small>set PATH=/local/jdk141/bin:$PATH</small><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>
+To run 1 test:
+</p>
+<table
+ style="text-align: left; width: 514px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">syntax:<br>
+&nbsp;&nbsp;&nbsp; <small>java
+-D&lt;testproperty&gt;
+org.apache.derbyTesting.functionTests.harness.RunTest
+&lt;testdir&gt;/&lt;testname&gt;</small><br>
+      <small>where <br>
+      </small>
+      <ul>
+        <li><small>&nbsp;&nbsp; &lt;testproperty&gt; are test specific
+properties, such as
+'framework' for the RunTest class. </small></li>
+        <li><small>&nbsp;&nbsp; &lt;testdir&gt; is one of the
+directories under
+functionTests/tests where the actual test is located</small></li>
+        <li><small>&nbsp;&nbsp; &lt;testname&gt; is the actual name of
+the test</small></li>
+      </ul>
+      <small>examples:<br>
+to run the test supersimple against the embedded driver:<br>
+      </small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small>java
+org.apache.derbyTesting.functionTests.harness.RunTest
+lang/supersimple.sql<br>
+      <br>
+To run a test with network server, add -Dframework=DerbyNet to the run.
+The test harness will to start
+network server at port 1527 or connect to a running one, run the test,
+and stop network server thereafter.<br>
+for example:<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; java </small><small>-Dframework=DerbyNet
+      </small><small>org.apache.derbyTesting.functionTests.harness.RunTest
+lang/supersimple.sql<br>
+      </small><small> </small></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+A successful run will have a .pass file, and the output to the
+console will show no difference between expected and actual test
+result. A failed test run will have at least a .fail file and the
+output to the console will show the difference between expected and
+actual result.<br>
+</p>
+<p>
+To run a suite:
+</p>
+<table
+ style="text-align: left; width: 546px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">syntax:<br>
+&nbsp; <small>java
+-D&lt;testproperty&gt;
+org.apache.derbyTesting.functionTests.harness.RunSuite&nbsp;
+&lt;testsuite&gt;</small><br>
+      <small>where <br>
+      </small>
+      <ul>
+        <li><small>&nbsp;&nbsp; &lt;testproperty&gt; are test specific
+properties, such as
+'verbose' for the RunSuite class. </small></li>
+        <li><small>&nbsp;&nbsp; &lt;testsuite&gt; is one of the suites
+under
+org/apache/derbyTesting/suites</small></li>
+      </ul>
+      <small>for example for running&nbsp; the suite derbylang:<br>
+      </small><small>&nbsp;&nbsp; java -Dverbose=true
+org.apache.derbyTesting.functionTests.harness.RunSuite derbylang</small><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Each suite run should be started in a clean directory. The test
+output directory will not be emptied out before testing is
+begun, although individual test files and result files will be cleaned
+out and overwritten.&nbsp;
+</p>
+<p>
+Initially the suites provided are:
+</p>
+<ul>
+  <li>derbylang: <br>
+  </li>
+  <ul>
+    <li>basic functionality of&nbsp;
+language implementation in derby. <br>
+    </li>
+    <li>Mostly .sql type tests. <br>
+    </li>
+    <li>tested on a variety of hardware takes from 1.15m to 3 hours<br>
+    </li>
+  </ul>
+  <li>derbynetmats</li>
+  <ul>
+    <li>basic network server tests.</li>
+    <li>variety of tests, including some from derbylang suite</li>
+    <li>tested on a variety of hardware takes from 15 to 50 minutes<br>
+    </li>
+  </ul>
+  <li>derbyall</li>
+  <ul>
+    <li>contains all suites typically run by all developers<br>
+    </li>
+  </ul>
+  <ul>
+    <li>tested on a variety of hardware takes from 1.30 - 3.45 minutes <br>
+    </li>
+  </ul>
+  <li><a href="#Note1:"><small>See Note1</small></a><br>
+  </li>
+</ul>
+<p>
+A successful run with all tests passing will have no *.fail files
+created, the &lt;testsuite&gt;_fail.txt file will be empty, and the
+&lt;testsuite&gt;_report.txt file will show no failures in the Summary
+results section.
+</p>
+<table
+ style="text-align: left; width: 556px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>-------snippet from
+derbylang_report.txt -----<br>
+-----------------------------------------------------------<br>
+Summary results:<br>
+      <br>
+Test Run Started: 2004-11-10 11:27:55.0<br>
+Test Run Duration: 00:04:09<br>
+      <br>
+129 Tests Run<br>
+100% Pass (129 tests passed)<br>
+&nbsp;0% Fail (0 tests failed)<br>
+0 Suites skipped</small><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<h3><a name="building_derbyTesting__running_with"></a>2.2 building
+derbyTesting package<br>
+</h3>
+<p>
+To build the derbyTesting package:<br>
+</p>
+<ul>
+  <li>follow all the steps in the derby <a
+ href="http://incubator.apache.org/derby/BUILDING.html">BUILDING.txt</a>.</li>
+</ul>
+<p>This is some typical
+output for the ant build process.<br>
+</p>
+<table
+ style="text-align: left; width: 516px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>&gt; cd
+/local/derby/java/testing<br>
+&gt; ant.ksh<br>
+Searching for build.xml ...<br>
+Buildfile: /local/derby/java/testing/build.xml<br>
+      <br>
+compile:<br>
+&nbsp;&nbsp;&nbsp; [javac] Compiling 30 source files to
+/local/derby/classes<br>
+...<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [copy] Copying 1 file to
+/local/derby/classes/org/apache/derbyTesting/funct<br>
+ionTests<br>
+      <br>
+BUILD SUCCESSFUL<br>
+Total time: 10 minutes 3 seconds</small></td>
+    </tr>
+  </tbody>
+</table>
+<p>Once you have built the derbyTesting package built, you can make a
+derbyTesting.jar use the jar build target at the ${derby.source}level.
+</p>
+<p>
+This will look something like:
+</p>
+<table
+ style="text-align: left; width: 528px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>c:&gt; ant derbytestingjar<br>
+Searching for build.xml ...<br>
+Buildfile: C:\derby\build.xml<br>
+      <br>
+initjars:<br>
+&nbsp;&nbsp;&nbsp; [mkdir] Created dir: C:\derby\jars\<br>
+&nbsp;&nbsp;&nbsp; [mkdir] Created dir: C:\derby\jars\lists<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [echo] Revision number set to exported<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [echo] .<br>
+      <br>
+derbytestingjar:<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [echo] Beginning derbytesting.jar build<br>
+.....<br>
+BUILD SUCCESSFULL<br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h2><a class="mozTocH2" name="mozTocId582299"></a>3. <a name="run"></a>More
+details on running the derby functional tests</h2>
+<p>
+The functional tests are run using a class called 'RunTest'. This class
+calls a number of other classes. A group of tests, called a 'suite' is
+executed using a class called 'RunSuite'.<br>
+</p>
+<h3><a class="mozTocH3" name="mozTocId595945"></a>3.1 <a name="run1"></a>Running
+1 test</h3>
+<p>See section 2.1 for the basic steps to run 1 test.
+</p>
+<p>To pass on system level properties to the test harness, use the test
+harness property -DtestSpecialFlags. For
+example, to run a test forcing
+the message text to be retrieved from the network server:
+</p>
+<table
+ style="text-align: left; width: 558px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"> <small>java
+-Dframework=DerbyNet
+-DtestSpecialFlags=RetrieveMessagesFromServerOnGetMessage=true&nbsp;
+org.apache.derbyTesting.functionTests.harness.RunTest
+lang/supersimple.sql</small></td>
+    </tr>
+  </tbody>
+</table>
+<p><br>
+Tests will be executed in the current directory. When
+running a test
+using the network server, i.e. -Dframework=DerbyNet, the test will run
+in a subdirectory (automatically created) 'DerbyNet'. <small> <br>
+<a href="#Note2:">See Note2</a>.<br>
+</small></p>
+<p>
+The test will normally create the following:<br>
+</p>
+<ul>
+  <li>a database. The default name is 'wombat'. However, the name may
+be different depending on certain properties passed in to the test
+harness.</li>
+  <li>a .out file: the final result file</li>
+  <li>a .tmp file; the initial result file, before any modification to
+prevent irrelevant differences has been applied (before 'masking').</li>
+  <li>a .diff file; the differences between the .out and the master
+file with expected output it is compared to.</li>
+  <li>a .pass or .fail file. This file lists the test if it passes
+under .pass, and under .fail if the output in .out is different from
+the expected output in the master.</li>
+</ul>
+<p>
+possibly created:<br>
+</p>
+<ul>
+  <li>additional files used in a specific test may get copied over to
+the test directory. These normally do not get cleaned up.</li>
+  <li>.tmpstr file is created for network server tests and is a
+possibly
+massaged copy of the master file the output needs to be compared with.</li>
+  <li>.err and .out files in network server database files for any
+additional error output.</li>
+</ul>
+<p>
+When the test is successful, cleanup will occur unless the test harness
+property -Dkeepfiles=true is used. Cleanup will attempt to cleanup all
+files except for .pass. <small><br>
+<a href="#Note3:_">See Note3.</a></small>
+</p>
+<p>
+A successful run (this example is from a dos environment) would
+look for instance like:
+</p>
+<table
+ style="text-align: left; width: 414px; height: 45px; margin-left: 80px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>c:&gt;
+derbyTesting.functionTests.harness.RunTest lang/supersimple.sql<br>
+C:\derby\run2<br>
+supersimple<br>
+-- listing properties --<br>
+derby.locks.deadlockTimeout=3<br>
+derby.locks.waitTimeout=3<br>
+*** Start: supersimple jdk1.4.2_03 2004-11-10 16:51:02 ***<br>
+The test should be running...<br>
+MasterFileName = master/supersimple.out<br>
+*** End:&nbsp;&nbsp; supersimple jdk1.4.2_03 2004-11-10 16:51:25 ***<br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<p>A Test Failure shows the diff, creates a .fail file, does not create
+a .pass file, and does not cleanup any files upon completion. The
+output might look like this:<br>
+</p>
+<table
+ style="text-align: left; width: 442px; height: 32px; margin-left: 80px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>&nbsp;</small><small>c:&gt;
+derbyTesting.functionTests.harness.RunTest lang/supersimple.sql<br>
+C:\derby\run2</small><small><br>
+supersimple<br>
+-- listing properties --<br>
+derby.locks.deadlockTimeout=3<br>
+derby.locks.waitTimeout=3<br>
+*** Start: supersimple jdk1.4.2_03 2004-11-10 16:54:39 ***<br>
+The test should be running...<br>
+MasterFileName = master/supersimple.out<br>
+10 del<br>
+&lt; 10<br>
+10a10<br>
+&gt; 1<br>
+Test Failed.<br>
+*** End:&nbsp;&nbsp; supersimple jdk1.4.2_03 2004-11-10 16:55:02 ***</small><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<h3><a class="mozTocH3" name="mozTocId368566"></a>3.2 <a name="run2"></a>Running
+a suite of tests</h3>
+<p>
+See section 2.1 for a basic explanation on how to run a suite of tests.<br>
+</p>
+<p>
+Tests will be run in a subdirectory with the name of the test
+suite under the current directory. Eg. for derbylang suite, a directory
+derbylang will be created. While the tests are run, information about
+the run is inserted into a &lt;testsuite&gt;.sum file. When all tests
+have completed summary files are created &lt;testsuite&gt;_pass.txt,
+_fail.txt, and _diff.txt files are created as well as a
+&lt;testsuite&gt;_report.txt
+with additional details. Some of the information is duplicate. Also, a
+.skip file will be created holding a list of the tests that were
+skipped (for more details on this, see the section on <a
+ href="#skipping">skipping tests</a>).
+</p>
+<p>
+RunSuite does not empty the top level directory before running. Thus, if another suite was run in the same directory at an earlier time, the resulting summary files might contain results for more than the current run. Therefore it is important to run each suite in a clean directory.
+</p>
+<p>Sample output from RunSuite:<br>
+</p>
+<table
+ style="text-align: left; width: 471px; height: 32px; margin-left: 80px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small><small>c:&gt; $ java
+org.apache.derbyTesting.functionTests.harness.RunSuite derbylang<br>
+Top suite: derbylang<br>
+Suite to run: derbylang:derbylang<br>
+Now do RunList<br>
+Now run the suite's tests<br>
+Run the tests...<br>
+Execute command: java -DjavaCmd=java
+-Doutputdir=C:\derbyt1\derbylang\derbylang
+-Dtopsuitedir=C:\derbyt1\derbylang -Dtoprepo<br>
+rtdir=C:\derbyt1\derbylang -Drundir=C:\derbyt1
+-Dsuitename=derbylang:derbylang -Dtopsuitename=derbylang
+org.apache.derbyTesting.functionTests.harness.RunTest
+lang/altertable.sql<br>
+Execute command: java -DjavaCmd=java
+-Doutputdir=C:\derbyt1\derbylang\derbylang
+-Dtopsuitedir=C:\derbyt1\derbylang -Dtopreportdir=C:\derbyt1\derbylang
+-Drundir=C:\derbyt1 -Dsuitename=derbylang:derbylang
+-Dtopsuitename=derbylang
+org.apache.derbyTesting.functionTests.harness.RunTest
+lang/arithmetic.sql<br>
+...(.more tests)....<br>
+Generated report: derbylang_report.txt</small></small><small><br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+This output does not show whether the tests passed or failed. The
+Summary section in &lt;testsuite&gt;_report.txt shows the statistics of
+the passed vs. failed tests, the summary &lt;testsuite&gt;_*.txt files
+list the tests that passed and failed.
+</p>
+<br>
+<h2><a class="mozTocH2" name="mozTocId635355"></a>4. <a name="overview"></a>
+Harness internals for developers<br>
+</h2>
+<p>
+The following is intended for people who have the subversion tree
+available and want to add or modify tests.
+</p>
+<p>
+The test harness executing one test basically does the following in
+sequence:
+</p>
+<ul>
+  <li>identify test to run</li>
+  <li>identify properties to run with</li>
+  <li>copy needed support files</li>
+  <li>find the expected output</li>
+  <li>if network server, start network server</li>
+  <li>run the test, creating the database</li>
+  <li>if network server, shutdown the server</li>
+  <li>modify the output based on Sed class and _sed.properties file for
+the test</li>
+  <li>compare expected output with actual output</li>
+  <li>if pass, cleanup.</li>
+</ul>
+<br>
+<h3><a class="mozTocH3" name="mozTocId344499"></a>4.1 <a name="ov1"></a>Test
+types</h3>
+<p>
+The test harness recognizes, or will recognize tests with the following
+extensions:<br>
+</p>
+<ul>
+  <li>&nbsp;.java&nbsp;&nbsp;&nbsp; tests that run in a separate jvm.</li>
+  <li>&nbsp;.sql &nbsp;&nbsp;&nbsp; tests that run using ij</li>
+  <li>&nbsp;.sql2 &nbsp;&nbsp;&nbsp; related to .sql</li>
+  <li>&nbsp;.multi &nbsp;&nbsp;&nbsp; multi threaded tests. There are
+no
+multi threaded tests in the first contribution to apache, and the
+sections pertaining to such tests have been commented out</li>
+  <li>&nbsp;.unit &nbsp;&nbsp;&nbsp; unit tests. Currently there are no
+hooks for unit tests in the harness and no unit tests are contributed
+initially.</li>
+</ul>
+<br>
+<h3><a class="mozTocH3" name="mozTocId809770"></a>4.2 <a name="ov2"></a>Supporting
+files for tests</h3>
+<p>
+Various additional files may be used by a test, for instance, to create
+large data values, to test using of jar files and the like. Any files
+that need to be accessed by a particular test that are not accessed
+from the classpath need to be listed under supportfiles= in the
+&lt;testname&gt;_app.properties file.<br>
+Tests can refer to classes without being in the classpath, and sql
+tests can use the ij command 'run resource ' to execute additional .sql
+files without changes to the _app.properties files.
+</p>
+<p>For example, in the file
+(org/apache/derbyTesting/functionTests/tests/)tools/dblook_test_app.properties:<br>
+<small>&nbsp;&nbsp;&nbsp;
+supportfiles=tools/dblook_makeDB.sql,tools/dblook_test.jar</small><br>
+</p>
+<h3><a class="mozTocH3" name="mozTocId427577"></a>4.3 <a name="ov3"></a>&lt;testname&gt;_app.properties</h3>
+<p>
+Every test directory has a default_app.properties. This file is for
+system level properties generic to all the tests in that test
+directory. </p>
+<p>
+If a test requires different system level properties, a test specific
+properties file can be created to overwrite the defaults. The test
+specific properties file needs to have a name starting with the
+test file name, followed with _app.properties</p>
+<p>For example, for the test tools/dblook_test.java, there is a
+properties file called tools/dblook_test_app.properties<br>
+</p>
+<h3><a class="mozTocH3" name="mozTocId715566"></a>4.4 <a name="ov4"></a>&lt;testname&gt;_derby.properties</h3>
+<p>
+Every test directory has a default_derby.properties. This file is for
+derby specific properties common to all the tests in that test
+directory.<br>
+If a test requires different derby properties, a test specific
+properties file can be created to overwrite the defaults. The test
+specific properties file needs to have a name starting with the
+test file name, followed with _derby.properties<br>
+<br>
+</p>
+<h3><a class="mozTocH3" name="mozTocId874096"></a>4.5 <a name="ov5"></a>tmp
+files, out files, master files, and canons</h3>
+<p>
+The test's output will be put into a file testname.tmp. Then the output
+is modified if masking is required and the result is put into a .out
+file.<br>
+The expected output is found by examining the following directories,
+based on certain input<br>
+</p>
+<ul>
+  <li>functionTests/master/framework/jcc_version/jvmcode</li>
+  <li>functionTests/master/framework/jcc_version/earlier_jvmcode</li>
+  <li>functionTests/master/framework/jcc_version</li>
+  <li>functionTests/master/framework/jvmcode</li>
+  <li>functionTests/master/framework/earlier_jvmcode</li>
+  <li>functionTests/master/jvmcode</li>
+  <li>functionTests/master</li>
+</ul>
+<p>
+For example, if we are running a test and the flag -Dframework=DerbyNet
+is used and the jvm we are
+using is Sun's jdk 142, and the jcc version is 2.4 (not available at
+time of writing) then the search for the master to compare with
+starts in the functionTests/derbynet/jcc2.4/jdk14 directory. If a .out
+file with the same name as the test is found in that directory, that
+master is taken. If there is no such file in that directory, search
+continues in the directory functionTests/derbynet/jcc2.4/jdk13 if it
+exists.</p>
+<p>If there is no file there, nor for any other jcc directory, it will
+continue to derbynet/jdk14, and the search is continued for earlier jvm
+versions.<br>
+If we are not running network server, the DerbyNet and
+jcc_version directories are not traversed.<br>
+</p>
+<p>The version details do not go into the subversion level, i.e.
+running
+with jdk141 or jdk142 is expected to have the same behavior.
+</p>
+<p>
+This functionality supports dealing with minor differences in behavior
+caused by minor differences in behavior in the underlying jvms, jcc
+versions, differences between results returned through network server
+vs. embedded and minor differences between a debug and non debug (jar)
+build. </p>
+<p>
+However, having a large number of these files means a maintenance
+problem. Every time test output changes due to modifications to derby
+or to the test, all output files in all directories need to be updated
+accordingly. If at all possible, irrelevant differences should be
+masked out, or the test should be written so that the output does not
+reflect such items. </p>
+<p>
+Suggestions to minimize canons:
+</p>
+<ul>
+  <li>create test specific masking</li>
+  <li>ensure test data has a specific correct returned order; or an
+order by should be added to a query</li>
+  <li>when writing java tests, ensure only pertinent output is
+reflected.</li>
+</ul>
+<br>
+<h3><a class="mozTocH3" name="mozTocId68107"></a>4.6 <a name="ov6"></a>Masking
+and comparing</h3>
+<p>
+Tests often fail because of unimportant differences, such as process
+ids, statement ids, timestamps. The derby functional test harness
+provides for masking of these differences at 2 levels:<br>
+</p>
+<ol>
+  <li>overall level. Masking required in all, or many tests can be
+achieved using the class Sed in the test harness directory. This class
+can either delete a reference present in the .tmp file from the .out
+file, or replace it with a generic string. </li>
+  <li>test specific level. To make masking for only one test, a
+(testname)_sed.properties file can be created which allows to either
+remove a string from the output or to replace it.</li>
+</ol>
+<p>
+The diff is executed between the final resulting output and the master
+file found.<br>
+<br>
+</p>
+<h3><a name="Adding_a_new_test"></a>4.7<span style="font-weight: bold;">&nbsp;
+</span>Adding
+a new test</h3>
+<p>
+To add a new test:
+</p>
+<ul>
+  <li>create the test file (e.g. newfunctest.java or newfunctest.sql)
+in the appropriate tests subdirectory</li>
+  <li>list any files needed that are not .sql or .java files in a
+supportfiles entry in a test specific _app.properties file. e.g.
+newfunctest_app.properties:&nbsp; supportfiles=xyz.jar<br>
+  </li>
+  <li>list any specific derby properties in a test specific
+_derby.properties file.</li>
+  <li>add the properties files to the copyfiles.ant file in the test
+specific directory</li>
+  <li>run the test. The first time around, the test will fail because
+no master file will be found. </li>
+  <li>if the output is correct, copy it to the master directory. Note
+that there is no copyfiles.ant file needed for the master directory,
+all .out files are automatically copied.</li>
+  <li>run the test again. Investigate if any differences need to be
+masked out using a test specific sed.properties file (e.g.
+newfunctest_sed.properties). If so, ensure this is added to
+copyfiles.ant.</li>
+  <li>add the test to a specific suites/*.xml file, maintaining proper
+xml syntax. </li>
+  <li>run the suite, and correct any problems found.</li>
+</ul>
+<br>
+<h3><a name="4.8_Suites_and_Adding_a_new_suite"></a>4.8 Suites and
+Adding a new suite</h3>
+<p>
+A suite constitutes of a &lt;suitename&gt;.properties file and/or a
+&lt;suitename&gt;.runall file in the
+org/apache/derbyTesting/functionTests/suites directory. The .properties
+files hold references to other .properties files, or .runall files, the
+.runall files are the actual lists of tests.
+</p>
+<p>
+The lowest level suite always needs to have a .runall file.
+</p>
+<p>
+For example, the derbyall suite is only a derbyall.properties file that
+refers to 2 other suites in the 'suites' property:
+</p>
+<table
+ style="text-align: left; width: 527px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>-----------------------derbyall.properties---------------<br>
+suites=derbylang derbynetmats<br>
+derby.debug.true=enableBtreeConsistencyCheck<br>
+derby.stream.error.logSeverityLevel=0<br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+The derbylang suite is only a derbylang.runall, which lists the tests.
+The derbynetmats suite has both a .runall and a .properties file, so
+some additional properties can be specified that are true for all tests
+in that suite. </p>
+<table
+ style="text-align: left; width: 521px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>------------------derbynetmats.properties-----------------<br>
+framework=DerbyNet<br>
+suites=derbynetmats<br>
+jdk12test=true<br>
+runwithj9=false<br>
+timeout=60<br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+To add a suite, you need to create at least a &lt;suite&gt;.runall
+file, which lists the actual tests, or a properties file that refers to
+other suites that do have a .runall file. The suite should be added
+into the directory
+${derby.source}/java/testing/org/apache/derbyTesting/functionTests/suites.<br>
+<br>
+</p>
+<h3><a name="4.9_Running_with_a_new_jvm_"></a> <a name="ov9"></a>4.9
+Running
+with a new jvm<br>
+</h3>
+<p>Currently, the supported jvms are:
+</p>
+<table style="text-align: left; width: 497px; height: 32px;" border="1"
+ cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>&nbsp;&nbsp;&nbsp; jdk131
+- Sun
+HotSpot jdk1.3.1 - class: jdk13</small><br>
+      <small>&nbsp;&nbsp;&nbsp; jdk141 - Sun HotSpot jdk1.4.1 - class
+jdk14</small><br>
+      <small>&nbsp;&nbsp;&nbsp; jdk142 - Sun HotSpot jdk1.4.2 - class
+jdk14</small><br>
+      <small>&nbsp;&nbsp;&nbsp; jdk15 - Sun HotSpot jdk1.5 - class jdk15</small><br>
+      <small>&nbsp;&nbsp;&nbsp; ibm131 - IBM Classic jdk1.3.1&nbsp; -
+class ibm13</small><br>
+      <small>&nbsp;&nbsp;&nbsp; ibm141 - IBM Classic jdk1.4.1 - class
+ibm14</small><br>
+      <small>&nbsp;&nbsp;&nbsp; ibm142 - IBM Classic jdk1.4.1 - class
+ibm14</small><br>
+      <small>&nbsp;&nbsp;&nbsp; j9_13 - WCTME jvm (available with IBM
+Websphere Client Technology Micro Edition) - class j9_13<br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<p>The classes above are subclasses of
+org.apache.derbyTesting.functionTests.harness.jvm. The name at the
+front is just a convention.<br>
+</p>
+<p>To run a test with a jvm that does not have a matching class under
+org.apache.derbyTesting.functionTests.harness, do the following:<br>
+</p>
+<ul>
+  <li>just run the tests as if there is a jvm class. The harness will
+default to using
+the jdk14 class. Unlikely, but possibly there are no differences<br>
+  </li>
+  <li>if there are failures showing that cannot be explained any other
+way but genuine, acceptable jvm differences, do the following:</li>
+  <ul>
+    <li>create a subclass of
+org.apache.derbyTesting.functionTests.harness.jvm. In this class,
+specify any jvm specific property settings required </li>
+    <li>compile the new jvm class and run the tests</li>
+    <li>create a new canon directory for any additional canons that
+need to be created.</li>
+    <li>in rare occasions, other harness changes may be required</li>
+    <li>for any tests that should not run with this environment, add a
+line in the testname_app.properties file indicating this. For instance
+to add a line for a jvm called jdk29, it would be like this:
+runwithjdk29=false. Note that the versioning does not currently extend
+past 2 digits.</li>
+    <li>Add code in RunTest.java to switch to the new jvm based on
+values for system and vendor properties</li>
+  </ul>
+</ul>
+<br>
+<h3><a name="skipping"></a>4.10 Skipping a test</h3>
+<p>
+Some tests are written to test specific functionality only available
+with for instance certain jvms, or, with network server, certain
+versions of the IBM Universal Driver. To control this, properties can
+be set for each test, for instance, if a test should not be run when
+using an ibm jvm, set runwithibmjvm=false. If a test should be run with
+Sun Hotspot jvm version 14, then set runwithjdk14=true.<br>
+The skip setting does not go into the subversion level, i.e. setting
+runwithjdk141=false has no effect, and setting runwithjdk14 affects
+runs with jdk141 as well as jdk142.<br>
+Other skip reasons are encryption protocols specific to a certain jvm. <br>
+</p>
+<br>
+<h3><a name="frameworks"></a>4.11 Frameworks</h3>
+<p>
+Currently, the only framework used is DerbyNet for network server. <br>
+Setting framework property setting will invoke the test harness class
+NetServer, which currently has configuration for connecting to DB2 via
+jcc (the IBM Universal Driver), and via the older db2 driver. But there
+are currently no tests to exercise these settings.<br>
+Setting this framework also causes the search for expected output to
+include DerbyNet and jcc version specific subdirectories under master.<br>
+</p>
+<br>
+<h3><a name="props"></a>4.12 Some test harness properties</h3>
+<p>
+For a complete set, refer to comments in RunTest.java, but here are
+some valuable test properties which can be passed to the RunTest class:
+</p>
+<table
+ style="text-align: left; margin-left: 40px; width: 601px; height: 252px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">runwith&lt;jvm&gt;<br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; See above
+section <a href="#skipping">4.10</a><br>
+framework<br>
+&nbsp;&nbsp;&nbsp; specifies which framework to run with. For example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java -Dframework=DerbyNet
+org.apache.derbyTesting.functionTests.RunTest <br>
+lang/supersimple.sql<br>
+verbose<br>
+&nbsp;&nbsp;&nbsp; Shows more detailed output. For example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java -Dverbose=true
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
+keepfiles<br>
+&nbsp; &nbsp; Indicates to not clean up any of the files if the test
+passed.<br>
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; java -Dkeepfiles=true
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
+TestSpecialFlags<br>
+&nbsp;&nbsp;&nbsp; sets additional properties.<br>
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
+-D=TestSpecialFlags=derby.infolog.append=true
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3><br>
+</h3>
+<br>
+<br>
+<h2>Notes</h2>
+<small><a name="Note1:"></a> Note1:<br>
+</small>
+<div style="margin-left: 40px;"><small>There is one more suite
+included: the j9derbynetmats
+suite is a modification of the derbynetmats suite. It is available to
+test
+the network server with the jvm available with IBM's WCTME (Workplace
+Client Technology, Micro Edition; formerly WSDD), and will be run at IBM</small><small>.
+Note that the setup for running the j9derbynetmats
+tests is very specific to the test harness, not even using the WCTME
+files in their normal location.</small><small> <br>
+The j9derbynetmats suite is included to serve as an
+example of splitting the network server process to run with a different
+jvm than the test client. The j9derbynetmats suite will run with
+another
+jvm
+as client (as defined in the suite properties), but start up
+network server with the 'j9' jvm files (the reference to 'j9' is based
+on the executable, j9.exe), based on the property 'serverJvm'. Running
+this suite requires providing the property&nbsp; bootcp,
+which is&nbsp; interpreted from the test harness class j9_13. See also
+section on adding a new <a href="#ov9%22">jvm setup</a>.
+</small><br>
+</div>
+<br>
+<small><a name="Note2:"></a>Note2:<br>
+</small>
+<div style="margin-left: 40px;"><small>setting
+RetrieveMessagesFromServerOnGetMessage to true
+for the test harness is purely for
+illustration, the test harness actually forces
+RetrieveMessagesFromServerOnGetMessage to true for the tests so the
+output is always as expected.</small><br>
+</div>
+<br>
+<small><a name="Note3:_"></a>Note3: <br>
+</small>
+<div style="margin-left: 40px;"><small>occasionally, cleanup is
+unsuccessful. This does not
+constitute a problem in any way, as the harness starts with a clean
+database, and clean copies of all files. However, you will see
+something like this in the output:</small><br>
+<small>Warning: Cleanup failed on baseDir:
+/local/myrun1/DerbyNet/supersimple</small><br>
+</div>
+<br>
+</body>
+</html>

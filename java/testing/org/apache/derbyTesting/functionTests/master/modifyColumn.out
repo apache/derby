@@ -1,0 +1,157 @@
+ij> -- Testing changing the length of a column.
+-- Also testing the new syntax for generated column spec and identity attribute
+create table alltypes (i int, tn int, s smallint, l bigint,
+				c char(10), v varchar(50), lvc long varchar,
+				nc char(10), nvc varchar(10),
+				d double precision, r real, f float,
+				dt date, t time, ts timestamp,
+				b char(2) for bit data, bv varchar(2) for bit data, lbv long varchar for bit data,
+				dc decimal(5,2), n numeric(8,4), o bigint);
+0 rows inserted/updated/deleted
+ij> -- lets start with negative tests first.
+alter table alltypes alter c set data type char(20);
+ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
+ij> alter table alltypes alter b set data type char(4) for bit data;
+ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
+ij> alter table alltypes alter nc set data type char(20);
+ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
+ij> alter table alltypes alter dc set data type decimal (8,2);
+ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
+ij> alter table alltypes alter n set data type numeric (12,8);
+ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
+ij> alter table alltypes alter c set data type varchar(10);
+ERROR 42Z15: Invalid Type specified for column 'C'. The type of a column may not be changed.
+ij> alter table alltypes alter b set data type varchar(2) for bit data;
+ERROR 42Z15: Invalid Type specified for column 'B'. The type of a column may not be changed.
+ij> alter table alltypes alter dc set data type numeric(8,2);
+ERROR 42Z15: Invalid Type specified for column 'DC'. The type of a column may not be changed.
+ij> alter table alltypes alter tn set data type int;
+ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
+ij> alter table alltypes alter v set data type varchar(1);
+ERROR 42Z17: Invalid Length specified for Column 'V'. Length must be greater than the current column length
+ij> alter table alltypes alter v set data type varchar(49);
+ERROR 42Z17: Invalid Length specified for Column 'V'. Length must be greater than the current column length
+ij> alter table alltypes alter bv set data type varchar(1) for bit data;
+ERROR 42Z17: Invalid Length specified for Column 'BV'. Length must be greater than the current column length
+ij> alter table alltypes alter bv set data type varchar(2) for bit data;
+0 rows inserted/updated/deleted
+ij> alter table alltypes alter nvc set data type varchar(0);
+ERROR 42X44: Invalid length '0' in column specification.
+ij> alter table alltypes alter nvc set data type varchar(9);
+ERROR 42Z17: Invalid Length specified for Column 'NVC'. Length must be greater than the current column length
+ij> drop table alltypes;
+0 rows inserted/updated/deleted
+ij> create table t0 (i int not null, v varchar(1) not null, constraint pk primary key(v,i));
+0 rows inserted/updated/deleted
+ij> -- this should work. primary key constraint has no referencing fkey
+-- constraints.
+alter table t0 alter v set data type varchar(2);
+0 rows inserted/updated/deleted
+ij> create table t1 (i int, v varchar(2), constraint fk foreign key  (v,i) references t0(v,i));
+0 rows inserted/updated/deleted
+ij> alter table t0 alter v set data type varchar(3);
+ERROR 42Z19: Column 'V' is being referenced by atleast one foreign key constraint 'FK'. To alter the length of this column, you should drop referencing constraints, perform the ALTER TABLE and then recreate the constraints.
+ij> -- should fail; can't muck around with fkey constraints.
+alter table t1 alter v set data type varchar(3);
+ERROR 42Z18: Column 'V' is part of a foreign key constraint 'FK'. To alter the length of this column, you should drop the constraint first, perform the ALTER TABLE and then recreate the constraint.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t0;
+0 rows inserted/updated/deleted
+ij> -- do the same thing over again with a unique key constraint this time.
+create table t0 (i int not null, v varchar(1) not null, constraint  uq unique(v,i));
+0 rows inserted/updated/deleted
+ij> -- this should work. unique constraint has no referencing fkey
+-- constraints.
+alter table t0 alter v set data type varchar(2);
+0 rows inserted/updated/deleted
+ij> create table t1 (i int, v varchar(2), constraint fk foreign key  (v,i) references t0(v,i));
+0 rows inserted/updated/deleted
+ij> -- this should fail-- someone is referencing me.
+alter table t0 alter v set data type varchar(3);
+ERROR 42Z19: Column 'V' is being referenced by atleast one foreign key constraint 'FK'. To alter the length of this column, you should drop referencing constraints, perform the ALTER TABLE and then recreate the constraints.
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t0;
+0 rows inserted/updated/deleted
+ij> --
+-- test that we can't alter a column with an autoincrement default to nullable
+create table t1(a int generated always as identity (start with 1, increment by 1));
+0 rows inserted/updated/deleted
+ij> insert into t1 values(DEFAULT);
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+ij> -- this should fail
+alter table t1 modify a null;
+ERROR 42X01: Syntax error: Encountered "modify" at line 2, column 16.
+ij> insert into t1 values(DEFAULT);
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- lets get to positive tests.
+create table t1 (vc varchar(1) not null, nvc varchar(1) not null, bv varchar(1) for bit data not null);
+0 rows inserted/updated/deleted
+ij> alter table t1 add constraint uq unique (vc, nvc, bv);
+0 rows inserted/updated/deleted
+ij> insert into t1 values ('p', 'p', x'01');
+1 row inserted/updated/deleted
+ij> insert into t1 values ('pe', 'p', x'01');
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR 'pe' to length 1.
+ij> alter table t1 alter vc set data type varchar(2);
+0 rows inserted/updated/deleted
+ij> insert into t1 values ('pe', 'p', x'01');
+1 row inserted/updated/deleted
+ij> insert into t1 values ('pe', 'pe', x'01');
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR 'pe' to length 1.
+ij> alter table t1 alter nvc set data type varchar(2);
+0 rows inserted/updated/deleted
+ij> insert into t1 values ('pe', 'pe', x'01');
+1 row inserted/updated/deleted
+ij> insert into t1 values ('pe', 'pe', x'1000');
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA '1000' to length 1.
+ij> alter table t1 alter bv set data type varchar(2) for bit data;
+0 rows inserted/updated/deleted
+ij> insert into t1 values ('pe', 'pe', x'1000');
+1 row inserted/updated/deleted
+ij> -- make sure constraints aren't lost due to an alter.
+insert into t1 values ('pe','pe', x'01');
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'UQ' defined on 'T1'.
+ij> -- do some selects to ensure consistency of data.
+select * from t1 where vc='pe';
+VC  |NVC |BV  
+--------------
+pe  |p   |01  
+pe  |pe  |01  
+pe  |pe  |1000
+ij> select * from t1 where vc='pe';
+VC  |NVC |BV  
+--------------
+pe  |p   |01  
+pe  |pe  |01  
+pe  |pe  |1000
+ij> alter table t1 alter vc set data type varchar(3);
+0 rows inserted/updated/deleted
+ij> select * from t1 where vc='pe';
+VC  |NVC |BV  
+--------------
+pe  |p   |01  
+pe  |pe  |01  
+pe  |pe  |1000
+ij> select * from t1 where vc='pe';
+VC  |NVC |BV  
+--------------
+pe  |p   |01  
+pe  |pe  |01  
+pe  |pe  |1000
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,917 @@
+ij> -- test filtering of duplicates at language layer
+-- for in-order distincts
+-- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij> -- create some tables
+create table t1(c1 int, c2 char(50), c3 char(50));
+0 rows inserted/updated/deleted
+ij> create table t2(c1 int, c2 char(50), c3 char(50));
+0 rows inserted/updated/deleted
+ij> -- t1 gets non-unique indexes, t2 gets unique
+create index t11 on t1(c1);
+0 rows inserted/updated/deleted
+ij> create index t12 on t1(c1, c2);
+0 rows inserted/updated/deleted
+ij> create index t13 on t1(c1, c3, c2);
+0 rows inserted/updated/deleted
+ij> create unique index t21 on t2(c1, c2);
+0 rows inserted/updated/deleted
+ij> create unique index t22 on t2(c1, c3);
+0 rows inserted/updated/deleted
+ij> -- populate 
+insert into t1 values (1, '1', '1'), (1, '1', '1'),
+	(1, '11', '11'), (1, '11', '11'), (2, '2', '2'),
+	(2, '2', '3'), (2, '3', '2'), (3, '3', '3'),
+	(null, null, null);
+9 rows inserted/updated/deleted
+ij> insert into t2 values (1, '1', '1'), (1, '2', '2'),
+		      (2, '1', '1'), (2, '2', '2'),
+		      (null, 'null', 'null');
+5 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 7000;
+ij> -- first column of an index
+select distinct c1 from t1 where 1=1;
+C1         
+-----------
+1          
+2          
+3          
+NULL       
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- first column of an index
+select distinct c1 from t1 where 1=1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 9
+Rows returned = 4
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (3):
+	Number of opens = 1
+	Rows seen = 9
+	Rows filtered = 0
+	restriction = false
+	projection = false
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Index Scan ResultSet for T1 using index T11 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 9
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=9
+			Number of rows visited=9
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
+ij> select distinct c1 from t1 where 1=1;
+C1         
+-----------
+1          
+2          
+3          
+NULL       
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select distinct c1 from t1 where 1=1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 9
+Rows returned = 4
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (3):
+	Number of opens = 1
+	Rows seen = 9
+	Rows filtered = 0
+	restriction = false
+	projection = false
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Index Scan ResultSet for T1 using index T11 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 9
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=9
+			Number of rows visited=9
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
+ij> -- equality predicate on preceding key columns
+select distinct c2 from t1 where c1 = 1 and c3 = '1';
+C2                                                
+--------------------------------------------------
+1                                                 
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- equality predicate on preceding key columns
+select distinct c2 from t1 where c1 = 1 and c3 = '1'
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 2
+Rows returned = 1
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (4):
+	Number of opens = 1
+	Rows seen = 2
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 2
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index T13 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 2
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1, 2}
+				Number of columns fetched=3
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=2
+				Number of rows visited=3
+				Scan type=btree
+				Tree height=1
+				start position: 
+	>= on first 2 column(s).
+	Ordered null semantics on the following columns: 
+				stop position: 
+	> on first 2 column(s).
+	Ordered null semantics on the following columns: 
+				qualifiers:
+None
+ij> -- equality predicate on all key columns, non unique
+select distinct c3 from t1 where c1 = 1 and c2 = '1';
+C3                                                
+--------------------------------------------------
+1                                                 
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- equality predicate on all key columns, non unique
+select distinct c3 from t1 where c1 = 1 and c2 = '1'
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 2
+Rows returned = 1
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (4):
+	Number of opens = 1
+	Rows seen = 2
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 2
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index T13 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 2
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1, 2}
+				Number of columns fetched=3
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=2
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				qualifiers:
+Column[0][0] Id: 2
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- equality predicate on all key columns, non unique
+select distinct c3 from t2 where c1 = 1 and c2 = '1';
+C3                                                
+--------------------------------------------------
+1                                                 
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- equality predicate on all key columns, non unique
+select distinct c3 from t2 where c1 = 1 and c2 = '1'
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (3):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Index Row to Base Row ResultSet for T2:
+	Number of opens = 1
+	Rows seen = 1
+	Columns accessed from heap = {2}
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		Index Scan ResultSet for T2 using index T21 at read committed isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 2 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 2 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
+ij> -- different orderings
+select distinct c2, c1 from t1 where 1=1;
+C2                                                |C1         
+--------------------------------------------------------------
+1                                                 |1          
+11                                                |1          
+2                                                 |2          
+3                                                 |2          
+3                                                 |3          
+NULL                                              |NULL       
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- different orderings
+select distinct c2, c1 from t1 where 1=1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 9
+Rows returned = 6
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (4):
+	Number of opens = 1
+	Rows seen = 9
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 9
+		Rows filtered = 0
+		restriction = false
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index T12 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 9
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=9
+				Number of rows visited=9
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> select distinct c2 from t1 where c1 = 1;
+C2                                                
+--------------------------------------------------
+1                                                 
+11                                                
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select distinct c2 from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 4
+Rows returned = 2
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (3):
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Index Scan ResultSet for T1 using index T12 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 1}
+			Number of columns fetched=2
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=5
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
+ij> select distinct c2, c1 from t1 where c3 = '1';
+C2                                                |C1         
+--------------------------------------------------------------
+1                                                 |1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select distinct c2, c1 from t1 where c3 = '1'
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 2
+Rows returned = 1
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (4):
+	Number of opens = 1
+	Rows seen = 2
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 2
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index T13 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 2
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1, 2}
+				Number of columns fetched=3
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=2
+				Number of rows visited=9
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> select distinct c2 from t1 where c3 = '1' and c1 = 1;
+C2                                                
+--------------------------------------------------
+1                                                 
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select distinct c2 from t1 where c3 = '1' and c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 2
+Rows returned = 1
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (4):
+	Number of opens = 1
+	Rows seen = 2
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 2
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for T1 using index T13 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 2
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1, 2}
+				Number of columns fetched=3
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=2
+				Number of rows visited=3
+				Scan type=btree
+				Tree height=1
+				start position: 
+	>= on first 2 column(s).
+	Ordered null semantics on the following columns: 
+				stop position: 
+	> on first 2 column(s).
+	Ordered null semantics on the following columns: 
+				qualifiers:
+None
+ij> -- ordered, but no where clause - uses distinct scan
+-- the following approach is used because the ordering of the results from
+-- the distinct is not guaranteed (it varies depending on the JVM hash 
+-- implementation), but adding an order by to the query may
+-- change how we execute the distinct and we want to test the code path without
+-- the order by.  By adding the temp table, we can maintain a single master
+-- file for all JVM's.
+create table temp_result (result_column int);
+0 rows inserted/updated/deleted
+ij> insert into temp_result 
+    (select distinct c1 from t1);
+4 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	insert into temp_result 
+    (select distinct c1 from t1)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Insert ResultSet using row locking:
+deferred: false
+insert mode: normal
+Rows inserted = 4
+Indexes updated = 0
+Execute Time = 0
+	Distinct Scan ResultSet for T1 using index T11 at read committed isolation level using instantaneous share row locking: 
+	Number of opens = 1
+	Hash table size = 4
+	Distinct column is column number 0
+	Rows seen = 4
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={0}
+		Number of columns fetched=1
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=9
+		Number of rows visited=9
+		Scan type=btree
+		Tree height=1
+		start position:
+	None
+		stop position:
+	None
+		scan qualifiers:
+None
+		next qualifiers:
+None
+ij> select * from temp_result order by result_column;
+RESULT_COL&
+-----------
+1          
+2          
+3          
+NULL       
+ij> drop table temp_result;
+0 rows inserted/updated/deleted
+ij> -- test distinct with an order by
+select distinct c1 from t1 order by c1;
+C1         
+-----------
+1          
+2          
+3          
+NULL       
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- test distinct with an order by
+select distinct c1 from t1 order by c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 9
+Rows returned = 4
+Eliminate duplicates = true
+In sorted order = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Index Scan ResultSet for T1 using index T11 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 9
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={0}
+		Number of columns fetched=1
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=9
+		Number of rows visited=9
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> 

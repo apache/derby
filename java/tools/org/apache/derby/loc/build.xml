@@ -18,8 +18,8 @@
   <target name="copyfiles">
     <copy todir="${loc.dir}" flatten="true">
       <fileset dir="${derby.tools.locales.dir}">
-        <include name="sysinfoMessages.properties"/>
-        <include name="toolsmessages.properties"/>
+        <include name="sysinfoMessages*.properties"/>
+        <include name="toolsmessages*.properties"/>
       </fileset>
     </copy>
   </target>

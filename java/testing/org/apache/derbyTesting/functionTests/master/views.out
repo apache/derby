@@ -1,0 +1,337 @@
+ij> -- tests for views
+-- set autocommit off
+autocommit off;
+ij> -- create some tables
+create table t1(i int, s smallint, f float, dp double precision);
+0 rows inserted/updated/deleted
+ij> create table t2(i int, s smallint, f float, dp double precision);
+0 rows inserted/updated/deleted
+ij> create table insert_test (f float);
+0 rows inserted/updated/deleted
+ij> -- create some views
+create view sv1 (s_was_i, dp_was_s, i_was_f, f_was_dp) as
+select * from t1;
+0 rows inserted/updated/deleted
+ij> create view sv2 as select * from t1;
+0 rows inserted/updated/deleted
+ij> create view sv3 as select dp, f from t1 where i = s;
+0 rows inserted/updated/deleted
+ij> create view sv4(i) as values 1, 2, 3;
+0 rows inserted/updated/deleted
+ij> create view sv5 (c1) as select * from sv4;
+0 rows inserted/updated/deleted
+ij> create view cv1 (t1_i, t2_s, t1_f, t2_dp) as
+select t1.i, t2.s, t1.f, t2.dp from t1, t2 where t1.i between t2.s and t2.i;
+0 rows inserted/updated/deleted
+ij> create view cv2 as select * from sv1, sv3 where dp = f_was_dp;
+0 rows inserted/updated/deleted
+ij> create view cv3(i,s,f,dp) as select i, s, f, dp from sv2 union
+				   select dp_was_s, s_was_i, f_was_dp, i_was_f from sv1;
+0 rows inserted/updated/deleted
+ij> create view cv4 (distinct_i) as select distinct i from t1;
+0 rows inserted/updated/deleted
+ij> create view cv5(i,s) as select * from (select i, s from cv3 where i = s) xyz;
+0 rows inserted/updated/deleted
+ij> create view cv6 (c1, c2) as select a.c1 as x, b.c1 as y from sv5 a, sv5 b 
+where a.c1 <> b.c1;
+0 rows inserted/updated/deleted
+ij> create view cv7 as select t.i, v.c1 from t1 t, cv6 v where t.i = v.c1;
+0 rows inserted/updated/deleted
+ij> create view cv8(col1, col2) as select 'Column 1',  'Value = ' || cast(c1 as char(5)) from cv7
+		where 1 in (select i from sv5);
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into t1 values (1, 1, 1.0, 1.0);
+1 row inserted/updated/deleted
+ij> insert into t1 values (1, 2, 3.0, 4.0);
+1 row inserted/updated/deleted
+ij> insert into t1 values (8, 7, 6.0, 5.0);
+1 row inserted/updated/deleted
+ij> insert into t2 values (1, 1, 1.0, 1.0);
+1 row inserted/updated/deleted
+ij> insert into t2 values (1, 2, 3.0, 4.0);
+1 row inserted/updated/deleted
+ij> insert into t2 values (8, 7, 6.0, 5.0);
+1 row inserted/updated/deleted
+ij> -- negative tests
+-- view with a parameter
+create view vneg as select * from t1 where i = ?;
+ERROR 42X98: Parameters are not allowed in a VIEW definition.
+ij> -- drop view on table
+drop view t1;
+ERROR X0Y16: 'T1' is not a view.  If it is a table, then use DROP TABLE instead.
+ij> -- drop table on view
+drop table sv1;
+ERROR 42Y62: 'DROP TABLE' is not allowed on 'APP.SV1' because it is a view.
+ij> -- views and tables share same name space
+create view sv1(i) as values 1;
+ERROR X0Y32: Table/View 'SV1' already exists in Schema 'APP'.
+ij> create table sv1 (c1 int);
+ERROR X0Y32: Table/View 'SV1' already exists in Schema 'APP'.
+ij> create view t1(i) as values 1;
+ERROR X0Y32: Table/View 'T1' already exists in Schema 'APP'.
+ij> -- drop non-existant view
+drop view notexists;
+ERROR X0X05: Table 'NOTEXISTS' does not exist.
+ij> -- duplicate column name in view's column list
+create view shouldntwork (c1, c2, c1) as select i, s, f from t1;
+ERROR 42Y13: Column name 'C1' appears more than once in the create view statement.
+ij> -- # of columns in view's column list does not match that in view definition
+create view shouldntwork (c1, c2, c3) as select i, s from t1;
+ERROR 42X56: The number of columns in the view column list does not match the number of columns in the underlying query expression in the view definition for 'SHOULDNTWORK'.
+ij> create view shouldntwork (c1, c2, c3) as select i, s, f, dp from t1;
+ERROR 42X56: The number of columns in the view column list does not match the number of columns in the underlying query expression in the view definition for 'SHOULDNTWORK'.
+ij> -- try to drop a table out from under a view
+drop table t1;
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'SV1' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'SV2' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'SV3' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'CV1' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'CV2' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'CV3' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'CV4' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'CV5' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'CV7' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'CV8' is dependent on that object.
+ij> drop table t2;
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T2' because VIEW 'CV1' is dependent on that object.
+ij> -- try to drop a view out from under another view
+drop view sv1;
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV1' because VIEW 'CV2' is dependent on that object.
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV1' because VIEW 'CV3' is dependent on that object.
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV1' because VIEW 'CV5' is dependent on that object.
+ij> drop view sv3;
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV3' because VIEW 'CV2' is dependent on that object.
+ij> -- try to drop a view out from under a cursor
+get cursor c1 as 'select * from cv8';
+ij> drop view cv8;
+ERROR X0X95: Operation 'DROP VIEW' cannot be performed on object 'CV8' because there is an open ResultSet dependent on that object.
+ij> drop view sv5;
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV5' because VIEW 'CV6' is dependent on that object.
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV5' because VIEW 'CV7' is dependent on that object.
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV5' because VIEW 'CV8' is dependent on that object.
+ERROR X0X95: Operation 'DROP VIEW' cannot be performed on object 'SV5' because there is an open ResultSet dependent on that object.
+ij> drop view sv4;
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV4' because VIEW 'SV5' is dependent on that object.
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV4' because VIEW 'CV6' is dependent on that object.
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV4' because VIEW 'CV7' is dependent on that object.
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'SV4' because VIEW 'CV8' is dependent on that object.
+ERROR X0X95: Operation 'DROP VIEW' cannot be performed on object 'SV4' because there is an open ResultSet dependent on that object.
+ij> close c1;
+ij> -- view updateability
+-- (No views are currently updateable)
+insert into sv1 values 1;
+ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updateable.)
+ij> delete from sv1;
+ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updateable.)
+ij> update sv1 set s_was_i = 0;
+ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updateable.)
+ij> get cursor c2 as 'select * from sv1 for update of s_was_i';
+ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ij> -- create index on a view
+create index i1 on sv2(i);
+ERROR 42Y62: 'CREATE INDEX' is not allowed on 'APP.SV2' because it is a view.
+ij> -- positive tests
+select * from sv1;
+S_WAS_I    |DP_WA&|I_WAS_F               |F_WAS_DP              
+----------------------------------------------------------------
+1          |1     |1.0                   |1.0                   
+1          |2     |3.0                   |4.0                   
+8          |7     |6.0                   |5.0                   
+ij> select * from sv2;
+I          |S     |F                     |DP                    
+----------------------------------------------------------------
+1          |1     |1.0                   |1.0                   
+1          |2     |3.0                   |4.0                   
+8          |7     |6.0                   |5.0                   
+ij> select * from sv3;
+DP                    |F                     
+---------------------------------------------
+1.0                   |1.0                   
+ij> select * from sv4;
+I          
+-----------
+1          
+2          
+3          
+ij> select * from sv5;
+C1         
+-----------
+1          
+2          
+3          
+ij> select * from cv1;
+T1_I       |T2_S  |T1_F                  |T2_DP                 
+----------------------------------------------------------------
+1          |1     |1.0                   |1.0                   
+1          |1     |3.0                   |1.0                   
+8          |7     |6.0                   |5.0                   
+ij> select * from cv2;
+S_WAS_I    |DP_WA&|I_WAS_F               |F_WAS_DP              |DP                    |F                     
+--------------------------------------------------------------------------------------------------------------
+1          |1     |1.0                   |1.0                   |1.0                   |1.0                   
+ij> select * from cv3;
+I          |S          |F                     |DP                    
+---------------------------------------------------------------------
+1          |1          |1.0                   |1.0                   
+1          |2          |3.0                   |4.0                   
+2          |1          |4.0                   |3.0                   
+7          |8          |5.0                   |6.0                   
+8          |7          |6.0                   |5.0                   
+ij> select * from cv4 order by 1;
+DISTINCT_I 
+-----------
+1          
+8          
+ij> select * from cv5;
+I          |S          
+-----------------------
+1          |1          
+ij> select * from cv6;
+C1         |C2         
+-----------------------
+1          |2          
+1          |3          
+2          |1          
+2          |3          
+3          |1          
+3          |2          
+ij> select * from cv7;
+I          |C1         
+-----------------------
+1          |1          
+1          |1          
+1          |1          
+1          |1          
+ij> select * from cv8;
+COL1    |COL2         
+----------------------
+Column 1|Value = 1    
+Column 1|Value = 1    
+Column 1|Value = 1    
+Column 1|Value = 1    
+ij> select * from (select * from cv3) x order by 1,2;
+I          |S          |F                     |DP                    
+---------------------------------------------------------------------
+1          |1          |1.0                   |1.0                   
+1          |2          |3.0                   |4.0                   
+2          |1          |4.0                   |3.0                   
+7          |8          |5.0                   |6.0                   
+8          |7          |6.0                   |5.0                   
+ij> select * from (select * from cv4) x order by 1;
+DISTINCT_I 
+-----------
+1          
+8          
+ij> select * from (select * from cv5) x;
+I          |S          
+-----------------------
+1          |1          
+ij> -- verify that we can create and drop indexes on underlying tables
+create index i on t1(i);
+0 rows inserted/updated/deleted
+ij> drop index i;
+0 rows inserted/updated/deleted
+ij> -- verify the consistency of the indexes on the system catalogs
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
+from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+SYSCONGLOMERATES                                                                                                                |1          
+SYSTABLES                                                                                                                       |1          
+SYSCOLUMNS                                                                                                                      |1          
+SYSSCHEMAS                                                                                                                      |1          
+SYSCONSTRAINTS                                                                                                                  |1          
+SYSKEYS                                                                                                                         |1          
+SYSDEPENDS                                                                                                                      |1          
+SYSALIASES                                                                                                                      |1          
+SYSVIEWS                                                                                                                        |1          
+SYSCHECKS                                                                                                                       |1          
+SYSFOREIGNKEYS                                                                                                                  |1          
+SYSSTATEMENTS                                                                                                                   |1          
+SYSFILES                                                                                                                        |1          
+SYSTRIGGERS                                                                                                                     |1          
+SYSSTATISTICS                                                                                                                   |1          
+ij> -- test inserts from a view
+insert into insert_test select * from sv5;
+3 rows inserted/updated/deleted
+ij> select * from insert_test;
+F                     
+----------------------
+1.0                   
+2.0                   
+3.0                   
+ij> -- drop the views
+drop view cv8;
+0 rows inserted/updated/deleted
+ij> drop view cv7;
+0 rows inserted/updated/deleted
+ij> drop view cv6;
+0 rows inserted/updated/deleted
+ij> drop view cv5;
+0 rows inserted/updated/deleted
+ij> drop view cv4;
+0 rows inserted/updated/deleted
+ij> drop view cv3;
+0 rows inserted/updated/deleted
+ij> drop view cv2;
+0 rows inserted/updated/deleted
+ij> drop view cv1;
+0 rows inserted/updated/deleted
+ij> drop view sv5;
+0 rows inserted/updated/deleted
+ij> drop view sv4;
+0 rows inserted/updated/deleted
+ij> drop view sv3;
+0 rows inserted/updated/deleted
+ij> drop view sv2;
+0 rows inserted/updated/deleted
+ij> drop view sv1;
+0 rows inserted/updated/deleted
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table insert_test;
+0 rows inserted/updated/deleted
+ij> -- verify the consistency of the indexes on the system catalogs
+select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
+from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+TABLENAME                                                                                                                       |2          
+--------------------------------------------------------------------------------------------------------------------------------------------
+SYSCONGLOMERATES                                                                                                                |1          
+SYSTABLES                                                                                                                       |1          
+SYSCOLUMNS                                                                                                                      |1          
+SYSSCHEMAS                                                                                                                      |1          
+SYSCONSTRAINTS                                                                                                                  |1          
+SYSKEYS                                                                                                                         |1          
+SYSDEPENDS                                                                                                                      |1          
+SYSALIASES                                                                                                                      |1          
+SYSVIEWS                                                                                                                        |1          
+SYSCHECKS                                                                                                                       |1          
+SYSFOREIGNKEYS                                                                                                                  |1          
+SYSSTATEMENTS                                                                                                                   |1          
+SYSFILES                                                                                                                        |1          
+SYSTRIGGERS                                                                                                                     |1          
+SYSSTATISTICS                                                                                                                   |1          
+ij> -- bug 2745
+CREATE TABLE orgtable (
+	name VARCHAR(255),
+	supervisorname VARCHAR(255),
+	jobtitle VARCHAR(255)
+);
+0 rows inserted/updated/deleted
+ij> CREATE VIEW orgview AS
+    SELECT name, supervisorname, jobtitle FROM orgtable;
+0 rows inserted/updated/deleted
+ij> SELECT name,jobtitle FROM orgview WHERE name IN (SELECT supervisorname FROM orgview WHERE name LIKE 'WYATT%');
+NAME                                                                                                                            |JOBTITLE                                                                                                                        
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> drop view orgview;
+0 rows inserted/updated/deleted
+ij> drop table orgtable;
+0 rows inserted/updated/deleted
+ij> -- reset autocommit
+autocommit on;
+ij> 

@@ -1,0 +1,398 @@
+ij> -- tests for drop table
+--
+autocommit off;
+ij> --
+-- test simple table - all should work
+--
+create table t1 ( a int);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 (a int);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 (a int);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> --
+-- test table with unique constraint - all should work
+--
+create table t1 (a int not null unique);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 (a int not null unique);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 (a int not null unique);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> --
+-- test table with primary constraint - all should work
+--
+create table t1 ( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 ( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 ( a int not null primary key);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> --
+-- test table with check constraint - all should work
+--
+create table t1 ( a int check(a > 0));
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 ( a int check(a > 0));
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 ( a int check(a > 0));
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> --
+-- test table with index - all should work
+--
+create table t1 ( a int);
+0 rows inserted/updated/deleted
+ij> create index t1index on t1(a);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 (a int);
+0 rows inserted/updated/deleted
+ij> create index t1index on t1(a);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1 (a int);
+0 rows inserted/updated/deleted
+ij> create index t1index on t1(a);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> --
+-- test table with foreign key references;
+--
+create table t1(a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table t2(a int constraint reft1a references t1(a));
+0 rows inserted/updated/deleted
+ij> -- this should fail with a dependent constraint error
+drop table t1;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'xxxxGENERATED-IDxxxx' because CONSTRAINT 'REFT1A' is dependent on that object.
+ij> -- this should fail with a dependent constraint error
+drop table t1;
+ERROR X0Y25: Operation 'DROP CONSTRAINT' cannot be performed on object 'xxxxGENERATED-IDxxxx' because CONSTRAINT 'REFT1A' is dependent on that object.
+ij> -- dropping dependent constraint
+alter table t2 drop constraint reft1a;
+0 rows inserted/updated/deleted
+ij> -- this should work since dependent constraint was dropped
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> -- the following should work since no referential constraint is left
+insert into t2 values(1);
+1 row inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --
+-- test table with view
+--
+create table t1(a int, b int);
+0 rows inserted/updated/deleted
+ij> create table t2(c int, d int);
+0 rows inserted/updated/deleted
+ij> create view vt1a as select a from t1;
+0 rows inserted/updated/deleted
+ij> create view vt1b as select b from t1;
+0 rows inserted/updated/deleted
+ij> create view vt1t2 as select * from t1, t2;
+0 rows inserted/updated/deleted
+ij> create view vvt1a as select * from vt1a;
+0 rows inserted/updated/deleted
+ij> create view vvvt1a as select * from vvt1a;
+0 rows inserted/updated/deleted
+ij> -- this should fail with view being a dependent object
+drop table t1;
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VT1A' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VT1B' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VT1T2' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VVT1A' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VVVT1A' is dependent on that object.
+ij> -- this should fail with view being a dependent object
+drop table t1;
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VT1A' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VT1B' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VT1T2' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VVT1A' is dependent on that object.
+ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'T1' because VIEW 'VVVT1A' is dependent on that object.
+ij> -- dropping dependent views
+drop view vvvt1a;
+0 rows inserted/updated/deleted
+ij> drop view vvt1a;
+0 rows inserted/updated/deleted
+ij> drop view vt1t2;
+0 rows inserted/updated/deleted
+ij> drop view vt1b;
+0 rows inserted/updated/deleted
+ij> drop view vt1a;
+0 rows inserted/updated/deleted
+ij> -- this should work after dependent views were dropped
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- this shouldn't find the view
+select * from vt1a;
+ERROR 42X05: Table 'VT1A' does not exist.
+ij> select * from vt1b;
+ERROR 42X05: Table 'VT1B' does not exist.
+ij> select * from vt1t2;
+ERROR 42X05: Table 'VT1T2' does not exist.
+ij> select * from vvt1a;
+ERROR 42X05: Table 'VVT1A' does not exist.
+ij> select * from vvvt1a;
+ERROR 42X05: Table 'VVVT1A' does not exist.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --
+-- test table with prepared statement
+--
+create table t1(a int);
+0 rows inserted/updated/deleted
+ij> prepare t1stmt as 'select * from t1';
+ij> -- this should work, statement will be invalidated and will fail when recompiled
+drop table t1;
+0 rows inserted/updated/deleted
+ij> execute t1stmt;
+ERROR 42X05: Table 'T1' does not exist.
+ij> remove t1stmt;
+ij> create table t1(a int);
+0 rows inserted/updated/deleted
+ij> prepare t1stmt as 'select * from t1';
+ij> -- this should work, statement will be invalidated and will fail when recompiled
+drop table t1;
+0 rows inserted/updated/deleted
+ij> execute t1stmt;
+ERROR 42X05: Table 'T1' does not exist.
+ij> remove t1stmt;
+ij> create table t1(a int);
+0 rows inserted/updated/deleted
+ij> prepare t1stmt as 'select * from t1';
+ij> -- this should work, statement will be invalidated and will fail when recompiled
+drop table t1;
+0 rows inserted/updated/deleted
+ij> execute t1stmt;
+ERROR 42X05: Table 'T1' does not exist.
+ij> remove t1stmt;
+ij> --
+-- test table with triggers
+--
+create table t1(a int);
+0 rows inserted/updated/deleted
+ij> create table t2(a int);
+0 rows inserted/updated/deleted
+ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+0 rows inserted/updated/deleted
+ij> -- this should work - trigger should be deleted
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1(a int);
+0 rows inserted/updated/deleted
+ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+0 rows inserted/updated/deleted
+ij> -- this should work - trigger should be deleted
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> create table t1(a int);
+0 rows inserted/updated/deleted
+ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+0 rows inserted/updated/deleted
+ij> -- this should work - trigger should be deleted
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- t1 shouldn't be found
+select * from t1;
+ERROR 42X05: Table 'T1' does not exist.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --
+-- test table within the body of a trigger on another table
+--
+create table t1(a int);
+0 rows inserted/updated/deleted
+ij> create table t2(a int);
+0 rows inserted/updated/deleted
+ij> create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+0 rows inserted/updated/deleted
+ij> -- this should work
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- the following should get an error when trying to recompile the trigger action
+insert into t2 values(1);
+ERROR 42X05: Table 'T1' does not exist.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t1(a int);
+0 rows inserted/updated/deleted
+ij> create table t2(a int);
+0 rows inserted/updated/deleted
+ij> create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+0 rows inserted/updated/deleted
+ij> -- this should work
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- the following should get an error when trying to recompile the trigger action
+insert into t2 values(1);
+ERROR 42X05: Table 'T1' does not exist.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t1(a int);
+0 rows inserted/updated/deleted
+ij> create table t2(a int);
+0 rows inserted/updated/deleted
+ij> create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+0 rows inserted/updated/deleted
+ij> -- this should work
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- the following should get an error when trying to recompile the trigger action
+insert into t2 values(1);
+ERROR 42X05: Table 'T1' does not exist.
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> --
+-- test drop view
+--
+create table t1(a int);
+0 rows inserted/updated/deleted
+ij> create view vt1 as select * from t1;
+0 rows inserted/updated/deleted
+ij> create view vvt1 as select * from vt1;
+0 rows inserted/updated/deleted
+ij> -- these should fail
+drop view vt1;
+ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'VT1' because VIEW 'VVT1' is dependent on that object.
+ij> drop view vt1 restrict;
+ERROR 42X01: Syntax error: Encountered "restrict" at line 1, column 15.
+ij> drop view vt1 cascade;
+ERROR 42X01: Syntax error: Encountered "cascade" at line 1, column 15.
+ij> -- 
+-- make sure that indexes are dropped for drop table
+--
+create table t2(a int not null primary key);
+0 rows inserted/updated/deleted
+ij> create table reft2(a int constraint ref1 references t2);
+0 rows inserted/updated/deleted
+ij> -- count should be 2
+select count(*) 
+from sys.sysconglomerates c, sys.systables t
+where t.tableid = c.tableid and
+t.tablename = 'REFT2';
+1          
+-----------
+2          
+ij> -- drop dependent referential constraint
+alter table reft2 drop constraint ref1;
+0 rows inserted/updated/deleted
+ij> -- should work since dependent constraint was previously dropped
+drop table t2;
+0 rows inserted/updated/deleted
+ij> -- count should be 1
+select count(*) 
+from sys.sysconglomerates c, sys.systables t
+where t.tableid = c.tableid and
+t.tablename = 'REFT2';
+1          
+-----------
+1          
+ij> -- unsuccessful drop table should not affect open cursor
+-- beetle 4393
+rollback;
+ij> create table T1 (i int, c varchar(255), d varchar(255));
+0 rows inserted/updated/deleted
+ij> insert into T1(i) values(1);
+1 row inserted/updated/deleted
+ij> insert into T1(i) values(2);
+1 row inserted/updated/deleted
+ij> get cursor X1 as 'select i from t1 for update of c';
+ij> prepare U as 'update t1 set c = CHAR(i) where current of X1';
+ij> next X1;
+I          
+-----------
+1          
+ij> drop table T1;
+ERROR X0X95: Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+ij> execute U;
+1 row inserted/updated/deleted
+ij> select * from T1;
+I          |C                                                                                                                               |D                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |1                                                                                                                               |NULL                                                                                                                            
+2          |NULL                                                                                                                            |NULL                                                                                                                            
+ij> -- pretend all of the above didn't happen
+autocommit on;
+ij> 

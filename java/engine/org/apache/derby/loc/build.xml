@@ -20,6 +20,46 @@
       <param name="msgdir" value="${derby.locales.dir}"/>
       <param name="msgfile" value="messages_en"/>
     </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_de_DE"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_es"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_ja_JP"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_ko_KR"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_qq_PP_testOnly"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_pt_BR"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_zh_CN"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_zh_TW"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_it"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_fr"/>
+    </antcall>
   </target>
 
   <target name="doSplit" depends="splitprops,verifysplit,noSplit,chksplit" unless="split.done">

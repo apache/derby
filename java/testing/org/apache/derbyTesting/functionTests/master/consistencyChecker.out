@@ -1,0 +1,215 @@
+ij> --
+-- this test shows the consistency checker in action;
+--
+-- create a table with some indexes
+create table t1(i int, s smallint, c10 char(10), vc10 varchar(10), dc decimal(5,2));
+0 rows inserted/updated/deleted
+ij> create index t1_i on t1(i);
+0 rows inserted/updated/deleted
+ij> create index t1_s on t1(s);
+0 rows inserted/updated/deleted
+ij> create index t1_c10 on t1(c10);
+0 rows inserted/updated/deleted
+ij> create index t1_vc10 on t1(vc10);
+0 rows inserted/updated/deleted
+ij> create index t1_dc on t1(dc);
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into t1 values (1, 11, '1 1', '1 1 1 ', 111.11);
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 22, '2 2', '2 2 2 ', 222.22);
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, 33, '3 3', '3 3 3 ', 333.33);
+1 row inserted/updated/deleted
+ij> insert into t1 values (4, 44, '4 4', '4 4 4 ', 444.44);
+1 row inserted/updated/deleted
+ij> -- verify that everything is alright
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+1          
+ij> CREATE PROCEDURE RFHR(P1 VARCHAR(128), P2 VARCHAR(128))
+LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.reinsertFirstHeapRow'
+PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE DFHR(P1 VARCHAR(128), P2 VARCHAR(128))
+LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.deleteFirstHeapRow'
+PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE NFHR(P1 VARCHAR(128), P2 VARCHAR(128))
+LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.nullFirstHeapRow'
+PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- differing row counts
+call RFHR('APP', 'T1');
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0Y55: The number of rows in the base table does not match the number of rows in at least 1 of the indexes on the table. Index 'T1_I' on table 'APP.T1' has 4 rows, but the base table has 5 rows.  The suggested corrective action is to recreate the index.
+ij> -- drop and recreate each index to see differing count move to next index
+drop index t1_i;
+0 rows inserted/updated/deleted
+ij> create index t1_i on t1(i);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0Y55: The number of rows in the base table does not match the number of rows in at least 1 of the indexes on the table. Index 'T1_S' on table 'APP.T1' has 4 rows, but the base table has 5 rows.  The suggested corrective action is to recreate the index.
+ij> drop index t1_s;
+0 rows inserted/updated/deleted
+ij> create index t1_s on t1(s);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0Y55: The number of rows in the base table does not match the number of rows in at least 1 of the indexes on the table. Index 'T1_C10' on table 'APP.T1' has 4 rows, but the base table has 5 rows.  The suggested corrective action is to recreate the index.
+ij> drop index t1_c10;
+0 rows inserted/updated/deleted
+ij> create index t1_c10 on t1(c10);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0Y55: The number of rows in the base table does not match the number of rows in at least 1 of the indexes on the table. Index 'T1_VC10' on table 'APP.T1' has 4 rows, but the base table has 5 rows.  The suggested corrective action is to recreate the index.
+ij> drop index t1_vc10;
+0 rows inserted/updated/deleted
+ij> create index t1_vc10 on t1(vc10);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0Y55: The number of rows in the base table does not match the number of rows in at least 1 of the indexes on the table. Index 'T1_DC' on table 'APP.T1' has 4 rows, but the base table has 5 rows.  The suggested corrective action is to recreate the index.
+ij> drop index t1_dc;
+0 rows inserted/updated/deleted
+ij> create index t1_dc on t1(dc);
+0 rows inserted/updated/deleted
+ij> -- everything should be back to normal
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+1          
+ij> -- delete 1st row from heap
+call DFHR('APP', 'T1');
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X62: Inconsistency found between table 'APP.T1' and index 'T1_I'.  Error when trying to retrieve row location '(1,7)' from the table.  The full index key, including the row location, is '{ 1, (1,7) }'. The suggested corrective action is to recreate the index.
+ij> -- drop and recreate each index to see differing count move to next index
+drop index t1_i;
+0 rows inserted/updated/deleted
+ij> create index t1_i on t1(i);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X62: Inconsistency found between table 'APP.T1' and index 'T1_S'.  Error when trying to retrieve row location '(1,7)' from the table.  The full index key, including the row location, is '{ 11, (1,7) }'. The suggested corrective action is to recreate the index.
+ij> drop index t1_s;
+0 rows inserted/updated/deleted
+ij> create index t1_s on t1(s);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X62: Inconsistency found between table 'APP.T1' and index 'T1_C10'.  Error when trying to retrieve row location '(1,7)' from the table.  The full index key, including the row location, is '{ 1 1       , (1,7) }'. The suggested corrective action is to recreate the index.
+ij> drop index t1_c10;
+0 rows inserted/updated/deleted
+ij> create index t1_c10 on t1(c10);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X62: Inconsistency found between table 'APP.T1' and index 'T1_VC10'.  Error when trying to retrieve row location '(1,7)' from the table.  The full index key, including the row location, is '{ 1 1 1 , (1,7) }'. The suggested corrective action is to recreate the index.
+ij> drop index t1_vc10;
+0 rows inserted/updated/deleted
+ij> create index t1_vc10 on t1(vc10);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X62: Inconsistency found between table 'APP.T1' and index 'T1_DC'.  Error when trying to retrieve row location '(1,7)' from the table.  The full index key, including the row location, is '{ 111.11, (1,7) }'. The suggested corrective action is to recreate the index.
+ij> drop index t1_dc;
+0 rows inserted/updated/deleted
+ij> create index t1_dc on t1(dc);
+0 rows inserted/updated/deleted
+ij> -- everything should be back to normal
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+1          
+ij> -- set 1st row from heap to all nulls
+select * from t1;
+I          |S     |C10       |VC10      |DC      
+-------------------------------------------------
+2          |22    |2 2       |2 2 2     |222.22  
+3          |33    |3 3       |3 3 3     |333.33  
+4          |44    |4 4       |4 4 4     |444.44  
+1          |11    |1 1       |1 1 1     |111.11  
+ij> call NFHR('APP', 'T1');
+0 rows inserted/updated/deleted
+ij> select * from t1;
+I          |S     |C10       |VC10      |DC      
+-------------------------------------------------
+NULL       |NULL  |NULL      |NULL      |NULL    
+3          |33    |3 3       |3 3 3     |333.33  
+4          |44    |4 4       |4 4 4     |444.44  
+1          |11    |1 1       |1 1 1     |111.11  
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X61: The values for column 'I' in index 'T1_I' and table 'APP.T1' do not match for row location (1,8).  The value in the index is '2', while the value in the base table is 'NULL'.  The full index key, including the row location, is '{ 2, (1,8) }'.  The suggested corrective action is to recreate the index.
+ij> -- drop and recreate each index to see differing count move to next index
+drop index t1_i;
+0 rows inserted/updated/deleted
+ij> create index t1_i on t1(i);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X61: The values for column 'S' in index 'T1_S' and table 'APP.T1' do not match for row location (1,8).  The value in the index is '22', while the value in the base table is 'NULL'.  The full index key, including the row location, is '{ 22, (1,8) }'.  The suggested corrective action is to recreate the index.
+ij> drop index t1_s;
+0 rows inserted/updated/deleted
+ij> create index t1_s on t1(s);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X61: The values for column 'C10' in index 'T1_C10' and table 'APP.T1' do not match for row location (1,8).  The value in the index is '2 2       ', while the value in the base table is 'NULL'.  The full index key, including the row location, is '{ 2 2       , (1,8) }'.  The suggested corrective action is to recreate the index.
+ij> drop index t1_c10;
+0 rows inserted/updated/deleted
+ij> create index t1_c10 on t1(c10);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X61: The values for column 'VC10' in index 'T1_VC10' and table 'APP.T1' do not match for row location (1,8).  The value in the index is '2 2 2 ', while the value in the base table is 'NULL'.  The full index key, including the row location, is '{ 2 2 2 , (1,8) }'.  The suggested corrective action is to recreate the index.
+ij> drop index t1_vc10;
+0 rows inserted/updated/deleted
+ij> create index t1_vc10 on t1(vc10);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+ERROR X0X61: The values for column 'DC' in index 'T1_DC' and table 'APP.T1' do not match for row location (1,8).  The value in the index is '222.22', while the value in the base table is 'NULL'.  The full index key, including the row location, is '{ 222.22, (1,8) }'.  The suggested corrective action is to recreate the index.
+ij> drop index t1_dc;
+0 rows inserted/updated/deleted
+ij> create index t1_dc on t1(dc);
+0 rows inserted/updated/deleted
+ij> -- everything should be back to normal
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+1          
+-----------
+1          
+ij> -- RESOLVE - Next test commented out due to inconsistency in store error
+-- message (sane vs. insane).  Check every index once store returns
+-- consistent error.
+-- insert a row with a bad row location into index
+-- call org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker::insertBadRowLocation('APP', 'T1', 'T1_I');
+-- values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1');
+-- cleanup
+drop table t1;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> 

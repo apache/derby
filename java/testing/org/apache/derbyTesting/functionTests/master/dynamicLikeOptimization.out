@@ -1,0 +1,511 @@
+ij> -- test the dynamic like optimization
+-- NOTE: the metadata test does a bunch
+-- of likes with parameters
+autocommit off;
+ij> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+-- NoHoldForConnection;
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 2000;
+ij> -- language layer tests
+create table t1(c11 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> prepare ll1 as 'select 1 from t1 where ''asdf'' like ?';
+ij> execute ll1 using 'values '''' ';
+1          
+-----------
+ij> -- no match char(1) pads to ' '
+execute ll1 using 'values ''%'' ';
+1          
+-----------
+1          
+ij> execute ll1 using 'values ''%f'' ';
+1          
+-----------
+1          
+ij> execute ll1 using 'values cast(''%f'' as varchar(2)) ';
+1          
+-----------
+1          
+ij> execute ll1 using 'values ''%g'' ';
+1          
+-----------
+ij> execute ll1 using 'values ''asd%'' ';
+1          
+-----------
+1          
+ij> execute ll1 using 'values ''_%'' ';
+1          
+-----------
+1          
+ij> execute ll1 using 'values ''%_'' ';
+1          
+-----------
+1          
+ij> execute ll1 using 'values ''_asdf'' ';
+1          
+-----------
+ij> execute ll1 using 'values ''%asdf'' ';
+1          
+-----------
+1          
+ij> execute ll1 using 'values cast(null as char)';
+1          
+-----------
+ij> execute ll1 using 'values '''' ';
+1          
+-----------
+ij> -- Escape tests
+prepare ll15 as 'select 1 from t1 where ''%foobar'' like ''Z%foobar'' escape ?';
+ij> execute ll15 using 'values ''Z''';
+1          
+-----------
+1          
+ij> -- match: optimize to LIKE AND ==
+execute ll15 using 'values cast(''Z'' as varchar(1)) ';
+1          
+-----------
+1          
+ij> execute ll15 using 'values ''raZ''';
+ERROR 22019: Invalid escape sequence, 'raZ'. The escape string must be exactly one character. It can not be a null or more than one character.
+ij> -- too many like chars
+execute ll15 using 'values ''%''';
+1          
+-----------
+ij> -- no match, wrong char
+select 1 from t1  where '%foobar' like '%%foobar' escape '%';
+1          
+-----------
+1          
+ij> -- match
+select 1 from t1  where '_foobar' like '__foobar' escape '_';
+1          
+-----------
+1          
+ij> -- match
+select 1 from t1  where 'asdf' like 'a%' escape cast(null as char);
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> -- error NULL escape
+prepare ll2 as 'select 1 from t1 where ''%foobar'' like ? escape ?';
+ij> execute ll2 using 'values (''Z%foobar'', ''Z'') ';
+1          
+-----------
+1          
+ij> -- match
+execute ll2 using 'values (''Z%foobar'', '''') ';
+ERROR 22019: Invalid escape sequence, ''. The escape string must be exactly one character. It can not be a null or more than one character.
+ij> -- error empty string escape 
+prepare ll2 as 'select 1 from t1 where ''%foobar'' like ? escape ''Z''';
+ij> execute ll2 using 'values ''x%foobar'' ';
+1          
+-----------
+ij> -- no match 
+execute ll2 using 'values ''Z%foobar'' ';
+1          
+-----------
+1          
+ij> -- match 
+prepare ll2 as 'select 1 from t1 where ''%foobar'' like ? escape ''$''';
+ij> execute ll2 using 'values ''$%f%bar'' ';
+1          
+-----------
+1          
+ij> -- match
+prepare ll3 as 'select 1 from t1 where ''Z%foobar'' like ? escape ''Z''';
+ij> execute ll3 using 'values ''ZZZ%foo%a_'' ';
+1          
+-----------
+1          
+ij> -- MATCH
+CREATE FUNCTION GETMAXCHAR() RETURNS CHAR(1) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.CharUTF8.getMaxDefinedCharAsString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> --\uFA2D - the highest valid character according to Character.isDefined() of JDK 1.4;
+--prepare ll4 as 'select 1 from t1 where ''\uFA2D'' like ?';
+prepare ll4 as 'select 1 from t1 where GETMAXCHAR() like ?';
+ij> execute ll4 using 'values ''%'' ';
+1          
+-----------
+1          
+ij> execute ll4 using 'values '''' ';
+1          
+-----------
+ij> execute ll4 using 'values ''_'' ';
+1          
+-----------
+1          
+ij> execute ll4 using 'values GETMAXCHAR() ';
+1          
+-----------
+1          
+ij> -- create and populate tables
+create table test(id char(10), c10 char(10), vc10 varchar(10));
+0 rows inserted/updated/deleted
+ij> insert into test values ('V-NULL', null, null);
+1 row inserted/updated/deleted
+ij> insert into test values ('asdf', 'asdf', 'asdf');
+1 row inserted/updated/deleted
+ij> insert into test values ('asdg', 'asdg', 'asdg');
+1 row inserted/updated/deleted
+ij> insert into test values ('aasdf', 'aasdf', 'aasdf');
+1 row inserted/updated/deleted
+ij> insert into test values ('%foobar', '%foobar', '%foobar');
+1 row inserted/updated/deleted
+ij> insert into test values ('foo%bar', 'foo%bar', 'foo%bar');
+1 row inserted/updated/deleted
+ij> insert into test values ('foo_bar', 'foo_bar', 'foo_bar');
+1 row inserted/updated/deleted
+ij> insert into test values ('MAX_CHAR', '\uFA2D', '\uFA2D');
+1 row inserted/updated/deleted
+ij> -- pushing generated predicates down
+prepare p1 as 'select id from test where c10 like ?';
+ij> prepare p2 as 'select id from test where vc10 like ?';
+ij> select vc10 from test where vc10 like 'values cast(null as varchar(1))';
+VC10      
+----------
+ij> -- return 0 rows
+execute p1 using 'values cast(null as char)';
+ID        
+----------
+ij> execute p2 using 'values cast(null as varchar(1))';
+ID        
+----------
+ij> -- false
+execute p1 using 'values 1';
+ID        
+----------
+ij> execute p2 using 'values 1';
+ID        
+----------
+ij> -- false
+execute p1 using 'values '''' ';
+ID        
+----------
+ij> execute p2 using 'values '''' ';
+ID        
+----------
+ij> -- true
+execute p1 using 'values ''%'' ';
+ID        
+----------
+asdf      
+asdg      
+aasdf     
+%foobar   
+foo%bar   
+foo_bar   
+MAX_CHAR  
+ij> execute p2 using 'values ''%'' ';
+ID        
+----------
+asdf      
+asdg      
+aasdf     
+%foobar   
+foo%bar   
+foo_bar   
+MAX_CHAR  
+ij> -- fail, no end blankd pad
+execute p1 using 'values ''%f'' ';
+ID        
+----------
+ij> execute p2 using 'values ''%f'' ';
+ID        
+----------
+asdf      
+aasdf     
+ij> execute p1 using 'values cast(''%f'' as varchar(2)) ';
+ID        
+----------
+ij> execute p2 using 'values cast(''%f'' as varchar(2)) ';
+ID        
+----------
+asdf      
+aasdf     
+ij> execute p1 using 'values ''%g'' ';
+ID        
+----------
+ij> execute p2 using 'values ''%g'' ';
+ID        
+----------
+asdg      
+ij> execute p1 using 'values ''asd%'' ';
+ID        
+----------
+asdf      
+asdg      
+ij> execute p2 using 'values ''asd%'' ';
+ID        
+----------
+asdf      
+asdg      
+ij> execute p1 using 'values ''_%'' ';
+ID        
+----------
+asdf      
+asdg      
+aasdf     
+%foobar   
+foo%bar   
+foo_bar   
+MAX_CHAR  
+ij> execute p2 using 'values ''_%'' ';
+ID        
+----------
+asdf      
+asdg      
+aasdf     
+%foobar   
+foo%bar   
+foo_bar   
+MAX_CHAR  
+ij> execute p1 using 'values ''%_'' ';
+ID        
+----------
+asdf      
+asdg      
+aasdf     
+%foobar   
+foo%bar   
+foo_bar   
+MAX_CHAR  
+ij> execute p2 using 'values ''%_'' ';
+ID        
+----------
+asdf      
+asdg      
+aasdf     
+%foobar   
+foo%bar   
+foo_bar   
+MAX_CHAR  
+ij> -- one: aasdf
+execute p1 using 'values ''_asdf'' ';
+ID        
+----------
+ij> -- fail: char blank padding significant
+execute p1 using 'values ''_asdf   %'' ';
+ID        
+----------
+aasdf     
+ij> execute p2 using 'values ''_asdf'' ';
+ID        
+----------
+aasdf     
+ij> execute p1 using 'values ''%asdf'' ';
+ID        
+----------
+ij> -- fail
+execute p2 using 'values ''%asdf'' ';
+ID        
+----------
+asdf      
+aasdf     
+ij> -- verify that like optimization being performed
+execute p2 using 'values ''%'' ';
+ID        
+----------
+asdf      
+asdg      
+aasdf     
+%foobar   
+foo%bar   
+foo_bar   
+MAX_CHAR  
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select id from test where vc10 like ?
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (3):
+Number of opens = 1
+Rows seen = 7
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (2):
+	Number of opens = 1
+	Rows seen = 7
+	Rows filtered = 0
+	restriction = true
+	projection = false
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Table Scan ResultSet for TEST at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 7
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 2}
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=7
+			Number of rows visited=8
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 2
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
+Column[0][1] Id: 2
+Operator: <
+Order&
+ij> create index i1 on test(vc10);
+0 rows inserted/updated/deleted
+ij> create table likeable (match_me varchar(10), pattern varchar(10), esc varchar(1));
+0 rows inserted/updated/deleted
+ij> insert into likeable values ('foo%bar', 'fooZ%bar', 'Z');
+1 row inserted/updated/deleted
+ij> insert into likeable values ('foo%bar', '%Z%ba_', 'Z');
+1 row inserted/updated/deleted
+ij> insert into likeable values ('foo%bar', 'fooZ%baZ', 'Z');
+1 row inserted/updated/deleted
+ij> -- error
+select match_me from likeable where match_me like pattern escape esc;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> delete from likeable;
+3 rows inserted/updated/deleted
+ij> insert into likeable values ('foo%bar', 'foo%bar', NULL);
+1 row inserted/updated/deleted
+ij> -- should error
+select match_me from likeable where match_me like pattern escape esc;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> delete from likeable;
+1 row inserted/updated/deleted
+ij> insert into likeable values ('foo%bar', 'foo%bar', '');
+1 row inserted/updated/deleted
+ij> -- should error
+select match_me from likeable where match_me like pattern escape esc;
+ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+ij> -- Defect 6002/6039
+create table cei(id int, name varchar(192) not null, source varchar(252) not null);
+0 rows inserted/updated/deleted
+ij> insert into cei values (1, 'Alarms', 'AlarmDisk999'), 
+		(2, 'Alarms', 'AlarmFS-usr'),
+		(3, 'Alarms', 'AlarmPower'),
+		(4, 'Alert', 'AlertBattery'),
+		(5, 'Alert', 'AlertUPS'),
+		(6, 'Warning', 'WarnIntrusion'),
+		(7, 'Warning', 'WarnUnlockDoor'),
+		(8, 'Warning', 'Warn%Unlock%Door'),
+		(9, 'Warning', 'W_Unlock_Door');
+9 rows inserted/updated/deleted
+ij> select * from cei;
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |Alarms                                                                                                                                                                                          |AlarmDisk999                                                                                                                                                                                                                                                
+2          |Alarms                                                                                                                                                                                          |AlarmFS-usr                                                                                                                                                                                                                                                 
+3          |Alarms                                                                                                                                                                                          |AlarmPower                                                                                                                                                                                                                                                  
+4          |Alert                                                                                                                                                                                           |AlertBattery                                                                                                                                                                                                                                                
+5          |Alert                                                                                                                                                                                           |AlertUPS                                                                                                                                                                                                                                                    
+6          |Warning                                                                                                                                                                                         |WarnIntrusion                                                                                                                                                                                                                                               
+7          |Warning                                                                                                                                                                                         |WarnUnlockDoor                                                                                                                                                                                                                                              
+8          |Warning                                                                                                                                                                                         |Warn%Unlock%Door                                                                                                                                                                                                                                            
+9          |Warning                                                                                                                                                                                         |W_Unlock_Door                                                                                                                                                                                                                                               
+ij> prepare s as 'select id, name, source from cei where (name LIKE ? escape ''\'') and (source like ? escape ''\'') order by source asc, name asc';
+ij> execute s using 'values (''%'', ''%'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |Alarms                                                                                                                                                                                          |AlarmDisk999                                                                                                                                                                                                                                                
+2          |Alarms                                                                                                                                                                                          |AlarmFS-usr                                                                                                                                                                                                                                                 
+3          |Alarms                                                                                                                                                                                          |AlarmPower                                                                                                                                                                                                                                                  
+4          |Alert                                                                                                                                                                                           |AlertBattery                                                                                                                                                                                                                                                
+5          |Alert                                                                                                                                                                                           |AlertUPS                                                                                                                                                                                                                                                    
+9          |Warning                                                                                                                                                                                         |W_Unlock_Door                                                                                                                                                                                                                                               
+8          |Warning                                                                                                                                                                                         |Warn%Unlock%Door                                                                                                                                                                                                                                            
+6          |Warning                                                                                                                                                                                         |WarnIntrusion                                                                                                                                                                                                                                               
+7          |Warning                                                                                                                                                                                         |WarnUnlockDoor                                                                                                                                                                                                                                              
+ij> execute s using 'values (''Alarms'', ''AlarmDisk%'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |Alarms                                                                                                                                                                                          |AlarmDisk999                                                                                                                                                                                                                                                
+ij> execute s using 'values (''A%'', ''%'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |Alarms                                                                                                                                                                                          |AlarmDisk999                                                                                                                                                                                                                                                
+2          |Alarms                                                                                                                                                                                          |AlarmFS-usr                                                                                                                                                                                                                                                 
+3          |Alarms                                                                                                                                                                                          |AlarmPower                                                                                                                                                                                                                                                  
+4          |Alert                                                                                                                                                                                           |AlertBattery                                                                                                                                                                                                                                                
+5          |Alert                                                                                                                                                                                           |AlertUPS                                                                                                                                                                                                                                                    
+ij> execute s using 'values (''%'',	''___rm%'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |Alarms                                                                                                                                                                                          |AlarmDisk999                                                                                                                                                                                                                                                
+2          |Alarms                                                                                                                                                                                          |AlarmFS-usr                                                                                                                                                                                                                                                 
+3          |Alarms                                                                                                                                                                                          |AlarmPower                                                                                                                                                                                                                                                  
+ij> execute s using 'values (''Warning'', ''%oor'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9          |Warning                                                                                                                                                                                         |W_Unlock_Door                                                                                                                                                                                                                                               
+8          |Warning                                                                                                                                                                                         |Warn%Unlock%Door                                                                                                                                                                                                                                            
+7          |Warning                                                                                                                                                                                         |WarnUnlockDoor                                                                                                                                                                                                                                              
+ij> execute s using 'values (''Warning'', ''Warn\%Unlock\%Door'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8          |Warning                                                                                                                                                                                         |Warn%Unlock%Door                                                                                                                                                                                                                                            
+ij> execute s using 'values (''Warning'', ''%\%Unlo%'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8          |Warning                                                                                                                                                                                         |Warn%Unlock%Door                                                                                                                                                                                                                                            
+ij> execute s using 'values (''Warning'', ''W\_Unloc%'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9          |Warning                                                                                                                                                                                         |W_Unlock_Door                                                                                                                                                                                                                                               
+ij> execute s using 'values (''Warning'', ''_\_Unlock\_Door'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9          |Warning                                                                                                                                                                                         |W_Unlock_Door                                                                                                                                                                                                                                               
+ij> execute s using 'values (''W%'', ''Warn\%Unlock\%Door'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8          |Warning                                                                                                                                                                                         |Warn%Unlock%Door                                                                                                                                                                                                                                            
+ij> execute s using 'values (''%ing'', ''W\_Unlock\_%Door'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9          |Warning                                                                                                                                                                                         |W_Unlock_Door                                                                                                                                                                                                                                               
+ij> execute s using 'values (''Bogus'', ''Name'')';
+ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- clean up
+drop table test;
+0 rows inserted/updated/deleted
+ij> drop table likeable;
+0 rows inserted/updated/deleted
+ij> drop table cei;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,1004 @@
+ij> -- this also tests multiple indexes share one conglomerate if they essentially
+-- are the same
+autocommit off;
+ij> create table tab1 (c1 int, c2 smallint, c3 double precision, c4 varchar(30),
+		   c5 varchar(1024));
+0 rows inserted/updated/deleted
+ij> insert into tab1 values (8, 12, 5.6, 'dfg', 'ghji');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (76, 2, -9.86, 'yudf', '45gd');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (-78, 45, -5.6, 'jakdsfh', 'df89g');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (56, -3, 6.7, 'dfgs', 'fds');
+1 row inserted/updated/deleted
+ij> create index i1 on tab1 (c1, c3, c4);
+0 rows inserted/updated/deleted
+ij> create index i2 on tab1 (c1 desc, c3 desc, c4 desc);
+0 rows inserted/updated/deleted
+ij> create index i3 on tab1 (c1 desc, c3 asc, c4 desc);
+0 rows inserted/updated/deleted
+ij> create index i4 on tab1 (c2 desc, c3, c1);
+0 rows inserted/updated/deleted
+ij> create index i5 on tab1 (c1, c2 desc);
+0 rows inserted/updated/deleted
+ij> insert into tab1 values (34, 67, 5.3, 'rtgd', 'hds');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (100, 11, 9.0, '34sfg', 'ayupo');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (-100, 93, 9.1, 'egfh', 's6j');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (55, 44, -9.85, 'yudd', 'df89f');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (34, 68, 2.7, 'srg', 'iur');
+1 row inserted/updated/deleted
+ij> insert into tab1 values (34, 66, 1.2, 'yty', 'wer');
+1 row inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 2500;
+ij> -- should use index i4
+select c1, c3 from tab1 where c2 > 40 and c3 <= 5.3;
+C1         |C3                    
+----------------------------------
+34         |2.7                   
+34         |5.3                   
+34         |1.2                   
+-78        |-5.6                  
+55         |-9.85                 
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use index i4
+select c1, c3 from tab1 where c2 > 40 and c3 <= 5.3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (3):
+Number of opens = 1
+Rows seen = 5
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (2):
+	Number of opens = 1
+	Rows seen = 5
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Index Scan ResultSet for TAB1 using index I4 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 1, 2}
+			Number of columns fetched=3
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=7
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+Column[0][0] Id: 1
+Operator: <=
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- should use index i5
+select c2, c1 from tab1 where c2 <= 44 and c1 > 55;
+C2    |C1         
+------------------
+-3    |56         
+2     |76         
+11    |100        
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use index i5
+select c2, c1 from tab1 where c2 <= 44 and c1 > 55
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (2):
+Number of opens = 1
+Rows seen = 3
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Index Scan ResultSet for TAB1 using index I5 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 3
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={0, 1}
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=3
+		Number of rows visited=3
+		Scan type=btree
+		Tree height=1
+		start position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+		stop position: 
+	None
+		qualifiers:
+Column[0][0] Id: 1
+Operator: <=
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- should use i1
+select c1, c3, c4 from tab1 order by c1, c3;
+C1         |C3                    |C4                            
+-----------------------------------------------------------------
+-100       |9.1                   |egfh                          
+-78        |-5.6                  |jakdsfh                       
+8          |5.6                   |dfg                           
+34         |1.2                   |yty                           
+34         |2.7                   |srg                           
+34         |5.3                   |rtgd                          
+55         |-9.85                 |yudd                          
+56         |6.7                   |dfgs                          
+76         |-9.86                 |yudf                          
+100        |9.0                   |34sfg                         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i1
+select c1, c3, c4 from tab1 order by c1, c3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for TAB1 using index I1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 10
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0, 1, 2}
+	Number of columns fetched=3
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=10
+	Number of rows visited=10
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- should use i2
+select c1, c3, c4 from tab1 order by c1 desc, c3 desc, c4 desc;
+C1         |C3                    |C4                            
+-----------------------------------------------------------------
+100        |9.0                   |34sfg                         
+76         |-9.86                 |yudf                          
+56         |6.7                   |dfgs                          
+55         |-9.85                 |yudd                          
+34         |5.3                   |rtgd                          
+34         |2.7                   |srg                           
+34         |1.2                   |yty                           
+8          |5.6                   |dfg                           
+-78        |-5.6                  |jakdsfh                       
+-100       |9.1                   |egfh                          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i2
+select c1, c3, c4 from tab1 order by c1 desc, c3 desc, c4 desc
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for TAB1 using index I2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 10
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0, 1, 2}
+	Number of columns fetched=3
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=10
+	Number of rows visited=10
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- should use i3
+select c1, c3, c4 from tab1 order by c1 desc, c3 asc, c4 desc;
+C1         |C3                    |C4                            
+-----------------------------------------------------------------
+100        |9.0                   |34sfg                         
+76         |-9.86                 |yudf                          
+56         |6.7                   |dfgs                          
+55         |-9.85                 |yudd                          
+34         |1.2                   |yty                           
+34         |2.7                   |srg                           
+34         |5.3                   |rtgd                          
+8          |5.6                   |dfg                           
+-78        |-5.6                  |jakdsfh                       
+-100       |9.1                   |egfh                          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i3
+select c1, c3, c4 from tab1 order by c1 desc, c3 asc, c4 desc
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for TAB1 using index I3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 10
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0, 1, 2}
+	Number of columns fetched=3
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=10
+	Number of rows visited=10
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- should use i4
+select c1, c2, c3 from tab1 order by c2 desc, c3 asc;
+C1         |C2    |C3                    
+-----------------------------------------
+-100       |93    |9.1                   
+34         |68    |2.7                   
+34         |67    |5.3                   
+34         |66    |1.2                   
+-78        |45    |-5.6                  
+55         |44    |-9.85                 
+8          |12    |5.6                   
+100        |11    |9.0                   
+76         |2     |-9.86                 
+56         |-3    |6.7                   
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i4
+select c1, c2, c3 from tab1 order by c2 desc, c3 asc
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (2):
+Number of opens = 1
+Rows seen = 10
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Index Scan ResultSet for TAB1 using index I4 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 10
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={0, 1, 2}
+		Number of columns fetched=3
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=10
+		Number of rows visited=10
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
+ij> -- should use i5
+select c1, c2 from tab1 order by c1, c2 desc;
+C1         |C2    
+------------------
+-100       |93    
+-78        |45    
+8          |12    
+34         |68    
+34         |67    
+34         |66    
+55         |44    
+56         |-3    
+76         |2     
+100        |11    
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i5
+select c1, c2 from tab1 order by c1, c2 desc
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for TAB1 using index I5 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 10
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0, 1}
+	Number of columns fetched=2
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=10
+	Number of rows visited=10
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- should use i4
+select max(c2) from tab1;
+1     
+------
+93    
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i4
+select max(c2) from tab1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for TAB1 using index I4 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> -- should use i4
+select min(c2) from tab1;
+1     
+------
+-3    
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i4
+select min(c2) from tab1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Last Key Index Scan ResultSet for TAB1 using index I4at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+ij> -- should use i5
+select min(c2) from tab1 where c1 = 34;
+1     
+------
+66    
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i5
+select min(c2) from tab1 where c1 = 34
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 3
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for TAB1 using index I5 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 3
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=3
+				Number of rows visited=4
+				Scan type=btree
+				Tree height=1
+				start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				qualifiers:
+None
+				optimizer estimated r&
+ij> -- should use i5
+select max(c2) from tab1 where c1 = 34;
+1     
+------
+68    
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- should use i5
+select max(c2) from tab1 where c1 = 34
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = true
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for TAB1 using index I5 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=1
+				start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+				qualifiers:
+None
+ij> -- test if bulk insert rebuilds desc index right
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'TAB1', 0);
+0 rows inserted/updated/deleted
+ij> select * from tab1 order by c1 desc;
+C1         |C2    |C3                    |C4                            |C5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+100        |11    |9.0                   |34sfg                         |ayupo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+76         |2     |-9.86                 |yudf                          |45gd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+56         |-3    |6.7                   |dfgs                          |fds                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+55         |44    |-9.85                 |yudd                          |df89f                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+34         |66    |1.2                   |yty                           |wer                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+34         |68    |2.7                   |srg                           |iur                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+34         |67    |5.3                   |rtgd                          |hds                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+8          |12    |5.6                   |dfg                           |ghji                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+-78        |45    |-5.6                  |jakdsfh                       |df89g                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+-100       |93    |9.1                   |egfh                          |s6j                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+ij> -- this tests multiple indexes share one conglomerate if they essentially
+-- are the same
+create table tab2 (c1 int not null primary key, c2 int, c3 int);
+0 rows inserted/updated/deleted
+ij> -- not unique index, shouldn't share with primary key's index
+create index i21 on tab2(c1);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+ij> -- desc index, shouldn't share with primary key's index
+create index i22 on tab2(c1 desc);
+0 rows inserted/updated/deleted
+ij> -- this should share with primary key's index, and give a warning
+create unique index i23 on tab2(c1);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+ij> create index i24 on tab2(c1, c3 desc);
+0 rows inserted/updated/deleted
+ij> -- this should share with i24's conglomerate
+create index i25 on tab2(c1, c3 desc);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I24.
+ij> -- no share
+create index i26 on tab2(c1, c3);
+0 rows inserted/updated/deleted
+ij> insert into tab2 values (6, 2, 8), (2, 8, 5), (28, 5, 9), (3, 12, 543);
+4 rows inserted/updated/deleted
+ij> create index i27 on tab2 (c1, c2 desc, c3);
+0 rows inserted/updated/deleted
+ij> -- no share
+create index i28 on tab2 (c1, c2 desc, c3 desc);
+0 rows inserted/updated/deleted
+ij> -- share with i27
+create index i29 on tab2 (c1, c2 desc, c3);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I27.
+ij> create index i20 on tab2 (c1, c2 desc, c3);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I27.
+ij> insert into tab2 values (56, 2, 7), (31, 5, 7), (-12, 5, 2);
+3 rows inserted/updated/deleted
+ij> select count(distinct conglomeratenumber) from sys.sysconglomerates
+	where tableid = (select tableid from sys.systables
+						where tablename = 'TAB2');
+1          
+-----------
+7          
+ij> select * from tab2;
+C1         |C2         |C3         
+-----------------------------------
+-12        |5          |2          
+2          |8          |5          
+3          |12         |543        
+6          |2          |8          
+28         |5          |9          
+31         |5          |7          
+56         |2          |7          
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'TAB2');
+1          
+-----------
+1          
+ij> -- see if rebuild indexes correctly
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'TAB2', 0);
+0 rows inserted/updated/deleted
+ij> select count(distinct conglomeratenumber) from sys.sysconglomerates
+	where tableid = (select tableid from sys.systables
+						where tablename = 'TAB2');
+1          
+-----------
+7          
+ij> select * from tab2;
+C1         |C2         |C3         
+-----------------------------------
+-12        |5          |2          
+2          |8          |5          
+3          |12         |543        
+6          |2          |8          
+28         |5          |9          
+31         |5          |7          
+56         |2          |7          
+ij> update tab2 set c2 = 11 where c3 = 7;
+2 rows inserted/updated/deleted
+ij> select * from tab2;
+C1         |C2         |C3         
+-----------------------------------
+-12        |5          |2          
+2          |8          |5          
+3          |12         |543        
+6          |2          |8          
+28         |5          |9          
+31         |11         |7          
+56         |11         |7          
+ij> delete from tab2 where c2 > 10 and c2 < 12;
+2 rows inserted/updated/deleted
+ij> select * from tab2;
+C1         |C2         |C3         
+-----------------------------------
+-12        |5          |2          
+2          |8          |5          
+3          |12         |543        
+6          |2          |8          
+28         |5          |9          
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'TAB2');
+1          
+-----------
+1          
+ij> -- drop indexes
+drop index i22;
+0 rows inserted/updated/deleted
+ij> drop index i24;
+0 rows inserted/updated/deleted
+ij> drop index i26;
+0 rows inserted/updated/deleted
+ij> drop index i28;
+0 rows inserted/updated/deleted
+ij> drop index i20;
+ERROR 42X65: Index 'I20' does not exist.
+ij> select count(distinct conglomeratenumber) from sys.sysconglomerates
+	where tableid = (select tableid from sys.systables
+						where tablename = 'TAB2');
+1          
+-----------
+3          
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'TAB2', 0);
+0 rows inserted/updated/deleted
+ij> select * from tab2;
+C1         |C2         |C3         
+-----------------------------------
+-12        |5          |2          
+2          |8          |5          
+3          |12         |543        
+6          |2          |8          
+28         |5          |9          
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'TAB2');
+1          
+-----------
+1          
+ij> drop index i21;
+ERROR 42X65: Index 'I21' does not exist.
+ij> drop index i23;
+ERROR 42X65: Index 'I23' does not exist.
+ij> drop index i25;
+ERROR 42X65: Index 'I25' does not exist.
+ij> drop index i27;
+0 rows inserted/updated/deleted
+ij> drop index i29;
+ERROR 42X65: Index 'I29' does not exist.
+ij> select count(distinct conglomeratenumber) from sys.sysconglomerates
+	where tableid = (select tableid from sys.systables
+						where tablename = 'TAB2');
+1          
+-----------
+2          
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'TAB2');
+1          
+-----------
+1          
+ij> -- beetle 4974
+create table b4974 (a BIGINT, b BIGINT, c INT, d CHAR(16), e BIGINT);
+0 rows inserted/updated/deleted
+ij> create index i4974 on b4974(a, d, c, e);
+0 rows inserted/updated/deleted
+ij> SELECT b from b4974 t1
+where (T1.a = 10127 or T1.a = 0)
+	and (T1.d = 'ProductBean' or T1.d = 'CatalogEntryBean')
+	and (T1.e =0 or T1.e = 0);
+B                   
+--------------------
+ij> rollback;
+ij> 

@@ -1,0 +1,36 @@
+ij> -- This tests whether we are prevented from creating more than 15 tables
+-- in the standard (unlimited) version of the product.
+--
+create table t1 (x int);
+0 rows inserted/updated/deleted
+ij> create table t2 (x int);
+0 rows inserted/updated/deleted
+ij> create table t3 (x int);
+0 rows inserted/updated/deleted
+ij> create table t4 (x int);
+0 rows inserted/updated/deleted
+ij> create table t5 (x int);
+0 rows inserted/updated/deleted
+ij> create table t6 (x int);
+0 rows inserted/updated/deleted
+ij> create table t7 (x int);
+0 rows inserted/updated/deleted
+ij> create table t8 (x int);
+0 rows inserted/updated/deleted
+ij> create table t9 (x int);
+0 rows inserted/updated/deleted
+ij> create table t10 (x int);
+0 rows inserted/updated/deleted
+ij> create table t11 (x int);
+0 rows inserted/updated/deleted
+ij> create table t12 (x int);
+0 rows inserted/updated/deleted
+ij> create table t13 (x int);
+0 rows inserted/updated/deleted
+ij> create table t14 (x int);
+0 rows inserted/updated/deleted
+ij> create table t15 (x int);
+0 rows inserted/updated/deleted
+ij> create table t16 (x int);
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,8 @@
+-- Unit Test TLike starting
+-- Unit Test TLike finished
+ij> -- just a simple query so that we have a .sql file
+values 1;
+1          
+-----------
+1          
+ij> 

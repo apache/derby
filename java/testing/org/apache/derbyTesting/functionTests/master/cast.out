@@ -1,0 +1,1591 @@
+ij> -- tests for cast expressions
+-- refer to casting.java for a complete analysis on casting
+--==================================
+--
+-- simple test cases
+--
+--==================================
+-- shrink/grow bit and char
+-- no exceptions should be raised.
+-- once we have warnings we'll expect
+-- a warning when shrinking non space/zeros
+-- shrink
+values (cast ('hell' as char(2)));
+1   
+----
+he  
+ij> values (cast ('hell' as varchar(2)));
+1   
+----
+he  
+ij> -- shrink, whitespace only
+values (cast ('he  ' as char(2)));
+1   
+----
+he  
+ij> -- expand, check lengths
+values (cast ('hell' as char(20)));
+1                   
+--------------------
+hell                
+ij> values (cast ('hell' as varchar(20)));
+1                   
+--------------------
+hell                
+ij> values length(cast ('hell' as char(20)));
+1          
+-----------
+20         
+ij> values length(cast ('hell' as varchar(20)));
+1          
+-----------
+4          
+ij> ----------------
+--char->bit data
+----------------
+-- shrink
+values (cast (X'1111' as char(1) for bit data));
+1   
+----
+11  
+ij> -- shrink, zero only
+values (cast (X'1100' as char(1) for bit data));
+1   
+----
+11  
+ij> -- expand
+values (cast (X'1111' as char(2) for bit data));
+1   
+----
+1111
+ij> -- w/o format
+-- DB2 UDB PASS
+-- DB2 CS FAIL
+values (cast ('1234' as char(2) for bit data));
+ERROR 42846: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
+ij> -- extra tests for shrinking parts of bits
+values cast (X'11111111' as char(1) for bit data);
+1   
+----
+11  
+ij> values cast (X'01111111' as char(1) for bit data);
+1   
+----
+01  
+ij> values cast (X'11111111' as char(1) for bit data);
+1   
+----
+11  
+ij> values cast (X'01111111' as char(1) for bit data);
+1   
+----
+01  
+ij> values cast (X'00111111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'11111111' as char(1) for bit data);
+1   
+----
+11  
+ij> values cast (X'01111111' as char(1) for bit data);
+1   
+----
+01  
+ij> values cast (X'00111111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00011111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'11111111' as char(1) for bit data);
+1   
+----
+11  
+ij> values cast (X'01111111' as char(1) for bit data);
+1   
+----
+01  
+ij> values cast (X'00111111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00011111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00001111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'11111111' as char(1) for bit data);
+1   
+----
+11  
+ij> values cast (X'01111111' as char(1) for bit data);
+1   
+----
+01  
+ij> values cast (X'00111111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00011111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00001111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00000111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'11111111' as char(1) for bit data);
+1   
+----
+11  
+ij> values cast (X'01111111' as char(1) for bit data);
+1   
+----
+01  
+ij> values cast (X'00111111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00011111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00001111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00000111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00000011' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'11111111' as char(1) for bit data);
+1   
+----
+11  
+ij> values cast (X'01111111' as char(1) for bit data);
+1   
+----
+01  
+ij> values cast (X'00111111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00011111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00001111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00000111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00000011' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'00000001' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'0011111111111111' as char(1) for bit data);
+1   
+----
+00  
+ij> values cast (X'1111111100111111' as char(2) for bit data);
+1   
+----
+1111
+ij> ---------
+--numbers
+---------
+values (cast (1.1 as int));
+1          
+-----------
+1          
+ij> values (cast (1.1 as smallint));
+1     
+------
+1     
+ij> values (cast (1.1 as bigint));
+1                   
+--------------------
+1                   
+ij> values (cast (1.1 as double precision));
+1                     
+----------------------
+1.1                   
+ij> values (cast (1.1 as numeric(2,1)));
+1    
+-----
+1.1  
+ij> values (cast (1.1 as decimal(2,1)));
+1    
+-----
+1.1  
+ij> values (cast (1.1 as numeric(2,0)));
+1   
+----
+1   
+ij> values (cast (1.1 as decimal(2,0)));
+1   
+----
+1   
+ij> values (cast (1.1 as float));
+1                     
+----------------------
+1.1                   
+ij> values (cast (1.1 as real));
+1            
+-------------
+1.1          
+ij> values (cast (1.9 as int));
+1          
+-----------
+1          
+ij> values (cast (1.9 as smallint));
+1     
+------
+1     
+ij> values (cast (1.9 as bigint));
+1                   
+--------------------
+1                   
+ij> values (cast (1.9 as double precision));
+1                     
+----------------------
+1.9                   
+ij> values (cast (1.9 as numeric(2,1)));
+1    
+-----
+1.9  
+ij> values (cast (1.9 as decimal(2,1)));
+1    
+-----
+1.9  
+ij> values (cast (1.9 as numeric(2,0)));
+1   
+----
+1   
+ij> values (cast (1.9 as decimal(2,0)));
+1   
+----
+1   
+ij> values (cast (1.9 as float));
+1                     
+----------------------
+1.9                   
+ij> values (cast (1.9 as real));
+1            
+-------------
+1.9          
+ij> -- bug 4352,4358 loss of precision on casts
+--   9223372036854775807 is Long::MAX_VALUE
+values (
+  9223372036854775807,
+  cast (9223372036854775807 as DECIMAL(24,1)),
+  cast (
+  cast (9223372036854775807 as DECIMAL(24,1)) as BIGINT)
+  );
+1                   |2                          |3                   
+---------------------------------------------------------------------
+9223372036854775807 |9223372036854775807.0      |9223372036854775807 
+ij> values (
+  cast ('9223372036854775807' as DECIMAL(24,1)),
+  cast (cast ('9223372036854775807' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+9223372036854775807.0      |9223372036854775807 
+ij> values (
+  cast ('9223372036854775806' as DECIMAL(24,1)),
+  cast (cast ('9223372036854775806' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+9223372036854775806.0      |9223372036854775806 
+ij> -- only this should fail
+values (
+  cast ('9223372036854775808' as DECIMAL(24,1)),
+  cast (cast ('9223372036854775808' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> values (
+  cast ('9223372036854775807.9' as DECIMAL(24,1)),
+  cast (cast ('9223372036854775807.9' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+9223372036854775807.9      |9223372036854775807 
+ij> --   -9223372036854775808 is Long::MIN_VALUE
+values (
+  cast ('-9223372036854775808' as DECIMAL(24,1)),
+  cast (cast ('-9223372036854775808' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+-9223372036854775808.0     |-9223372036854775808
+ij> values (
+  cast ('-9223372036854775807' as DECIMAL(24,1)),
+  cast (cast ('-9223372036854775807' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+-9223372036854775807.0     |-9223372036854775807
+ij> -- only this should fail
+values (
+  cast ('-9223372036854775809' as DECIMAL(24,1)),
+  cast (cast ('-9223372036854775809' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+ERROR 22003: The resulting value is outside the range for the data type BIGINT.
+ij> values (
+  cast ('-9223372036854775808.9' as DECIMAL(24,1)),
+  cast (cast ('-9223372036854775808.9' as DECIMAL(24,1)) as BIGINT)
+  );
+1                          |2                   
+------------------------------------------------
+-9223372036854775808.9     |-9223372036854775808
+ij> values (
+  cast ('32767' as DECIMAL(24,1)),
+  cast (cast ('32767' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+32767.0                    |32767 
+ij> values (
+  cast ('32766' as DECIMAL(24,1)),
+  cast (cast ('32766' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+32766.0                    |32766 
+ij> values (
+  cast ('32768' as DECIMAL(24,1)),
+  cast (cast ('32768' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> -- only this should fail
+values (
+  cast ('32767.9' as DECIMAL(24,1)),
+  cast (cast ('32767.9' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+32767.9                    |32767 
+ij> values (
+  cast ('-32768' as DECIMAL(24,1)),
+  cast (cast ('-32768' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+-32768.0                   |-32768
+ij> values (
+  cast ('-32767' as DECIMAL(24,1)),
+  cast (cast ('-32767' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+-32767.0                   |-32767
+ij> -- only this should fail
+values (
+  cast ('-32769' as DECIMAL(24,1)),
+  cast (cast ('-32769' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> values (
+  cast ('-32768.9' as DECIMAL(24,1)),
+  cast (cast ('-32768.9' as DECIMAL(24,1)) as SMALLINT)
+  );
+1                          |2     
+----------------------------------
+-32768.9                   |-32768
+ij> values (
+  cast ('2147483647' as DECIMAL(24,1)),
+  cast (cast ('2147483647' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+2147483647.0               |2147483647 
+ij> values (
+  cast ('2147483646' as DECIMAL(24,1)),
+  cast (cast ('2147483646' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+2147483646.0               |2147483646 
+ij> -- only this should fail
+values (
+  cast ('2147483648' as DECIMAL(24,1)),
+  cast (cast ('2147483648' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> values (
+  cast ('2147483647.9' as DECIMAL(24,1)),
+  cast (cast ('2147483647.9' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+2147483647.9               |2147483647 
+ij> values (
+  cast ('-2147483647' as DECIMAL(24,1)),
+  cast (cast ('-2147483647' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+-2147483647.0              |-2147483647
+ij> values (
+  cast ('-2147483646' as DECIMAL(24,1)),
+  cast (cast ('-2147483646' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+-2147483646.0              |-2147483646
+ij> -- only this should fail
+values (
+  cast ('-2147483649' as DECIMAL(24,1)),
+  cast (cast ('-2147483649' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> values (
+  cast ('-2147483648.9' as DECIMAL(24,1)),
+  cast (cast ('-2147483648.9' as DECIMAL(24,1)) as INTEGER)
+  );
+1                          |2          
+---------------------------------------
+-2147483648.9              |-2147483648
+ij> --numbers to char
+values (cast (1.1 as char(10)));
+1         
+----------
+1.1       
+ij> values (cast (1.1 as varchar(10)));
+ERROR 42846: Cannot convert types 'DECIMAL' to 'VARCHAR'.
+ij> values (cast (1e1 as varchar(10)));
+ERROR 42846: Cannot convert types 'DOUBLE' to 'VARCHAR'.
+ij> values (cast (1e1 as char(10)));
+ERROR 42846: Cannot convert types 'DOUBLE' to 'CHAR'.
+ij> values (cast (1 as char(10)));
+1         
+----------
+1         
+ij> values (cast (1 as varchar(10)));
+ERROR 42846: Cannot convert types 'INTEGER' to 'VARCHAR'.
+ij> values (cast (1e200 as char(10)));
+ERROR 42846: Cannot convert types 'DOUBLE' to 'CHAR'.
+ij> values (cast (1e200 as varchar(10)));
+ERROR 42846: Cannot convert types 'DOUBLE' to 'VARCHAR'.
+ij> values (cast (1 as long varchar));
+ERROR 42846: Cannot convert types 'INTEGER' to 'LONG VARCHAR'.
+ij> values (cast (1.1 as long varchar));
+ERROR 42846: Cannot convert types 'DECIMAL' to 'LONG VARCHAR'.
+ij> values (cast (1e1 as long varchar));
+ERROR 42846: Cannot convert types 'DOUBLE' to 'LONG VARCHAR'.
+ij> --char to numbers
+values (cast ('123' as smallint));
+1     
+------
+123   
+ij> values (cast ('123' as int));
+1          
+-----------
+123        
+ij> values (cast ('123' as bigint));
+1                   
+--------------------
+123                 
+ij> values (cast ('123' as double precision));
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> values (cast ('123' as float));
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> values (cast ('123' as real));
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> values (cast ('123' as numeric(3,0)));
+1   
+----
+123 
+ij> values (cast ('123' as decimal(3,0)));
+1   
+----
+123 
+ij> -- char (with decimal) to numbers  (truncates where needed Track #3756)
+-- bug 5568
+values (cast ('123.45' as smallint));
+1     
+------
+123   
+ij> values (cast ('123.45' as int));
+1          
+-----------
+123        
+ij> values (cast ('123.45' as bigint));
+1                   
+--------------------
+123                 
+ij> values (cast ('123.45' as double precision));
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> values (cast ('123.45' as float));
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> values (cast ('123.45' as real));
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> values (cast ('123.45' as numeric(5,1)));
+1       
+--------
+123.4   
+ij> values (cast ('123.45' as decimal(5,1)));
+1       
+--------
+123.4   
+ij> values (cast ('123.99' as smallint));
+1     
+------
+123   
+ij> values (cast ('123.99' as int));
+1          
+-----------
+123        
+ij> values (cast ('123.99' as bigint));
+1                   
+--------------------
+123                 
+ij> values (cast ('123.99' as double precision));
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> values (cast ('123.99' as float));
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> values (cast ('123.99' as real));
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> values (cast ('123.99' as numeric(5,1)));
+1       
+--------
+123.9   
+ij> values (cast ('123.99' as decimal(5,1)));
+1       
+--------
+123.9   
+ij> --bad
+values (cast (1 as char(2) for bit data));
+ERROR 42846: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
+ij> values (cast (1 as date));
+ERROR 42846: Cannot convert types 'INTEGER' to 'DATE'.
+ij> values (cast (1 as time));
+ERROR 42846: Cannot convert types 'INTEGER' to 'TIME'.
+ij> values (cast (1 as timestamp));
+ERROR 42846: Cannot convert types 'INTEGER' to 'TIMESTAMP'.
+ij> -------------------
+--char -> date/time
+-------------------
+values (cast ('TIME''11:11:11''' as time));
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> values (cast ('11:11:11' as time));
+1       
+--------
+11:11:11
+ij> values (cast ('DATE''1999-09-09''' as date));
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> values (cast ('1999-09-09' as date));
+1         
+----------
+1999-09-09
+ij> values (cast ('TIMESTAMP''xxxxxxFILTERED-TIMESTAMPxxxxx'' as timestamp));
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> values (cast ('xxxxxxFILTERED-TIMESTAMPxxxxxas timestamp));
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> ------------------
+--date/time ->other
+------------------
+values (cast (TIME('11:11:11') as char(20)));
+1                   
+--------------------
+11:11:11            
+ij> values (cast (DATE('1999-09-09') as char(20)));
+1                   
+--------------------
+1999-09-09          
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as char(40)));
+1                                       
+----------------------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> values (cast (TIME('11:11:11') as varchar(20)));
+1                   
+--------------------
+11:11:11            
+ij> values (cast (DATE('1999-09-09') as varchar(20)));
+1                   
+--------------------
+1999-09-09          
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as varchar(40)));
+1                                       
+----------------------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> values (cast (TIME('11:11:11') as long varchar));
+ERROR 42846: Cannot convert types 'TIME' to 'LONG VARCHAR'.
+ij> values (cast (DATE('1999-09-09') as long varchar));
+ERROR 42846: Cannot convert types 'DATE' to 'LONG VARCHAR'.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as long varchar));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'LONG VARCHAR'.
+ij> -- truncation errors
+values (cast (TIME('11:11:11') as char(2)));
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '11:11:11' to length 2.
+ij> values (cast (DATE('1999-09-09') as char(2)));
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '1999-09-09' to length 2.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as char(2)));
+ERROR 22001: A truncation error was encountered trying to shrink CHAR 'xxxxxxFILTERED-TIMESTAMPxxxxx' to length 2.
+ij> -- to date/time
+values (cast (TIME('11:11:11') as time));
+1       
+--------
+11:11:11
+ij> values (cast (TIME('11:11:11') as date));
+ERROR 42846: Cannot convert types 'TIME' to 'DATE'.
+ij> -- this piece of convoluted logic is to ensure that we
+-- get the current date for a conversion of time to timestamp
+values cast (cast (TIME('11:11:11') as timestamp) as char(50)).substring(0, 10).equals(cast (current_date as char(10)));
+ERROR 42846: Cannot convert types 'TIME' to 'TIMESTAMP'.
+ij> -- now make sure we got the time right
+values cast (cast (TIME('11:11:11') as timestamp) as char(30)).substring(11,21);
+ERROR 42846: Cannot convert types 'TIME' to 'TIMESTAMP'.
+ij> values (cast (DATE('1999-09-09') as date));
+1         
+----------
+1999-09-09
+ij> values (cast (DATE('1999-09-09') as time));
+ERROR 42846: Cannot convert types 'DATE' to 'TIME'.
+ij> values (cast (DATE('1999-09-09') as timestamp));
+ERROR 42846: Cannot convert types 'DATE' to 'TIMESTAMP'.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as date));
+1         
+----------
+1999-09-09
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as time));
+1       
+--------
+11:11:11
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as timestamp));
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> --bad
+values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as int));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'INTEGER'.
+ij> values (cast (DATE('1999-09-09') as int));
+ERROR 42846: Cannot convert types 'DATE' to 'INTEGER'.
+ij> values (cast (TIME('11:11:11') as int));
+ERROR 42846: Cannot convert types 'TIME' to 'INTEGER'.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as smallint));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'SMALLINT'.
+ij> values (cast (DATE('1999-09-09') as smallint));
+ERROR 42846: Cannot convert types 'DATE' to 'SMALLINT'.
+ij> values (cast (TIME('11:11:11') as smallint));
+ERROR 42846: Cannot convert types 'TIME' to 'SMALLINT'.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as bigint));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'BIGINT'.
+ij> values (cast (DATE('1999-09-09') as bigint));
+ERROR 42846: Cannot convert types 'DATE' to 'BIGINT'.
+ij> values (cast (TIME('11:11:11') as bigint));
+ERROR 42846: Cannot convert types 'TIME' to 'BIGINT'.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as numeric));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'NUMERIC'.
+ij> values (cast (DATE('1999-09-09') as numeric));
+ERROR 42846: Cannot convert types 'DATE' to 'NUMERIC'.
+ij> values (cast (TIME('11:11:11') as numeric));
+ERROR 42846: Cannot convert types 'TIME' to 'NUMERIC'.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as decimal));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'DECIMAL'.
+ij> values (cast (DATE('1999-09-09') as decimal));
+ERROR 42846: Cannot convert types 'DATE' to 'DECIMAL'.
+ij> values (cast (TIME('11:11:11') as decimal));
+ERROR 42846: Cannot convert types 'TIME' to 'DECIMAL'.
+ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx) as char(13) for bit data));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'CHAR () FOR BIT DATA'.
+ij> values (cast (DATE('1999-09-09') as char(13) for bit data));
+ERROR 42846: Cannot convert types 'DATE' to 'CHAR () FOR BIT DATA'.
+ij> values (cast (TIME('11:11:11') as char(13) for bit data));
+ERROR 42846: Cannot convert types 'TIME' to 'CHAR () FOR BIT DATA'.
+ij> ------------
+--bit ->char
+------------
+values (cast (X'00680065006c006c006f' as char(10)));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+ij> --small bit
+values (cast (X'11' as char(10)));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+ij> values (cast (X'11' as varchar(10)));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+ij> values (cast (X'11' as long varchar));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
+ij> --values (cast (X'00' as char(10)));
+--odd length won't work anymore
+values (cast (X'123' as char(20)));
+ERROR 42606: An invalid hexadecimal constant starting with 'X'123'' has been detected.
+ij> --truncate, (should be warning in future)
+values (cast ('1234' as char(1) for bit data));
+ERROR 42846: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
+ij> --truncate, ok
+values (cast ('1200' as char(1) for bit data));
+ERROR 42846: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
+ij> ------------------------------------------------
+-- Casting
+-----------------------------------------------
+create table tab1 (
+				i integer, 
+				s integer, 
+				b integer, 
+				l bigint,
+				c char(10),
+				v varchar(10),
+				d double precision,
+				r real,
+				dt date,
+				t time,
+				ts timestamp,
+				dc decimal);
+0 rows inserted/updated/deleted
+ij> insert into tab1 values(1, 
+				cast(1 as smallint), 
+				cast(1 as int), 
+				cast(1 as bigint), 
+				'char', 
+				'varchar', 
+				cast(1.1 as double precision), 
+				cast(1.1 as real), 
+				DATE('1990-10-10'),
+				TIME('11:11:11'), 
+				TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx),
+				1.1);
+1 row inserted/updated/deleted
+ij> insert into tab1 values (null,
+				null,
+				null,	
+				null,	
+				null,	
+				null,	
+				null,	
+				null,	
+				null,	
+				null,	
+				null,	
+				null);
+1 row inserted/updated/deleted
+ij> -- tab1 type -> its tab1 type
+select cast(i as integer) from tab1;
+1          
+-----------
+1          
+NULL       
+ij> select cast(s as smallint) from tab1;
+1     
+------
+1     
+NULL  
+ij> select cast(l as bigint) from tab1;
+1                   
+--------------------
+1                   
+NULL                
+ij> select cast(c as char(10)) from tab1;
+1         
+----------
+char      
+NULL      
+ij> select cast(v as char varying(10)) from tab1;
+1         
+----------
+varchar   
+NULL      
+ij> select cast(d as double precision) from tab1;
+1                     
+----------------------
+1.1                   
+NULL                  
+ij> select cast(r as float) from tab1;
+1                     
+----------------------
+1.100000023841858     
+NULL                  
+ij> select cast(dt as date) from tab1;
+1         
+----------
+1990-10-10
+NULL      
+ij> select cast(t as time) from tab1;
+1       
+--------
+11:11:11
+NULL    
+ij> select cast(ts as timestamp) from tab1;
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+NULL                      
+ij> select cast(dc as dec) from tab1;
+1     
+------
+1     
+NULL  
+ij> -- try a few others where we try all conversions
+select cast(i as integer) from tab1;
+1          
+-----------
+1          
+NULL       
+ij> select cast(i as smallint) from tab1;
+1     
+------
+1     
+NULL  
+ij> select cast(i as bigint) from tab1;
+1                   
+--------------------
+1                   
+NULL                
+ij> select cast(i as char(10)) from tab1;
+1         
+----------
+1         
+NULL      
+ij> select cast(i as char varying(10)) from tab1;
+ERROR 42846: Cannot convert types 'INTEGER' to 'VARCHAR'.
+ij> select cast(i as double precision) from tab1;
+1                     
+----------------------
+1.0                   
+NULL                  
+ij> select cast(i as float) from tab1;
+1                     
+----------------------
+1.0                   
+NULL                  
+ij> select cast(i as date) from tab1;
+ERROR 42846: Cannot convert types 'INTEGER' to 'DATE'.
+ij> select cast(i as time) from tab1;
+ERROR 42846: Cannot convert types 'INTEGER' to 'TIME'.
+ij> select cast(i as timestamp) from tab1;
+ERROR 42846: Cannot convert types 'INTEGER' to 'TIMESTAMP'.
+ij> select cast(i as dec) from tab1;
+1     
+------
+1     
+NULL  
+ij> -- try a few others
+select cast(c as integer) from tab1;
+1          
+-----------
+ERROR 22018: Invalid character string format for type INTEGER.
+ij> select cast(c as smallint) from tab1;
+1     
+------
+ERROR 22018: Invalid character string format for type SMALLINT.
+ij> select cast(c as bigint) from tab1;
+1                   
+--------------------
+ERROR 22018: Invalid character string format for type BIGINT.
+ij> select cast(c as char(10)) from tab1;
+1         
+----------
+char      
+NULL      
+ij> select cast(c as char varying(10)) from tab1;
+1         
+----------
+char      
+NULL      
+ij> select cast(c as double precision) from tab1;
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> select cast(c as float) from tab1;
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> select cast(c as date) from tab1;
+1         
+----------
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> select cast(c as time) from tab1;
+1       
+--------
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> select cast(c as timestamp) from tab1;
+1                         
+--------------------------
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> select cast(c as dec) from tab1;
+1     
+------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> select cast(t as integer) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'INTEGER'.
+ij> select cast(t as smallint) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'SMALLINT'.
+ij> select cast(t as bigint) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'BIGINT'.
+ij> select cast(t as char(10)) from tab1;
+1         
+----------
+11:11:11  
+NULL      
+ij> select cast(t as char varying(10)) from tab1;
+1         
+----------
+11:11:11  
+NULL      
+ij> select cast(t as double precision) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'DOUBLE'.
+ij> select cast(t as float) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'DOUBLE'.
+ij> select cast(t as date) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'DATE'.
+ij> select cast(t as time) from tab1;
+1       
+--------
+11:11:11
+NULL    
+ij> select cast(t as timestamp) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'TIMESTAMP'.
+ij> select cast(t as dec) from tab1;
+ERROR 42846: Cannot convert types 'TIME' to 'DECIMAL'.
+ij> drop table tab1;
+0 rows inserted/updated/deleted
+ij> ---------------------------------------------------------------
+-- Other Tests
+---------------------------------------------------------------
+autocommit off;
+ij> -- create tables
+create table t1 (bt char(1) for bit data, btv varchar(1) for bit data,
+				 c char(30), d double precision, i int, r real, 
+				 s smallint, dc decimal(18), num numeric(18),
+				 dt date, t time, ts timestamp, v varchar(30), 
+				 lvc long varchar);
+0 rows inserted/updated/deleted
+ij> create table strings(c30 char(30));
+0 rows inserted/updated/deleted
+ij> -- we need a 1 row table with date/time columns because of problems
+-- with single quotes in using 'values DATE('')'
+create table temporal_values (dt date, t time, ts timestamp);
+0 rows inserted/updated/deleted
+ij> insert into temporal_values values(DATE('9876-5-4'), TIME('1:02:34'),
+								   TIMESTAMP('9876-5-4 1:02:34'));
+1 row inserted/updated/deleted
+ij> -- negative
+-- pass wrong type for parameter
+prepare a1 as 'values cast(? as smallint)';
+ij> execute a1 using 'values 1';
+1     
+------
+1     
+ij> -- uninitialized parameter
+values cast(? as int);
+ERROR 07000: At least one parameter to the current statement is uninitialized.
+ij> -- positive
+-- test casting null to all builtin types
+insert into t1 (bt) values cast(null as char(1) for bit data);
+1 row inserted/updated/deleted
+ij> insert into t1 (btv) values cast(null as varchar(1) for bit data);
+1 row inserted/updated/deleted
+ij> insert into t1 (c) values cast(null as char(30));
+1 row inserted/updated/deleted
+ij> insert into t1 (d) values cast(null as double precision);
+1 row inserted/updated/deleted
+ij> insert into t1 (i) values cast(null as int);
+1 row inserted/updated/deleted
+ij> insert into t1 (r) values cast(null as real);
+1 row inserted/updated/deleted
+ij> insert into t1 (s) values cast(null as smallint);
+1 row inserted/updated/deleted
+ij> insert into t1 (dc) values cast(null as decimal);
+1 row inserted/updated/deleted
+ij> insert into t1 (num) values cast(null as numeric);
+1 row inserted/updated/deleted
+ij> insert into t1 (dt) values cast(null as date);
+1 row inserted/updated/deleted
+ij> insert into t1 (t) values cast(null as time);
+1 row inserted/updated/deleted
+ij> insert into t1 (ts) values cast(null as timestamp);
+1 row inserted/updated/deleted
+ij> insert into t1 (v) values cast(null as varchar(30));
+1 row inserted/updated/deleted
+ij> insert into t1 (lvc) values cast(null as long varchar);
+1 row inserted/updated/deleted
+ij> -- expect 10 rows of nulls
+select * from t1;
+BT  |BTV |C                             |D                     |I          |R            |S     |DC                 |NUM                |DT        |T       |TS                        |V                             |LVC                                                                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+ij> -- make sure casting works correctly on nulls
+select cast (bt as char(1) for bit data) from t1;
+1   
+----
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+ij> select cast (btv as varchar(1) for bit data) from t1;
+1   
+----
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+ij> select cast (c as char(30)) from t1;
+1                             
+------------------------------
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+ij> select cast (d as double precision) from t1;
+1                     
+----------------------
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+NULL                  
+ij> select cast (r as real) from t1;
+1            
+-------------
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+NULL         
+ij> select cast (s as smallint) from t1;
+1     
+------
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+ij> select cast (num as numeric) from t1;
+1     
+------
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+ij> select cast (dc as decimal) from t1;
+1     
+------
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+NULL  
+ij> select cast (dt as date) from t1;
+1         
+----------
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+NULL      
+ij> select cast (t as time) from t1;
+1       
+--------
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+NULL    
+ij> select cast (ts as timestamp) from t1;
+1                         
+--------------------------
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+NULL                      
+ij> select cast (v as varchar(30)) from t1;
+1                             
+------------------------------
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+NULL                          
+ij> select cast (lvc as long varchar) from t1;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+ij> -- clean up t1
+delete from t1;
+14 rows inserted/updated/deleted
+ij> -- test casting ? to all builtin types
+prepare q1 as 'insert into t1 (bt) values cast(? as char(1) for bit data)';
+ij> prepare q2 as 'insert into t1 (btv) values cast(? as varchar(1) for bit data)';
+ij> prepare q4 as 'insert into t1 (c) values cast(? as char(30))';
+ij> prepare q5 as 'insert into t1 (d) values cast(? as double precision)';
+ij> prepare q6 as 'insert into t1 (i) values cast(? as int)';
+ij> prepare q7 as 'insert into t1 (r) values cast(? as real)';
+ij> prepare q8 as 'insert into t1 (s) values cast(? as smallint)';
+ij> prepare q10 as 'insert into t1 (num) values cast(? as numeric(18))';
+ij> prepare q11 as 'insert into t1 (dc) values cast(? as decimal(18))';
+ij> prepare q12 as 'insert into t1 (dt) values cast(? as date)';
+ij> prepare q13 as 'insert into t1 (t) values cast(? as time)';
+ij> prepare q14 as 'insert into t1 (ts) values cast(? as timestamp)';
+ij> prepare q15 as 'insert into t1 (v) values cast(? as varchar(30))';
+ij> prepare q16 as 'insert into t1 (lvc) values cast(? as long varchar)';
+ij> execute q1 using 'values X''aa''';
+1 row inserted/updated/deleted
+ij> execute q2 using 'values X''aa''';
+1 row inserted/updated/deleted
+ij> execute q4 using 'values char(123456)';
+1 row inserted/updated/deleted
+ij> execute q5 using 'values 123456.78e0';
+1 row inserted/updated/deleted
+ij> execute q6 using 'values 4321';
+1 row inserted/updated/deleted
+ij> -- bug 5421 - support db2 udb compatible built-in functions
+execute q7 using 'values REAL(4321.01234)';
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> execute q8 using 'values SMALLINT(12321)';
+1 row inserted/updated/deleted
+ij> execute q10 using 'values 123456.78';
+1 row inserted/updated/deleted
+ij> execute q11 using 'values 123456.78';
+1 row inserted/updated/deleted
+ij> execute q12 using 'select dt from temporal_values';
+1 row inserted/updated/deleted
+ij> execute q13 using 'select t from temporal_values';
+1 row inserted/updated/deleted
+ij> execute q14 using 'select ts from temporal_values';
+1 row inserted/updated/deleted
+ij> execute q15 using 'values char(654321)';
+1 row inserted/updated/deleted
+ij> execute q16 using 'values char(987654)';
+1 row inserted/updated/deleted
+ij> select * from t1;
+BT  |BTV |C                             |D                     |I          |R            |S     |DC                 |NUM                |DT        |T       |TS                        |V                             |LVC                                                                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+aa  |NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|aa  |NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|123456                        |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |123456.78             |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |4321       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |12321 |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |123456             |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |123456             |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |9876-05-04|NULL    |NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |01:02:34|NULL                      |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |xxxxxxFILTERED-TIMESTAMPxxxxx|NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |654321                        |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |987654                                                                                                                          
+ij> -- clean up t1
+delete from t1;
+13 rows inserted/updated/deleted
+ij> -- more ? tests
+-- Truncation exception expected in non-parameter cases
+-- RESOLVE, no truncation expected in parameter cases
+-- where parameter value is not a string.  This is
+-- currently an "extension".
+create table x(c1 char(1));
+0 rows inserted/updated/deleted
+ij> prepare param1 as 'insert into x values cast(? as char(1))';
+ij> insert into x values cast('12' as char(1));
+1 row inserted/updated/deleted
+ij> execute param1 using 'values ''34''';
+1 row inserted/updated/deleted
+ij> select * from x;
+C1  
+----
+1   
+3   
+ij> delete from x;
+2 rows inserted/updated/deleted
+ij> insert into x values cast(12 as char(1));
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '12' to length 1.
+ij> execute param1 using 'values 34';
+1 row inserted/updated/deleted
+ij> select * from x;
+C1  
+----
+3   
+ij> delete from x;
+1 row inserted/updated/deleted
+ij> insert into x values cast(time('12:12:12') as char(1));
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '12:12:12' to length 1.
+ij> execute param1 using 'values time(''21:12:12'')';
+1 row inserted/updated/deleted
+ij> select * from x;
+C1  
+----
+2   
+ij> delete from x;
+1 row inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> -- method resolution tests
+-- clean up the prepared statements
+remove a1;
+ij> remove q1;
+ij> remove q2;
+ij> remove q4;
+ij> remove q5;
+ij> remove q6;
+ij> remove q7;
+ij> remove q8;
+ij> remove q10;
+ij> remove q11;
+ij> remove q12;
+ij> remove q13;
+ij> remove q14;
+ij> remove q15;
+ij> -- reset autocomiit
+commit;
+ij> autocommit on;
+ij> -- bind time casting tests
+-- negative
+values cast('asdf' as smallint);
+ERROR 22018: Invalid character string format for type SMALLINT.
+ij> values cast('asdf' as int);
+ERROR 22018: Invalid character string format for type INTEGER.
+ij> values cast('asdf' as bigint);
+ERROR 22018: Invalid character string format for type BIGINT.
+ij> values cast('asdf' as real);
+ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
+ij> values cast('asdf' as double precision);
+ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
+ij> values cast('asdf' as decimal(5,4));
+1       
+--------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast('asdf' as date);
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> values cast('asdf' as time);
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> values cast('asdf' as timestamp);
+ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ij> values cast('2999999999' as int);
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> values cast(2999999999 as int);
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> values cast('99999' as smallint);
+ERROR 22003: The resulting value is outside the range for the data type SHORT.
+ij> values cast(99999 as smallint);
+ERROR 22003: The resulting value is outside the range for the data type SHORT.
+ij> values cast(cast(99 as int) as char);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '99' to length 1.
+ij> values cast(cast(-9 as int) as char);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '-9' to length 1.
+ij> values cast(cast(99 as smallint) as char);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '99' to length 1.
+ij> values cast(cast(99 as bigint) as char);
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '99' to length 1.
+ij> values cast(cast(9.9 as real) as char);
+ERROR 42846: Cannot convert types 'REAL' to 'CHAR'.
+ij> values cast(cast(9.9 as double precision) as char);
+ERROR 42846: Cannot convert types 'DOUBLE' to 'CHAR'.
+ij> -- positive
+values cast(1 as int);
+1          
+-----------
+1          
+ij> values cast(1 as smallint);
+1     
+------
+1     
+ij> values cast(1 as bigint);
+1                   
+--------------------
+1                   
+ij> values cast(1 as char);
+1
+-
+1
+ij> values cast('true' as char(4));
+1   
+----
+true
+ij> -- drop the tables
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table temporal_values;
+0 rows inserted/updated/deleted
+ij> drop table strings;
+0 rows inserted/updated/deleted
+ij> -- ISO time/timestamp formats
+values (cast ('08.08.08' as TIME));
+1       
+--------
+08:08:08
+ij> values (cast ('2001-01-01-08.08.08.123456' as TIMESTAMP));
+1                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- char, varchar
+values (char('abcde', 5));
+1    
+-----
+abcde
+ij> values (char('abcde', 6));
+1     
+------
+abcde 
+ij> values (char('abcde', 4));
+1   
+----
+abcd
+ij> values (varchar('', 20));
+1                   
+--------------------
+ij> create table t1 (c5 date, c6 time, c7 timestamp, c8 char(5), c9 varchar(5));
+0 rows inserted/updated/deleted
+ij> insert into t1 values ('2003-09-10', '16:44:02', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'abc', 'abcde');
+1 row inserted/updated/deleted
+ij> insert into t1 values ('2005-09-10', '18.44.02', '2004-09-08-12.20.30.123456', 'cba', 'c');
+1 row inserted/updated/deleted
+ij> select char(c5), char(c6), char(c7), char(c8), char(c9) from t1;
+1         |2       |3                         |4              |5              
+------------------------------------------------------------------------------
+2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc            |abcde          
+2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba            |c              
+ij> select varchar(c5), varchar(c6), varchar(c7), varchar(c8), varchar(c9) from t1;
+1         |2       |3                         |4              |5              
+------------------------------------------------------------------------------
+2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc            |abcde          
+2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba            |c              
+ij> select char(c8, 10), varchar(c9, 9) from t1;
+1         |2        
+--------------------
+abc       |abcde    
+cba       |c        
+ij> select { fn concat(c8, char(c8)) } from t1;
+1                   
+--------------------
+abc  abc            
+cba  cba            
+ij> select { fn concat(c8, varchar(c9)) } from t1;
+1                   
+--------------------
+abc  abcde          
+cba  c              
+ij> select { fn concat(varchar(c9, 20), char(c8, 8)) } from t1;
+1                           
+----------------------------
+abcdeabc                    
+ccba                        
+ij> select { fn concat(char(c9, 20), varchar(c8, 8)) } from t1;
+1                           
+----------------------------
+abcde               abc     
+c                   cba     
+ij> -- clean up
+drop table t1;
+0 rows inserted/updated/deleted
+ij> -- bug 5421 - support db2 udb compatible built-in functions
+values CHAR(INT(67890));
+ERROR 42X01: Syntax error: Encountered "INT" at line 2, column 13.
+ij> values CHAR(INTEGER(12345));
+1          
+-----------
+12345      
+ij> values CHAR(DEC(67.21,4,2));
+ERROR 42X01: Syntax error: Encountered "DEC" at line 1, column 13.
+ij> values CHAR(DECIMAL(67.10,4,2));
+ERROR 42X01: Syntax error: Encountered "DECIMAL" at line 1, column 13.
+ij> values CHAR(DOUBLE(5.55));
+1                                                    
+-----------------------------------------------------
+5.55                                                 
+ij> values CHAR(DOUBLE_PRECISION(5.555));
+ERROR 42Y03: 'DOUBLE_PRECISION' is not recognized as a function or procedure.
+ij> values CHAR(BIGINT(1));
+1                   
+--------------------
+1                   
+ij> values CHAR(BIGINT(-1));
+1                   
+--------------------
+-1                  
+ij> values LENGTH(CAST('hello' AS CHAR(25)));
+1          
+-----------
+25         
+ij> values LENGTH(CAST('hello' AS VARCHAR(25)));
+1          
+-----------
+5          
+ij> values LENGTH(CAST('hello' AS LONG VARCHAR));
+1          
+-----------
+5          
+ij> values CAST (X'03' as CHAR(5) for bit data);
+1         
+----------
+0320202020
+ij> values CAST (X'04' as VARCHAR(5) for bit data);
+1         
+----------
+04        
+ij> values CAST (X'05' as LONG VARCHAR for bit data);
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+05                                                                                                                              
+ij> -- clean up
+drop table t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> 

@@ -1,0 +1,12 @@
+Test metadataMultiConn starting
+A new connection is doing metadata calls, but never commit...
+Submitted getTypeInfo request
+Getting column info for %
+A new connection is doing metadata calls, but never commit...
+Submitted getTypeInfo request
+Getting column info for %
+A new connection is doing metadata calls, but never commit...
+Submitted getTypeInfo request
+Getting column info for %
+All tables are consistent.
+Test metadataMultiConn finishes.

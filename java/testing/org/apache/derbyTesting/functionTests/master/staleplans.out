@@ -1,0 +1,1167 @@
+ij> -- This is the test for stale plan invalidation.  The system determines
+-- at execution whether the tables used by a DML statement have grown or
+-- shrunk significantly, and if so, causes the statement to be recompiled
+-- at the next execution.
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- Create and populate a table to be used for flushing the cache.
+-- Flushing the cache causes all row count changes to be written,
+-- which is necessary for the results of this test to be stable
+-- (because otherwise the row count changes would be written
+-- asynchronously)
+create table flusher (c1 varchar(3000));
+0 rows inserted/updated/deleted
+ij> insert into flusher values (PADSTRING('a',3000));
+1 row inserted/updated/deleted
+ij> -- 1 row
+insert into flusher select c1 from flusher;
+1 row inserted/updated/deleted
+ij> -- 2 rows
+insert into flusher select c1 from flusher;
+2 rows inserted/updated/deleted
+ij> -- 4 rows
+insert into flusher select c1 from flusher;
+4 rows inserted/updated/deleted
+ij> -- 8 rows
+insert into flusher select c1 from flusher;
+8 rows inserted/updated/deleted
+ij> -- 16 rows
+insert into flusher select c1 from flusher;
+16 rows inserted/updated/deleted
+ij> -- 32 rows
+insert into flusher select c1 from flusher;
+32 rows inserted/updated/deleted
+ij> -- 64 rows
+commit;
+ij> -- Negative test - try setting stalePlanCheckInterval to a value out of range
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.stalePlanCheckInterval', '2');
+ERROR XCY00: Invalid value for property 'derby.language.stalePlanCheckInterval'='2'.
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 3500;
+ij> -- Make it check for stale plans every 10th execution.  The default is 100,
+-- which would force the test to take a lot longer to run, due to more
+-- executions.
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.stalePlanCheckInterval', '10');
+0 rows inserted/updated/deleted
+ij> commit;
+ij> create table t1 (c1 int, c2 int, c3 varchar(255));
+0 rows inserted/updated/deleted
+ij> commit;
+ij> create index t1x on t1(c1);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into t1 values (1, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- Make sure row count from insert is flushed out
+select count(c1) from flusher;
+1          
+-----------
+64         
+ij> prepare s1 as 'select count(c1 + c2) from t1 where c1 = 1';
+ij> execute s1;
+1          
+-----------
+1          
+ij> -- Expect this to do a table scan
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T1:
+			Number of opens = 1
+			Rows seen = 1
+			Columns accessed from heap = {0, 1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T1 using index T1X at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> -- Execute 11 more times, the plan should not change
+execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> -- Expect this to do a table scan
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T1:
+			Number of opens = 1
+			Rows seen = 1
+			Columns accessed from heap = {0, 1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T1 using index T1X at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> commit;
+ij> -- Now increase the size of the table
+insert into t1 values (2, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (4, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (5, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (6, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (7, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (8, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (9, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t1 values (10, 100, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- Make sure row count from inserts is flushed out
+select count(c1) from flusher;
+1          
+-----------
+64         
+ij> -- Execute 11 times, the plan should change
+execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> -- Expect this to use index
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T1:
+			Number of opens = 1
+			Rows seen = 1
+			Columns accessed from heap = {0, 1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T1 using index T1X at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=2
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> commit;
+ij> -- Now shrink the table back to its original size
+delete from t1 where c1 >= 2;
+9 rows inserted/updated/deleted
+ij> commit;
+ij> -- Make sure row count from inserts is flushed out
+select count(c1) from flusher;
+1          
+-----------
+64         
+ij> -- Execute 11 times, the plan should change
+execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> execute s1;
+1          
+-----------
+1          
+ij> -- Expect this to do a table scan
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t1 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T1:
+			Number of opens = 1
+			Rows seen = 1
+			Columns accessed from heap = {0, 1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T1 using index T1X at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=2
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> commit;
+ij> -- Now do the same thing with a table that has many rows
+create table t2 (c1 int, c2 int, c3 varchar(255));
+0 rows inserted/updated/deleted
+ij> commit;
+ij> create index t2x on t2(c1);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into t2 values (1, 1, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 select c1 + 1, c2 + 1, c3 from t2;
+1 row inserted/updated/deleted
+ij> insert into t2 select c1 + 2, c2 + 2, c3 from t2;
+2 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 4, c2 + 4, c3 from t2;
+4 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 8, c2 + 8, c3 from t2;
+8 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 16, c2 + 16, c3 from t2;
+16 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 32, c2 + 32, c3 from t2;
+32 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 64, c2 + 64, c3 from t2;
+64 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 128, c2 + 128, c3 from t2;
+128 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 256, c2 + 256, c3 from t2;
+256 rows inserted/updated/deleted
+ij> insert into t2 select c1 + 512, c2 + 512, c3 from t2;
+512 rows inserted/updated/deleted
+ij> commit;
+ij> -- Make sure row count from inserts is flushed out
+select count(c1) from flusher;
+1          
+-----------
+64         
+ij> prepare s2 as 'select count(c1 + c2) from t2 where c1 = 1';
+ij> execute s2;
+1          
+-----------
+1          
+ij> -- Expect this to use index
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t2 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T2:
+			Number of opens = 1
+			Rows seen = 1
+			Columns accessed from heap = {0, 1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T2 using index T2X at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=2
+					Number of rows qualified=1
+					Number of rows visited=2
+					Scan type=btree
+					Tree height=2
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> commit;
+ij> -- Change the row count a little bit
+insert into t2 values (1025, 1025, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1026, 1026, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1027, 1027, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1028, 1028, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1029, 1029, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1030, 1030, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1031, 1031, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1032, 1032, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1033, 1033, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1034, 1034, PADSTRING('abc',255));
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- Change the data so a table scan would make more sense.
+-- Use a qualifier to convince TableScanResultSet not to
+-- update the row count in the store (which would make it
+-- hard for this test to control when recompilation takes
+-- place).
+update t2 set c1 = 1 where c1 > 0;
+1034 rows inserted/updated/deleted
+ij> -- Make sure row count from inserts is flushed out
+select count(c1) from flusher;
+1          
+-----------
+64         
+ij> -- Execute 11 more times, the plan should not change
+execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> execute s2;
+1          
+-----------
+1034       
+ij> -- Expect this to use tables scan, as the above update has basically made
+-- all the rows in the table be equal to "1", thus using the index does not
+-- help if all the rows are going to qualify.
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t2 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 1034
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 1034
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1034
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of pages visited=87
+				Number of rows qualified=1034
+				Number of rows visited=1034
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- Change the row count significantly
+insert into t2 select c1, c2, c3 from t2 where c1 < 128;
+1034 rows inserted/updated/deleted
+ij> -- Make sure row count from inserts is flushed out
+select count(c1) from flusher;
+1          
+-----------
+64         
+ij> -- Execute 11 times, the plan should change
+execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> execute s2;
+1          
+-----------
+2068       
+ij> -- Expect this to do table scan
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t2 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 2068
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (3):
+		Number of opens = 1
+		Rows seen = 2068
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 2068
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of pages visited=173
+				Number of rows qualified=2068
+				Number of rows visited=2068
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- Change the distribution back to where an index makes sense.
+update t2 set c1 = c2;
+2068 rows inserted/updated/deleted
+ij> -- Change the row count significantly
+insert into t2 select c1, c2, c3 from t2;
+2068 rows inserted/updated/deleted
+ij> -- Make sure row count from inserts is flushed out
+select count(c1) from flusher;
+1          
+-----------
+64         
+ij> -- Execute 11 times, the plan should change
+execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> execute s2;
+1          
+-----------
+4          
+ij> -- Expect this to do index to baserow.
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select count(c1 + c2) from t2 where c1 = 1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Scalar Aggregate ResultSet:
+	Number of opens = 1
+	Rows input = 4
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Index Key Optimization = false
+	Source result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Row to Base Row ResultSet for T2:
+			Number of opens = 1
+			Rows seen = 4
+			Columns accessed from heap = {0, 1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T2 using index T2X at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 4
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=2066
+					Number of pages visited=23
+					Number of rows qualified=4
+					Number of rows visited=2071
+					Scan type=btree
+					Tree height=2
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> rollback;
+ij> 

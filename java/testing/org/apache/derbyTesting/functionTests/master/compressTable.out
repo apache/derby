@@ -1,0 +1,1085 @@
+ij> -- tests for system procedure SYSCS_COMPRESS_TABLE
+-- that reclaims disk space to the OS
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 512;
+ij> CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> -- create tables
+create table noindexes(c1 int, c2 char(30), c3 decimal(5,2));
+0 rows inserted/updated/deleted
+ij> create table indexes(c1 int, c2 char(30), c3 decimal(5,2));
+0 rows inserted/updated/deleted
+ij> create index i_c1 on indexes(c1);
+0 rows inserted/updated/deleted
+ij> create index i_c2 on indexes(c2);
+0 rows inserted/updated/deleted
+ij> create index i_c3 on indexes(c3);
+0 rows inserted/updated/deleted
+ij> create index i_c3c1 on indexes(c3, c1);
+0 rows inserted/updated/deleted
+ij> create index i_c2c1 on indexes(c2, c1);
+0 rows inserted/updated/deleted
+ij> create table oldconglom(o_cnum bigint, o_cname long varchar);
+0 rows inserted/updated/deleted
+ij> create table newconglom(n_cnum bigint, n_cname long varchar);
+0 rows inserted/updated/deleted
+ij> create view v_noindexes as select * from noindexes;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- test with heap only
+-- test with empty table
+insert into oldconglom
+select conglomeratenumber, conglomeratename 
+from sys.systables t, sys.sysconglomerates c
+where t.tablename = 'NOINDEXES' and t.tableid = c.tableid;
+1 row inserted/updated/deleted
+ij> select count(*) from oldconglom;
+1          
+-----------
+1          
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 0);
+0 rows inserted/updated/deleted
+ij> insert into newconglom
+select conglomeratenumber, conglomeratename 
+from sys.systables t, sys.sysconglomerates c
+where t.tablename = 'NOINDEXES' and t.tableid = c.tableid;
+1 row inserted/updated/deleted
+ij> select * from oldconglom, newconglom where o_cnum = n_cnum;
+O_CNUM              |O_CNAME                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |N_CNUM              |N_CNAME                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> select count(*) from newconglom;
+1          
+-----------
+1          
+ij> select * from noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- test with various sizes as we use bulk fetch
+insert into noindexes values (1, '1', 1.1), (2, '2', 2.2), (3, '3', 3.3),
+     (4, '4', 4.4), (5, '5', 5.5), (6, '6', 6.6), (7, '7', 7.7);
+7 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 0);
+0 rows inserted/updated/deleted
+ij> select * from noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+ij> insert into noindexes values (8, '8', 8.8), (8, '8', 8.8), (9, '9', 9.9),
+     (10, '10', 10.10), (11, '11', 11.11), (12, '12', 12.12), (13, '13', 13.13),
+     (14, '14', 14.14), (15, '15', 15.15), (16, '16', 16.16);
+10 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 0);
+0 rows inserted/updated/deleted
+ij> select * from noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+ij> insert into noindexes values (17, '17', 17.17), (18, '18', 18.18);
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 0);
+0 rows inserted/updated/deleted
+ij> select * from noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+17         |17                            |17.17   
+18         |18                            |18.18   
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- test with some indexes
+-- test with empty table
+insert into oldconglom
+select conglomeratenumber, conglomeratename 
+from sys.systables t, sys.sysconglomerates c
+where t.tablename = 'INDEXES' and t.tableid = c.tableid;
+6 rows inserted/updated/deleted
+ij> select count(*) from oldconglom;
+1          
+-----------
+6          
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 0);
+0 rows inserted/updated/deleted
+ij> insert into newconglom
+select conglomeratenumber, conglomeratename 
+from sys.systables t, sys.sysconglomerates c
+where t.tablename = 'INDEXES' and t.tableid = c.tableid;
+6 rows inserted/updated/deleted
+ij> select * from oldconglom, newconglom where o_cnum = n_cnum;
+O_CNUM              |O_CNAME                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |N_CNUM              |N_CNAME                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> select count(*) from newconglom;
+1          
+-----------
+6          
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- test with various sizes as we use bulk fetch
+insert into indexes values (1, '1', 1.1), (2, '2', 2.2), (3, '3', 3.3),
+     (4, '4', 4.4), (5, '5', 5.5), (6, '6', 6.6), (7, '7', 7.7);
+7 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 0);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+ij> insert into indexes values (8, '8', 8.8), (8, '8', 8.8), (9, '9', 9.9),
+     (10, '10', 10.10), (11, '11', 11.11), (12, '12', 12.12), (13, '13', 13.13),
+     (14, '14', 14.14), (15, '15', 15.15), (16, '16', 16.16);
+10 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 0);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+ij> insert into indexes values (17, '17', 17.17), (18, '18', 18.18);
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 0);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+17         |17                            |17.17   
+18         |18                            |18.18   
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- primary/foreign keys
+create table p (c1 char(1), y int not null, c2 char(1) not null, x int not null, constraint pk primary key(x,y));
+0 rows inserted/updated/deleted
+ij> create table f (x int, t int, y int, constraint fk foreign key (x,y) references p);
+0 rows inserted/updated/deleted
+ij> insert into p values ('1', 1, '1', 1);
+1 row inserted/updated/deleted
+ij> insert into f values (1, 1, 1), (1, 1, null);
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'P', 0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'F', 0);
+0 rows inserted/updated/deleted
+ij> insert into f values (1, 1, 1);
+1 row inserted/updated/deleted
+ij> insert into f values (2, 2, 2);
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'FK' for key (2,2).  The statement has been rolled back.
+ij> insert into p values ('2', 2, '2', 2);
+1 row inserted/updated/deleted
+ij> insert into f values (2, 2, 2);
+1 row inserted/updated/deleted
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+4 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- self referencing table
+create table pf (x int not null constraint p primary key, y int constraint f references pf);
+0 rows inserted/updated/deleted
+ij> insert into pf values (1,1), (2, 2);
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'PF', 0);
+0 rows inserted/updated/deleted
+ij> insert into pf values (3,1), (4, 2);
+2 rows inserted/updated/deleted
+ij> insert into pf values (3,1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'P' defined on 'PF'.
+ij> insert into pf values (5,6);
+ERROR 23503: INSERT on table 'PF' caused a violation of foreign key constraint 'F' for key (6).  The statement has been rolled back.
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+4 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- multiple indexes on same column
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096');
+0 rows inserted/updated/deleted
+ij> create table t (i int, s varchar(1500));
+0 rows inserted/updated/deleted
+ij> create index t_s on t(s);
+0 rows inserted/updated/deleted
+ij> create index t_si on t(s, i);
+0 rows inserted/updated/deleted
+ij> insert into t values (1, '1'), (2, '2');
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T', 0);
+0 rows inserted/updated/deleted
+ij> select * from t;
+I          |S                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+2          |2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- verify statements get re-prepared
+create table t(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t values (1, 2), (3, 4), (5, 6);
+3 rows inserted/updated/deleted
+ij> prepare p1 as 'select * from t where c2 = 4';
+ij> execute p1;
+C1         |C2         
+-----------------------
+3          |4          
+ij> prepare s as 'select * from t where c2 = 6';
+ij> execute s;
+C1         |C2         
+-----------------------
+5          |6          
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T', 0);
+0 rows inserted/updated/deleted
+ij> execute p1;
+C1         |C2         
+-----------------------
+3          |4          
+ij> execute s;
+C1         |C2         
+-----------------------
+5          |6          
+ij> remove p1;
+ij> remove s;
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> -- verify that space getting reclaimed
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096');
+0 rows inserted/updated/deleted
+ij> create table t(c1 int, c2 varchar(1500));
+0 rows inserted/updated/deleted
+ij> insert into t values (1,PADSTRING('1', 1500)), (2,PADSTRING('2', 1500)), (3,PADSTRING('3', 1500)), (4, PADSTRING('4', 1500)),
+	(5, PADSTRING('5', 1500)), (6, PADSTRING('6', 1500)), (7, PADSTRING('7', 1500)), (8, PADSTRING('8', 1500));
+8 rows inserted/updated/deleted
+ij> create table oldinfo (cname varchar(128), nap bigint);
+0 rows inserted/updated/deleted
+ij> insert into oldinfo select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('T') t;
+1 row inserted/updated/deleted
+ij> delete from t where c1 in (1, 3, 5, 7);
+4 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T', 0);
+0 rows inserted/updated/deleted
+ij> create table newinfo (cname varchar(128), nap bigint);
+0 rows inserted/updated/deleted
+ij> insert into newinfo select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('T') t;
+1 row inserted/updated/deleted
+ij> -- verify space reclaimed, this query should return 'compressed!'
+-- if nothing is returned from this query, then the table was not compressed
+select 'compressed!' from oldinfo o, newinfo n where o.cname = n.cname and o.nap > n.nap;
+1          
+-----------
+compressed!
+ij> rollback;
+ij> -- sequential
+-- no indexes
+-- empty table
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from v_noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+ij> -- full table
+insert into noindexes values (1, '1', 1.1), (2, '2', 2.2), (3, '3', 3.3),
+     (4, '4', 4.4), (5, '5', 5.5), (6, '6', 6.6), (7, '7', 7.7);
+7 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from v_noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+ij> insert into noindexes values (8, '8', 8.8), (8, '8', 8.8), (9, '9', 9.9),
+     (10, '10', 10.10), (11, '11', 11.11), (12, '12', 12.12), (13, '13', 13.13),
+     (14, '14', 14.14), (15, '15', 15.15), (16, '16', 16.16);
+10 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from v_noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+ij> insert into noindexes values (17, '17', 17.17), (18, '18', 18.18);
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'NOINDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from v_noindexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+17         |17                            |17.17   
+18         |18                            |18.18   
+ij> rollback;
+ij> -- 1 index
+drop index i_c2;
+0 rows inserted/updated/deleted
+ij> drop index i_c3;
+0 rows inserted/updated/deleted
+ij> drop index i_c2c1;
+0 rows inserted/updated/deleted
+ij> drop index i_c3c1;
+0 rows inserted/updated/deleted
+ij> -- empty table
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+ij> -- full table
+insert into indexes values (1, '1', 1.1), (2, '2', 2.2), (3, '3', 3.3),
+     (4, '4', 4.4), (5, '5', 5.5), (6, '6', 6.6), (7, '7', 7.7);
+7 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+ij> insert into indexes values (8, '8', 8.8), (8, '8', 8.8), (9, '9', 9.9),
+     (10, '10', 10.10), (11, '11', 11.11), (12, '12', 12.12), (13, '13', 13.13),
+     (14, '14', 14.14), (15, '15', 15.15), (16, '16', 16.16);
+10 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+ij> insert into indexes values (17, '17', 17.17), (18, '18', 18.18);
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+17         |17                            |17.17   
+18         |18                            |18.18   
+ij> rollback;
+ij> -- multiple indexes
+-- empty table
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+ij> -- full table
+insert into indexes values (1, '1', 1.1), (2, '2', 2.2), (3, '3', 3.3),
+     (4, '4', 4.4), (5, '5', 5.5), (6, '6', 6.6), (7, '7', 7.7);
+7 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+ij> insert into indexes values (8, '8', 8.8), (8, '8', 8.8), (9, '9', 9.9),
+     (10, '10', 10.10), (11, '11', 11.11), (12, '12', 12.12), (13, '13', 13.13),
+     (14, '14', 14.14), (15, '15', 15.15), (16, '16', 16.16);
+10 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+ij> insert into indexes values (17, '17', 17.17), (18, '18', 18.18);
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'INDEXES', 1);
+0 rows inserted/updated/deleted
+ij> select * from indexes;
+C1         |C2                            |C3      
+---------------------------------------------------
+1          |1                             |1.10    
+2          |2                             |2.20    
+3          |3                             |3.30    
+4          |4                             |4.40    
+5          |5                             |5.50    
+6          |6                             |6.60    
+7          |7                             |7.70    
+8          |8                             |8.80    
+8          |8                             |8.80    
+9          |9                             |9.90    
+10         |10                            |10.10   
+11         |11                            |11.11   
+12         |12                            |12.12   
+13         |13                            |13.13   
+14         |14                            |14.14   
+15         |15                            |15.15   
+16         |16                            |16.16   
+17         |17                            |17.17   
+18         |18                            |18.18   
+ij> rollback;
+ij> --table with multiple indexes, indexes share columns
+--table has more than 4 rows
+-- multiple indexes on same column
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096');
+0 rows inserted/updated/deleted
+ij> create table tab (a int, b int, s varchar(1500));
+0 rows inserted/updated/deleted
+ij> create index i_a on tab(a);
+0 rows inserted/updated/deleted
+ij> create index i_s on tab(s);
+0 rows inserted/updated/deleted
+ij> create index i_ab on tab(a, b);
+0 rows inserted/updated/deleted
+ij> insert into tab values (1, 1, 'abc'), (2, 2,  'bcd');
+2 rows inserted/updated/deleted
+ij> insert into tab values (3, 3, 'abc'), (4, 4,  'bcd');
+2 rows inserted/updated/deleted
+ij> insert into tab values (5, 5, 'abc'), (6, 6,  'bcd');
+2 rows inserted/updated/deleted
+ij> insert into tab values (7, 7, 'abc'), (8, 8,  'bcd');
+2 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'TAB', 1);
+0 rows inserted/updated/deleted
+ij> select * from tab;
+A          |B          |S                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |1          |abc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+2          |2          |bcd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+3          |3          |abc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+4          |4          |bcd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+5          |5          |abc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+6          |6          |bcd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+7          |7          |abc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+8          |8          |bcd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+ij> -- do consistency check on scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> --record the number of rows
+create table oldstat(rowCount int);
+0 rows inserted/updated/deleted
+ij> insert into oldstat select count(*) from tab;
+1 row inserted/updated/deleted
+ij> commit;
+ij> --double the size of the table
+select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('TAB') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+TAB                                                                                                                             |2                   
+I_A                                                                                                                             |1                   
+I_S                                                                                                                             |1                   
+I_AB                                                                                                                            |1                   
+ij> insert into tab values (1, 1, 'abc'), (2, 2,  'bcd');
+2 rows inserted/updated/deleted
+ij> insert into tab values (3, 3, 'abc'), (4, 4,  'bcd');
+2 rows inserted/updated/deleted
+ij> insert into tab values (5, 5, 'abc'), (6, 6,  'bcd');
+2 rows inserted/updated/deleted
+ij> insert into tab values (7, 7, 'abc'), (8, 8,  'bcd');
+2 rows inserted/updated/deleted
+ij> select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('TAB') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+TAB                                                                                                                             |2                   
+I_A                                                                                                                             |1                   
+I_S                                                                                                                             |1                   
+I_AB                                                                                                                            |1                   
+ij> delete from tab;
+16 rows inserted/updated/deleted
+ij> select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('TAB') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+TAB                                                                                                                             |2                   
+I_A                                                                                                                             |1                   
+I_S                                                                                                                             |1                   
+I_AB                                                                                                                            |1                   
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'TAB', 0);
+0 rows inserted/updated/deleted
+ij> -- verify space reclaimed
+select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('TAB') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+TAB                                                                                                                             |2                   
+I_A                                                                                                                             |1                   
+I_S                                                                                                                             |1                   
+I_AB                                                                                                                            |1                   
+ij> -- do consistency check on scans, etc.
+values  ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+3 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> rollback;
+ij> --record the number of rows
+create table newstat(rowCount int);
+0 rows inserted/updated/deleted
+ij> insert into newstat select count(*) from tab;
+1 row inserted/updated/deleted
+ij> --make sure the number of rows are the same
+select o.rowCount, n.rowCount from oldstat o, newstat n where o.rowCount = n.rowCount;
+ROWCOUNT   |ROWCOUNT   
+-----------------------
+8          |8          
+ij> --show old space usage
+select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('TAB') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+TAB                                                                                                                             |2                   
+I_A                                                                                                                             |1                   
+I_S                                                                                                                             |1                   
+I_AB                                                                                                                            |1                   
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'TAB', 0);
+0 rows inserted/updated/deleted
+ij> --show new space usage
+select conglomeratename, numallocatedpages from new org.apache.derby.diag.SpaceTable('TAB') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+TAB                                                                                                                             |2                   
+I_A                                                                                                                             |1                   
+I_S                                                                                                                             |1                   
+I_AB                                                                                                                            |1                   
+ij> rollback;
+ij> drop table tab;
+0 rows inserted/updated/deleted
+ij> drop table oldstat;
+0 rows inserted/updated/deleted
+ij> -- test that many levels of aborts of compress table still work
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096');
+0 rows inserted/updated/deleted
+ij> create table xena (a int, b int, c varchar(1000), d varchar(8000));
+0 rows inserted/updated/deleted
+ij> create index xena_idx1 on xena (a, c);
+0 rows inserted/updated/deleted
+ij> create unique index xena_idx2 on xena (b, c);
+0 rows inserted/updated/deleted
+ij> insert into xena values (1, 1, 'argo', 'horse');
+1 row inserted/updated/deleted
+ij> insert into xena values (1, -1, 'argo', 'horse');
+1 row inserted/updated/deleted
+ij> insert into xena values (2, 2, 'ares', 'god of war');
+1 row inserted/updated/deleted
+ij> insert into xena values (2, -2, 'ares', 'god of war');
+1 row inserted/updated/deleted
+ij> insert into xena values (3, 3, 'joxer', 'the mighty');
+1 row inserted/updated/deleted
+ij> insert into xena values (4, -4, 'gabrielle', 'side kick');
+1 row inserted/updated/deleted
+ij> insert into xena values (4, 4, 'gabrielle', 'side kick');
+1 row inserted/updated/deleted
+ij> select 
+    conglomeratename, isindex, 
+    numallocatedpages, numfreepages, 
+    pagesize, estimspacesaving
+    from new org.apache.derby.diag.SpaceTable('XENA') t
+        order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+XENA                                                                                                                            |0     |1                   |0                   |4096       |0                   
+XENA_IDX1                                                                                                                       |1     |1                   |0                   |4096       |0                   
+XENA_IDX2                                                                                                                       |1     |1                   |0                   |4096       |0                   
+ij> commit;
+ij> delete from xena where b = 1;
+1 row inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> create table xena2(a int);
+0 rows inserted/updated/deleted
+ij> delete from xena where b = 2;
+1 row inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> create table xena3(a int);
+0 rows inserted/updated/deleted
+ij> delete from xena where b = 3;
+1 row inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> create table xena4(a int);
+0 rows inserted/updated/deleted
+ij> delete from xena where b = 4;
+1 row inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> create table xena5(a int);
+0 rows inserted/updated/deleted
+ij> rollback;
+ij> -- should all fail
+drop table xena2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'XENA2' because it does not exist.
+ij> drop table xena3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'XENA3' because it does not exist.
+ij> select a, b from xena;
+A          |B          
+-----------------------
+1          |1          
+1          |-1         
+2          |2          
+2          |-2         
+3          |3          
+4          |-4         
+4          |4          
+ij> -- read every row and value in the table, including overflow pages.
+insert into xena values (select a + 4, b - 4, c, d from xena);
+ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ij> insert into xena values (select (a + 4, b - 4, c, d from xena);
+ERROR 42X01: Syntax error: Encountered "," at line 1, column 39.
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |1   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> -- delete all but 1 row (the sidekick)
+delete from xena where a <> 4 or b <> -4;
+6 rows inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |1   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+XENA_IDX1 |1   |0   |0         
+XENA_IDX2 |1   |0   |0         
+ij> rollback;
+ij> select a, b from xena;
+A          |B          
+-----------------------
+1          |1          
+1          |-1         
+2          |2          
+2          |-2         
+3          |3          
+4          |-4         
+4          |4          
+ij> drop table xena;
+0 rows inserted/updated/deleted
+ij> -- bug 2940
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096');
+0 rows inserted/updated/deleted
+ij> create table xena (a int, b int, c varchar(1000), d varchar(8000));
+0 rows inserted/updated/deleted
+ij> insert into xena values (1, 1, 'argo', 'horse');
+1 row inserted/updated/deleted
+ij> insert into xena values (2, 2, 'beta', 'mule');
+1 row inserted/updated/deleted
+ij> insert into xena values (3, 3, 'comma', 'horse');
+1 row inserted/updated/deleted
+ij> insert into xena values (4, 4, 'delta', 'goat');
+1 row inserted/updated/deleted
+ij> insert into xena values (1, 1, 'x_argo', 'x_horse');
+1 row inserted/updated/deleted
+ij> insert into xena values (2, 2, 'x_beta', 'x_mule');
+1 row inserted/updated/deleted
+ij> insert into xena values (3, 3, 'x_comma', 'x_horse');
+1 row inserted/updated/deleted
+ij> insert into xena values (4, 4, 'x_delta', 'x_goat');
+1 row inserted/updated/deleted
+ij> autocommit off;
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4000');
+0 rows inserted/updated/deleted
+ij> create unique index xena1 on xena (a, c);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','20000');
+0 rows inserted/updated/deleted
+ij> create unique index xena2 on xena (a, d);
+0 rows inserted/updated/deleted
+ij> create unique index xena3 on xena (c, d);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> select * from xena;
+A          |B          |C                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |D                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |1          |argo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+2          |2          |beta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |mule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+3          |3          |comma                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+4          |4          |delta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |goat                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+1          |1          |x_argo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |x_horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+2          |2          |x_beta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |x_mule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+3          |3          |x_comma                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |x_horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+4          |4          |x_delta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |x_goat                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'XENA', 0);
+0 rows inserted/updated/deleted
+ij> select * from xena;
+A          |B          |C                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |D                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |1          |argo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+2          |2          |beta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |mule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+3          |3          |comma                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+4          |4          |delta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |goat                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+1          |1          |x_argo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |x_horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+2          |2          |x_beta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |x_mule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+3          |3          |x_comma                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |x_horse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+4          |4          |x_delta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |x_goat                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+ij> rollback;
+ij> select 
+     cast (conglomeratename as char(10)) as name, 
+     cast (numallocatedpages as char(4)) as aloc, 
+     cast (numfreepages as char(4))      as free, 
+     cast (estimspacesaving as char(10)) as est
+        from new org.apache.derby.diag.SpaceTable('XENA') t order by name;
+NAME      |ALOC|FREE|EST       
+-------------------------------
+XENA      |2   |0   |0         
+ij> select schemaname, tablename, 
+SYSCS_UTIL.SYSCS_CHECK_TABLE(schemaname, tablename)
+ from sys.systables a,  sys.sysschemas b where a.schemaid = b.schemaid
+order by schemaname, tablename;
+SCHEMANAME                                                                                                                      |TABLENAME                                                                                                                       |3          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |INDEXES                                                                                                                         |1          
+APP                                                                                                                             |NEWCONGLOM                                                                                                                      |1          
+APP                                                                                                                             |NOINDEXES                                                                                                                       |1          
+APP                                                                                                                             |OLDCONGLOM                                                                                                                      |1          
+APP                                                                                                                             |V_NOINDEXES                                                                                                                     |1          
+APP                                                                                                                             |XENA                                                                                                                            |1          
+SYS                                                                                                                             |SYSALIASES                                                                                                                      |1          
+SYS                                                                                                                             |SYSCHECKS                                                                                                                       |1          
+SYS                                                                                                                             |SYSCOLUMNS                                                                                                                      |1          
+SYS                                                                                                                             |SYSCONGLOMERATES                                                                                                                |1          
+SYS                                                                                                                             |SYSCONSTRAINTS                                                                                                                  |1          
+SYS                                                                                                                             |SYSDEPENDS                                                                                                                      |1          
+SYS                                                                                                                             |SYSFILES                                                                                                                        |1          
+SYS                                                                                                                             |SYSFOREIGNKEYS                                                                                                                  |1          
+SYS                                                                                                                             |SYSKEYS                                                                                                                         |1          
+SYS                                                                                                                             |SYSSCHEMAS                                                                                                                      |1          
+SYS                                                                                                                             |SYSSTATEMENTS                                                                                                                   |1          
+SYS                                                                                                                             |SYSSTATISTICS                                                                                                                   |1          
+SYS                                                                                                                             |SYSTABLES                                                                                                                       |1          
+SYS                                                                                                                             |SYSTRIGGERS                                                                                                                     |1          
+SYS                                                                                                                             |SYSVIEWS                                                                                                                        |1          
+SYSIBM                                                                                                                          |SYSDUMMY1                                                                                                                       |1          
+ij> select a, b from xena;
+A          |B          
+-----------------------
+1          |1          
+2          |2          
+3          |3          
+4          |4          
+1          |1          
+2          |2          
+3          |3          
+4          |4          
+ij> -- clean up
+drop function padstring;
+0 rows inserted/updated/deleted
+ij> drop view v_noindexes;
+0 rows inserted/updated/deleted
+ij> drop table noindexes;
+0 rows inserted/updated/deleted
+ij> drop table indexes;
+0 rows inserted/updated/deleted
+ij> drop table oldconglom;
+0 rows inserted/updated/deleted
+ij> drop table newconglom;
+0 rows inserted/updated/deleted
+ij> 

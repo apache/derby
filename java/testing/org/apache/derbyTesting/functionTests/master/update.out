@@ -1,0 +1,439 @@
+ij> --
+-- this test is for basic update functionality
+--
+-- create the table
+create table t1 (int_col int, smallint_col smallint, char_30_col char(30),
+		 varchar_50_col varchar(50));
+0 rows inserted/updated/deleted
+ij> create table t2 (int_col int, smallint_col smallint, char_30_col char(30),
+		 varchar_50_col varchar(50));
+0 rows inserted/updated/deleted
+ij> -- populate t1
+insert into t1 values (1, 2, 'char_30_col', 'varchar_50_col');
+1 row inserted/updated/deleted
+ij> insert into t1 values (null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t2 select * from t1;
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+1          |2     |char_30_col                   |varchar_50_col                                    
+NULL       |NULL  |NULL                          |NULL                                              
+ij> -- update with constants
+update t1 set int_col = 3, smallint_col = 4, char_30_col = 'CHAR_30_COL',
+	      varchar_50_col = 'VARCHAR_50_COL';
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+3          |4     |CHAR_30_COL                   |VARCHAR_50_COL                                    
+3          |4     |CHAR_30_COL                   |VARCHAR_50_COL                                    
+ij> update t1 set varchar_50_col = null, char_30_col = null, smallint_col = null,
+	      int_col = null;
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                                              
+NULL       |NULL  |NULL                          |NULL                                              
+ij> update t1 set smallint_col = 6, int_col = 5, varchar_50_col = 'varchar_50_col',
+	      char_30_col = 'char_30_col';
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+5          |6     |char_30_col                   |varchar_50_col                                    
+5          |6     |char_30_col                   |varchar_50_col                                    
+ij> -- update columns with column values
+update t1 set smallint_col = int_col, int_col = smallint_col,
+	      varchar_50_col = char_30_col, char_30_col = varchar_50_col;
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+6          |5     |varchar_50_col                |char_30_col                                       
+6          |5     |varchar_50_col                |char_30_col                                       
+ij> update t1 set int_col = int_col, smallint_col = smallint_col,
+	      char_30_col = char_30_col, varchar_50_col = varchar_50_col;
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+6          |5     |varchar_50_col                |char_30_col                                       
+6          |5     |varchar_50_col                |char_30_col                                       
+ij> -- Negative test - column in SET clause twice
+update t1 set int_col = 1, int_col = 2;
+ERROR 42X16: Column name 'INT_COL' appears multiple times in the SET clause of an update statement.
+ij> -- Negative test - non-existent column in SET clause
+update t1 set notacolumn = int_col + 1;
+ERROR 42X14: 'NOTACOLUMN' is not a column in table or VTI 'APP.T1'.
+ij> -- target table in source - deferred update
+--
+-- first, populate table
+delete from t1;
+2 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1, 'one', 'one');
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, 2, 'two', 'two');
+1 row inserted/updated/deleted
+ij> delete from t2;
+2 rows inserted/updated/deleted
+ij> insert into t2 select * from t1;
+2 rows inserted/updated/deleted
+ij> autocommit off;
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+1          |1     |one                           |one                                               
+2          |2     |two                           |two                                               
+ij> update t1 set int_col =
+	(select t1.int_col
+	 from t1, t2
+	 where t1.int_col = t2.int_col and t1.int_col = 1);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+1          |1     |one                           |one                                               
+1          |2     |two                           |two                                               
+ij> rollback;
+ij> update t1 set int_col =
+	(select
+		(select int_col
+		 from t1
+		 where int_col = 2)
+	 from t2
+	 where int_col = 1);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+2          |1     |one                           |one                                               
+2          |2     |two                           |two                                               
+ij> rollback;
+ij> update t1 set int_col =
+	(select 1
+	 from t2
+	 where int_col = 2
+	 and 1 in
+		(select int_col
+		 from t1)
+	);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+1          |1     |one                           |one                                               
+1          |2     |two                           |two                                               
+ij> rollback;
+ij> update t1 set int_col =
+	(select int_col
+	 from
+		(select int_col
+		 from t1) a
+	 where int_col = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+2          |1     |one                           |one                                               
+2          |2     |two                           |two                                               
+ij> rollback;
+ij> update t1 set int_col =
+	(select int_col
+	 from t2
+	 where int_col = 37
+	union
+	 select int_col
+	 from t1
+	 where int_col = 2);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+2          |1     |one                           |one                                               
+2          |2     |two                           |two                                               
+ij> rollback;
+ij> update t1 set int_col =
+	(select int_col
+	 from t2
+	 where int_col = 37
+	union
+	 select int_col
+	 from
+		(select int_col
+		 from t1
+		 where int_col = 2) a
+	);
+2 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+2          |1     |one                           |one                                               
+2          |2     |two                           |two                                               
+ij> rollback;
+ij> -- single-row deferred update
+update t1 set int_col =
+	(select int_col
+	 from t1
+	 where int_col = 1)
+where int_col = 2;
+1 row inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+1          |1     |one                           |one                                               
+1          |2     |two                           |two                                               
+ij> rollback;
+ij> -- zero-row deferred update - degenerate case
+update t1 set int_col =
+	(select int_col
+	 from t1
+	 where int_col = 1)
+where int_col = 37;
+0 rows inserted/updated/deleted
+ij> select * from t1;
+INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
+----------------------------------------------------------------------------------------------------
+1          |1     |one                           |one                                               
+2          |2     |two                           |two                                               
+ij> rollback;
+ij> autocommit on;
+ij> -- drop the table
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> -- Show whether update is statement atomic or not
+create table s (s smallint, i int);
+0 rows inserted/updated/deleted
+ij> insert into s values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into s values (1, 65337);
+1 row inserted/updated/deleted
+ij> insert into s values (1, 1);
+1 row inserted/updated/deleted
+ij> select * from s;
+S     |I          
+------------------
+1     |1          
+1     |65337      
+1     |1          
+ij> -- this should fail and no rows should change
+update s set s=s+i;
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
+ij> -- this select should have the same results as the previous one.
+select * from s;
+S     |I          
+------------------
+1     |1          
+1     |65337      
+1     |1          
+ij> -- Show that the table name can be used on the set column
+update s set s.s=3;
+3 rows inserted/updated/deleted
+ij> -- and that it must match the target table
+update s set t.s=4;
+ERROR 42X55: Table name 'T' should be the same as 'S'.
+ij> select * from s;
+S     |I          
+------------------
+3     |1          
+3     |65337      
+3     |1          
+ij> -- do some partial updates
+create table t1 (c1 char(250), c2 varchar(100), c3 varchar(100));
+0 rows inserted/updated/deleted
+ij> insert into t1 values ('a', 'b', 'c');
+1 row inserted/updated/deleted
+ij> insert into t1 values ('a', 'b', 'c');
+1 row inserted/updated/deleted
+ij> insert into t1 values ('a', 'b', 'c');
+1 row inserted/updated/deleted
+ij> insert into t1 values ('a', 'b', 'c');
+1 row inserted/updated/deleted
+ij> update t1 set c1 = '1st';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+1st  |b    |c    
+1st  |b    |c    
+1st  |b    |c    
+1st  |b    |c    
+ij> update t1 set c2 = '2nd';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+1st  |2nd  |c    
+1st  |2nd  |c    
+1st  |2nd  |c    
+1st  |2nd  |c    
+ij> update t1 set c3 = '3rd';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+1st  |2nd  |3rd  
+1st  |2nd  |3rd  
+1st  |2nd  |3rd  
+1st  |2nd  |3rd  
+ij> update t1 set c3 = '4th', c2 = '4th';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+1st  |4th  |4th  
+1st  |4th  |4th  
+1st  |4th  |4th  
+1st  |4th  |4th  
+ij> update t1 set c1 = '5th', c3 = '5th';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+5th  |4th  |5th  
+5th  |4th  |5th  
+5th  |4th  |5th  
+5th  |4th  |5th  
+ij> update t1 set c2 = 'expandingxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+5th  |expan|5th  
+5th  |expan|5th  
+5th  |expan|5th  
+5th  |expan|5th  
+ij> update t1 set c3 = 'expandingxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+5th  |expan|expan
+5th  |expan|expan
+5th  |expan|expan
+5th  |expan|expan
+ij> update t1 set c2 = 'shrink';
+4 rows inserted/updated/deleted
+ij> update t1 set c3 = 'shrink';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+5th  |shrin|shrin
+5th  |shrin|shrin
+5th  |shrin|shrin
+5th  |shrin|shrin
+ij> update t1 set c2 = 'expandingxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+			c3 = 'expandingxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+4 rows inserted/updated/deleted
+ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
+1    |2    |3    
+-----------------
+5th  |expan|expan
+5th  |expan|expan
+5th  |expan|expan
+5th  |expan|expan
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (c1 int, c2 int, c3 int, c4 int, c5 int, c6 int, c7 int, c8 int, c9 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1,2,3,4,5,6,7,8,9);
+1 row inserted/updated/deleted
+ij> update t1 set c3 = 33, c5 = 55, c6 = 666, c8 = 88;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         |C3         |C4         |C5         |C6         |C7         |C8         |C9         
+-----------------------------------------------------------------------------------------------------------
+1          |2          |33         |4          |55         |666        |7          |88         |9          
+ij> update t1 set c9 = 99;
+1 row inserted/updated/deleted
+ij> select * from t1;
+C1         |C2         |C3         |C4         |C5         |C6         |C7         |C8         |C9         
+-----------------------------------------------------------------------------------------------------------
+1          |2          |33         |4          |55         |666        |7          |88         |99         
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> --
+-- here we test extra state lying around in the
+-- deleteResultSet on a prepared statement that
+-- is executed multiple times.  if we don't
+-- get a nasty error then we are ok
+--
+create table x (x int, y int);
+0 rows inserted/updated/deleted
+ij> create index ix on x(x);
+0 rows inserted/updated/deleted
+ij> create index iy on x(y);
+0 rows inserted/updated/deleted
+ij> insert into x values (1,1),(2,2),(3,3);
+3 rows inserted/updated/deleted
+ij> autocommit off;
+ij> prepare p as 'update x set x = x where x = ? and y = ?';
+ij> execute p using 'values (1,1)';
+1 row inserted/updated/deleted
+ij> execute p using 'values (2,2)';
+1 row inserted/updated/deleted
+ij> commit;
+ij> -- test extra state in update 
+get cursor c1 as 'select * from x for update of x';
+ij> prepare p1 as 'update x set x = x where current of c1';
+ij> execute p1;
+ERROR XCL08: Cursor 'C1' is not on a row.
+ij> next c1;
+X          |Y          
+-----------------------
+1          |1          
+ij> execute p1;
+1 row inserted/updated/deleted
+ij> next c1;
+X          |Y          
+-----------------------
+2          |2          
+ij> next c1;
+X          |Y          
+-----------------------
+3          |3          
+ij> execute p1;
+1 row inserted/updated/deleted
+ij> close c1;
+ij> execute p1;
+ERROR XCL07: Cursor 'C1' is closed. Verify that autocommit is OFF.
+ij> -- clean up
+autocommit on;
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> -- bug 4318, possible deadlock if table first has IX, then X table lock; make
+-- sure you don't have IX table lock and X table lock at the same time
+create table tab1 (c1 int not null primary key, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into tab1 values (1, 8);
+1 row inserted/updated/deleted
+ij> autocommit off;
+ij> -- default read committed isolation level
+update tab1 set c2 = c2 + 3 where c1 = 1;
+1 row inserted/updated/deleted
+ij> select type, mode from new org.apache.derby.diag.LockTable() as lockstable where tablename = 'TAB1' order by type;
+TYPE |MODE
+----------
+ROW  |X   
+TABLE|IX  
+ij> rollback;
+ij> -- serializable isolation level
+set current isolation to SERIALIZABLE;
+0 rows inserted/updated/deleted
+ij> update tab1 set c2 = c2 + 3 where c1 = 1;
+1 row inserted/updated/deleted
+ij> select type, mode from new org.apache.derby.diag.LockTable() as lockstable where tablename = 'TAB1' order by type;
+TYPE |MODE
+----------
+ROW  |X   
+TABLE|IX  
+ij> rollback;
+ij> autocommit on;
+ij> drop table tab1;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,1635 @@
+ij> --
+-- Test IN lists and BETWEEN on the builtin  types
+-- assumes these builtin types exist:
+--	int, smallint, char, varchar, real
+--
+-- other things we might test:
+-- compatibility with dynamic parameters 
+set isolation to rr;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- Create the tables
+create table s (i int);
+0 rows inserted/updated/deleted
+ij> create table t (i int, s smallint, c char(10), v varchar(50), 
+	d double precision, r real, e date, t time, p timestamp);
+0 rows inserted/updated/deleted
+ij> create table test (i int, d double precision);
+0 rows inserted/updated/deleted
+ij> -- Populate the tables
+insert into s values (1);
+1 row inserted/updated/deleted
+ij> insert into s values (1);
+1 row inserted/updated/deleted
+ij> insert into s values (2);
+1 row inserted/updated/deleted
+ij> insert into t values (null, null, null, null, null, null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into t values (0, 100, 'hello', 'everyone is here', 200.0e0,
+	300.0e0, '1992-01-01', '12:30:30', 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+1 row inserted/updated/deleted
+ij> insert into t values (-1, -100, 'goodbye', 'everyone is there', -200.0e0,
+	-300.0e0, '1992-01-02', '12:30:59', 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+1 row inserted/updated/deleted
+ij> insert into test values (2, 4.0);
+1 row inserted/updated/deleted
+ij> insert into test values (3, 10.0);
+1 row inserted/updated/deleted
+ij> insert into test values (4, 12.0);
+1 row inserted/updated/deleted
+ij> insert into test values (5, 25.0);
+1 row inserted/updated/deleted
+ij> insert into test values (10, 100.0);
+1 row inserted/updated/deleted
+ij> insert into test values (-6, 36);
+1 row inserted/updated/deleted
+ij> -- BETWEEN
+-- negative tests
+-- type mismatches
+select * from t where i between i and e;
+ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported.
+ij> select * from t where i between i and t;
+ERROR 42818: Comparisons between 'INTEGER' and 'TIME' are not supported.
+ij> select * from t where i between i and p;
+ERROR 42818: Comparisons between 'INTEGER' and 'TIMESTAMP' are not supported.
+ij> select * from t where e between p and p;
+ERROR 42818: Comparisons between 'DATE' and 'TIMESTAMP' are not supported.
+ij> select * from t where 1 between e and p;
+ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported.
+ij> -- between null and
+select * from t where i between null and i;
+ERROR 42X01: Syntax error: Encountered "null" at line 2, column 33.
+ij> -- cardinality violation on a subquery
+select * from t where i between i and (select i from s);
+ERROR 21000: Scalar subquery is only allowed to return a single row.
+ij> -- all parameters
+select * from t where ? between ? and ?;
+ERROR 42X35: It is not allowed for both operands of 'BETWEEN' to be ? parameters.
+ij> -- positive tests
+-- type comparisons
+select i from t where i between s and r;
+I          
+-----------
+ij> select i from t where i between r and d;
+I          
+-----------
+ij> select i from t where s between i and r;
+I          
+-----------
+0          
+ij> select i from t where s between r and d;
+I          
+-----------
+ij> select i from t where r between s and i;
+I          
+-----------
+ij> select i from t where d between s and i;
+I          
+-----------
+ij> select i from t where i between 40e1 and 50e1;
+I          
+-----------
+ij> select i from t where s between 40e1 and 50e1;
+I          
+-----------
+ij> select i from t where c between c and v;
+I          
+-----------
+ij> select i from t where 40e1 between i and s;
+I          
+-----------
+ij> select i from t where 'goodbye' between c and c;
+I          
+-----------
+-1         
+ij> select i from t where 'xxxxxxFILTERED-TIMESTAMPxxxxxbetween p and p;
+I          
+-----------
+-1         
+ij> -- between 2 and 1
+select * from t where i between 2 and 1;
+I          |S     |C         |V                                                 |D                     |R            |E         |T       |P                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> select * from t where not i not between 2 and 1;
+I          |S     |C         |V                                                 |D                     |R            |E         |T       |P                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> select * from t where not i between 2 and 1;
+I          |S     |C         |V                                                 |D                     |R            |E         |T       |P                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |100   |hello     |everyone is here                                  |200.0                 |300.0        |1992-01-01|12:30:30|xxxxxxFILTERED-TIMESTAMPxxxxx
+-1         |-100  |goodbye   |everyone is there                                 |-200.0                |-300.0       |1992-01-02|12:30:59|xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select * from t where i not between 2 and 1;
+I          |S     |C         |V                                                 |D                     |R            |E         |T       |P                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |100   |hello     |everyone is here                                  |200.0                 |300.0        |1992-01-01|12:30:30|xxxxxxFILTERED-TIMESTAMPxxxxx
+-1         |-100  |goodbye   |everyone is there                                 |-200.0                |-300.0       |1992-01-02|12:30:59|xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- between arbitrary expressions
+select * from test where sqrt(d) between 5 and 10;
+I          |D                     
+----------------------------------
+5          |25.0                  
+10         |100.0                 
+-6         |36.0                  
+ij> select * from test where (i+d) between 20 and 50;
+I          |D                     
+----------------------------------
+5          |25.0                  
+-6         |36.0                  
+ij> select * from test where {fn abs (i)} between 5 and 8;
+I          |D                     
+----------------------------------
+5          |25.0                  
+-6         |36.0                  
+ij> select * from test where (i+d) not between 20 and 50;
+I          |D                     
+----------------------------------
+2          |4.0                   
+3          |10.0                  
+4          |12.0                  
+10         |100.0                 
+ij> select * from test where sqrt(d) not between 5 and 20;
+I          |D                     
+----------------------------------
+2          |4.0                   
+3          |10.0                  
+4          |12.0                  
+ij> -- not (test clone() once its implemented)
+select i from t where i not between i and i;
+I          
+-----------
+ij> select i from t where s not between s and s;
+I          
+-----------
+ij> select i from t where c not between c and c;
+I          
+-----------
+ij> select i from t where v not between v and v;
+I          
+-----------
+ij> select i from t where d not between d and d;
+I          
+-----------
+ij> select i from t where r not between r and r;
+I          
+-----------
+ij> select i from t where e not between e and e;
+I          
+-----------
+ij> select i from t where t not between t and t;
+I          
+-----------
+ij> select i from t where p not between p and p;
+I          
+-----------
+ij> -- between complex expressions
+select i from t where s between (select i from s where i = 2) and
+							    (select 100 from s where i = 2);
+I          
+-----------
+0          
+ij> select * from t where i between i and (select max(i) from s);
+I          |S     |C         |V                                                 |D                     |R            |E         |T       |P                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |100   |hello     |everyone is here                                  |200.0                 |300.0        |1992-01-01|12:30:30|xxxxxxFILTERED-TIMESTAMPxxxxx
+-1         |-100  |goodbye   |everyone is there                                 |-200.0                |-300.0       |1992-01-02|12:30:59|xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- subquery between
+select i from t where (select i from s where i = 2) between 1 and 2;
+I          
+-----------
+NULL       
+0          
+-1         
+ij> -- parameters
+prepare q1 as 'select i from t where ? between 2 and 3';
+ij> prepare q2 as 'select i from t where ? between ? and 3';
+ij> prepare q3 as 'select i from t where ? between 2 and ?';
+ij> prepare q4 as 'select i from t where i between ? and ?';
+ij> execute q1 using 'values 2';
+I          
+-----------
+NULL       
+0          
+-1         
+ij> execute q2 using 'values (2, 2)';
+I          
+-----------
+NULL       
+0          
+-1         
+ij> execute q3 using 'values (2, 3)';
+I          
+-----------
+NULL       
+0          
+-1         
+ij> execute q4 using 'values (0, 1)';
+I          
+-----------
+0          
+ij> remove q1;
+ij> remove q2;
+ij> remove q3;
+ij> remove q4;
+ij> update s set i = 5 where i between 2 and 3;
+1 row inserted/updated/deleted
+ij> select * from s;
+I          
+-----------
+1          
+1          
+5          
+ij> -- delete - where clause
+delete from s where i between 3 and 5;
+1 row inserted/updated/deleted
+ij> select * from s;
+I          
+-----------
+1          
+1          
+ij> -- check consistency of scans, etc.
+values ConsistencyChecker();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                        
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> -- IN List
+-- recreate s as ss
+create table ss (i int);
+0 rows inserted/updated/deleted
+ij> insert into ss values (1);
+1 row inserted/updated/deleted
+ij> insert into ss values (1);
+1 row inserted/updated/deleted
+ij> insert into ss values (2);
+1 row inserted/updated/deleted
+ij> -- negative tests
+-- empty list
+select i from t where i in ();
+ERROR 42X01: Syntax error: Encountered ")" at line 4, column 29.
+ij> -- null in list
+select i from t where i in (null);
+ERROR 42X01: Syntax error: Encountered "null" at line 2, column 29.
+ij> -- cardinality violation from subquery
+select i from t where i in (1, 3, 5, 6, (select i from ss));
+ERROR 21000: Scalar subquery is only allowed to return a single row.
+ij> -- type mismatches
+select i from t where i in (i, i, e);
+ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported.
+ij> select i from t where i in (i, i, t);
+ERROR 42818: Comparisons between 'INTEGER' and 'TIME' are not supported.
+ij> select i from t where i in (i, i, p);
+ERROR 42818: Comparisons between 'INTEGER' and 'TIMESTAMP' are not supported.
+ij> select i from t where e in (e, p, e);
+ERROR 42818: Comparisons between 'DATE' and 'TIMESTAMP' are not supported.
+ij> select i from t where 1 in (p, 2, 1);
+ERROR 42818: Comparisons between 'INTEGER' and 'TIMESTAMP' are not supported.
+ij> -- positive tests
+-- type comparisons
+select i from t where i in (s, r, i, d, 40e1);
+I          
+-----------
+0          
+-1         
+ij> select s from t where s in (s, r, i, d, 40e1);
+S     
+------
+100   
+-100  
+ij> select r from t where r in (s, r, i, d, 40e1);
+R            
+-------------
+300.0        
+-300.0       
+ij> select d from t where d in (s, r, i, d, 40e1);
+D                     
+----------------------
+200.0                 
+-200.0                
+ij> select i from t where 40e1 in (s, r, i, d, 40e1);
+I          
+-----------
+NULL       
+0          
+-1         
+ij> select c from t where c in (c, v, 'goodbye');
+C         
+----------
+hello     
+goodbye   
+ij> select v from t where v in (c, v, 'goodbye');
+V                                                 
+--------------------------------------------------
+everyone is here                                  
+everyone is there                                 
+ij> select i from t where 'goodbye' in (c, v, 'goodbye');
+I          
+-----------
+NULL       
+0          
+-1         
+ij> select i from t where 'xxxxxxFILTERED-TIMESTAMPxxxxxin (p, 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+I          
+-----------
+NULL       
+0          
+-1         
+ij> select p from t where p in (p, 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+P                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- not (test clone() once its implemented)
+select i from t where i not in (i, i);
+I          
+-----------
+ij> select i from t where s not in (s, s);
+I          
+-----------
+ij> select i from t where c not in (c, c);
+I          
+-----------
+ij> select i from t where v not in (v, v);
+I          
+-----------
+ij> select i from t where d not in (d, d);
+I          
+-----------
+ij> select i from t where r not in (r, r);
+I          
+-----------
+ij> select i from t where e not in (e, e);
+I          
+-----------
+ij> select i from t where t not in (t, t);
+I          
+-----------
+ij> select i from t where p not in (p, p);
+I          
+-----------
+ij> -- more nots
+select i from t where i not in (0, 9, 8, 2, 7);
+I          
+-----------
+-1         
+ij> select i from t where i not in (0, 9, 8, 2, 7);
+I          
+-----------
+-1         
+ij> select i from t where not i not in (0, 9, 8, 2, 7);
+I          
+-----------
+0          
+ij> -- 1 element list
+select s from t where s in (100);
+S     
+------
+100   
+ij> -- left side of expression
+select s from t where (s in (100));
+S     
+------
+100   
+ij> select s from t where (s in (100));
+S     
+------
+100   
+ij> -- complex expressions
+select i from t where i in (1, 3, 5, 6, (select i from ss where i = 2) - 2);
+I          
+-----------
+0          
+ij> select * from test where i in (sqrt(d),{fn abs (i)}, -6);
+I          |D                     
+----------------------------------
+2          |4.0                   
+3          |10.0                  
+4          |12.0                  
+5          |25.0                  
+10         |100.0                 
+-6         |36.0                  
+ij> select * from test where sqrt(d) in (i, 4);
+I          |D                     
+----------------------------------
+2          |4.0                   
+5          |25.0                  
+10         |100.0                 
+ij> select * from test where (i+d) in (6, 30);
+I          |D                     
+----------------------------------
+2          |4.0                   
+5          |25.0                  
+-6         |36.0                  
+ij> select * from test where sqrt(d) in (i);
+I          |D                     
+----------------------------------
+2          |4.0                   
+5          |25.0                  
+10         |100.0                 
+ij> select * from test where {fn abs (i)} in (i);
+I          |D                     
+----------------------------------
+2          |4.0                   
+3          |10.0                  
+4          |12.0                  
+5          |25.0                  
+10         |100.0                 
+ij> select * from test where {fn abs (i)} not in (i);
+I          |D                     
+----------------------------------
+-6         |36.0                  
+ij> select * from test where (i+d) not in (6, 30);
+I          |D                     
+----------------------------------
+3          |10.0                  
+4          |12.0                  
+10         |100.0                 
+ij> select * from test where sqrt(d) not in (5, 10, 2);
+I          |D                     
+----------------------------------
+3          |10.0                  
+4          |12.0                  
+-6         |36.0                  
+ij> -- subquery in
+select i from t where (select i from ss where i = 2) in (1, 2);
+I          
+-----------
+NULL       
+0          
+-1         
+ij> -- derived table
+select * from (select * from t 
+where i in (1, 3, 5, 6, (select i from ss where i = 2) - 2)) a;
+I          |S     |C         |V                                                 |D                     |R            |E         |T       |P                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |100   |hello     |everyone is here                                  |200.0                 |300.0        |1992-01-01|12:30:30|xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> update ss set i = 5 where i in (2, 3, 40e1);
+1 row inserted/updated/deleted
+ij> select * from ss;
+I          
+-----------
+1          
+1          
+5          
+ij> -- delete - where clause
+delete from ss where i not in (5, 3);
+2 rows inserted/updated/deleted
+ij> select * from ss;
+I          
+-----------
+5          
+ij> -- in/between 
+create table u (c1 integer);
+0 rows inserted/updated/deleted
+ij> insert into u values null;
+1 row inserted/updated/deleted
+ij> insert into u values 1;
+1 row inserted/updated/deleted
+ij> insert into u values null;
+1 row inserted/updated/deleted
+ij> insert into u values 2;
+1 row inserted/updated/deleted
+ij> select * from u where c1 between 2 and 3;
+C1         
+-----------
+2          
+ij> select * from u where c1 in (2, 3, 0, 1);
+C1         
+-----------
+1          
+2          
+ij> -- add some more rows before testing static in list xform
+insert into t values (20, 200, 'maybe', 'noone is here', 800.0e0,
+	1000.0e0, '1892-01-01', '07:30:30', 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+1 row inserted/updated/deleted
+ij> insert into t values (-50, -200, 'never', 'noone is there', -800.0e0,
+	-10300.0e0, '2992-01-02', '19:30:59', 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+1 row inserted/updated/deleted
+ij> -- test the static in list xform for the various types
+select i from t;
+I          
+-----------
+NULL       
+0          
+-1         
+20         
+-50        
+ij> select i from t where i in (80, 20, -60, -1);
+I          
+-----------
+-1         
+20         
+ij> select s from t;
+S     
+------
+NULL  
+100   
+-100  
+200   
+-200  
+ij> select s from t where s in (100, -200, -400);
+S     
+------
+100   
+-200  
+ij> select c from t;
+C         
+----------
+NULL      
+hello     
+goodbye   
+maybe     
+never     
+ij> select c from t where c in ('a', 'goodbye', '');
+C         
+----------
+goodbye   
+ij> select v from t;
+V                                                 
+--------------------------------------------------
+NULL                                              
+everyone is here                                  
+everyone is there                                 
+noone is here                                     
+noone is there                                    
+ij> select v from t where v in ('noone is there', 'everyone is here', '');
+V                                                 
+--------------------------------------------------
+everyone is here                                  
+noone is there                                    
+ij> select d from t;
+D                     
+----------------------
+NULL                  
+200.0                 
+-200.0                
+800.0                 
+-800.0                
+ij> select d from t where d in (200, -800);
+D                     
+----------------------
+200.0                 
+-800.0                
+ij> select r from t;
+R            
+-------------
+NULL         
+300.0        
+-300.0       
+1000.0       
+-10300.0     
+ij> select r from t where r in (300.0, -10300.0);
+R            
+-------------
+300.0        
+-10300.0     
+ij> select e from t;
+E         
+----------
+NULL      
+1992-01-01
+1992-01-02
+1892-01-01
+2992-01-02
+ij> select e from t where e in ('2992-01-02', '3999-08-08', '1992-01-02');
+E         
+----------
+1992-01-02
+2992-01-02
+ij> select t from t;
+T       
+--------
+NULL    
+12:30:30
+12:30:59
+07:30:30
+19:30:59
+ij> select t from t where t in ('12:30:58', '07:20:20', '07:30:30');
+T       
+--------
+07:30:30
+ij> select p from t;
+P                         
+--------------------------
+NULL                      
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> select p from t where p in ('xxxxxxFILTERED-TIMESTAMPxxxxx', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'xxxxxxFILTERED-TIMESTAMPxxxxx');
+P                         
+--------------------------
+xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- verify that added predicates getting pushed down
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 2000;
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- verify that added predicates getting pushed down
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+null                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+ij> -- big in lists (test binary search)
+create table big(i int, c char(10));
+0 rows inserted/updated/deleted
+ij> insert into big values 
+	(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'), (6, '6'), (7, '7'), (8, '8'), (9, '9'), (10, '10'), 
+	(11, '11'), (12, '12'), (13, '13'), (14, '14'), (15, '15'), (16, '16'), (17, '17'), (18, '18'), (19, '19'), (20, '20'), 
+	(21, '21'), (22, '22'), (23, '23'), (24, '24'), (25, '25'), (26, '26'), (27, '27'), (28, '28'), (29, '29'), (30, '30');
+30 rows inserted/updated/deleted
+ij> select * from big where i in (1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+I          |C         
+----------------------
+1          |1         
+3          |3         
+5          |5         
+7          |7         
+9          |9         
+11         |11        
+13         |13        
+15         |15        
+17         |17        
+19         |19        
+21         |21        
+23         |23        
+25         |25        
+27         |27        
+29         |29        
+ij> select * from big where i in (31, 32, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 1);
+I          |C         
+----------------------
+1          |1         
+5          |5         
+7          |7         
+9          |9         
+11         |11        
+13         |13        
+15         |15        
+17         |17        
+19         |19        
+21         |21        
+23         |23        
+25         |25        
+27         |27        
+29         |29        
+ij> select * from big where i in (1, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+I          |C         
+----------------------
+1          |1         
+5          |5         
+7          |7         
+9          |9         
+11         |11        
+13         |13        
+15         |15        
+17         |17        
+19         |19        
+21         |21        
+23         |23        
+25         |25        
+27         |27        
+29         |29        
+ij> select * from big where i in (1, 5, 7, 9, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+I          |C         
+----------------------
+1          |1         
+5          |5         
+7          |7         
+9          |9         
+13         |13        
+15         |15        
+17         |17        
+19         |19        
+21         |21        
+23         |23        
+25         |25        
+27         |27        
+29         |29        
+ij> select * from big where i in (1, 5, 7, 9, 13, 15, 17, 19, 23, 25, 27, 29, 31);
+I          |C         
+----------------------
+1          |1         
+5          |5         
+7          |7         
+9          |9         
+13         |13        
+15         |15        
+17         |17        
+19         |19        
+23         |23        
+25         |25        
+27         |27        
+29         |29        
+ij> select * from big where i in (3, 3, 3, 3);
+I          |C         
+----------------------
+3          |3         
+ij> select * from big where i in (4, 4, 4, 4);
+I          |C         
+----------------------
+4          |4         
+ij> select * from big where c in (1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+ERROR 42818: Comparisons between 'CHAR' and 'INTEGER' are not supported.
+ij> select * from big where c in (31, 32, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 1);
+ERROR 42818: Comparisons between 'CHAR' and 'INTEGER' are not supported.
+ij> select * from big where c in (1, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+ERROR 42818: Comparisons between 'CHAR' and 'INTEGER' are not supported.
+ij> select * from big where c in (1, 5, 7, 9, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+ERROR 42818: Comparisons between 'CHAR' and 'INTEGER' are not supported.
+ij> select * from big where c in ('1', '5', '7', '9', '13', '15', '17', '19', '21', '23', '25', '27', '29', '31');
+I          |C         
+----------------------
+1          |1         
+5          |5         
+7          |7         
+9          |9         
+13         |13        
+15         |15        
+17         |17        
+19         |19        
+21         |21        
+23         |23        
+25         |25        
+27         |27        
+29         |29        
+ij> select * from big where i in (1, 5, 7, 9, 13, 15, 17, 19, 23, 25, 27, 29, 31);
+I          |C         
+----------------------
+1          |1         
+5          |5         
+7          |7         
+9          |9         
+13         |13        
+15         |15        
+17         |17        
+19         |19        
+23         |23        
+25         |25        
+27         |27        
+29         |29        
+ij> -- check consistency of scans, etc.
+values ConsistencyChecker();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+No open scans, etc.
+2 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> -- beetle 4316, check "in" with self-reference and correlation, etc.
+create table t1 (c1 real, c2 real);
+0 rows inserted/updated/deleted
+ij> create index i11 on t1 (c1);
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 real, c2 real);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (2, 1), (3, 9), (8, 63), (5, 25), (20, 5);
+5 rows inserted/updated/deleted
+ij> insert into t2 values (4, 8), (8, 8), (7, 6), (5, 6);
+4 rows inserted/updated/deleted
+ij> select c1 from t1 where c1 in (2, sqrt(c2));
+C1           
+-------------
+2.0          
+3.0          
+5.0          
+ij> select c1 from t1 where c1 in ('10', '5', '20') and c1 > 3
+and c1 < 19;
+ERROR 42818: Comparisons between 'REAL' and 'CHAR' are not supported.
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 4000;
+ij> -- nested loop exists join, right side should be ProjectRestrict on index scan with start and stop keys
+select c1 from t2 where c1 in (select c1 from t1 where c1 in (5, t2.c2));
+C1           
+-------------
+8.0          
+5.0          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- nested loop exists join, right side should be ProjectRestrict on index scan with start and stop keys
+select c1 from t2 where c1 in (select c1 from t1 where c1 in (5, t2.c2))
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 2
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Exists Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 4
+	Rows seen from the right = 2
+	Rows filtered = 0
+	Rows returned = 2
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for T2 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 4
+		Rows seen = 2
+		Rows filtered = 0
+		restriction = true
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Hash Scan ResultSet for T1 using index I11 at serializable isolation level using share table locking: 
+			Number of opens = 4
+			Hash table size = 5
+			Hash key is column number 0
+			Rows seen = 2
+			Rows filtered = 0
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				scan qualifiers:
+None
+				next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- nested loop exists join, right side should be ProjectRestrict on index scan with start and stop keys
+select c1 from t2 where c1 in (select c1 from t1 where c1 in (5, t2.c2) and c1 in ('5', '7'));
+ERROR 42818: Comparisons between 'REAL' and 'CHAR' are not supported.
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Row ResultSet:
+Number of opens = 1
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+ij> -- hash exists join, right side PR on hash index scan, no start/stop key, next qualifier "=".
+select c1 from t2 where c1 in (select c1 from t1 where c1 in (5, t2.c2));
+C1           
+-------------
+8.0          
+5.0          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- hash exists join, right side PR on hash index scan, no start/stop key, next qualifier "=".
+select c1 from t2 where c1 in (select c1 from t1 where c1 in (5, t2.c2))
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 2
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Exists Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 4
+	Rows seen from the right = 2
+	Rows filtered = 0
+	Rows returned = 2
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for T2 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 4
+		Rows seen = 2
+		Rows filtered = 0
+		restriction = true
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Hash Scan ResultSet for T1 using index I11 at serializable isolation level using share table locking: 
+			Number of opens = 4
+			Hash table size = 5
+			Hash key is column number 0
+			Rows seen = 2
+			Rows filtered = 0
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				scan qualifiers:
+None
+				next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- hash exists join, right side PR on hash index scan, still no start/stop key, next qualifier "=".
+-- It still doesn't have start/stop key because c1 in ('5', '7') is blocked out by 2 others.
+select c1 from t2 where c1 in (select c1 from t1 where c1 in (5, t2.c2) and c1 in ('5', '7'));
+ERROR 42818: Comparisons between 'REAL' and 'CHAR' are not supported.
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Row ResultSet:
+Number of opens = 1
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+ij> create index i12 on t1 (c1, c2);
+0 rows inserted/updated/deleted
+ij> -- at push "in" time, we determined that it is key and we can push; but at hash time we determined
+-- it's not key.  Now the key is it should be filtered out, otherwise we get exception.
+select c1 from t2 where c1 in (select c1 from t1 where c2 in (5, t2.c2));
+C1           
+-------------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- at push "in" time, we determined that it is key and we can push; but at hash time we determined
+-- it's not key.  Now the key is it should be filtered out, otherwise we get exception.
+select c1 from t2 where c1 in (select c1 from t1 where c2 in (5, t2.c2))
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Exists Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 4
+	Rows seen from the right = 0
+	Rows filtered = 0
+	Rows returned = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for T2 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 4
+		Rows seen = 2
+		Rows filtered = 2
+		restriction = true
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Hash Scan ResultSet for T1 using index I12 at serializable isolation level using share table locking: 
+			Number of opens = 4
+			Hash table size = 5
+			Hash key is column number 0
+			Rows seen = 2
+			Rows filtered = 0
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				scan qualifiers:
+None
+				next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- just some more tests in different situations, not for the bug 4316
+-- many items
+select c1 from t1 where c1 in ('9', '4', '8.0', '7.7',
+	5.2, 6, '7.7', '4.9', '6.1');
+ERROR 42818: Comparisons between 'REAL' and 'CHAR' are not supported.
+ij> prepare q1 as 'select c1 from t1 where c1 in (3, ?)';
+ij> execute q1 using 'values 8';
+C1           
+-------------
+3.0          
+8.0          
+ij> execute q1 using 'values 9';
+C1           
+-------------
+3.0          
+ij> remove q1;
+ij> -- reset autocommit
+autocommit on;
+ij> -- Clean up
+drop table ss;
+0 rows inserted/updated/deleted
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> drop table u;
+0 rows inserted/updated/deleted
+ij> drop table big;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table test;
+0 rows inserted/updated/deleted
+ij> --reproduction for beetle 5135 ( long list of constants in IN clause)
+create table t1(id int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(2);
+1 row inserted/updated/deleted
+ij> insert into t1 values(5644);
+1 row inserted/updated/deleted
+ij> insert into t1 values(723);
+1 row inserted/updated/deleted
+ij> insert into t1 values(0);
+1 row inserted/updated/deleted
+ij> insert into t1 values(1827);
+1 row inserted/updated/deleted
+ij> insert into t1 values(4107);
+1 row inserted/updated/deleted
+ij> insert into t1 values(5095);
+1 row inserted/updated/deleted
+ij> insert into t1 values(6666);
+1 row inserted/updated/deleted
+ij> insert into t1 values(7777);
+1 row inserted/updated/deleted
+ij> insert into t1 values(15157);
+1 row inserted/updated/deleted
+ij> insert into t1 values(13037);
+1 row inserted/updated/deleted
+ij> insert into t1 values(9999);
+1 row inserted/updated/deleted
+ij> SELECT id FROM t1 WHERE id IN (2,3,5,7,6,8,11,13,14,15,16,18,19
+,22,25,30,32,33,5712,34,39,42,43,46,51,54
+,55,56,58,60,62,63,64,65,68,70,72,73,5663
+,5743,74,5396,78,81,83,87,5267,89,91,92,93,94
+,95,96,97,99,101,102,103,104,107,108,109,110,114
+,115,116,118,121,122,124,126,128,129,130,131,132,134
+,136,135,139,140,141,145,150,155,156,158,159,162,160
+,164,165,166,168,169,170,171,172,173,174,175,176,178
+,180,182,183,185,187,188,190,191,193,197,198,200,202
+,203,208,5672,5221,5713,212,213,215,219,220,221,225,227
+,229,5763,234,235,236,238,241,239,243,245,249,250,5716
+,255,256,257,258,259,260,261,262,263,264,265,269,5644
+,272,274,275,276,277,280,282,284,286,289,290,294,296
+,293,299,301,303,305,5234,306,310,311,5473,313,314,315
+,316,318,319,322,323,324,326,327,328,330,333,334,336
+,337,338,340,341,342,343,344,345,346,347,348,350,351
+,353,354,361,363,368,369,370,374,372,373,375,376,379
+,380,384,388,389,390,392,394,396,397,398,400,403,404
+,5775,406,407,408,409,410,412,413,414,416,420,422,423
+,424,428,429,431,434,436,438,441,442,443,450,452,454
+,456,457,458,462,467,466,468,469,5651,470,474,477,479
+,481,482,483,484,488,486,493,494,495,496,498,500,501
+,502,503,504,506,507,508,509,510,512,513,514,516,519
+,520,522,523,524,527,528,530,532,534,535,538,539,542
+,543,546,548,550,552,555,562,561,563,565,567,568,569
+,571,574,572,5250,576,573,579,581,583,584,586,589,590
+,5642,592,596,600,601,602,604,606,607,609,610,611,615
+,616,617,618,619,620,621,623,624,625,626,627,629,630
+,631,632,633,635,636,637,640,641,642,643,644,5246,647
+,646,648,653,5324,654,655,656,658,660,662,663,665,668
+,669,670,672,673,674,675,676,677,678,680,681,683,684
+,686,689,691,2762,694,695,5464,696,697,698,700,701,705
+,5635,5471,708,711,713,714,715,717,719,720,721,722,723
+,724,726,728,729,730,731,733,735,740,741,746,747,748
+,749,750,751,752,754,755,756,757,759,761,762,763,764
+,766,768,769,772,774,776,775,779,780,781,783,788,790
+,794,795,797,801,800,802,804,806,811,813,814,816,819
+,822,823,824,825,826,827,829,5755,832,833,834,836,838
+,840,841,843,844,846,847,848,850,851,852,855,856,857
+,858,859,860,864,5602,865,869,871,872,873,874,876,878
+,880,882,883,885,886,888,890,892,896,898,5528,900,901
+,902,903,904,905,906,907,908,5334,911,912,913,914,915
+,916,918,919,920,921,922,924,923,926,927,928,930,933
+,934,937,938,939,941,942,943,947,945,948,949,951,955
+,957,958,959,960,961,967,968,971,974,980,981,986,987
+,988,991,989,993,995,996,997,999,1000,1001,1002,1003,1005
+,1006,1007,1008,1009,1010,1012,1011,1014,1015,1016,1017,1019,1021
+,1025,1026,1028,1029,1030,1031,1034,1036,1037,1039,1041,1042,1043
+,1049,1047,1050,1051,1052,1053,1054,1056,1057,1058,1061,1062,1063
+,1066,1071,1070,1073,1075,1077,1078,5710,1084,1085,1086,1088,1090
+,1091,1093,1094,1095,1096,1099,1102,1104,1105,1107,1108,1109,1110
+,1114,1117,1119,1121,1123,1124,1126,1127,1128,1129,1130,1131,1136
+,1138,1141,1143,1144,1145,1147,1150,1151,1157,1146,1158,1164,1166
+,1171,1170,1176,1177,1189,5525,1202,1203,1173,1175,1179,1181,1183
+,1184,1186,1188,1193,1195,1196,1197,1198,1199,1200,1205,1207,1225
+,1226,1227,1228,1209,1210,1214,1212,1215,1217,1218,1219,1220,5238
+,1221,1223,5288,1230,5727,1232,1234,1235,1236,5795,5816,1238,1240
+,1241,1245,1246,1247,1250,1253,1254,1258,1261,1262,1264,1265,1266
+,1268,1270,1274,1275,1277,1278,1280,1281,1282,1283,1284,1286,1285
+,1287,1288,1290,1293,1294,1295,1297,1301,1302,1305,1307,1308,1309
+,1311,1313,1314,1316,1317,1318,1320,1321,1323,1327,1329,1332,1334
+,1336,1338,1339,1341,1343,1348,1346,1347,1349,1350,1353,1357,1358
+,1359,1361,1363,1366,1367,1368,1369,1370,1371,1374,5689,1376,1377
+,1379,1380,1381,1386,1387,5661,1389,1390,1392,1393,1394,1395,1396
+,1398,1400,1402,1408,1409,1410,1411,1412,1413,1414,1415,1416,1419
+,1421,1425,1427,1428,5216,1430,1431,1432,1433,1434,1437,1438,1440
+,1444,1446,1448,1449,1451,1453,1454,1456,1457,1458,1459,1461,1463
+,1464,1465,1466,1467,1468,1472,1474,1475,1477,1476,1479,1480,1482
+,1484,1485,1489,1490,1491,1492,1494,1495,1498,1496,1502,1503,1504
+,1506,1507,1508,1510,1511,1512,1517,1519,5686,1521,1525,1528,1531
+,1530,1529,1535,1537,1538,1539,1541,1542,1546,1549,1552,1554,1555
+,1557,1558,1561,1562,1563,1566,1568,1570,1574,1575,1576,1580,1579
+,1577,1581,1583,1584,1585,1586,1589,1588,1592,1590,1594,1597,1598
+,1600,1601,1605,1606,1607,1608,1610,1611,1612,1613,1614,1615,1618
+,1620,1624,1625,1626,1627,1628,1631,1633,1635,1639,1640,1641,1642
+,5653,1645,1647,1649,1650,1655,5633,1656,1657,5647,1661,1662,1666
+,1667,1668,1669,1671,1672,1673,1674,1675,1676,1677,1678,1680,1682
+,1686,1688,1690,1694,1695,1696,1697,1699,1700,1701,1702,1703,1708
+,1710,1714,1713,1716,1719,1722,1721,1723,1724,1726,1727,1728,1729
+,1732,1734,1735,5419,1736,1737,1739,1740,1743,1744,1747,1748,1749
+,1750,1751,1752,1754,1757,1758,1767,1759,1761,1762,1764,1765,1766
+,1768,1771,1774,1775,1776,1779,1777,1781,1783,1785,1787,1789,1791
+,1794,1795,1796,1797,1798,1802,1804,1805,1806,1808,1809,1811,1812
+,1813,1814,1815,1816,1817,1819,5372,1822,1823,1824,1825,1827,1829
+,5709,1830,1831,1832,1833,1834,1835,1837,1838,1839,1841,1842,1847
+,5337,1848,1850,1851,1852,1854,1855,1858,1856,1859,1861,1862,1863
+,1867,1866,1868,1870,1871,1873,1874,1878,1879,1880,1881,1883,1884
+,1886,1889,1891,1893,1894,1896,1901,1903,1905,1906,1907,1908,1909
+,1911,1915,1916,1918,1919,1921,1922,1924,1925,5468,5671,1930,1931
+,1932,1933,1935,1937,1942,1943,1944,1947,1949,1951,1952,1955,1956
+,1957,1961,1962,1963,5393,1965,1966,1968,1972,1971,1976,1978,1980
+,1982,1983,1986,1989,1991,1992,1994,1995,1996,1997,1998,2000,2001
+,2002,2003,2005,2006,2008,2009,2012,2013,2015,2016,2018,2024,2026
+,2027,2028,2029,2031,2038,2039,2044,2046,2049,2050,2051,2052,2053
+,2054,2056,2058,2055,2060,2061,2062,2063,2065,2069,2070,2066,2076
+,2074,2072,2077,2079,2080,2083,2085,2086,2088,2089,2091,2092,2094
+,2096,2095,2098,2097,2099,2100,2106,2107,2108,2111,2112,2113,2114
+,2116,2117,2118,2119,2121,2123,2124,2125,2126,2127,2128,2129,2130
+,2134,2138,2139,2144,2145,2147,2148,2150,2151,2152,2153,2156,2157
+,2158,2160,2161,2162,2163,2164,2165,2166,2167,2170,2171,2172,2173
+,2174,2175,2176,2178,2180,2181,2186,5408,2188,2189,2190,2191,2192
+,2195,2198,2199,2201,2203,2206,2207,2209,2211,2212,5236,2213,2215
+,2216,2217,2218,2219,5253,2224,2225,2226,2227,2229,2231,2232,2233
+,2235,2236,2237,2238,2240,2241,2242,2243,2245,2246,2247,2248,2249
+,2251,2257,2259,2260,2261,2262,2263,2264,2265,2266,2267,2270,2272
+,2273,2274,2275,2276,2277,2281,2282,2284,2285,2288,2289,2290,2291
+,2293,2294,2295,2296,2298,2299,2300,2301,2304,2306,2308,2310,2309
+,2312,2313,2316,2317,2322,2324,2320,2318,2330,2331,2332,2334,5711
+,2335,2337,2338,2339,2344,2345,2347,2348,2349,5740,2350,2354,2356
+,2357,2358,2359,2361,2362,2365,2367,2368,2370,2372,2374,2378,2379
+,2380,2381,2382,2385,2388,2389,2391,2392,2393,2395,2396,2398,2400
+,2402,2401,2403,2404,2406,2408,2409,2411,2413,2417,2419,2421,2422
+,2424,2425,2426,2427,2428,2430,2432,2433,2434,2435,2436,2440,2439
+,2441,2443,2445,2446,2450,2448,2449,2451,2453,2456,2457,2458,5751
+,2460,2462,2463,2465,5731,2468,2469,2471,2472,2474,2479,2480,2481
+,2482,2484,2485,2486,2487,2488,2489,2491,2492,2494,2495,2496,2497
+,2499,2500,2501,2503,2505,2506,2507,2508,2511,2513,2515,2514,2516
+,2522,2525,2523,2526,2527,2528,2529,2532,2531,2533,2534,2535,2537
+,2539,2541,2543,2544,2546,2548,2550,2551,5629,2553,2555,2556,2557
+,2558,2559,2560,2563,2565,2569,2571,2574,2575,5718,5434,2577,2578
+,5760,2580,2584,2585,2587,2589,2590,2591,2592,2593,2594,2596,2598
+,2600,2602,2603,2605,2606,2607,2608,2610,2612,2613,2615,2616,2618
+,2619,2623,2621,2624,2625,2630,2633,2634,2636,2638,2640,2643,2644
+,2649,2651,2653,2654,2655,2656,2657,2658,2659,2660,2661,2662,2665
+,2666,2667,2670,2671,2673,2674,2676,2680,2682,2683,2684,2687,2685
+,2690,2688,2694,2692,2695,2696,5448,2698,2699,2700,2701,2703,2704
+,2705,2706,2708,2709,2711,2714,2716,2717,2718,2719,2720,2722,2724
+,2725,2726,2728,2729,2733,2736,2734,2737,2738,2739,2743,2744,2745
+,2746,2747,2748,2754,2751,2753,2755,2757,2758,2761,2763,2766,2768
+,2769,2771,2773,2775,2774,2776,2778,2780,2781,2782,2784,2785,2786
+,2787,2788,2789,2790,2791,2795,2798,2801,2802,2803,2804,2807,2808
+,2809,2810,2812,2814,2815,2816,2819,2820,2822,2824,5649,2828,5465
+,2832,2833,5817,5809,5814,5815,2835,2838,2839,2845,2846,2847,2850
+,2851,2852,2854,2855,2857,2842,2858,2859,2861,2863,2864,2865,2866
+,2872,2873,2874,2875,2878,2881,2882,2883,2884,2885,2886,2887,2888
+,2891,2893,2894,2895,2896,2898,2897,2899,2900,2901,2903,2905,2906
+,2907,2908,2910,2914,2916,2917,2920,2918,2921,2925,2927,2928,2929
+,2932,2934,2936,2937,2938,2940,2939,2942,2943,2944,2945,2947,2950
+,2952,2953,2955,2957,2958,2959,2961,2962,2963,2964,2966,2967,2968
+,2972,2974,2976,2977,2978,2979,2980,2981,2982,2983,2984,2986,2987
+,2988,2989,2990,2991,2992,2993,2994,2996,2997,2998,2999,3000,3001
+,3003,3007,3008,3009,3011,3013,3014,3015,3016,3017,3019,3021,5768
+,3023,3026,3027,3028,3029,3032,3033,3035,3039,3040,3041,3042,3043
+,3044,3045,3046,3048,3050,3051,3055,3056,3057,3060,3061,3062,3064
+,3069,3068,3070,3071,3072,3074,3076,3079,3080,3082,3083,3086,3099
+,3088,3089,3090,3091,3092,3093,3094,3095,3096,5183,3097,3101,3103
+,3104,3107,3109,3111,3112,3114,3116,3120,3122,3123,3126,3127,3128
+,3129,3131,3132,3134,3135,3137,3139,5758,5724,3140,3144,3145,3147
+,3148,3149,3150,3152,3153,3154,3155,3158,3161,3162,3163,3164,3165
+,3166,3167,5776,3168,3170,3180,3181,3182,3186,3191,3192,3196,3198
+,3199,3200,3203,3205,3206,3207,3208,3210,3211,3212,3213,3215,3216
+,3217,3218,3219,3220,3221,3224,3226,3228,3230,3231,3232,3233,3235
+,3236,3237,3239,3241,3242,3243,5687,3245,3246,3248,3249,3253,3254
+,3259,3260,3261,3262,3264,3266,3267,3269,5811,3271,3273,3275,3277
+,5620,3278,3279,3280,3282,3284,3286,3287,3289,3293,3294,3295,3297
+,3299,3302,3301,3305,3307,3306,3308,3310,3311,3312,3313,3315,3316
+,5497,3318,3322,3324,3326,3328,3336,3337,3338,3339,3341,5589,3344
+,5742,3345,3346,3348,3350,3352,3354,3355,3356,3357,3361,3363,3364
+,3365,3367,3368,3369,3371,3370,3372,3375,3373,3377,3378,3379,3381
+,5638,3382,3384,3386,3387,3389,3390,3391,3392,3397,3398,3400,3401
+,3402,3404,3405,3406,3407,3408,3409,3410,3411,3414,3415,3416,3417
+,3418,3420,3421,3423,3424,3426,3428,3430,3431,3432,3433,3435,3436
+,3437,5391,3440,3441,3442,3443,3444,3446,3448,3450,3452,3451,3453
+,3455,3456,3457,3460,3461,3463,3464,3467,3466,3468,3471,3472,3474
+,3475,3477,3479,3481,3482,3484,3485,3486,3487,3488,3489,3491,3493
+,3494,3496,3497,3498,3500,3502,3504,3499,3505,3507,3514,3515,3517
+,3519,3520,3522,3524,3525,5256,3526,3527,3528,3529,3531,5636,3532
+,3533,3535,3536,3538,3539,3541,3544,3548,3550,3551,3552,3554,3556
+,3557,3559,3560,3563,3564,3565,3567,3568,3571,3572,3573,3574,3577
+,3583,3582,3580,3584,3586,3589,3587,3590,3591,3592,3593,3596,3597
+,3599,3602,3603,3604,3605,3606,3608,3609,5398,3612,3614,3615,3616
+,3617,3618,3619,3620,3621,3623,3624,3628,3630,3631,3633,3635,3636
+,3637,3638,3640,3641,3643,3645,3644,3648,3650,3649,3651,3655,3662
+,3664,3665,3667,3668,3672,3673,3676,3679,3681,3682,3683,3685,3688
+,3689,3690,3692,3695,3696,3697,3699,3700,3701,3704,5349,3707,3708
+,3710,3713,3715,3716,3717,3718,3720,3721,3724,3726,3727,3728,3729
+,3731,3732,3733,3735,3736,3741,3745,3747,3749,3751,3752,3754,3756
+,3758,3761,3762,3767,3769,3773,3775,5680,5181,3779,3783,3784,3788
+,5567,3792,3794,3797,3800,3801,3804,3805,3806,3807,3808,3809,3810
+,3811,3812,3813,3814,3819,3818,3820,3821,3822,3824,3825,3826,3827
+,3829,3830,3832,5242,3834,3835,3836,3838,3843,3802,3849,3850,3855
+,3857,5657,3858,3859,3862,5645,3863,3864,3865,5669,3866,3867,3868
+,3869,3872,5720,3873,3874,3877,3879,3880,3881,3882,3884,3885,3886
+,3887,3888,3889,3890,3892,3893,3898,3899,3900,3903,3904,3905,3908
+,3909,3910,3911,3916,3917,3918,3921,3924,3926,3930,3931,3933,3934
+,3936,3938,3939,3940,3941,3945,3949,3950,3954,3955,3957,3958,3960
+,3961,3964,3966,3968,3973,3979,3980,3981,3982,3983,3985,3986,3987
+,3989,3991,3990,3994,3992,3993,3995,3997,3998,3999,4000,4001,4002
+,4003,4004,4005,4006,4007,4008,4009,4011,4012,4013,4015,4016,4020
+,4022,4023,5536,4026,4027,4028,4030,4031,4034,5770,4035,4037,4040
+,4041,4043,4044,4045,4046,4047,4048,4051,4052,4053,4055,4059,4061
+,4062,4063,4064,4067,4070,4073,4074,4075,4076,4077,4079,4081,4083
+,4084,4085,4086,4093,5240,4090,4092,4094,4095,4097,4098,4100,4102
+,4103,4104,4105,4106,4107,4108,4109,4110,4112,4114,4115,4118,5631
+,4120,4124,4132,4135,4142,4144,4145,4147,4148,4149,4150,4156,4159
+,4160,4162,4163,4165,4166,4168,4167,4169,4171,4172,4174,4175,4179
+,4181,4182,4186,4190,4188,4194,4196,4198,5738,4200,4202,4203,4205
+,4206,4208,4211,4212,4213,4215,4217,4220,4223,4225,4229,4230,4231
+,4235,4236,4237,4238,4239,5826,4241,4242,4243,4244,4246,5343,4250
+,4251,4252,4253,4254,4255,4256,4257,4258,4262,5685,4264,4268,4269
+,4270,4271,4272,4273,4274,5659,4279,4281,4283,4284,4285,4287,4291
+,4292,4296,4298,4299,4300,4301,4302,4303,4304,4305,4308,4310,5348
+,4311,4312,4313,4315,5438,4317,4319,4321,4322,4324,4326,4327,4328
+,4329,4330,4331,4334,4336,4337,4341,4342,4343,4344,5326,4346,4352
+,4354,4356,4359,4362,4364,4366,4367,4371,4373,4375,4379,4381,4384
+,4386,4392,4390,5218,4397,4404,4406,4409,4410,4412,4411,4413,4414
+,4416,4418,4420,4424,4426,4427,4430,4431,4432,4433,4437,4438,4439
+,4440,4441,4442,4444,4445,4448,4446,5748,4451,4453,4454,4455,4458
+,5774,4461,4462,4464,4465,4466,4467,4468,4469,4470,4472,4474,4475
+,4476,4479,4480,4482,4483,4485,4487,4490,4492,4493,4494,4500,4501
+,4503,4504,4506,4507,4508,4509,4510,4511,4512,4513,4516,4519,4520
+,4521,4522,4524,4525,4527,4528,4533,4535,4536,4537,4538,4539,4540
+,4541,4542,4544,4547,4548,4550,4552,4553,4555,4556,4557,4559,4561
+,4562,4564,4565,4566,4567,4568,4569,5417,4570,4572,4575,4582,4576
+,4578,4581,4583,4584,4585,4586,4587,4588,4589,4593,4594,4596,4603
+,4604,4605,4610,4612,4614,5387,4619,4622,4624,4626,4627,4628,4629
+,4630,4632,4634,4636,4637,4640,4645,4646,4648,4650,4651,4652,4653
+,4654,4657,4659,4662,4660,4664,4665,4667,4668,4669,4672,4674,4677
+,4679,4681,4682,4683,4684,4686,4688,4689,4690,4692,4693,4694,4695
+,4698,4699,4700,4705,4701,4703,4708,4709,4711,4713,4714,4717,4727
+,4728,4732,4734,4736,4737,4739,4741,4744,4747,4748,4750,4751,4754
+,4755,4756,4758,4759,4761,4762,4764,4765,4767,4769,4749,4770,4771
+,4773,4774,4775,4776,4777,4778,4784,4785,4786,4787,4788,4791,4793
+,4794,5389,4798,4800,4801,4803,4805,4808,4806,4809,4810,4811,4814
+,4815,4816,4822,4826,4827,4829,4831,4824,4832,4835,4836,4838,4839
+,4840,4842,4844,4846,4848,4849,4850,4853,4854,4858,4860,4861,4862
+,4863,4864,4867,4868,4871,4873,4874,4875,4877,4878,4879,4884,4886
+,4888,4889,4890,4891,4892,4893,4894,4895,4896,4897,4899,4902,4903
+,4904,4908,4905,4906,4907,4910,4911,4912,4913,4915,4914,4916,4917
+,4918,4919,4920,4921,4923,4926,4927,4928,4929,4930,4931,4932,4933
+,4937,4942,4944,4945,4946,4948,4950,4951,4954,4956,4958,4960,4961
+,4963,4964,4965,4967,4970,4969,4971,4972,4974,4977,4975,4979,4981
+,5729,4982,4983,4984,4986,4989,4991,4992,4994,4995,4996,4997,4998
+,4999,5001,5003,5005,5006,5655,3969,5007,5622,5009,5013,5015,5021
+,5022,5024,5025,5026,5028,5029,5031,5033,5036,5037,5038,5040,5041
+,5042,5043,5047,5048,5050,5051,5053,5054,5056,5058,5059,5061,5063
+,5064,5065,5066,5068,5069,5070,5072,5073,5076,5080,5081,5082,5083
+,5084,5085,5087,5086,5088,5090,5092,5094,5095,5097,5099,5101,5102
+,5104,5105,5106,5107,5108,5110,5112,5114,5115,5116,5117,5118,5119
+,5120,5121,5123,5124,5125,5126,5127,5128,5130,5131,5132,5134,5136
+,5137,5138,5139,5140,5141,5143,5777,5812,5148,5154,5155,5157,5159
+,6022,6024,6025,6026,6028,6029,6031,6033,6036,6037,6038,6040,6041
+,6042,6043,6047,6048,6050,6051,6053,6054,6056,6058,6059,6061,6063
+,6064,6065,6066,6068,6069,6070,6072,6073,6076,6080,6081,6082,6083
+,6084,6085,6087,6086,6088,6090,6092,6094,6095,6097,6099,6101,6102
+,6104,6105,6106,6107,6108,6110,6112,6114,6115,6116,6117,6118,6119
+,6120,6121,6123,6124,6125,6126,6127,6128,6130,6131,6132,6134,6136
+,6137,6138,6139,6140,6141,6143,6777,6812,6148,6154,6155,6157,6159
+,7022,7024,7025,7026,7028,7029,7031,7033,7036,7037,7038,7040,7041
+,7042,7043,7047,7048,7050,7051,7053,7054,7056,7058,7059,7061,7063
+,7064,7065,7066,7068,7069,7070,7072,7073,7076,7080,7081,7082,7083
+,7084,7085,7087,7086,7088,7090,7092,7094,7095,7097,7099,7101,7102
+,7104,7105,7106,7107,7108,7110,7112,7114,7115,7116,7117,7118,7119
+,7120,7121,7123,7124,7125,7126,7127,7128,7130,7131,7132,7134,7136
+,7137,7138,7139,7140,7141,7143,7777,7812,7148,7154,7155,7157,7159
+,8022,8024,8025,8026,8028,8029,8031,8033,8036,8037,8038,8040,8041
+,8042,8043,8047,8048,8050,8051,8053,8054,8056,8058,8059,8061,8063
+,8064,8065,8066,8068,8069,8070,8072,8073,8076,8080,8081,8082,8083
+,8084,8085,8087,8086,8088,8090,8092,8094,8095,8097,8099,8101,8102
+,8104,8105,8106,8107,8108,8110,8112,8114,8115,8116,8117,8118,8119
+,8120,8121,8123,8124,8125,8126,8127,8128,8130,8131,8132,8134,8136
+,8137,8138,8139,8140,8141,8143,8777,8812,8148,8154,8155,8157,8159
+,9022,9024,9025,9026,9028,9029,9031,9033,9036,9037,9038,9040,9041
+,9042,9043,9047,9048,9050,9051,9053,9054,9056,9058,9059,9061,9063
+,9064,9065,9066,9068,9069,9070,9072,9073,9076,9080,9081,9082,9083
+,9084,9085,9087,9086,9088,9090,9092,9094,9095,9097,9099,9101,9102
+,9104,9105,9106,9107,9108,9110,9112,9114,9115,9116,9117,9118,9119
+,9120,9121,9123,9124,9125,9126,9127,9128,9130,9131,9132,9134,9136
+,9137,9138,9139,9140,9141,9143,9777,9812,9148,9154,9155,9157,9159
+,10022,10024,10025,10026,10028,10029,10031,10033,10036,10037,10038,10040,10041
+,10042,10043,10047,10048,10050,10051,10053,10054,10056,10058,10059,10061,10063
+,10064,10065,10066,10068,10069,10070,10072,10073,10076,10080,10081,10082,10083
+,10084,10085,10087,10086,10088,10090,10092,10094,10095,10097,10099,10101,10102
+,10104,10105,10106,10107,10108,10110,10112,10114,10115,10116,10117,10118,10119
+,10120,10121,10123,10124,10125,10126,10127,10128,10130,10131,10132,10134,10136
+,10137,10138,10139,10140,10141,10143,10777,10812,10148,10154,10155,10157,10159
+,11022,11024,11025,11026,11028,11029,11031,11033,11036,11037,11038,11040,11041
+,11042,11043,11047,11048,11050,11051,11053,11054,11056,11058,11059,11061,11063
+,11064,11065,11066,11068,11069,11070,11072,11073,11076,11080,11081,11082,11083
+,11084,11085,11087,11086,11088,11090,11092,11094,11095,11097,11099,11101,11102
+,11104,11105,11106,11107,11108,11110,11112,11114,11115,11116,11117,11118,11119
+,11120,11121,11123,11124,11125,11126,11127,11128,11130,11131,11132,11134,11136
+,11137,11138,11139,11140,11141,11143,11777,11812,11148,11154,11155,11157,11159
+,12022,12024,12025,12026,12028,12029,12031,12033,12036,12037,12038,12040,12041
+,12042,12043,12047,12048,12050,12051,12053,12054,12056,12058,12059,12061,12063
+,12064,12065,12066,12068,12069,12070,12072,12073,12076,12080,12081,12082,12083
+,12084,12085,12087,12086,12088,12090,12092,12094,12095,12097,12099,12101,12102
+,12104,12105,12106,12107,12108,12110,12112,12114,12115,12116,12117,12118,12119
+,12120,12121,12123,12124,12125,12126,12127,12128,12130,12131,12132,12134,12136
+,12137,12138,12139,12140,12141,12143,12777,12812,12148,12154,12155,12157,12159
+,13022,13024,13025,13026,13028,13029,13031,13033,13036,13037,13038,13040,13041
+,13042,13043,13047,13048,13050,13051,13053,13054,13056,13058,13059,13061,13063
+,13064,13065,13066,13068,13069,13070,13072,13073,13076,13080,13081,13082,13083
+,13084,13085,13087,13086,13088,13090,13092,13094,13095,13097,13099,13101,13102
+,13104,13105,13106,13107,13108,13110,13112,13114,13115,13116,13117,13118,13119
+,13120,13121,13123,13124,13125,13126,13127,13128,13130,13131,13132,13134,13136
+,13137,13138,13139,13140,13141,13143,13777,13812,13148,13154,13155,13157,13159
+,14022,14024,14025,14026,14028,14029,14031,14033,14036,14037,14038,14040,14041
+,14042,14043,14047,14048,14050,14051,14053,14054,14056,14058,14059,14061,14063
+,14064,14065,14066,14068,14069,14070,14072,14073,14076,14080,14081,14082,14083
+,14084,14085,14087,14086,14088,14090,14092,14094,14095,14097,14099,14101,14102
+,14104,14105,14106,14107,14108,14110,14112,14114,14115,14116,14117,14118,14119
+,14120,14121,14123,14124,14125,14126,14127,14128,14130,14131,14132,14134,14136
+,14137,14138,14139,14140,14141,14143,14777,14812,14148,14154,14155,14157,14159
+,15022,15024,15025,15026,15028,15029,15031,15033,15036,15037,15038,15040,15041
+,15042,15043,15047,15048,15050,15051,15053,15054,15056,15058,15059,15061,15063
+,15064,15065,15066,15068,15069,15070,15072,15073,15076,15080,15081,15082,15083
+,15084,15085,15087,15086,15088,15090,15092,15094,15095,15097,15099,15101,15102
+,15104,15105,15106,15107,15108,15110,15112,15114,15115,15116,15117,15118,15119
+,15120,15121,15123,15124,15125,15126,15127,15128,15130,15131,15132,15134,15136
+,15137,15138,15139,15140,15141,15143,15777,15812,15148,15154,15155,15157,15159
+,4436,5162,5165,5170,5171,5173,5345,5174,5765,5177,5750,5793,0) ORDER BY id;
+ID         
+-----------
+0          
+2          
+723        
+1827       
+4107       
+5095       
+5644       
+7777       
+13037      
+15157      
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1(c1 int );
+0 rows inserted/updated/deleted
+ij> create table t2(c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values(0);
+1 row inserted/updated/deleted
+ij> create view v1(c1)
+as
+select c1 from t1
+union all
+select c2 from t2 ;
+0 rows inserted/updated/deleted
+ij> --following statement fails with NPE before fix of 5469
+select c1 from v1 where c1 NOT IN (1, 2);
+C1         
+-----------
+0          
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> 

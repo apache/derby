@@ -1,0 +1,1234 @@
+ij> --
+-- General trigger test
+--
+create function printTriggerInfo() returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.printTriggerInfo';
+0 rows inserted/updated/deleted
+ij> create function triggerFiresMin(s varchar(128)) returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.triggerFiresMinimal';
+0 rows inserted/updated/deleted
+ij> create function triggerFires(s varchar(128)) returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.triggerFires';
+0 rows inserted/updated/deleted
+ij> create function begInvRefToTECTest() returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.beginInvalidRefToTECTest';
+0 rows inserted/updated/deleted
+ij> create procedure notifyDMLDone() PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
+  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.notifyDMLDone';
+0 rows inserted/updated/deleted
+ij> drop table x;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'X' because it does not exist.
+ij> create table x (x int, y int, z int, constraint ck1 check (x > 0));
+0 rows inserted/updated/deleted
+ij> create view v as select * from x;
+0 rows inserted/updated/deleted
+ij> -- ok
+create trigger t1 NO CASCADE before update of x,y on x for each row mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> -- trigger already exists
+create trigger t1 NO CASCADE before update of x,y on x for each row mode db2sql values 1;
+ERROR X0Y32: Trigger 'T1' already exists in Schema 'APP'.
+ij> -- trigger already exists
+create trigger app.t1 NO CASCADE before update of x,y on x for each row mode db2sql values 1;
+ERROR X0Y32: Trigger 'T1' already exists in Schema 'APP'.
+ij> -- make sure system tables look as we expect
+select cast(triggername as char(10)), event, firingtime, type, state, referencedcolumns from sys.systriggers;
+1         |&|&|&|&|REFERENCEDCOLU&
+----------------------------------
+T1        |U|B|R|E|(1,2)          
+ij> select cast(triggername as char(10)), text from sys.systriggers t, sys.sysstatements s 
+		where s.stmtid = t.actionstmtid;
+1         |TEXT                                                                                                                            
+-------------------------------------------------------------------------------------------------------------------------------------------
+T1        |values 1                                                                                                                        
+ij> select cast(triggername as char(10)), tablename from sys.systriggers t, sys.systables tb
+		where t.tableid = tb.tableid;
+1         |TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+T1        |X                                                                                                                               
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', 'SYSTRIGGERS');
+1          
+-----------
+1          
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> -- not in sys schema
+create trigger sys.tr NO CASCADE before insert on x for each row mode db2sql values 1;
+ERROR 42X62: 'CREATE TRIGGER' is not allowed in the 'SYS' schema.
+ij> -- not on table in sys schema
+create trigger tr NO CASCADE before insert on sys.systables for each row mode db2sql values 1;
+ERROR X0Y56: 'CREATE TRIGGER' is not allowed on the System table 'SYS.SYSTABLES'.
+ij> -- duplicate columns, not allowed
+create trigger tr NO CASCADE before update of x, x on x for each row mode db2sql values 1;
+ERROR 42Y40: 'X' appears multiple times in the UPDATE OF column list for trigger 'TR'.
+ij> -- no params in column list
+create trigger tr NO CASCADE before update of x, ? on x for each row mode db2sql values 1;
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 50.
+ij> -- invalid column
+create trigger tr NO CASCADE before update of doesnotexist on x for each row mode db2sql values 1;
+ERROR 42X14: 'DOESNOTEXIST' is not a column in table or VTI 'X'.
+ij> -- not on view
+create trigger tr NO CASCADE before insert on v for each row mode db2sql values 1;
+ERROR 42Y62: 'CREATE TRIGGER' is not allowed on 'APP.V' because it is a view.
+ij> -- error to use table qualifier
+create trigger tr NO CASCADE before update of x.x on x for each row mode db2sql values 1;
+ERROR 42X01: Syntax error: Encountered "." at line 2, column 48.
+ij> -- error to use schema.table qualifier
+create trigger tr NO CASCADE before update of app.x.x on x for each row mode db2sql values 1;
+ERROR 42X01: Syntax error: Encountered "." at line 2, column 50.
+ij> -- no params in trigger action
+-- bad
+create trigger tr NO CASCADE before delete on x for each row mode db2sql select * from x where x = ?;
+ERROR 42Y27: Parameters are not allowed in the trigger action.
+ij> create trigger stmttrigger NO CASCADE before delete on x for each statement mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> select triggername, type from sys.systriggers where triggername = 'STMTTRIGGER';
+TRIGGERNAME                                                                                                                     |&
+----------------------------------------------------------------------------------------------------------------------------------
+STMTTRIGGER                                                                                                                     |S
+ij> drop trigger stmttrigger;
+0 rows inserted/updated/deleted
+ij> create trigger rowtrigger NO CASCADE before delete on x for each row mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> select triggername, type from sys.systriggers where triggername = 'ROWTRIGGER';
+TRIGGERNAME                                                                                                                     |&
+----------------------------------------------------------------------------------------------------------------------------------
+ROWTRIGGER                                                                                                                      |R
+ij> drop trigger rowtrigger;
+0 rows inserted/updated/deleted
+ij> -- fool around with depedencies
+-- CREATE TRIGGER
+create trigger t2 NO CASCADE before update of x,y on x for each row mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> -- CREATE CONSTRAINT
+alter table x add constraint ck2 check(x > 0);
+0 rows inserted/updated/deleted
+ij> -- DROP VIEW
+drop view v;
+0 rows inserted/updated/deleted
+ij> -- CREATE VIEW
+create view v as select * from x;
+0 rows inserted/updated/deleted
+ij> -- CREATE INDEX
+create index ix on x(x);
+0 rows inserted/updated/deleted
+ij> -- DROP TRIGGER: to the other types we have here
+drop trigger t2;
+0 rows inserted/updated/deleted
+ij> -- DROP INDEX
+drop index ix;
+0 rows inserted/updated/deleted
+ij> -- DROP CONSTRAINT
+alter table x drop constraint ck2;
+0 rows inserted/updated/deleted
+ij> -- MAKE SURE TRIGGER SPS IS RECOMPILED IF TABLE IS ALTERED.
+create table y (x int, y int, z int);
+0 rows inserted/updated/deleted
+ij> create trigger tins after insert on x referencing new_table as newtab for each statement mode db2sql insert into y select x, y, z from newtab;
+0 rows inserted/updated/deleted
+ij> insert into x values (1, 1, 1);
+1 row inserted/updated/deleted
+ij> alter table x add column w int default 100;
+0 rows inserted/updated/deleted
+ij> alter table x add constraint nonulls check (w is not null);
+0 rows inserted/updated/deleted
+ij> insert into x values (2, 2, 2, 2);
+1 row inserted/updated/deleted
+ij> select * from y;
+X          |Y          |Z          
+-----------------------------------
+1          |1          |1          
+2          |2          |2          
+ij> drop trigger tins;
+0 rows inserted/updated/deleted
+ij> drop table y;
+0 rows inserted/updated/deleted
+ij> -- prove that by dropping the underlying table, we have dropped the trigger
+-- first, lets create a few other triggers
+create trigger t2 NO CASCADE before update of x,y on x for each row mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> create trigger t3 after update of x,y on x for each statement mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> create trigger t4 after delete on x for each statement mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> select cast(triggername as char(10)), tablename from sys.systriggers t, sys.systables  tb
+		where t.tableid = tb.tableid order by 1;
+1         |TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+T2        |X                                                                                                                               
+T3        |X                                                                                                                               
+T4        |X                                                                                                                               
+ij> drop view v;
+0 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> select cast(triggername as char(10)), tablename from sys.systriggers t, sys.systables  tb
+		where t.tableid = tb.tableid order by 1;
+1         |TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+ij> --
+-- schema testing
+--
+create table x (x int, y int, z int);
+0 rows inserted/updated/deleted
+ij> create schema test;
+0 rows inserted/updated/deleted
+ij> create trigger test.t1 NO CASCADE before delete on x for each row mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> set schema test;
+0 rows inserted/updated/deleted
+ij> create trigger t2 NO CASCADE before delete on app.x for each row mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> select schemaname, triggername from sys.systriggers t, sys.sysschemas s
+	where s.schemaid = t.schemaid;
+SCHEMANAME                                                                                                                      |TRIGGERNAME                                                                                                                     
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TEST                                                                                                                            |T1                                                                                                                              
+TEST                                                                                                                            |T2                                                                                                                              
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> -- fails
+drop schema test restrict;
+ERROR X0Y54: Schema 'TEST' cannot be dropped because it is not empty.
+ij> drop trigger test.t2;
+0 rows inserted/updated/deleted
+ij> -- fails
+drop schema test restrict;
+ERROR X0Y54: Schema 'TEST' cannot be dropped because it is not empty.
+ij> set schema test;
+0 rows inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> -- ok this time
+drop schema test restrict;
+0 rows inserted/updated/deleted
+ij> --
+-- Test the information in the trigger information context
+--
+create table t (x int, y int, c char(1));
+0 rows inserted/updated/deleted
+ij> create trigger t1 NO CASCADE before insert on t for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> insert into t values (1,1,'1');
+TriggerInformation
+------------------
+getEventStatetmentText(): insert into t values (1,1,'1')
+getEventType(): INSERT
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	X:	true
+	Y:	true
+	C:	true
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{1,1,1}
+1 row inserted/updated/deleted
+ij> delete from t;
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> create trigger t1 after insert on t for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> insert into t values (1,1,'1');
+TriggerInformation
+------------------
+getEventStatetmentText(): insert into t values (1,1,'1')
+getEventType(): INSERT
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	X:	true
+	Y:	true
+	C:	true
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{1,1,1}
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> create trigger t1 NO CASCADE before update on t for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> update t set x = 2;
+TriggerInformation
+------------------
+getEventStatetmentText(): update t set x = 2
+getEventType(): UPDATE
+getModifiedColumns(): {X}
+wasColumnModified() on each column
+	X:	true
+	Y:	false
+	C:	false
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+	{1,1,1}
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{2,1,1}
+1 row inserted/updated/deleted
+ij> update t set y = 2, c = '2';
+TriggerInformation
+------------------
+getEventStatetmentText(): update t set y = 2, c = '2'
+getEventType(): UPDATE
+getModifiedColumns(): {Y, C}
+wasColumnModified() on each column
+	X:	false
+	Y:	true
+	C:	true
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+	{2,1,1}
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{2,2,2}
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> create trigger t1 after update on t for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> update t set x = 3;
+TriggerInformation
+------------------
+getEventStatetmentText(): update t set x = 3
+getEventType(): UPDATE
+getModifiedColumns(): {X}
+wasColumnModified() on each column
+	X:	true
+	Y:	false
+	C:	false
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+	{2,2,2}
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{3,2,2}
+1 row inserted/updated/deleted
+ij> update t set y = 3, c = '3';
+TriggerInformation
+------------------
+getEventStatetmentText(): update t set y = 3, c = '3'
+getEventType(): UPDATE
+getModifiedColumns(): {Y, C}
+wasColumnModified() on each column
+	X:	false
+	Y:	true
+	C:	true
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+	{3,2,2}
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{3,3,3}
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> create trigger t1 no cascade before delete on t for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> delete from t;
+TriggerInformation
+------------------
+getEventStatetmentText(): delete from t
+getEventType(): DELETE
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	X:	true
+	Y:	true
+	C:	true
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+	{3,3,3}
+AFTER RESULT SET
+<NULL>
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> insert into t values(3,3,'3');
+1 row inserted/updated/deleted
+ij> create trigger t1 after delete on t for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> delete from t;
+TriggerInformation
+------------------
+getEventStatetmentText(): delete from t
+getEventType(): DELETE
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	X:	true
+	Y:	true
+	C:	true
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+	{3,3,3}
+AFTER RESULT SET
+<NULL>
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> --
+-- Test trigger firing order
+--
+create trigger t1 after insert on t for each row mode db2sql
+	values app.triggerFiresMin('3rd');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after insert on t for each statement mode db2sql
+	values app.triggerFiresMin('1st');
+0 rows inserted/updated/deleted
+ij> create trigger t3 no cascade before insert on t for each row mode db2sql
+	values app.triggerFiresMin('4th');
+0 rows inserted/updated/deleted
+ij> create trigger t4 after insert on t for each row mode db2sql
+	values app.triggerFiresMin('2nd');
+0 rows inserted/updated/deleted
+ij> create trigger t5 no cascade before insert on t for each statement mode db2sql
+	values app.triggerFiresMin('5th');
+0 rows inserted/updated/deleted
+ij> insert into t values (1,1,'1');
+TRIGGER: <4th>
+TRIGGER: <5th>
+TRIGGER: <3rd>
+TRIGGER: <1st>
+TRIGGER: <2nd>
+1 row inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> drop trigger t2;
+0 rows inserted/updated/deleted
+ij> drop trigger t3;
+0 rows inserted/updated/deleted
+ij> drop trigger t4;
+0 rows inserted/updated/deleted
+ij> drop trigger t5;
+0 rows inserted/updated/deleted
+ij> -- try multiple values, make sure result sets don't get screwed up
+-- this time we'll print out result sets
+create trigger t1 after insert on t for each row mode db2sql
+	values app.triggerFires('3rd');
+0 rows inserted/updated/deleted
+ij> create trigger t2 no cascade before insert on t for each statement mode db2sql
+	values app.triggerFires('1st');
+0 rows inserted/updated/deleted
+ij> create trigger t3 after insert on t for each row mode db2sql
+	values app.triggerFires('4th');
+0 rows inserted/updated/deleted
+ij> create trigger t4 no cascade before insert on t for each row mode db2sql
+	values app.triggerFires('2nd');
+0 rows inserted/updated/deleted
+ij> create trigger t5 after insert on t for each statement mode db2sql
+	values app.triggerFires('5th');
+0 rows inserted/updated/deleted
+ij> insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4');
+TRIGGER: <1st> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{2,2,2}
+	{3,3,3}
+	{4,4,4}
+TRIGGER: <2nd> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{2,2,2}
+TRIGGER: <2nd> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{3,3,3}
+TRIGGER: <2nd> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{4,4,4}
+TRIGGER: <3rd> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{2,2,2}
+TRIGGER: <3rd> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{3,3,3}
+TRIGGER: <3rd> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{4,4,4}
+TRIGGER: <4th> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{2,2,2}
+TRIGGER: <4th> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{3,3,3}
+TRIGGER: <4th> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{4,4,4}
+TRIGGER: <5th> on statement insert into t values 
+	(2,2,'2'),
+	(3,3,'3'),
+	(4,4,'4')
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+	{2,2,2}
+	{3,3,3}
+	{4,4,4}
+3 rows inserted/updated/deleted
+ij> delete from t;
+4 rows inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> drop trigger t2;
+0 rows inserted/updated/deleted
+ij> drop trigger t3;
+0 rows inserted/updated/deleted
+ij> drop trigger t4;
+0 rows inserted/updated/deleted
+ij> drop trigger t5;
+0 rows inserted/updated/deleted
+ij> --
+-- Test firing on empty change sets, 
+-- statement triggers fire, row triggers
+-- do not.
+--
+create trigger t1 after insert on t for each row mode db2sql
+	values app.triggerFires('ROW: empty insert, should NOT fire');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after insert on t for each statement mode db2sql
+	values app.triggerFires('STATEMENT: empty insert, ok');
+0 rows inserted/updated/deleted
+ij> insert into t select * from t;
+TRIGGER: <STATEMENT: empty insert, ok> on statement insert into t select * from t
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+0 rows inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> drop trigger t2;
+0 rows inserted/updated/deleted
+ij> create trigger t1 after update on t for each row mode db2sql
+	values app.triggerFires('ROW: empty update, should NOT fire');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after update on t for each statement mode db2sql
+	values app.triggerFires('STATEMENT: empty update, ok');
+0 rows inserted/updated/deleted
+ij> update t set x = x;
+TRIGGER: <STATEMENT: empty update, ok> on statement update t set x = x
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+AFTER RESULT SET
+	 X,Y,C
+	 - - -
+0 rows inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> drop trigger t2;
+0 rows inserted/updated/deleted
+ij> create trigger t1 after delete on t for each row mode db2sql
+	values app.triggerFires('ROW: empty delete, should NOT fire');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after delete on t for each statement mode db2sql
+	values app.triggerFires('STATEMENT: empty delete, ok');
+0 rows inserted/updated/deleted
+ij> delete from t;
+TRIGGER: <STATEMENT: empty delete, ok> on statement delete from t
+BEFORE RESULT SET
+	 X,Y,C
+	 - - -
+AFTER RESULT SET
+<NULL>
+0 rows inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> drop trigger t2;
+0 rows inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> --
+-- After alter table, should pick up the new columns
+--
+create table talt(c1 int);
+0 rows inserted/updated/deleted
+ij> create trigger tins after insert on talt for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> create trigger tdel no cascade before delete on talt for each row mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> create trigger tupd after update on talt for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> insert into talt values (1);
+TriggerInformation
+------------------
+getEventStatetmentText(): insert into talt values (1)
+getEventType(): INSERT
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	C1:	true
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 C1
+	 --
+	{1}
+1 row inserted/updated/deleted
+ij> alter table talt add column cnew int default null;
+0 rows inserted/updated/deleted
+ij> select * from talt;
+C1         |CNEW       
+-----------------------
+1          |NULL       
+ij> insert into talt values (2,2);
+TriggerInformation
+------------------
+getEventStatetmentText(): insert into talt values (2,2)
+getEventType(): INSERT
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	C1:	true
+	CNEW:	true
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 C1,CNEW
+	 -- ----
+	{2,2}
+1 row inserted/updated/deleted
+ij> delete from talt;
+TriggerInformation
+------------------
+getEventStatetmentText(): delete from talt
+getEventType(): DELETE
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	C1:	true
+	CNEW:	true
+BEFORE RESULT SET
+	 C1,CNEW
+	 -- ----
+	{1,null}
+AFTER RESULT SET
+<NULL>
+TriggerInformation
+------------------
+getEventStatetmentText(): delete from talt
+getEventType(): DELETE
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	C1:	true
+	CNEW:	true
+BEFORE RESULT SET
+	 C1,CNEW
+	 -- ----
+	{2,2}
+AFTER RESULT SET
+<NULL>
+2 rows inserted/updated/deleted
+ij> insert into talt values (3,3);
+TriggerInformation
+------------------
+getEventStatetmentText(): insert into talt values (3,3)
+getEventType(): INSERT
+getModifiedColumns(): { <all> }
+wasColumnModified() on each column
+	C1:	true
+	CNEW:	true
+BEFORE RESULT SET
+<NULL>
+AFTER RESULT SET
+	 C1,CNEW
+	 -- ----
+	{3,3}
+1 row inserted/updated/deleted
+ij> update talt set cnew = 666;
+TriggerInformation
+------------------
+getEventStatetmentText(): update talt set cnew = 666
+getEventType(): UPDATE
+getModifiedColumns(): {CNEW}
+wasColumnModified() on each column
+	C1:	false
+	CNEW:	true
+BEFORE RESULT SET
+	 C1,CNEW
+	 -- ----
+	{3,3}
+AFTER RESULT SET
+	 C1,CNEW
+	 -- ----
+	{3,666}
+1 row inserted/updated/deleted
+ij> drop trigger tins;
+0 rows inserted/updated/deleted
+ij> drop trigger tdel;
+0 rows inserted/updated/deleted
+ij> drop trigger tupd;
+0 rows inserted/updated/deleted
+ij> -- make sure update w/ columns doesn't pick up new col
+create trigger tupd after update of c1 on talt for each statement mode db2sql
+	values app.printTriggerInfo();
+0 rows inserted/updated/deleted
+ij> alter table talt add column cnew2 int default null;
+0 rows inserted/updated/deleted
+ij> insert into talt values (1,1,1);
+1 row inserted/updated/deleted
+ij> update talt set cnew2 = 666;
+2 rows inserted/updated/deleted
+ij> -- clean up
+drop table talt;
+0 rows inserted/updated/deleted
+ij> --
+-- Trigger ordering wrt constraints
+--
+create table p (x int not null, constraint pk primary key (x));
+0 rows inserted/updated/deleted
+ij> insert into p values 1,2,3;
+3 rows inserted/updated/deleted
+ij> create table f (x int, 
+		constraint ck check (x > 0),
+		constraint fk foreign key (x) references p);
+0 rows inserted/updated/deleted
+ij> create trigger t1 no cascade before insert on f for each row mode db2sql
+	values app.triggerFiresMin('BEFORE constraints');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after insert on f for each row mode db2sql
+	values app.triggerFiresMin('AFTER constraints');
+0 rows inserted/updated/deleted
+ij> -- INSERT
+-- fails, ck violated
+insert into f values 0;
+TRIGGER: <BEFORE constraints>
+ERROR 23513: The check constraint 'CK' was violated while performing an INSERT or UPDATE on table 'APP.F'.
+ij> alter table f drop constraint ck;
+0 rows inserted/updated/deleted
+ij> -- fails, fk violated
+insert into f values 0;
+TRIGGER: <BEFORE constraints>
+ERROR 23503: INSERT on table 'F' caused a violation of foreign key constraint 'FK' for key (0).  The statement has been rolled back.
+ij> alter table f drop foreign key fk;
+0 rows inserted/updated/deleted
+ij> -- ok
+insert into f values 0;
+TRIGGER: <BEFORE constraints>
+TRIGGER: <AFTER constraints>
+1 row inserted/updated/deleted
+ij> delete from f;
+1 row inserted/updated/deleted
+ij> alter table f add constraint ck check (x > 0);
+0 rows inserted/updated/deleted
+ij> alter table f add constraint fk foreign key (x) references p;
+0 rows inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> drop trigger t2;
+0 rows inserted/updated/deleted
+ij> insert into f values (1);
+1 row inserted/updated/deleted
+ij> -- UPDATE
+create trigger t1 no cascade before update on f for each row mode db2sql
+	values app.triggerFiresMin('BEFORE constraints');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after update on f for each row mode db2sql
+	values app.triggerFiresMin('AFTER constraints');
+0 rows inserted/updated/deleted
+ij> -- fails, ck violated
+update f set x = 0;
+TRIGGER: <BEFORE constraints>
+ERROR 23513: The check constraint 'CK' was violated while performing an INSERT or UPDATE on table 'APP.F'.
+ij> alter table f drop constraint ck;
+0 rows inserted/updated/deleted
+ij> -- fails, fk violated
+update f set x = 0;
+TRIGGER: <BEFORE constraints>
+ERROR 23503: UPDATE on table 'F' caused a violation of foreign key constraint 'FK' for key (0).  The statement has been rolled back.
+ij> alter table f drop foreign key fk;
+0 rows inserted/updated/deleted
+ij> -- ok
+update f set x = 0;
+TRIGGER: <BEFORE constraints>
+TRIGGER: <AFTER constraints>
+1 row inserted/updated/deleted
+ij> delete from f;
+1 row inserted/updated/deleted
+ij> alter table f add constraint ck check (x > 0);
+0 rows inserted/updated/deleted
+ij> alter table f add constraint fk foreign key (x) references p;
+0 rows inserted/updated/deleted
+ij> drop trigger t1;
+0 rows inserted/updated/deleted
+ij> drop trigger t2;
+0 rows inserted/updated/deleted
+ij> -- DELETE
+insert into f values 1;
+1 row inserted/updated/deleted
+ij> create trigger t1 no cascade before delete on p for each row mode db2sql
+	values app.triggerFiresMin('BEFORE constraints');
+0 rows inserted/updated/deleted
+ij> create trigger t2 after delete on p for each row mode db2sql
+	values app.triggerFiresMin('AFTER constraints');
+0 rows inserted/updated/deleted
+ij> -- fails, fk violated
+delete from p;
+TRIGGER: <BEFORE constraints>
+TRIGGER: <BEFORE constraints>
+TRIGGER: <BEFORE constraints>
+ERROR 23503: DELETE on table 'P' caused a violation of foreign key constraint 'FK' for key (1).  The statement has been rolled back.
+ij> alter table f drop foreign key fk;
+0 rows inserted/updated/deleted
+ij> -- ok
+delete from p;
+TRIGGER: <BEFORE constraints>
+TRIGGER: <BEFORE constraints>
+TRIGGER: <BEFORE constraints>
+TRIGGER: <AFTER constraints>
+TRIGGER: <AFTER constraints>
+TRIGGER: <AFTER constraints>
+3 rows inserted/updated/deleted
+ij> drop table f;
+0 rows inserted/updated/deleted
+ij> drop table p;
+0 rows inserted/updated/deleted
+ij> --
+-- Prove that we are firing the proper triggers based
+-- on the columns we are changing;
+--
+drop table t;
+0 rows inserted/updated/deleted
+ij> create table t (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create trigger tins after insert on t for each row mode db2sql
+	values app.triggerFiresMin('insert');
+0 rows inserted/updated/deleted
+ij> create trigger tdel after delete on t for each row mode db2sql
+	values app.triggerFiresMin('delete');
+0 rows inserted/updated/deleted
+ij> create trigger tupc1 after update of c1 on t for each row mode db2sql
+	values app.triggerFiresMin('update c1');
+0 rows inserted/updated/deleted
+ij> create trigger tupc2 after update of c2 on t for each row mode db2sql
+	values app.triggerFiresMin('update c2');
+0 rows inserted/updated/deleted
+ij> create trigger tupc1c2 after update of c1,c2 on t for each row mode db2sql
+	values app.triggerFiresMin('update c1,c2');
+0 rows inserted/updated/deleted
+ij> create trigger tupc2c1 after update of c2,c1 on t for each row mode db2sql
+	values app.triggerFiresMin('update c2,c1');
+0 rows inserted/updated/deleted
+ij> insert into t values (1,1);
+TRIGGER: <insert>
+1 row inserted/updated/deleted
+ij> update t set c1 = 1;
+TRIGGER: <update c1>
+TRIGGER: <update c1,c2>
+TRIGGER: <update c2,c1>
+1 row inserted/updated/deleted
+ij> update t set c2 = 1;
+TRIGGER: <update c2>
+TRIGGER: <update c1,c2>
+TRIGGER: <update c2,c1>
+1 row inserted/updated/deleted
+ij> update t set c2 = 1, c1 = 1;
+TRIGGER: <update c1>
+TRIGGER: <update c2>
+TRIGGER: <update c1,c2>
+TRIGGER: <update c2,c1>
+1 row inserted/updated/deleted
+ij> update t set c1 = 1, c2 = 1;
+TRIGGER: <update c1>
+TRIGGER: <update c2>
+TRIGGER: <update c1,c2>
+TRIGGER: <update c2,c1>
+1 row inserted/updated/deleted
+ij> delete from t;
+TRIGGER: <delete>
+1 row inserted/updated/deleted
+ij> -- Make sure that triggers work with delimited identifiers
+-- Make sure that text munging works correctly
+create table trigtable("cOlUmN1" int, "cOlUmN2  " int, "cOlUmN3""""  " int);
+0 rows inserted/updated/deleted
+ij> create table trighistory("cOlUmN1" int, "cOlUmN2  " int, "cOlUmN3""""  " int);
+0 rows inserted/updated/deleted
+ij> insert into trigtable values (1, 2, 3);
+1 row inserted/updated/deleted
+ij> create trigger "tt1" after insert on trigtable
+referencing NEW as NEW for each row mode db2sql
+insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values
+(new."cOlUmN1" + 5, "NEW"."cOlUmN2  " * new."cOlUmN3""""  ", 5);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 700;
+ij> select cast(triggername as char(10)), text from sys.systriggers t, sys.sysstatements s 
+		where s.stmtid = t.actionstmtid and triggername = 'tt1';
+1         |TEXT                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+tt1       |insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values
+(cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN1') AS INTEGER)  + 5, cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN2  ') AS INTEGER)  * cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN3""  ') AS INTEGER) , 5)                                                                                                                                                                                                                                                                        
+ij> insert into trigtable values (1, 2, 3);
+1 row inserted/updated/deleted
+ij> select * from trighistory;
+cOlUmN1    |cOlUmN2    |cOlUmN3""  
+-----------------------------------
+6          |6          |5          
+ij> drop trigger "tt1";
+0 rows inserted/updated/deleted
+ij> create trigger "tt1" after insert on trigtable
+referencing new as new for each row mode db2sql
+insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values
+(new."cOlUmN1" + new."cOlUmN1", "NEW"."cOlUmN2  " * new."cOlUmN3""""  ", new."cOlUmN2  " * 3);
+0 rows inserted/updated/deleted
+ij> select cast(triggername as char(10)), text from sys.systriggers t, sys.sysstatements s 
+		where s.stmtid = t.actionstmtid and triggername = 'tt1';
+1         |TEXT                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+tt1       |insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values
+(cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN1') AS INTEGER)  + cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN1') AS INTEGER) , cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN2  ') AS INTEGER)  * cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN3""  ') AS INTEGER) , cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject('cOlUmN2  ') AS INTEGER)  * 3)                                
+ij> insert into trigtable values (1, 2, 3);
+1 row inserted/updated/deleted
+ij> select * from trighistory;
+cOlUmN1    |cOlUmN2    |cOlUmN3""  
+-----------------------------------
+6          |6          |5          
+2          |6          |6          
+ij> drop table trigtable;
+0 rows inserted/updated/deleted
+ij> drop table trighistory;
+0 rows inserted/updated/deleted
+ij> -- trigger bug that got fixed mysteriously
+-- between xena and buffy
+create table trigtable1(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create table trighistory(trigtable char(30), c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create trigger trigtable1 after update on trigtable1
+referencing OLD as oldtable
+for each row mode db2sql
+insert into trighistory values ('trigtable1', oldtable.c1, oldtable.c2);
+0 rows inserted/updated/deleted
+ij> insert into trigtable1 values (1, 1);
+1 row inserted/updated/deleted
+ij> update trigtable1 set c1 = 11, c2 = 11;
+1 row inserted/updated/deleted
+ij> select * from trighistory;
+TRIGTABLE                     |C1         |C2         
+------------------------------------------------------
+trigtable1                    |1          |1          
+ij> drop table trigtable1;
+0 rows inserted/updated/deleted
+ij> drop table trighistory;
+0 rows inserted/updated/deleted
+ij> -- 
+-- Lets make sure that the tec cannot be accessed once
+-- the dml that caused it to be pushed is finished.
+--
+drop table t;
+0 rows inserted/updated/deleted
+ij> create table t (x int);
+0 rows inserted/updated/deleted
+ij> create trigger t no cascade before insert on t for each statement mode db2sql
+	values app.begInvRefToTECTest();
+0 rows inserted/updated/deleted
+ij> -- causes the trigger to fire, which causes a thread
+-- to be cranked up
+insert into t values 1;
+1 row inserted/updated/deleted
+ij> -- tell the background thread that dml is done,
+-- it will now try to do some stuff with the stale
+-- tec.  We MUST do this in a different thread lest
+-- we block the background thread on connection 
+-- synchronization
+connect 'wombat' as conn2;
+ij(CONN2)> call app.notifyDMLDone();
+...nested thread running using expired tec
+...trying to loop through stale result set
+Got expected exception: SQL Exception: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Got expected exception: java.sql.SQLException: Statement closed.
+Got expected exception: java.sql.SQLException: Statement closed.
+0 rows inserted/updated/deleted
+ij(CONN2)> disconnect;
+ij> set connection connection0;
+ij> -- Test for bug 3495 - triggers were causing deferred insert, which
+-- caused the insert to use a TemporaryRowHolderImpl. This was not
+-- being re-initialized properly when closed, and it was trying to
+-- re-insert the row from the first insert.
+autocommit off;
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> create table t (x int);
+0 rows inserted/updated/deleted
+ij> create trigger tr after insert on t for each statement mode db2sql values 1;
+0 rows inserted/updated/deleted
+ij> prepare ps as 'insert into t values (?)';
+ij> execute ps using 'values (1)';
+1 row inserted/updated/deleted
+ij> execute ps using 'values (2)';
+1 row inserted/updated/deleted
+ij> select * from t;
+X          
+-----------
+1          
+2          
+ij> -- Test MODE DB2SQL not as reserved keyword. beetle 4546 
+drop table db2sql;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'DB2SQL' because it does not exist.
+ij> drop table db2sql2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'DB2SQL2' because it does not exist.
+ij> create table db2sql  (db2sql int, mode int, yipng int);
+0 rows inserted/updated/deleted
+ij> create table db2sql2 (db2sql2 int);
+0 rows inserted/updated/deleted
+ij> -- Test MODE DB2SQL on trigger.  beetle 4546
+drop trigger db2sqltr1;
+ERROR 42X94: TRIGGER 'DB2SQLTR1' does not exist.
+ij> create trigger db2sqltr1 after insert on db2sql 
+for each row
+MODE DB2SQL 
+insert into db2sql2 values (1);
+0 rows inserted/updated/deleted
+ij> -- Test optimizer plan of trigger action. Beetle 4826
+autocommit on;
+ij> drop table parent;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'PARENT' because it does not exist.
+ij> create table t1(a int not null primary key, b int);
+0 rows inserted/updated/deleted
+ij> create table parent (a int not null primary key, b int);
+0 rows inserted/updated/deleted
+ij> create trigger trig1 AFTER DELETE on t1
+referencing OLD as OLD for each row mode db2sql
+delete from parent where a = OLD.a;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (0, 1);
+1 row inserted/updated/deleted
+ij> insert into t1  values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t1  values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t1  values (3, 1);
+1 row inserted/updated/deleted
+ij> insert into parent values (0, 1);
+1 row inserted/updated/deleted
+ij> insert into parent values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into parent values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into parent values (3, 1);
+1 row inserted/updated/deleted
+ij> insert into parent values (4, 1);
+1 row inserted/updated/deleted
+ij> autocommit off ;
+ij> delete from t1 where a = 3;
+1 row inserted/updated/deleted
+ij> select type, mode, tablename from new org.apache.derby.diag.LockTable() t order by tablename, type;
+TYPE |MODE|TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+ROW  |X   |PARENT                                                                                                                          
+TABLE|IX  |PARENT                                                                                                                          
+ROW  |X   |T1                                                                                                                              
+TABLE|IX  |T1                                                                                                                              
+ij> rollback;
+ij> autocommit on;
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table parent;
+0 rows inserted/updated/deleted
+ij> -- Test use of old AND new referencing names within the same trigger (beetle 5725).
+create table x(x int);
+0 rows inserted/updated/deleted
+ij> insert into x values (2), (8), (78);
+3 rows inserted/updated/deleted
+ij> create table removed (x int);
+0 rows inserted/updated/deleted
+ij> -- statement trigger
+create trigger t1 after update of x on x referencing
+ old_table as old new_table as new for each statement mode db2sql insert into
+ removed select * from old where x not in (select x from 
+ new where x < 10);
+0 rows inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+2          
+8          
+78         
+ij> select * from removed;
+X          
+-----------
+ij> update x set x=18 where x=8;
+1 row inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+2          
+18         
+78         
+ij> select * from removed;
+X          
+-----------
+8          
+ij> -- row trigger
+create trigger t2 after update of x on x referencing
+ old as oldrow new as newrow for each row mode db2sql insert into
+ removed values (newrow.x + oldrow.x);
+0 rows inserted/updated/deleted
+ij> update x set x=28 where x=18;
+1 row inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+2          
+28         
+78         
+ij> select * from removed;
+X          
+-----------
+8          
+18         
+46         
+ij> -- do an alter table, then make sure triggers recompile correctly.
+alter table x add column y int;
+0 rows inserted/updated/deleted
+ij> update x set x=88 where x > 44;
+1 row inserted/updated/deleted
+ij> select * from x;
+X          |Y          
+-----------------------
+2          |NULL       
+28         |NULL       
+88         |NULL       
+ij> select * from removed;
+X          
+-----------
+8          
+18         
+46         
+78         
+166        
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> drop table removed;
+0 rows inserted/updated/deleted
+ij> create table x (x int, constraint ck check (x > 0));
+0 rows inserted/updated/deleted
+ij> -- after
+create trigger tgood after insert on x for each statement mode db2sql insert into x values 666;
+0 rows inserted/updated/deleted
+ij> insert into x values 1;
+1 row inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+1          
+666        
+ij> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij> create trigger tgood after insert on x for each statement mode db2sql delete from x;
+0 rows inserted/updated/deleted
+ij> insert into x values 1;
+1 row inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+ij> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij> create trigger tgood after insert on x for each statement mode db2sql update x set x = x+100;
+0 rows inserted/updated/deleted
+ij> insert into x values 1;
+1 row inserted/updated/deleted
+ij> select * from x;
+X          
+-----------
+101        
+ij> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij> delete from x;
+1 row inserted/updated/deleted
+ij> drop table x;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,103 @@
+ij> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij> -- make sure that we cannot do a commit/rollback
+-- on a nested connection when we are in the middle
+-- of something that has to be atomic (e.g. DML).
+-- commit/rollback on a nested connection is only
+-- permitted when we are doing something simple
+-- like CALL myMethod() or VALUES myMethod()
+CREATE PROCEDURE doConnCommit() 
+       DYNAMIC RESULT SETS 0 LANGUAGE JAVA 
+       EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.doConnCommit' 
+	   CONTAINS SQL
+       PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE doConnRollback() 
+       DYNAMIC RESULT SETS 0 LANGUAGE JAVA 
+       EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.doConnRollback' 
+	   CONTAINS SQL
+       PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE doConnStmt(IN TEXT CHAR(50)) 
+       DYNAMIC RESULT SETS 0 LANGUAGE JAVA 
+       EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.doConnStmtNoRS' 
+	   CONTAINS SQL
+       PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION doConnCommitInt() 
+       RETURNS INT EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.doConnCommitInt' 
+       LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION doConnStmtInt(TEXT CHAR(50)) 
+       RETURNS INT EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.doConnStmtIntNoRS' 
+       LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> create table x (x int);
+0 rows inserted/updated/deleted
+ij> insert into x values 1,2,3,4;
+4 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- all the following calls should succeed 
+call doConnCommit();
+0 rows inserted/updated/deleted
+ij> call doConnRollback();
+0 rows inserted/updated/deleted
+ij> -- No longer supported as language statements.
+-- call doConnStmt('commit');
+-- call doConnStmt('rollback');
+call doConnStmt('call doConnCommit()');
+0 rows inserted/updated/deleted
+ij> call doConnStmt('call doConnRollback()');
+0 rows inserted/updated/deleted
+ij> -- call doConnStmt('call doConnStmt(''call doConnStmt(''''commit'''')'')');
+values doConnCommitInt();
+1          
+-----------
+1          
+ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ij> -- values doConnStmtInt('commit');
+-- values doConnStmtInt('rollback');
+-- values doConnStmtInt('call doConnStmt(''call doConnStmt(''''commit'''')'')');
+values doConnStmtInt('values doConnCommitInt()');
+1          
+-----------
+1          
+ij> -- fail
+insert into x select x+doConnCommitInt() from x;
+ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
+ij> delete from x where x in (select x+doConnCommitInt() from x);
+ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
+ij> delete from x where x = doConnCommitInt();
+ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
+ij> update x set x = doConnCommitInt();
+ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
+ij> -- insert into x values doConnStmtInt('call doConnStmt(''call doConnStmt(''''commit'''')'')');
+-- select doConnStmtInt('call doConnStmt(''call doConnStmt(''''rollback'''')'')') from x;
+select doConnStmtInt('call doConnStmt(''call doConnCommit()'')') from x;
+1          
+-----------
+ERROR 38000: The exception 'SQL Exception: The exception 'SQL Exception: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'SQL Exception: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
+ij> -- isolation level always fails in a nested connection
+call doConnStmt('set isolation serializable');
+0 rows inserted/updated/deleted
+ij> -- clean up
+drop table x;
+0 rows inserted/updated/deleted
+ij> drop procedure doConnCommit;
+0 rows inserted/updated/deleted
+ij> drop procedure doConnRollback;
+0 rows inserted/updated/deleted
+ij> drop function doConnCommitInt;
+0 rows inserted/updated/deleted
+ij> drop procedure doConnStmt;
+0 rows inserted/updated/deleted
+ij> drop function doConnStmtInt;
+0 rows inserted/updated/deleted
+ij> 

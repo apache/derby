@@ -1,0 +1,387 @@
+ij> --
+-- this test is for logical operators (AND, OR, etc.)
+--
+-- create a table. Logical operators work on the results of comparisons,
+-- which are tested in a separate test, so the types of the columns being
+-- compared are irrelevant here.
+create table t (x int, y int);
+0 rows inserted/updated/deleted
+ij> -- insert some values, including nulls
+insert into t values (1, 1);
+1 row inserted/updated/deleted
+ij> insert into t values (1, 2);
+1 row inserted/updated/deleted
+ij> insert into t values (2, 1);
+1 row inserted/updated/deleted
+ij> insert into t values (2, 2);
+1 row inserted/updated/deleted
+ij> insert into t values (null, 2);
+1 row inserted/updated/deleted
+ij> insert into t values (1, null);
+1 row inserted/updated/deleted
+ij> insert into t values (null, null);
+1 row inserted/updated/deleted
+ij> -- basic AND test
+select x, y from t where x = 1 and y = 2;
+X          |Y          
+-----------------------
+1          |2          
+ij> select x, y from t where y = 2 and x = 1;
+X          |Y          
+-----------------------
+1          |2          
+ij> select x, y from t where x = 1 and y = 3;
+X          |Y          
+-----------------------
+ij> select x, y from t where y = 3 and x = 1;
+X          |Y          
+-----------------------
+ij> create table s (x int);
+0 rows inserted/updated/deleted
+ij> insert into s values (1);
+1 row inserted/updated/deleted
+ij> -- there is no short-circuiting with AND: ie when the first operand is FALSE,
+-- the second operant still got evaluated for AND. Same behavior in DB2 as well.
+select x from s where x = 5 and 2147483647 + 10 = 2;
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> -- Does not matter it in what order the 2 operands are. Both of them always gets evaluated.
+select x from s where 2147483647 + 10 = 2 and x = 5;
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> -- Now try a chain of ANDs
+select x, y from t where x = 1 and x + 0 = 1 and y = 2 and y + 0 = 2;
+X          |Y          
+-----------------------
+1          |2          
+ij> -- basic OR test
+select x, y from t where x = 1 or y = 2;
+X          |Y          
+-----------------------
+1          |1          
+1          |2          
+2          |2          
+NULL       |2          
+1          |NULL       
+ij> select x, y from t where y = 2 or x = 1;
+X          |Y          
+-----------------------
+1          |1          
+1          |2          
+2          |2          
+NULL       |2          
+1          |NULL       
+ij> select x, y from t where x = 4 or y = 5;
+X          |Y          
+-----------------------
+ij> select x, y from t where y = 5 or x = 4;
+X          |Y          
+-----------------------
+ij> -- test short-circuiting: for OR, when the first operand is TRUE, the second
+-- operand should not be evaluated.  We test this by deliberately causing an
+-- error in one of the operands.
+select x from s where x = 1 or 2147483647 + 10 = 2;
+X          
+-----------
+1          
+ij> -- Now try it with the error on the left, just to be sure the error really
+-- happens.
+select x from s where 2147483647 + 10 = 2 or x = 1;
+X          
+-----------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> -- Now try a chain of ORs
+select x, y from t where x = 1 or x + 0 = 1 or y = 2 or y + 0 = 2;
+X          |Y          
+-----------------------
+1          |1          
+1          |2          
+2          |2          
+NULL       |2          
+1          |NULL       
+ij> -- Test the precedence of AND versus OR.  AND is supposed to have a higher
+-- precedence that OR, i.e. "a OR b AND c" is equivalent to "a OR (b AND c)"
+-- First test TRUE OR TRUE AND FALSE.  This should evaluate to TRUE.  If
+-- the precedence is wrong, it will evaluate to FALSE.
+select x from s where (1 = 1) or (2 = 2) and (3 = 4);
+X          
+-----------
+1          
+ij> -- Now test FALSE AND TRUE OR TRUE.  This should evaluate to to TRUE.  If
+-- the precedence is wrong, it will evaluate to FALSE.
+select x from s where (1 = 2) and (3 = 3) or (4 = 4);
+X          
+-----------
+1          
+ij> -- Now test whether parenthesized expressions work.  Use the parentheses to
+-- force the OR to be evaluated before the AND.
+select x from s where ( (1 = 1) or (2 = 2) ) and (3 = 4);
+X          
+-----------
+ij> select x from s where (1 = 2) and ( (3 = 3) or (4 = 4) );
+X          
+-----------
+ij> -- More involved testing of expression normalization
+-- Ands under ands under ands ...
+select * from s where (	( ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) and
+						  ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) ) and
+						( ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) and
+						  ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) ) );
+X          
+-----------
+1          
+ij> -- Ors under ors under ors ...
+select * from s where (	( ( ((1=1) or (1=1)) or ((1=1) or (1=1)) ) or
+						  ( ((1=1) or (1=1)) or ((1=1) or (1=1)) ) ) or
+						( ( ((1=1) or (1=1)) or ((1=1) or (1=1)) ) or
+						  ( ((1=1) or (1=1)) or ((1=1) or (1=1)) ) ) );
+X          
+-----------
+1          
+ij> -- Ands under ors under ors ...
+select * from s where (	( ( ((1=1) and (1=1)) or ((1=1) and (1=1)) ) or
+						  ( ((1=1) and (1=1)) or ((1=1) and (1=1)) ) ) or
+						( ( ((1=1) and (1=1)) or ((1=1) and (1=1)) ) or
+						  ( ((1=1) and (1=1)) or ((1=1) and (1=1)) ) ) );
+X          
+-----------
+1          
+ij> -- Ors under ands under ands
+select * from s where ( ( ( ((1=1) or (1=1)) and ((1=1) or (1=1)) ) and
+						  ( ((1=1) or (1=1)) and ((1=1) or (1=1)) ) ) and
+						( ( ((1=1) or (1=1)) and ((1=1) or (1=1)) ) and
+						  ( ((1=1) or (1=1)) and ((1=1) or (1=1)) ) ) );
+X          
+-----------
+1          
+ij> -- left deep with ands
+select * from s where ( ( ( ( ( ((1=1) and (1=1)) and (1=1)) and (1=1)) and (1=1))
+						and (1=1)) and (1=1));
+X          
+-----------
+1          
+ij> -- left deep with ors
+select * from s where ( ( ( ( ( ((1=1) or (1=1)) or (1=1)) or (1=1)) or (1=1))
+						or (1=1)) or (1=1));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( ((1=1) or (1=2)) or (1=2)) or (1=2)) or (1=2))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( ((1=2) or (1=2)) or (1=1)) or (1=2)) or (1=2))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=1)) or (1=2))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=2)) or (1=1))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=2)) or (1=2))
+						or (1=1)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=2)) or (1=2))
+						or (1=2)) or (1=1));
+X          
+-----------
+1          
+ij> -- right deep with ors
+select * from s where ( ( ( ( ( (1=1) or ((1=2) or (1=2)) ) or (1=2)) or (1=2))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( (1=2) or ((1=1) or (1=2)) ) or (1=2)) or (1=2))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( (1=2) or ((1=2) or (1=1)) ) or (1=2)) or (1=2))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=1)) or (1=2))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=2)) or (1=1))
+						or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=2)) or (1=2))
+						or (1=1)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=2)) or (1=2))
+						or (1=2)) or (1=1));
+X          
+-----------
+1          
+ij> -- ... and false and ... should get resolved to false
+select x from s where 2147483647 + 10 = 2 and (1=2);
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+ij> select x from s where (1=2) and 2147483647 + 10 = 2;
+X          
+-----------
+ij> -- nots
+select x from s where not ( (1 = 1) or (2 = 2) ) and (3 = 4);
+X          
+-----------
+ij> select x from s where not ( ( (1 = 1) or (2 = 2) ) and (3 = 4) );
+X          
+-----------
+1          
+ij> select x from s where (1 = 2) and not ( (3 = 3) or (4 = 4) );
+X          
+-----------
+ij> select x from s where not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) );
+X          
+-----------
+1          
+ij> -- following NOTs in select clause won't work because it results in a transient boolean datatype
+select not ( (1 = 1) or (2 = 2) ) and (3 = 4) from s;
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.
+ij> --
+select not ( ( (1 = 1) or (2 = 2) ) and (3 = 4) ) from s;
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.
+ij> --
+select (1 = 2) and not ( (3 = 3) or (4 = 4) ) from s;
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
+ij> --
+select not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) ) from s;
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.
+ij> -- Ands under ands under ands ...
+select * from s where not (	( ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) and
+						      ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) ) and
+						    ( ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) and
+						      ( ((1=1) and (1=1)) and ((1=1) and (1=2)) ) ) );
+X          
+-----------
+1          
+ij> -- Ors under ors under ors ...
+select * from s where not (	( ( ((1=1) or (1=1)) or ((1=1) or (1=1)) ) or
+						      ( ((1=1) or (1=1)) or ((1=1) or (1=1)) ) ) or
+						    ( ( ((1=1) or (1=1)) or ((1=1) or (1=1)) ) or
+						      ( ((1=1) or (1=1)) or ((1=1) or (1=2)) ) ) );
+X          
+-----------
+ij> -- Ands under ors under ors ...
+select * from s where not (	( ( ((1=1) and (1=1)) or ((1=1) and (1=1)) ) or
+						      ( ((1=1) and (1=1)) or ((1=1) and (1=1)) ) ) or
+						    ( ( ((1=1) and (1=1)) or ((1=1) and (1=1)) ) or
+						      ( ((1=1) and (1=1)) or ((1=1) and (1=2)) ) ) );
+X          
+-----------
+ij> -- Ors under ands under ands
+select * from s where not ( ( ( ((1=1) or (1=1)) and ((1=1) or (1=1)) ) and
+						      ( ((1=1) or (1=1)) and ((1=1) or (1=1)) ) ) and
+						    ( ( ((1=1) or (1=1)) and ((1=1) or (1=1)) ) and
+						      ( ((1=1) or (1=1)) and ((1=1) or (1=2)) ) ) );
+X          
+-----------
+ij> -- left deep with ands
+select * from s where not ( ( ( ( ( ((1=1) and (1=2)) and (1=1)) and (1=1)) and (1=1))
+						    and (1=1)) and (1=1));
+X          
+-----------
+1          
+ij> -- left deep with ors
+select * from s where not ( ( ( ( ( ((1=2) or (1=1)) or (1=1)) or (1=1)) or (1=1))
+						    or (1=1)) or (1=1));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=2)) or (1=2))
+						    or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where not ( ( ( ( ( ((1=2) or (1=2)) or (1=1)) or (1=2)) or (1=2))
+						    or (1=2)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=1)) or (1=2))
+						    or (1=2)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=2)) or (1=1))
+						    or (1=2)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=2)) or (1=2))
+						    or (1=1)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( ((1=2) or (1=2)) or (1=2)) or (1=2)) or (1=2))
+						    or (1=2)) or (1=1));
+X          
+-----------
+ij> -- right deep with ors
+select * from s where not ( ( ( ( ( (1=1) or ((1=2) or (1=2)) ) or (1=2)) or (1=2))
+						    or (1=2)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=2)) or (1=2))
+						    or (1=2)) or (1=2));
+X          
+-----------
+1          
+ij> select * from s where not ( ( ( ( ( (1=2) or ((1=2) or (1=1)) ) or (1=2)) or (1=2))
+						    or (1=2)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=1)) or (1=2))
+						    or (1=2)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=2)) or (1=1))
+						    or (1=2)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=2)) or (1=2))
+						    or (1=1)) or (1=2));
+X          
+-----------
+ij> select * from s where not ( ( ( ( ( (1=2) or ((1=2) or (1=2)) ) or (1=2)) or (1=2))
+						    or (1=2)) or (1=1));
+X          
+-----------
+ij> -- nots on nots
+select * from s where not ( not ( not ((1=2) or (1=1))) or (not ((1=2) or (1=2)) ) );
+X          
+-----------
+ij> -- following nots on nots won't work because they result in transient boolean datatype in the select clause
+select not ( not ( not ((1=2) or (1=1))) or (not ((1=2) or (1=2)) ) ) from s;
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.
+ij> -- negative testing
+-- non boolean where clauses
+select * from s where 1;
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
+ij> select * from s where 1 and (1=1);
+ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ij> select * from s where (1=1) and 1;
+ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ij> select * from s where 1 or (1=1);
+ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ij> select * from s where (1=1) or 1;
+ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ij> select * from s where not 1;
+ERROR 42X40: A NOT has a non-Boolean operand. The operand of NOT must evaluate to TRUE, FALSE, or UNKNOWN.
+ij> -- Clean up
+drop table t;
+0 rows inserted/updated/deleted
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> 
