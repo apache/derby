@@ -27,8 +27,8 @@ User :APP
 Prepared Statement Information: 
 	Stmt ID		SQLText
 	-------------	-----------
-	SYSSH0001	SELECT count(*) from sys.systables
-	SYSSH0002	VALUES(1)
+	SYSLH0002	VALUES(1)
+	SYSLH0001	SELECT count(*) from sys.systables
 Session # :4
 Database :wombat;create=true
 User :APP
@@ -36,8 +36,8 @@ User :APP
 Prepared Statement Information: 
 	Stmt ID		SQLText
 	-------------	-----------
-	SYSSH0001	SELECT count(*) from sys.systables
-	SYSSH0002	VALUES(2)
+	SYSLH0002	VALUES(2)
+	SYSLH0001	SELECT count(*) from sys.systables
 Session # :5
 Database :wombat;create=true
 User :APP
