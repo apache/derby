@@ -63,7 +63,7 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="simple"
+      srcdir="${derby.demo.src.dir}/simple"
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir};${jcc};${jta1_2}"/>

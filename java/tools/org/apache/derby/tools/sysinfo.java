@@ -35,9 +35,9 @@ import org.apache.derby.impl.tools.sysinfo.Main;
 	<p>
 	Also available on this class are methods which allow you to determine
 	the version of the code for the system without actually booting a database.
-	Please note that this is the Cloudscape version of the .jar files, not of your databases.
+	Please note that this is the Derby version of the .jar files, not of your databases.
 	<p>
-	The numbering scheme for released Cloudscape products is <b><code>m1.m2.m3 </code></b>
+	The numbering scheme for released Derby products is <b><code>m1.m2.m3 </code></b>
 	where <b><code>m1</code></b> is the major release version, <b><code>m2</code></b> is the minor release version,
 	and <b><code>m3</code></b> is the maintenance level. Versions of the product with the same
 	major and minor version numbers are considered feature compatible. 
@@ -56,8 +56,8 @@ public class sysinfo {
   }
 
 	/**
-		The genus name for the IBM Cloudscape code. Use this to determine the version of the
-		IBM Cloudscape embedded code in cs.jar.
+		The genus name for the Apache Derby code. Use this to determine the version of the
+		Apache Derby embedded code in cs.jar.
 	*/
 	public static final String DBMS="DBMS";
 
@@ -69,7 +69,7 @@ public class sysinfo {
 
 
 	/**
-		gets the major version of the IBM Cloudscape embedded code.
+		gets the major version of the Apache Derby embedded code.
 		@return	the major version. Returns -1 if not found.
 	 */
   static public int getMajorVersion()
@@ -97,7 +97,7 @@ public class sysinfo {
 
 
 	/**
-		gets the minor version of the IBM Cloudscape embedded code.
+		gets the minor version of the Apache Derby embedded code.
 		@return	the minor version. Returns -1 if not found.
 	 */
   static public int getMinorVersion()
@@ -123,7 +123,7 @@ public class sysinfo {
   }
 
 	/**
-		gets the build number for the IBM Cloudscape embedded library
+		gets the build number for the Apache Derby embedded library
 		@return the build number, or -1 if the information is not found.
 	*/
   static public String getBuildNumber()
@@ -150,7 +150,7 @@ public class sysinfo {
 
 
 	/**
-		gets the product name for the IBM Cloudscape embedded library
+		gets the product name for the Apache Derby embedded library
 		@return the name
 	*/
   static public String getProductName()
@@ -183,7 +183,7 @@ public class sysinfo {
   }
 
   /**
-	Return the version information string for the IBM Cloudscape embedded library including alpha or beta indicators.
+	Return the version information string for the Apache Derby embedded library including alpha or beta indicators.
   */
   static public String getVersionString(String genus) {
 

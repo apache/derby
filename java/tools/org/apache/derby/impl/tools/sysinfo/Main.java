@@ -63,7 +63,7 @@ import org.apache.derby.iapi.tools.i18n.*;
   This class can be used to print out system information at the
   command line by issuing the command:
   <PRE>
-    java com.ibm.db2j.tools.SysInfo.main
+    java org.apache.derby.tools.sysinfo
   </PRE>
   Alternatively, you can use SysInfo within your program to display
   Cloudscape information; a Cloudscape version string is returned by this Java code:

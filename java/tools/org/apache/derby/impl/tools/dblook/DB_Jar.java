@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.tools.cslook.DB_Jar
+   Derby - Class org.apache.derby.impl.tools.dblook.DB_Jar
 
    Copyright 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -18,7 +18,7 @@
 
  */
 
-package org.apache.derby.impl.tools.cslook;
+package org.apache.derby.impl.tools.dblook;
 
 import java.sql.Connection;
 import java.sql.Statement;

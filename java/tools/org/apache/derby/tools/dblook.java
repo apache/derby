@@ -38,16 +38,16 @@ import java.util.ArrayList;
 
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
-import org.apache.derby.impl.tools.cslook.DB_Check;
-import org.apache.derby.impl.tools.cslook.DB_Index;
-import org.apache.derby.impl.tools.cslook.DB_Jar;
-import org.apache.derby.impl.tools.cslook.DB_Key;
-import org.apache.derby.impl.tools.cslook.DB_Table;
-import org.apache.derby.impl.tools.cslook.DB_Schema;
-import org.apache.derby.impl.tools.cslook.DB_StoredProcedure;
-import org.apache.derby.impl.tools.cslook.DB_Trigger;
-import org.apache.derby.impl.tools.cslook.DB_View;
-import org.apache.derby.impl.tools.cslook.Logs;
+import org.apache.derby.impl.tools.dblook.DB_Check;
+import org.apache.derby.impl.tools.dblook.DB_Index;
+import org.apache.derby.impl.tools.dblook.DB_Jar;
+import org.apache.derby.impl.tools.dblook.DB_Key;
+import org.apache.derby.impl.tools.dblook.DB_Table;
+import org.apache.derby.impl.tools.dblook.DB_Schema;
+import org.apache.derby.impl.tools.dblook.DB_StoredProcedure;
+import org.apache.derby.impl.tools.dblook.DB_Trigger;
+import org.apache.derby.impl.tools.dblook.DB_View;
+import org.apache.derby.impl.tools.dblook.Logs;
 
 public class dblook {
 
@@ -102,7 +102,7 @@ public class dblook {
 	/* ************************************************
 	 * Constructor:
 	 * Parse the command line, initialize logs, echo program variables,
-	 * and load the Cloudscape driver.
+	 * and load the Derby driver.
 	 * @param args args[0] is the database URL.  All other command-line
 	 *  parameters are read as system properties.
 	 * ****/

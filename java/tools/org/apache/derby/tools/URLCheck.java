@@ -104,7 +104,7 @@ public class URLCheck {
         else if( url.startsWith( "jdbc:derby:"))
 		{
 			protocol = "jdbc:derby:";
-            validProps = getValidCloudscapeProps();
+            validProps = getValidDerbyProps();
 		}
         else
             validProps = null;
@@ -149,10 +149,10 @@ public class URLCheck {
     return booleanAttributes;
   }
 
-    private static Vector validCloudscapeProps;
-    private Vector getValidCloudscapeProps()
+    private static Vector validDerbyProps;
+    private Vector getValidDerbyProps()
     {
-        if( validCloudscapeProps == null)
+        if( validDerbyProps == null)
         {
             try
             {
@@ -167,14 +167,14 @@ public class URLCheck {
                     Field aField = (Field)fields[i];
                     props.addElement(aField.get(att));
                 }
-                validCloudscapeProps = props;
+                validDerbyProps = props;
             }
             catch (Exception ex)
             {
                 ex.printStackTrace();
             }
         }
-        return validCloudscapeProps;
-    } // end of getValidCloudscapeProps
+        return validDerbyProps;
+    } // end of getValidDerbyProps
 
 }

@@ -28,8 +28,8 @@ import java.io.IOException;
 
 /**
 	
-	ij is Cloudscape's interactive JDBC scripting tool.
-	It is a simple utility for running scripts against a Cloudscape database.
+	ij is Derby's interactive JDBC scripting tool.
+	It is a simple utility for running scripts against a Derby database.
 	You can also use it interactively to run ad hoc queries.
 	ij provides several commands for ease in accessing a variety of JDBC features.
 	<P>
