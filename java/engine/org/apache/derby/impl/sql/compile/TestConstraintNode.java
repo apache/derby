@@ -35,10 +35,6 @@ import java.util.Vector;
 
 public class TestConstraintNode extends UnaryLogicalOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private String sqlState;
 	private String tableName;
 	private String constraintName;

@@ -37,10 +37,6 @@ import org.apache.derby.iapi.reference.ClassName;
 public class SumAvgAggregateDefinition
 		implements AggregateDefinition 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	private boolean isSum;
 	/**
 	 * Niladic constructor.  Does nothing.  For ease

@@ -56,10 +56,6 @@ import java.util.Vector;
 
 public abstract class ValueNode extends QueryTreeNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public static final int IN_UNKNOWN_CLAUSE = 0;
 	public static final int IN_SELECT_LIST = 1;
 	public static final int IN_WHERE_CLAUSE = 2;

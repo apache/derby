@@ -55,10 +55,6 @@ import java.sql.Types;
 
 public class ColumnDefinitionNode extends TableElementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	boolean						isAutoincrement;
 	DataTypeDescriptor			dataTypeServices;
 	DataValueDescriptor			defaultValue;

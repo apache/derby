@@ -28,10 +28,6 @@ import java.sql.Types;
 public final class CharConstantNode extends ConstantNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Initializer for a CharConstantNode.
 	 *
 	 * @param arg1	A String containing the value of the constant

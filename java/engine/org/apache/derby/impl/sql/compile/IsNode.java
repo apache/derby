@@ -31,10 +31,6 @@ import java.util.Vector;
 
 public class IsNode extends BinaryLogicalOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	boolean		notMe;	// set to true if we're to negate the sense of this node
 
 	/**

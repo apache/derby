@@ -67,10 +67,6 @@ import java.util.Vector;
 public class ResultColumn extends ValueNode 
 				implements ResultColumnDescriptor, Comparable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* name and exposedName should point to the same string, unless there is a
 	 * derived column list, in which case name will point to the underlying name
 	 * and exposedName will point to the name from the derived column list.

@@ -65,10 +65,6 @@ import org.apache.derby.iapi.reference.ClassName;
 
 public abstract class QueryTreeNode implements Visitable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public static final int AUTOINCREMENT_START_INDEX = 0;
 	public static final int AUTOINCREMENT_INC_INDEX   = 1;
 	public static final int AUTOINCREMENT_IS_AUTOINCREMENT_INDEX   = 2;

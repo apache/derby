@@ -45,10 +45,6 @@ import java.util.Vector;
 
 public class BinaryOperatorNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	String	operator;
 	String	methodName;
 	ValueNode	receiver; // used in generation

@@ -51,10 +51,6 @@ import java.util.Properties;
   */
 public class IndexChanger
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private IndexRowGenerator irg;
 	//Index Conglomerate ID
 	private long indexCID;

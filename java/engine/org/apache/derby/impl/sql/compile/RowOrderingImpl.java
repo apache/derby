@@ -19,12 +19,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import java.util.Vector;
 
-class RowOrderingImpl implements RowOrdering { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+class RowOrderingImpl implements RowOrdering {
 
 	/* This vector contains ColumnOrderings */
 	Vector ordering;

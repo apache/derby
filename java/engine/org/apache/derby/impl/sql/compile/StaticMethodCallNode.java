@@ -101,10 +101,6 @@ import java.lang.reflect.Modifier;
  */
 public class StaticMethodCallNode extends MethodCallNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private TableName procedureName;
 
 	private LocalField[] outParamArrays;

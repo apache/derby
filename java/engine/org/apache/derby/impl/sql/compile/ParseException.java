@@ -20,10 +20,6 @@ package org.apache.derby.impl.sql.compile;
  * mechanisms so long as you retain the public fields.
  */
 public class ParseException extends Exception {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
   /**
    * This constructor is used by the method "generateParseException"

@@ -94,10 +94,6 @@ public class GenericLanguageConnectionContext
 	extends ContextImpl 
 	implements LanguageConnectionContext
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	// make sure these are not zeros
 	private final static int NON_XA = 0;

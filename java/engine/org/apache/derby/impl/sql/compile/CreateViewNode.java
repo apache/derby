@@ -51,10 +51,6 @@ import org.apache.derby.catalog.UUID;
 
 public class CreateViewNode extends CreateStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	Dependent			currentDependent;
 	ResultColumnList	resultColumns;
 	ResultSetNode		queryExpression;

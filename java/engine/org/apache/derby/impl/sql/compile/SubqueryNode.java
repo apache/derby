@@ -91,10 +91,6 @@ import java.util.Vector;
 
 public class SubqueryNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** This must be a single-column result set.  If the subquery is
 	** not quantified, it must also be a single-row result set - that is,

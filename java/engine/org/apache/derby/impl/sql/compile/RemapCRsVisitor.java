@@ -24,10 +24,6 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public class RemapCRsVisitor implements Visitor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private boolean remap;
 
 	public RemapCRsVisitor(boolean remap)

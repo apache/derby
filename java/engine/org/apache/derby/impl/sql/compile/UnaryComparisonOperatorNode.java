@@ -46,10 +46,6 @@ import java.util.Vector;
 public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Bind this comparison operator.  All that has to be done for binding
 	 * a comparison operator is to bind the operand and set the result type 
 	 * to SQLBoolean.

@@ -27,10 +27,6 @@ import java.sql.Types;
 
 public final class BooleanConstantNode extends ConstantNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Cache actual value to save overhead and
 	 * throws clauses.
 	 */

@@ -39,10 +39,6 @@ import java.util.Vector;
 
 public abstract class BinaryListOperatorNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	String	methodName;
 	/* operator used for error messages */
 	String	operator;

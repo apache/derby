@@ -59,10 +59,6 @@ import java.util.Properties;
 
 public class OptimizerImpl implements Optimizer 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	DataDictionary			 dDictionary;
 	/* The number of tables in the query as a whole.  (Size of bit maps.) */

@@ -29,11 +29,6 @@ import java.sql.SQLException;
  */
 class VTIDeferModPolicy implements Visitor
 {
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
     /**
      * See if a VTI modification statement should be deferred.
      *

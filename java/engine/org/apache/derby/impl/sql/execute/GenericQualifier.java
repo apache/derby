@@ -30,10 +30,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public class GenericQualifier implements Qualifier
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private int columnId;
 	private int operator;
 	private GeneratedMethod orderableGetter;

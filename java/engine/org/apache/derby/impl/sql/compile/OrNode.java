@@ -20,10 +20,6 @@ import java.util.Vector;
 
 public class OrNode extends BinaryLogicalOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Is this the 1st OR in the OR chain? */
 	private boolean firstOr;
 

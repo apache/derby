@@ -23,10 +23,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 public class SavepointNode extends DDLStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 	private String	savepointName; //name of the savepoint
 	private int	savepointStatementType; //Type of savepoint statement ie rollback, release or set savepoint
 

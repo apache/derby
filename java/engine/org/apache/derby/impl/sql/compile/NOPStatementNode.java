@@ -24,10 +24,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 public class NOPStatementNode extends StatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public String statementToString()
 	{
 		return "NO-OP";

@@ -84,10 +84,6 @@ import java.lang.reflect.Modifier;
  */
 public class FromVTI extends FromTable implements VTIEnvironment
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	JBitSet				correlationMap;
 	JBitSet				dependencyMap;

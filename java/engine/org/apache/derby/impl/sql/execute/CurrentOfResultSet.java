@@ -40,10 +40,6 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
  */
 public class CurrentOfResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     private boolean next;
 	private RowLocation rowLocation;

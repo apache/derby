@@ -55,10 +55,6 @@ import java.util.Vector;
 
 public class ParameterNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/*
 	** The parameter number for this parameter.  The numbers start at 0.

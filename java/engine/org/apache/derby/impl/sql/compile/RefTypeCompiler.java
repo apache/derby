@@ -35,10 +35,6 @@ import org.apache.derby.iapi.reference.ClassName;
 
 public class RefTypeCompiler extends BaseTypeCompiler
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/** @see TypeCompiler#getCorrespondingPrimitiveTypeName */
 	public String getCorrespondingPrimitiveTypeName()
 	{

@@ -45,10 +45,6 @@ import java.util.Properties;
 public class Level2OptimizerFactoryImpl
 	extends OptimizerFactoryImpl 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	//
 	// ModuleControl interface

@@ -41,10 +41,6 @@ import java.util.Properties;
 
 public class CreateTableNode extends CreateStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private char				lockGranularity;
 	private boolean				onCommitDeleteRows; //If true, on commit delete rows else on commit preserve rows of temporary table.
 	private boolean				onRollbackDeleteRows; //If true, on rollback delete rows from temp table if it was logically modified in that UOW. true is the only supported value

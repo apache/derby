@@ -72,10 +72,6 @@ import java.io.Serializable;
  */
 public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	///////////////////////////////////////////////////////////////////////
 	//
 	// CONSTANTS

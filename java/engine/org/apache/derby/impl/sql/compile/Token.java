@@ -15,10 +15,6 @@ package org.apache.derby.impl.sql.compile;
  */
 
 public class Token {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
   /**
    * An integer that describes the kind of this token.  This numbering

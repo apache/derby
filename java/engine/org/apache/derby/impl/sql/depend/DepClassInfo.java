@@ -14,12 +14,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
 
 // lifted from TypeFactoryImpl.DTSClassInfo
-public class DepClassInfo extends FormatableInstanceGetter { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public class DepClassInfo extends FormatableInstanceGetter {
 
 	public Object getNewInstance() {
 		switch (fmtId) 

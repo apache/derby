@@ -44,10 +44,6 @@ import java.util.Vector;
  */
 public  class DefaultNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private ProviderList apl;
 	private String		columnName;
 	private String		defaultText;

@@ -50,10 +50,6 @@ import java.util.Vector;
  */
 public class IndexToBaseRowNode extends FromTable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected FromBaseTable	source;
 	protected ConglomerateDescriptor	baseCD;
 	protected boolean	cursorTargetTable;

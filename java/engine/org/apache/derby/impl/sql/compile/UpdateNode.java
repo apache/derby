@@ -78,10 +78,6 @@ import java.util.Vector;
 
 public final class UpdateNode extends DMLModStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	//Note: These are public so they will be visible to
 	//the RepUpdateNode.
 	public int[]				changedColumnIds;

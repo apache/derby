@@ -63,10 +63,6 @@ import java.sql.SQLWarning;
 
 public class GenericStatement
 	implements Statement {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	// these fields define the identity of the statement
 	private final SchemaDescriptor compilationSchema;

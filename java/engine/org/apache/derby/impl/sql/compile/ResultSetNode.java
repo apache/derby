@@ -74,10 +74,6 @@ import java.util.Vector;
 
 public abstract class ResultSetNode extends QueryTreeNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	int					resultSetNumber;
 	/* Bit map of referenced tables under this ResultSetNode */
 	JBitSet				referencedTableMap;

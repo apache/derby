@@ -29,10 +29,6 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
  */
 public interface RelationalOperator
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public final int EQUALS_RELOP = 1;
 	public final int NOT_EQUALS_RELOP = 2;
 	public final int GREATER_THAN_RELOP = 3;

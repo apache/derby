@@ -48,10 +48,6 @@ import java.util.Vector;
 
 public class CursorNode extends ReadCursorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public final static int UNSPECIFIED = 0;
 	public final static int READ_ONLY = 1;
 	public final static int UPDATE = 2;

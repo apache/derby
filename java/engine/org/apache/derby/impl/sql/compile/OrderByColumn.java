@@ -30,10 +30,6 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
  * @author ames
  */
 public class OrderByColumn extends OrderedColumn {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private ResultColumn	resultCol;
 	private String			columnName;

@@ -36,10 +36,6 @@ import java.sql.Types;
 public class BooleanTypeCompiler extends BaseTypeCompiler
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Tell whether this type (boolean) can be compared to the given type.
 	 *
 	 * @param otherType	The TypeId of the other type.

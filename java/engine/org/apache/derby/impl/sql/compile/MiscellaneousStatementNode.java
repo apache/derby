@@ -37,10 +37,6 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 public abstract class MiscellaneousStatementNode extends StatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	int activationKind()
 	{

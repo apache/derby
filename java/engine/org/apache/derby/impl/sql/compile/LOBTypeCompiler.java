@@ -38,12 +38,8 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
  */
 
 public class LOBTypeCompiler extends BaseTypeCompiler
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-{ private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
-        /**
+{
+       /**
          * Tell whether this type (BLOB) can be compared to the given type. // 
 		 * BLOBS are not comparable.
          *

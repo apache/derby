@@ -26,12 +26,7 @@ import org.apache.derby.iapi.error.StandardException;
 	It needs to be notified if the schema object changes, so that
 	it can recompile against the new information.
  */
-class BasicDependency implements Dependency { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+class BasicDependency implements Dependency {
 
 	//
 	// Dependency interface

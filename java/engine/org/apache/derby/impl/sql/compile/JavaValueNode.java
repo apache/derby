@@ -52,10 +52,6 @@ import java.util.Vector;
 
 public abstract class JavaValueNode extends QueryTreeNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private boolean	mustCastToPrimitive;
 
 	protected boolean forCallStatement;

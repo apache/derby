@@ -33,10 +33,6 @@ import java.util.Vector;
 
 public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private final static int UNARY_PLUS	= 0;
 	private final static int UNARY_MINUS	= 1;
 	private final static int SQRT = 2;

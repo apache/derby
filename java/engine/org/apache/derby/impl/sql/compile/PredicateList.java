@@ -72,10 +72,6 @@ import java.util.Vector;
 
 public class PredicateList extends QueryTreeNodeVector implements OptimizablePredicateList
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private int	numberOfStartPredicates;
 	private int numberOfStopPredicates;
 	private int numberOfQualifiers;

@@ -61,10 +61,6 @@ import java.sql.Types;
 	@author ames
  */
 public class UserTypeConstantNode extends ConstantNode {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** This value field hides the value in the super-type.  It is here
 	** Because user-type constants work differently from built-in constants.

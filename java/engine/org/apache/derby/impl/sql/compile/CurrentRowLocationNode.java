@@ -46,10 +46,6 @@ import java.util.Vector;
 public class CurrentRowLocationNode extends ValueNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Binding this expression means setting the result DataTypeServices.
 	 * In this case, the result type is always the same.
 	 *

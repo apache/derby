@@ -36,10 +36,6 @@ import java.util.Vector;
  * @author ames
  */
 public class ExtractOperatorNode extends UnaryOperatorNode {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	static private final String fieldName[] = {
 		"YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND"

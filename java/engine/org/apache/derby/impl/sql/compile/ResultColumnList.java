@@ -94,10 +94,6 @@ import java.util.Vector;
 
 public class ResultColumnList extends QueryTreeNodeVector
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Is this the ResultColumnList for an index row? */
 	protected boolean indexRow;
 	protected long	conglomerateId;

@@ -51,10 +51,6 @@ import java.util.Vector;
  */
 public class NonStaticMethodCallNode extends MethodCallNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** The receiver for a non-static method call is an object, represented
 	** by a ValueNode.

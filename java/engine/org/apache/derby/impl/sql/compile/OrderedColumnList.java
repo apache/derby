@@ -24,10 +24,6 @@ import java.util.Hashtable;
 public abstract class OrderedColumnList extends QueryTreeNodeVector
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Get an array of ColumnOrderings to pass to the store
 	 */
 	public IndexColumnOrder[] getColumnOrdering()

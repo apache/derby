@@ -35,10 +35,6 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
  */
 public class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     public HashLeftOuterJoinResultSet(
 						NoPutResultSet leftResultSet,
 						int leftNumCols,

@@ -47,10 +47,6 @@ import java.util.Properties;
 
 public class Level2OptimizerImpl extends OptimizerImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private LanguageConnectionContext lcc;
 
 	Level2OptimizerImpl(OptimizableList optimizableList, 

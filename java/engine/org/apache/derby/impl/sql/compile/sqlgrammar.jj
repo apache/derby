@@ -144,11 +144,6 @@ import java.lang.Character;
 
 public class SQLParser
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001;
-
 	private static final String[] SAVEPOINT_CLAUSE_NAMES = {"UNIQUE", "ON ROLLBACK RETAIN LOCKS", "ON ROLLBACK RETAIN CURSORS"};
 	private static final String[] PROCEDURE_CLAUSE_NAMES =
 		{null, "SPECIFIC", "RESULT SET", "LANGUAGE", "EXTERNAL NAME", "PARAMETER STYLE", "SQL", "ON NULL INPUT"};

@@ -31,10 +31,6 @@ import java.util.Vector;
 public final class UntypedNullConstantNode extends ConstantNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Constructor for an UntypedNullConstantNode.  Untyped constants
 	 * contain no state (not too surprising).
 	 */

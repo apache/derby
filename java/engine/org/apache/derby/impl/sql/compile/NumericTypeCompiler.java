@@ -44,10 +44,6 @@ import java.math.BigDecimal;
 
 public final class NumericTypeCompiler extends BaseTypeCompiler
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	/** @see TypeCompiler#interfaceName */
 	public String interfaceName()
 	{

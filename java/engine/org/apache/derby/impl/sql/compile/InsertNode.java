@@ -91,10 +91,6 @@ import org.apache.derby.iapi.util.ReuseFactory;
  */
 public final class InsertNode extends DMLModStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public		ResultColumnList	targetColumnList;
 	public 		boolean				deferred;
 	public		ValueNode			checkConstraints;

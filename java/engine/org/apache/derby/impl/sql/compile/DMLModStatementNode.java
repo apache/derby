@@ -81,10 +81,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 public abstract class DMLModStatementNode extends DMLStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 //	protected DataDictionary	dataDictionary;
 	protected FromVTI			targetVTI;
 	protected TableName			targetTableName;

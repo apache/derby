@@ -32,10 +32,6 @@ import java.sql.ResultSet;
  */
 abstract class DMLVTIResultSet extends DMLWriteResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	// passed in at construction time
 

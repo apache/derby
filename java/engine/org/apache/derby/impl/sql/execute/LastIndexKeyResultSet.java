@@ -47,10 +47,6 @@ import java.util.Properties;
  */
 public class LastIndexKeyResultSet extends NoPutResultSetImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected	ExecRow		candidate;
 
 	// set in constructor and not altered during

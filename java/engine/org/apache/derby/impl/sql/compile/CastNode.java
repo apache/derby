@@ -85,10 +85,6 @@ import java.util.Vector;
 
 public class CastNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	DataTypeDescriptor	castTarget;
 	ValueNode			castOperand;
 	int					targetCharType;

@@ -56,10 +56,6 @@ import java.util.Vector;
  */
 public class CallStatementNode extends DMLStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private String		methodName;
 	private ValueNode	methodCall;
 

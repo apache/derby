@@ -25,10 +25,6 @@ import java.util.Vector;
 public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Initializer for a UnaryLogicalOperatorNode
 	 *
 	 * @param operand	The operand of the operator

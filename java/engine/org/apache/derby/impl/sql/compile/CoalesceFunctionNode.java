@@ -90,10 +90,6 @@ import java.util.Vector;
 
 public class CoalesceFunctionNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 	String	functionName; //Are we here because of COALESCE function or VALUE function
 	ValueNodeList	argumentsList; //this is the list of arguments to the function. We are interested in the first not-null argument
 	ValueNode firstNonParameterNode;//The generated method will generate code to call coalesce on this non-parameter argument

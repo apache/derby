@@ -66,10 +66,6 @@ import java.util.Vector;
 
 public class JoinNode extends TableOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Join semantics */
 	public static final int INNERJOIN = 1;
 	public static final int CROSSJOIN = 2;

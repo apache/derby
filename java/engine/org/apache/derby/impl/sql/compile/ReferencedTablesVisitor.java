@@ -25,10 +25,6 @@ import org.apache.derby.iapi.util.JBitSet;
  */
 public class ReferencedTablesVisitor implements Visitor 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private JBitSet tableMap;
 
 	public ReferencedTablesVisitor(JBitSet tableMap)

@@ -24,10 +24,6 @@ import org.apache.derby.iapi.sql.StatementType;
 
 public abstract class DropStatementNode extends DDLStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	//public static final int RESTRICT = StatementType.RESTRICT;
 	//public static final int CASCADE = StatementType.CASCADE;
 	//public static final int DEFAULT = StatementType.DEFAULT;

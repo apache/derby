@@ -21,10 +21,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public class ParserImpl implements Parser
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** We will use the following constant to pass in to
 	** our CharStream.  It is the size of the internal

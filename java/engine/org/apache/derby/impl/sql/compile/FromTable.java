@@ -59,10 +59,6 @@ import java.util.Vector;
  */
 public abstract class FromTable extends ResultSetNode implements Optimizable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	Properties		tableProperties;
 	String		correlationName;
 	TableName	corrTableName;

@@ -18,11 +18,6 @@ import org.apache.derby.vti.DeferModification;
  */
 class DefaultVTIModDeferPolicy implements DeferModification
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
     private final String targetVTIClassName;
     private final boolean VTIResultSetIsSensitive;
 

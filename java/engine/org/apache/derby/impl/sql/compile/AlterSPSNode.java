@@ -29,10 +29,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  */
 public class AlterSPSNode extends DDLStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private ResultSetNode		usingClause;
 	private String				usingText;
 	private boolean				invalidOnly;

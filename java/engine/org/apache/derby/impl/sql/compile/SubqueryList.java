@@ -26,10 +26,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public class SubqueryList extends QueryTreeNodeVector
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for

@@ -70,10 +70,6 @@ import java.util.Properties;
 public class ProjectRestrictNode extends SingleChildResultSetNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * The ValueNode for the restriction to be evaluated here.
 	 */
 	public ValueNode	restriction;

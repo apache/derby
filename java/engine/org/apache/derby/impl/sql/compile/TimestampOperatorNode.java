@@ -33,10 +33,6 @@ import java.util.Vector;
 
 public class TimestampOperatorNode extends BinaryOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
     /**
      * Initailizer for a TimestampOperatorNode.

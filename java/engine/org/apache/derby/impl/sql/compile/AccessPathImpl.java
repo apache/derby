@@ -26,10 +26,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 class AccessPathImpl implements AccessPath
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	ConglomerateDescriptor	cd = null;
 	private CostEstimate	costEstimate = null;
 	boolean					coveringIndexScan = false;

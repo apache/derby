@@ -28,10 +28,6 @@ import java.sql.Types;
 public final class LOBConstantNode extends ConstantNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
-	/**
 	 * Initializer for a LOBConstantNode.
 	 *
 	 * @param arg1	The TypeId for the type of the node, or a string?

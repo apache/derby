@@ -41,10 +41,6 @@ import java.util.Vector;
 public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Initializer for a BinaryArithmeticOperatorNode
 	 *
 	 * @param leftOperand	The left operand

@@ -26,10 +26,6 @@ import java.util.Properties;
 class GenericAuthorizer
 implements Authorizer
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	//
 	//Enumerations for user access levels.
 	private static final int NO_ACCESS = 0;

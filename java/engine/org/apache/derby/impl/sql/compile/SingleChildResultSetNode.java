@@ -50,10 +50,6 @@ import java.util.Vector;
 abstract class SingleChildResultSetNode extends FromTable
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * ResultSetNode under the SingleChildResultSetNode
 	 */
 	ResultSetNode	childResult;

@@ -23,10 +23,6 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public class ReplaceAggregatesWithCRVisitor implements Visitor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private ResultColumnList rcl;
 	private Class skipOverClass;
 	private int tableNumber;

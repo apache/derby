@@ -44,10 +44,6 @@ import java.util.Enumeration;
  */
 public class DeleteCascadeResultSet extends DeleteResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
 
 	public ResultSet[] dependentResultSets;

@@ -82,10 +82,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 
 public class DeleteNode extends DMLModStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Column name for the RowLocation column in the ResultSet */
 	public static final String COLUMNNAME = "###RowLocationToDelete";
 

@@ -49,10 +49,6 @@ import java.util.Properties;
 
 public abstract class TableOperatorNode extends FromTable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	boolean			nestedInParens;
 	ResultSetNode	leftResultSet;
 	ResultSetNode	rightResultSet;

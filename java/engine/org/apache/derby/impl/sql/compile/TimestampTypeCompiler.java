@@ -28,10 +28,6 @@ import org.apache.derby.iapi.reference.ClassName;
 
 public class TimestampTypeCompiler extends BaseTypeCompiler
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/* TypeCompiler methods */
 
 	/**

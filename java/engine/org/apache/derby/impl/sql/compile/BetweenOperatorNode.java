@@ -37,10 +37,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 public class BetweenOperatorNode extends BinaryListOperatorNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Initializer for a BetweenOperatorNode
 	 *
 	 * @param leftOperand		The left operand of the node

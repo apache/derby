@@ -40,10 +40,6 @@ import java.sql.Statement;
  */
 class GenericAggregator 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	AggregatorInfo			aggInfo;
 	int						aggregatorColumnId;
 	private int						inputColumnId;

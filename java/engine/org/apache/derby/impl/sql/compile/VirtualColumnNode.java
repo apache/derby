@@ -32,10 +32,6 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 public class VirtualColumnNode extends ValueNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* A VirtualColumnNode contains a pointer to the immediate child result
 	 * that is materializing the virtual column and the ResultColumn
 	 * that represents that materialization.

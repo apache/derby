@@ -28,10 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public class HasNodeVisitor implements Visitor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private boolean hasNode;
 	private Class 	nodeClass;
 	private Class	skipOverClass;

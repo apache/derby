@@ -36,10 +36,6 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 abstract class ReadCursorNode extends DMLStatementNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Bind this ReadCursorNode.  This means looking up tables and columns and
 	 * getting their types, and figuring out the result types of all
 	 * expressions.

@@ -44,10 +44,6 @@ import java.sql.SQLException;
 interface AggregateDefinition
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Get the aggregator that performs the aggregation on the
 	 * input datatype at execution time.  If the input type can be handled, 
 	 * return a type descriptor with the resultant type information and

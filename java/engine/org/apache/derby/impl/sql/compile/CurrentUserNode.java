@@ -46,10 +46,6 @@ import java.util.Vector;
  */
 public class CurrentUserNode extends ValueNode 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	public static final int USER = 0;
 	public static final int CURRENT_USER = 1;

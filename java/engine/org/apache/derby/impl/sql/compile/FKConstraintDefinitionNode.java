@@ -34,10 +34,6 @@ import org.apache.derby.iapi.sql.dictionary.DDUtils;
 
 public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	TableName 			refTableName;
 	ResultColumnList	refRcl;
 	SchemaDescriptor	refTableSd;

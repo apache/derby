@@ -109,10 +109,6 @@ import java.util.Vector;
 
 public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	boolean addedEquals;
 	String escape;
 

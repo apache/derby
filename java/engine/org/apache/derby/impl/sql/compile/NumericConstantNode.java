@@ -33,10 +33,6 @@ import java.math.BigDecimal;
 public final class NumericConstantNode extends ConstantNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Initializer for a typed null node
 	 *
 	 * @param arg1	The TypeId for the type of node

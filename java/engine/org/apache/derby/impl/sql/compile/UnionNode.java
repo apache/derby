@@ -64,10 +64,6 @@ import java.util.Properties;
 public class UnionNode extends TableOperatorNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	** Tells whether to eliminate duplicate rows.  all == TRUE means do
 	** not eliminate duplicates, all == FALSE means eliminate duplicates.
 	*/

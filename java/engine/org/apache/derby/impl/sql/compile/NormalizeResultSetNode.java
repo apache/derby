@@ -51,10 +51,6 @@ import java.util.Properties;
 public class NormalizeResultSetNode extends SingleChildResultSetNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * this indicates if the normalize is being performed for an Update
 	 * statement or not. The row passed to update also has
 	 * before values of the columns being updated-- we need not 

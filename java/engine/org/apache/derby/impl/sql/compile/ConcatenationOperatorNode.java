@@ -49,10 +49,6 @@ import java.util.Vector;
 public class ConcatenationOperatorNode extends BinaryOperatorNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Initializer for a ConcatenationOperatorNode
 	 *
 	 * @param leftOperand	The left operand of the concatenation

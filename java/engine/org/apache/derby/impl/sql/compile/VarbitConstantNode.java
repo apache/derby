@@ -27,10 +27,6 @@ import java.sql.Types;
 public final class VarbitConstantNode extends BitConstantNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Initializer for a VarbitConstantNode.
 	 *
 	 * @param arg1  The TypeId for the type of the node

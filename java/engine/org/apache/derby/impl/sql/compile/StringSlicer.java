@@ -20,10 +20,6 @@ import	java.lang.Math;
  */
 public class StringSlicer
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private	char[]		charArray;
 	private	int			charLength;
 

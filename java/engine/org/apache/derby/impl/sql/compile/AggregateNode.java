@@ -54,10 +54,6 @@ import java.util.Vector;
 
 public class AggregateNode extends UnaryOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private boolean					distinct;
 
 	private AggregateDefinition		uad;

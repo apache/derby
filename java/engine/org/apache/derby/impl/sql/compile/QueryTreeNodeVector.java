@@ -29,10 +29,6 @@ import java.util.Vector;
 
 abstract class QueryTreeNodeVector extends QueryTreeNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private Vector			v = new Vector();
 
 	public final int size()

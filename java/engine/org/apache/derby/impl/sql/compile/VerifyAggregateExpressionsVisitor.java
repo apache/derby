@@ -31,10 +31,6 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public class VerifyAggregateExpressionsVisitor implements Visitor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private GroupByList groupByList;
 
 	public VerifyAggregateExpressionsVisitor(GroupByList groupByList)

@@ -21,10 +21,6 @@ package org.apache.derby.impl.sql.compile;
 
 public final class UCode_CharStream implements CharStream
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
   // The next two lines are added to support ability to get the input
   // between two tokens.
   int charCnt;

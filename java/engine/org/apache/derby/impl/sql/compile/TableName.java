@@ -31,10 +31,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 public class TableName extends QueryTreeNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Both schemaName and tableName can be null, however, if 
 	** tableName is null then schemaName must also be null.
 	*/

@@ -46,10 +46,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 public class LockTableNode extends MiscellaneousStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private TableName	tableName;
 	private boolean		exclusiveMode;
 	private long		conglomerateNumber;

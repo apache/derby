@@ -40,10 +40,6 @@ import org.apache.derby.catalog.UUID;
 
 public class ModifyColumnNode extends ColumnDefinitionNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	int		columnPosition = -1;
 	UUID	oldDefaultUUID;
 

@@ -58,10 +58,6 @@ import java.util.Properties;
 
 abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/********************************************************
 	**

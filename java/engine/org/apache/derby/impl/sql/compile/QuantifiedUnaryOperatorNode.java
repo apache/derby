@@ -33,10 +33,6 @@ import java.util.Vector;
 
 public class QuantifiedUnaryOperatorNode extends UnaryOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** For NOT EXISTS (SELECT * ...), the parser will generate a NOT
 	** node and an EXISTS node.  Later, normalization will change this

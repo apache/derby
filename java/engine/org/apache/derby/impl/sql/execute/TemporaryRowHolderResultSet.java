@@ -48,10 +48,6 @@ import java.sql.Timestamp;
  */
 public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cloneable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private ExecRow[] 				rowArray;
 	private int						numRowsOut;
 	private ScanController			scan;

@@ -48,10 +48,6 @@ import java.util.Enumeration;
  */
 public class NewInvocationNode extends MethodCallNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// Whether or not to do a single instantiation
 	private boolean singleInstantiation = false;
 

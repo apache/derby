@@ -61,12 +61,7 @@ import java.util.Properties;
  *
  */
 public class CompilerContextImpl extends ContextImpl
-	implements CompilerContext { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+	implements CompilerContext {
 
 	//
 	// Context interface       

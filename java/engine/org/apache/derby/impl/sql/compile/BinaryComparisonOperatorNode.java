@@ -38,10 +38,6 @@ import java.sql.Types;
 
 public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// Use between selectivity?
 	private boolean forQueryRewrite;
 	private boolean betweenSelectivity;

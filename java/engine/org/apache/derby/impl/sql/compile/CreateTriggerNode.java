@@ -58,10 +58,6 @@ import java.util.Vector;
 
 public class CreateTriggerNode extends CreateStatementNode
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private	TableName			triggerName;
 	private	TableName			tableName;
 	private	int					triggerEventMask;

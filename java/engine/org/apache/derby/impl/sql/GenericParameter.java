@@ -47,10 +47,6 @@ import java.lang.reflect.Array;
  */
 final class GenericParameter
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	// These defaults match the Network Server/ JCC max precision and
 	// The JCC "guessed" scale. They are used as the defaults for 

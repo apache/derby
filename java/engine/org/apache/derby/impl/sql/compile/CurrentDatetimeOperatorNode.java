@@ -40,10 +40,6 @@ import java.util.Vector;
  * @author ames
  */
 public class CurrentDatetimeOperatorNode extends ValueNode {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	public static final int CURRENT_DATE = 0;
 	public static final int CURRENT_TIME = 1;

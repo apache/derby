@@ -65,10 +65,6 @@ import java.util.Properties;
  */
 public class GenericResultSetFactory implements ResultSetFactory 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	//
 	// ResultSetFactory interface
 	//

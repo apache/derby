@@ -41,12 +41,7 @@ import java.util.Properties;
  */
 
 public class OptimizerFactoryImpl
-	implements ModuleControl, OptimizerFactory { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+	implements ModuleControl, OptimizerFactory {
 
 	protected String optimizerId = null;
 	protected boolean ruleBasedOptimization = false;

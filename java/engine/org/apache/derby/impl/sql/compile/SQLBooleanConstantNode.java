@@ -28,10 +28,6 @@ import java.sql.Types;
 public class SQLBooleanConstantNode extends ConstantNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Initializer for a SQLBooleanConstantNode.
 	 *
 	 * @param newValue	A String containing the value of the constant: true, false, unknown

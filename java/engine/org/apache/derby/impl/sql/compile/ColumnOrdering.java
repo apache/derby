@@ -17,12 +17,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.Vector;
 
-class ColumnOrdering { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+class ColumnOrdering {
 
 	/* See RowOrdering for possible values */
 	int	myDirection;

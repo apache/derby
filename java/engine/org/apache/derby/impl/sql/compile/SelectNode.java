@@ -51,10 +51,6 @@ import java.util.Vector;
 public class SelectNode extends ResultSetNode
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * List of tables in the FROM clause of this SELECT
 	 */
 	FromList	fromList;
