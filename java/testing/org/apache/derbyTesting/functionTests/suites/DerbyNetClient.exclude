@@ -6,3 +6,4 @@ jdbcapi/resultsetStream.java
 lang/scrollCursors2.java
 jdbcapi/batchUpdate.java
 jdbcapi/statementJdbc20.java
+jdbcapi/setTransactionIsolation.java
