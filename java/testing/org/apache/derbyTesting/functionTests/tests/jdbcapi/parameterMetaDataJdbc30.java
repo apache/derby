@@ -127,22 +127,26 @@ public class parameterMetaDataJdbc30 {
       //internally. But we should only show 2 user visible parameters through
       //getParameterMetaData().
       System.out.println("Bug 4533 - hide associated parameters");
-	  // this test has been modified to not create a statement and 
-      // so does not actually test bug 4533 anymore.
-      // however, still an interesting test scenario.
-      // orig: s.execute("create statement systab as select * from sys.systables where " +
-      //       " tablename like ? and tableID like ?");
-      //       ps = con.prepareStatement("execute statement systab");
-      ps = con.prepareStatement("select * from sys.systables where tablename like ? and tableId like ?");
+      ps = con.prepareStatement("select * from sys.systables where " +
+             " tablename like ? and tableID like ?");
       ps.setString (1, "SYS%");
       ps.setString (2, "8000001%");
-
       paramMetaData = ps.getParameterMetaData();
       System.out.println("parameters count for prepared statement is " + paramMetaData.getParameterCount());
       dumpParameterMetaData(paramMetaData);
       ps.execute();
 
-      // here too, the test no longer tests 4552, but kept as an interesting test scenario 
+      // variation, and also test out empty string in the escape (jira 44). 
+      System.out.println("variation 1, testing jira 44");
+      ps = con.prepareStatement("select * from sys.systables where tablename like ? escape ?");
+      ps.setString (1, "SYS%");
+      ps.setString (2, "");
+      paramMetaData = ps.getParameterMetaData();
+      System.out.println("parameters count for prepared statement is " + paramMetaData.getParameterCount());
+      dumpParameterMetaData(paramMetaData);
+      ps.execute();
+
+      // the test no longer tests 4552, but kept as an interesting test scenario 
       // bug 4552 - no parameters would be returned for execute statement using
       // System.out.println("Bug 4552 - no parameters would be returned for execute statement using");
       // orig: ps = con.prepareStatement("execute statement systab using values('SYS%','8000001%')");

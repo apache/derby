@@ -42,10 +42,6 @@ public class forbitdata
 			if (framework != null && framework.toUpperCase().equals("DB2JNET"))
 				isDB2jNet = true;
 
-//			Class.forName("com.ibm.db2.jcc.DB2Driver").newInstance();
-
-//			Connection conn = DriverManager.getConnection("jdbc:db2://debrun.ibmus2.ibm.com:50000/tours", "db2admin", "ejbcache");
-
 			runTests( conn);
 		} catch (Throwable t) {
 			System.out.println("FAIL " + t);

@@ -122,6 +122,26 @@ parameter getParameterType 1
 parameter getParameterTypeName CHAR
 parameter getParameterClassName java.lang.String
 parameter getParameterMode PARAMETER_MODE_IN
+variation 1, testing jira 44
+parameters count for prepared statement is 2
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 128
+parameter getScale 0
+parameter getParameterType 12
+parameter getParameterTypeName VARCHAR
+parameter getParameterClassName java.lang.String
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 128
+parameter getScale 0
+parameter getParameterType 12
+parameter getParameterTypeName VARCHAR
+parameter getParameterClassName java.lang.String
+parameter getParameterMode PARAMETER_MODE_IN
 parameters count for prepared statement is 0
 Bug 4654 - fill in where clause parameter type info
 parameters count for prepared statement is 1
