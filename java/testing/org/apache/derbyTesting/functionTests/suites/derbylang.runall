@@ -60,6 +60,7 @@ lang/forupdate.sql
 lang/functions.sql
 lang/groupBy.sql
 lang/holdCursorIJ.sql
+lang/holdCursorJavaReflection.java
 lang/identifier.sql
 lang/implicitConversions.sql
 lang/inbetween.sql
