@@ -483,7 +483,7 @@ public final class SQLBoolean
 
 	}
 
-	public void setBigDecimal(Number bigDecimal)
+	public void setBigDecimal(Number bigDecimal) throws StandardException
 	{
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT( ! immutable,
@@ -495,7 +495,9 @@ public final class SQLBoolean
 		}
 		else
 		{
-			value = org.apache.derby.iapi.types.SQLDecimal.ZERO.compareTo(bigDecimal) != 0;
+			DataValueDescriptor tempDecimal = NumberDataType.ZERO_DECIMAL.getNewNull();
+			tempDecimal.setBigDecimal(bigDecimal);
+			value = NumberDataType.ZERO_DECIMAL.compare(tempDecimal) != 0;
 			isnull = false;
 		}
 

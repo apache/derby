@@ -20,6 +20,8 @@
 
 package org.apache.derby.iapi.types;
 
+import java.util.Properties;
+
 import org.apache.derby.iapi.error.StandardException;
 
 /**
@@ -34,6 +36,14 @@ public class J2SEDataValueFactory extends DataValueFactoryImpl
 	public J2SEDataValueFactory() {
 	}
 
+   	public void boot(boolean create, Properties properties) throws StandardException {
+   		
+   		NumberDataType.MINLONG_MINUS_ONE = SQLDecimal.MINLONG_MINUS_ONE;
+   		NumberDataType.MAXLONG_PLUS_ONE = SQLDecimal.MAXLONG_PLUS_ONE;
+
+    	super.boot(create, properties);
+   	}
+	
 	public NumberDataValue getDecimalDataValue(Long value,
 			NumberDataValue previous) throws StandardException {
 		if (previous == null)

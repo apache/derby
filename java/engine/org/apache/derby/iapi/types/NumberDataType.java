@@ -43,7 +43,19 @@ import org.apache.derby.iapi.types.*;
 public abstract class NumberDataType extends DataType 
 									 implements NumberDataValue
 {
-
+	/**
+	 * Set by the booting DataValueFactory implementation.
+	 */
+	static DataValueDescriptor ZERO_DECIMAL;
+	
+	/**
+	 * Set by the booting DataValueFactory implementation.
+	 */
+	static Comparable MINLONG_MINUS_ONE;
+	/**
+	 * Set by the booting DataValueFactory implementation.
+	 */
+	static Comparable MAXLONG_PLUS_ONE;
 
     /**
      * Numbers check for isNegative first and negate it if negative.
@@ -386,8 +398,8 @@ public abstract class NumberDataType extends DataType
 
 		// See comment in SQLDecimal.getLong()
 
-		if (   (bdc.compareTo(SQLDecimal.MINLONG_MINUS_ONE) == 1)
-			&& (bdc.compareTo(SQLDecimal.MAXLONG_PLUS_ONE) == -1)) {
+		if (   (bdc.compareTo(NumberDataType.MINLONG_MINUS_ONE) == 1)
+			&& (bdc.compareTo(NumberDataType.MAXLONG_PLUS_ONE) == -1)) {
 
 			setValue(bigDecimal.longValue());
 		} else {

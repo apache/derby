@@ -67,8 +67,8 @@ import java.sql.Types;
  */
 public final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
 {
-	static final BigDecimal ZERO = BigDecimal.valueOf(0L);
-	static final BigDecimal ONE = BigDecimal.valueOf(1L);
+	private static final BigDecimal ZERO = BigDecimal.valueOf(0L);
+	private static final BigDecimal ONE = BigDecimal.valueOf(1L);
 	static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);
 	static final BigDecimal MINLONG_MINUS_ONE = BigDecimal.valueOf(Long.MIN_VALUE).subtract(ONE);
 
