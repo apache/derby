@@ -54,7 +54,7 @@ public class SysInfoLog
                 if ( (jvmName == null) || (jvmName.length()==0) )
                     jvmName = "jdk13";
                 else if (jvmName.startsWith("jdk13"))
-                    jvmName = "jdk31";
+                    jvmName = "jdk13";
 
 				javavm = jvm.getJvm(jvmName);
                 if (javaCmd != null)
