@@ -1290,11 +1290,11 @@ public final class TypeId implements Formatable
          */
         public String getResultSetMetaDataTypeName()
         {
-            if (BLOB_ID == this)
+            if (BLOB_ID.equals(this))
                 return "java.sql.Blob";
-            if (CLOB_ID == this)
+            if (CLOB_ID.equals(this))
                 return "java.sql.Clob";
-            if (NCLOB_ID == this)
+            if (NCLOB_ID.equals(this))
                 return "java.sql.Clob";
             return getCorrespondingJavaTypeName();
         }
