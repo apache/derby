@@ -148,8 +148,6 @@ import org.apache.derby.iapi.util.StringUtil;
 import java.sql.Types;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.Enumeration;
-import java.math.BigDecimal;
 import java.lang.Character;
 
 public class SQLParser
@@ -561,18 +559,14 @@ public class SQLParser
 	 */
 	ValueNode getNumericNode(String num) throws StandardException
 	{
-		BigDecimal bigDecimalValue = null;
-		Integer			intValue;
-		Long		longValue;
 		ContextManager cm = getContextManager();
 
 		// first, see if it might be an integer
 		try
 		{
-			intValue = new Integer(num);
 			return (ValueNode) nodeFactory.getNode(
 										C_NodeTypes.INT_CONSTANT_NODE,
-										intValue,
+										new Integer(num),
 										cm);
 		}
 		catch (NumberFormatException nfe)
@@ -583,10 +577,9 @@ public class SQLParser
 		// next, see if it might be a long
 		try
 		{
-			longValue = new Long(num);
 			return (ValueNode) nodeFactory.getNode(
 										C_NodeTypes.LONGINT_CONSTANT_NODE,
-										longValue,
+										new Long(num),
 										cm);
 		}
 		catch (NumberFormatException nfe)
@@ -594,23 +587,9 @@ public class SQLParser
 			// we catch because we want to continue on below
 		}
 
-		// check whether we can convert to a BigDecimal
-		try
-		{
-			bigDecimalValue = new BigDecimal(num);
-		}
-		catch (NumberFormatException nfe)
-		{
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.THROWASSERT(
-					"String \"" + num + "\" cannot be converted to a BigDecimal: " + nfe);
-			}
-		}
-
 		return (ValueNode) nodeFactory.getNode(
 									C_NodeTypes.DECIMAL_CONSTANT_NODE,
-									bigDecimalValue,
+									num,
 									cm);
 	}
 	/**

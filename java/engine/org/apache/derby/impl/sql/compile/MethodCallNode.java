@@ -995,7 +995,7 @@ public abstract class MethodCallNode extends JavaValueNode
 
 							TypeId	ctid = mapToTypeID( jsqlType );
 
-							if (ctid.isNumericTypeId() || ctid.isBooleanTypeId())
+							if ((ctid.isNumericTypeId() && !ctid.isDecimalTypeId()) || ctid.isBooleanTypeId())
 							{
 								TypeCompiler tc = getTypeCompiler(ctid);
 								primParmTypeNames[i] = tc.getCorrespondingPrimitiveTypeName();

@@ -258,6 +258,20 @@ public interface NumberDataValue extends DataValueDescriptor
 	 *
 	 */
 	public void setValue(Boolean theValue) throws StandardException;
+
+	/**
+		Return the precision of this specific DECIMAL value.
+		If the value does not represent a SQL DECIMAL then
+		the return is undefined.
+	*/
+	public int getDecimalValuePrecision();
+
+	/**
+		Return the scale of this specific DECIMAL value.
+		If the value does not represent a SQL DECIMAL then
+		the return is undefined.
+	*/
+	public int getDecimalValueScale();
 }
 
 

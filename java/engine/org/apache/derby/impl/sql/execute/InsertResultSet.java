@@ -98,7 +98,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
-//import java.math.BigDecimal;
 
 /**
  * Insert the rows from the source into the specified

@@ -32,13 +32,13 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeUtilities;
+import org.apache.derby.iapi.types.NumberDataValue;
 
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.Types;
-import java.math.BigDecimal;
 
 public final class NumericConstantNode extends ConstantNode
 {
@@ -61,7 +61,6 @@ public final class NumericConstantNode extends ConstantNode
 		boolean valueInP; // value in Predicate-- if TRUE a value was passed in
 		TypeId  typeId = null;
 		int typeid = 0;
-		Object val = null;	
 
 		if (arg1 instanceof TypeId)
 		{
@@ -74,7 +73,6 @@ public final class NumericConstantNode extends ConstantNode
 		else	
 		{
 			isNullable = Boolean.FALSE;
-			val = arg1;
 			valueInP = true;
 		}
 
@@ -88,8 +86,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.SMALLINT_MAXWIDTH;
 				typeid = Types.TINYINT;
-				setValue(getDataValueFactory().getDataValue(
-														((Byte)val).byteValue()));
+				setValue(getDataValueFactory().getDataValue((Byte) arg1));
 			} 
 			break;
 
@@ -100,9 +97,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.INT_MAXWIDTH;
 				typeid = Types.INTEGER;
-				setValue(
-					getDataValueFactory().getDataValue(
-												((Integer) val).intValue()));
+				setValue(getDataValueFactory().getDataValue((Integer) arg1));
 			}
 			break;
 
@@ -113,9 +108,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.SMALLINT_MAXWIDTH;
 				typeid = Types.SMALLINT;
-				setValue(
-					getDataValueFactory().getDataValue(
-												((Short) val).shortValue()));
+				setValue(getDataValueFactory().getDataValue((Short) arg1));
 			}
 			break;
 
@@ -126,23 +119,24 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.LONGINT_MAXWIDTH;
 				typeid = Types.BIGINT;
-				setValue(getDataValueFactory().getDataValue(((Long) arg1).longValue()));
+				setValue(getDataValueFactory().getDataValue((Long) arg1));
 			}
 			break;
 			
 		case C_NodeTypes.DECIMAL_CONSTANT_NODE:
 			if (valueInP)
 			{
-				BigDecimal dVal = (BigDecimal)val;
+
+				NumberDataValue constantDecimal = getDataValueFactory().getDecimalDataValue((String) arg1);
 
 				typeid = Types.DECIMAL;
-				precision = org.apache.derby.iapi.types.SQLDecimal.getPrecision(dVal);
-				scal = (dVal == null) ? 0 : dVal.scale();
+				precision = constantDecimal.getDecimalValuePrecision();
+				scal = constantDecimal.getDecimalValueScale();
 				/* be consistent with our convention on maxwidth, see also
 				 * exactNumericType(), otherwise we get format problem, b 3923
 				 */
-				maxwidth = DataTypeUtilities.computeMaxWidth( precision, scal);
-				setValue(getDataValueFactory().getDataValue(dVal));
+				maxwidth = DataTypeUtilities.computeMaxWidth(precision, scal);
+				setValue(constantDecimal);
 			}
 			else
 			{
@@ -159,8 +153,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.DOUBLE_MAXWIDTH;
 				typeid = Types.DOUBLE;
-				setValue(getDataValueFactory().getDataValue(
-											((Double) arg1).doubleValue()));
+				setValue(getDataValueFactory().getDataValue((Double) arg1));
 			}
 			break;
 
@@ -172,8 +165,7 @@ public final class NumericConstantNode extends ConstantNode
 				maxwidth = TypeId.REAL_MAXWIDTH;
 				typeid = Types.REAL;
 				setValue(
-					getDataValueFactory().getDataValue(
-											((Float) arg1).floatValue()));
+					getDataValueFactory().getDataValue((Float) arg1));
 			}
 			break;
 			
@@ -196,24 +188,6 @@ public final class NumericConstantNode extends ConstantNode
 				   ReuseFactory.getInteger(scal), 
 				   isNullable, 
 				   ReuseFactory.getInteger(maxwidth));
-	}
-	
-	long	getLong() throws StandardException
-	{
-		return value.getLong();
-	}
-
-	/**
-	 * Return the value from this DoubleConstantNode
-	 *
-	 * @return	The value of this DoubleConstantNode.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-
-	double	getDouble() throws StandardException
-	{
-		return value.getDouble();
 	}
 
 	/**
@@ -265,13 +239,13 @@ public final class NumericConstantNode extends ConstantNode
 			mb.pushNewComplete(1);
 			break;
 		case C_NodeTypes.DOUBLE_CONSTANT_NODE:
-			mb.push(getDouble());
+			mb.push(value.getDouble());
 			break;
 		case C_NodeTypes.FLOAT_CONSTANT_NODE:
 			mb.push(value.getFloat());
 			break;
 		case C_NodeTypes.LONGINT_CONSTANT_NODE:
-			mb.push(getLong());
+			mb.push(value.getLong());
 			break;
 		default:
 			if (SanityManager.DEBUG)

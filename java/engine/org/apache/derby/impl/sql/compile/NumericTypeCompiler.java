@@ -68,9 +68,6 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		int formatId = getStoredFormatIdFromTypeId();
 		switch (formatId)
 		{
-			case StoredFormatIds.DECIMAL_TYPE_ID:
-				return "double";
-
 			case StoredFormatIds.DOUBLE_TYPE_ID:
 				return "double";
 
@@ -89,6 +86,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.TINYINT_TYPE_ID:
 				return "byte";
 
+			case StoredFormatIds.DECIMAL_TYPE_ID:
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -111,9 +109,6 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		int formatId = getStoredFormatIdFromTypeId();
 		switch (formatId)
 		{
-			case StoredFormatIds.DECIMAL_TYPE_ID:
-				return "getDouble";
-
 			case StoredFormatIds.DOUBLE_TYPE_ID:
 				return "getDouble";
 
@@ -132,6 +127,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.TINYINT_TYPE_ID:
 				return "getByte";
 
+			case StoredFormatIds.DECIMAL_TYPE_ID:
 			default:
 				if (SanityManager.DEBUG)
 				{

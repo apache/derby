@@ -1426,7 +1426,7 @@ ERROR 22003: The resulting value is outside the range for the data type INTEGER.
 ij> values cast('99999' as smallint);
 ERROR 22003: The resulting value is outside the range for the data type SHORT.
 ij> values cast(99999 as smallint);
-ERROR 22003: The resulting value is outside the range for the data type SHORT.
+ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
 ij> values cast(cast(99 as int) as char);
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '99' to length 1.
 ij> values cast(cast(-9 as int) as char);

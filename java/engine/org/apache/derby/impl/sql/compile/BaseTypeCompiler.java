@@ -53,7 +53,7 @@ import java.sql.Types;
  * @author Jeff
  */
 
-public abstract class BaseTypeCompiler implements TypeCompiler
+abstract class BaseTypeCompiler implements TypeCompiler
 {
 	TypeId correspondingTypeId;
 

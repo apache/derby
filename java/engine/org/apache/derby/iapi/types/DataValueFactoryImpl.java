@@ -22,7 +22,6 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.BitDataValue;

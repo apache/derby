@@ -298,7 +298,26 @@ public abstract class NumberDataType extends DataType
 			setValue(theValue.booleanValue());
 	}
 
-    
+	/**
+		Return the precision of this specific DECIMAL value.
+		If the value does not represent a SQL DECIMAL then
+		the return is undefined.
+	*/
+	public int getDecimalValuePrecision()
+	{
+		return -1;
+	}
+
+	/**
+		Return the scale of this specific DECIMAL value.
+		If the value does not represent a SQL DECIMAL then
+		the return is undefined.
+	*/
+	public int getDecimalValueScale()
+ 	{
+		return -1;
+	}
+   
 	protected final boolean objectNull(Object o) 
 	{
 		if (o == null) 

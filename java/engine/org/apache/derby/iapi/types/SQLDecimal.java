@@ -65,12 +65,12 @@ import java.sql.SQLException;
  *
  * @author jamie
  */
-public final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
+final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
 {
-	public static final BigDecimal ZERO = BigDecimal.valueOf(0L);
-	public static final BigDecimal ONE = BigDecimal.valueOf(1L);
-	public static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);
-	public static final BigDecimal MINLONG_MINUS_ONE = BigDecimal.valueOf(Long.MIN_VALUE).subtract(ONE);
+	static final BigDecimal ZERO = BigDecimal.valueOf(0L);
+	static final BigDecimal ONE = BigDecimal.valueOf(1L);
+	static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);
+	static final BigDecimal MINLONG_MINUS_ONE = BigDecimal.valueOf(Long.MIN_VALUE).subtract(ONE);
 
 
 
@@ -385,7 +385,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 	public int	getLength()
 	{
-		return getPrecision();
+		return getDecimalValuePrecision();
 	}
 
 	// this is for DataType's error generator
@@ -1040,7 +1040,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		return this;
 	}
 
-	public int getPrecision()
+	public int getDecimalValuePrecision()
 	{
 		return getPrecision(getBigDecimal());
 	}
@@ -1050,7 +1050,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 *
 	 * @return the precision
 	 */	
-	public static int getPrecision(BigDecimal decimalValue)
+	private static int getPrecision(BigDecimal decimalValue)
 	{
 		if ((decimalValue == null) ||
 			 decimalValue.equals(ZERO))
@@ -1061,18 +1061,18 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		return getWholeDigits(decimalValue) + decimalValue.scale();
 	}
 
-	public int getScale()
+	public int getDecimalValueScale()
 	{
 		BigDecimal localValue = getBigDecimal();
 		return (localValue == null) ? 0 : localValue.scale();
 	}
 
-	public int getWholeDigits()
+	private int getWholeDigits()
 	{
 		return getWholeDigits(getBigDecimal());
 	}
 
-	public static int getWholeDigits(BigDecimal decimalValue)
+	private static int getWholeDigits(BigDecimal decimalValue)
 	{
 		if ((decimalValue == null) ||
 			 decimalValue.equals(ZERO))
@@ -1091,15 +1091,5 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 		String s = decimalValue.toString();
         return (decimalValue.scale() == 0) ? s.length() : s.indexOf('.');
-	}
-
-	/**
-	 * Return the value field
-	 *
-	 * @return BigDecimal
-	 */
-	public BigDecimal getValue()
-	{
-		return getBigDecimal();
 	}
 }

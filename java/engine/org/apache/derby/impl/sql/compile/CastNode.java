@@ -337,38 +337,23 @@ public class CastNode extends ValueNode
 						}
 						break;
 
+					case Types.DECIMAL:
+						// ignore decimal -> decimal casts for now
+						if (destJDBCTypeId == Types.DECIMAL ||
+							destJDBCTypeId == Types.NUMERIC)
+							break;
+						// fall through
 					case Types.TINYINT:
 					case Types.SMALLINT:
 					case Types.INTEGER:
 					case Types.BIGINT:
-						long longValue = ((NumericConstantNode) castOperand).getLong();
-						retNode = getCastFromIntegralType(
-											longValue, 
-											destJDBCTypeId);
-						break;
-
 					case Types.DOUBLE:
 					case Types.REAL:
-						double doubleValue = ((NumericConstantNode) castOperand).getDouble();
-						retNode = getCastFromNonIntegralType(
-											doubleValue, 
+						retNode = getCastFromNumericType(
+											((ConstantNode) castOperand).getValue(), 
 											destJDBCTypeId);
 						break;
 
-					case Types.DECIMAL:
-						// ignore decimal -> decimal casts for now
-						if (destJDBCTypeId != Types.DECIMAL &&
-							destJDBCTypeId != Types.NUMERIC)
-						{
-							/* SQLDecimal.getDouble() throws an exception if the
-							 * BigDecimal is outside of the range of double.
-							 */
-							doubleValue = ((ConstantNode) castOperand).getValue().getDouble();
-							retNode = getCastFromNonIntegralType(
-												doubleValue, 
-												destJDBCTypeId);
-						}
-						break;
 			}
 
 			// Return the new constant if the cast was performed
@@ -668,93 +653,67 @@ public class CastNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	private ValueNode getCastFromNonIntegralType(
-									  double doubleValue, 
+	private ValueNode getCastFromNumericType(
+									  DataValueDescriptor constantValue, 
 									  int destJDBCTypeId)
 		throws StandardException
 	{
-		String	  stringValue = null;
-		ValueNode retNode = this;
+		int nodeType = -1;
+		Object constantObject = null;
 
 		switch (destJDBCTypeId)
 		{
 			case Types.CHAR:
+				nodeType = C_NodeTypes.CHAR_CONSTANT_NODE;
+				constantObject = constantValue.getString();
 				return (ValueNode) getNodeFactory().getNode(
-										C_NodeTypes.CHAR_CONSTANT_NODE,
-										Double.toString(doubleValue), 
+										nodeType,
+										constantObject, 
 										ReuseFactory.getInteger(
 											castTarget.getMaximumWidth()),
 										getContextManager());
+
 			case Types.TINYINT:
-				doubleValue = Math.floor(doubleValue);
-				if (doubleValue < Byte.MIN_VALUE ||
-					doubleValue > Byte.MAX_VALUE)
-				{
-					throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "TINYINT");
-				}
-				return (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.TINYINT_CONSTANT_NODE,
-											ReuseFactory.getByte(
-															(byte) doubleValue),
-											getContextManager());
+				nodeType = C_NodeTypes.TINYINT_CONSTANT_NODE;
+				constantObject = new Byte(constantValue.getByte());
+				break;
 
 			case Types.SMALLINT:
-				doubleValue = Math.floor(doubleValue);
-				if (doubleValue < Short.MIN_VALUE ||
-					doubleValue > Short.MAX_VALUE)
-				{
-					throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "SMALLINT");
-				}
-				return (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.SMALLINT_CONSTANT_NODE,
-											ReuseFactory.getShort(
-														(short) doubleValue),
-											getContextManager());
+				nodeType = C_NodeTypes.SMALLINT_CONSTANT_NODE;
+				constantObject = ReuseFactory.getShort(constantValue.getShort());
+				break;
 
 			case Types.INTEGER:
-				doubleValue = Math.floor(doubleValue);
-				if (doubleValue < Integer.MIN_VALUE ||
-					doubleValue > Integer.MAX_VALUE)
-				{
-					throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
-				}
-				return (ValueNode) getNodeFactory().getNode(
-												C_NodeTypes.INT_CONSTANT_NODE,
-												ReuseFactory.getInteger(
-															(int) doubleValue),
-												getContextManager());
+				nodeType = C_NodeTypes.INT_CONSTANT_NODE;
+				constantObject = ReuseFactory.getInteger(constantValue.getInt());
+				break;
 
 			case Types.BIGINT:
-				doubleValue = Math.floor(doubleValue);
-				if (doubleValue < Long.MIN_VALUE ||
-					doubleValue > Long.MAX_VALUE)
-				{
-					throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "BIGINT");
-				}
-				return (ValueNode) getNodeFactory().getNode(
-									C_NodeTypes.LONGINT_CONSTANT_NODE,
-									ReuseFactory.getLong((long) doubleValue),
-									getContextManager());
+				nodeType = C_NodeTypes.LONGINT_CONSTANT_NODE;
+				constantObject = ReuseFactory.getLong(constantValue.getLong());
+				break;
 
 			case Types.REAL:
-//                System.out.println("cast to real!");
-//				if (Math.abs(doubleValue) > Float.MAX_VALUE)
-//                    throw...
-//                SQLReal.check(doubleValue);
-// jsk: rounding problem???
-				return (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.FLOAT_CONSTANT_NODE,
-											new Float(NumberDataType.normalizeREAL(doubleValue)),
-											getContextManager());
+				nodeType = C_NodeTypes.FLOAT_CONSTANT_NODE;
+				constantObject = new Float(NumberDataType.normalizeREAL(constantValue.getDouble()));
+				break;
 
 			case Types.DOUBLE:
-				return (ValueNode) getNodeFactory().getNode(
-										C_NodeTypes.DOUBLE_CONSTANT_NODE,
-										new Double(doubleValue),
-										getContextManager());
+				// no need to normalize here because no constant could be out of range for a double
+				nodeType = C_NodeTypes.DOUBLE_CONSTANT_NODE;
+				constantObject = new Double(constantValue.getDouble());
+				break;
 		}
 
-		return retNode;
+		if (nodeType == -1)
+			return this;
+
+
+		return (ValueNode) getNodeFactory().getNode(
+										nodeType,
+										constantObject, 
+										getContextManager());
+
 	}
 
 	/**
