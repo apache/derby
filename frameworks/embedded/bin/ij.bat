@@ -3,7 +3,7 @@
 @REM -- an embedded environment.
 @REM --
 @REM -- REQUIREMENTS: 
-@REM -- You must have the Cloudscape libraries in your classpath
+@REM -- You must have the Derby libraries in your classpath
 @REM -- 
 @REM -- See the setEmbeddedCP.bat for an example of
 @REM -- how to do this.
@@ -11,10 +11,10 @@
 @REM -- This file for use on Windows systems
 @REM ---------------------------------------------------------
 
-rem set CLOUDSCAPE_INSTALL=
+rem set DERBY_INSTALL=
  
-@if !"%CLASSPATH%"==! call "%CLOUDSCAPE_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
-@if "%CLASSPATH%" == "" call "%CLOUDSCAPE_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
+@if !"%CLASSPATH%"==! call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
+@if "%CLASSPATH%" == "" call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
 
 @REM ---------------------------------------------------------
 @REM -- start ij

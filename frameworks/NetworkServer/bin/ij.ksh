@@ -11,10 +11,10 @@
 # -- This file for use on Unix ksh systems
 # ---------------------------------------------------------
 
-# CLOUDSCAPE_INSTALL=
+# DERBY_INSTALL=
 
 [ -z "$CLASSPATH" ] && {
-  . "$CLOUDSCAPE_INSTALL"/frameworks/NetworkServer/bin/setNetworkClientCP.ksh
+  . "$DERBY_INSTALL"/frameworks/NetworkServer/bin/setNetworkClientCP.ksh
 }
  
 export IJ_HOST=localhost

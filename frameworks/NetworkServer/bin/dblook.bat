@@ -11,10 +11,10 @@
 @REM -- This file for use on Windows systems
 @REM ---------------------------------------------------------
 
-rem set CLOUDSCAPE_INSTALL=
+rem set DERBY_INSTALL=
  
-@if !"%CLASSPATH%"==! call "%CLOUDSCAPE_INSTALL%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
-@if "%CLASSPATH%" == "" call "%CLOUDSCAPE_INSTALL%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
+@if !"%CLASSPATH%"==! call "%DERBY_INSTALL%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
+@if "%CLASSPATH%" == "" call "%DERBY_INSTALL%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
 
 @REM ---------------------------------------------------------
 @REM -- start dblook

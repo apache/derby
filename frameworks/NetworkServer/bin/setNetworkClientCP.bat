@@ -3,15 +3,15 @@
 @REM -- for use with Derby products in Network Server mode
 @REM --
 @REM -- To use this script from other locations, change the 
-@REM -- value assigned to CLOUDSCAPE_INSTALL to be an absolute path 
-@REM -- (set CLOUDSCAPE_INSTALL=C:\derby) instead of the current relative path
+@REM -- value assigned to DERBY_INSTALL to be an absolute path 
+@REM -- (set DERBY_INSTALL=C:\derby) instead of the current relative path
 @REM --
 @REM -- This file for use on Windows systems
 @REM -- 
 @REM ---------------------------------------------------------
 
-rem set CLOUDSCAPE_INSTALL=
+rem set DERBY_INSTALL=
 
-FOR %%X in ("%CLOUDSCAPE_INSTALL%") DO SET CLOUDSCAPE_INSTALL=%%~sX
+FOR %%X in ("%DERBY_INSTALL%") DO SET DERBY_INSTALL=%%~sX
 
-set CLASSPATH=%CLOUDSCAPE_INSTALL%\lib\derby.jar;%CLOUDSCAPE_INSTALL%\lib\derbytools.jar;%CLOUDSCAPE_INSTALL%\lib\db2jcc.jar;%CLOUDSCAPE_INSTALL%\lib\db2jcc_license_c.jar;%CLASSPATH%
+set CLASSPATH=%DERBY_INSTALL%\lib\derby.jar;%DERBY_INSTALL%\lib\derbytools.jar;%DERBY_INSTALL%\lib\db2jcc.jar;%DERBY_INSTALL%\lib\db2jcc_license_c.jar;%CLASSPATH%

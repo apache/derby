@@ -12,10 +12,10 @@
 @REM -- This file for use on Windows systems
 @REM ---------------------------------------------------------
 
-rem set CLOUDSCAPE_INSTALL=
+rem set DERBY_INSTALL=
  
-@if !"%CLASSPATH%"==! call "%CLOUDSCAPE_INSTALL%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
-@if "%CLASSPATH%" == "" call "%CLOUDSCAPE_INSTALL%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
+@if !"%CLASSPATH%"==! call "%DERBY_INSTALL%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
+@if "%CLASSPATH%" == "" call "%DERBY_INSTALL%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
 
 @REM ---------------------------------------------------------
 @REM -- start Derby as a Network server

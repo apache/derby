@@ -9,16 +9,16 @@
 # --  if your classpath will not be reported. 
 # --
 # -- Check the setCP.ksh to see an example of adding the
-# -- the Cloudscape jars to your classpath.
+# -- the Derby jars to your classpath.
 # -- 
 # --
 # -- This file for use on Unix korn shell systems
 # ---------------------------------------------------------
 
-# CLOUDSCAPE_INSTALL=
+# DERBY_INSTALL=
 
 [ -z "$CLASSPATH" ] && {
-  . "$CLOUDSCAPE_INSTALL"/frameworks/embedded/bin/setEmbeddedCP.ksh
+  . "$DERBY_INSTALL"/frameworks/embedded/bin/setEmbeddedCP.ksh
 }
  
 # ---------------------------------------------------------

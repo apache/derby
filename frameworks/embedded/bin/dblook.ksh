@@ -3,7 +3,7 @@
 # -- an embedded environment.
 # --
 #-- REQUIREMENTS: 
-# -- You must have the Cloudscape libraries in your classpath
+# -- You must have the Derby libraries in your classpath
 # -- 
 # -- See the setEmbeddedCP.ksh for an example of
 # -- how to do this.
@@ -11,10 +11,10 @@
 # -- This file for use on Unix ksh systems
 # ---------------------------------------------------------
 
-# CLOUDSCAPE_INSTALL=
+# DERBY_INSTALL=
 
 [ -z "$CLASSPATH" ] && {
-  . "$CLOUDSCAPE_INSTALL"/frameworks/embedded/bin/setEmbeddedCP.ksh
+  . "$DERBY_INSTALL"/frameworks/embedded/bin/setEmbeddedCP.ksh
 }
  
 # ---------------------------------------------------------

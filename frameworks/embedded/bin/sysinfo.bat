@@ -9,15 +9,15 @@
 @REM --  if your classpath will not be reported. 
 @REM --
 @REM -- Check the setCP.bat to see an example of adding the
-@REM -- the Cloudscape jars to your classpath.
+@REM -- the Derby jars to your classpath.
 @REM -- 
 @REM -- This file for use on Windows systems
 @REM ---------------------------------------------------------
 
-rem set CLOUDSCAPE_INSTALL=
+rem set DERBY_INSTALL=
  
-@if !"%CLASSPATH%"==! call "%CLOUDSCAPE_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
-@if "%CLASSPATH%" == "" call "%CLOUDSCAPE_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
+@if !"%CLASSPATH%"==! call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
+@if "%CLASSPATH%" == "" call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
 
 @REM ---------------------------------------------------------
 @REM -- start sysinfo
