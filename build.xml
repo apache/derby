@@ -591,6 +591,45 @@
   </target>
 
 <!-- =================================================================== -->
+<!-- Eclipse Plugin                                                     -->
+<!-- =================================================================== -->
+  <target name="plugin" depends= "buildjars">
+       <echo message="Begining Derby Eclipse plugin build"/>
+       <property name="plugin.tmp.dir" value ="plugintmp"/>
+       <mkdir dir="${derby.jar.dir}/${plugin.tmp.dir}"/>
+
+       <java classname="org.apache.derbyBuild.eclipse.DerbyEclipsePlugin">
+               <arg value="${derby.jar.dir}/${plugin.tmp.dir}"/>
+               <classpath>
+                       <pathelement path="${out.dir}"/>
+               </classpath>
+       </java>
+
+       <property file="${derby.jar.dir}/${plugin.tmp.dir}/plugintmp.properties"/>
+       <echo message="Derby Eclipse plugin build: ${plugin.derby.version.build.number}"/>
+
+       <property name="plugin.dir" value ="plugins"/>
+       <property name="plugin.core.dir" value ="${plugin.derby.core}_${plugin.derby.version}"/>
+
+       <mkdir dir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}"/>
+
+       <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}">
+               <fileset dir="${derby.jar.dir}" includes="derby*.jar" excludes="derbyTesting.jar,derbyLocale*.jar"/>
+       </copy>
+       <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}">
+               <fileset dir="${derby.jar.dir}/${plugin.tmp.dir}" includes="plugin*.xml"/>
+       </copy>
+
+       <delete file="${derby.jar.dir}/${plugin.tmp.dir}/plugintmp.properties"/>
+       <delete file="${derby.jar.dir}/${plugin.tmp.dir}/plugin.xml"/>
+
+       <!-- ZIP to create the final Derby plug-in -->
+
+       <zip zipfile="${derby.jar.dir}/${plugin.derby.core.zipfile}_${plugin.derby.version}.zip" compress="true" basedir="${derby.jar.dir}/${plugin.tmp.dir}"/>
+       <delete dir="${derby.jar.dir}/${plugin.tmp.dir}"/>
+  </target>
+
+<!-- =================================================================== -->
 <!--                               Jar targets                           -->
 <!-- =================================================================== -->
 
