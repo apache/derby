@@ -946,18 +946,39 @@ public class updatableResultSet {
 			rs.deleteRow();
 			rs.close();
                            
-			System.out.println("Positive Test9b - using correlation name for column names is not allowed with updateXXX");
+			System.out.println("Positive Test9b - using correlation name for updatable column name is not allowed");
 			reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			System.out.println("Table t1 has following rows");
 			dumpRS(stmt.executeQuery("select * from t1"));
-			rs = stmt.executeQuery("SELECT c1 as col1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
-			rs.next();
-			System.out.println("column 1 on this row is " + rs.getInt(1));
 			try {
-				System.out.println("attempt to send updateXXX on correlation name column will fail");
-				rs.updateShort(1, (new Integer(123)).shortValue());
-				System.out.println("FAIL!!! updateXXX should have failed");
+				System.out.println("attempt to get an updatable resultset using correlation name for an updatable column");
+				System.out.println("The sql is SELECT c1 as col1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
+				rs = stmt.executeQuery("SELECT c1 as col1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
+				System.out.println("FAIL!!! executeQuery should have failed");
+			}
+			catch (SQLException e) {
+				System.out.println("SQL State : " + e.getSQLState());
+				System.out.println("Got expected exception " + e.getMessage());
+			}
+			System.out.println("attempt to get an updatable resultset using correlation name for an readonly column. It should work");
+			System.out.println("The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
+			rs = stmt.executeQuery("SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
+			rs.next();
+			rs.updateInt(1,11);
+			rs.updateRow();
+			rs.close();
+			System.out.println("Table t1 after updateRow has following rows");
+			dumpRS(stmt.executeQuery("select * from t1"));
+
+			System.out.println("Positive Test9c - try to updateXXX on a readonly column. Should get error");
+			reloadData();
+			rs = stmt.executeQuery("SELECT c1, c2 FROM t1 abcde FOR UPDATE of c1");
+			rs.next();
+			rs.updateString(2,"bbbb");
+			try {
+				rs.updateRow();
+				System.out.println("FAIL!!! updateRow should have failed");
 			}
 			catch (SQLException e) {
 				System.out.println("SQL State : " + e.getSQLState());

@@ -716,6 +716,7 @@ public class CursorNode extends ReadCursorNode
 		int size = updatableColumns.size();
 		TableDescriptor tableDescriptor;
 		String columnName;
+		ResultColumnList rcls = resultSet.getResultColumns();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -723,9 +724,22 @@ public class CursorNode extends ReadCursorNode
 		    tableDescriptor = targetTable.getTableDescriptor();
 		    if ( tableDescriptor.getColumnDescriptor(columnName) == null)
 		    {
-			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND, columnName);
+					throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND, columnName);
 		    }
 
+		    ResultColumn rc;
+		    //make sure that we are not using correlation names for updatable columns. 
+		    //eg select c11 as col1, 2, c13 as col3 from t1 for update of c11, c12
+		    //In the eg above, correlation name for c11 will cause exception because Derby does not support correlation name for updatable columns
+		    //But correlation name for c13 is ok because it is a read only column
+		    for (int rclsIndex = 0; rclsIndex < rcls.size(); rclsIndex++) {//look through each column in the resultset for cursor
+					rc = ((ResultColumn) rcls.elementAt(rclsIndex));
+					if (rc.getSourceTableName() == null) //continue to look at the next column because this is derived column in the select list
+					continue;
+					if (rc.getExpression() != null && rc.getExpression().getColumnName().equals(columnName) &&  !rc.getName().equals(columnName)) {
+					throw StandardException.newException(SQLState.LANG_CORRELATION_NAME_FOR_UPDATABLE_COLUMN_DISALLOWED_IN_CURSOR, columnName);
+					}
+		    }
 		}
 	}
 

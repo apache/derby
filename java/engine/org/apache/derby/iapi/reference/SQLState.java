@@ -737,6 +737,7 @@ public interface SQLState {
 	String LANG_CURSOR_UPDATE_MISMATCH                                 = "42X29";
 	String LANG_CURSOR_NOT_FOUND                                       = "42X30";
 	String LANG_COLUMN_NOT_UPDATABLE_IN_CURSOR                         = "42X31";
+	String LANG_CORRELATION_NAME_FOR_UPDATABLE_COLUMN_DISALLOWED_IN_CURSOR = "42X42";
 	String LANG_DERIVED_COLUMN_LIST_MISMATCH                           = "42X32";
 	String LANG_DUPLICATE_COLUMN_NAME_DERIVED                          = "42X33";
 	String LANG_PARAM_IN_SELECT_LIST                                   = "42X34";

@@ -247,17 +247,28 @@ change the cursor name(case sensitive name) with setCursorName and then try to u
 Positive Test9a - using correlation name for the table in the select sql is not a problem
 column 1 on this row is 1
 now try to deleteRow
-Positive Test9b - using correlation name for column names is not allowed with updateXXX
+Positive Test9b - using correlation name for updatable column name is not allowed
 Table t1 has following rows
 	 C1,C2
 	 -- --
 	{1,aa                  }
 	{2,bb                  }
 	{3,cc                  }
-column 1 on this row is 1
-attempt to send updateXXX on correlation name column will fail
-SQL State : XJ084
-Got expected exception Column does not correspond to a column in the base table. Cant issue {0} on this column.
+attempt to get an updatable resultset using correlation name for an updatable column
+The sql is SELECT c1 as col1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
+SQL State : 42X42
+Got expected exception Correlation name not allowed for column 'C1' because it is part of the FOR UPDATE list.
+attempt to get an updatable resultset using correlation name for an readonly column. It should work
+The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
+Table t1 after updateRow has following rows
+	 C1,C2
+	 -- --
+	{11,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+Positive Test9c - try to updateXXX on a readonly column. Should get error
+SQL State : 42X31
+Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR15'.
 Table t1 after updateRow has following rows
 	 C1,C2
 	 -- --
@@ -268,7 +279,7 @@ Positive Test10 - 2 updatable resultsets going against the same table, will they
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
 SQL State : XCL08
-Got expected exception Cursor 'SQLCUR16' is not on a row.
+Got expected exception Cursor 'SQLCUR17' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
@@ -2761,7 +2772,7 @@ Positive Test32 - call updateXXX methods on column that is not in for update col
 	{2,bb                  }
 	{3,cc                  }
 SQL State : 42X31
-Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR1055'.
+Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR528'.
   Make sure the contents of table are unchanged
 	 C1,C2
 	 -- --

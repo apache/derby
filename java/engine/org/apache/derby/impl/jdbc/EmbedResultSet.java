@@ -155,8 +155,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 
     private int fetchDirection;
     private int fetchSize;
-    //td will be used to ensure the column selected for updateXXX is part of the table.
-    private TableDescriptor td = null;
 
 	/**
 	 * This class provides the glue between the Cloudscape
@@ -2038,15 +2036,25 @@ public abstract class EmbedResultSet extends ConnectionChild
 		return false;
 	}
 
+	//do following few checks before accepting updateXXX resultset api
+	protected void checksBeforeUpdateXXX(String methodName, int columnIndex) throws SQLException {
+      checksBeforeUpdateOrDelete(methodName, columnIndex);
+
+      //1)Make sure for updateXXX methods, the column position is not out of range
+      ResultDescription rd = theResults.getResultDescription();
+      if (columnIndex < 1 || columnIndex > rd.getColumnCount())
+        throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION, new Integer(columnIndex), String.valueOf(rd.getColumnCount()));
+
+      //2)Make sure the column corresponds to a column in the base table and it is not a derived column
+      if (rd.getColumnDescriptor(columnIndex).getSourceTableName() == null)
+        throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE, methodName);
+	}
+
 	//do following few checks before accepting updatable resultset api
 	//1)Make sure this is an updatable ResultSet
 	//2)Make sure JDBC ResultSet is not closed
 	//3)Make sure JDBC ResultSet is positioned on a row
 	//4)Make sure underneath language resultset is not closed
-	//5)Make sure for updateXXX methods, the column position is not out of range
-	//6)Make sure the column corresponds to a column in the base table and it is not a derived column
-	//7)Make sure correlation names are not used for base table column names in updateXXXX. This is because the mapping
-	//  of correlation name to base table column position is not available at runtime.
 	protected void checksBeforeUpdateOrDelete(String methodName, int columnIndex) throws SQLException {
 
       //1)Make sure this is an updatable ResultSet
@@ -2065,57 +2073,11 @@ public abstract class EmbedResultSet extends ConnectionChild
       //4)Make sure underneath language resultset is not closed
       if (theResults.isClosed())
         throw Util.generateCsSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, methodName);
-
-      //the remaining checks only apply to updateXXX methods
-      if (methodName.equals("updateRow") || methodName.equals("deleteRow") || methodName.equals("cancelRowUpdates"))
-        return;
-
-      //5)Make sure for updateXXX methods, the column position is not out of range
-      ResultDescription rd = theResults.getResultDescription();
-      if (columnIndex < 1 || columnIndex > rd.getColumnCount())
-        throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION, new Integer(columnIndex), String.valueOf(rd.getColumnCount()));
-
-      //6)Make sure the column corresponds to a column in the base table and it is not a derived column
-      if (rd.getColumnDescriptor(columnIndex).getSourceTableName() == null)
-        throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE, methodName);
-
-      //7)Make sure correlation names are not used for base table column names in updateXXX. This is because the mapping
-      //  of correlation name to base table column position is not available at runtime.
-      //If can't find the column in the base table, then throw exception. This will happen if correlation name is used for column names
-      if (td == null) getTargetTableDescriptor();
-      if (td.getColumnDescriptor(rd.getColumnDescriptor(columnIndex).getName()) == null)
-        throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE, methodName);
-	}
-
-	//Get the table descriptor for the target table for updateXXX. td will be used to ensure the column selected for updateXXX
-	//is part of the table.
-	private void getTargetTableDescriptor() throws SQLException {
-      setupContextStack();
-      try {
-        LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
-        CursorActivation activation = lcc.lookupCursorActivation(getCursorName());
-        ExecCursorTableReference targetTable = activation.getPreparedStatement().getTargetTable();
-        SchemaDescriptor sd = null;
-        if (targetTable.getSchemaName() != null)
-            sd = lcc.getDataDictionary().getSchemaDescriptor(targetTable.getSchemaName(),null, false);
-        else
-            sd = lcc.getDataDictionary().getSchemaDescriptor(lcc.getCurrentSchemaName(),null, false);
-
-        if ((sd != null) && sd.getSchemaName().equals(SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME))
-            td = lcc.getTableDescriptorForDeclaredGlobalTempTable(targetTable.getBaseName()); //check if this is a temp table before checking data dictionary
-
-        if (td == null) //td null here means it is not a temporary table. Look for table in physical SESSION schema
-            td = lcc.getDataDictionary().getTableDescriptor(targetTable.getBaseName(), sd);
-      } catch (StandardException t) {
-        throw noStateChangeException(t);
-      } finally {
-        restoreContextStack();
-      }
 	}
 
 	//mark the column as updated and return DataValueDescriptor for it. It will be used by updateXXX methods to put new values
 	protected DataValueDescriptor getDVDforColumnToBeUpdated(int columnIndex, String updateMethodName) throws StandardException, SQLException {
-      checksBeforeUpdateOrDelete(updateMethodName, columnIndex);
+      checksBeforeUpdateXXX(updateMethodName, columnIndex);
       if (columnGotUpdated[columnIndex-1] == false) {//this is the first updateXXX call on this column
         //this is the first updateXXX method call on this column. Save the original content of the column into copyOfDatabaseRow
         //The saved copy of the column will be needed if cancelRowUpdates is issued
@@ -2473,7 +2435,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateAsciiStream(int columnIndex, java.io.InputStream x,
 			int length) throws SQLException {
-		checksBeforeUpdateOrDelete("updateAsciiStream", columnIndex);
+		checksBeforeUpdateXXX("updateAsciiStream", columnIndex);
 
 		int colType = getColumnType(columnIndex);
 		switch (colType) {
@@ -2519,7 +2481,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateBinaryStream(int columnIndex, java.io.InputStream x,
 			int length) throws SQLException {
-		checksBeforeUpdateOrDelete("updateBinaryStream", columnIndex);
+		checksBeforeUpdateXXX("updateBinaryStream", columnIndex);
 		int colType = getColumnType(columnIndex);
 		switch (colType) {
 			case Types.BINARY:
@@ -2576,8 +2538,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 			int length) throws SQLException {
 		//If the column type is the right datatype, this method will eventually call getDVDforColumnToBeUpdated which will check for
 		//the read only resultset. But for other datatypes, we want to catch if this updateCharacterStream is being issued
-		//against a read only resultset. And that is the reason for call to checksBeforeUpdateOrDelete here.
-		checksBeforeUpdateOrDelete("updateCharacterStream", columnIndex);
+		//against a read only resultset. And that is the reason for call to checksBeforeUpdateXXX here.
+		checksBeforeUpdateXXX("updateCharacterStream", columnIndex);
 		int colType = getColumnType(columnIndex);
 		switch (colType) {
 			case Types.CHAR:
@@ -2680,7 +2642,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateObject(int columnIndex, Object x) throws SQLException {
-		checksBeforeUpdateOrDelete("updateObject", columnIndex);
+		checksBeforeUpdateXXX("updateObject", columnIndex);
 		int colType = getColumnType(columnIndex);
 		if (colType == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT) {
 			try {
@@ -3522,7 +3484,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateBlob(int columnIndex, Blob x) throws SQLException {
-        checksBeforeUpdateOrDelete("updateBlob", columnIndex);
+        checksBeforeUpdateXXX("updateBlob", columnIndex);
         int colType = getColumnType(columnIndex);
         if (colType != Types.BLOB)
             throw dataTypeConversion(columnIndex, "java.sql.Blob");
@@ -3568,7 +3530,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateClob(int columnIndex, Clob x) throws SQLException {
-        checksBeforeUpdateOrDelete("updateClob", columnIndex);
+        checksBeforeUpdateXXX("updateClob", columnIndex);
         int colType = getColumnType(columnIndex);
         if (colType != Types.CLOB)
             throw dataTypeConversion(columnIndex, "java.sql.Clob");
