@@ -3,6 +3,97 @@ Last modified at [$Date$] by $Author$.
 
 Web site: http://incubator.apache.org/derby/
 
+Incubator Status
+
+  Description
+
+  "Derby" is a snapshot of the IBM's Cloudscape Java relational database. IBM is
+  opening the code by contributing it to The Apache Software Foundation and 
+  basing future versions of IBM Cloudscape on the Apache-managed code.
+
+  To participate in the Derby podling, you should join the mailing list. Just 
+  send an empty message to derby-dev-subscribe@db.apache.org .
+
+  The initial goal of the project while in incubation is to build a viable 
+  developer community around the codebase.
+
+  The second goal of Derby-in-incubation is to successfully produce a release. 
+  Since Derby is in incubation, such a release would not have formal standing; 
+  it will serve as a proof-of-concept to demonstrate to the developers' and 
+  incubator's satisfaction that this aspect of the project is health and 
+  understood.
+
+Project info
+
+  * The Apache DB project will own the Derby subproject, and the subproject will
+    follow the Apache DB PMC's direction. Significant contributors to this sub-
+    project (for example, after a significant interval of sustained contribution)
+    will be proposed for commit access to the codebase.
+
+  * The Derby sub-project's modules will be available as distinct and discrete downloads.
+
+Detailed References:
+ 
+item            type      reference
+Status file     www       http://incubator.apache.org/projects/derby.html
+Website         www       http://incubator.apache.org/derby/
+Mailing list    dev       derby-dev@db.apache.org
+Mailing list    users     derby-user@db.apache.org
+Source code     SVN       /repos/asf/incubator/derby/code/trunk/
+Mentor          coar      Ken Coar (CLA on file)
+Committers      jta       Jean Anderson (CLA on file)
+Committers      satheesh  Satheesh Bandaram (CLA on file)
+Committers      djd       Daniel Debrunner (CLA on file)
+Committers      kmarsden  Katherine Marsden (CLA on file)
+Committers      mikem     Mike Matrigali (CLA on file)
+Committers      mcintyre  Samuel McIntyre (CLA on file)
+Committers      coar      Ken Coar (CLA on file)
+
+Completed tasks are shown by the completion date (YYYY-MM-dd).
+Incubation status reports
+
+    * none yet
+
+Incubation work items
+
+Project Setup
+
+Identify the codebase
+
+date        item
+....-..-..  If applicable, make sure that any associated name does not already 
+            exist and check www.nameprotect.com to be sure that the name is not
+            already trademarked for an existing software product.
+
+Copyright
+
+date 	    item
+2004-08-26  Check and make sure that the papers that transfer rights to the ASF 
+            been received. It is only necessary to transfer rights for the 
+            package, the core code, and any new code produced by the project.
+2004-11-04  Check and make sure that the files that have been donated have been 
+            updated to reflect the new ASF copyright.
+
+Verify distribution rights
+date 	    item
+2004-10-12  Check that all active committers have a signed CLA on record.
+2004-10-12  Remind active committers that they are responsible for ensuring that
+            a Corporate CLA is recorded if such is is required to authorize 
+            their contributions under their individual CLA.
+2004-10-12  Check and make sure that for all items included with the distribution
+            that is not under the Apache license, we have the right to combine 
+            with Apache-licensed code and redistribute.
+2004-10-12  Check and make sure that all items depended upon by the project is 
+            covered by one or more of the following approved licenses: Apache, 
+            BSD, Artistic, MIT/X, MIT/W3C, MPL 1.1, or something with essentially
+            the same terms.
+
+Generally, the result of checking off these items will be a Software Grant, CLA, and Corporate CLA for ASF licensed code, which must have no dependencies upon items whose licenses that are incompatible with the Apache License.
+Organizational acceptance of responsibility for the project
+
+    * Has the receiving PMC voted to accept it? **YES**
+
+
 Releases:
 
 None so far. A first release is in progress. This first release will be
@@ -10,15 +101,6 @@ versioned 10.0.2.1.
 
 PENDING ISSUES
 ==============
-
-IP/copyright issues:
-
-  There is concern over how the copyright and IP rights are to be transferred to
-  the ASF, and how IBM copyright is to be retained, if at all. The discussion on
-  the Derby list can be found in the 'Derby code copyright question' thread on 
-  derby-dev. The discussion has since moved off of derby-dev to
-  general@incubator.apache.org and elsewhere, but remains unresolved.
-  
 
 Derby documentation in PDF format:
 
@@ -28,27 +110,6 @@ Derby documentation in PDF format:
   <jlevitt@mutagen.net> to convert the documentation into XML DITA format.
 
  
-[VOTE] Re: Help detecting client disconnects for network server  
-
-  Kathey Marsden proposed the following vote concerning the use of TCP keepalive
-  for Network Server:
-  
-  1) Have keepAlive on by default. It seems important not only for locks
-  but for potential network server bloat due to connections not getting
-  cleaned up.
-  
-  2) Add a property derby.drda.keepAlive={true|false} (defaults to true as
-  described above).  There seems to be a need to be able to turn keepAlive
-  off in some cases.
-  
-  3) Add property derby.drda.connSoTimeout=<milliseconds> (defaults to 0,
-  infinite) to provide the ability to have connections timeout after a
-  period of inactivity. The connections will still timeout, even if the
-  connection is working fine but will timeout after blocking on a read for
-  this length of time.   I am about +.5 on this one.  It would be nice to
-  provide the capability, but hesitate to add yet another property.
-  
-
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
@@ -177,8 +238,43 @@ RESOLVED ISSUES SINCE LAST STATUS
   the new branch and to allow changes that require a database upgrade  
   into the trunk.
   
-  Result: Three +1 votes.
+  Result: Three +1 votes. Passed.
+
   
+[VOTE] Re: Help detecting client disconnects for network server  
+
+  Kathey Marsden proposed the following vote concerning the use of TCP keepalive
+  for Network Server:
+  
+  1) Have keepAlive on by default. It seems important not only for locks
+  but for potential network server bloat due to connections not getting
+  cleaned up.  Result: Three +1 votes. Passed.
+  
+  2) Add a property derby.drda.keepAlive={true|false} (defaults to true as
+  described above).  There seems to be a need to be able to turn keepAlive
+  off in some cases.  Result: Two +1 votes, no objections. Passed.
+
+  3) Add property derby.drda.connSoTimeout=<milliseconds> (defaults to 0,
+  infinite) to provide the ability to have connections timeout after a
+  period of inactivity. The connections will still timeout, even if the
+  connection is working fine but will timeout after blocking on a read for
+  this length of time.   I am about +.5 on this one.  It would be nice to
+  provide the capability, but hesitate to add yet another property.
+  Result: One +1 vote, objections noted. Not passed.
+  
+
+Copyright issues with the Derby codebase
+
+  There were concerns over how the IBM copyright notices attached to the
+  Derby source files were to be retained, if at all. For the discussion
+  of the concerns surrounding this issue, please see:
+
+  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgId=1885981
+
+  and the thread concerning the resolution of this issue:
+
+  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgId=1968757
+
 
 OTHER NEWS
 ==========
@@ -212,11 +308,39 @@ Resolved non-showstoppers:
   DERBY-6 Trigger of the form: create trigger ... values myFunction(); has
   no effect.
 
+  DERBY-14 Triggers do not evaluate functions in VALUES trigger actions.
+
+  DERBY-21 ResultsetMetaData.getColumnClassName() for CLOB and BLOB datatypes is
+  incorrect.
+
   DERBY-30 Connection.close() method inconsistently throws exception on 
   closed connection
 
+  DERBY-35 DRDA Chaining in Network Server is incorrect
+
   DERBY-38 Make LOCKS as non-reserved keyword in Derby since it is not a
   reserved keyword in the SQL standards
+
+  DERBY-40 Cannot set default value for BIGINT
+
+  DERBY-42 When using encryption, do not store the length information about the
+  external key in service.properties
+
+  DERBY-44 Support for like ? Escape ?
+
+  DERBY-50 getMaxColumnNameLength() database metadata function returns incorrect
+  value.
+  
+  DERBY-54 'retain' was not a keyword, now it is, possible schema impact
+  
+  DERBY-59 dblook currently has driver classes hard coded
+
+  DERBY-67 Network Server on a 64 bit JVM fails with: Execution failed because 
+  of a Distributed Protocol Error: DRDA_Proto_SYNTAXRM; CODPNT arg = 2116; Error
+  Code Value = 14
+
+  DERBY-72 IBM (c) message in properties files
+  
  
 Items deferred to next release:
 
@@ -225,7 +349,7 @@ Items deferred to next release:
   the current release due to an issue when setting the property on the command-line
   and passing the same property with the connection URL.
 
-Applied patches:
+Other applied patches:
 
   [PATCH] Optimization of org.apache.derby.impl.services.uuid.BasicUUID.toByteArray()
   [PATCH] Set Derby's build number to be the subversion revision number
@@ -240,3 +364,4 @@ Applied patches:
   [PATCH] Modify dblook messages to enable localization ...
   [PATCH] minor bugs in dblook 
   [PATCH] Extension Packaging
+  [PATCH] DB Shutdown fix for Network Server
