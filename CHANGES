@@ -1,0 +1,68 @@
+Changes in Derby 10.0.2.1
+    
+ *) Enable use of functions in triggers (Derby-6)
+    [Jack Klebanoff <klebanof@mutagen.net>] 
+    
+ *) Method calls on a closed Connection from a PooledConnection no longer
+    cause connection closed events to be sent to any listeners.
+    Minor clean up of BrokeredConnection as well, remove an unused 
+    constructor, make the control field final and remove incorrect comment 
+    and unused imports. (Derby-24)
+    [Dan Debrunner <djd@debrunners.com>]
+    
+ *) Connection.close() on a closed connection is defined by JDBC javadoc to 
+    be a no-op. (Derby-30)
+    [Dan Debrunner]
+    
+ *) Multiple jvms prevented from booting the same database in parallel to 
+    avoid accidental corruptions in Unix environments. (Derby-32)
+    [Suresh Thalamati <tsuresh@source-zone.org>]
+    
+ *) Allow default to be specified for CHAR FOR BIT DATA columns (Derby-34)
+    [Satheesh Bandaram <satheesh@sourcery.org>]
+    
+ *) LOCKS is no longer a reserved keyword (Derby-38)
+    [Mamta Satoor <mamta@remulak.net>]
+    
+ *) Faster create database by moving DatabaseMetaData SPS creation into the 
+    DataDictionary. Means creation of these statements is not logged and 
+    compilation is delayed until the matching DatabaseMetaData method is 
+    first called.
+    [Dan Debrunner]
+    
+ *) dblook argument handling has been improved. Bad arguments now generate 
+    an error, and connection URLs in quotes are handled properly.
+    [Jalud Abdulmenan <tendi@rogers.com>]
+    
+ *) Localization of dblook messages enabled.
+    [Satheesh Bandaram]
+    
+ *) Extension Packaging:
+       1. The monitor is changed to read multiple module.properties files,
+          using method ClassLoader.getSystemResources.
+       2. The monitor reads sub-sub-protocol properties from the
+          modules.properties files, instead of just the system properties.
+       3. Sub-sub-protocol property values can name either a StorageFactory
+          or a PersistentService implementation. Previously it could only
+          name a StorageFactory implementation.
+    [Jack Klebanoff]
+
+ *) Latent bug fixed in org.apache.derby.impl.store.access.sort.ExternalSortFactory. 
+    Its canSupport method throws an exception if it is called with a null 
+    startParams argument.
+    [Jack Klebanoff]
+    
+ *) Prevent empty log switches by rechecking the conditions that trigger the
+    log switched in synchronized blocks, and make backward scans skip the 
+    empty log files. In multi-threaded application when many threads are 
+    executing commits in parallel, empty log files might be created. Recovery
+    log scan does not expect empty log files while scanning log records to 
+    undo incomplete transactions.
+    [Suresh Thalamati] 
+    
+ *) Add derby.war file
+    [Kathey Marsden <kmarsden@sourcery.org>]
+    
+ *) Fix display of NetServlet messages. 
+    [Lynh Nguyen <lynhnn@remulak.net>]
+    

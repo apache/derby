@@ -1,0 +1,242 @@
+APACHE DERBY STATUS:
+Last modified at [$Date$] by $Author$.
+
+Web site: http://incubator.apache.org/derby/
+
+Releases:
+
+None so far. A first release is in progress. This first release will be
+versioned 10.0.2.1.
+
+PENDING ISSUES
+==============
+
+IP/copyright issues:
+
+  There is concern over how the copyright and IP rights are to be transferred to
+  the ASF, and how IBM copyright is to be retained, if at all. The discussion on
+  the Derby list can be found in the 'Derby code copyright question' thread on 
+  derby-dev. The discussion has since moved off of derby-dev to
+  general@incubator.apache.org and elsewhere, but remains unresolved.
+  
+
+Derby documentation in PDF format:
+
+  A request was made for PDF documentation, however, the source files for the
+  current HTML documentation for Derby are not in a form useful for creating PDF
+  documentation with Forrest. A proposal was made by Jeff Levitt 
+  <jlevitt@mutagen.net> to convert the documentation into XML DITA format.
+
+ 
+[VOTE] Re: Help detecting client disconnects for network server  
+
+  Kathey Marsden proposed the following vote concerning the use of TCP keepalive
+  for Network Server:
+  
+  1) Have keepAlive on by default. It seems important not only for locks
+  but for potential network server bloat due to connections not getting
+  cleaned up.
+  
+  2) Add a property derby.drda.keepAlive={true|false} (defaults to true as
+  described above).  There seems to be a need to be able to turn keepAlive
+  off in some cases.
+  
+  3) Add property derby.drda.connSoTimeout=<milliseconds> (defaults to 0,
+  infinite) to provide the ability to have connections timeout after a
+  period of inactivity. The connections will still timeout, even if the
+  connection is working fine but will timeout after blocking on a read for
+  this length of time.   I am about +.5 on this one.  It would be nice to
+  provide the capability, but hesitate to add yet another property.
+  
+
+RESOLVED ISSUES SINCE LAST STATUS
+=================================
+
+[VOTE] on repository layout:
+
+   [ Ten votes ]  Option 1: Keep the code and site pages in separately-versionable
+                  trees ( derby/site/{trunk,tags,branches}/<pages> and 
+                  derby/code/{t,t,b}<code> )
+   
+   [ One vote ]   Option 2: Put all things Derby into a single tree 
+                  ( derby/{trunk,tags,branches}/{<code>,<pages>} )
+
+
+[VOTE] Establish development model based on Apache DB guidelines
+
+  Derby is being sponsored by the Apache DB project and the Derby status
+  page states 'The Apache DB project will own the Derby subproject, and
+  the subproject will follow the Apache DB PMC's direction'. 
+  (http://incubator.apache.org/projects/derby.html)
+  
+  A vote was proposed that the Derby development model
+  follows the guidelines defined by the Apache DB project. This will set
+  the initial rules for development, changes to the model could
+  subsequently be called for and voted on using the Derby developer
+  mailing list.
+  
+  The guidelines are defined at http://db.apache.org/guidelines.html
+  
+  There is one difference that the Derby code is in SVN and not CVS.
+  
+  Note the decision making page at http://db.apache.org/decisions.html
+  and the Changes section on this page http://db.apache.org/source.html.
+  
+  The Changes section indicates the commit model is:
+  
+  (quote)
+  
+  Simple patches to fix bugs can be committed then reviewed. With a
+  commit-then-review process, the Committer is trusted to have a high
+  degree of confidence in the change.
+  
+  Doubtful changes, new features, and large scale overhauls need to be
+  discussed before committing them into the repository. Any change that
+  affects the semantics of an existing API function, the size of the
+  program, configuration data formats, or other major areas must receive
+  consensus approval before being committed.
+  
+  (end-quote)
+  
+  Result: Six +1 votes.
+
+
+[VOTE] Derby upgrade policy
+
+  A vote was proposed to accept that for any release of Derby the upgrade policy described in:
+
+  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgNo=77
+
+  is followed.
+
+  The summary is that any release of Derby can run against a database
+  created by a previous release with either no upgrade, soft upgrade or
+  hard upgrade mode, depending on the circumstance.
+  
+  This would mean that if some new feature was added to Derby, before a
+  release occurred the correct upgrade code would have to be written, if
+  the feature contributor did not provide it.
+  
+  Result: Three +1 votes.
+
+
+[VOTE] Derby versioning:
+  
+  A vote was proposed related to the Derby upgrade policy vote.
+  
+  That the version scheme currently in place, and described in:
+  
+  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby- 
+  dev@db.apache.org&msgNo=73
+  
+  be accepted in order to facilitate the upgrade policy voted on and  
+  accepted in the Derby upgrade policy thread. As such, Derby versions  
+  should take the following form: MAJOR.Minor.interim.point {beta} (build  
+  identifier). As an example, the currently posted snapshot version of  
+  Derby is 10.0.2.0 (46005).
+  
+  Whereby:
+  
+  Differences in the major version are used to identify large changes in  
+  architecture and functionality, and for which upgrade is required.
+  Differences in the minor version are used to identify changes in  
+  functionality large enough to require an upgrade procedure for  
+  databases from the previous version, and for which upgrade is required.
+  Differences in the interim version are used to identify significant  
+  differences in behavior of the database engine from the previous  
+  interim version, but for which upgrade to databases is not required.
+  Differences in the point version are used to identify that any amount  
+  of change to the database engine has occurred from the previously  
+  released point version.
+  That the build identifier be used to distinguish the exact state of the  
+  code from which any specific set of binaries have been compiled,
+  That the beta flag in the version denote that the upgrade policy is in  
+  an indeterminate state with respect to the previous version and, as  
+  such, that an upgrade to a beta version of Derby is allowed, but an  
+  upgrade from a beta version of Derby to any other version of Derby is  
+  not allowed.
+  
+  I would like to further propose that, following that version scheme,  
+  that releases from any branch have a specific version number and be  
+  tagged in the repository. Thus, following this version scheme, the  
+  forthcoming baseline release of Derby should be versioned 10.0.2.1, as  
+  it includes changes which are not included in the first public version  
+  of the source. Once the release is ready, the version on the trunk will  
+  be changed to 10.0.2.1 and then tagged in subversion.
+  
+  I would like to also further propose that before changes which would  
+  require upgrade are allowed into the trunk, that the trunk be branched,  
+  so that the branch can serve as the reference for the upgrade policy.  
+  After branching, the minor (and/or major) version of the trunk will be  
+  incremented, and the beta tag applied to indicate that significant  
+  changes exist in the trunk which would require database upgrade and  
+  that the code for performing the upgrade has not been rigorously  
+  tested. As an example, before a change could be applied which would  
+  require upgrade, a new 10.0 branch would be created and the trunk would  
+  be reversioned 10.1.0.0 beta, in order to distinguish the trunk from  
+  the new branch and to allow changes that require a database upgrade  
+  into the trunk.
+  
+  Result: Three +1 votes.
+  
+
+OTHER NEWS
+==========
+
+Bug tracking has been set up at http://issues.apache.org/jira/browse/DERBY 
+
+
+RELEASE STATUS
+==============
+
+A baseline release is in progress. This first release will be versioned 10.0.2.1.
+Any release must be approved by the Incubator PMC and must clearly be marked as
+an incubator release, according to the Apache Incubator guidelines:
+
+http://incubator.apache.org/incubation/Incubation_Policy.html#Releases%0A
+
+Open showstoppers:
+
+  None.
+
+Resolved showstoppers:
+
+  DERBY-24 Client should not be able to raise an event on a PooledConnection
+  it no longer owns.
+
+  DERBY-32 Logic to prevent mutiple jvms booting the same database in parallel 
+  to avoid accidental corruptions on Unix environment is not working.
+
+Resolved non-showstoppers:
+
+  DERBY-6 Trigger of the form: create trigger ... values myFunction(); has
+  no effect.
+
+  DERBY-30 Connection.close() method inconsistently throws exception on 
+  closed connection
+
+  DERBY-38 Make LOCKS as non-reserved keyword in Derby since it is not a
+  reserved keyword in the SQL standards
+ 
+Items deferred to next release:
+
+  [PATCH] retrieveMessages... true by default in ij
+  The original submitter of this patch (myrnap) requested that it not be applied to
+  the current release due to an issue when setting the property on the command-line
+  and passing the same property with the connection URL.
+
+Applied patches:
+
+  [PATCH] Optimization of org.apache.derby.impl.services.uuid.BasicUUID.toByteArray()
+  [PATCH] Set Derby's build number to be the subversion revision number
+  [PATCH] derby.war file build
+  [PATCH] derby.log file error message
+  [PATCH] Network servlet display only message key
+  [PATCH] added 3 more parser generated files to the clobber target in main build.xml
+  [PATCH] Various fixes to javadoc generation
+  [PATCH] Trigger Bug Fix
+  [PATCH] Fix to prevent empty log file switches that could cause recovery failures
+  [PATCH] ExternalSortFactory Bug Fix
+  [PATCH] Modify dblook messages to enable localization ...
+  [PATCH] minor bugs in dblook 
+  [PATCH] Extension Packaging
