@@ -37,7 +37,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 /**
   This tests JDBC 2.0 updateable resutlset - deleteRow api
  */
-public class updatableResultSet {
+public class updatableResultSet { 
 
 	private static Connection conn;
 	private static DatabaseMetaData dbmt;
@@ -593,6 +593,7 @@ public class updatableResultSet {
 			stmt.executeUpdate("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
 
 			System.out.println("---Positive Test12 - make sure delete trigger gets fired when deleteRow is issued");
+      reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			System.out.println("Verify that before delete trigger got fired, row count is 0 in deleteTriggerInsertIntoThisTable");
 			dumpRS(stmt.executeQuery("select count(*) from deleteTriggerInsertIntoThisTable"));
@@ -607,7 +608,55 @@ public class updatableResultSet {
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
 
-			System.out.println("---Positive Test13 - With autocommit off, attempt to drop a table when there is an open updatable resultset on it");
+			System.out.println("---Positive Test13 - Another test case for delete trigger");
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			rs = stmt.executeQuery("SELECT * FROM anotherTableWithDeleteTriggers FOR UPDATE");
+			rs.next();
+			System.out.println("column 1 on this row is " + rs.getInt(1));
+			System.out.println("this delete row will fire the delete trigger which will delete all the rows from the table and from the resultset");
+			rs.deleteRow();
+			rs.next();
+			try {
+				rs.deleteRow();
+				System.out.println("FAIL!!! there should have be no more rows in the resultset at this point because delete trigger deleted all the rows");
+			}
+			catch (SQLException e) {
+				if (e.getSQLState().equals("24000")) {
+					System.out.println("expected exception " + e.getMessage());
+				} else
+					dumpSQLExceptions(e);
+			}
+			rs.close();
+			System.out.println("Verify that delete trigger got fired by verifying the row count to be 0 in anotherTableWithDeleteTriggers");
+			dumpRS(stmt.executeQuery("select count(*) from anotherTableWithDeleteTriggers"));
+			//have to close the resultset because by default, resultsets are held open over commit
+			rs.close();
+
+			System.out.println("---Positive Test14 - make sure self referential delete cascade works when deleteRow is issued");
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			rs = stmt.executeQuery("SELECT * FROM selfReferencingT1 FOR UPDATE");
+			rs.next();
+			System.out.println("column 1 on this row is " + rs.getString(1));
+			System.out.println("this delete row will cause the delete cascade constraint to delete all the rows from the table and from the resultset");
+			rs.deleteRow();
+			rs.next();
+			try {
+				rs.deleteRow();
+				System.out.println("FAIL!!! there should have be no more rows in the resultset at this point because delete cascade deleted all the rows");
+			}
+			catch (SQLException e) {
+				if (e.getSQLState().equals("24000")) {
+					System.out.println("expected exception " + e.getMessage());
+				} else
+					dumpSQLExceptions(e);
+			}
+			rs.close();
+			System.out.println("Verify that delete trigger got fired by verifying the row count to be 0 in anotherTableWithDeleteTriggers");
+			dumpRS(stmt.executeQuery("select count(*) from selfReferencingT1"));
+			//have to close the resultset because by default, resultsets are held open over commit
+			rs.close();
+
+			System.out.println("---Positive Test15 - With autocommit off, attempt to drop a table when there is an open updatable resultset on it");
       reloadData();
       conn.setAutoCommit(false);
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
@@ -630,7 +679,34 @@ public class updatableResultSet {
 			rs.close();
       conn.setAutoCommit(true);
 
-			System.out.println("---Positive Test14 - After deleteRow, resultset is positioned before the next row");
+			System.out.println("---Positive Test16 - Do deleteRow within a transaction and then rollback the transaction");
+      reloadData();
+      conn.setAutoCommit(false);
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			System.out.println("Verify that before delete trigger got fired, row count is 0 in deleteTriggerInsertIntoThisTable");
+			dumpRS(stmt.executeQuery("select count(*) from deleteTriggerInsertIntoThisTable"));
+			System.out.println("Verify that before deleteRow, row count is 4 in tableWithDeleteTriggers");
+			dumpRS(stmt.executeQuery("select count(*) from tableWithDeleteTriggers"));
+			rs = stmt.executeQuery("SELECT * FROM tableWithDeleteTriggers FOR UPDATE");
+			rs.next();
+			System.out.println("column 1 on this row is " + rs.getInt(1));
+			System.out.println("now try to delete row and make sure that trigger got fired");
+			rs.deleteRow();
+			rs.close();
+			System.out.println("Verify that delete trigger got fired by verifying the row count to be 1 in deleteTriggerInsertIntoThisTable");
+			dumpRS(stmt.executeQuery("select count(*) from deleteTriggerInsertIntoThisTable"));
+			System.out.println("Verify that deleteRow in transaction, row count is 3 in tableWithDeleteTriggers");
+			dumpRS(stmt.executeQuery("select count(*) from tableWithDeleteTriggers"));
+			//have to close the resultset because by default, resultsets are held open over commit
+			rs.close();
+      conn.rollback();
+			System.out.println("Verify that after rollback, row count is back to 0 in deleteTriggerInsertIntoThisTable");
+			dumpRS(stmt.executeQuery("select count(*) from deleteTriggerInsertIntoThisTable"));
+			System.out.println("Verify that after rollback, row count is back to 4 in tableWithDeleteTriggers");
+			dumpRS(stmt.executeQuery("select count(*) from tableWithDeleteTriggers"));
+      conn.setAutoCommit(true);
+
+			System.out.println("---Positive Test17 - After deleteRow, resultset is positioned before the next row");
       reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
       rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
@@ -725,12 +801,12 @@ public class updatableResultSet {
 	static void reloadData() throws SQLException {
 		Statement stmt = conn.createStatement();
 		stmt.executeUpdate("delete from t1");
-		stmt.executeUpdate("insert into t1 values (1,'aa')");
-		stmt.executeUpdate("insert into t1 values (2,'bb')");
-		stmt.executeUpdate("insert into t1 values (3,'cc')");
+		stmt.executeUpdate("insert into t1 values (1,'aa'), (2,'bb'), (3,'cc')");
 		stmt.executeUpdate("delete from t3");
-		stmt.executeUpdate("insert into t3 values (1,1)");
-		stmt.executeUpdate("insert into t3 values (2,2)");
+		stmt.executeUpdate("insert into t3 values (1,1), (2,2)");
+		stmt.executeUpdate("delete from tableWithDeleteTriggers");
+		stmt.executeUpdate("insert into tableWithDeleteTriggers values (1, 1), (2, 2), (3, 3), (4, 4)");
+		stmt.executeUpdate("delete from deleteTriggerInsertIntoThisTable");
 	}
 
 	static void setup(boolean first) throws SQLException {
@@ -746,6 +822,7 @@ public class updatableResultSet {
 		stmt.executeUpdate("create trigger tr1 after delete on tableWithDeleteTriggers for each statement mode db2sql insert into deleteTriggerInsertIntoThisTable values (1)");
 		stmt.executeUpdate("create table anotherTableWithDeleteTriggers (c1 int, c2 bigint)");
 		stmt.executeUpdate("create trigger tr2 after delete on anotherTableWithDeleteTriggers for each statement mode db2sql delete from anotherTableWithDeleteTriggers");
+		stmt.executeUpdate("create table selfReferencingT1 (c1 char(2) not null, c2 char(2), constraint selfReferencingT1 primary key(c1), constraint manages foreign key(c2) references selfReferencingT1(c1) on delete cascade)");
 
 		stmt.executeUpdate("insert into t1 values (1,'aa')");
 		stmt.executeUpdate("insert into t1 values (2,'bb')");
@@ -757,6 +834,7 @@ public class updatableResultSet {
 		stmt.executeUpdate("insert into tableWithConstraint values (1, 1), (2, 2), (3, 3), (4, 4)");
 		stmt.executeUpdate("insert into tableWithDeleteTriggers values (1, 1), (2, 2), (3, 3), (4, 4)");
 		stmt.executeUpdate("insert into anotherTableWithDeleteTriggers values (1, 1), (2, 2), (3, 3), (4, 4)");
+		stmt.executeUpdate("insert into selfReferencingT1 values ('e1', null), ('e2', 'e1'), ('e3', 'e2'), ('e4', 'e3')");
 		stmt.close();
 	}
 
@@ -768,6 +846,10 @@ public class updatableResultSet {
 		stmt.executeUpdate("drop table t3");
 		stmt.executeUpdate("drop table tableWithConstraint");
 		stmt.executeUpdate("drop table tableWithPrimaryKey");
+		stmt.executeUpdate("drop table deleteTriggerInsertIntoThisTable");
+		stmt.executeUpdate("drop table tableWithDeleteTriggers");
+		stmt.executeUpdate("drop table anotherTableWithDeleteTriggers");
+		stmt.executeUpdate("drop table selfReferencingT1");
 		conn.commit();
 		stmt.close();
 	}
