@@ -398,22 +398,38 @@ public final class SQLReal
 		}
 	}
 
-	public  void setValue(BigDecimal theValue) throws StandardException
+	public  void setValue(Number theValue) throws StandardException
 	{
 		if (objectNull(theValue)) 
 			return;
 
-		float value = theValue.floatValue();
-		setValue(value);
+		if (SanityManager.ASSERT)
+		{
+			if (!(theValue instanceof java.lang.Float))
+				SanityManager.THROWASSERT("SQLReal.setValue(Number) passed a " + theValue.getClass());
+		}
+
+		setValue(theValue.floatValue());
+	}
+	/**
+		Called for an application setting this value using a BigDecimal 
+	*/
+	public  void setBigDecimal(Number bigDecimal) throws StandardException
+	{
+		if (objectNull(bigDecimal)) 
+			return;
+
+		// Note BigDecimal.floatValue() handles the case where
+		// its value is outside the range of a float. It returns
+		// infinity values which should throw an exception in setValue(double).
+		setValue(bigDecimal.floatValue());
+		
 	}
 
 	public void setValue(float theValue)
 		throws StandardException
 	{
-//        new Throwable().printStackTrace();
-//        System.out.println("setValue(float "+theValue+")");
 		value = NumberDataType.normalizeREAL(theValue);
-//        System.out.println("value = "+value);
 		isnull = false;
 	}
 

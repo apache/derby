@@ -285,15 +285,15 @@ public class DataValueFactoryImpl implements DataValueFactory
                 previous.setValue(value);
                 return previous;
         }
-        public NumberDataValue getDecimalDataValue(BigDecimal value)
+        public NumberDataValue getDecimalDataValue(Number value)
+			throws StandardException
         {
-                if (value != null)
-                        return new SQLDecimal(value);
-                else
-                        return new SQLDecimal();
+			NumberDataValue ndv = getNullDecimal((NumberDataValue) null);
+			ndv.setValue(value);
+			return ndv;
         }
 
-        public NumberDataValue getDecimalDataValue(BigDecimal value, NumberDataValue previous)
+        public NumberDataValue getDecimalDataValue(Number value, NumberDataValue previous)
                         throws StandardException
         {
                 if (previous == null)

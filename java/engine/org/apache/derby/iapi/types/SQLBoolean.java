@@ -492,19 +492,19 @@ public final class SQLBoolean
 
 	}
 
-	public void setValue(BigDecimal theValue)
+	public void setBigDecimal(Number bigDecimal)
 	{
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT( ! immutable,
 						"Attempt to set the value of an immutable SQLBoolean");
-		if (theValue == null)
+		if (bigDecimal == null)
 		{
 			value = false;
 			isnull = true;
 		}
 		else
 		{
-			value = theValue.compareTo(org.apache.derby.iapi.types.SQLDecimal.ZERO) != 0;
+			value = org.apache.derby.iapi.types.SQLDecimal.ZERO.compareTo(bigDecimal) != 0;
 			isnull = false;
 		}
 
@@ -595,78 +595,6 @@ public final class SQLBoolean
 			isnull = false;
 		}
 
-	}
-
-	/**
-	 * Set the value of this BooleanDataValue to the given Byte value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 */
-	public void setValue(Byte theValue)
-	{
-		setValueCore(theValue);
-	}
-
-	/**
-	 * Set the value of this BooleanDataValue to the given Short value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 */
-	public void setValue(Short theValue)
-	{
-		setValueCore(theValue);
-	}
-	
-	/**
-	 * Set the value of this BooleanDataValue to the given Long value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 */
-	public void setValue(Long theValue)
-	{
-		setValueCore(theValue);
-	}
-
-	/**
-	 * Set the value of this BooleanDataValue to the given Integer value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 */
-	public void setValue(Integer theValue)
-	{
-		setValueCore(theValue);
-	}
-
-	/**
-	 * Set the value of this BooleanDataValue to the given Double value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 */
-	public void setValue(Double theValue)
-	{
-		setValueCore(theValue);
-	}
-
-	/**
-	 * Set the value of this BooleanDataValue to the given Double value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 */
-	public void setValue(Float theValue)
-	{
-		setValueCore(theValue);
 	}
 
 	private void setValueCore(Number theValue)

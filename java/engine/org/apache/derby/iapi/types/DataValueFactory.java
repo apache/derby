@@ -298,8 +298,8 @@ public interface DataValueFactory
          *
          * @exception StandardException         Thrown on error
          */
-        NumberDataValue         getDecimalDataValue(BigDecimal value) throws StandardException;
-        NumberDataValue         getDecimalDataValue(BigDecimal value, NumberDataValue previous)
+        NumberDataValue         getDecimalDataValue(Number value) throws StandardException;
+        NumberDataValue         getDecimalDataValue(Number value, NumberDataValue previous)
                                                         throws StandardException;
 
 

@@ -969,20 +969,21 @@ public class StaticMethodCallNode extends MethodCallNode
 
 						boolean isNumericType = paramdtd.getTypeId().isNumericTypeId();
 
-						if (isNumericType) {
-							if (!paramdtd.getTypeId().isDecimalTypeId()) {
+						// is the underlying type for the OUT/INOUT parameter primitive.
+						boolean isPrimitive = ((java.lang.reflect.Method) method).getParameterTypes()[i].getComponentType().isPrimitive();
 
-								if (!((java.lang.reflect.Method) method).getParameterTypes()[i].getComponentType().isPrimitive())
-									mb.cast(ClassName.NumberDataValue);
-							}
+						if (isNumericType) {
+							// need to up-cast as the setValue(Number) method only exists on NumberDataValue
+
+							if (!isPrimitive)
+								mb.cast(ClassName.NumberDataValue);
 						}
 						else if (paramdtd.getTypeId().isBooleanTypeId())
 						{
-							if (!((java.lang.reflect.Method) method).getParameterTypes()[i].getComponentType().isPrimitive())
+							// need to cast as the setValue(Boolean) method only exists on BooleanDataValue
+							if (!isPrimitive)
 								mb.cast(ClassName.BooleanDataValue);
 						}
-
-
 
 						if (paramdtd.getTypeId().variableLength()) {
 							// need another DVD reference for the set width below.
@@ -992,6 +993,13 @@ public class StaticMethodCallNode extends MethodCallNode
 
 						mb.getField(lf); // pvs, dvd, array
 						mb.getArrayElement(0); // pvs, dvd, value
+
+						// The value needs to be set thorugh the setValue(Number) method.
+						if (isNumericType && !isPrimitive)
+						{
+							mb.upCast("java.lang.Number");
+						}
+
 						mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "setValue", "void", 1);
 
 						if (paramdtd.getTypeId().variableLength()) {

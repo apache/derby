@@ -118,69 +118,6 @@ public interface BooleanDataValue extends DataValueDescriptor
 	 */
 	public void setValue(Boolean theValue);
 
-
-	/**
-	 * Set the value of this BooleanDataValue to the given int value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 *
-	 */
-	public void setValue(Integer theValue);
-
-	/**
-	 * Set the value of this BooleanDataValue to the given double value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 *
-	 */
-	public void setValue(Double theValue);
-
-	/**
-	 * Set the value of this BooleanDataValue to the given float value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 *
-	 */
-	public void setValue(Float theValue);
-
-
-	/**
-	 * Set the value of this BooleanDataValue to the given short value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 *
-	 */
-	public void setValue(Short theValue);
-
-	/**
-	 * Set the value of this BooleanDataValue to the given long value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 *
-	 */
-	public void setValue(Long theValue);
-
-
-	/**
-	 * Set the value of this BooleanDataValue to the given Byte value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
-	 *
-	 */
-	public void setValue(Byte theValue);
-
 	/**
 	 * Tell whether a BooleanDataValue has the given value.  This is useful
 	 * for short-circuiting.

@@ -200,104 +200,51 @@ public abstract class NumberDataType extends DataType
      *          For positive values or null, return false.
      */
     protected abstract boolean isNegative();
-
+		
 	/**
+	   Common code to handle java.lang.Integer as a Number,
+	   used for TINYINT, SMALLINT, INTEGER
 	 * @see NumberDataValue#setValue
 	 *
+	 * @exception StandardException		Thrown on error
 	 */
-	public final void setValue(Byte theValue) throws StandardException
+	public void setValue(Number theValue) throws StandardException
 	{
-		if (!objectNull(theValue))
+		if (objectNull(theValue))
+			return;
+		
+		if (SanityManager.ASSERT)
 		{
-			setValue(theValue.byteValue());
+			if (!(theValue instanceof java.lang.Integer))
+				SanityManager.THROWASSERT("NumberDataType.setValue(Number) passed a " + theValue.getClass());
 		}
-	}
-	
-	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public final void setValue(Short theValue) throws StandardException
-	{
-		if (!objectNull(theValue))
-			setValue(theValue.shortValue());
-	}
-	
-	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public final void setValue(Integer theValue) throws StandardException
-	{
-		if (!objectNull(theValue))
-			setValue(theValue.intValue());
-	}
-	
-	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public final void setValue(Long theValue) throws StandardException
-	{
-		if (!objectNull(theValue))
-			setValue(theValue.longValue());
-	}
-	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public final void setValue(Double theValue) throws StandardException
-	{
-		if (!objectNull(theValue))
-			setValue(theValue.doubleValue());
+		
+		setValue(theValue.intValue());
 	}
 
 	/**
 		setValue for integral exact numerics. Converts the BigDecimal
 		to a long to preserve precision
 	*/
-	public  void setValue(BigDecimal theValue) throws StandardException
+	public void setBigDecimal(Number bigDecimal) throws StandardException
 	{
-		if (objectNull(theValue))
+		if (objectNull(bigDecimal))
 			return;
+
+		Comparable bdc = (Comparable) bigDecimal;
+
 
 		// See comment in SQLDecimal.getLong()
 
-		if (   (theValue.compareTo(SQLDecimal.MINLONG_MINUS_ONE) == 1)
-			&& (theValue.compareTo(SQLDecimal.MAXLONG_PLUS_ONE) == -1)) {
+		if (   (bdc.compareTo(SQLDecimal.MINLONG_MINUS_ONE) == 1)
+			&& (bdc.compareTo(SQLDecimal.MAXLONG_PLUS_ONE) == -1)) {
 
-			setValue(theValue.longValue());
+			setValue(bigDecimal.longValue());
 		} else {
 
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, getTypeName());
 		}
-	}
-
-	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public final void setValue(Float theValue) throws StandardException
-	{
-		if (!objectNull(theValue))
-			setValue(theValue.floatValue());
-	}
-	
-	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 */
-	public final void setValue(Boolean theValue) throws StandardException
-	{
-		if (!objectNull(theValue))
-			setValue(theValue.booleanValue());
-	}
-
+	}	
 	/**
 		Return the precision of this specific DECIMAL value.
 		If the value does not represent a SQL DECIMAL then

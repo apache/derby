@@ -31,10 +31,10 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.reference.ClassName;
-
-import java.sql.Types;
 
 public class UserDefinedTypeCompiler extends BaseTypeCompiler
 {
@@ -147,4 +147,16 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	{
 		return "getNullObject";
 	}
+
+	public void generateDataValue(MethodBuilder mb,
+										LocalField field)
+	{
+		// cast the value to an object for method resolution
+		mb.upCast("java.lang.Object");
+
+		super.generateDataValue(mb, field);
+	}
+
+		
+
 }

@@ -445,15 +445,18 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 */
 	public void setValue(byte[] theValue) throws StandardException;
 
-/**
-	 * Set the value of this DataValueDescriptor.
-	 *
-	 * @param theValue	The BigDecimal value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
-	 *
+	/**
+		Set this value from an application supplied java.math.BigDecimal.
+		This is to support the PreparedStatement.setBigDecimal method and
+		similar JDBC methods that allow an application to pass in a BigDecimal
+		to any SQL type.
+		Parameter is declared as java.lang.Number to allow compilation
+		under J2ME/CDC/Foundation. This method will not be called in
+		any environment that does not support java.math.BigDecimal.
+
+		@param bigDecimal required to be a BigDecimal or null.
 	 */
-	public void setValue(BigDecimal theValue) throws StandardException;
+	public void setBigDecimal(Number bigDecimal) throws StandardException;
 
 	/**
 	 * Set the value of this DataValueDescriptor.

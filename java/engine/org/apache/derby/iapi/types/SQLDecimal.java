@@ -367,7 +367,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		if ((theValue instanceof BigDecimal) ||
 			(theValue == null))
 		{
-			setValue((BigDecimal)theValue);
+			setCoreValue((BigDecimal)theValue);
 		}
 		else if (theValue instanceof Number)
 		{
@@ -380,7 +380,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
-		setValue(theValue.getBigDecimal());
+		setCoreValue(theValue.getBigDecimal());
 	}
 
 	public int	getLength()
@@ -663,12 +663,34 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 
 	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 */
-	public void setValue(BigDecimal theValue)
+		Only to be called when the application sets a value using BigDecimal
+		through setBigDecimal calls.
+	*/
+	public void setBigDecimal(Number theValue) throws StandardException
 	{
-		setCoreValue(theValue);
+		setCoreValue((BigDecimal) theValue);
+	}
+
+	/**
+		Called when setting a DECIMAL value internally or from
+		through a procedure or function.
+		Handles long in addition to BigDecimal to handle
+		identity being stored as a long but returned as a DECIMAL.
+	*/
+	public void setValue(Number theValue) throws StandardException
+	{
+		if (SanityManager.ASSERT)
+		{
+			if (theValue != null &&
+				!(theValue instanceof java.math.BigDecimal) &&
+				!(theValue instanceof java.lang.Long))
+				SanityManager.THROWASSERT("SQLDecimal.setValue(Number) passed a " + theValue.getClass());
+		}
+
+		if (theValue instanceof BigDecimal || theValue == null)
+			setCoreValue((BigDecimal) theValue);
+		else
+			setValue(theValue.longValue());
 	}
 
 	/**
@@ -725,7 +747,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		int desiredScale = desiredType.getScale();
 		int desiredPrecision = desiredType.getPrecision();
 
-		setValue(source.getBigDecimal());
+		setCoreValue(source.getBigDecimal());
 		setWidth(desiredPrecision, desiredScale, true);
 	}
 
@@ -764,7 +786,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		result.setValue(addend1.getBigDecimal().add(addend2.getBigDecimal()));
+		result.setBigDecimal(addend1.getBigDecimal().add(addend2.getBigDecimal()));
 		return result;
 	}
 
@@ -797,7 +819,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		result.setValue(left.getBigDecimal().subtract(right.getBigDecimal()));
+		result.setBigDecimal(left.getBigDecimal().subtract(right.getBigDecimal()));
 		return result;
 	}
 
@@ -830,7 +852,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		result.setValue(left.getBigDecimal().multiply(right.getBigDecimal()));
+		result.setBigDecimal(left.getBigDecimal().multiply(right.getBigDecimal()));
 		return result;
 	}
 
@@ -902,7 +924,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		** (for the whole result set column, eg.); otherwise dynamically
 		** calculates the scale according to actual values.  Beetle 3901
 		*/
-		result.setValue(dividendBigDecimal.divide(
+		result.setBigDecimal(dividendBigDecimal.divide(
 									divisorBigDecimal,
 									scale > -1 ? scale :
 									Math.max((dividendBigDecimal.scale() + 
@@ -938,7 +960,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		result.setValue(getBigDecimal().negate());
+		result.setBigDecimal(getBigDecimal().negate());
 		return result;
 	}
 

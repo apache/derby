@@ -55,7 +55,7 @@ import java.sql.Types;
 
 abstract class BaseTypeCompiler implements TypeCompiler
 {
-	TypeId correspondingTypeId;
+	private TypeId correspondingTypeId;
 
 	/**
 	 * Get the method name for getting out the corresponding primitive
@@ -110,16 +110,10 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	}
 
 	/** @see TypeCompiler#generateDataValue */
-	public final void generateDataValue(MethodBuilder mb,
+	public void generateDataValue(MethodBuilder mb,
 										LocalField field)
 	{
 		String				interfaceName = interfaceName();
-
-		if (this instanceof UserDefinedTypeCompiler)
-		{
-			// cast the value to an object for method resolution
-			mb.upCast("java.lang.Object");
-		}
 
 		// push the second argument
 
@@ -241,11 +235,11 @@ abstract class BaseTypeCompiler implements TypeCompiler
 		if (forDataTypeFunction)
 			retval = retval || 
 				(otherType.isFixedStringTypeId() &&
-				(correspondingTypeId.isFloatingPointTypeId()));
+				(getTypeId().isFloatingPointTypeId()));
 	   
 		retval = retval ||
 			(otherType.isFixedStringTypeId() && 					  
-			 (!correspondingTypeId.isFloatingPointTypeId()));
+			 (!getTypeId().isFloatingPointTypeId()));
 		
 		return retval;
 
@@ -312,7 +306,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	 */
 	protected int getStoredFormatIdFromTypeId()
 	{
-		return correspondingTypeId.getTypeFormatId();
+		return getTypeId().getTypeFormatId();
 	}
 
 

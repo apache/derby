@@ -984,27 +984,9 @@ readingLoop:
 		setValue(theValue ? "1" : "0");
 	}
 
-	/**
-	 * Set the value of this SQLChar to the given boolean.
-	 *
-	 * @param theValue	The Boolean
-	 *
-	 * @return	This as Boolean
-	 *
-	 */
-	public void setValue(Boolean theValue)  throws StandardException
-	{
-		setValue((Object) theValue);
-	}
-
 	public void setValue(int theValue)  throws StandardException
 	{
 		setValue(Integer.toString(theValue));
-	}
-
-	public void setValue(Integer theValue)  throws StandardException
-	{
-		setValue((Object) theValue);
 	}
 
 	public void setValue(double theValue)  throws StandardException
@@ -1012,19 +994,9 @@ readingLoop:
 		setValue(Double.toString(theValue));
 	}
 
-	public void setValue(Double theValue)  throws StandardException
-	{
-		setValue((Object) theValue);
-	}
-
 	public void setValue(float theValue)  throws StandardException
 	{
 		setValue(Float.toString(theValue));
-	}
-
-	public void setValue(Float theValue) throws StandardException
-	{
-		setValue((Object) theValue);
 	}
 
 	public void setValue(short theValue)  throws StandardException
@@ -1032,29 +1004,14 @@ readingLoop:
 		setValue(Short.toString(theValue));
 	}
 
-	public void setValue(Short theValue) throws StandardException
-	{
-		setValue((Object) theValue);
-	}
-
 	public void setValue(long theValue)  throws StandardException
 	{
 		setValue(Long.toString(theValue));
 	}
 
-	public void setValue(Long theValue) throws StandardException
-	{
-		setValue((Object) theValue);
-	}
-
 	public void setValue(byte theValue)  throws StandardException
 	{
 		setValue(Byte.toString(theValue));
-	}
-
-	public void setValue(Byte theValue) throws StandardException
-	{
-		setValue((Object) theValue);
 	}
 
 	public void setValue(byte[] theValue) throws StandardException
@@ -1098,9 +1055,13 @@ readingLoop:
 		setValue(new String(carray));
 	}
 
-	public void setValue(BigDecimal theValue)  throws StandardException
+	/**
+		Only to be called when an application through JDBC is setting a
+		SQLChar to a java.math.BigDecimal.
+	*/
+	public void setBigDecimal(Number bigDecimal)  throws StandardException
 	{
-		setValue((Object) theValue);
+		setValue((Object) bigDecimal);
 	}
 
 	/** @exception StandardException		Thrown on error */

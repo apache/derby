@@ -527,10 +527,10 @@ public class UserType extends DataType
 	 * @see UserDataValue#setValue
 	 *
 	 */
-	public void setValue(BigDecimal value)
+	public void setBigDecimal(Number theValue)
 	{
 		// needed to allow serializable BigDecimal
-		setValue((Object) value);
+		setValue((Object) theValue);
 	}
 
 	public void setValue(String theValue)

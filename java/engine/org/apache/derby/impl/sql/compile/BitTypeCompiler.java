@@ -62,7 +62,7 @@ public class BitTypeCompiler extends BaseTypeCompiler
                                   ClassFactory cf)
 		{
 
-			if (correspondingTypeId.isLongConcatableTypeId() ||
+			if (getTypeId().isLongConcatableTypeId() ||
 				otherType.isLongConcatableTypeId())
 				return false;
 

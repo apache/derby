@@ -172,92 +172,28 @@ public interface NumberDataValue extends DataValueDescriptor
                             throws StandardException;
 
 	/**
-	 * Set the value of this NumberDataValue to the given int value
+	 * Set the value of this NumberDataValue to the given value.
+	   This is only intended to be called when mapping values from
+	   the Java space into the SQL space, e.g. parameters and return
+	   types from procedures and functions. Each specific type is only
+	   expected to handle the explicit type according the JDBC.
+	   <UL>
+	   <LI> SMALLINT from java.lang.Integer
+	   <LI> INTEGER from java.lang.Integer
+	   <LI> LONG from java.lang.Long
+	   <LI> FLOAT from java.lang.Float
+	   <LI> DOUBLE from java.lang.Double
+	   <LI> DECIMAL from java.math.BigDecimal
+	   </UL>
 	 *
-	 * @param theValue	An Integer containing the value to set this
-	 *					NumberDataValue to.  Null means set the value
-	 *					to SQL null.
-	 *
-	 * @return	This NumberDataValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void setValue(Integer theValue) throws StandardException;
-
-	/**
-	 * Set the value of this NumberDataValue to the given double value
-	 *
-	 * @param theValue	A Double containing the value to set this
-	 *					NumberDataValue to.  Null means set the value
-	 *					to SQL null.
-	 *
-	 * @return	This NumberDataValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void setValue(Double theValue) throws StandardException;
-
-	/**
-	 * Set the value of this NumberDataValue to the given float value
-	 *
-	 * @param theValue	A Float containing the value to set this
-	 *					NumberDataValue to.  Null means set the value
-	 *					to SQL null.
-	 *
-	 * @return	This NumberDataValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void setValue(Float theValue) throws StandardException;
-
-	/**
-	 * Set the value of this NumberDataValue to the given short value
-	 *
-	 * @param theValue	A Short containing the value to set this
-	 *					NumberDataValue to.  Null means set the value
-	 *					to SQL null.
-	 *
-	 * @return	This NumberDataValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void setValue(Short theValue) throws StandardException;
-
-
-	/**
-	 * Set the value of this NumberDataValue to the given long value
-	 *
-	 * @param theValue	A Long containing the value to set this
-	 *					NumberDataValue to.  Null means set the value
-	 *					to SQL null.
-	 *
-	 * @return	This NumberDataValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void setValue(Long theValue) throws StandardException;
-
-	/**
-	 * Set the value of this NumberDataValue to the given byte value
-	 *
-	 * @param theValue	A Byte containing the value to set this
+	 * @param theValue	An Number containing the value to set this
 	 *					NumberDataValue to.  Null means set the value
 	 *					to SQL null.
 	 *
 	 * @return	This NumberDataValue
 	 *
 	 */
-	public void setValue(Byte theValue) throws StandardException;
-
-	/**
-	 * Set the value.
-	 *
-	 * @param theValue	Contains the boolean value to set this to
-	 *
-	 * @return	This value
-	 *
-	 */
-	public void setValue(Boolean theValue) throws StandardException;
+	public void setValue(Number theValue) throws StandardException;
 
 	/**
 		Return the precision of this specific DECIMAL value.

@@ -215,7 +215,7 @@ public class SQLClob
 		throwLangSetMismatch("java.sql.Date");
 	}
 	
-	public void setValue(BigDecimal theValue) throws StandardException
+	public void setBigDecimal(Number bigDecimal) throws StandardException
 	{
 		throwLangSetMismatch("java.math.BigDecimal");
 	}

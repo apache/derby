@@ -43,6 +43,8 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.DB2Limit;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 /**
  * This class implements TypeId for the SQL numeric datatype.
@@ -533,4 +535,18 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		val = Math.min(NumberDataValue.MAX_DECIMAL_PRECISION_SCALE, val);
 		return (int)val;
 	}
+
+
+	public void generateDataValue(MethodBuilder mb,
+										LocalField field)
+	{
+		if (getTypeId().isDecimalTypeId())
+		{
+			// cast the value to an object for method resolution
+			mb.upCast("java.lang.Number");
+		}
+
+		super.generateDataValue(mb, field);
+	}
+
 }

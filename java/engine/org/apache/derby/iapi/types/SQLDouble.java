@@ -461,12 +461,33 @@ public final class SQLDouble extends NumberDataType
 		isnull = false;
 	}
 
-	public  void setValue(BigDecimal theValue) throws StandardException
+	public  void setValue(Number theValue) throws StandardException
 	{
 		if (objectNull(theValue)) 
 			return;
 
+		if (SanityManager.ASSERT)
+		{
+			if (!(theValue instanceof java.lang.Double))
+				SanityManager.THROWASSERT("SQLDouble.setValue(Number) passed a " + theValue.getClass());
+		}
+
 		setValue(theValue.doubleValue());
+	}
+
+	/**
+		Called for an application setting this value using a BigDecimal 
+	*/
+	public  void setBigDecimal(Number bigDecimal) throws StandardException
+	{
+		if (objectNull(bigDecimal)) 
+			return;
+
+		// Note BigDecimal.doubleValue() handles the case where
+		// its value is outside the range of a double. It returns
+		// infinity values which should throw an exception in setValue(double).
+		setValue(bigDecimal.doubleValue());
+		
 	}
 
 	/**

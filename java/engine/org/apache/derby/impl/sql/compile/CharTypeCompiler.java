@@ -66,7 +66,7 @@ public final class CharTypeCompiler extends BaseTypeCompiler
 		{
 				
 			// Long Types cannot be compared
-			if (correspondingTypeId.isLongConcatableTypeId() ||
+			if (getTypeId().isLongConcatableTypeId() ||
 				otherType.isLongConcatableTypeId())
 				return false;
 			
@@ -78,7 +78,7 @@ public final class CharTypeCompiler extends BaseTypeCompiler
 			
 			
 			TypeCompiler otherTC = getTypeCompiler(otherType);
-			return (otherType.userType() && otherTC.comparable(correspondingTypeId,
+			return (otherType.userType() && otherTC.comparable(getTypeId(),
 															   forEquals, cf));
 		}
 	
@@ -92,14 +92,14 @@ public final class CharTypeCompiler extends BaseTypeCompiler
         {
 			// LONGVARCHAR can only be converted from  character types
 			// or CLOB.
-			if (correspondingTypeId.isLongVarcharTypeId())
+			if (getTypeId().isLongVarcharTypeId())
 			{
 				return (otherType.isStringTypeId());
 			}
 
 			// The double function can convert CHAR and VARCHAR
 			if (forDataTypeFunction && otherType.isDoubleTypeId())
-				return (correspondingTypeId.isStringTypeId());
+				return (getTypeId().isStringTypeId());
 
 			// can't CAST to CHAR and VARCHAR from REAL or DOUBLE
 			// or binary types
@@ -120,7 +120,7 @@ public final class CharTypeCompiler extends BaseTypeCompiler
 	 */
 	public boolean compatible(TypeId otherType)
 	{
-		return (otherType.isStringTypeId() || (otherType.isDateTimeTimeStampTypeId() && !correspondingTypeId.isLongVarcharTypeId()));
+		return (otherType.isStringTypeId() || (otherType.isDateTimeTimeStampTypeId() && !getTypeId().isLongVarcharTypeId()));
 		
 	}
 

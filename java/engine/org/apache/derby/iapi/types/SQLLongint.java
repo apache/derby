@@ -356,6 +356,25 @@ public final class SQLLongint
 		}
 	}
 
+	/**
+	 * @see NumberDataValue#setValue
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public final void setValue(Number theValue)
+	{
+		if (objectNull(theValue))
+			return;
+		
+		if (SanityManager.ASSERT)
+		{
+			if (!(theValue instanceof java.lang.Long))
+				SanityManager.THROWASSERT("SQLLongint.setValue(Number) passed a " + theValue.getClass());
+		}
+		
+		setValue(theValue.longValue());
+	}
+
 	public void setValue(long theValue)
 	{
 		value = theValue;

@@ -364,22 +364,6 @@ public abstract class DataType
 	{
 		throwLangSetMismatch("java.sql.Date");
 	}
-	
-	/**
-	 * Set the value of this DataValueDescriptor.
-	 * At DataType level just throws an error lower classes will override
-	 *
-	 * @param theValue	The BigDecimal value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
-	 *
-	 */
-
-	public void setValue(BigDecimal theValue) throws StandardException
-	{
-		throwLangSetMismatch("java.math.BigDecimal");
-	}
-
 
 	/**
 	 * Set the value of this DataValueDescriptor.
@@ -511,6 +495,14 @@ public abstract class DataType
 	public void setValue(byte[] theValue) throws StandardException
 	{
 		throwLangSetMismatch("byte[]");
+	}
+
+	/**
+		Only to be called when the application sets a value using BigDecimal
+	*/
+	public void setBigDecimal(Number bigDecimal) throws StandardException
+	{
+		throwLangSetMismatch("java.math.BigDecimal");
 	}
 
 
