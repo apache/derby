@@ -2445,6 +2445,10 @@ public class FromBaseTable extends FromTable
 
 		columnsTableName = columnReference.getTableNameNode();
 
+        if(columnsTableName != null) {
+            if(columnsTableName.getSchemaName() == null && correlationName == null)
+                columnsTableName.bind(this.getDataDictionary());
+        }
 		/*
 		** If there is a correlation name, use that instead of the
 		** table name.
@@ -2458,6 +2462,8 @@ public class FromBaseTable extends FromTable
 			exposedTableName = tableName;
 		}
 
+        if(exposedTableName.getSchemaName() == null && correlationName == null)
+            exposedTableName.bind(this.getDataDictionary());
 		/*
 		** If the column did not specify a name, or the specified name
 		** matches the table we're looking at, see whether the column
@@ -3572,6 +3578,13 @@ public class FromBaseTable extends FromTable
 		TableName tn;
 
 		tn = super.getTableName();
+
+        if(tn != null) {
+            if(tn.getSchemaName() == null &&
+               correlationName == null)
+                   tn.bind(this.getDataDictionary());
+        }
+
 		return (tn != null ? tn : tableName);
 	}
 

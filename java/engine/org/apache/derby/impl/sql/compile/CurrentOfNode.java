@@ -305,6 +305,10 @@ public final class CurrentOfNode extends FromTable {
 
 		columnsTableName = columnReference.getTableNameNode();
 
+        if(columnsTableName != null)
+            if(columnsTableName.getSchemaName() == null && correlationName == null)
+                columnsTableName.bind(this.getDataDictionary());
+
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(preStmt!=null, "must have prepared statement");
@@ -323,6 +327,10 @@ public final class CurrentOfNode extends FromTable {
 		{
 			SanityManager.ASSERT(baseTableName!=null,"no name on target table");
 		}
+
+        if(baseTableName != null)
+            if(baseTableName.getSchemaName() == null && correlationName == null)
+                baseTableName.bind(this.getDataDictionary());
 
 		/*
 		 * If the column did not specify a name, or the specified name

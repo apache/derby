@@ -460,7 +460,7 @@ ERROR 42877: A qualified column name 'T3.C3' is not allowed in the ORDER BY clau
 ij> select c1 from t1 union select c3 from t3 order by asdf.c3;
 ERROR 42877: A qualified column name 'ASDF.C3' is not allowed in the ORDER BY clause.
 ij> select c1 from t1 order by sys.t1.c1;
-ERROR 42X10: 'SYS.T1' is not an exposed table name in the scope in which it appears.
+ERROR 42X04: Column 'SYS.T1.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SYS.T1.C1' is not a column in the target table.
 ij> select c1 from app.t1 order by sys.t1.c1;
 ERROR 42X04: Column 'SYS.T1.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SYS.T1.C1' is not a column in the target table.
 ij> select c1 from t1 c order by app.c.c1;
