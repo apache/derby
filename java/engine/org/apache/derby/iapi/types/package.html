@@ -1,0 +1,342 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Derby Type System</title>
+</head>
+<body>
+<h2>Derby Type System</h2>
+The Derby type system is mainly contained in the <span
+ style="font-family: monospace;">org.apache.derby.iapi.types</span>
+package. The main two classes are <span style="font-family: monospace;">DataValueDescriptor
+</span>and
+<span style="font-family: monospace;">DataTypeDescriptor</span>.<br>
+<h3>DataValueDescriptor</h3>
+Values in Derby are always represented by instances of <span
+ style="font-family: monospace;">org.apache.derby.iapi.types.DataValueDescriptor</span>,
+which might have
+been better named <span style="font-family: monospace;">DataValue</span>.
+<span style="font-family: monospace;"><span
+ style="font-family: monospace;">DataValueDescriptor</span></span>, or
+DVD for short, is
+mainly used to represent SQL data values, though it is used for other
+internal types.&nbsp; <span style="font-family: monospace;">DataValueDescriptor
+</span>is a Java&nbsp;
+interface and in general all values are manipulated through interfaces
+and not the Java class implementations such as <span
+ style="font-family: monospace;">SQLInteger</span>.
+DVDs are mutable
+(their value can change) and can represent <span
+ style="font-family: monospace;">NULL </span>or a valid value. Note
+that SQL <span style="font-family: monospace;">NULL </span>is
+represented by a <span style="font-family: monospace;">DataValueDescriptor
+</span>with a state of <span style="font-family: monospace;">NULL</span>,
+not a <span style="font-family: monospace;">null </span>Java
+reference to a <span style="font-family: monospace;">DataValueDescriptor</span>.<br>
+<br>
+Generally the Derby
+engine works upon an array of DVD's that represent a row, which can
+correspond to a row in a table, a row in a <span
+ style="font-family: monospace;">ResultSet </span>to be returned to
+the application or an intermediate row in a query. The DVD's within
+this array are re-used for each row processed, this is why they are
+mutable. For example in&nbsp; reading rows from the store a single DVD
+is used to read a column's value for all the rows processed. This is to
+benefit performance, thus in a table scan of one million rows Derby
+does not create one million objects, which would be the case if the
+type system was immutable, like the Java object wrappers
+java.lang.Integer
+etc.<br>
+<br>
+The methods in <span style="font-family: monospace;">DataValueDescriptor
+</span>can be broken into
+these groups<span style="font-family: monospace;"><span
+ style="font-family: times new roman,times,serif;"><br>
+</span></span>
+<ul>
+  <li><span style="font-family: monospace;">getXXX </span>methods
+to help implement <span style="font-family: monospace;">java.sql.ResultSet.getXXX</span>
+methods. Thus a <span style="font-family: monospace;">ResultSet.getInt()</span>
+corresponds to the <span style="font-family: monospace;">DataValueDescriptor.getInt()</span>
+method.</li>
+  <li>setValue methods to help implement <span
+ style="font-family: monospace;">java.sql.PreparedStatement.setXXX</span>
+methods. Thus a <span style="font-family: monospace;">PreparedStatement.setInt()</span>
+corresponds to the <span style="font-family: monospace;">DataValueDescriptor.setValue(int)</span>
+method. These methods perform overflow and other range checks, e.g.
+setting a <span style="font-family: monospace;">long </span>into a <span
+ style="font-family: monospace;">SQLInteger </span>checks
+to see that the value is within the range of an <span
+ style="font-family: monospace;">int</span>, if not
+an exception is thrown.<br>
+These methods are also used to implement casts and other data type
+conversion, thus ensuring consistent type conversions for Derby within
+SQL and JDBC.<br>
+  </li>
+  <li>Methods to support SQL operators, e.g. <span
+ style="font-family: monospace;">isNull</span>.</li>
+  <li>Methods to read and write to disk, or strictly to convert the
+value into a byte representation, e.g.<span
+ style="font-family: monospace;">writeExternal</span>.<br>
+  </li>
+</ul>
+<span style="font-family: monospace;"><span
+ style="font-family: times new roman,times,serif;"></span></span>
+<h4>Type Specific
+Interfaces</h4>
+To support operators specific to a type, or set of types, Java
+interfaces that extend <span style="font-family: monospace;">DataValueDescriptor<span
+ style="font-family: times new roman,times,serif;"> exist:<br>
+</span></span>
+<ul>
+  <li><span style="font-family: monospace;">NumberDataValue </span>-
+Methods for operators on numeric types, such as <span
+ style="font-family: monospace;">INTEGER</span>, <span
+ style="font-family: monospace;">DECIMAL</span>, <span
+ style="font-family: monospace;">REAL</span>, e.g. plus for the SQL +
+operator.<br>
+  </li>
+  <li><span style="font-family: monospace;">StringDataValue </span>-
+Methods for operators on character types, such as <span
+ style="font-family: monospace;">CHAR</span>, <span
+ style="font-family: monospace;">VARCHAR</span><span
+ style="font-family: monospace;"></span>.</li>
+  <li><span style="font-family: monospace;">BitDataValue </span>-
+Methods for operators on binary types, such as <span
+ style="font-family: monospace;">CHAR FOR BIT DATA</span>, <span
+ style="font-family: monospace;">BLOB</span><span
+ style="font-family: monospace;"></span>.</li>
+  <li><span style="font-family: monospace;">DateTimeDataValue </span>-
+Methods for operators on character types, such as <span
+ style="font-family: monospace;">CHAR</span>, <span
+ style="font-family: monospace;">VARCHAR</span><span
+ style="font-family: monospace;"></span>.</li>
+  <li><span style="font-family: monospace;">BooleanDataValue </span>-
+Methods for operators on <span style="font-family: monospace;">BOOLEAN
+    </span><span style="font-family: monospace;"></span>type<span
+ style="font-family: monospace;"></span><span
+ style="font-family: monospace;"></span>.</li>
+</ul>
+<h4>Language Compilation</h4>
+Much of the generate code for language involves the type system. E.g.
+SQL operators are converted to method calls on interfaces within the
+type system, such as <span style="font-family: monospace;">DataValueDesciptor
+</span>or NumberDataValue. Thus all
+this generated code makes method calls through interface method calls.
+The language has a policy/style of generating fields with holder
+objects for the result of any operation. This holder
+<span style="font-family: monospace;">DataValueDescriptor </span>is
+then re-used for all the operations within that
+query execution, thus saving object creation when the operation is
+called on multiple rows. The generated code does not create the initial
+value for the field, instead the operator method or <span
+ style="font-family: monospace;">DataValueFactory
+</span>methods create instance the first time that the result is passed
+in as
+<span style="font-family: monospace;">null</span>. The approximate Java
+code for this would be (note the generator
+generates to byte code directly).<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp; // instance field to
+hold the result of the minus</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; private
+NumberDataValue f7;</span><br style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+...</span><br style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; // code within
+a generated method</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; f7 = value.minus(f7);</span><br
+ style="font-family: monospace;">
+<br>
+<h4><span style="font-family: monospace;"><span
+ style="font-family: times new roman,times,serif;"></span></span></h4>
+<h4>Interaction with
+Store</h4>
+The store knows little about how values represent themselves in bytes,
+all that knowledge is contained within the DVD implementation.<br>
+The exception is SQL <span style="font-family: monospace;">NULL </span>handling,
+the store handles <span style="font-family: monospace;">NULL </span>values
+consistently, as a null bit in the status byte for a field. Thus
+<span style="font-family: monospace;">readExternal </span>and <span
+ style="font-family: monospace;">writeExternal </span>are never called
+for a
+<span style="font-family: monospace;">DataValueDescriptor </span>that
+is <span style="font-family: monospace;">NULL</span>.<br>
+<h4>Delayed Object Creation</h4>
+When a value reads itself from its byte representation it is required
+that the least amount of work is performed to obtain a useful
+representation of a value. This is because the value being read from
+disk may never be returned to the application, or returned but never
+used by the application. The first case can occur when a qualification
+in the SQL statement is executed at the language layer and not pushed
+down to the store, thus the row is fetched from the store but filtered
+out at the language layer. Taking <span style="font-family: monospace;">SQLDecimal
+</span>as an example, the byte
+format is a representation of&nbsp; a <span
+ style="font-family: monospace;">java.math.BigInteger</span> instance
+along with a scale. Taking the simple approach that <span
+ style="font-family: monospace;">SQLDecimal </span>would
+always use a java.math.BigDecimal, then this is the steps that would
+occur when reading a <span style="font-family: monospace;">DECIMAL </span>column:<br>
+<ol>
+  <li>Read <span style="font-family: monospace;">BigInteger </span>format
+into byte array, read scale</li>
+  <li>New <span style="font-family: monospace;">BigInteger </span>instance
+from byte array - <span style="font-weight: bold;">2 object creations
+and byte array copy</span></li>
+  <li>New <span style="font-family: monospace;">BigDecimal </span>instance
+from BigInteger and scale - <span style="font-weight: bold;">1 object
+creation</span><br>
+  </li>
+</ol>
+Now think about a million row table scan with a DECIMAL column that
+returns 1% of the rows to the application, filtering at the language
+layer.<br>
+<br>
+This simple <span style="font-family: monospace;">SQLDecimal </span>implementation
+will create 3 million objects and
+do 1 million byte array copies.<br>
+<br>
+The smart (and current) implementation of <span
+ style="font-family: monospace;">SQLDecimal </span>will delay steps 2
+and 3 until there is an actual need for a <span
+ style="font-family: monospace;">BigDecimal </span>object, e.g when
+the application calls <span style="font-family: monospace;">ResultSet.getBigDecimal</span>.
+So assuming the
+application calls <span style="font-family: monospace;">getBigDecimal </span>for
+every row it receives, then, since
+only 1% of the rows are returned, 30,000 objects are created and 10,000
+byte copies are made, thus saving 2,970,000 object creations and
+990,000 byte array copies and the garbage collection overhead of those
+short lived objects.<br>
+<br>
+This delayed object creation increases the complexity of the
+<span style="font-family: monospace;">DataValueDescriptor </span>implementation,
+but the performance benefit is well
+worth it. The complexity comes from the implementation maintaining dual
+state, in <span style="font-family: monospace;">SQLDecimal </span>case
+the value is represented by either the raw
+value, or by a <span style="font-family: monospace;">BigDecimal </span>object.
+Care is taken in the implementation
+to always access the value through methods, and not the fields
+directly. String based values such as <span
+ style="font-family: monospace;">SQLChar </span>also perform this
+delayed
+object creation to String, as creating a String object requires two
+object creations and a char array copy. In the case of <span
+ style="font-family: monospace;">SQLChar </span>though,
+the raw value is maintained as a char array and not a byte array, this
+is because the char[] can be used as-is as the value, e.g. in string
+comparisons.<br>
+<h3>DataValueFactory</h3>
+Specific instances of <span style="font-family: monospace;">DataValueDescriptor
+</span>are mostly created through
+the <span style="font-family: monospace;">DataValueFactory </span>interface.
+This hides the implementation of types
+from the JDBC, language and store layers. This interface includes
+methods to:<br>
+<ul>
+  <li>generate new <span style="font-family: monospace;">NULL </span>values
+for specific SQL types.<br>
+  </li>
+  <li>generate specific types from Java primitves or Java objects (such
+as String). The returned type corresponds to the JDBC mapping for the
+Java type, e.g. <span style="font-family: monospace;">SQLInteger </span>for
+    <span style="font-family: monospace;">int</span>. Where the Java
+type can map to
+multiple SQL types there are specific methods such as getChar,
+getVarchar.</li>
+</ul>
+<h3><span style="font-family: monospace;"></span></h3>
+<h3>DataTypeDescriptor</h3>
+The SQL type of a column, value or expression is represented by an
+instance of <span style="font-family: monospace;">org.apache.derby.iapi.types.DataTypeDescriptor.</span><span
+ style="font-family: monospace;"> DataTypeDescriptor</span><span
+ style="font-family: monospace;"> contains three key
+pieces of information:<br>
+</span>
+<ol>
+  <li>The fundamental SQL type, e.g. <span
+ style="font-family: monospace;">INTEGER</span>, <span
+ style="font-family: monospace;">DECIMAL, represented by a
+org.apache.derby.iapi.types.TypeId.<br>
+    </span></li>
+  <li>Any length, precision or scale attributes, e.g. length for <span
+ style="font-family: monospace;">CHAR</span>, precision &amp; scale for
+    <span style="font-family: monospace;">DECIMAL</span>.</li>
+  <li>Is the type nullable</li>
+</ol>
+Note that a <span style="font-family: monospace;">DataValueDescriptor </span>is
+not tied to any <span style="font-family: monospace;">DataTypeDescriptor</span>,
+thus setting a value into a <span style="font-family: monospace;">DataValueDescriptor
+</span>that does not conform to the intended <span
+ style="font-family: monospace;">DataTypeDescriptor </span>is allowed.
+The value is checked in an explict normalization phase. As an example,
+an application can use <span style="font-family: monospace;">setBigDecimal()</span>
+to set <span style="font-family: monospace;">199.0</span> to a
+parameter that is marked as being <span style="font-family: monospace;">DECIMAL(4,2)</span>.
+Only on the execute phase will the out of range exception be raised.<br>
+<ol>
+</ol>
+<h3>Issues</h3>
+<h4>Interfaces or Classes</h4>
+Matching the interface type hierachy is a implementation (class)
+hierachy complete with abstract types, for example DataType (again
+badly named) is the abstract root for all implementations of
+DataValueDescriptor, and NumberDataType for NumberDataValue. Code would
+be smaller and faster if the interfaces were removed and the official
+api became the public methods of these abstract classes. The work
+involved here is fixing the code generation involving types, regular
+java code would be compiled correctly with any change, but the
+generated code needs to be change by hand, to change interface calls to
+method calls. Any change like this should probably rename the abstract
+classes to short descriptive names, liker DataValue and NumberValue.<br>
+<h4>DataValueFactory</h4>
+There is demonstrated need to hide the implementation of DECIMAL as
+J2ME, J2SE and J2SE5 require different versions, thus a type
+implementation factory is required. However it seems to be too generic
+to have the ability to support different implementations of INTEGER,
+BIGINT and some other fundemental types. Thus maybe the code could be
+simplified to allow use of SQLInteger, SQLLong and others directly. At
+least the SQL types that are implemented using Java primitives.<br>
+<h4>Result Holder Generation</h4>
+The dynamic creation of result holders (see language section) means
+that all operators have to check for the result reference being passed
+in being null, and if so create a new instance of the desired type.
+This check seems inefficient as it will be performed once per
+operation, again, imagine the million row query. In addition the field
+that holds the result holder in the generated code is assigned each
+time to the same value, inefficient. It seems that the code using the
+type system, generated or coded, can set up the result holder at
+initialization time, thus removing the need for the check and field
+assignment, leading to faster smaller code.<br>
+<h4>NULL and operators</h4>
+The operators typically have to check for incoming NULL values and
+assign the result to be NULL if any of the inputs are NULL. This
+combined with the result holder generation issue leads to a lot of
+duplicate code checking to see if the inputs are NULL. It's hard to
+currently do this in a single method as the code needs to determine if
+the inputs are NULL, generate a result holder and return two values (is
+the result NULL and what is the result holder). Splitting the operator
+methods into two would help as at least the NULL checks could be in the
+super-class for all the types, rather than in each implementation. In
+addition this would lead to the ability to generate to a more efficient
+operator if the inputs are not nullable. E.g for the + operator there
+could be <span style="font-family: monospace;">plus()</span> and <span
+ style="font-family: monospace;">plusNotNull()</span> methods, the <span
+ style="font-family: monospace;">plus()</span> being implemented in the
+NumberDataType class, handling NULL inputs and calling plusNotNull(),
+with the plusNotNull() implemented in the specific type.<br>
+<h4>Operators and self</h4>
+It seems the operator methods should almost always be acting on thier
+own value, e.g. the plus() method should only take one input and the
+result is the value of the receiver (self) added to the input.
+Currently the plus takes two inputs and probably in most if not all
+cases the left input is the receiver. The result would be smaller code
+and possible faster, as the method calls on self would not be through
+an interface.<br>
+</body>
+</html>
