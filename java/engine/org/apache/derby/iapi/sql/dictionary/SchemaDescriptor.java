@@ -2,7 +2,9 @@
  *
  * Product ID: 5697-F53
  *
- * (C) Copyright IBM Corp. 1997, 2004.
+
+ * Copyright 1997, 2004.WESTHAM
+
  *
  * The source code for this program is not published or otherwise divested
  * of its trade secrets, irrespective of what has been deposited with the
