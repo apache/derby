@@ -34,11 +34,7 @@ import org.apache.derby.tools.ij;
 	@author ames
  */
 
-public class repeat { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class repeat {
 
 
 	public static void main(String[] args) {

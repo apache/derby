@@ -20,10 +20,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  * Demonstrate subselect behavior with prepared statement. 
  */
 public class logStream {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
   public static void main (String args[]) 
   { 

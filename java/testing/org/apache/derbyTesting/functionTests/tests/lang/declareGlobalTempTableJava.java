@@ -30,11 +30,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  */
 
 
-public class declareGlobalTempTableJava { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+public class declareGlobalTempTableJava {
 
 	/*
 	** There is a small description prior to each sub-test describing what is being tested.

@@ -53,11 +53,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  * the sharing of code across the various static methods.
  */
 public class T_ConsistencyChecker
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 	private	DataDictionary				dd;
 	private	TransactionController		tc;
 	private	LanguageConnectionContext	lcc;

@@ -29,11 +29,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 	@author manish
  */
 public class AIjdbc
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+{
 
 	public static void main(String[] args) {
 		System.out.println("Test AIjdbc starting");

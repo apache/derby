@@ -25,10 +25,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  * Demonstrate subselect behavior with prepared statement. 
  */
 public class bug4356 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
  
   public static void main (String args[]) 
   { 

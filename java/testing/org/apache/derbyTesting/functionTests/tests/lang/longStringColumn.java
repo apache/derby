@@ -28,11 +28,7 @@ import java.sql.PreparedStatement;
  */
 
 
-public class longStringColumn { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class longStringColumn {
 
 	public static PreparedStatement psSet;
 	public static PreparedStatement psGet;

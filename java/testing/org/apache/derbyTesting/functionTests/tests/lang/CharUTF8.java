@@ -27,11 +27,7 @@ import java.sql.PreparedStatement;
  * Test all characters written through the UTF8 format.
  */
 
-public class CharUTF8 { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+public class CharUTF8 {
 
 	public static PreparedStatement psSet;
 	public static PreparedStatement psGet;    

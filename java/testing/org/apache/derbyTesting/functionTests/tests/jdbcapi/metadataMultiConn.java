@@ -27,10 +27,6 @@ import java.util.Properties;
 
 public class metadataMultiConn
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	public static Connection getConnection(String[] args, boolean autoCommit)
 		throws Exception

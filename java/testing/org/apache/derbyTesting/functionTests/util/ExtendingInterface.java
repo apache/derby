@@ -11,10 +11,6 @@
 package org.apache.derbyTesting.functionTests.util;
 
 public interface ExtendingInterface extends Runnable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	public static int INTERFACE_FIELD = 7541;
 

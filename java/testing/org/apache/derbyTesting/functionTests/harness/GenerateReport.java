@@ -34,11 +34,7 @@ import java.sql.Timestamp;
 
 	@author ames
 **/
-public class GenerateReport { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class GenerateReport {
 
 	static void CollectProperties () {
 		Properties ps = System.getProperties();

@@ -17,11 +17,7 @@ import java.util.StringTokenizer;
   Used by the test harness for special cases
   */
 public class JavaVersionHolder
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+{
  
     private String majorVersion;
     private String minorVersion;

@@ -17,11 +17,7 @@ import java.sql.SQLException;
 
 /** Test DML statement called from within static initializer */
 public class DMLInStaticInitializer
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+{
 
 	/* This is the method that is invoked from the outer query */
 	public static int getANumber()

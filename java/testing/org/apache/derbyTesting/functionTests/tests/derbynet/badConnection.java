@@ -23,11 +23,7 @@ import org.apache.derbyTesting.functionTests.harness.TimedProcess;
 */
 
 public class badConnection
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+{
 	
 	private static Properties properties = new java.util.Properties();
 

@@ -19,10 +19,6 @@ import java.util.StringTokenizer;
   @author ames
  */
 public class ibm13 extends jvm {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	public String getName(){return "ibm13";}
     public ibm13(boolean noasyncgc, boolean verbosegc, boolean noclassgc,

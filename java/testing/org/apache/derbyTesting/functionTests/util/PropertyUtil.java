@@ -16,11 +16,7 @@ import java.io.Serializable;
     A bread for the internalUtil class
 */
 public abstract class PropertyUtil extends org.apache.derby.iapi.util.PropertyUtil
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 	public static Serializable getDatabasePropertyDefault(String k) throws Exception
 	{
         LanguageConnectionContext lcc =

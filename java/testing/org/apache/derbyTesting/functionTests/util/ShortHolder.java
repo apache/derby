@@ -20,11 +20,7 @@ import java.io.Serializable;
  */
 
 public class ShortHolder implements Serializable
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+{
 	short		value;
 
 	/**

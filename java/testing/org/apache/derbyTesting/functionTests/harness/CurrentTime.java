@@ -18,11 +18,7 @@ import java.lang.String;
   Used to print a timestamp for suite/test runs
 */
 public class CurrentTime
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
 	public static String getTime()
 	{

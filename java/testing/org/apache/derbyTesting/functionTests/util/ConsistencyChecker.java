@@ -41,11 +41,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  * objects like tables.
  */
 public class ConsistencyChecker
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+{
 
 	/**
 	 * Run all of the consistency checkers which do not take parameters.

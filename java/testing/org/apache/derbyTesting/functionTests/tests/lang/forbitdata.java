@@ -17,11 +17,7 @@ import java.math.BigInteger;
 import java.math.BigDecimal;
 
 public class forbitdata
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
+{
 
 	static private boolean isDB2jNet;
 

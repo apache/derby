@@ -15,11 +15,7 @@ package org.apache.derbyTesting.functionTests.util;
  */
 
 public class SubSubClass extends SubClass
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+{
 
 	public static int OVEROVERLOADED_INTSTATIC = 3;
 

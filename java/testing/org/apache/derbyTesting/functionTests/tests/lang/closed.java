@@ -35,10 +35,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 	@author ames
  */
 public class closed implements Runnable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 
 	public static void main(String[] args) {

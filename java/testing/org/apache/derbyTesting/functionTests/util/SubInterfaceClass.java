@@ -12,10 +12,6 @@ package org.apache.derbyTesting.functionTests.util;
 
 public class SubInterfaceClass extends ManyMethods
 	implements NoMethodInterface, ExtendingInterface {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	public SubInterfaceClass(int value) {
 		super(value);

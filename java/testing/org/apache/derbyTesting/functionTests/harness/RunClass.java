@@ -15,11 +15,7 @@ import java.lang.reflect.Method;
 
 // the purpose of this class is to run Java-based test cases in a separate thread
 public class RunClass implements Runnable
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+{
 
 	/**
 		param args the arguments to pass into ij

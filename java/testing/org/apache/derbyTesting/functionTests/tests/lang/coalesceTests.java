@@ -23,11 +23,7 @@ import org.apache.derby.tools.ij;
  * can be null. The selected argument is converted, if necessary, to the attributes of the result.
  */
 public class coalesceTests
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
+{
 
 	private static String VALID_DATE_STRING = "'2000-01-01'";
 	private static String VALID_TIME_STRING = "'15:30:20'";

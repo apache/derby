@@ -40,11 +40,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
   Because of this, I had to make some changes into the stack level checking for long varchars.
  */
 
-public class streams { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+public class streams {
 
 	private static int pkCount;
 	private static Connection conn;

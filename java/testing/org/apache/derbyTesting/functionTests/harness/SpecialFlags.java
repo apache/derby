@@ -23,11 +23,7 @@ import java.util.StringTokenizer;
 */
 
 public class SpecialFlags
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
     public static Properties getSpecialProperties(Properties suiteProperties)
     {

@@ -19,11 +19,7 @@ import java.sql.SQLException;
 
 /** Utility functions for testing authorization. */
 public class T_Authorize
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+{
 
 	public static void verifyAccessRW(int k)
 		 throws Exception

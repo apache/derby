@@ -21,10 +21,6 @@ import java.sql.ResultSetMetaData;
  * benchmark schema.
  */
 class WiscMetaData extends VTIMetaDataTemplate {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
  
 	public int getColumnCount() {
 		return 16;

@@ -34,11 +34,7 @@ import java.util.Vector;
 import java.util.StringTokenizer;
 
 public class RunList
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
 	static String jvmName = "currentjvm";
 	static String javaCmd = "java";

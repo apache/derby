@@ -23,11 +23,7 @@ import java.io.ByteArrayInputStream;
   Concatenation tests for various datatypes
  */
 public class concateTests
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
+{
 
 	private static String[] concatenatedSQLTypesNames =
 	{

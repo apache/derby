@@ -22,10 +22,6 @@ import java.sql.Connection;
  * See The Benchmark Handbook, Second Edition (edited by Jim Gray).
  */
 public class WiscVTI extends VTITemplate {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	int numrows;
 	int prime;

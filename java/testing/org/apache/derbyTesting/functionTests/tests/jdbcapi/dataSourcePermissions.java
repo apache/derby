@@ -42,11 +42,7 @@ import javax.naming.*;
 import javax.naming.directory.*;
 
 public class dataSourcePermissions
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+{
 
 	private static final String zeus = "\u0396\u0395\u03A5\u03A3";
 	private static final String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";

@@ -22,11 +22,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 
 public class NetServer
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+{
 
     File homeDir; // The server directory (usually the test directory)
     String jvmName = "jdk13";

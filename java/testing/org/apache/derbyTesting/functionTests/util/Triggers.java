@@ -19,11 +19,7 @@ import java.math.BigInteger;
  * Methods for testing triggers
  */
 public class Triggers
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
 	// used for threading test
 	static TriggerThread triggerThread;

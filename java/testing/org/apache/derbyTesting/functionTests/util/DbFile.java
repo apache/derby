@@ -27,11 +27,7 @@ import java.net.URL;
   Utility class for testing files stored in the database.
   */ 
 public class DbFile
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+{
 	/**
 	  Read the current generation of a file stored in the
 	  database we are connected to and return a 1 line string

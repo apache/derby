@@ -30,11 +30,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  */
 
 
-public class savepointJdbc30 { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+public class savepointJdbc30 {
 
 	static private boolean isDerbyNet = false;
 

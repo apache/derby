@@ -14,11 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-public class BackgroundStreamSaver implements Runnable { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public class BackgroundStreamSaver implements Runnable {
  
 	protected InputStream in;
 	protected OutputStream out;

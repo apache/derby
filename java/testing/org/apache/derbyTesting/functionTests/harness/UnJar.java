@@ -17,11 +17,7 @@ import java.io.*;
   databases. These need to be "unjarred" in order to do the tests.
   */
 public class UnJar
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
  
     public UnJar()
     {

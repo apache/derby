@@ -19,11 +19,7 @@ import java.math.*;
 import java.io.*;
 
 
-public class casting { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
+public class casting {
 
 	public static String VALID_DATE_STRING = "'2000-01-01'";
 	public static String VALID_TIME_STRING = "'15:30:20'";

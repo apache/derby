@@ -27,11 +27,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 public class Sed
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
     public Sed()
     {

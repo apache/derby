@@ -24,11 +24,7 @@ import java.io.Serializable;
  */
 
 public class ManyMethods implements Serializable
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+{
 
 	int	value;
 	protected int protectedValue;

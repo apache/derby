@@ -22,10 +22,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  * Where current of cursorname and case sensitivity
  */
 public class bug5054 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
   public static void main (String args[]) 
   { 

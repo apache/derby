@@ -52,10 +52,6 @@ import org.apache.derby.impl.tools.sysinfo.ZipInfoProperties;
 
 
 public abstract class jvm {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
     // they all take their defaults as the initial value.
     // -1, null, and false all will mean we won't include them

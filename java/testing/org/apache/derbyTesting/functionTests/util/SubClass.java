@@ -15,11 +15,7 @@ package org.apache.derbyTesting.functionTests.util;
  */
 
 public class SubClass extends ManyMethods
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+{
 
 	static int OVERLOADED_INTSTATIC = 2;
 	public static int OVEROVERLOADED_INTSTATIC = 2;

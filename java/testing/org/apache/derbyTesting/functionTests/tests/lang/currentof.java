@@ -33,11 +33,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
   NIST suite or some equivalent will suffice.
  */
 
-public class currentof { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class currentof {
 
 	private static Connection conn;
 	private static boolean passed = false;

@@ -13,10 +13,6 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import org.apache.derbyTesting.functionTests.tests.tools.dblook_test;
 
 public class dblook_test_net extends dblook_test {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	// This test runs dblook on a test database using
 	// a connection to the Network Server.

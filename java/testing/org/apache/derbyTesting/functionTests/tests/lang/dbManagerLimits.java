@@ -20,11 +20,7 @@ import org.apache.derbyTesting.functionTests.util.Formatters;
   Test various data manager limits like in db2 here.
  */
 public class dbManagerLimits
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
+{
 
 	public static void main (String[] argv) throws Throwable
 	{

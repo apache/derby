@@ -17,10 +17,6 @@ import java.sql.*;
  * See The Benchmark Handbook, Second Edition (edited by Jim Gray).
  */
 public class WISCInsert {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	private static final char[] chars = {
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',

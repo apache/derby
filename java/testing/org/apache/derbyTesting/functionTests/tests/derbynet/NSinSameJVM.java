@@ -16,10 +16,6 @@ import java.net.InetAddress;
 import java.io.PrintWriter;
 
 public class NSinSameJVM {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
     private static final int NETWORKSERVER_PORT = 20000;
 	private static final String INVALID_HOSTNAME = "myhost.nowhere.ibm.com";

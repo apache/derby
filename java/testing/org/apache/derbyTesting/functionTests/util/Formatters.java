@@ -11,11 +11,7 @@
 package org.apache.derbyTesting.functionTests.util;
 
 
-public class Formatters { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public class Formatters {
 
 	static final char[] hexDigits = { '0', '1', '2', '3',
 									  '4', '5', '6', '7',

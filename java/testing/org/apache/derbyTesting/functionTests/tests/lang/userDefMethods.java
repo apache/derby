@@ -17,10 +17,6 @@ import java.util.Vector;
 //These are not generic methods, typically  used by a particular tests.
 public class userDefMethods
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
  
 	//method that does a delete of rows on table t1 based on values from triggers.
     public static void deleteFromATable() throws SQLException

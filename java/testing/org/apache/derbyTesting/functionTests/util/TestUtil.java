@@ -20,10 +20,6 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 	Utility methods for tests, in order to bring some consistency to test output.
 */
 public class TestUtil {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	public static void dumpSQLExceptions(SQLException sqle) {
 		TestUtil.dumpSQLExceptions(sqle, false);

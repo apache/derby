@@ -37,11 +37,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  */
 
 
-public class declareGlobalTempTableJavaJDBC30 { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+public class declareGlobalTempTableJavaJDBC30 {
 
 	static private boolean isDerbyNet = false;
 

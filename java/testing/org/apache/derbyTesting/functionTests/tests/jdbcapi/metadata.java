@@ -37,11 +37,7 @@ import org.apache.derby.tools.ij;
  * @author alan
  */
 
-public class metadata { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class metadata {
 
 	public static void main(String[] args) {
 

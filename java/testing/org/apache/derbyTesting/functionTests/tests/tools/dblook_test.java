@@ -38,10 +38,6 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class dblook_test {
-	/* 
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private static final int SERVER_PORT = 1527;
 	private static final int FRONT = -1;

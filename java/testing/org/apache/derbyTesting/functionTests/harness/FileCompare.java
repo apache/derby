@@ -24,11 +24,7 @@ import java.util.StringTokenizer;
 import java.util.Properties;
 
 public class FileCompare
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
     private String testBase;
     private String framework;

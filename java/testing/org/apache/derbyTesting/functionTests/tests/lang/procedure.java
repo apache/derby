@@ -24,11 +24,7 @@ import java.lang.reflect.*;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.parameterMetaDataJdbc30;
 
 public class procedure
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+{
 
   private static Class[] CONN_PARAM = { Integer.TYPE };
   private static Object[] CONN_ARG = { new Integer(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)};

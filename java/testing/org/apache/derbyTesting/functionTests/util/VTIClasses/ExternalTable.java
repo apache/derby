@@ -41,10 +41,6 @@ import java.sql.DriverManager;
  *
  */
 public class ExternalTable extends UpdatableVTITemplate  {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	private Connection	conn;
 	private int		columnCount = 0;

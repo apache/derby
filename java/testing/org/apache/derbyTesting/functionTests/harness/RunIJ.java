@@ -13,11 +13,7 @@ package org.apache.derbyTesting.functionTests.harness;
 
 // the purpose of this class is to run IJ in a separate thread
 public class RunIJ implements Runnable
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+{
 
 	/**
 		param args the arguments to pass into ij

@@ -18,11 +18,7 @@ import java.util.StringTokenizer;
   Copy them to the output directory for the test.
   */
 public class CopySuppFiles
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
 	public static void main(String[] args) throws Exception
 	{

@@ -18,10 +18,6 @@ import java.math.BigDecimal;
 	Java procedures for the procedure.sql test.
 */
 public abstract class ProcedureTest implements ResultSet {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	public static void zeroArg() {
 		System.out.println("zeroArg() called");

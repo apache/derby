@@ -20,11 +20,7 @@ import java.sql.SQLException;
  * hold onto.
 */
 public class InsertInStaticInitializer
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+{
 
 	/* This is the method that is invoked from the outer query */
 	public static int getANumber()

@@ -28,11 +28,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  **
  */
 public class shutdown
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+{
  
 	static String shutdownurl;
 	static String driver = "org.apache.derby.jdbc.EmbeddedDriver";

@@ -19,10 +19,6 @@ import java.util.StringTokenizer;
   @author ames
  */
 public class jdk15 extends jvm {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	public String getName(){return "jdk15";}
     public jdk15(boolean noasyncgc, boolean verbosegc, boolean noclassgc,

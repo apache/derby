@@ -45,11 +45,7 @@ import javax.naming.directory.*;
 import java.lang.reflect.*;
 
 public class dataSourcePermissions_net extends org.apache.derbyTesting.functionTests.tests.jdbcapi.dataSourcePermissions
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+{
 
 	private static final int NETWORKSERVER_PORT = 20000;
 

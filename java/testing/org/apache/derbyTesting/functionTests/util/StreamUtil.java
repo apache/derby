@@ -23,11 +23,7 @@ import java.math.BigInteger;
  * Methods for stream columns
  */
 public class StreamUtil
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
 	public static void insertAsciiColumn
 	(

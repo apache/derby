@@ -33,11 +33,7 @@ import java.sql.Types;
  * default values, the other for caller specified values.
  */
 public class ResultSetMetaDataPositive extends VTIMetaDataTemplate
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+{
 
 	int			columnCount;
 	int[]		nullable;

@@ -18,10 +18,6 @@ import java.io.File;
 	for generating reports.
  */
 class GRFileFilter implements FilenameFilter {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	public boolean accept (File dir, String name) {
 	    if (name.endsWith(".skip")) return true;

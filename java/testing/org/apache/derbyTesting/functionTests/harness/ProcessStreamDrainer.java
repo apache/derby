@@ -14,11 +14,7 @@ import java.io.*;
 
 
 public class ProcessStreamDrainer implements Runnable
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 
 	protected ByteArrayOutputStream data;
 	protected InputStream in;

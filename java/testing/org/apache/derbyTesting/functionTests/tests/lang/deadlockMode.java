@@ -33,11 +33,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 	and then both thread will want the same table lock.
  */
 
-public class deadlockMode { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+public class deadlockMode {
 
 	private static final int THREAD_COUNT = 20;
 	private static boolean passed = false;

@@ -19,11 +19,7 @@ package org.apache.derbyTesting.functionTests.harness;
  * 
  */
 public class TimedProcess
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+{
 
   private Process process;
 

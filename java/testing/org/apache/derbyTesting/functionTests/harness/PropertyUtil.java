@@ -13,11 +13,7 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.util.Properties;
 import java.util.Enumeration;
 
-public class PropertyUtil { 
- 	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;  
+public class PropertyUtil {  
 
 
 	//////////////////////////////////////////////////////////////////////////////

@@ -29,10 +29,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  * this feature under jdk13.
  */
 public class holdCursorJavaReflection {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
   //we implemented hold cursor functionality in EmbedConnection20 package and hence
   //the functionality is available under both jdk14 and jdk13 (though, jdbc in jdk13

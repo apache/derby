@@ -20,11 +20,7 @@ import org.apache.derby.tools.ij;
 /*
 	This is from a bug found by a beta customer.
  */
-public class simpleThread implements Runnable { 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class simpleThread implements Runnable {
 
         private static Connection _connection = null;
         private static boolean _inUse = false;
