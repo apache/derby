@@ -44,6 +44,7 @@ import java.util.Calendar;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedConnection;
@@ -120,7 +121,13 @@ public class EmbedCallableStatement20
      */
 	public Object  getObject (int i, java.util.Map map) throws SQLException 
 	{
-		throw Util.notImplemented();
+		if( map == null)
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
+                                              "java.sql.CallableStatement.getObject");
+        if(!(map.isEmpty()))
+            throw Util.notImplemented();
+        // Map is empty call the normal getObject method.
+        return getObject(i);
 	}
 
     /**
@@ -1108,7 +1115,14 @@ public class EmbedCallableStatement20
 	public Object getObject(String parameterName, Map map)
     throws SQLException
 	{
-		throw Util.notImplemented();
+		if( map == null)
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
+                                              "java.sql.CallableStatement.getObject");
+        if(!(map.isEmpty()))
+            throw Util.notImplemented();
+
+        // Map is empty so call the normal getObject method.
+        return getObject(parameterName);
 	}
 
 	/**

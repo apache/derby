@@ -1362,6 +1362,7 @@ public interface SQLState {
     String MIDDLE_OF_BATCH = "XJ068.S";
     String NO_SETXXX_FOR_EXEC_USING = "XJ069.S";
     String LANG_NUM_PARAMS_INCORRECT = "XJ080.S";
+    String INVALID_API_PARAMETER = "XJ081.S";
     String INTERNAL_ERROR = "XJ999.S";
     String CONN_GENERIC = "X0RQB.S";
     String CONN_REMOTE_ERROR = "X0RQC.S";

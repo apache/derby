@@ -31,6 +31,7 @@ import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.Driver169;
 
 import org.apache.derby.iapi.store.access.XATransactionController;
+import org.apache.derby.iapi.reference.SQLState;
 
 import java.util.Properties;
 
@@ -109,7 +110,12 @@ public class EmbedConnection20 extends EmbedConnection
      * @exception SQLException Feature not implemented for now.
 	 */
     public void setTypeMap(java.util.Map map) throws SQLException {
-		throw Util.notImplemented();
+
+        if( map == null)
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
+                                              "java.sql.Connection.setTypeMap");
+        if(!(map.isEmpty()))
+            throw Util.notImplemented();
     }
 
 	/*

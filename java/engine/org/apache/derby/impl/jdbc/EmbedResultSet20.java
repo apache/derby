@@ -1434,7 +1434,13 @@ public class EmbedResultSet20
          * @exception SQLException Feature not implemented for now.
      */
     public Object getObject(int columnIndex, java.util.Map map) throws SQLException {
-                throw Util.notImplemented();
+        if( map == null)
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
+                                              "java.sql.ResultSet.getObject");
+        if(!(map.isEmpty()))
+            throw Util.notImplemented();
+        // Map is empty call the normal getObject method.
+        return getObject(columnIndex);
         }
 
     /**
@@ -1600,7 +1606,7 @@ public class EmbedResultSet20
      */
     public Object getObject(String colName, java.util.Map map)
     throws SQLException {
-                throw Util.notImplemented();
+        return getObject(findColumn(colName),map);
         }
 
     /**
