@@ -33,7 +33,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
-import java.math.BigDecimal;
 
 /**
 	Aggregator for AVG(). Extends the SumAggregator and

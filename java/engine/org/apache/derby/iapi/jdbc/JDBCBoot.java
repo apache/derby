@@ -20,16 +20,12 @@
 
 package org.apache.derby.iapi.jdbc;
 
-import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
-
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
 import java.util.Properties;
 import java.io.PrintStream;
