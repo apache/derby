@@ -87,4 +87,9 @@ public class AllResultColumn extends ResultColumn
 									tableName,
 									getContextManager());
 	}
+
+
+    public TableName getTableNameObject() {
+        return tableName;
+    }
 }

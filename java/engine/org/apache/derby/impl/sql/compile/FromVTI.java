@@ -901,18 +901,25 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 * result columns from the subquery.
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(String allTableName)
+	public ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
 		ResultColumnList rcList = null;
 		ResultColumn	 resultColumn;
 		ValueNode		 valueNode;
 		String			 columnName;
+        TableName        toCompare;
 
-		if (allTableName != null && ! allTableName.equals(getExposedName()))
-		{
-			return null;
-		}
+		if(allTableName != null)
+             toCompare = makeTableName(allTableName.getSchemaName(),correlationName);
+        else
+            toCompare = makeTableName(null,correlationName);
+
+        if ( allTableName != null &&
+             ! allTableName.equals(toCompare))
+        {
+            return null;
+        }
 
 		rcList = (ResultColumnList) getNodeFactory().getNode(
 										C_NodeTypes.RESULT_COLUMN_LIST,

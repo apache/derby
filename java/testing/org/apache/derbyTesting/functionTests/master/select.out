@@ -160,4 +160,23 @@ ij> drop table content.keygen;
 0 rows inserted/updated/deleted
 ij> drop schema content restrict;
 0 rows inserted/updated/deleted
+ij> -- This is to test quotes handling in tables.
+-- This tests patch for Derby 13
+create table "S1.T1" (id int not null primary key, d1 int);
+0 rows inserted/updated/deleted
+ij> create schema s1;
+0 rows inserted/updated/deleted
+ij> create table s1.t1 (id int not null primary key, d2 int);
+0 rows inserted/updated/deleted
+ij> select * from s1.t1, "S1.T1" where s1.t1.id = "S1.T1".id;
+ID         |D2         |ID         |D1         
+-----------------------------------------------
+ij> select s1.t1.* from "S1.T1";
+ERROR 42X10: 'S1.T1' is not an exposed table name in the scope in which it appears.
+ij> select "S1.T1".* from s1.t1;
+ERROR 42X10: 'S1.T1' is not an exposed table name in the scope in which it appears.
+ij> select * from "S1.T1" , APP."S1.T1";
+ERROR 42X09: The table or alias name 'APP.S1.T1' is used more than once in the FROM list.
+ij> select "S1.T1".d1 from "S1.T1", APP."S1.T1";
+ERROR 42X09: The table or alias name 'APP.S1.T1' is used more than once in the FROM list.
 ij> 

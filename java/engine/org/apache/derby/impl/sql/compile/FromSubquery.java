@@ -626,17 +626,24 @@ public class FromSubquery extends FromTable
 	 * result columns from the subquery.
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(String allTableName)
+	public ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
 		ResultColumnList rcList = null;
 		TableName		 exposedName;
+        TableName        toCompare;
 
 
-		if (allTableName != null && ! allTableName.equals(getExposedName()))
-		{
-			return null;
-		}
+		if(allTableName != null)
+             toCompare = makeTableName(allTableName.getSchemaName(),correlationName);
+        else
+            toCompare = makeTableName(null,correlationName);
+        
+        if ( allTableName != null &&
+             ! allTableName.equals(toCompare))
+        {
+            return null;
+        }
 
 		/* Cache exposed name for this table.
 		 * The exposed name becomes the qualifier for each column

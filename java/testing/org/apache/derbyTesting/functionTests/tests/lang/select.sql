@@ -102,3 +102,22 @@ drop table content.content;
 drop table content.style;
 drop table content.keygen;
 drop schema content restrict;
+
+
+-- This is to test quotes handling in tables.
+-- This tests patch for Derby 13
+
+create table "S1.T1" (id int not null primary key, d1 int);
+
+create schema s1;
+create table s1.t1 (id int not null primary key, d2 int);
+
+select * from s1.t1, "S1.T1" where s1.t1.id = "S1.T1".id;
+
+select s1.t1.* from "S1.T1";
+
+select "S1.T1".* from s1.t1;
+
+select * from "S1.T1" , APP."S1.T1";
+
+select "S1.T1".d1 from "S1.T1", APP."S1.T1";

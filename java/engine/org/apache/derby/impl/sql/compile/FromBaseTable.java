@@ -3412,7 +3412,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(String allTableName)
+	public ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
 		return getResultColumnsForList(allTableName, resultColumns, tableName);

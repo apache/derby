@@ -32,12 +32,7 @@ import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.*;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -52,6 +47,7 @@ import org.apache.derby.impl.sql.execute.HashScanResultSet;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.catalog.UUID;
 
 import java.util.Enumeration;
 import java.util.Properties;
@@ -958,7 +954,7 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getResultColumnsForList(String allTableName,
+	public ResultColumnList getResultColumnsForList(TableName allTableName,
 												ResultColumnList inputRcl,
 												TableName tableName)
 			throws StandardException
@@ -968,14 +964,26 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		ValueNode		 valueNode;
 		String			 columnName;
 		TableName		 exposedName;
+        TableName        toCompare;
 
-		/* If allTableName is non-null, then we must check to see if it matches 
+		/* If allTableName is non-null, then we must check to see if it matches
 		 * our exposed name.
 		 */
-		if (allTableName != null && ! allTableName.equals(getExposedName()))
-		{
-			return null;
-		}
+
+        if(correlationName == null)
+           toCompare = tableName;
+        else {
+            if(allTableName != null)
+                toCompare = makeTableName(allTableName.getSchemaName(),correlationName);
+            else
+                toCompare = makeTableName(null,correlationName);
+        }
+
+        if ( allTableName != null &&
+             ! allTableName.equals(toCompare))
+        {
+            return null;
+        }
 
 		/* Cache exposed name for this table.
 		 * The exposed name becomes the qualifier for each column

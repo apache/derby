@@ -136,14 +136,24 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		 * user is executing a really dumb query and we won't throw
 		 * and exception - consider it an ANSI extension.
 		 */
+        TableName leftTable = null;
+        TableName rightTable = null;
 		if (! (fromTable instanceof TableOperatorNode))
 		{
 			/* Check for duplicate table name in FROM list */
 			int size = size();
 			for (int index = 0; index < size; index++)
 			{
-				if (fromTable.getExposedName().equals
-					(((FromTable) elementAt(index)).getExposedName()) )
+                leftTable = fromTable.getTableName();
+
+                if(((FromTable) elementAt(index)) instanceof TableOperatorNode) {
+                    continue;
+                }
+
+                else {                    
+                    rightTable = ((FromTable) elementAt(index)).getTableName();
+                }
+                if(leftTable.equals(rightTable))
 				{
 					throw StandardException.newException(SQLState.LANG_FROM_LIST_DUPLICATE_TABLE_NAME, fromTable.getExposedName());
 				}
@@ -380,7 +390,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList expandAll(String allTableName)
+	public ResultColumnList expandAll(TableName allTableName)
 			throws StandardException
 	{
 		ResultColumnList resultColumnList = null;

@@ -493,7 +493,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(String allTableName)
+	public ResultColumnList getAllResultColumns(TableName allTableName)
 					throws StandardException
 	{
 		if (SanityManager.DEBUG)

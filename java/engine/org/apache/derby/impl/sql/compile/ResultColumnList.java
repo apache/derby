@@ -1451,7 +1451,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	{
 		boolean			expanded = false;
 		ResultColumnList allExpansion;
-		String			fullTableName;
+		TableName			fullTableName;
 
 		/* First walk result column list looking for *'s to expand */
 		for (int index = 0; index < size(); index++)
@@ -1461,7 +1461,15 @@ public class ResultColumnList extends QueryTreeNodeVector
 			{
 				expanded = true;
 
-				fullTableName = ((AllResultColumn) rc).getFullTableName();
+				//fullTableName = ((AllResultColumn) rc).getFullTableName();
+                TableName temp = rc.getTableNameObject();
+                if(temp != null) {
+                   String sName = temp.getSchemaName();
+                   String tName = temp.getTableName();
+                   fullTableName = makeTableName(sName,tName);
+                }
+                else
+                   fullTableName = null;
 				allExpansion = fromList.expandAll(fullTableName);
 
 				/* Make sure that every column has a name */

@@ -1730,4 +1730,8 @@ public class ResultColumn extends ValueNode
         }
         return dtd;
     } // end of getTypeServices
+
+    public TableName getTableNameObject() {
+        return null;
+    }
 }

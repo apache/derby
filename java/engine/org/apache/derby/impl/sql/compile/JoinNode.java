@@ -359,7 +359,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(String allTableName)
+	public ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
 		/* We need special processing when there is a USING clause.
@@ -453,7 +453,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	private ResultColumnList getAllResultColumnsNoUsing(String allTableName)
+	private ResultColumnList getAllResultColumnsNoUsing(TableName allTableName)
 			throws StandardException
 	{
 		ResultColumnList leftRCL = leftResultSet.getAllResultColumns(allTableName); 
