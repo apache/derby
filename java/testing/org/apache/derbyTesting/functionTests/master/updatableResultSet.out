@@ -95,7 +95,6 @@ Should be able to deletRow() on the current row now
 requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
 got TYPE_FORWARD_ONLY? true
 got CONCUR_UPDATABLE? true
-row not deleted yet. Confirm with rs.rowDeleted()? false
 column 1 on this row is 1
 Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
 Got expected exception Invalid cursor state - no current row.
