@@ -389,16 +389,10 @@ public class util implements java.security.PrivilegedAction {
 	if (databaseURL == null || databaseURL.length()==0) databaseURL = defaultURL;
 	if (databaseURL != null) {
 	    // add protocol if might help find driver.
-	    boolean noDriver = false;
-	    try {
 		// if have full URL, load driver for it
 		if (databaseURL.startsWith("jdbc:"))
 		    util.loadDriverIfKnown(databaseURL);
-		DriverManager.getDriver(databaseURL);
-	    } catch (SQLException se) {
-		noDriver = true;
-	    }
-	    if (noDriver && jdbcProtocol != null)
+	    if (!databaseURL.startsWith("jdbc:") && jdbcProtocol != null)
 		databaseURL = jdbcProtocol+databaseURL;
 
 	    String user = util.getSystemProperty("ij.user");

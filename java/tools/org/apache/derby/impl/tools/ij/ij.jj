@@ -32,7 +32,6 @@ import org.apache.derby.tools.URLCheck;
 
 import java.lang.reflect.*;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -119,7 +118,7 @@ class ij {
 		protocol = p.getProperty(PROTOCOL_PROPERTY);
 		String framework_property = p.getProperty(FRAMEWORK_PROPERTY);
 		
-		if ((JVMInfo.JDK_ID >= 2) && ij.JDBC20X() && ij.JTA() && ij.JNDI())
+		if (ij.JDBC20X() && ij.JTA() && ij.JNDI())
 		{
 			try {
 				xahelper = (xaAbstractHelper) Class.forName("org.apache.derby.impl.tools.ij.xaHelper").newInstance();
@@ -1161,7 +1160,6 @@ throws SQLException
 
 		// add protocol if no driver matches url
 		boolean noDriver = false;
-		try {
 			// if we have a full URL, make sure it's loaded first
 			try {
 				if (sVal.startsWith("jdbc:"))
@@ -1174,11 +1172,7 @@ throws SQLException
                         if (System.getProperty("ij.URLCheck") == null || Boolean.getBoolean("ij.URLCheck")) {
                           URLCheck aCheck = new URLCheck(sVal);
                         }
-			Driver driver = DriverManager.getDriver(sVal);
-		} catch (SQLException se) {
-			noDriver = true;
-		}
-		if (noDriver && (p == null) && (protocol != null)) {
+		if (!sVal.startsWith("jdbc:") && (p == null) && (protocol != null)) {
 			sVal = protocol + sVal;
 		}
 
