@@ -99,26 +99,7 @@ public class TriggerEventActivator
 
 		cc = (ConnectionContext)lcc.getContextManager().
 									getContext(ConnectionContext.CONTEXT_ID);
-		/*
-		** During replication we may not have a connection context.
-		** in that case, we'll get a proxy connection that will
-		** push a connection context.  This looks really expensive
-		** but we'll probably need a jdbc connection anyway, so
-		** it is more or less unavoidable.
-		*/
-		if (cc == null)
-		{
-			java.sql.Connection conn;
-			try
-			{
-				conn = ((BaseActivation)activation).getCurrentConnection();
-				cc = (ConnectionContext)lcc.getContextManager().
-										getContext(ConnectionContext.CONTEXT_ID);
-			} catch (SQLException e)
-			{
-				throw StandardException.unexpectedUserException(e);
-			}
-		}
+
 		this.statementText = lcc.getStatementContext().getStatementText();
 
 		this.tec = ((GenericExecutionFactory)lcc.getLanguageConnectionFactory().getExecutionFactory()).
