@@ -27,11 +27,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 */
 class Database
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
 	protected String dbName;			// database name 
 	protected int securityMechanism;	// Security mechanism

@@ -12,11 +12,6 @@ package org.apache.derby.impl.drda;
 // Peforms character conversions.
 abstract class CcsidManager
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-  private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
   byte space; // ' ' character
   byte dot;   // '.' character
 

@@ -11,12 +11,8 @@
 package org.apache.derby.impl.drda;
 
 import java.util.Date;
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-public class memCheck extends Thread { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+public class memCheck extends Thread {
 	int delay = 200000;
 	boolean stopNow = false;
 

@@ -25,8 +25,6 @@ package org.apache.derby.impl.drda;
  */
 public class EbcdicCcsidManager extends CcsidManager
 {
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
-
 	private static final int[] conversionArrayToEbcdic = {
 		0x0000,0x0001,0x0002,0x0003,0x0037,0x002d,0x002e,0x002f
 		,0x0016,0x0005,0x0025,0x000b,0x000c,0x000d,0x000e,0x000f

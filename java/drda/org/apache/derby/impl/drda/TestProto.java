@@ -34,12 +34,8 @@ import java.io.UnsupportedEncodingException;
 	Tests can also be done as separate files and given as an argument to
 	this class.
 */
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-public class TestProto { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+public class TestProto {
 
 	private static final CodePointNameTable codePointNameTable = new CodePointNameTable();
 	private static final Hashtable codePointValueTable = new Hashtable();

@@ -25,11 +25,6 @@ import java.sql.SQLException;
 */
 class Session
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	// session states
 	protected static final int INIT = 1;	// before exchange of server attributes

@@ -15,12 +15,8 @@ package org.apache.derby.impl.drda;
 	This tests protocol errors and protocol not used by JCC
 	The file containing the test is given as an argument
 */
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-public class TestFile{ private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+public class TestFile{
 
 	
 	// constructor

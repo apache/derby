@@ -15,12 +15,6 @@ package org.apache.derby.impl.drda;
 // the ascii and ebcdic translations.
 public class DssTrace
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-
-  private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
   // This class was implemented using character arrays to translate bytes
   // into ascii and ebcdic.  The goal was to be able to quickly index into the
   // arrays to find the characters.  Char arrays instead of strings were used as

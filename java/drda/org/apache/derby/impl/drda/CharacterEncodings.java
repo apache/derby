@@ -12,11 +12,6 @@ package org.apache.derby.impl.drda;
 
 public final class CharacterEncodings
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-   private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
   // This is a static class, so hide the default constructor.
   private CharacterEncodings () {}

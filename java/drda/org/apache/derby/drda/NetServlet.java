@@ -39,12 +39,6 @@ import org.apache.derby.iapi.reference.Property;
 
 */
 public class NetServlet extends HttpServlet {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 	private final static int MAX_CONNECT_TRYS = 20;
 	private final static String SERVLET_PROP_MESSAGES =  "org.apache.derby.loc.drda.servlet";
 	private final static String SERVLET_ADDRESS = "csnet";

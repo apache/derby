@@ -36,11 +36,6 @@ import java.math.BigInteger;
 
 public class DecryptionManager
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-  private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
   // DRDA's Diffie-Hellman agreed public value: prime.
   private static final byte modulusBytes__[] = {
     (byte)0xC6, (byte)0x21, (byte)0x12, (byte)0xD7,

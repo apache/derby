@@ -67,11 +67,7 @@ import org.apache.derby.drda.NetworkServerControl;
 	@see NetworkServerControl for description
 
 */
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-public class DB2jServerImpl { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+public class DB2jServerImpl {
 	private final static int NO_USAGE_MSGS= 12;
 	private final static String [] COMMANDS = 
 	{"start","shutdown","trace","tracedirectory","ping", 

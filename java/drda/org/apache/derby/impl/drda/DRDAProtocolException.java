@@ -24,11 +24,6 @@ import java.util.Hashtable;
 
 public class DRDAProtocolException extends Exception
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	
 	/* Static values, used in constructor if there is no associated 
 	   Error Code or the codepoint argument.

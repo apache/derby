@@ -11,12 +11,6 @@
 package org.apache.derby.impl.drda;
 
 public class DRDAProtocolExceptionInfo {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
     
     /*
       Holds static information about the protocol error

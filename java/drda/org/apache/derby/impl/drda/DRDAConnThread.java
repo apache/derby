@@ -63,12 +63,8 @@ import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.monitor.Monitor;
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-public class DRDAConnThread extends Thread { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
+public class DRDAConnThread extends Thread {
 
 	private static final String leftBrace = "{";
 	private static final String rightBrace = "}";

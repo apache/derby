@@ -18,11 +18,6 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 
 public class SQLTypes {
 
-  /**
-     IBM Copyright &copy notice.
-  */
-  public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
-
   //----------------------------------------------------------------------------
   protected final static int DB2_SQLTYPE_DATE = 384;        // DATE
   protected final static int DB2_SQLTYPE_NDATE = 385;

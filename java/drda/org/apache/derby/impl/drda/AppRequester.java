@@ -19,11 +19,6 @@ import org.apache.derby.iapi.reference.DB2Limit;
 */
 class AppRequester
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
 	protected static final int MGR_LEVEL_UNKNOWN = -1;
 

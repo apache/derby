@@ -17,11 +17,6 @@ package org.apache.derby.impl.drda;
 */
 class DssConstants
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-  private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
   protected static final int MAX_DSS_LENGTH = 32767;
 

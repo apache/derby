@@ -151,13 +151,7 @@ import org.apache.derby.impl.drda.DB2jServerImpl;
 	
 */
 
-public class NetworkServerControl{ 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
+public class NetworkServerControl{
 
 
 	

@@ -17,11 +17,6 @@ package org.apache.derby.impl.drda;
 
 class CodePointNameTable extends java.util.Hashtable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-  private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
   CodePointNameTable ()
   {
     put (new Integer (CodePoint.ABNUOWRM), "ABNUOWRM");

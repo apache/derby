@@ -37,11 +37,6 @@ import org.apache.derby.iapi.reference.SQLState;
 */
 class DRDAResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	// resultSet states are NOT_OPENED and SUSPENDED
 	protected static final int NOT_OPENED = 1;

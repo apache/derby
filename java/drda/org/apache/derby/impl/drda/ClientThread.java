@@ -15,11 +15,6 @@ import java.net.*;
 import java.security.*;
 
 class ClientThread extends Thread {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
- private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
 	DB2jServerImpl parent;
 	ServerSocket serverSocket;

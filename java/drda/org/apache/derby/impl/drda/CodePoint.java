@@ -16,11 +16,6 @@ package org.apache.derby.impl.drda;
 
 class CodePoint
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	// --------------------code points for constant ddm data----------------------
 
 	// Indicates false state.  This 1-byte code point is used by some DDM parameters.

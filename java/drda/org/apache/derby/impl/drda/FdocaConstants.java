@@ -16,11 +16,6 @@ import org.apache.derby.iapi.reference.DB2Limit;
 
 class FdocaConstants
 {
-/**
-   IBM Copyright &copy notice.
-*/
-
-public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 // DRDA FD:OCA constants.
   static final int FDOCA_TYPE_FIXEDBYTES = 0x01;
   static final int FDOCA_TYPE_NFIXEDBYTES = 0x81;

@@ -26,11 +26,6 @@ import java.util.Arrays;
 */
 class DDMWriter
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	// number of nesting levels for collections.  We need to mark the length
 	// location of the collection so that we can update it as we add more stuff

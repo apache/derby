@@ -79,11 +79,6 @@ import java.math.BigDecimal;
 */
 class DDMReader
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	private final static int DEFAULT_BUFFER_SIZE = 32767;
 	private final static int MAX_MARKS_NESTING = 10;
 	private final static int NO_CODEPOINT = -1;
