@@ -645,6 +645,14 @@ public class ColumnDefinitionNode extends TableElementNode
 			// value if it's integer.
 				return (defType == StoredFormatIds.INT_TYPE_ID);
 
+			case StoredFormatIds.LONGINT_TYPE_ID:
+			// This is a BIGINT column: we allow smallints, ints,
+			// and big int constants.  Smallint and int literals
+			// are both covered by INT_TYPE; big int literals are
+			// covered by LONG_INT type.
+				return ((defType == StoredFormatIds.INT_TYPE_ID)
+					|| (defType == StoredFormatIds.LONGINT_TYPE_ID));
+	
 			case StoredFormatIds.DECIMAL_TYPE_ID:
 				if (defType == StoredFormatIds.DECIMAL_TYPE_ID) {
 				// only valid if scale and precision are within
