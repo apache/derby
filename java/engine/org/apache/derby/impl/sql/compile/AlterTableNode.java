@@ -341,7 +341,6 @@ public class AlterTableNode extends DDLStatementNode
 											 TableDescriptor.BASE_TABLE_TYPE,
 											 colInfos,
 											 conActions,
-											 null, null, null, null, null, null,
 											 lockGranularity,
 											 compressTable,
 											 behavior,

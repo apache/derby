@@ -462,39 +462,6 @@ public class TabInfoImpl implements TabInfo
 	}
 
 	/**
-	 * Deletes a list of keyed rows from a catalog and all the corresponding
-	 * index rows. Deletes through the first index--all tuples are assumed to
-	 * be keys into the first index.
-	 *
-	 *	@param	rowList		List of keyed rows to delete
-	 *	@param	lcc			language state variable
-	 *
-	 * @return the number of rows deleted.
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	public int deleteRowList( RowList rowList, LanguageConnectionContext lcc )
-		throws StandardException
-	{
-		int						totalRows = 0;
-		int						indexNumber;
-		ExecIndexRow			key;
-		Enumeration	       		iterator;
-		TransactionController	tc = lcc.getTransactionExecute();
-
-		// loop through rows on this list, deleting them through the first index.
-		for (iterator =  rowList.elements(); iterator.hasMoreElements(); )
-		{
-			indexNumber = crf.getPrimaryKeyIndexNumber();
-
-			key = (ExecIndexRow) iterator.nextElement();
-			totalRows += deleteRow( tc, key, indexNumber );
-		}
-
-		return	totalRows;
-	}
-
-	/**
 	 * Inserts a list of base rows into a catalog and inserts all the corresponding
 	 * index rows.
 	 *
@@ -528,7 +495,7 @@ public class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public int insertRowList( RowList rowList, LanguageConnectionContext lcc )
+	private int insertRowList( RowList rowList, LanguageConnectionContext lcc )
 		throws StandardException
 	{
 		TransactionController	tc = lcc.getTransactionExecute();

@@ -20,8 +20,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.sql.depend.DependableList;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.context.ContextService;
@@ -36,7 +34,6 @@ import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.ListOfRowLists;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
@@ -151,11 +148,6 @@ public class GenericConstantActionFactory
 	 *  @param tableType	Type of table (e.g., BASE).
 	 *  @param columnInfo	Information on all the columns in the table.
 	 *  @param constraintActions	ConstraintConstantAction[] for constraints
-	 *	@param stageTokens			Compiled array of versioned metadata tokens.
-	 *	@param deleteRowLists	lists of tuples to be deleted from Publication catalogs.
-	 *	@param insertRowLists	lists of tuples to be inserted into Publication catalogs.
-	 *  @param publicationIDs	IDs of publications which must be altered
-	 *	@param dependableLists	List, per publication, of objects that this publication depends on.
 	 * @param lockGranularity	The lock granularity.
 	 *	@param compressTable	Whether or not this is a compress table
 	 *	@param behavior			drop behavior of dropping column
@@ -172,13 +164,6 @@ public class GenericConstantActionFactory
 		ColumnInfo[]				columnInfo,
 		ConstraintConstantAction[] 	constraintActions,
 
-		Object[]					stageControl,
-		Object[]					ddlList,
-		ListOfRowLists				deleteRowLists,
-		ListOfRowLists				insertRowLists,
-
-		UUID[]						publicationIDs,
-		DependableList[]			dependableLists,
 		char						lockGranularity,
 		boolean						compressTable,
 		int							behavior,
@@ -186,7 +171,6 @@ public class GenericConstantActionFactory
 		boolean                     truncateTable
     )
 	{
-		// the replication arguments should be null
 		return new	AlterTableConstantAction( sd, tableName, tableId, tableConglomerateId, 
 											  tableType, columnInfo, constraintActions, 
 											  lockGranularity, compressTable,

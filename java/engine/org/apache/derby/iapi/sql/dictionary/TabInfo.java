@@ -244,20 +244,6 @@ public interface TabInfo
 		 throws StandardException;
 
 	/**
-	 * Deletes a list of keyed rows from a catalog and all the corresponding
-	 * index rows.  
-	 *
-	 *	@param	rowList		List of keyed rows to delete
-	 *	@param	lcc			language state variable
-	 *
-	 * @return the number of rows deleted.
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	public int deleteRowList( RowList rowList, LanguageConnectionContext lcc )
-		throws StandardException;
-
-	/**
 	 * Inserts a list of base rows into a catalog and inserts all the corresponding
 	 * index rows.
 	 *
@@ -271,22 +257,6 @@ public interface TabInfo
 	 * @exception StandardException		Thrown on failure
 	 */
 	public int insertRowList( RowList rowList, TransactionController tc )
-		throws StandardException;
-
-	/**
-	 * Inserts a list of base rows into a catalog and inserts all the corresponding
-	 * index rows.
-	 *
-	 *	@param	rowList		List of rows to insert
-	 *	@param	lcc			language state variable
-	 *
-	 *
-	 *	@return	row number (>= 0) if duplicate row inserted into an index
-	 *			ROWNOTDUPLICATE otherwise
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	public int insertRowList( RowList rowList, LanguageConnectionContext lcc )
 		throws StandardException;
 
 	/**

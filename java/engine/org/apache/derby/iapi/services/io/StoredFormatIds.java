@@ -569,9 +569,9 @@ public interface StoredFormatIds {
         **
         ******************************************************************/
         /**
-            class org.apache.derby.iapi.sql.depend.DependableList
+			Unused 243
          */
-        static public final int DEPENDABLE_LIST_ID =
+        static public final int UNUSED_243 =
                 (MIN_ID_2 + 243);
         
         /**

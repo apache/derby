@@ -290,11 +290,11 @@ String[] TwoByte = {
         /* 236 */       null,
         /* 237 */       "org.apache.derby.impl.sql.execute.ValueRow",
         /* 238 */       "org.apache.derby.impl.sql.execute.IndexRow",
-        /* 239 */       "org.apache.derby.iapi.sql.dictionary.RowList",
+        /* 239 */       null,
         /* 240 */       null,
         /* 241 */       "org.apache.derby.impl.store.raw.data.InitPageOperation",
         /* 242 */       "org.apache.derby.impl.store.raw.data.ContainerOperation",
-        /* 243 */       "org.apache.derby.iapi.sql.depend.DependableList",
+        /* 243 */       null,
         /* 244 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 245 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 246 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
