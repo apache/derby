@@ -1428,6 +1428,45 @@ public interface ResultSetFactory {
 					throws StandardException;
 
 
+    /**
+     * The SetOpResultSet is used to implement an INTERSECT or EXCEPT operation.
+     * It selects rows from two ordered input result sets.
+     *
+     * @param leftSource The result set that implements the left input
+     * @param rightSource The result set that implements the right input
+     * @param activation the activation for this result set
+     * @param resultSetNumber
+     * @param optimizerEstimatedRowCount
+     * @param optimizerEstimatedCost
+     * @param opType IntersectOrExceptNode.INTERSECT_OP or EXCEPT_OP
+     * @param all true if the operation is an INTERSECT ALL or an EXCEPT ALL,
+     *            false if the operation is an INTERSECT DISCTINCT or an EXCEPT DISCTINCT
+     * @param closeCleanup a method to be called by close
+     * @param intermediateOrderByColumnsSavedObject The saved object index for the array of order by columns for the
+     *        ordering of the left and right sources. That is, both the left and right sources have an order by
+     *        clause of the form ORDER BY intermediateOrderByColumns[0],intermediateOrderByColumns[1],...
+     * @param intermediateOrderByDirectionSavedObject The saved object index for the array of source
+     *        order by directions. That is, the ordering of the i'th order by column in the input is ascending
+     *        if intermediateOrderByDirection[i] is 1, descending if intermediateOrderByDirection[i] is -1.
+	 *
+	 * @return	A ResultSet from which the caller can get the INTERSECT or EXCEPT
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+    NoPutResultSet getSetOpResultSet( NoPutResultSet leftSource,
+                                      NoPutResultSet rightSource,
+                                      Activation activation, 
+                                      int resultSetNumber,
+                                      long optimizerEstimatedRowCount,
+                                      double optimizerEstimatedCost,
+                                      int opType,
+                                      boolean all,
+                                      GeneratedMethod closeCleanup,
+                                      int intermediateOrderByColumnsSavedObject,
+                                      int intermediateOrderByDirectionSavedObject)
+        throws StandardException;
+                                                     
+                                                     
 	//
 	// Misc operations
 	//

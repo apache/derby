@@ -258,6 +258,8 @@ public interface C_NodeNames
 
 	static final String UNION_NODE_NAME = "org.apache.derby.impl.sql.compile.UnionNode";
 
+	static final String INTERSECT_OR_EXCEPT_NODE_NAME = "org.apache.derby.impl.sql.compile.IntersectOrExceptNode";
+
 	static final String UNTYPED_NULL_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.UntypedNullConstantNode";
 
 	static final String UPDATE_NODE_NAME = "org.apache.derby.impl.sql.compile.UpdateNode";

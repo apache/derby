@@ -266,13 +266,13 @@ ij> create table d(a char large object(204K));
 0 rows inserted/updated/deleted
 ij> -- create index (not allowed)
 create index ia on a(a);
-ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> create index ib on b(a);
-ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> create index ic on c(a);
 ERROR 42Y55: 'CREATE INDEX' cannot be performed on 'C' because it does not exist.
 ij> create index id on d(a);
-ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> -- cleanup
 drop table a;
 0 rows inserted/updated/deleted
@@ -535,7 +535,7 @@ ij> insert into testPredicate2 (c1) values 'a';
 1 row inserted/updated/deleted
 ij> -- UNION
 select * from testPredicate1 union select * from testPredicate2;
-ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> -- IN predicate
 select c1 from testPredicate1 where c1 IN (select c1 from testPredicate2);
 ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
@@ -544,10 +544,10 @@ select c1 from testPredicate1 where c1 NOT IN (select c1 from testPredicate2);
 ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
 ij> -- ORDER BY clause
 select * from testPredicate1 order by c1;
-ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> -- GROUP BY clause
 select substr(c1,1,2) from testPredicate1 group by c1;
-ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> -- JOIN
 select * from testPredicate1 t1, testPredicate2 t2 where t1.c1=t2.c1;
 ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
@@ -555,15 +555,15 @@ ij> select * from testPredicate1 LEFT OUTER JOIN testPredicate2 on testPredicate
 ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
 ij> -- PRIMARY KEY
 create table testConst1(c1 long varchar not null primary key);
-ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> -- UNIQUE KEY constraints
 CREATE TABLE testconst2 (col1 long varchar not null, CONSTRAINT uk UNIQUE (col1));
-ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> -- FOREIGN KEY constraints
 create table testConst3 (c1 char(10) not null, primary key (c1));
 0 rows inserted/updated/deleted
 ij> create table testConst4 (c1 long varchar not null, constraint fk foreign key (c1) references testConst3 (c1));
-ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> drop table testConst3;
 0 rows inserted/updated/deleted
 ij> -- MAX aggregate function

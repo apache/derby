@@ -16,6 +16,8 @@
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
 
+  <property name="cur.dir" value="impl/sql"/>
+
 <!-- Targets -->
   <target name="parser">
     <ant antfile="${src.dir}/build.xml" target="genParser">
@@ -42,9 +44,9 @@
       <classpath>
         <pathelement path="${compile.classpath}"/>
       </classpath>
-      <include name="${derby.dir}/impl/sql/**"/>
+      <include name="${derby.dir}/${cur.dir}/**"/>
     </javac>
-    <copy file="catalog/metadata_net.properties" tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>
+    <copy file="${derby.engine.src.dir}/${derby.dir}/${cur.dir}/catalog/metadata_net.properties" tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>
   </target>
 
 </project>

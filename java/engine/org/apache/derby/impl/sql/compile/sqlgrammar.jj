@@ -85,6 +85,7 @@ import org.apache.derby.impl.sql.compile.TableOperatorNode;
 import org.apache.derby.impl.sql.compile.TransactionStatementNode;
 import org.apache.derby.impl.sql.compile.TriggerReferencingStruct;
 import org.apache.derby.impl.sql.compile.UnionNode;
+import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
 import org.apache.derby.impl.sql.compile.UntypedNullConstantNode;
 import org.apache.derby.impl.sql.compile.UpdateNode;
 import org.apache.derby.impl.sql.compile.UserTypeConstantNode;
@@ -172,6 +173,15 @@ public class SQLParser
 
 	// Define for UTF8 max
 	private static final int	MAX_UTF8_LENGTH = 65535;
+
+    // Constants for set operator types
+    private static final int NO_SET_OP = 0;
+    private static final int UNION_OP = 1;
+    private static final int UNION_ALL_OP = 2;
+    private static final int EXCEPT_OP = 3;
+    private static final int EXCEPT_ALL_OP = 4;
+    private static final int INTERSECT_OP = 5;
+    private static final int INTERSECT_ALL_OP = 6;
 
 	private StringSlicer				stringSlicer;
 	private Object[]					paramDefaults;
@@ -2662,7 +2672,7 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 	OrderByList orderCols = null;
 }
 {
-	queryExpression = queryExpression(null, Boolean.FALSE) 
+	queryExpression = queryExpression(null, NO_SET_OP) 
 		[ orderCols = orderByClause() ]
 		[ <FOR> forUpdateState = forUpdateClause(updateColumns) ]
 		[ isolationLevel = atIsolationLevel() ]
@@ -4108,24 +4118,37 @@ qualifiedName( int nodeType, int id_length_limit) throws StandardException :
 
 /*
  * <A NAME="queryExpression">queryExpression</A>
+ *
+ * We have to be carefull to get the associativity correct. According to the SQL spec
+ *   <non-join query expression> ::=
+ *     <non-join query term>
+ *    | <query expression body> UNION [ ALL ] <query term>
+ *    | <query expression body> EXCEPT [ ALL ] <query term>
+ * Meaning that
+ *   t1 UNION ALL t2 UNION t3
+ * is equivalent to
+ *   (t1 UNION ALL t2) UNION t3
+ * However recursive descent parsers want recursion to be on the right, so this kind of associativity is unnatural
+ * for our parser. The queryExpression method must know whether it is being called as the right hand side of a
+ * set operator to produce a query tree with the correct associativity.
  */
 ResultSetNode
-queryExpression(ResultSetNode leftSide, Boolean unionAll) throws StandardException :
+queryExpression(ResultSetNode leftSide, int operatorType) throws StandardException :
 {
 	ResultSetNode	term;
 }
 {
-	term = nonJoinQueryTerm(leftSide, unionAll) [ term = union(term) ]
+	term = nonJoinQueryTerm(leftSide, operatorType) [ term = unionOrExcept(term) ]
 	{
 		return term;
 	}
 }
 
 /*
- * <A NAME="union">union</A>
+ * <A NAME="unionOrExcept">unionOrExcept</A>
  */
 ResultSetNode
-union(ResultSetNode term) throws StandardException :
+unionOrExcept(ResultSetNode term) throws StandardException :
 {
 	ResultSetNode	expression;
 	Token 			tok = null;
@@ -4133,7 +4156,14 @@ union(ResultSetNode term) throws StandardException :
 {
 	<UNION> [ tok = <ALL> ] expression =
 				queryExpression(term,
-								(tok != null) ? Boolean.TRUE : Boolean.FALSE)
+								(tok != null) ? UNION_ALL_OP : UNION_OP)
+	{
+		return expression;
+	}
+|
+	<EXCEPT> [ tok = <ALL> ] expression =
+				queryExpression(term,
+								(tok != null) ? EXCEPT_ALL_OP : EXCEPT_OP)
 	{
 		return expression;
 	}
@@ -4142,33 +4172,113 @@ union(ResultSetNode term) throws StandardException :
 
 /*
  * <A NAME="nonJoinQueryTerm">nonJoinQueryTerm</A>
+ *
+ * Be careful with the associativity of INTERSECT. According to the SQL spec
+ *   t1 INTERSECT t2 INTERSECT ALL t3
+ * is equivalent to
+ *   (t1 INTERSECT t2) INTERSECT ALL t3
+ * which is not the same as
+ *   t1 INTERSECT (t2 INTERSECT ALL t3)
+ * See the comment on queryExpression.
  */
 ResultSetNode
-nonJoinQueryTerm(ResultSetNode leftSide, Boolean unionAll) throws StandardException :
+nonJoinQueryTerm(ResultSetNode leftSide, int operatorType) throws StandardException :
 {
 	ResultSetNode	term;
 }
 {
-	/*
-	** Omitted "intersect".
-	*/
-	term = nonJoinQueryPrimary()
+	term = nonJoinQueryPrimary() [ term = intersect( term) ]
 	{
-		if (leftSide != null)
-		{
-			return (ResultSetNode) nodeFactory.getNode(
-									C_NodeTypes.UNION_NODE,
-									leftSide,
-									term,
-									unionAll,
-									Boolean.FALSE,
-									null,
-									getContextManager());
-		}
-		else
-		{
-			return term;
-		}
+        switch( operatorType)
+        {
+        case NO_SET_OP:
+            return term;
+
+        case UNION_OP:
+            return (ResultSetNode) nodeFactory.getNode(
+                C_NodeTypes.UNION_NODE,
+                leftSide,
+                term,
+                Boolean.FALSE,
+                Boolean.FALSE,
+                null,
+                getContextManager());
+
+        case UNION_ALL_OP:
+            return (ResultSetNode) nodeFactory.getNode(
+                C_NodeTypes.UNION_NODE,
+                leftSide,
+                term,
+                Boolean.TRUE,
+                Boolean.FALSE,
+                null,
+                getContextManager());
+
+        case EXCEPT_OP:
+            return (ResultSetNode) nodeFactory.getNode(
+                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
+                ReuseFactory.getInteger( IntersectOrExceptNode.EXCEPT_OP),
+                leftSide,
+                term,
+                Boolean.FALSE,
+                null,
+                getContextManager());
+
+        case EXCEPT_ALL_OP:
+            return (ResultSetNode) nodeFactory.getNode(
+                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
+                ReuseFactory.getInteger( IntersectOrExceptNode.EXCEPT_OP),
+                leftSide,
+                term,
+                Boolean.TRUE,
+                null,
+                getContextManager());
+
+        case INTERSECT_OP:
+            return (ResultSetNode) nodeFactory.getNode(
+                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
+                ReuseFactory.getInteger( IntersectOrExceptNode.INTERSECT_OP),
+                leftSide,
+                term,
+                Boolean.FALSE,
+                null,
+                getContextManager());
+
+        case INTERSECT_ALL_OP:
+            return (ResultSetNode) nodeFactory.getNode(
+                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
+                ReuseFactory.getInteger( IntersectOrExceptNode.INTERSECT_OP),
+                leftSide,
+                term,
+                Boolean.TRUE,
+                null,
+                getContextManager());
+
+
+        default:
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT( "Invalid set operator type: " + operatorType);
+            }
+            return null;
+        }
+    }
+}
+
+/*
+ * <A NAME="intersect">intersect</A>
+ */
+ResultSetNode
+intersect(ResultSetNode term) throws StandardException :
+{
+	ResultSetNode	expression;
+	Token 			tok = null;
+}
+{
+	<INTERSECT> [ tok = <ALL> ] expression =
+				nonJoinQueryTerm(term, (tok != null) ? INTERSECT_ALL_OP : INTERSECT_OP)
+	{
+		return expression;
 	}
 }
 
@@ -4186,7 +4296,7 @@ nonJoinQueryPrimary() throws StandardException :
 		return primary;
 	}
 |
-	<LEFT_PAREN> primary = queryExpression(null, Boolean.FALSE) <RIGHT_PAREN>
+	<LEFT_PAREN> primary = queryExpression(null, NO_SET_OP) <RIGHT_PAREN>
 	{
 		return primary;
 	}
@@ -6729,7 +6839,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 		<LEFT_PAREN> columnList = insertColumnList() <RIGHT_PAREN>
 	]
 	[ targetProperties = propertyList() ]
-	queryExpression = queryExpression(null, Boolean.FALSE)
+	queryExpression = queryExpression(null, NO_SET_OP)
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 							C_NodeTypes.INSERT_NODE,
@@ -6976,7 +7086,7 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
 	SubqueryNode	subqueryNode;
 }
 {
-	queryExpression = queryExpression(null, Boolean.FALSE)
+	queryExpression = queryExpression(null, NO_SET_OP)
 	{
 		subqueryNode = (SubqueryNode) nodeFactory.getNode(
 										C_NodeTypes.SUBQUERY_NODE,
@@ -8757,7 +8867,7 @@ viewDefinition(Token beginToken) throws StandardException :
 {
 	<VIEW> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
 		[ <LEFT_PAREN> resultColumns = viewColumnList() <RIGHT_PAREN> ]
-		<AS> queryExpression = queryExpression(null, Boolean.FALSE)
+		<AS> queryExpression = queryExpression(null, NO_SET_OP)
 	{
 		checkOptionType = ViewDescriptor.NO_CHECK_OPTION;
 		endToken = getToken(0);
@@ -9641,7 +9751,7 @@ execStatement() throws StandardException :
 	<EXECUTE> <STATEMENT> stmtName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
 		[ LOOKAHEAD( { getToken(1).kind == USING } )
 		  usingToken = <USING> usingClause =
-		  							queryExpression(null, Boolean.FALSE) ]
+		  							queryExpression(null, NO_SET_OP) ]
 	{
 		endToken = getToken(0);
 

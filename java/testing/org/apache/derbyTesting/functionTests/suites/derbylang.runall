@@ -67,6 +67,7 @@ lang/inbetween.sql
 lang/infostreams.sql
 lang/innerjoin.sql
 lang/insert.sql
+lang/intersect.sql
 lang/isolationLevels.sql
 lang/joinDeadlock.sql
 lang/joins.sql

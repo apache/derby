@@ -419,8 +419,8 @@ public abstract class TableOperatorNode extends FromTable
 					throws StandardException
 	{
 		/*
-		** Parameters not allowed in select list of either side of union,
-		** except when the union is for a table constructor.
+		** Parameters not allowed in select list of either side of a set operator,
+		** except when the set operator is for a table constructor.
 		*/
 		if ( ! (this instanceof UnionNode) ||
 			 ! ((UnionNode) this).tableConstructor())

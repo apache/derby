@@ -95,6 +95,7 @@ infostreams_derby.properties
 innerjoin.sql
 insert.sql
 insert_sed.properties
+intersect.sql
 isolationLevels.sql
 joinDeadlock.sql
 joinDeadlock.sql1

@@ -512,6 +512,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.UNION_NODE:
 		  	return C_NodeNames.UNION_NODE_NAME;
 
+		  case C_NodeTypes.INTERSECT_OR_EXCEPT_NODE:
+		  	return C_NodeNames.INTERSECT_OR_EXCEPT_NODE_NAME;
+
 		  case C_NodeTypes.CREATE_TRIGGER_NODE:
 		  	return C_NodeNames.CREATE_TRIGGER_NODE_NAME;
 

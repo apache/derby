@@ -1053,6 +1053,32 @@ public class GenericResultSetFactory implements ResultSetFactory
 								  closeCleanup);
 	}
 
+    public NoPutResultSet getSetOpResultSet( NoPutResultSet leftSource,
+                                             NoPutResultSet rightSource,
+                                             Activation activation, 
+                                             int resultSetNumber,
+                                             long optimizerEstimatedRowCount,
+                                             double optimizerEstimatedCost,
+                                             int opType,
+                                             boolean all,
+                                             GeneratedMethod closeCleanup,
+                                             int intermediateOrderByColumnsSavedObject,
+                                             int intermediateOrderByDirectionSavedObject)
+        throws StandardException
+    {
+        return new SetOpResultSet( leftSource,
+                                   rightSource,
+                                   activation,
+                                   resultSetNumber,
+                                   optimizerEstimatedRowCount,
+                                   optimizerEstimatedCost,
+                                   opType,
+                                   all,
+                                   closeCleanup,
+                                   intermediateOrderByColumnsSavedObject,
+                                   intermediateOrderByDirectionSavedObject);
+    }
+
 	/**
 	 * A last index key sresult set returns the last row from
 	 * the index in question.  It is used as an ajunct to max().

@@ -172,7 +172,7 @@ public class OrderByColumn extends OrderedColumn {
 		ResultColumnList	targetCols = target.getResultColumns();
 
 		//bug 5716 - for db2 compatibility - no qualified names allowed in order by clause when union/union all operator is used 
-		if (target instanceof UnionNode && correlationName != null)
+		if (target instanceof SetOperatorNode && correlationName != null)
 		{
 			String fullName = (schemaName != null) ?
 				(schemaName + "." + correlationName + "." + columnName) :
@@ -207,7 +207,7 @@ public class OrderByColumn extends OrderedColumn {
 			 * because of the gyrations we go to with building the RCLs
 			 * for a UnionNode.
 			 */
-			if (target instanceof UnionNode)
+			if (target instanceof SetOperatorNode)
 			{
 				sourceTableNumber = ((FromTable) target).getTableNumber();
 			}

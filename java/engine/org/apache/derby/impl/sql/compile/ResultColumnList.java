@@ -2025,7 +2025,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Set up the result expressions for a UNION:
+	 * Set up the result expressions for a UNION, INTERSECT, or EXCEPT:
 	 *	o Verify union type compatiblity
 	 *	o Get dominant type for result (type + max length + nullability)
 	 *  o Create a new ColumnReference with dominant type and name of from this
@@ -2038,14 +2038,16 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param otherRCL	RCL from other side of the UNION.
 	 * @param tableNumber	The tableNumber for the UNION.
 	 * @param level		The nesting level for the UNION.
+     * @param operatorName "UNION", "INTERSECT", or "EXCEPT"
 	 *
 	 * @return Nothing.
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
 	public void	setUnionResultExpression(ResultColumnList otherRCL,
-						 int tableNumber,
-						 int level)
+                                         int tableNumber,
+                                         int level,
+                                         String operatorName)
 		throws StandardException
 	{
 		TableName		dummyTN;
@@ -2116,8 +2118,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 				!otherExpr.getTypeCompiler().storable(thisTypeId, cf))
 			{
 				throw StandardException.newException(SQLState.LANG_NOT_UNION_COMPATIBLE, 
-							thisTypeId.getSQLTypeName(),
-							otherTypeId.getSQLTypeName() );
+                                                     thisTypeId.getSQLTypeName(),
+                                                     otherTypeId.getSQLTypeName(),
+                                                     operatorName);
 			}
 
 			DataTypeDescriptor resultType = thisExpr.getTypeServices().getDominantType(
