@@ -43,6 +43,7 @@ import org.apache.derby.iapi.services.loader.InstanceGetter;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 
+import  org.apache.derby.io.StorageFactory;
 
 import org.apache.derby.iapi.services.context.ErrorStringBuilder;
 
@@ -79,6 +80,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
+
+import java.net.URL;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -1052,8 +1055,6 @@ public abstract class BaseMonitor
 
 		Vector implementations = actualModuleList ? new Vector(moduleList.size()) : new Vector(0,1);
 
-		Class persistentServiceClass = PersistentService.class;
-
 		// Get my current JDK environment
 		int theJDKId = JVMInfo.JDK_ID;
 
@@ -1113,17 +1114,8 @@ nextModule:
 					Class possibleModule = Class.forName(className);
 
 					// Look for the monitors special modules, PersistentService ones.
-					if (persistentServiceClass.isAssignableFrom(possibleModule))  {
-						PersistentService ps = (PersistentService) newInstance(possibleModule);
-						if (ps == null) {
-							report("Class " + className + " cannot create instance, module ignored.");
-							continue;
-						}
-						if (serviceProviders == null)
-							serviceProviders = new Hashtable(3, (float) 1.0);
-						serviceProviders.put(ps.getType(), ps);
-						continue;
-					}
+					if (getPersistentServiceImplementation(possibleModule))
+                        continue;
 
 					// If this is a specific JDK version (environment) module
 					// then it must be ordered in the implementation list by envJDKId.
@@ -1199,7 +1191,34 @@ nextModule:
 					report("Class " + className + " " + le.toString() + ", module ignored.");
 				}
 			}
-		}
+            else if( key.startsWith( Property.SUB_SUB_PROTOCOL_PREFIX)) {
+                String subSubProtocol = key.substring( Property.SUB_SUB_PROTOCOL_PREFIX.length());
+                String className = moduleList.getProperty(key);
+
+				if (SanityManager.DEBUG && reportOn) {
+					report("Accessing module " + className + " to run initializers at boot time");
+				}
+                try {
+                    Class possibleImplementation = Class.forName(className);
+					// Look for the monitors special classes, PersistentService and StorageFactory ones.
+                    if( getPersistentServiceImplementation( possibleImplementation))
+                        continue;
+                    if( StorageFactory.class.isAssignableFrom( possibleImplementation)) {
+                        if( newInstance( possibleImplementation) == null)
+                            report("Class " + className + " cannot create instance, StorageFactory ignored.");
+                        else
+                            storageFactories.put( subSubProtocol, className);
+                        continue;
+                    }
+                }
+				catch (ClassNotFoundException cnfe) {
+					report("Class " + className + " " + cnfe.toString() + ", module ignored.");
+				}
+				catch (LinkageError le) {
+					report("Class " + className + " " + le.toString() + ", module ignored.");
+				}
+            }
+        }
 
 		if (implementations.isEmpty())
 			return null;
@@ -1208,40 +1227,79 @@ nextModule:
 		return implementations;
 	}
 
+    private boolean getPersistentServiceImplementation( Class possibleModule)
+    {
+        if( ! PersistentService.class.isAssignableFrom(possibleModule))
+            return false;
+
+        PersistentService ps = (PersistentService) newInstance(possibleModule);
+        if (ps == null) {
+            report("Class " + possibleModule.getName() + " cannot create instance, module ignored.");
+        } else {
+            if (serviceProviders == null)
+                serviceProviders = new Hashtable(3, (float) 1.0);
+            serviceProviders.put(ps.getType(), ps);
+        }
+        return true;
+    } // end of getPersistentServiceImplementation
+        
 	protected Vector getDefaultImplementations() {
 
-		InputStream is = loadModuleDefinitions();
+		Properties moduleList = new Properties();
+        boolean firstList = true;
 
-		if (is == null) {
+        try {
+            for( Enumeration e = ClassLoader.getSystemResources( "org/apache/derby/modules.properties");
+                 e.hasMoreElements() ;) {
+                URL modulesPropertiesURL = (URL) e.nextElement();
+                InputStream is = null;
+                try {
+                    is = loadModuleDefinitions( modulesPropertiesURL);
+                    if( firstList) {
+                        moduleList.load( is);
+                        firstList = false;
+                    }
+                    else {
+                        // Check for duplicates
+                        Properties otherList = new Properties();
+                        otherList.load( is);
+                        for( Enumeration newKeys = otherList.keys(); newKeys.hasMoreElements() ;)
+                        {
+                            String key = (String) newKeys.nextElement();
+                            if( moduleList.contains( key))
+                                // RESOLVE how do we localize messages before we have finished initialization?
+                                report( "Ignored duplicate property " + key + " in " + modulesPropertiesURL.toString());
+                            else
+                                moduleList.setProperty( key, otherList.getProperty( key));
+                        }
+                    }
+                } catch (IOException ioe) {
+                    if (SanityManager.DEBUG)
+                        report("Can't load implementation list " + modulesPropertiesURL.toString() + ": " + ioe.toString());
+                } finally {
+                    try {
+                        if( is != null)
+                            is.close();
+                    } catch (IOException ioe2) {
+                    }
+                }
+            }
+        } catch (IOException ioe) {
+            if (SanityManager.DEBUG)
+                report("Can't load implementation list: " + ioe.toString());
+        }
+        if( firstList) {
 			if (SanityManager.DEBUG)
 				report("Default implementation list not found");
 			return null;
 		}
 
-		Properties moduleList = new Properties();
-
-		try {
-
-			moduleList.load(is);
-
-		} catch (IOException ioe) {
-			if (SanityManager.DEBUG)
-				report("Can't load default implementation list: " + ioe.toString());
-			return null;
-		} finally {
-
-			try {
-				is.close();
-			} catch (IOException ioe2) {
-			}
-		}
-
 		return getImplementations(moduleList, true);
-	}
+	} // end of getDefaultImplementations
 
-	protected InputStream loadModuleDefinitions() {
+	protected InputStream loadModuleDefinitions( URL propertyFileURL) throws IOException {
 		// SECURITY PERMISSION - IP1
-		return getClass().getResourceAsStream("/org/apache/derby/modules.properties");
+		return propertyFileURL.openStream();
 	}
 
 	/*
@@ -1595,10 +1653,10 @@ nextModule:
             className = PropertyUtil.getSystemProperty( propertyName);
         if( className != null)
             return className;
-        return (String) builtInStorageFactory.get( subSubProtocol);
+        return (String) storageFactories.get( subSubProtocol);
     } // end of getStorageFactoryClassName
 
-    private static final HashMap builtInStorageFactory = new HashMap();
+    private static final HashMap storageFactories = new HashMap();
     static {
 		String dirStorageFactoryClass;
 		if( JVMInfo.JDK_ID >= 4)
@@ -1607,14 +1665,14 @@ nextModule:
             dirStorageFactoryClass = "org.apache.derby.impl.io.DirStorageFactory";
 
 
-        builtInStorageFactory.put( PersistentService.DIRECTORY, dirStorageFactoryClass);
-        builtInStorageFactory.put( PersistentService.CLASSPATH,
+        storageFactories.put( PersistentService.DIRECTORY, dirStorageFactoryClass);
+        storageFactories.put( PersistentService.CLASSPATH,
                                 "org.apache.derby.impl.io.CPStorageFactory");
-        builtInStorageFactory.put( PersistentService.JAR,
+        storageFactories.put( PersistentService.JAR,
                                 "org.apache.derby.impl.io.JarStorageFactory");
-        builtInStorageFactory.put( PersistentService.HTTP,
+        storageFactories.put( PersistentService.HTTP,
                                 "org.apache.derby.impl.io.URLStorageFactory");
-        builtInStorageFactory.put( PersistentService.HTTPS,
+        storageFactories.put( PersistentService.HTTPS,
                                 "org.apache.derby.impl.io.URLStorageFactory");
     }
 

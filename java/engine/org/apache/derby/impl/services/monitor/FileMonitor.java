@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.net.URL;
+
 /**
 	Implementation of the monitor that uses the class loader
 	that the its was loaded in for all class loading.
@@ -154,6 +156,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	private String key3;
 	private Runnable task;
 	private int intValue;
+    private URL propertyFileURL;
 
 	/**
 		Initialize the system in a privileged block.
@@ -170,14 +173,20 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 		}
 	}
 
-	protected synchronized final InputStream loadModuleDefinitions() {
+	protected synchronized final InputStream loadModuleDefinitions(URL propertyFileURL) throws IOException {
 		action = 2;
+        this.propertyFileURL = propertyFileURL;
 		try {
 			return (InputStream) java.security.AccessController.doPrivileged(this);
         } catch (java.security.PrivilegedActionException pae) {
-			throw (RuntimeException) pae.getException();
-		}
-	}
+            Exception e = pae.getException();
+            if( e instanceof IOException)
+                throw (IOException) e;
+            throw (RuntimeException) e;
+        } finally {
+            this.propertyFileURL = null;
+        }
+    }
 
 	public synchronized final String getJVMProperty(String key) {
 		if (!key.startsWith("derby."))
@@ -247,7 +256,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 			return new Boolean(PBinitialize(action == 0));
 		case 2: 
 			// SECURITY PERMISSION - IP1
-			return super.loadModuleDefinitions();
+			return super.loadModuleDefinitions( propertyFileURL);
 		case 3:
 			// SECURITY PERMISSION - OP1
 			return PBgetJVMProperty(key3);
