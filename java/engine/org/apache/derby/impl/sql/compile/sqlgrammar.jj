@@ -21,7 +21,7 @@ PARSER_BEGIN(SQLParser)
 
    Derby - File org.apache.derby.impl.sql.compile.sqlgrammar.jj
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -2421,7 +2421,6 @@ dropStatements() throws StandardException :
             statementNode = dropIndexStatement() |
             statementNode = dropAliasStatement() |
             statementNode = dropViewStatement() |
-            statementNode = dropSPSStatement() |
             statementNode = dropTriggerStatement() 
         )
 	{
@@ -9742,39 +9741,13 @@ QueryTreeNode
 execStatement() throws StandardException :
 {
 	TableName	stmtName;
-	String 		usingText = null;
-	ResultSetNode	usingClause = null;	
-	Token		usingToken = null;
-	Token		endToken;
 }
 {
 	<EXECUTE> <STATEMENT> stmtName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
-		[ LOOKAHEAD( { getToken(1).kind == USING } )
-		  usingToken = <USING> usingClause =
-		  							queryExpression(null, NO_SET_OP) ]
 	{
-		endToken = getToken(0);
-
-		if (usingClause != null)
-		{
-			HasNodeVisitor visitor = new HasNodeVisitor(ParameterNode.class);
-			usingClause.accept(visitor);
-			if (visitor.hasNode())
-			{
-				throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_USING);
-			}
-
-			// grab the USING text
-			usingText = getStringSlicer().slice(
-										usingToken.endOffset + 1,
-										getToken(0).endOffset,false);
-		}
-
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.EXEC_SPS_NODE,
 								stmtName,
-								usingClause,
-								usingText,
 								getContextManager());
 	}
 }
@@ -11003,23 +10976,6 @@ dropViewStatement() throws StandardException :
 								C_NodeTypes.DROP_VIEW_NODE,
 								viewName,
 								getContextManager());
-	}
-}
-
-QueryTreeNode
-dropSPSStatement() throws StandardException :
-{
-	TableName statementName;
-}
-{
-	<STATEMENT> statementName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
-	{
-		QueryTreeNode stmt = nodeFactory.getNode(
-								C_NodeTypes.DROP_SPS_NODE,
-								statementName,
-								getContextManager());
-
-		return stmt;
 	}
 }
 

@@ -57,8 +57,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 	final ClassInspector 			ci;
 	private	final boolean			hasReturnOutputParam;
 
-	//bug 4552 - "exec statement using" will return no parameters through parametermetadata
-	private boolean					isUsingPVS;
 
 	/**
 	 * Constructor for a GenericParameterValueSet
@@ -110,9 +108,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 	 */
 	public void clearParameters()
 	{
-		if (isUsingPVS)
-			return;
-
 		for (int i = 0; i < parms.length; i++)
 		{
 			parms[i].clear();
@@ -149,9 +144,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 
 	public	DataValueDescriptor	getParameterForSet(int position) throws StandardException {
 
-		if (isUsingPVS)
-			throw StandardException.newException(SQLState.NO_SETXXX_FOR_EXEC_USING);
-
 		try {
 
 			GenericParameter gp = parms[position];
@@ -169,9 +161,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 	}
 	
 	public	DataValueDescriptor	getParameterForGet(int position) throws StandardException {
-
-		if (isUsingPVS)
-			throw StandardException.newException(SQLState.NO_SETXXX_FOR_EXEC_USING);
 
 		try {
 
@@ -266,7 +255,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 				pvstarget.getParameterForSet(i).setValue(oldp.getValue());
 			}
 		}
-		((GenericParameterValueSet) pvstarget).isUsingPVS = isUsingPVS;
 	}
 
 	/*
@@ -510,27 +498,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 	public boolean hasReturnOutputParameter()
 	{
 		return hasReturnOutputParam;
-	}
-
-	// bug 4552 - "exec statement using" will return no parameters through parametermetadata
-	/**
-	 * Is this pvs for using clause.
-	 *
-	 * @return true if this pvs for using clause.
-	 *
-	 */
-	public boolean isUsingParameterValueSet()
-	{
-		return isUsingPVS;
-	}
-
-	// bug 4552 - "exec statement using" will return no parameters through parametermetadata
-	/**
-	 * Set pvs for using clause.
-	 */
-	public void setUsingParameterValueSet()
-	{
-		isUsingPVS = true;
 	}
 
     /**

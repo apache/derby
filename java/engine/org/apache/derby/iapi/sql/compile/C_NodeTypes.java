@@ -93,7 +93,7 @@ public interface C_NodeTypes
 	static final int CHAR_CONSTANT_NODE = 61;
 	static final int COLUMN_REFERENCE = 62;
 	static final int DROP_INDEX_NODE = 63;
-	static final int DROP_SPS_NODE = 64;
+	// 64 available;
 	static final int DROP_TRIGGER_NODE = 65;
 	static final int READ_CURSOR_NODE = 66;
 	static final int DECIMAL_CONSTANT_NODE = 67;
@@ -160,7 +160,7 @@ public interface C_NodeTypes
 	static final int SELECT_NODE = 129;
 	static final int CREATE_VIEW_NODE = 130;
 	static final int CONSTRAINT_DEFINITION_NODE = 131;
-	static final int ALTER_SPS_NODE = 132;
+	// 132 available;
 	static final int NEW_INVOCATION_NODE = 133;
 	static final int CREATE_SCHEMA_NODE = 134;
 	static final int FROM_BASE_TABLE = 135;

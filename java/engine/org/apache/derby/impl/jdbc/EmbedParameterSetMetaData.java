@@ -57,13 +57,7 @@ public class EmbedParameterSetMetaData
 	//////////////////////////////////////////////////////////////
     protected EmbedParameterSetMetaData(ParameterValueSet pvs, DataTypeDescriptor[] types)  {
 		int paramCount;
-		if (pvs.isUsingParameterValueSet()) {
-			pvs = null;
-			types = null;
-			paramCount = 0;
-		} else {
-			paramCount = pvs.getParameterCount();
-		}
+		paramCount = pvs.getParameterCount();
 		this.pvs = pvs;
 		this.paramCount = paramCount;
 		this.types = types;

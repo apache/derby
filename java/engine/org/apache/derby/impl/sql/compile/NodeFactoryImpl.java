@@ -327,9 +327,6 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.DROP_INDEX_NODE:
 		  	return C_NodeNames.DROP_INDEX_NODE_NAME;
 
-		  case C_NodeTypes.DROP_SPS_NODE:
-		  	return C_NodeNames.DROP_SPS_NODE_NAME;
-
 		  case C_NodeTypes.DROP_TRIGGER_NODE:
 		  	return C_NodeNames.DROP_TRIGGER_NODE_NAME;
 
@@ -478,9 +475,6 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 
 		  case C_NodeTypes.CONSTRAINT_DEFINITION_NODE:
 		  	return C_NodeNames.CONSTRAINT_DEFINITION_NODE_NAME;
-
-		  case C_NodeTypes.ALTER_SPS_NODE:
-		  	return C_NodeNames.ALTER_SPS_NODE_NAME;
 
 		  case C_NodeTypes.NEW_INVOCATION_NODE:
 		  	return C_NodeNames.NEW_INVOCATION_NODE_NAME;

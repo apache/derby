@@ -20,10 +20,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.loader.GeneratedClass;
@@ -32,36 +28,21 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Dependent;
 
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.execute.ExecRow;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.sql.PreparedStatement;
-import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.ResultSet;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.execute.BaseActivation;
-import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.apache.derby.impl.sql.CursorInfo;
 
 import org.apache.derby.iapi.util.ByteArray;
@@ -87,28 +68,19 @@ public class ExecSPSNode extends StatementNode
 	private TableName			name;
 	private SPSDescriptor		spsd;
 	private ExecPreparedStatement ps;
-	private ResultSetNode		usingClause;
-	private String				usingText;
 
 	/**
 	 * Initializer for a ExecSPSNode
 	 *
 	 * @param newObjectName		The name of the table to be created
-	 * @param usingClause		The using clause
-	 * @param usingText			The text of the using clause
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
 	public void init(
-				Object 		newObjectName,
-				Object	usingClause,
-				Object			usingText)
-		throws StandardException
+				Object 		newObjectName)
 	{
 		this.name = (TableName) newObjectName;
-		this.usingClause = (ResultSetNode) usingClause;
-		this.usingText = (String) usingText;
 	}
 
 	/**
@@ -123,20 +95,12 @@ public class ExecSPSNode extends StatementNode
 	 */
 	public QueryTreeNode bind() throws StandardException
 	{
-		DataDictionary		dd;
-
 		/*
 		** Grab the compiler context each time we bind just
 		** to make sure we have the write one (even though
 		** we are caching it).
 		*/
-		dd = getDataDictionary();
-
-		// bind the using Clause
-		if (usingClause != null)
-		{
-			usingClause.bind();
-		}
+		DataDictionary dd = getDataDictionary();
 
 		String schemaName = name.getSchemaName();
 		SchemaDescriptor sd = getSchemaDescriptor(name.getSchemaName());
@@ -224,11 +188,6 @@ public class ExecSPSNode extends StatementNode
 		getCompilerContext().setSavedObjects(ps.getSavedObjects());
 		getCompilerContext().setCursorInfo(ps.getCursorInfo());
 		GeneratedClass gc = ps.getActivationClass();
-
-		/*
-		** Set up the params for our using clause.
-		*/
-		setupParams();
 		
 		return gc;
 	}
@@ -347,94 +306,7 @@ public class ExecSPSNode extends StatementNode
 	// PRIVATE
 	//
 	/////////////////////////////////////////////////////////////////////
-	/*
-	** Set up the parameters for this node.  Takes
-	** the usingClause and executes it.  The results
-	** are used to set the parameters for the
-	** statement.
-	*/
-	private void setupParams() throws StandardException
-	{
-		if (usingClause == null)
-			return;
 
-		DataTypeDescriptor[] types = spsd.getParams();
-		/*
-		** If the sps doesn't support any 
-		** parameters, then don't bother.
-		*/
-		if (types == null) 
-		{
-			return;
-		}
-
-		/*
-		** Get the results the easy way: create
-		** a statement from the text and execute
-		** it.
-		*/
-		LanguageConnectionContext lcc = getLanguageConnectionContext();
-
-		PreparedStatement ps = lcc.prepareInternalStatement(usingText);
-	
-		ResultSet rs = ps.execute(lcc, false);
-		
-		try {
-			ExecRow row = rs.getNextRow();
-			if (row == null)
-			{
-				throw StandardException.newException(SQLState.LANG_NO_ROWS_FROM_USING);
-			}
-
-			/*
-			** Get the row and set the parameters based on that
-			*/
-			ParameterValueSet params = lcc.getLanguageFactory().newParameterValueSet(
-				lcc.getLanguageConnectionFactory().getClassFactory().getClassInspector(), types.length, false);
-
-			DataValueDescriptor[] rowArray = row.getRowArray();
-			// Check at compile time that the using clause has the correct number of parameters.
-			if (rowArray.length != types.length) {
-				throw StandardException.newException(SQLState.LANG_NUM_PARAMS_INCORRECT,
-					Integer.toString(rowArray.length), Integer.toString(types.length));
-			}
-
-			for (int i = 0; i < types.length; i++)
-			{
-				TypeId typeId = types[i].getTypeId();
-
-				params.setStorableDataValue( 
-					typeId.getNull(),
-					i, typeId.getJDBCTypeId(), typeId.getCorrespondingJavaTypeName());
-
-				params.getParameterForSet(i).setValue(rowArray[i]);
-			}
-
-			/*
-			** If there are any other rows, then throw an
-			** exception
-			*/
-			if (rs.getNextRow() != null)
-			{
-				throw StandardException.newException(SQLState.LANG_USING_CARDINALITY_VIOLATION);
-			}
-			//bug 4552 - "exec statement using" will return no parameters through parametermetadata
-			params.setUsingParameterValueSet();
-
-			/*
-			** Stash the parameters in the compiler context
-			*/	
-			getCompilerContext().setParams(params); 
-		}
-		finally {
-
-			rs.close();
-		}
-
-
-
-
-	}
 		
 	/////////////////////////////////////////////////////////////////////
 	//
@@ -447,13 +319,8 @@ public class ExecSPSNode extends StatementNode
 	}
 
 	// called after bind only
-	SPSDescriptor getSPSDescriptor()
+	private final SPSDescriptor getSPSDescriptor()
 	{
 		return spsd;
-	}
-
-	String getUsingText()
-	{
-		return usingText;
 	}
 }

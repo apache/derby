@@ -78,7 +78,7 @@ alter statement recompile all;
 ERROR 42X01: Syntax error: Encountered "statement" at line 2, column 7.
 ij> -- following will give error because there is no stored prepared statement s1 in the database
 drop statement s1;
-ERROR 42Y55: 'DROP STATEMENT' cannot be performed on 'S1' because it does not exist.
+ERROR 42X01: Syntax error: Encountered "statement" at line 2, column 6.
 ij> -- clean up
 DROP TABLE t1;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
@@ -87,7 +87,7 @@ ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
 ij> DROP CLASS ALIAS ExternalInsert;
 ERROR 42X01: Syntax error: Encountered "CLASS" at line 1, column 6.
 ij> DROP STATEMENT insert1;
-ERROR 42Y55: 'DROP STATEMENT' cannot be performed on 'INSERT1' because it does not exist.
+ERROR 42X01: Syntax error: Encountered "STATEMENT" at line 1, column 6.
 ij> -- Primary key constraint, DB2 requires NOT null on the columns.
 create table customer (id int primary key, name char(100));
 ERROR 42831: 'ID' cannot be a column of a primary key or unique key because it can contain null values.

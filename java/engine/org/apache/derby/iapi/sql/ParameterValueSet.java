@@ -205,22 +205,6 @@ public interface ParameterValueSet
 	*/
 	public boolean checkNoDeclaredOutputParameters();
 
-
-	// bug 4552 - "exec statement using" will return no parameters through parametermetadata
-	/**
-	 * Is this pvs for using clause.
-	 *
-	 * @return true if it has a output parameter
-	 *
-	 */
-	public boolean isUsingParameterValueSet();
-
-	// bug 4552 - "exec statement using" will return no parameters through parametermetadata
-	/**
-	 * Setthis pvs for using clause.
-	 */
-	public void setUsingParameterValueSet();
-
 	/**
 	 * Set the parameter values of the pvstarget to equal those 
 	 * set in this PVS.

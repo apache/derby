@@ -85,32 +85,6 @@ public class GenericConstantActionFactory
 	//
 	///////////////////////////////////////////////////////////////////////
 
-
-
-
-	/**
-	 * Get ConstantAction for ALTER STATEMENT statement.
-	 *
-	 *  @param sd			descriptor of the schema in which
-	 *						our beloved stmt resides
-	 *  @param spsName		Name of sps.  if null, all statements
-	 *						are recompiled
-	 *	@param usingText	the text of the USING clause	
-	 *	@param invalidOnly	only recompile if invalid.  Only used
-	 *						for the case where all statements are
-	 *						recompiled.
-	 */
-	public	ConstantAction	getAlterSPSConstantAction
-	(
-		SchemaDescriptor	sd,
-		String				spsName,
-		String				usingText,
-		boolean				invalidOnly
-    )
-	{
-		return	new AlterSPSConstantAction(sd, spsName, usingText, invalidOnly);
-	}
-	
 	/**
 	 * Get ConstantAction for SET CONSTRAINTS statement.
 	 *
@@ -278,35 +252,6 @@ public class GenericConstantActionFactory
 	{
 		return new CreateAliasConstantAction
 			(aliasName, schemaName, javaClassName, aliasInfo, aliasType );
-	}
-
-
-	/**
-	 * Make the ConstantAction for a CREATE STORED PREPARED STATEMENT statement.
-	 * Adds an extra parameter that allows the user to designate whether
-	 * this sps can be created in the SYS schema.
-	 *
-	 *  @param schemaName			name for the schema that table lives in.
-	 *  @param spsName		Name of statement
-	 *	@param spsText		Text of query expression for sps definition
-	 *	@param usingText	the text of the USING clause
-	 *	@param okInSys		ok to create in sys schema
-	 *	@param nocompile	don't try to compile the sps when it is created
-	 *	@param compSchemaId	the compilation schema id
-	 */
-	public	ConstantAction	getCreateSPSConstantAction
-	(
-		String				schemaName,
-		String				spsName,
-		String				spsText,
-		String				usingText,
-		boolean				okInSys,
-		boolean				nocompile,
-		UUID				compSchemaId
-	)
-	{
-		return	new CreateSPSConstantAction(schemaName, spsName, spsText, 
-						usingText, compSchemaId, okInSys, nocompile);
 	}
 
 	/**
@@ -568,24 +513,6 @@ public class GenericConstantActionFactory
 	{
 		return	new DropAliasConstantAction(sd, aliasName, aliasType );
 	}
-
-
-	/**
-	 *	Make the ConstantAction for a DROP STATEMENT statement.
-	 *
-	 *	@param	sd					Schema that stored prepared statement lives in.
-	 *	@param	spsName				Name of the SPS
-	 *
-	 */
-	public	ConstantAction	getDropSPSConstantAction
-	(
-		SchemaDescriptor	sd,
-		String				spsName
-    )
-	{
-		return	new DropSPSConstantAction( sd, spsName );
-	}
-
 
 	/**
 	 *	Make the ConstantAction for a DROP TABLE statement.

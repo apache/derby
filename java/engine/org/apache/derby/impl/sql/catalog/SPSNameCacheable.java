@@ -32,8 +32,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import java.util.Hashtable;
-
 /**
  * This class implements a Cacheable for a DataDictionary cache of
  * sps descriptors, with the lookup key being the name/schema of the sps.

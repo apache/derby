@@ -46,8 +46,6 @@ public interface C_NodeNames
 
 	static final String ALL_RESULT_COLUMN_NAME = "org.apache.derby.impl.sql.compile.AllResultColumn";
 
-	static final String ALTER_SPS_NODE_NAME = "org.apache.derby.impl.sql.compile.AlterSPSNode";
-
 	static final String ALTER_TABLE_NODE_NAME = "org.apache.derby.impl.sql.compile.AlterTableNode";
 
 	static final String AND_NODE_NAME = "org.apache.derby.impl.sql.compile.AndNode";
@@ -119,8 +117,6 @@ public interface C_NodeNames
 	static final String DROP_ALIAS_NODE_NAME = "org.apache.derby.impl.sql.compile.DropAliasNode";
 
 	static final String DROP_INDEX_NODE_NAME = "org.apache.derby.impl.sql.compile.DropIndexNode";
-
-	static final String DROP_SPS_NODE_NAME = "org.apache.derby.impl.sql.compile.DropSPSNode";
 
 	static final String DROP_SCHEMA_NODE_NAME = "org.apache.derby.impl.sql.compile.DropSchemaNode";
 

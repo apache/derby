@@ -386,7 +386,7 @@ String[] TwoByte = {
         /* 332 */       null,
         /* 333 */       null,
         /* 334 */       "org.apache.derby.impl.sql.execute.rts.RealDistinctScanStatistics",
-        /* 335 */       "org.apache.derby.impl.sql.execute.AlterSPSConstantAction",
+        /* 335 */       null,
         /* 336 */       null,
         /* 337 */       null,
         /* 338 */       null,
