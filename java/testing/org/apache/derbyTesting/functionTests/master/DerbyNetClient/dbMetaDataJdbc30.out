@@ -27,5 +27,5 @@ EXPECTED: Not Implemented Exception or empty  ResultSet
 getAttributes() with null :
 EXPECTED: Not Implemented Exception or empty  ResultSet
 locatorsUpdateCopy(): 
-Returned: true
+Returned: false
 Test dbMetaDataJdbc30 finished
