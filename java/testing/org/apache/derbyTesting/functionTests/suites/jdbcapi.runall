@@ -13,4 +13,5 @@ jdbcapi/LOBTest.java
 jdbcapi/blobclob4BLOB.java
 jdbcapi/parameterMapping.java
 jdbcapi/setTransactionIsolation.java
+jdbcapi/prepStmtNull.java
 
