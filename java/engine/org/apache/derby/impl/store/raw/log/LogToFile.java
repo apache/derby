@@ -2218,7 +2218,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 		// For 2.0 beta we added the build number and the isBeta indication.
 		// (5 bytes from our first spare long)
-		daos.writeInt(jbmsVersion.getBuildNumberAsInt());
+		daos.writeInt(jbmsVersion.getBuildNumber());
 		byte flags = 0;
 		if (onDiskBeta) flags |= IS_BETA_FLAG;
 		daos.writeByte(flags);

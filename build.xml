@@ -488,20 +488,16 @@
   <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar"/>
   <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar"/>
 
-  <target name="initjars" depends="setsanityname,getsvnversion">
+  <target name="initjars" depends="setsanityname">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
     <property name="derby.jar.topdir" value="${basedir}/jars"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
-     <loadfile srcFile="${basedir}/changenumber.properties"
-               failonerror="false"
-               property="changenumber"/>
-    <condition property="changenumber" value="???">
+    <condition property="changenumber" value="1">
       <not>
         <isset property="changenumber"/>
       </not>
     </condition>
-    <echo message="Revision number set to ${changenumber}."/>
   </target>
 
 
@@ -738,14 +734,6 @@
     </condition>
   </target>
 
-   <target name="getsvnversion">
-     <exec executable="svnversion"
-           failifexecutionfails="no"
-           output="${basedir}/changenumber.properties">
-       <arg value="${basedir}"/>
-       <arg value="-n"/>
-     </exec>
-   </target>
 
   <target name="cleanjars" depends="setsanityname">
     <delete dir="${basedir}/jars/${sanity.name}"/>

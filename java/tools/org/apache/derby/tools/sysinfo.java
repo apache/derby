@@ -120,7 +120,7 @@ public class sysinfo {
 		gets the build number for the IBM Cloudscape embedded library
 		@return the build number, or -1 if the information is not found.
 	*/
-  static public String getBuildNumber()
+  static public int getBuildNumber()
   {
     return getBuildNumber("DBMS");
   }
@@ -129,14 +129,14 @@ public class sysinfo {
 		gets the build number for the specified library
 		@param genus which library to get the build number for. Valid inputs are
 			DBMS, TOOLS
-		@return the build number, or ???? if the information is not found.
+		@return the build number, or -1 if the information is not found.
 	*/
-  static public String getBuildNumber(String genus)
+  static public int getBuildNumber(String genus)
   {
         ProductVersionHolder pvh = ProductVersionHolder.getProductVersionHolderFromMyEnv(genus);
         if (pvh == null)
         {
-            return "????";
+            return -1;
         }
 
         return pvh.getBuildNumber();

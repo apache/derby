@@ -122,7 +122,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	private int minorVersion = BAD_NUMBER;
 	private int maintVersion = BAD_NUMBER;
 	private int drdaMaintVersion = BAD_NUMBER;
-	private String buildNumber = "????";
+	private int buildNumber = BAD_NUMBER;
 	private Boolean isBeta;
 
 	private ProductVersionHolder() {
@@ -141,7 +141,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 								 int minorVersion,
 								 int maintVersion,
 								 int drdaMaintVersion,
-								 String buildNumber,
+								 int buildNumber,
 								 Boolean isBeta)
 	{
 		if (productVendorName != null)
@@ -171,7 +171,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	  @param maintVersion The least significant portion of a 3 part
 	  product version. Must be non-negative.
 	  @param drdaMaintVersion The protocol modification number for minor release.
-	  @param buildNumber The buildNumber for a product. 
+	  @param buildNumber The buildNumber for a product. Must be positive.
 	  @param isBeta true iff the product is beta.
 	  @return A valid ProductVersionHolder of null if any of the parameters
 	  provided are not valid.
@@ -185,7 +185,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 						   int minorVersion,
 						   int maintVersion,
 						   int drdaMaintVersion,
-						   String buildNumber,
+						   int buildNumber,
 						   Boolean isBeta)
 	{
 		ProductVersionHolder pvh =
@@ -288,7 +288,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 		int v2 = parseInt(p.getProperty(PropertyNames.PRODUCT_MINOR_VERSION));
 		int v3 = parseInt(p.getProperty(PropertyNames.PRODUCT_MAINT_VERSION));
 		int v4 = parseInt(p.getProperty(PropertyNames.PRODUCT_DRDA_MAINT_VERSION));
-		String bn = p.getProperty(PropertyNames.PRODUCT_BUILD_NUMBER);
+		int bn = parseInt(p.getProperty(PropertyNames.PRODUCT_BUILD_NUMBER));
 		Boolean isBeta =
 			Boolean.valueOf(p.getProperty(PropertyNames.PRODUCT_BETA_VERSION));
 		return 	getProductVersionHolder(pvn,pn,ptn,v1,v2,v3,v4,bn,isBeta);
@@ -357,40 +357,8 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	/**
 	  Return the build number for this product.
 	  */
-	public String getBuildNumber() {return buildNumber;}
+	public int getBuildNumber() {return buildNumber;}
 
-    /**
-     * Return the build number as an integer if possible,
-     * mapping from the SVN number.
-     * nnnnn -> returns nnnnn
-     * nnnnnM -> returns -nnnnn indicates a modified code base
-     * nnnnn:mmmmm -> returns -nnnnn
-     * anything else -> returns -1
-    */
-    public int getBuildNumberAsInt(){
-    	if (buildNumber == null)
-    	    return -1;
-    	boolean dubiousCode = false;
-    	int offset = buildNumber.indexOf('M');
-    	if (offset == -1)
-    	    offset = buildNumber.indexOf(':');
-    	else
-    	    dubiousCode = true;
-    	if (offset == -1)
-    		offset = buildNumber.length();
-        else
-            dubiousCode = true;
-    	
-    	try {
-    		int bnai = Integer.parseInt(buildNumber.substring(0, offset));
-    		if (dubiousCode)
-    		    bnai = -bnai;
-    		return bnai;
-    	} catch (NumberFormatException nfe) 
-     	{
-     		return -1;
-    	}
-    }
 
 	/**
 	  Parse a string containing a non-negative integer. Return
@@ -458,7 +426,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 
 		return sb.toString();
 	}
-	public static String fullVersionString(int major, int minor, int maint, boolean isBeta, String build) {
+	public static String fullVersionString(int major, int minor, int maint, boolean isBeta, int build) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(major);
 		sb.append('.');
@@ -494,7 +462,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 			sb.append(' ');
             sb.append(preRelease);
         }
-		if (build != null) {
+		if (build != 0) {
 			sb.append(" - (");
 
 			sb.append(build);
@@ -510,7 +478,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
     public String getVersionBuildString(boolean withBuild)
     {
 		return ProductVersionHolder.fullVersionString(majorVersion, minorVersion, maintVersion, isBeta(),
-			withBuild ? buildNumber : null);
+			withBuild ? buildNumber : 0);
     }
 
 	/*

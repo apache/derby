@@ -20,5 +20,5 @@ public abstract class Performance {
 	// file and change the value of this to `true', then compile
 	// whichever other classes are depending on this.  In general,
 	// such a check-out should only be temporary.
-	public static final boolean MEASURE = true;
+	public static final boolean MEASURE = false;
 }
