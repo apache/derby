@@ -33,6 +33,7 @@ lang/holdCursorJavaReflection.java
 lang/procedure.java
 lang/simpleScroll.sql
 lang/supersimple.sql
+lang/updatableResultSet.java
 lang/wisconsin.sql
 store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
