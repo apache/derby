@@ -26,26 +26,12 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.VariableSizeDataValue;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
-
-import org.apache.derby.iapi.types.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -691,12 +677,8 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 *
 	 * @param desiredType	The type to normalize the source column to
 	 * @param source		The value to normalize
-	 * @param cachedDest	DataValueDescriptor, if non-null, to hold result
-	 *						(Reuse if normalizing multiple rows)
 	 *
-	 * @return	The normalized SQLDecimal
-	 *
-	 * @exception StandardException				Thrown for null into
+	 * @throws StandardException				Thrown for null into
 	 *											non-nullable column, and for
 	 *											truncation error
 	 */
@@ -802,8 +784,6 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 							NumberDataValue result)
 				throws StandardException
 	{
-		double		tempResult;
-
 		if (result == null)
 		{
 			result = new SQLDecimal();
@@ -1031,7 +1011,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 	/**
 	 *
-	 * @param the big decimal
+	 * @param decimalValue the big decimal
 	 *
 	 * @return the precision
 	 */	
@@ -1065,19 +1045,19 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return 0;
 		}
 
-		/*
-		** Get the absolute value so we dont
-		** get a leading '-' sign.  Make sure
-		** we don't count the leading '0' as
-		** precision.  Would be nice to use log10, but
-		** we might be bigger than a double.
-		*/
-		String s = decimalValue.abs().toString();
-		int scale = decimalValue.scale();
-		return (scale == 0) ? 
-			s.length() :
-			s.indexOf('.') - (s.startsWith("0.") ? 1 : 0);
+        /**
+         * if ONE > abs(value) then the number of whole digits is 0
+         */
+        decimalValue = decimalValue.abs();
+        if (ONE.compareTo(decimalValue) == 1)
+        {
+            return 0;
+        }
+
+		String s = decimalValue.toString();
+        return (decimalValue.scale() == 0) ? s.length() : s.indexOf('.');
 	}
+
 	/**
 	 * Return the value field
 	 *
