@@ -90,7 +90,13 @@ class DDMWriter
 
 	// Whether or not the current DSS is a continuation DSS.
 	private boolean isContinuationDss;
-	
+
+	// In situations where we want to "mark" a buffer location so that
+	// we can "back-out" of a write to handle errors, this holds the
+	// location within the "bytes" array of the start of the header
+	// that immediately precedes the mark.
+	private int lastDSSBeforeMark;
+
 	// Constructors
 	DDMWriter (int minSize, CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
 	{
@@ -101,6 +107,7 @@ class DDMWriter
 		this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
 		this.previousChainByte = DssConstants.DSS_NOCHAIN;
 		this.isContinuationDss = false;
+		this.lastDSSBeforeMark = -1;
 		reset(dssTrace);
 	}
 
@@ -113,6 +120,7 @@ class DDMWriter
 		this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
 		this.previousChainByte = DssConstants.DSS_NOCHAIN;
 		this.isContinuationDss = false;
+		this.lastDSSBeforeMark = -1;
 		reset(dssTrace);
 	}
 
@@ -1808,6 +1816,59 @@ class DDMWriter
 					"OutputStream.flush()",
 					e.getMessage(),"*");
 			}
+		}
+
+	}
+
+	/**
+	 * Takes note of the location of the most recently completed
+	 * DSS in the buffer, and then returns the current offset.
+	 * This method is used in conjunction with "clearDSSesBackToMark"
+	 * to allow for DRDAConnThread to "back-out" DSSes in the
+	 * event of errors.
+	 */
+	protected int markDSSClearPoint()
+	{
+
+		lastDSSBeforeMark = prevHdrLocation;
+		return getOffset();
+
+	}
+
+	/**
+	 * Does a logical "clear" of everything written to the buffer after
+	 * the received mark.  It's assumed that this method will be used
+	 * in error cases when we've started writing one or more DSSes,
+	 * but then hit an error and need to back out.  After backing out,
+	 * we'll always need to write _something_ back to the client to
+	 * indicate an error (typically, we just write an SQLCARD) but what
+	 * exactly gets written is handled in DRDAConnThread.  Here, we
+	 * just do the necessary prep so that whatever comes next will
+	 * succeed.
+	 */
+	protected void clearDSSesBackToMark(int mark)
+	{
+
+		// Logical clear.
+		setOffset(mark);
+
+		// Because we've just cleared out the most recently-
+		// written DSSes, we have to make sure the next thing
+		// we write will have the correct correlation id.  We
+		// do this by setting the value of 'nextCorrelationID'
+		// based on the chaining byte from the last remaining
+		// DSS (where "remaining" means that it still exists
+		// in the buffer after the clear).
+		if (lastDSSBeforeMark == -1)
+		// we cleared out the entire buffer; reset corr id.
+			nextCorrelationID = 1;
+		else {
+		// last remaining DSS had chaining, so we set "nextCorrelationID"
+		// to be 1 greater than whatever the last remaining DSS had as
+		// its correlation id.
+ 			nextCorrelationID = 1 + (int)
+				(((bytes[lastDSSBeforeMark + 4] & 0xff) << 8) +
+				(bytes[lastDSSBeforeMark + 5] & 0xff));
 		}
 
 	}

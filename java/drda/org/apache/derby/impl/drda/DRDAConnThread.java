@@ -558,6 +558,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		{
 			correlationID = reader.readDssHeader();
 			int codePoint = reader.readLengthAndCodePoint();
+			int writerMark = writer.markDSSClearPoint();
 			switch(codePoint)
 			{
 				case CodePoint.CNTQRY:
@@ -581,7 +582,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
  						{
 							// if we got a SQLException we need to clean up and
  							// close the statement Beetle 4758
-							writer.clearBuffer();
+							writer.clearDSSesBackToMark(writerMark);
  							if (! stmt.rsIsClosed())
  							{
  								try {
@@ -626,6 +627,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 							null, updateCount, true, true);
 					} catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
@@ -643,6 +645,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					}
 					catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
@@ -663,6 +666,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 
 					} catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						writeSQLCARDs(e, 0, true);
 						PRPSQLSTTfailed = true;
 						errorInChain(e);
@@ -702,13 +706,9 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					}
 					catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						try {
 							// Try to cleanup if we hit an error.
-							// We me have written all or part of
-							// OPNQRYRM and/or QRYDSC before hitting
-							// the error, so we have to clear the write
-							// buffer and ONLY write the OPNQLFRM.
-							writer.clearBuffer();
 							if (ps != null)
 								ps.close();
 							writeOPNQFLRM(e);
@@ -735,6 +735,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					}
 					catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						// Even in case of error, we have to write the ENDUOWRM.
 						writeENDUOWRM(COMMIT);
 						writeSQLCARDs(e, 0);
@@ -756,6 +757,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					}
 					catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						// Even in case of error, we have to write the ENDUOWRM.
 						writeENDUOWRM(ROLLBACK);
 						writeSQLCARDs(e, 0);
@@ -770,6 +772,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					}
 					catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
@@ -811,6 +814,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 						
 					} catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						server.consoleExceptionPrint(e);
 						try {
 							writeSQLDARD(database.getCurrentStatement(), true, e);
@@ -835,6 +839,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 							curStmt.rsSuspend();
 					} catch (SQLException e)
 					{
+						writer.clearDSSesBackToMark(writerMark);
 						if (SanityManager.DEBUG) 
 						{
 							server.consoleExceptionPrint(e);
