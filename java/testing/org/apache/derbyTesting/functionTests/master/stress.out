@@ -1,0 +1,7 @@
+...running initialization via init.sql
+...running with 10 threads
+...running duration 0:10:0
+...stopping testers
+...waiting for testers to complete
+TEST CASE SUMMARY: normal termination
+...running last checks via final.sql

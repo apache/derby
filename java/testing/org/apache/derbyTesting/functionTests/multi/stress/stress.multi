@@ -1,0 +1,86 @@
+threads: 10
+runtime: 00:10:00
+	# INITIALIZATION
+	init: initialization
+	file: init.sql
+	properties: init.properties
+	ignoreErrors: X0X05, 42X05, 42Y55, 42Y07,42Y55
+
+	# CASES
+	
+	case: createX
+	file: create.sql
+	properties: run.properties
+	weight: 5
+	ignoreErrors: X0X08, X0X05, 42X05, 42Y55, 42000, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: createY
+	file: createy.sql
+	properties: run.properties
+	weight: 5
+	ignoreErrors: X0X08, X0X05, 42X05, 42Y55, 42000, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: createZ
+	file: createz.sql
+	properties: run.properties
+	weight: 10
+	ignoreErrors: X0X08, X0X05, 42X05, 42Y55, 42000, 40001,40XL1,40XL2, 42Y07, X0Y32,42Y55
+
+	case: createA
+	file: createa.sql
+	properties: run.properties
+	weight: 10
+	ignoreErrors: X0X05, 42X05, 42Y55, 42000, 40001,40XL1,40XL2, 42Y07, X0Y32,42Y55
+
+	case: roll
+	file: roll.sql
+	properties: run.properties
+	weight: 15
+	ignoreErrors: X0X05, 42X05, 42Y55, 42000, 23505, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: roll2
+	file: roll2.sql
+	properties: run.properties
+	weight: 15
+	ignoreErrors: X0X05, 42X05, 42Y55, 42000, 23505, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: insert
+	file: insert.sql
+	properties: run.properties
+	weight: 15
+	ignoreErrors: 42000, 23505, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: insert2
+	file: insert2.sql
+	properties: run.properties
+	weight: 15
+	ignoreErrors: 42000, 23505, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: update
+	file: update.sql
+	properties: run.properties
+	weight: 15
+	ignoreErrors: 42000, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: update2
+	file: update2.sql
+	properties: run.properties
+	weight: 15
+	ignoreErrors: 42000, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: SELECT1
+	file: selectmain.sql
+	properties: run.properties
+	weight: 80
+	ignoreErrors: 42000, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	case: SELECT2
+	file: selectmain2.sql
+	properties: run.properties
+	weight: 80
+	ignoreErrors: 42000, 40001,40XL1,40XL2, 42Y07,42Y55
+
+	# FINAL SCRIPT
+	last: final
+	file: final.sql
+	properties: run.properties

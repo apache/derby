@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<!-- ==================================================================== -->
+<!--                       Derby build file                          -->
+<!-- ==================================================================== -->
+
+<project default="FTstress" basedir=".">
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="${ant.home}/properties"/>
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+
+  <!-- derby testing specific properties files -->
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/tests/lang"/>
+
+<!--             ============ Begin Targets ==============                -->
+  <target name="FTstress" depends="copyfiles"/>
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/multi/stress">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress/copyfiles.ant"/> 
+    </copy>
+  </target>
+
+</project>
+

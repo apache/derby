@@ -107,7 +107,7 @@ public class RunTest
 	static String canondir; // optional (to specify other than "master")
 	static String bootcp; // for j9 bootclasspath
 	static String canonpath; // special full path (will be platform dependent)
-	//static String mtestdir = ""; // for MultiTest user must specify testdir
+	static String mtestdir = ""; // for MultiTest user must specify testdir
 	static String testSpecialProps = ""; // any special suite properties
 	static String testJavaFlags = ""; // special command line flags
 	static String jvmflags; // java special flags
@@ -472,7 +472,10 @@ public class RunTest
             //System.out.println("testDirName: " + testDirName);
             scriptFileName = scriptName.substring(index+1, scriptName.length());
             //System.out.println("scriptFileName: " + scriptFileName);
-            defaultPackageName = defaultPackageName + "functionTests/tests/" + testDirName + "/";
+            if (testType.equals("multi"))
+                defaultPackageName = defaultPackageName + "functionTests/multi/" + testDirName + "/";
+            else
+                defaultPackageName = defaultPackageName + "functionTests/tests/" + testDirName + "/";
             //System.out.println("defaultPackage: " + defaultPackageName);
             resourceName = defaultPackageName + scriptFileName;
             //System.out.println("resource: " + resourceName);
@@ -592,12 +595,20 @@ public class RunTest
 		        
 	    fileSep = File.separatorChar;
 
-        // for now, only addressing java and sql tests; other possible test 
-        // contributions will be unittests and multithreaded tests.
+        // for now, only addressing java, sql and multi threaded tests; other possible test 
+        // contributions will be unittests.
+
+        // For multi tests, the user should have specified mtestdir (full path)
+        // unless this is a Suite, in which case outDir is used for mtestdir
+        if ( testType.equals("multi") )
+            if ( (mtestdir == null) || (mtestdir.length()==0) )
+                // Use outDir for mtestdir
+                mtestdir = outDir.getPath();
 
         // For certain test types, locate script file based on scriptName
         // Then determine the actual test name and directory
-        if ( (!testType.equals("java")) ) 
+        if ( (!testType.equals("java")) && 
+             (!testType.equals("multi")) ) 
         {
             // NOTE: cannot use getResource because the urls returned
             // are not the same between different java environments
@@ -625,7 +636,7 @@ public class RunTest
                     fw.close();
                     script = new File(f.getCanonicalPath());
                 }
-			// else is probably only multi test, not contributed at this point
+			// else is probably only multi test
             else
                 try { script = new File((new File(outDir, scriptFileName)).getCanonicalPath()); } 
                 catch (IOException e) {
@@ -1016,9 +1027,9 @@ public class RunTest
 		testOutName = sp.getProperty("testoutname");
 		useOutput = new Boolean(sp.getProperty("useoutput","true")).booleanValue();
 		outcopy = new Boolean(sp.getProperty("outcopy","false")).booleanValue();
-		// mtestdir = sp.getProperty("mtestdir"); // used by multi tests
-		//if (mtestdir == null)
-		//    mtestdir = "";
+		mtestdir = sp.getProperty("mtestdir"); // used by multi tests
+		if (mtestdir == null)
+		    mtestdir = "";
 		    
 		String usepr = sp.getProperty("useprocess");
 		if (usepr != null)
@@ -1274,7 +1285,11 @@ clp.list(System.out);
         isApDef = loadTestResource(apDefProp);
 
         // Check for test_app.properties
-        isAp = loadTestResource("tests/" + testDirName + "/" + testBase + "_app.properties");
+
+        if ( testType.equals("multi") )
+            isAp = loadTestResource("multi/" + testDirName + "/" + testBase + "_app.properties");
+        else
+            isAp = loadTestResource("tests/" + testDirName + "/" + testBase + "_app.properties");
 //System.out.println("**************");
 //System.out.println("isAp = " + isAp);
 //System.out.println(defaultPackageName + testBase + "_app.properties");
@@ -1501,18 +1516,18 @@ clp.list(System.out);
     		        else
 						copyOutDir = outDir;
     		    }
-    		    //else if ( testType.equals("multi") )
-    		    //{
-    		    //    if ( (isSuiteRun) || (mtestdir == null) || (mtestdir.length()==0) )
-    		    //    {
-				//		copyOutDir = outDir;
-    		    //    }
-    		    //    else
-    		    //    {
-    		    //        File multiDir = new File(mtestdir);
-				//		copyOutDir = multiDir;
-    		    //    }
-    		    //}
+    		    else if ( testType.equals("multi") )
+    		    {
+    		        if ( (isSuiteRun) || (mtestdir == null) || (mtestdir.length()==0) )
+    		        {
+						copyOutDir = outDir;
+    		        }
+    		        else
+    		        {
+    		            File multiDir = new File(mtestdir);
+						copyOutDir = multiDir;
+    		        }
+    		    }
                 else if ( outcopy == true )
                     copyOutDir = outDir;
                 else if ( (runDir != null) && (runDir.exists()) )
@@ -2055,8 +2070,21 @@ clp.list(System.out);
                 v.addElement(propString);
             }
         }
-        // here would be placed calls to and set properties for e.g. unittests and multithreaded tests methods
-            
+           
+        else if ( testType.equals("multi") )
+        {
+	System.out.println("scriptiflename is: " + scriptFileName);
+            v.addElement("org.apache.derbyTesting.functionTests.harness.MultiTest");
+            v.addElement(scriptFileName);
+            v.addElement("-i");
+            v.addElement(mtestdir);
+            v.addElement("-o");
+            v.addElement(outDir.getPath());
+            v.addElement("-p");
+            v.addElement(propString);
+        }
+        // here would be placed calls to and set properties for e.g. unittests methods
+
         // Now convert the vector into a string array
         String[] sCmd = new String[v.size()];
         for (int i = 0; i < v.size(); i++)
@@ -2270,7 +2298,30 @@ clp.list(System.out);
 			}
     		sysProp.put("user.dir", olduserdir);
         }
-        // here would be placed messages re unittests and multithreaded tests not working with useprocess false
+        else if (testType.equals("multi"))
+        {
+	System.out.println("scriptiflename is: later " + scriptFileName);
+            // multi tests will now run with useprocess=false;
+            // however, probably because they use Threads, if run 
+            // within another test suite, the next suite will not run
+            // And using a Thread.join() to start the tests doesn't resolve
+            // this. So this support is here simply to allow running
+            // something like stressmulti just by itself for debugging
+            //sysProp.put("user.dir", outDir.getCanonicalPath());
+            //javaPath = "org.apache.derbyTesting.functionTests.harness.MultiTest";
+            String[] args = new String[5];
+            args[0] = scriptFileName;
+            args[1] = "-i";
+            args[2] = mtestdir;
+            args[3] = "-o";
+            args[4] = outDir.getPath();
+            System.out.println("Try running MultiTest.main");
+            for (int i = 0; i < args.length; i++)
+                System.out.println("args: " + args[i]);
+            System.exit(1);
+            org.apache.derbyTesting.functionTests.harness.MultiTest.main(args);
+        }
+        // here would be placed messages re unittests not working with useprocess false
         ps.close();
         // Reset System.out and System.err
         System.setOut(stdout);

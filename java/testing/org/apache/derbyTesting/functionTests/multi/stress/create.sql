@@ -1,0 +1,10 @@
+autocommit off;
+create table x (x int);
+insert into x values (1);
+insert into x values (1);
+insert into x values (1);
+insert into x values (1);
+insert into x values (1);
+drop table x;
+commit;
+disconnect;
