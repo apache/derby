@@ -2073,7 +2073,7 @@ public class DB2jServerImpl {
 										// socket with 0.0.0.0 (all addresses) so we will
 										// getLocalHost() which will suffice.
 										InetAddress connectAddress;
-										if (JVMInfo.JDK_ID < 4 &&
+										if (JVMInfo.JDK_ID <= JVMInfo.J2SE_13 &&
 											hostAddress.getHostAddress().equals("0.0.0.0"))
 											connectAddress = InetAddress.getLocalHost();
 										else

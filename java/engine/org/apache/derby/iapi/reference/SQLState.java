@@ -961,7 +961,6 @@ public interface SQLState {
     String LANG_MULTIPLE_CONSTRAINTS_WITH_SAME_COLUMNS                 = "42Z93";
 	// String LANG_ALTER_SYSTEM_TABLE_ATTEMPTED                            = "42Z94"; -- replaced by 42X62
 	// String LANG_ALTER_TABLE_ON_NON_TABLE                                = "42Z95"; -- replaced by 42Y62
-	String LANG_RW_VTI_JAVA11										   = "42Z96";
 	String LANG_RENAME_COLUMN_WILL_BREAK_CHECK_CONSTRAINT              = "42Z97";
 	// beetle 2758.  For now just raise an error for literals > 64K
 	String LANG_INVALID_LITERAL_LENGTH                                 = "42Z99";

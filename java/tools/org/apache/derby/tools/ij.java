@@ -51,7 +51,7 @@ public class ij {
 	   * load based on the same criteria that the JDBC driver
 	   * uses.
 	   */
-	  if (JVMInfo.JDK_ID == 2)
+	  if (JVMInfo.JDK_ID == JVMInfo.J2SE_13)
 	  {
 		  Main.main(args);
 	  }

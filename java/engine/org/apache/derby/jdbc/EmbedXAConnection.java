@@ -36,6 +36,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -869,7 +870,7 @@ final class EmbedXAConnection extends EmbedPooledConnection
 		else
 			xae = new XAException(XAException.XAER_RMERR);
 
-		if (org.apache.derby.iapi.services.info.JVMInfo.JDK_ID >= 4)
+		if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14)
 			xae.initCause(se);
 		return xae;
 	}

@@ -293,9 +293,7 @@ public final class SQLSmallint
 			value = resultSet.getShort(colNumber);
 			isnull = (isNullable && resultSet.wasNull());
 		} catch (SQLException selq) {
-			System.out.println("GET SHORT " + selq.toString());
 			int i = resultSet.getInt(colNumber);
-			System.out.println("GET SHORT VALUE " + i);
 			value = (short) i;
 			isnull = false;
 

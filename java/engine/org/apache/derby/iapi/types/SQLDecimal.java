@@ -312,7 +312,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		BigDecimal localValue = getBigDecimal();
 		if (localValue == null)
 			return null;
-		else if (JVMInfo.JDK_ID < 6)
+		else if (JVMInfo.JDK_ID < JVMInfo.J2SE_15)
 			return localValue.toString();
         else
         {

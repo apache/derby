@@ -241,18 +241,7 @@ public final class MessageService {
 
 		if (arguments == null)
 			arguments = new Object[0];
- 		else if (JVMInfo.JDK_ID == 1)
-		{
-			// make sure the Object array contains only string because in
-			// pre-116 JVMs, MessageFormat.format has a bug which cause it to
-			// output a string to System.out whenever it sees an object it
-			// can't recognize, instead of calling toString().
-			for (int i = 0; i < arguments.length; i++)
-			{
-				if (arguments[i] != null)
-					arguments[i] = arguments[i].toString();
-			}
-		}
+
 		if (bundle != null) {
 
 			try {

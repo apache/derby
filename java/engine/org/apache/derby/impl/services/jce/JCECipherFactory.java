@@ -376,11 +376,6 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 		throws StandardException
 	{
 
-		if (SanityManager.DEBUG) {
-			if (JVMInfo.JDK_ID < 2)
-				SanityManager.THROWASSERT("expected JDK ID to be 2 - is " + JVMInfo.JDK_ID);
-		}
-
         boolean provider_or_algo_specified = false;
 		boolean storeProperties = create;
 
@@ -394,7 +389,7 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 		if (cryptoProvider == null)
 		{
 			// JDK 1.3 does not create providers by itself.
-			if (JVMInfo.JDK_ID == 2) {
+			if (JVMInfo.JDK_ID == JVMInfo.J2SE_13) {
 
 				String vendor;
 				try {

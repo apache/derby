@@ -536,10 +536,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		}
 		else
 		{
-			if (JVMInfo.JDK_ID == 1)
-				throw StandardException.newException(SQLState.LANG_RW_VTI_JAVA11, 
-										getVTIName());
-
 			version2 = true;
 		}
 

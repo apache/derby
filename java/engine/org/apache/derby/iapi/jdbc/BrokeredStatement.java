@@ -24,7 +24,7 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
-
+import org.apache.derby.iapi.services.info.JVMInfo;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -465,7 +465,7 @@ public class BrokeredStatement implements Statement
         throws SQLException
 	{
 		int defaultHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
-		if (org.apache.derby.iapi.services.info.JVMInfo.JDK_ID > 2) { //No need to use reflection for jdks 1.4 and higher
+		if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14) { //No need to use reflection for jdks 1.4 and higher
 			defaultHoldability = getStatement().getResultSetHoldability();
 		} else {
 			try {

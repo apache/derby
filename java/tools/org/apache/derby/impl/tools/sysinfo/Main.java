@@ -187,6 +187,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
   private static void reportCloudscape (java.io.PrintWriter localAW) {
 
+	  localAW.println("JRE - JDBC: " + org.apache.derby.iapi.services.info.JVMInfo.derbyVMLevel());
+
 	  String classpath;
 
 	  try {
@@ -259,6 +261,10 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
     localAW.println (Main.getTextMessage ("SIF02.J",
                                                            getJavaProperty ("user.dir")));
+
+	localAW.println("java.specification.name: " + getJavaProperty("java.specification.name"));
+	localAW.println("java.specification.version: " + getJavaProperty("java.specification.version"));
+
 
   } // end of reportJavaInfo
 

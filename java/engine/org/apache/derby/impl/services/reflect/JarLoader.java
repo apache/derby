@@ -32,11 +32,9 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 
-import java.sql.*;
+
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.util.IdUtil;
-
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -47,20 +45,9 @@ public class JarLoader extends ClassLoader {
 	private static final JarFile jarFileFactory;
 
 	static {
-		JarFile jf = null;
 
-		if (JVMInfo.JDK_ID >= 2) {
-			try {
-				Class jf2c = Class.forName("org.apache.derby.impl.services.reflect.JarFileJava2");
-				jf = (JarFile) jf2c.newInstance();
-			} catch (Exception e) {
-				throw new ExceptionInInitializerError(e);
-			}
-		} else {	
-			jf = new JarFile();
-		}
-
-		jarFileFactory = jf;
+		// 
+		jarFileFactory = new JarFileJava2();
 	}
 
 	private UpdateLoader updateLoader;

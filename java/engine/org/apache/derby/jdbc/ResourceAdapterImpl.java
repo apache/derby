@@ -61,10 +61,6 @@ public class ResourceAdapterImpl
 	{
 		// we can only run on jdk1.2 or beyond with JTA and JAVA 20 extension
 		// loaded.
-		if (SanityManager.DEBUG) {
-			if (JVMInfo.JDK_ID < 2)
-				SanityManager.THROWASSERT("expected JDK ID to be 2 - is " + JVMInfo.JDK_ID);
-		}
 
 		connectionTable = new Hashtable();
 

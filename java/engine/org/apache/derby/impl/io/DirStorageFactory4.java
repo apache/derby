@@ -32,7 +32,7 @@ import java.io.IOException;
 public class DirStorageFactory4 extends DirStorageFactory
 {
 
-	private static final boolean	rwsOK = JVMInfo.JDK_ID >= 5;
+	private static final boolean	rwsOK = JVMInfo.JDK_ID >= JVMInfo.J2SE_142;
     
     /**
      * Most of the initialization is done in the init method.

@@ -773,22 +773,19 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		// classes were missing, and continue without it.
 		// Done this way to work around Chai's need to preload
 		// classes.
-		if (JVMInfo.JDK_ID >= 2)
+		// Assume both of these classes are in the class path.
+		// Assume we may need a ResourceAdapter since we don't know how
+		// this database is going to be used.
+		try
 		{
-			// If we got here, both of these classes are in the class path.
-			// Assume we may need a ResourceAdapter since we don't know how
-			// this database is going to be used.
-			try
-			{
-				resourceAdapter = 
-					Monitor.bootServiceModule(create, this,
-											 org.apache.derby.iapi.reference.Module.ResourceAdapter,
-											 allParams);
-			}
-			catch (StandardException mse)
-			{
-				// OK, resourceAdapter is an optional module
-			}
+			resourceAdapter = 
+				Monitor.bootServiceModule(create, this,
+										 org.apache.derby.iapi.reference.Module.ResourceAdapter,
+										 allParams);
+		}
+		catch (StandardException mse)
+		{
+			// OK, resourceAdapter is an optional module
 		}
 	}
 
