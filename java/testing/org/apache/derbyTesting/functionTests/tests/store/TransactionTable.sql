@@ -95,9 +95,9 @@ order by lockname, mode, cnt, state;
 
 select * from foo;
 
--- when this finished rolling back, this transaction should be IDLE;
 select * from xactTable order by username, sql_text, status, type;
 
+-- when last statement finished rolling back, this transaction should be IDLE;
 select type, lockcount as cnt, mode, tablename, lockname, state
 from new org.apache.derby.diag.LockTable() t
 where tableType <> 'S'
