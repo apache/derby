@@ -1,0 +1,582 @@
+ij> set isolation to RR;
+0 rows inserted/updated/deleted
+ij> run resource 'TableLockBasic.subsql';
+ij> -- Very basic single user testing of table locking, verify that the right locks
+-- are obtained for simple operations.  This test only looks at table and
+-- row logical locks, it does not verify physical latches or lock ordering.
+--
+-- The basic methodology is:
+--    start transaction
+--    simple operation
+--    print lock table which should match the master
+--    end transation
+-- 
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> run resource 'LockTableQuery.subsql';
+ij> create view lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
+0 rows inserted/updated/deleted
+ij> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
+-- order by
+--     tabname, type desc, mode, cnt, lockname
+-- lock table with system catalog locks included.
+create view full_lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- lock table with no join.
+create view lock_table2 as
+select 
+    cast(l.xid as char(8)) as xid,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state
+from 
+    new org.apache.derby.diag.LockTable() l  
+where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- transaction table with no join.
+create view tran_table as
+select 
+    *
+from 
+    new org.apache.derby.diag.TransactionTable() t ;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> create table heap_only (a int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into empty heap, should just get table lock 
+--------------------------------------------------------------------------------
+insert into heap_only values (1);
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |X   |HEAP_ONLY   |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into heap with one row, just get table lock 
+--------------------------------------------------------------------------------
+insert into heap_only values (2);
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |X   |HEAP_ONLY   |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test select from a heap, should get shared table lock.
+--------------------------------------------------------------------------------
+select a from heap_only where a = 1;
+A          
+-----------
+1          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |S   |HEAP_ONLY   |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test delete from a heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+delete from heap_only where a = 1;
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |X   |HEAP_ONLY   |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test update to heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+update heap_only set a = 1000 where a = 2;
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |X   |HEAP_ONLY   |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test drop of heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+drop table heap_only;
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |3   |X   |*** TRANSIEN|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> create table indexed_heap (a int, b varchar(1000));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |X   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> create index a_idx on indexed_heap (a, b);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |4   |S   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into indexed heap, should just get table lock 
+--------------------------------------------------------------------------------
+insert into indexed_heap (a) values (1);
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |X   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into indexed heap with one row, just get table lock 
+--------------------------------------------------------------------------------
+insert into indexed_heap (a) values (2);
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |X   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test select from a indexed heap, should get shared table lock.
+--------------------------------------------------------------------------------
+select a from indexed_heap where a = 1;
+A          
+-----------
+1          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |S   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test delete from a indexed heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+delete from indexed_heap where a = 1;
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |X   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test update to indexed heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+update indexed_heap set a = 1000 where a = 2;
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |4   |X   |INDEXED_HEAP|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test drop of indexed heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+drop table indexed_heap;
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |X   |*** TRANSIEN|Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |4   |X   |*** TRANSIEN|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test LOCK TABLE statement
+--------------------------------------------------------------------------------
+create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> prepare p1 as 'lock table t1 in exclusive mode';
+ij> execute p1;
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |X   |T1          |Tablelock |GRANT|ACTIVE  
+ij> -- verify that statement gets recompiled correctly
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1(c1 int);
+0 rows inserted/updated/deleted
+ij> execute p1;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> lock table t1 in share mode;
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- verify that lock table not allowed in sys schema
+lock table sys.systables in exclusive mode;
+ERROR 42X62: 'LOCK TABLE' is not allowed in the 'SYS' schema.
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test RTS output when table locking configured
+--------------------------------------------------------------------------------
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 2000;
+ij> create table rts(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into rts values 1;
+1 row inserted/updated/deleted
+ij> commit;
+ij> select * from rts with cs;
+C1         
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from rts with cs
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for RTS at read committed isolation level using instantaneous share row locking chosen by the optimizer (Actual locking used: table level locking.)
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=1
+	Number of rows visited=1
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> drop table rts;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test DDL TABLE LOCK MODE
+--------------------------------------------------------------------------------
+create table default_granularity(c1 int);
+0 rows inserted/updated/deleted
+ij> create table row_granularity(c1 int);
+0 rows inserted/updated/deleted
+ij> alter table row_granularity locksize row;
+0 rows inserted/updated/deleted
+ij> create table table_granularity(c1 int);
+0 rows inserted/updated/deleted
+ij> alter table table_granularity locksize table;
+0 rows inserted/updated/deleted
+ij> select * from default_granularity with cs;
+C1         
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from default_granularity with cs
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for DEFAULT_GRANULARITY at read committed isolation level using instantaneous share row locking chosen by the optimizer (Actual locking used: table level locking.)
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> select * from default_granularity with rr;
+C1         
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from default_granularity with rr
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for DEFAULT_GRANULARITY at serializable isolation level using share table locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> select * from row_granularity with cs;
+C1         
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from row_granularity with cs
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for ROW_GRANULARITY at read committed isolation level using instantaneous share row locking chosen by the optimizer (Actual locking used: table level locking.)
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> select * from row_granularity with rr;
+C1         
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from row_granularity with rr
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for ROW_GRANULARITY at serializable isolation level using share table locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> select * from table_granularity with cs;
+C1         
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from table_granularity with cs
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for TABLE_GRANULARITY at read committed isolation level using instantaneous share table locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> select * from table_granularity with rr;
+C1         
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from table_granularity with rr
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for TABLE_GRANULARITY at serializable isolation level using share table locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> rollback;
+ij> 

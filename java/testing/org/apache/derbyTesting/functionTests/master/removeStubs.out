@@ -1,0 +1,137 @@
+ij> ---test which goes through the code path that 
+--removes the stub files are no longer necessary
+create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> autocommit off ;
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> commit ;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect all;
+ij> connect 'jdbc:derby:wombat';
+ij> autocommit on;
+ij> create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> drop table t1 ;
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect all;
+ij> connect 'jdbc:derby:wombat';
+ij> create table t2( a int ) ;
+0 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect all;
+ij> connect 'jdbc:derby:wombat';
+ij> drop table t2 ;
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> --following create will make sure that the container
+--cache does not have the delete stub file entry
+create table t3(a int ) ;
+0 rows inserted/updated/deleted
+ij> --do some inserts/delete and thene remove the stubs
+create table t2(b int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> autocommit off;
+ij> delete from t2;
+28 rows inserted/updated/deleted
+ij> commit;
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> -- do some delete and drpop of the container in the same transaction
+create table t2(b int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> commit;
+ij> delete from t2;
+28 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> --just do a rollback for the heck of it
+-- do some delete and drpop of the container in the same transaction
+create table t2(b int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1) , (2) , (3) , (4);
+4 rows inserted/updated/deleted
+ij> commit;
+ij> delete from t2;
+28 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> rollback;
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> 

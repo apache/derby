@@ -1,0 +1,72 @@
+--------------------------------------------------------------------------------
+-- Test 0.1: ddl interaction
+--------------------------------------------------------------------------------
+
+-- create 1st table.  Drop the table, which will get regular X locks on the
+-- rows in the system catalogs (which are different than insert locks).
+set connection create1;
+create table create1 (a int);
+drop table create1;
+
+-- create 2nd table
+--    The following should not block now that ddl work is done under 
+--    repeatable read no matter what the user isolation level.
+set connection create2;
+create table create2 (a int);
+
+set connection create1;
+commit;
+set connection create2;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test 0.2: normal user data, previous key must block on serializable read,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+select * from data where keycol <= 10;
+
+-- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+insert into data values (5, '50');
+commit;
+
+-- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+select * from data where keycol <= 10;
+
+set connection create1;
+commit;
+delete from data where keycol = 5;
+commit;
+set connection create2;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test 0.3: normal user data, previous key must block on serializable delete,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+delete from data where keycol <= 10;
+
+-- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+insert into data values (6, '60');
+commit;
+
+-- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+select * from data where keycol <= 10;
+
+set connection create1;
+commit;
+delete from data where keycol = 6;
+commit;
+set connection create2;
+commit;

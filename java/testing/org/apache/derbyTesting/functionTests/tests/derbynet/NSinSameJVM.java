@@ -33,10 +33,10 @@ public class NSinSameJVM {
 
     public NSinSameJVM() {
 
-        // Load the Cloudscape driver
+        // Load the Derby driver
         try {
             Class.forName("com.ibm.db2.jcc.DB2Driver").newInstance();
-            dbg("Cloudscape drivers loaded");
+            dbg("Derby drivers loaded");
         } catch (Exception e) {
             e.printStackTrace();
         }

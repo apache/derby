@@ -1,0 +1,156 @@
+ij> autocommit off;
+ij> create table foo (a int, b char(250), c char(250), d int);
+0 rows inserted/updated/deleted
+ij> insert into foo values (1, '1', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (11, '11', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (12, '12', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (13, '13', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (14, '14', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (15, '15', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (16, '16', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (17, '17', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (18, '18', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (11, '111', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (12, '121', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (13, '131', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (14, '141', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (15, '151', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (16, '161', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (17, '171', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (18, '181', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (2, '2', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (3, '3', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (4, '4', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (5, '5', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (6, '6', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (7, '7', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (8, '8', '1', 1);
+1 row inserted/updated/deleted
+ij> insert into foo values (9, '9', '1', 1);
+1 row inserted/updated/deleted
+ij> create index foox on foo (b);
+0 rows inserted/updated/deleted
+ij> -- normal max optimization, last row in index is not deleted.
+select max(b) from foo;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+9                                                                                                                              &
+ij> -- new max optimization, last row in index is deleted but others on page aren't.
+delete from foo where a = 9;
+1 row inserted/updated/deleted
+ij> select max(b) from foo;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+8                                                                                                                              &
+ij> -- new max optimization, last row in index is deleted but others on page aren't.
+delete from foo where a = 8;
+1 row inserted/updated/deleted
+ij> select max(b) from foo;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+7                                                                                                                              &
+ij> -- new max optimization, last row in index is null, real max on last page.
+insert into foo values (9, null, '1', 1);
+1 row inserted/updated/deleted
+ij> select max(b) from foo;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+7                                                                                                                              &
+ij> -- new max optimization, last is null and deleted, real max on last page.
+delete from foo where a > 2;
+22 rows inserted/updated/deleted
+ij> select max(b) from foo;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+2                                                                                                                              &
+ij> -- max optimization does not work - fail over to scan, all rows on last page are
+-- deleted, except for non-deleted null row on last page. max row on 1st page.
+delete from foo where a > 1;
+1 row inserted/updated/deleted
+ij> insert into foo values (9, null, '1', 1);
+1 row inserted/updated/deleted
+ij> select max(b) from foo;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                              &
+ij> -- max optimization does not work - fail over to scan, all rows on last page are
+-- deleted.  non-deleted null row on last page. max row is on 1st page.
+delete from foo where a > 1;
+1 row inserted/updated/deleted
+ij> select max(b) from foo;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                              &
+ij> create table b5772 (a int, b int);
+0 rows inserted/updated/deleted
+ij> create index b1 on b5772(b);
+0 rows inserted/updated/deleted
+ij> -- 0 row case
+select max(b) from b5772;
+1          
+-----------
+NULL       
+ij> select min(b) from b5772;
+1          
+-----------
+NULL       
+ij> -- 1 row case
+insert into b5772 values (1, 1);
+1 row inserted/updated/deleted
+ij> select max(b) from b5772;
+1          
+-----------
+1          
+ij> select min(b) from b5772;
+1          
+-----------
+1          
+ij> -- 1 null row case
+drop table b5772;
+0 rows inserted/updated/deleted
+ij> create table b5772 (a int, b int);
+0 rows inserted/updated/deleted
+ij> create index b1 on b5772(b);
+0 rows inserted/updated/deleted
+ij> insert into b5772 values (2, null);
+1 row inserted/updated/deleted
+ij> select max(b) from b5772;
+1          
+-----------
+NULL       
+ij> select min(b) from b5772;
+1          
+-----------
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- 1 row plus, one null row.
+insert into b5772 values (1, 1);
+1 row inserted/updated/deleted
+ij> -- cleanup
+drop table b5772;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> 

@@ -1,4 +1,4 @@
-main-NSinSameJVM: Cloudscape drivers loaded
+main-NSinSameJVM: Derby drivers loaded
 Server is ready to accept connections on port 20000.
 Connection number: 1.
 main-NSinSameJVM: NetworkServer started

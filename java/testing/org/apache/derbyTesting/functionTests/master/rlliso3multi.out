@@ -1,0 +1,661 @@
+ij> --------------------------------------------------------------------------------
+-- Test multi user lock interaction under isolation level 3.  default isolation
+-- level has been set as a property to serializable.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Test 0: verify isolation level by seeing if a read lock is released or not.
+--------------------------------------------------------------------------------
+connect 'wombat' as scanner;
+ij(SCANNER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(SCANNER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(SCANNER)> connect 'wombat' as writer;
+ij(WRITER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(WRITER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(WRITER)> run resource 'createTestProcedures.subsql';
+ij(WRITER)> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(WRITER)> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(WRITER)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij(WRITER)> -- set up
+set connection scanner;
+ij(SCANNER)> autocommit off;
+ij(SCANNER)> create table test_0 (a int);
+0 rows inserted/updated/deleted
+ij(SCANNER)> insert into test_0 values (1);
+1 row inserted/updated/deleted
+ij(SCANNER)> commit;
+ij(SCANNER)> set connection writer;
+ij(WRITER)> autocommit off;
+ij(WRITER)> -- scanner should hold read lock on table until end of transaction.
+set connection scanner;
+ij(SCANNER)> select * from test_0;
+A          
+-----------
+1          
+ij(SCANNER)> -- writer should get a lock timeout.
+set connection writer;
+ij(WRITER)> insert into test_0 values (2);
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(WRITER)> -- scanner should only see the original row.
+set connection scanner;
+ij(SCANNER)> select * from test_0;
+A          
+-----------
+1          
+ij(SCANNER)> commit;
+ij(SCANNER)> select * from test_0;
+A          
+-----------
+1          
+ij(SCANNER)> -- cleanup
+set connection scanner;
+ij(SCANNER)> drop table test_0;
+0 rows inserted/updated/deleted
+ij(SCANNER)> commit;
+ij(SCANNER)> disconnect;
+ij> set connection writer;
+ij(WRITER)> disconnect;
+ij> --------------------------------------------------------------------------------
+-- Test 1: make sure a leaf root growing get's the right lock.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Test setup - create a 1 page btre, with the page ready to split.
+--------------------------------------------------------------------------------
+connect 'wombat' as scanner;
+ij(SCANNER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(SCANNER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(SCANNER)> connect 'wombat' as rootgrower;
+ij(ROOTGROWER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(ROOTGROWER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(ROOTGROWER)> set connection scanner;
+ij(SCANNER)> autocommit off;
+ij(SCANNER)> create table a (a varchar(1000), b varchar(1000)) ;
+0 rows inserted/updated/deleted
+ij(SCANNER)> insert into a values (PADSTRING('a',1000), PADSTRING('a',1000));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into a values (PADSTRING('b',1000), PADSTRING('b',1000));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into a values (PADSTRING('c',1000), PADSTRING('c',1000));
+1 row inserted/updated/deleted
+ij(SCANNER)> create index a_idx on a (a) ;
+0 rows inserted/updated/deleted
+ij(SCANNER)> ;
+ij(SCANNER)> commit;
+ij(SCANNER)> set connection rootgrower;
+ij(ROOTGROWER)> autocommit off;
+ij(ROOTGROWER)> commit;
+ij(ROOTGROWER)> --------------------------------------------------------------------------------
+-- Set up scanner to be doing a row locked covered scan on the index.
+--------------------------------------------------------------------------------
+set connection scanner;
+ij(SCANNER)> autocommit off;
+ij(SCANNER)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(SCANNER)> get cursor scan_cursor as 
+    'select a from a where a >= PADSTRING(''a'',1000) and a < PADSTRING(''c'',1000) ';
+ij(SCANNER)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(SCANNER)> next scan_cursor;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+a                                                                                                                              &
+ij(SCANNER)> --------------------------------------------------------------------------------
+-- This should block on the scan lock held by the scanner on the first page.
+--------------------------------------------------------------------------------
+set connection rootgrower;
+ij(ROOTGROWER)> autocommit off;
+ij(ROOTGROWER)> insert into a values (PADSTRING('d',1000), PADSTRING('d',1000));
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(ROOTGROWER)> --------------------------------------------------------------------------------
+-- The scan should continue unaffected.
+--------------------------------------------------------------------------------
+set connection scanner;
+ij(SCANNER)> next scan_cursor;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+b                                                                                                                              &
+ij(SCANNER)> next scan_cursor;
+No current row
+ij(SCANNER)> --------------------------------------------------------------------------------
+-- This insert will block on the previous key lock of the scanner.
+--------------------------------------------------------------------------------
+set connection rootgrower;
+ij(ROOTGROWER)> insert into a values (PADSTRING('ab',1000), PADSTRING('ab',1000));
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(ROOTGROWER)> --------------------------------------------------------------------------------
+-- Now the grow root should be allowed (note that cursor scan has locks
+-- on the leaf page being grown - just not the scan lock).
+--------------------------------------------------------------------------------
+set connection rootgrower;
+ij(ROOTGROWER)> insert into a values (PADSTRING('d',1000), PADSTRING('d',1000));
+1 row inserted/updated/deleted
+ij(ROOTGROWER)> select a from a;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+a                                                                                                                              &
+b                                                                                                                              &
+c                                                                                                                              &
+d                                                                                                                              &
+ij(ROOTGROWER)> --------------------------------------------------------------------------------
+-- cleanup.
+--------------------------------------------------------------------------------
+set connection rootgrower;
+ij(ROOTGROWER)> commit;
+ij(ROOTGROWER)> disconnect;
+ij> set connection scanner;
+ij(SCANNER)> commit;
+ij(SCANNER)> drop table a;
+0 rows inserted/updated/deleted
+ij(SCANNER)> commit;
+ij(SCANNER)> disconnect;
+ij> --------------------------------------------------------------------------------
+-- Test 2: make sure previous key locks are gotten correctly.
+--------------------------------------------------------------------------------
+connect 'wombat' as client_1;
+ij(CLIENT_1)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(CLIENT_1)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(CLIENT_1)> connect 'wombat' as client_2;
+ij(CLIENT_2)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(CLIENT_2)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(CLIENT_2)> set connection client_1;
+ij(CLIENT_1)> autocommit off;
+ij(CLIENT_1)> create table a (a varchar(1000), b varchar(1000)) ;
+0 rows inserted/updated/deleted
+ij(CLIENT_1)> create index a_idx on a (a) ;
+0 rows inserted/updated/deleted
+ij(CLIENT_1)> commit;
+ij(CLIENT_1)> insert into a values (PADSTRING('b',1000), PADSTRING('b',1000));
+1 row inserted/updated/deleted
+ij(CLIENT_1)> set connection client_2;
+ij(CLIENT_2)> autocommit off;
+ij(CLIENT_2)> --------------------------------------------------------------------------------
+-- the following will not cause a time out, as the previous
+-- key insert lock will not conflict with other insert locks, only other
+-- select locks, or non insert update locks.
+--------------------------------------------------------------------------------
+insert into a values (PADSTRING('c',1000), PADSTRING('c',1000));
+1 row inserted/updated/deleted
+ij(CLIENT_2)> --------------------------------------------------------------------------------
+-- the following should NOT cause a time out
+--------------------------------------------------------------------------------
+insert into a values (PADSTRING('a',1000), PADSTRING('a',1000));
+1 row inserted/updated/deleted
+ij(CLIENT_2)> --------------------------------------------------------------------------------
+-- cleanup.
+--------------------------------------------------------------------------------
+set connection client_1;
+ij(CLIENT_1)> commit;
+ij(CLIENT_1)> set connection client_2;
+ij(CLIENT_2)> commit;
+ij(CLIENT_2)> drop table a;
+0 rows inserted/updated/deleted
+ij(CLIENT_2)> commit;
+ij(CLIENT_2)> --------------------------------------------------------------------------------
+-- Test 3: make sure an exact key insert into unique key index blocks.
+--------------------------------------------------------------------------------
+set connection client_1;
+ij(CLIENT_1)> autocommit off;
+ij(CLIENT_1)> create table a (a varchar(1000), b varchar(1000));
+0 rows inserted/updated/deleted
+ij(CLIENT_1)> create unique index a_idx on a (a) ;
+0 rows inserted/updated/deleted
+ij(CLIENT_1)> commit;
+ij(CLIENT_1)> insert into a values (PADSTRING('b',1000), PADSTRING('b',1000));
+1 row inserted/updated/deleted
+ij(CLIENT_1)> set connection client_2;
+ij(CLIENT_2)> autocommit off;
+ij(CLIENT_2)> --------------------------------------------------------------------------------
+-- the following should cause a time out, as the previous
+-- key lock will conflict with client_1's lock on 'b'
+--------------------------------------------------------------------------------
+insert into a values (PADSTRING('b',1000), PADSTRING('b',1000));
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CLIENT_2)> --------------------------------------------------------------------------------
+-- Test 4: make sure that row lock wait in a heap scan works
+--------------------------------------------------------------------------------
+set connection client_1;
+ij(CLIENT_1)> autocommit off;
+ij(CLIENT_1)> create table test_4 (a int, b varchar(1000), c varchar(1000)) ;
+0 rows inserted/updated/deleted
+ij(CLIENT_1)> commit;
+ij(CLIENT_1)> set connection client_2;
+ij(CLIENT_2)> autocommit off;
+ij(CLIENT_2)> commit;
+ij(CLIENT_2)> -- client_1 will get a single row lock in the heap.
+set connection client_1;
+ij(CLIENT_1)> insert into test_4 values (1, PADSTRING('a',1000), PADSTRING('b',1000));
+1 row inserted/updated/deleted
+ij(CLIENT_1)> -- client_2 scans table, blocking on a row lock on the client_1 insert row, 
+-- will get timout message.
+set connection client_2;
+ij(CLIENT_2)> select * from test_4;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CLIENT_2)> -- release the insert lock.
+set connection client_1;
+ij(CLIENT_1)> commit;
+ij(CLIENT_1)> -- reader should be able to see row now.
+set connection client_2;
+ij(CLIENT_2)> select * from test_4;
+A          |B                                                                                                                               |C                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |a                                                                                                                              &|b                                                                                                                              &
+ij(CLIENT_2)> commit;
+ij(CLIENT_2)> -- cleanup
+set connection client_1;
+ij(CLIENT_1)> drop table test_4;
+0 rows inserted/updated/deleted
+ij(CLIENT_1)> commit;
+ij(CLIENT_1)> --------------------------------------------------------------------------------
+-- Test 5: make sure a that a group fetch through a secondary index correctly
+--         handles the previous to first key locking.  In serializable the
+--         scanner should hold the previous to first key lock until end of 
+--         transaction, thus blocking the attempted insert to the range.
+--------------------------------------------------------------------------------
+connect 'wombat' as scanner;
+ij(SCANNER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(SCANNER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(SCANNER)> connect 'wombat' as inserter;
+ij(INSERTER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(INSERTER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(INSERTER)> set connection scanner;
+ij(SCANNER)> autocommit off;
+ij(SCANNER)> create table test_5 (a int, b varchar(1000), c varchar(1000));
+0 rows inserted/updated/deleted
+ij(SCANNER)> insert into test_5 values (1, PADSTRING('a',1000), PADSTRING('a',1000));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into test_5 values (2, PADSTRING('b',1000), PADSTRING('b',1000));
+1 row inserted/updated/deleted
+ij(SCANNER)> create index test_5_idx on test_5 (a);
+0 rows inserted/updated/deleted
+ij(SCANNER)> commit;
+ij(SCANNER)> set connection inserter;
+ij(INSERTER)> autocommit off;
+ij(INSERTER)> commit;
+ij(INSERTER)> --------------------------------------------------------------------------------
+-- Set up scanner to be doing a row locked index to base row scan on the index.
+-- By using group fetch it will read and release locks on multiple rows from
+-- the index and save away row pointers from the index.
+--------------------------------------------------------------------------------
+set connection scanner;
+ij(SCANNER)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','10');
+0 rows inserted/updated/deleted
+ij(SCANNER)> get cursor scan_cursor as 
+    'select a, b from test_5 where a <= 2 ';
+ij(SCANNER)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(SCANNER)> -- because of group locking will get locks on 1, 2, 3, 4, and 5 and then will
+-- release the locks on 1, 2, 3, and 4.  The last one is released on close or
+-- on next call emptying the cursor.
+next scan_cursor;
+A          |B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------
+1          |a                                                                                                                              &
+ij(SCANNER)> --------------------------------------------------------------------------------
+-- Insert a row previous to all other rows, this should block and back out.
+--------------------------------------------------------------------------------
+set connection inserter;
+ij(INSERTER)> insert into test_5 values (0, PADSTRING('b',1000), PADSTRING('b',1000));
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(INSERTER)> --------------------------------------------------------------------------------
+-- The scan should finish fine without blocking.
+--------------------------------------------------------------------------------
+set connection scanner;
+ij(SCANNER)> next scan_cursor;
+A          |B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------
+2          |b                                                                                                                              &
+ij(SCANNER)> next scan_cursor;
+No current row
+ij(SCANNER)> -- commit the insert
+set connection inserter;
+ij(INSERTER)> commit;
+ij(INSERTER)> -- scanner should now see 1 and 2
+set connection scanner;
+ij(SCANNER)> close scan_cursor;
+ij(SCANNER)> select a from test_5;
+A          
+-----------
+1          
+2          
+ij(SCANNER)> --------------------------------------------------------------------------------
+-- cleanup.
+--------------------------------------------------------------------------------
+set connection inserter;
+ij(INSERTER)> commit;
+ij(INSERTER)> disconnect;
+ij> set connection scanner;
+ij(SCANNER)> commit;
+ij(SCANNER)> drop table test_5;
+0 rows inserted/updated/deleted
+ij(SCANNER)> commit;
+ij(SCANNER)> disconnect;
+ij> --------------------------------------------------------------------------------
+-- Test 6: test update locks
+--------------------------------------------------------------------------------
+connect 'wombat' as t6scanner;
+ij(T6SCANNER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(T6SCANNER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(T6SCANNER)> connect 'wombat' as t6updater;
+ij(T6UPDATER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(T6UPDATER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(T6UPDATER)> connect 'wombat' as t6writer;
+ij(T6WRITER)> set isolation to rr;
+0 rows inserted/updated/deleted
+ij(T6WRITER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+NoHoldForConnection;
+ij(T6WRITER)> run resource 'LockTableQuery.subsql';
+ij(T6WRITER)> create view lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
+0 rows inserted/updated/deleted
+ij(T6WRITER)> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
+-- order by
+--     tabname, type desc, mode, cnt, lockname
+-- lock table with system catalog locks included.
+create view full_lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij(T6WRITER)> -- lock table with no join.
+create view lock_table2 as
+select 
+    cast(l.xid as char(8)) as xid,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state
+from 
+    new org.apache.derby.diag.LockTable() l  
+where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij(T6WRITER)> -- transaction table with no join.
+create view tran_table as
+select 
+    *
+from 
+    new org.apache.derby.diag.TransactionTable() t ;
+0 rows inserted/updated/deleted
+ij(T6WRITER)> -- set up
+set connection t6updater;
+ij(T6UPDATER)> autocommit off;
+ij(T6UPDATER)> create table test_6 (a int, b int);
+0 rows inserted/updated/deleted
+ij(T6UPDATER)> insert into test_6 values (1,1);
+1 row inserted/updated/deleted
+ij(T6UPDATER)> insert into test_6 values (2,2);
+1 row inserted/updated/deleted
+ij(T6UPDATER)> insert into test_6 values (8,8);
+1 row inserted/updated/deleted
+ij(T6UPDATER)> create index test6_idx on test_6 (a);
+0 rows inserted/updated/deleted
+ij(T6UPDATER)> commit;
+ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+ij(T6UPDATER)> --
+--==================================================
+-- t6updater gets an update lock on row where a=1
+--==================================================
+get cursor update_cursor as
+    'select b from test_6 where a=1 for update of b';
+ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+ij(T6UPDATER)> next update_cursor;
+B          
+-----------
+1          
+ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+ij(T6UPDATER)> set connection t6scanner;
+ij(T6SCANNER)> autocommit off;
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- try to scan the table, should timeout
+--------------------------------------------------
+select * from test_6;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- try to update the table, should timeout
+--------------------------------------------------
+update test_6 set b=99 where a = 1;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- try to update the table, should timeout (previous key is locked)
+--------------------------------------------------
+update test_6 set b=99 where a = 2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- try to update the table, should go through
+--------------------------------------------------
+update test_6 set b=99 where a = 8;
+1 row inserted/updated/deleted
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |3   |X   |TEST_6      |(1,9)     |GRANT|ACTIVE  
+ij(T6SCANNER)> commit;
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- try to get an update lock
+--------------------------------------------------
+get cursor update_cursor2 as
+    'select b from test_6 where a=1 for update of b';
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- should timeout (other transaction has a shared lock on this row)
+--------------------------------------------------
+next update_cursor2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- should succeed (no other transaction has a shared lock on this row)
+--------------------------------------------------
+get cursor update_cursor3 as
+    'select b from test_6 where a=8 for update of b';
+ij(T6SCANNER)> select type, cnt, mode, tabname, lockname, state from lock_table2 order by tabname, type desc, mode, cnt, lockname;
+TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE
+------------------------------------------------
+TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT
+TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT
+ROW     |1   |S   |TEST_6      |(1,1)     |GRANT
+ROW     |1   |U   |TEST_6      |(1,3)     |GRANT
+ROW     |1   |U   |TEST_6      |(1,7)     |GRANT
+ij(T6SCANNER)> next update_cursor3;
+B          
+-----------
+99         
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,9)     |GRANT|ACTIVE  
+ij(T6SCANNER)> commit;
+ij(T6SCANNER)> close update_cursor2;
+ij(T6SCANNER)> close update_cursor3;
+ij(T6SCANNER)> set connection t6updater;
+ij(T6UPDATER)> commit;
+ij(T6UPDATER)> close update_cursor;
+ij(T6UPDATER)> set connection t6scanner;
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+ij(T6SCANNER)> --
+--==================================================
+-- t6scanner gets a read lock
+--==================================================
+select b from test_6 where a=1;
+B          
+-----------
+1          
+ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+ij(T6SCANNER)> --
+--------------------------------------------------
+-- should succeed (can get an update lock if there is already a shared lock)
+--------------------------------------------------
+set connection t6updater;
+ij(T6UPDATER)> get cursor update_cursor as
+    'select b from test_6 where a=1 for update of b';
+ij(T6UPDATER)> next update_cursor;
+B          
+-----------
+1          
+ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+ij(T6UPDATER)> commit;
+ij(T6UPDATER)> close update_cursor;
+ij(T6UPDATER)> set connection t6scanner;
+ij(T6SCANNER)> commit;
+ij(T6SCANNER)> --
+--==================================================
+-- t6writer gets a write lock
+--==================================================
+set connection t6writer;
+ij(T6WRITER)> autocommit off;
+ij(T6WRITER)> update test_6 set b=77 where a=2;
+1 row inserted/updated/deleted
+ij(T6WRITER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |3   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+ij(T6WRITER)> set connection t6updater;
+ij(T6UPDATER)> get cursor update_cursor as
+    'select b from test_6 where a=2 for update of b';
+ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |3   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+ij(T6UPDATER)> --
+----------------------------------------------------
+-- should timeout
+----------------------------------------------------
+next update_cursor;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(T6UPDATER)> --------------------------------------------------------------------------------
+-- cleanup.
+--------------------------------------------------------------------------------
+set connection t6updater;
+ij(T6UPDATER)> close update_cursor;
+ij(T6UPDATER)> drop table test_6;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(T6UPDATER)> commit;
+ij(T6UPDATER)> disconnect;
+ij> set connection t6scanner;
+ij(T6SCANNER)> disconnect;
+ij> set connection t6writer;
+ij(T6WRITER)> disconnect;
+ij> exit;

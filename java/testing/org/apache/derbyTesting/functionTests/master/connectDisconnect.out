@@ -1,0 +1,95 @@
+ij> -- Track 4257
+-- Track 4258
+-- Track 4259
+--
+-- test case to make sure that conglomerate metadata is stored/retrieved
+-- correctly across database boots.  track 4257-9 all were caused by not
+-- storing the metadata correctly after an addColumn call.
+-- baseline case for add column test
+create table foo (a int);
+0 rows inserted/updated/deleted
+ij> insert into foo values (1);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 2);
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> select * from foo;
+A          
+-----------
+1          
+ij> -- baseline case of simple create/index test
+create table foo2 (a int, b int, c int);
+0 rows inserted/updated/deleted
+ij> create index foo2_idx on foo2 (c);
+0 rows inserted/updated/deleted
+ij> insert into foo2 values (3, 30, 300);
+1 row inserted/updated/deleted
+ij> insert into foo2 values (2, 20, 200);
+1 row inserted/updated/deleted
+ij> insert into foo2 values (1, 10, 100);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> connect 'wombat' as conn1;
+ij> alter table foo add column b int;
+0 rows inserted/updated/deleted
+ij> select * from foo;
+A          |B          
+-----------------------
+1          |NULL       
+ij> insert into foo values (2, 1);
+1 row inserted/updated/deleted
+ij> select * from foo;
+A          |B          
+-----------------------
+1          |NULL       
+2          |1          
+ij> -- just make sure normal case works too.
+select * from foo2;
+A          |B          |C          
+-----------------------------------
+3          |30         |300        
+2          |20         |200        
+1          |10         |100        
+ij> select c from foo2;
+C          
+-----------
+100        
+200        
+300        
+ij> select c from foo2;
+C          
+-----------
+100        
+200        
+300        
+ij> disconnect;
+ij> connect 'wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> connect 'wombat' as conn2;
+ij> -- does insert correctly pick up previous alter?
+insert into foo values (2, 2);
+1 row inserted/updated/deleted
+ij> -- does alter correctly pick up previous alter?
+alter table foo add column c int;
+0 rows inserted/updated/deleted
+ij> -- does select correctly pick up previous alter?
+select * from foo;
+A          |B          |C          
+-----------------------------------
+1          |NULL       |NULL       
+2          |1          |NULL       
+2          |2          |NULL       
+ij> insert into foo values (3, 1, 1);
+1 row inserted/updated/deleted
+ij> select * from foo;
+A          |B          |C          
+-----------------------------------
+1          |NULL       |NULL       
+2          |1          |NULL       
+2          |2          |NULL       
+3          |1          |1          
+ij> disconnect;
+ij> connect 'wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> 

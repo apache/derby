@@ -614,7 +614,7 @@ create view db2test.vempjoin12 (vname1, vname2, vname3, vname4, vname5,
   and e.dno = e12.dno;
 commit;
 
--- FOLLOWING TWO QUERIES HANG IN CLOUDSCAPE NOW ..
+-- FOLLOWING TWO QUERIES HANG IN DERBY NOW ..
 -- UNCOMMENT once they pass.
 -- select * from db2test.dept where dno in (select vdno from
 --  db2test.vempjoin12)

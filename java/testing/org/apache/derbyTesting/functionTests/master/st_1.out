@@ -1,0 +1,255 @@
+ij> -- simple SYSCS procedures test - just test if we can call them
+-- other tests will check that they work, this is just a quick test
+-- that they can be called.  For the purpose of this test "works", 
+-- means function called with no errors.  Other tests will check if
+-- function did the right thing.
+autocommit off;
+ij> maximumdisplaywidth 9000;
+ij> create table foo(a int);
+0 rows inserted/updated/deleted
+ij> -- check if unqualified schema call works.
+set schema SYSCS_UTIL;
+0 rows inserted/updated/deleted
+ij> call SYSCS_FREEZE_DATABASE();
+0 rows inserted/updated/deleted
+ij> call SYSCS_UNFREEZE_DATABASE();
+0 rows inserted/updated/deleted
+ij> call SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> call SYSCS_SET_DATABASE_PROPERTY('foo', 'bar');
+0 rows inserted/updated/deleted
+ij> call SYSCS_BACKUP_DATABASE('extinout/mybackup');
+0 rows inserted/updated/deleted
+ij> call SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup2', 0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup2', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_DISABLE_LOG_ARCHIVE_MODE(0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_COMPRESS_TABLE('APP', 'FOO', 0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_COMPRESS_TABLE('APP', 'FOO', 1);
+0 rows inserted/updated/deleted
+ij> -- system funtions
+set schema SYSCS_UTIL;
+0 rows inserted/updated/deleted
+ij> values SYSCS_GET_DATABASE_PROPERTY('foo');
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+ij> values SYSCS_CHECK_TABLE('APP', 'FOO');
+1          
+-----------
+1          
+ij> call SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_SET_STATISTICS_TIMING(1);
+0 rows inserted/updated/deleted
+ij> select * from APP.foo;
+A          
+-----------
+ij> -- TODO, figure out how to test with a master file, that timings are non-zero,
+-- without having them diff everytime.  Ran this once and hand checked that
+-- it was working.
+-- values SYSCS_GET_RUNTIMESTATISTICS();
+call SYSCS_SET_STATISTICS_TIMING(0);
+0 rows inserted/updated/deleted
+ij> select * from APP.foo;
+A          
+-----------
+ij> values SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from APP.foo
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for FOO at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=2
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> call SYSCS_SET_RUNTIMESTATISTICS(0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_SET_STATISTICS_TIMING(0);
+0 rows inserted/updated/deleted
+ij> select * from APP.foo;
+A          
+-----------
+ij> values SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	values SYSCS_GET_RUNTIMESTATISTICS()
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Row ResultSet:
+Number of opens = 1
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+ij> -- check if qualified schema call works.
+set schema APP;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_FREEZE_DATABASE();
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE();
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('foo', 'bar');
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup');
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup3', 0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup3', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'FOO', 0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'FOO', 1);
+0 rows inserted/updated/deleted
+ij> -- the following does not work yet.
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('foo');
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'FOO');
+1          
+-----------
+1          
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(1);
+0 rows inserted/updated/deleted
+ij> select * from APP.foo;
+A          
+-----------
+ij> -- TODO, figure out how to test with a master file, that timings are non-zero,
+-- without having them diff everytime.  Ran this once and hand checked that
+-- it was working.
+-- values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+call SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0);
+0 rows inserted/updated/deleted
+ij> select * from APP.foo;
+A          
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from APP.foo
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for FOO at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=1
+	Number of pages visited=2
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0);
+0 rows inserted/updated/deleted
+ij> select * from APP.foo;
+A          
+-----------
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Row ResultSet:
+Number of opens = 1
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+ij> drop table foo;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> 

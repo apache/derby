@@ -1,0 +1,1099 @@
+ij> ------------------------------------------------------------------------------
+-- 2 CONCURRENT USER TESTS of READ UNCOMMITTED TEST CASES.
+--
+--    See rlliso1multi.subsql for description of individual test cases.  That
+--    test is run 4 times each with the second user running in a different 
+--    isolation level.
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+-- TEST READ COMMITTED INTERACTION:
+------------------------------------------------------------------------------
+connect 'wombat' as writer;
+ij(WRITER)> autocommit off;
+ij(WRITER)> set isolation CS;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> ------------------------------------------------------------------------------
+-- 2 CONCURRENT USER TESTS of READ UNCOMMITTED TESTS
+--
+-- each test assumes calling script has set up a writer connection, it is
+-- expected the calling script(s) will vary the isolation of the writer 
+-- connection to test the interaction of read uncommitted with various isolation
+-- levels.
+-- 
+-- overview:
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 2: test RU(read uncommitted) ddl interaction
+--
+------------------------------------------------------------------------------
+-- SCRIPT SETUP
+connect 'wombat' as iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_0 (a int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_0 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_0';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_0 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+update test_0 set a = 3 where a = 1;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+2          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_0;
+A          
+-----------
+3          
+2          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+delete from test_0 where a = 2;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+No current row
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_0;
+A          
+-----------
+3          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TEST_1' because it does not exist.
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_1 (a int, b int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_1 values (1, 1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create index test_1_idx on test_1 (a);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_1';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_1 values (2, 2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- writer should in no way be blocked by reader.
+update test_1 set b = 10 where a = 1;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+2          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+2          |2          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- writer should in no way be blocked by reader.
+delete from test_1 where a = 2;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+No current row
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 2: test RU(read uncommitted) ddl interaction
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_2 (a int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_2 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_2;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_2';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer can't do ddl while reader has open cursor (reader blocks writer).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(WRITER)> -- get lock on test_2, held to end of xact.
+insert into test_2 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- uncommitted reader is blocked from doing ddl while other xact has locks.
+-- (writer blocks reader).
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- should block on lock (writer blocks reader).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_2;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> --------------------------------------------------------------------------------
+-- FINAL CLEANUP (only disconnect at end of script)
+set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> disconnect;
+ij> set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> disconnect;
+ij> ------------------------------------------------------------------------------
+-- TEST SERIALIZABLE INTERACTION:
+------------------------------------------------------------------------------
+connect 'wombat' as writer;
+ij(WRITER)> autocommit off;
+ij(WRITER)> set isolation RR;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> ------------------------------------------------------------------------------
+-- 2 CONCURRENT USER TESTS of READ UNCOMMITTED TESTS
+--
+-- each test assumes calling script has set up a writer connection, it is
+-- expected the calling script(s) will vary the isolation of the writer 
+-- connection to test the interaction of read uncommitted with various isolation
+-- levels.
+-- 
+-- overview:
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 2: test RU(read uncommitted) ddl interaction
+--
+------------------------------------------------------------------------------
+-- SCRIPT SETUP
+connect 'wombat' as iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_0 (a int);
+ERROR X0Y32: Table/View 'TEST_0' already exists in Schema 'APP'.
+ij(ISO_READ_UNCOMMITTED)> insert into test_0 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_0';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_0 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+update test_0 set a = 3 where a = 1;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_0;
+A          
+-----------
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+delete from test_0 where a = 2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+No current row
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_0;
+A          
+-----------
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TEST_1' because it does not exist.
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_1 (a int, b int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_1 values (1, 1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create index test_1_idx on test_1 (a);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_1';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_1 values (2, 2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- writer should in no way be blocked by reader.
+update test_1 set b = 10 where a = 1;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+2          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+2          |2          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- writer should in no way be blocked by reader.
+delete from test_1 where a = 2;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+No current row
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 2: test RU(read uncommitted) ddl interaction
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_2 (a int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_2 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_2;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_2';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer can't do ddl while reader has open cursor (reader blocks writer).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(WRITER)> -- get lock on test_2, held to end of xact.
+insert into test_2 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- uncommitted reader is blocked from doing ddl while other xact has locks.
+-- (writer blocks reader).
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- should block on lock (writer blocks reader).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_2;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> --------------------------------------------------------------------------------
+-- FINAL CLEANUP (only disconnect at end of script)
+set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> disconnect;
+ij> set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> disconnect;
+ij> ------------------------------------------------------------------------------
+-- TEST REPEATABLE READ INTERACTION:
+------------------------------------------------------------------------------
+connect 'wombat' as writer;
+ij(WRITER)> autocommit off;
+ij(WRITER)> set current isolation = RS;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> ------------------------------------------------------------------------------
+-- 2 CONCURRENT USER TESTS of READ UNCOMMITTED TESTS
+--
+-- each test assumes calling script has set up a writer connection, it is
+-- expected the calling script(s) will vary the isolation of the writer 
+-- connection to test the interaction of read uncommitted with various isolation
+-- levels.
+-- 
+-- overview:
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 2: test RU(read uncommitted) ddl interaction
+--
+------------------------------------------------------------------------------
+-- SCRIPT SETUP
+connect 'wombat' as iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_0 (a int);
+ERROR X0Y32: Table/View 'TEST_0' already exists in Schema 'APP'.
+ij(ISO_READ_UNCOMMITTED)> insert into test_0 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_0';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_0 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+update test_0 set a = 3 where a = 1;
+3 rows inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+3          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_0;
+A          
+-----------
+3          
+3          
+3          
+2          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+delete from test_0 where a = 2;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+3          
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_0;
+A          
+-----------
+3          
+3          
+3          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TEST_1' because it does not exist.
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_1 (a int, b int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_1 values (1, 1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create index test_1_idx on test_1 (a);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_1';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_1 values (2, 2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- writer should in no way be blocked by reader.
+update test_1 set b = 10 where a = 1;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+2          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+2          |2          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- writer should in no way be blocked by reader.
+delete from test_1 where a = 2;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+No current row
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 2: test RU(read uncommitted) ddl interaction
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_2 (a int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_2 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_2;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_2';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer can't do ddl while reader has open cursor (reader blocks writer).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(WRITER)> -- get lock on test_2, held to end of xact.
+insert into test_2 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- uncommitted reader is blocked from doing ddl while other xact has locks.
+-- (writer blocks reader).
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- should block on lock (writer blocks reader).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_2;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> --------------------------------------------------------------------------------
+-- FINAL CLEANUP (only disconnect at end of script)
+set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> disconnect;
+ij> set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> disconnect;
+ij> ------------------------------------------------------------------------------
+-- TEST READ UNCOMMITTED INTERACTION:
+------------------------------------------------------------------------------
+connect 'wombat' as writer;
+ij(WRITER)> autocommit off;
+ij(WRITER)> set isolation UR;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> ------------------------------------------------------------------------------
+-- 2 CONCURRENT USER TESTS of READ UNCOMMITTED TESTS
+--
+-- each test assumes calling script has set up a writer connection, it is
+-- expected the calling script(s) will vary the isolation of the writer 
+-- connection to test the interaction of read uncommitted with various isolation
+-- levels.
+-- 
+-- overview:
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 2: test RU(read uncommitted) ddl interaction
+--
+------------------------------------------------------------------------------
+-- SCRIPT SETUP
+connect 'wombat' as iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_0 (a int);
+ERROR X0Y32: Table/View 'TEST_0' already exists in Schema 'APP'.
+ij(ISO_READ_UNCOMMITTED)> insert into test_0 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+1          
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_0';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_0 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+update test_0 set a = 3 where a = 1;
+4 rows inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+3          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_0;
+A          
+-----------
+3          
+3          
+3          
+3          
+2          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+delete from test_0 where a = 2;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+3          
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_0;
+A          
+-----------
+3          
+3          
+3          
+3          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_0;
+A          
+-----------
+1          
+1          
+1          
+1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TEST_1' because it does not exist.
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_1 (a int, b int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_1 values (1, 1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create index test_1_idx on test_1 (a);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_1';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer should not be blocked.
+insert into test_1 values (2, 2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- writer should in no way be blocked by reader.
+update test_1 set b = 10 where a = 1;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+2          
+ij(ISO_READ_UNCOMMITTED)> -- full select should see the update and the new row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+2          |2          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+ij(WRITER)> -- writer should in no way be blocked by reader.
+delete from test_1 where a = 2;
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+No current row
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> -- full select should see just one row.
+select * from test_1;
+A          |B          
+-----------------------
+1          |10         
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> rollback;
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_1;
+A          |B          
+-----------------------
+1          |1          
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_1;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> ------------------------------------------------------------------------------
+--  TEST 2: test RU(read uncommitted) ddl interaction
+------------------------------------------------------------------------------
+-- set up
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> autocommit off;
+ij(ISO_READ_UNCOMMITTED)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> create table test_2 (a int);
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> insert into test_2 values (1);
+1 row inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> select * from test_2;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> get cursor scan_cursor as 
+    'select a from test_2';
+ij(ISO_READ_UNCOMMITTED)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(ISO_READ_UNCOMMITTED)> next scan_cursor;
+A          
+-----------
+1          
+ij(ISO_READ_UNCOMMITTED)> -- WRITER CONNECTION:
+set connection writer;
+ij(WRITER)> -- writer can't do ddl while reader has open cursor (reader blocks writer).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(WRITER)> -- get lock on test_2, held to end of xact.
+insert into test_2 values (2);
+1 row inserted/updated/deleted
+ij(WRITER)> -- READ UNCOMMITTED CONNECTION:
+-- uncommitted reader is blocked from doing ddl while other xact has locks.
+-- (writer blocks reader).
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> close scan_cursor;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> -- should block on lock (writer blocks reader).
+drop table test_2;
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(ISO_READ_UNCOMMITTED)> -- cleanup
+set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> drop table test_2;
+0 rows inserted/updated/deleted
+ij(WRITER)> commit;
+ij(WRITER)> --------------------------------------------------------------------------------
+-- FINAL CLEANUP (only disconnect at end of script)
+set connection writer;
+ij(WRITER)> commit;
+ij(WRITER)> disconnect;
+ij> set connection iso_read_uncommitted;
+ij(ISO_READ_UNCOMMITTED)> commit;
+ij(ISO_READ_UNCOMMITTED)> disconnect;
+ij> 

@@ -1,0 +1,71 @@
+ij> --
+-- this test shows the basic functionality
+-- that does work in the language system for mad hare
+--
+-- this was the simple mad hare challenge
+create table t(i int);
+0 rows inserted/updated/deleted
+ij> insert into t (i) values (1956);
+1 row inserted/updated/deleted
+ij> select i from t;
+I          
+-----------
+1956       
+ij> -- we can also have multiple columns
+create table s (i int, n int, t int, e int, g int, r int);
+0 rows inserted/updated/deleted
+ij> -- and reorder the columns on the insert
+insert into s (i,r,t,n,g,e) values (1,6,3,2,5,4);
+1 row inserted/updated/deleted
+ij> -- or not list the columns at all
+-- (not to mention inserting more than one row into the table)
+insert into s values (10,11,12,13,14,15);
+1 row inserted/updated/deleted
+ij> -- and we can select some of the columns
+select i from s;
+I          
+-----------
+1          
+10         
+ij> -- and in funny orders
+select n,e,r,i,t,g from s;
+N          |E          |R          |I          |T          |G          
+-----------------------------------------------------------------------
+2          |4          |6          |1          |3          |5          
+11         |13         |15         |10         |12         |14         
+ij> -- and with constants instead
+select 20,n,22,e,24,r from s;
+1          |N          |3          |E          |5          |R          
+-----------------------------------------------------------------------
+20         |2          |22         |4          |24         |6          
+20         |11         |22         |13         |24         |15         
+ij> -- we do have prepare and execute support
+prepare stmt as 'select i,n,t,e,g,r from s';
+ij> execute stmt;
+I          |N          |T          |E          |G          |R          
+-----------------------------------------------------------------------
+1          |2          |3          |4          |5          |6          
+10         |11         |12         |13         |14         |15         
+ij> -- execute can be done multiple times
+execute stmt;
+I          |N          |T          |E          |G          |R          
+-----------------------------------------------------------------------
+1          |2          |3          |4          |5          |6          
+10         |11         |12         |13         |14         |15         
+ij> -- and, we also have smallint!
+create table r (s smallint, i int);
+0 rows inserted/updated/deleted
+ij> insert into r values (23,2);
+1 row inserted/updated/deleted
+ij> select s,i from r;
+S     |I          
+------------------
+23    |2          
+ij> -- cleanup
+drop table r;
+0 rows inserted/updated/deleted
+ij> drop table s;
+0 rows inserted/updated/deleted
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> 

@@ -1,0 +1,74 @@
+ij> -- Test whether the RllRAMAccessmanager is working right (ie. forcing row 
+-- level locking with no properties set). 
+run resource 'LockTableQuery.subsql';
+ij> create view lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
+0 rows inserted/updated/deleted
+ij> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
+-- order by
+--     tabname, type desc, mode, cnt, lockname
+-- lock table with system catalog locks included.
+create view full_lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- lock table with no join.
+create view lock_table2 as
+select 
+    cast(l.xid as char(8)) as xid,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state
+from 
+    new org.apache.derby.diag.LockTable() l  
+where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- transaction table with no join.
+create view tran_table as
+select 
+    *
+from 
+    new org.apache.derby.diag.TransactionTable() t ;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> create table heap_only (a int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into empty heap, should just get row lock 
+--------------------------------------------------------------------------------
+insert into heap_only values (1);
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |HEAP_ONLY   |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |HEAP_ONLY   |(1,7)     |GRANT|ACTIVE  
+ij> commit;
+ij> 

@@ -1,0 +1,53 @@
+ij> --test to make sure WAIT state is displayed when lock table is printed
+connect 'jdbc:derby:wombat;user=c1' AS C1;
+ij(C1)> create procedure c1.sleep(t INTEGER) dynamic result sets 0  language java external name 'java.lang.Thread.sleep' parameter style java;
+0 rows inserted/updated/deleted
+ij(C1)> create table c1.account (a int primary key not null, b int);
+0 rows inserted/updated/deleted
+ij(C1)> autocommit off;
+ij(C1)> insert into c1.account values (0, 1);
+1 row inserted/updated/deleted
+ij(C1)> insert into c1.account values (1, 1);
+1 row inserted/updated/deleted
+ij(C1)> insert into c1.account values (2, 1);
+1 row inserted/updated/deleted
+ij(C1)> --setting to -1 (wait for ever to handle timing issues in the test)
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '-1');
+0 rows inserted/updated/deleted
+ij(C1)> commit ;
+ij(C1)> -- call sleep once now  we don't have a timing problem later
+call c1.sleep(200);
+0 rows inserted/updated/deleted
+ij(C1)> update c1.account set b = b + 11;
+3 rows inserted/updated/deleted
+ij(C1)> connect 'jdbc:derby:wombat;user=c2' AS C2;
+ij(C2)> autocommit off;
+ij(C2)> async C2S1 'update c1.account set b = b + 11';
+ij(C2)> set connection C1;
+ij(C1)> call c1.sleep(200);
+0 rows inserted/updated/deleted
+ij(C1)> select state from new org.apache.derby.diag.LockTable() t order by state;
+STATE
+-----
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+WAIT 
+ij(C1)> commit;
+ij(C1)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '180');
+0 rows inserted/updated/deleted
+ij(C1)> commit;
+ij(C1)> set connection c2 ;
+ij(C2)> wait for C2S1;
+3 rows inserted/updated/deleted
+ij(C2)> select state from new org.apache.derby.diag.LockTable() t order by state;
+STATE
+-----
+GRANT
+GRANT
+GRANT
+GRANT
+ij(C2)> commit;
+ij(C2)> 

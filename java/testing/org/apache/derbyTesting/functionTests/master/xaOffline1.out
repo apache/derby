@@ -1,0 +1,184 @@
+ij> xa_datasource 'wombat' create;
+ij> -- xa_datasource 'wombat';
+---------------------------------------------
+-- a single connection, prepare transaction and crash.
+---------------------------------------------
+xa_connect ;
+ij> xa_start xa_noflags 0;
+ij> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> drop table foo;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO' because it does not exist.
+ij(XA)> create table foo (a int);
+0 rows inserted/updated/deleted
+ij(XA)> insert into foo values (0);
+1 row inserted/updated/deleted
+ij(XA)> select * from foo;
+A          
+-----------
+0          
+ij(XA)> run resource 'global_xactTable.view';
+ij(XA)> create view global_xactTable as
+select 
+    cast(global_xid as char(2)) as gxid,
+    status,
+    case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
+    cast (username as char(10)) as username,
+    type 
+from new org.apache.derby.diag.TransactionTable() t;
+0 rows inserted/updated/deleted
+ij(XA)> run resource 'LockTableQuery.subsql';
+ij(XA)> create view lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
+0 rows inserted/updated/deleted
+ij(XA)> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
+-- order by
+--     tabname, type desc, mode, cnt, lockname
+-- lock table with system catalog locks included.
+create view full_lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij(XA)> -- lock table with no join.
+create view lock_table2 as
+select 
+    cast(l.xid as char(8)) as xid,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state
+from 
+    new org.apache.derby.diag.LockTable() l  
+where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij(XA)> -- transaction table with no join.
+create view tran_table as
+select 
+    *
+from 
+    new org.apache.derby.diag.TransactionTable() t ;
+0 rows inserted/updated/deleted
+ij(XA)> xa_end xa_success 0;
+ij(XA)> xa_commit xa_1phase 0;
+ij(XA)> ---------------------------------------------
+-- a single connection, prepare transaction and crash.
+---------------------------------------------
+xa_start xa_noflags 1;
+ij(XA)> insert into foo values (0);
+1 row inserted/updated/deleted
+ij(XA)> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |ACTIVE  |false|APP       |UserTransaction               
+ij(XA)> select global_xid, username, type, status, cast(sql_text as varchar(512)) sql_text from tran_table where global_xid is not null order by global_xid, username, type, status, sql_text;
+GLOBAL_XID                                                                                                                      |USERNAME                                                                                                                        |TYPE                          |STATUS  |SQL_TEXT                                                                                                                        
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+(1,776f6d626174,776f6d626174)                                                                                                   |APP                                                                                                                             |UserTransaction               |ACTIVE  |select global_xid, username, type, status, cast(sql_text as varchar(512)) sql_text from tran_table where global_xid is not null&
+ij(XA)> xa_end xa_success 1;
+ij(XA)> xa_prepare 1;
+ij(XA)> xa_start xa_noflags 2;
+ij(XA)> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |PREPARED|false|APP       |UserTransaction               
+(2  |IDLE    |NULL |APP       |UserTransaction               
+ij(XA)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |FOO         |Tablelock |GRANT|PREPARED
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,8)     |GRANT|PREPARED
+ij(XA)> xa_end xa_success 2;
+ij(XA)> xa_commit xa_1phase 2;
+ij(XA)> xa_recover xa_startrscan;
+Recovered 1 in doubt transactions
+Transaction 1 : (1,FILTERED,FILTERED)
+ij(XA)> --- xa_datasource 'wombat' shutdown;
+---------------------------------------------
+-- shutdown the database.
+---------------------------------------------
+connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij(XA)> ---------------------------------------------
+-- restart the system, should find the prepared transaction
+---------------------------------------------
+xa_datasource 'wombat';
+ij(XA)> ---------------------------------------------
+-- a single connection, verify the prepared xact has come back.
+---------------------------------------------
+xa_connect ;
+ij(XA)> xa_start xa_noflags 1;
+IJ ERROR: XAER_DUPID 
+ij(XA)> xa_start xa_noflags 4;
+ij(XA)> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |PREPARED|false|NULL      |UserTransaction               
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij(XA)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+NULL    |UserTran|TABLE   |1   |IX  |FOO         |Tablelock |GRANT|PREPARED
+NULL    |UserTran|ROW     |1   |X   |FOO         |(1,8)     |GRANT|PREPARED
+ij(XA)> xa_recover xa_startrscan;
+Recovered 1 in doubt transactions
+Transaction 1 : (1,FILTERED,FILTERED)
+ij(XA)> xa_end xa_success 4;
+ij(XA)> xa_commit xa_1phase 4;
+ij(XA)> ---------------------------------------------
+-- a single connection, now make sure after the commit that it is gone.
+---------------------------------------------
+xa_start xa_noflags 4;
+ij(XA)> xa_commit xa_2phase 1;
+ij(XA)> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij(XA)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+ij(XA)> xa_recover xa_startrscan;
+Recovered 0 in doubt transactions
+ij(XA)> xa_end xa_success 4;
+ij(XA)> xa_commit xa_1phase 4;
+ij(XA)> ---------------------------------------------
+-- a single connection, verify the prepared xact has come back - should
+-- get an error trying to start another with same global xact.
+---------------------------------------------
+exit;

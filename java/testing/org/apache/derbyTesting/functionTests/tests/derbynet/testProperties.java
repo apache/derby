@@ -33,12 +33,12 @@ import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
 import org.apache.derby.drda.NetworkServerControl;
 
 /**
-	This test tests the cloudscape.properties, system properties and 
+	This test tests the derby.properties, system properties and 
 	command line parameters to make sure the pick up settings in
 	the correct order. Search order is:
 	   command line parameters
 	   System properties
-	   cloudscape.properties
+	   derby.properties
 	   default
 
 	   The command line should take precedence
@@ -178,20 +178,20 @@ public class testProperties
 			 *  Test port setting priorty
 			 ************************************************************/
 			// derby.drda.portNumber set in derby.properties to 1528
-			System.out.println("Testing cloudscape.properties Port 1528 ");
+			System.out.println("Testing derby.properties Port 1528 ");
 			Properties derbyProperties = new Properties();
 			derbyProperties.put("derby.drda.portNumber","1528");
 			FileOutputStream propFile = new FileOutputStream("derby.properties");
-			derbyProperties.store(propFile,"testing cloudscape.properties");
+			derbyProperties.store(propFile,"testing derby.properties");
 			propFile.close();
-			//test start no parameters - Pickup 1528 from cloudscape.properties
+			//test start no parameters - Pickup 1528 from derby.properties
 			derbyServerCmd("start",null);	
 			waitForStart("1528",15000);
 			System.out.println("Successfully Connected");
-			//shutdown - also picks up from cloudscape.properties
+			//shutdown - also picks up from derby.properties
 			derbyServerCmd("shutdown",null);
 			System.out.println("Testing System properties  Port 1529 ");
-			//test start with system property. Overrides cloudscape.properties
+			//test start with system property. Overrides derby.properties
 			derbyServerCmd("start","-Dderby.drda.portNumber=1529");
 
 			waitForStart("1529",15000);	

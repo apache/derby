@@ -1,0 +1,284 @@
+ij> disconnect;
+ij> xa_datasource 'wombat';
+ij> ---------------------------------------------
+-- a single connection and 1 phase commit
+---------------------------------------------
+xa_connect ;
+ij> xa_start xa_noflags 0;
+ij> xa_getconnection;
+ij> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij> drop table APP.foo;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'APP.FOO' because it does not exist.
+ij> create table APP.foo (a int);
+0 rows inserted/updated/deleted
+ij> insert into APP.foo values (0);
+1 row inserted/updated/deleted
+ij> select * from APP.foo;
+A          
+-----------
+0          
+ij> run resource '/org/apache/derbyTesting/functionTests/tests/store/global_xactTable.view';
+ij> create view global_xactTable as
+select 
+    cast(global_xid as char(2)) as gxid,
+    status,
+    case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
+    cast (username as char(10)) as username,
+    type 
+from new org.apache.derby.diag.TransactionTable() t;
+0 rows inserted/updated/deleted
+ij> select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(0  |ACTIVE  |false|APP       |UserTransaction               
+ij> xa_end xa_success 0;
+ij> xa_commit xa_1phase 0;
+ij> xa_datasource 'wombat' shutdown;
+ERROR 08006: Database 'wombat' shutdown.
+ij> ---------------------------------------------
+-- 5 interleaving xa connections
+---------------------------------------------
+xa_datasource 'wombat';
+ij> xa_connect user 'mamta' password 'mamta' ;
+ij> -- global connection 1
+xa_start xa_noflags 1;
+ij> xa_getconnection;
+ij> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij> insert into APP.foo values (1);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 1;
+ij> -- global connection 2
+xa_start xa_noflags 2;
+ij> insert into APP.foo values (2);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 2;
+ij> -- global connection 3
+xa_start xa_noflags 3;
+ij> insert into APP.foo values (3);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 3;
+ij> -- global connection 4
+xa_start xa_noflags 4;
+ij> insert into APP.foo values (4);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 4;
+ij> -- global connection 5
+xa_start xa_noflags 5;
+ij> insert into APP.foo values (5);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 5;
+ij> xa_start xa_resume 1;
+ij> insert into APP.foo values (11);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 1;
+ij> xa_start xa_resume 5;
+ij> insert into APP.foo values (55);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 5;
+ij> xa_start xa_resume 2;
+ij> insert into APP.foo values (22);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 2;
+ij> xa_start xa_resume 4;
+ij> insert into APP.foo values (44);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 4;
+ij> xa_start xa_resume 3;
+ij> insert into APP.foo values (33);
+1 row inserted/updated/deleted
+ij> xa_end xa_suspend 3;
+ij> -- prepare all the global connections except the first one. This way, we will see all
+-- the global transactions prepared so far after the database shutdown and restart.
+xa_end xa_success 2;
+ij> xa_prepare 2;
+ij> xa_end xa_success 3;
+ij> xa_prepare 3;
+ij> xa_end xa_success 4;
+ij> xa_prepare 4;
+ij> xa_end xa_success 5;
+ij> xa_prepare 5;
+ij> -- local connection 1
+connect 'wombat' as local1;
+ij(LOCAL1)> autocommit off;
+ij(LOCAL1)> -- at this point, should see 4 global connections in the prepared mode and one global
+-- connection in active mode and one local connection.
+select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |ACTIVE  |false|MAMTA     |UserTransaction               
+(2  |PREPARED|false|MAMTA     |UserTransaction               
+(3  |PREPARED|false|MAMTA     |UserTransaction               
+(4  |PREPARED|false|MAMTA     |UserTransaction               
+(5  |PREPARED|false|MAMTA     |UserTransaction               
+ij(LOCAL1)> select count(*) from new org.apache.derby.diag.LockTable() t where mode = 'X' or mode = 'IX';
+1          
+-----------
+15         
+ij(LOCAL1)> xa_datasource 'wombat' shutdown;
+ERROR 08006: Database 'wombat' shutdown.
+ij(LOCAL1)> -- after shutdown and restart, should see only 4 prepared global connection from
+-- earlier boot of the database. The local connections made during that time and
+-- unprepared global connection will all rollback at the startup time and hence
+-- we won't see them
+xa_datasource 'wombat';
+ij(LOCAL1)> xa_connect user 'mamta1' password 'mamta1';
+ij(LOCAL1)> connect 'wombat' as local2;
+ij(LOCAL2)> autocommit off;
+ij(LOCAL2)> -- this will time out because there are locks on the table APP.foo from the global
+-- transactions
+select * from APP.foo;
+A          
+-----------
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(LOCAL2)> -- should see 4 global transactions and a local connection
+select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |PREPARED|false|NULL      |UserTransaction               
+(3  |PREPARED|false|NULL      |UserTransaction               
+(4  |PREPARED|false|NULL      |UserTransaction               
+(5  |PREPARED|false|NULL      |UserTransaction               
+ij(LOCAL2)> -- rollback first global transactions 2 and 3 and commit the 3rd one.
+xa_rollback 2;
+ij(LOCAL2)> xa_rollback 3;
+ij(LOCAL2)> xa_commit xa_2Phase 4;
+ij(LOCAL2)> -- add couple more global transactions
+xa_start xa_noflags 6;
+ij(LOCAL2)> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> insert into APP.foo values (6);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 6;
+ij(XA)> xa_start xa_noflags 7;
+ij(XA)> insert into APP.foo values (7);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 7;
+ij(XA)> xa_start xa_noflags 8;
+ij(XA)> insert into APP.foo values (8);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 8;
+ij(XA)> -- once a transaction is in prepare mode, can't resume it. Can only commit/rollback
+-- so the following will give an error
+xa_start xa_resume 5;
+IJ ERROR: XAER_NOTA 
+ij(XA)> xa_start xa_resume 6;
+ij(XA)> insert into APP.foo values (66);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 6;
+ij(XA)> xa_start xa_resume 8;
+ij(XA)> insert into APP.foo values (88);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 8;
+ij(XA)> xa_start xa_resume 7;
+ij(XA)> insert into APP.foo values (77);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 7;
+ij(XA)> -- prepare the global transactions added after the database boot
+xa_end xa_success 6;
+ij(XA)> xa_prepare 6;
+ij(XA)> xa_end xa_success 7;
+ij(XA)> xa_prepare 7;
+ij(XA)> xa_end xa_success 8;
+ij(XA)> xa_prepare 8;
+ij(XA)> -- make a local connection and at this point, should see 4 global transactions
+-- and 2 local connections
+connect 'wombat' as local3;
+ij(LOCAL3)> autocommit off;
+ij(LOCAL3)> select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(5  |PREPARED|false|NULL      |UserTransaction               
+(6  |PREPARED|false|MAMTA1    |UserTransaction               
+(7  |PREPARED|false|MAMTA1    |UserTransaction               
+(8  |PREPARED|false|MAMTA1    |UserTransaction               
+ij(LOCAL3)> xa_datasource 'wombat' shutdown;
+ERROR 08006: Database 'wombat' shutdown.
+ij(LOCAL3)> -- shutdown the datbase, restart and check the transactions in the transaction table.
+xa_datasource 'wombat';
+ij(LOCAL3)> xa_connect user 'mamta2' password 'mamta2';
+ij(LOCAL3)> connect 'wombat' as local4;
+ij(LOCAL4)> autocommit off;
+ij(LOCAL4)> -- this will time out as expected
+select * from APP.foo;
+A          
+-----------
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(LOCAL4)> -- will see 4 global transactions and 1 local transaction
+select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(5  |PREPARED|false|NULL      |UserTransaction               
+(6  |PREPARED|false|NULL      |UserTransaction               
+(7  |PREPARED|false|NULL      |UserTransaction               
+(8  |PREPARED|false|NULL      |UserTransaction               
+ij(LOCAL4)> xa_datasource 'wombat' shutdown;
+ERROR 08006: Database 'wombat' shutdown.
+ij(LOCAL4)> -- shutdown and restart and check the transaction table
+xa_datasource 'wombat';
+ij(LOCAL4)> xa_connect user 'mamta3' password 'mamta3';
+ij(LOCAL4)> connect 'wombat' as local5;
+ij(LOCAL5)> autocommit off;
+ij(LOCAL5)> insert into APP.foo values(90);
+1 row inserted/updated/deleted
+ij(LOCAL5)> connect 'wombat' as local6;
+ij(LOCAL6)> autocommit off;
+ij(LOCAL6)> insert into APP.foo values(101);
+1 row inserted/updated/deleted
+ij(LOCAL6)> -- 4 global transactions and 2 local transactions
+select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(5  |PREPARED|false|NULL      |UserTransaction               
+(6  |PREPARED|false|NULL      |UserTransaction               
+(7  |PREPARED|false|NULL      |UserTransaction               
+(8  |PREPARED|false|NULL      |UserTransaction               
+ij(LOCAL6)> -- rollback few global transactions and commit few others
+xa_rollback 5;
+ij(LOCAL6)> xa_rollback 6;
+ij(LOCAL6)> xa_commit xa_2Phase 7;
+ij(LOCAL6)> xa_rollback 8;
+ij(LOCAL6)> -- at this point, still time out because there are 2 local transactions
+-- holding locks on table APP.foo
+select * from APP.foo;
+A          
+-----------
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(LOCAL6)> select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij(LOCAL6)> xa_datasource 'wombat' shutdown;
+ERROR 08006: Database 'wombat' shutdown.
+ij(LOCAL6)> -- shutdown and restart. There should be no global transactions at this point.
+xa_datasource 'wombat';
+ij(LOCAL6)> xa_connect user 'mamta4' password 'mamta4';
+ij(LOCAL6)> connect 'wombat' as local7;
+ij(LOCAL7)> autocommit off;
+ij(LOCAL7)> -- no more locks on table APP.foo and hence select won't time out.
+select * from APP.foo;
+A          
+-----------
+0          
+4          
+44         
+7          
+77         
+ij(LOCAL7)> -- no more global transactions, just one local transaction
+select * from global_xactTable where gxid is not null order by gxid, username, status;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij(LOCAL7)> 

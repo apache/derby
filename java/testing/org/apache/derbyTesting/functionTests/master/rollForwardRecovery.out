@@ -1,0 +1,1548 @@
+ij> -- reusing container id case
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+    'extinout/mybackup', 0);
+0 rows inserted/updated/deleted
+ij> create table t1(a int not null primary key) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(2) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(3 ) ;
+1 row inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat';
+ij> --checkpoint to make sure that 
+--the stub is dropped and we use the 
+--the same container id which we dropped earlier
+CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
+0 rows inserted/updated/deleted
+ij> create table t1(a int not null primary key) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(4) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(5);
+1 row inserted/updated/deleted
+ij> insert into t1 values(6);
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+4          
+5          
+6          
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> --performa rollforward recovery
+connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> select * from t1 ;
+A          
+-----------
+4          
+5          
+6          
+ij> --drop the above tables and create
+--again tables with foreign key references and
+--make surte they are properly recovered
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1(a int not null);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(2) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(3 ) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(4 ) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(5 ) ;
+1 row inserted/updated/deleted
+ij> alter table t1 add constraint uk1 unique(a);
+0 rows inserted/updated/deleted
+ij> create table t2(b int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values(1);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2);
+1 row inserted/updated/deleted
+ij> insert into t2 values(3);
+1 row inserted/updated/deleted
+ij> alter table t2 add constraint c1 foreign key (b)
+                             references t1(a);
+0 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> insert into t2 values(4);
+1 row inserted/updated/deleted
+ij> insert into t2 values(5);
+1 row inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> select * from t2;
+B          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> --add a duplicate value to make sure index is intact
+insert into t1 values(1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'UK1' defined on 'T1'.
+ij> --add a value that does not exits in the parent table
+--to make reference indexes are fine.
+insert into t2 values(999);
+ERROR 23503: INSERT on table 'T2' caused a violation of foreign key constraint 'C1' for key (999).  The statement has been rolled back.
+ij> ---REGULAR UNLOGGED CASES , BUT LOGGED WHEN ARCHIVE MODE IS ENABLED.
+--compress table 
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T1', 0);
+0 rows inserted/updated/deleted
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> create table t3(c1 int not null);
+0 rows inserted/updated/deleted
+ij> create table t4(c1 int not null);
+0 rows inserted/updated/deleted
+ij> --insert
+insert into t3 (c1) 
+values(1) ,(2) , (3), (4), (5), (6), (7) , (8), (9) , (10) , (11), (12) , (13) , (14) , (15),
+(16), (17), (18) , (19) , (20) , (21) , (22) , (23) , (24) , (25) , (26) , (27) , (28) , (29) , (30);
+30 rows inserted/updated/deleted
+ij> insert into t4 
+values(101) ,(102) , (103), (104), (105), (106), (107) , (108), (109) , (110) , (111), (112) , (113), (114),
+(115), (116), (117), (118) , (119) , (120) , (121) , (122) , (123) , (124) , (125) , (126) , (127) , (128), (129), (130);
+30 rows inserted/updated/deleted
+ij> insert into t4 values(1001);
+1 row inserted/updated/deleted
+ij> alter table t3 add column c2 char(20);
+0 rows inserted/updated/deleted
+ij> --add constraint
+--alter table t3 add column c2 int not null primary key;
+--alter table t4 add column c2 int not null;
+--alter table t3 add column c3 int not null unique;
+connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> select * from t2;
+B          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> select * from t3;
+C1         |C2                  
+--------------------------------
+1          |NULL                
+2          |NULL                
+3          |NULL                
+4          |NULL                
+5          |NULL                
+6          |NULL                
+7          |NULL                
+8          |NULL                
+9          |NULL                
+10         |NULL                
+11         |NULL                
+12         |NULL                
+13         |NULL                
+14         |NULL                
+15         |NULL                
+16         |NULL                
+17         |NULL                
+18         |NULL                
+19         |NULL                
+20         |NULL                
+21         |NULL                
+22         |NULL                
+23         |NULL                
+24         |NULL                
+25         |NULL                
+26         |NULL                
+27         |NULL                
+28         |NULL                
+29         |NULL                
+30         |NULL                
+ij> select * from t4;
+C1         
+-----------
+101        
+102        
+103        
+104        
+105        
+106        
+107        
+108        
+109        
+110        
+111        
+112        
+113        
+114        
+115        
+116        
+117        
+118        
+119        
+120        
+121        
+122        
+123        
+124        
+125        
+126        
+127        
+128        
+129        
+130        
+1001       
+ij> insert into t3 (c1) 
+values(101) ,(102) , (103), (104), (105), (106), (107) , (108), (109) , (110) , (111), (112) , (113), (114),
+(115), (116), (117), (118) , (119) , (120) , (121) , (122) , (123) , (124) , (125) , (126) , (127) , (128), (129), (130);
+30 rows inserted/updated/deleted
+ij> insert into t3 (c1) values(1001), (1000);
+2 rows inserted/updated/deleted
+ij> --unlogged primary key add constraint
+alter table t3 add constraint pk1 primary key(c1);
+0 rows inserted/updated/deleted
+ij> --unlogged foreign key add
+alter table t4 add constraint fk1 foreign key (c1) references t3(c1);
+0 rows inserted/updated/deleted
+ij> --unlogged add unique constraint
+alter table t4 add constraint uk2 unique(c1);
+0 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> --following insert should throw duplicate error.
+insert into t4 values(101);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'UK2' defined on 'T4'.
+ij> insert into t3 (c1) values(101);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'PK1' defined on 'T3'.
+ij> --folowing should throw foreign key violations error.
+insert into t4 values(9999);
+ERROR 23503: INSERT on table 'T4' caused a violation of foreign key constraint 'FK1' for key (9999).  The statement has been rolled back.
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> select * from t2;
+B          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> select c1 from t3;
+C1         
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+10         
+11         
+12         
+13         
+14         
+15         
+16         
+17         
+18         
+19         
+20         
+21         
+22         
+23         
+24         
+25         
+26         
+27         
+28         
+29         
+30         
+101        
+102        
+103        
+104        
+105        
+106        
+107        
+108        
+109        
+110        
+111        
+112        
+113        
+114        
+115        
+116        
+117        
+118        
+119        
+120        
+121        
+122        
+123        
+124        
+125        
+126        
+127        
+128        
+129        
+130        
+1000       
+1001       
+ij> select * from t4;
+C1         
+-----------
+101        
+102        
+103        
+104        
+105        
+106        
+107        
+108        
+109        
+110        
+111        
+112        
+113        
+114        
+115        
+116        
+117        
+118        
+119        
+120        
+121        
+122        
+123        
+124        
+125        
+126        
+127        
+128        
+129        
+130        
+1001       
+ij> autocommit off;
+ij> insert into t3 (c1) values(100), 99, 999;
+3 rows inserted/updated/deleted
+ij> insert into t3 (c1) values(0), (-1);
+2 rows inserted/updated/deleted
+ij> --let's do some updates .
+update t4 set c1 = c1 -1;
+31 rows inserted/updated/deleted
+ij> update t3 set c1 = c1 + 1;
+67 rows inserted/updated/deleted
+ij> update t3 set c2 = 'rollforward';
+67 rows inserted/updated/deleted
+ij> commit;
+ij> delete from t2;
+5 rows inserted/updated/deleted
+ij> delete from t2;
+0 rows inserted/updated/deleted
+ij> delete from t4;
+31 rows inserted/updated/deleted
+ij> delete from t3;
+67 rows inserted/updated/deleted
+ij> rollback;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> select * from t2;
+B          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> select * from t3;
+C1         |C2                  
+--------------------------------
+2          |rollforward         
+3          |rollforward         
+4          |rollforward         
+5          |rollforward         
+6          |rollforward         
+7          |rollforward         
+8          |rollforward         
+9          |rollforward         
+10         |rollforward         
+11         |rollforward         
+12         |rollforward         
+13         |rollforward         
+14         |rollforward         
+15         |rollforward         
+16         |rollforward         
+17         |rollforward         
+18         |rollforward         
+19         |rollforward         
+20         |rollforward         
+21         |rollforward         
+22         |rollforward         
+23         |rollforward         
+24         |rollforward         
+25         |rollforward         
+26         |rollforward         
+27         |rollforward         
+28         |rollforward         
+29         |rollforward         
+30         |rollforward         
+31         |rollforward         
+102        |rollforward         
+103        |rollforward         
+104        |rollforward         
+105        |rollforward         
+106        |rollforward         
+107        |rollforward         
+108        |rollforward         
+109        |rollforward         
+110        |rollforward         
+111        |rollforward         
+112        |rollforward         
+113        |rollforward         
+114        |rollforward         
+115        |rollforward         
+116        |rollforward         
+117        |rollforward         
+118        |rollforward         
+119        |rollforward         
+120        |rollforward         
+121        |rollforward         
+122        |rollforward         
+123        |rollforward         
+124        |rollforward         
+125        |rollforward         
+126        |rollforward         
+127        |rollforward         
+128        |rollforward         
+129        |rollforward         
+130        |rollforward         
+131        |rollforward         
+1002       |rollforward         
+1001       |rollforward         
+101        |rollforward         
+100        |rollforward         
+1000       |rollforward         
+1          |rollforward         
+0          |rollforward         
+ij> select * from t4;
+C1         
+-----------
+100        
+101        
+102        
+103        
+104        
+105        
+106        
+107        
+108        
+109        
+110        
+111        
+112        
+113        
+114        
+115        
+116        
+117        
+118        
+119        
+120        
+121        
+122        
+123        
+124        
+125        
+126        
+127        
+128        
+129        
+1000       
+ij> create table t5(c1 int );
+0 rows inserted/updated/deleted
+ij> --unlogged add column because of primary key
+alter table t5 add column c2 int not null primary key default 0;
+0 rows inserted/updated/deleted
+ij> --logged add column
+alter table t5 add column c3 int not null default 0;
+0 rows inserted/updated/deleted
+ij> --unlogged add column
+alter table t5 add column c4 char(100) not null default '0';
+0 rows inserted/updated/deleted
+ij> alter table t5 add constraint uconst UNIQUE(c4);
+0 rows inserted/updated/deleted
+ij> insert into t5 values ( 1 , 2, 3 , 'one'), 
+(11 , 22, 33, 'eleven'), (111, 222, 333, 'one hundred eleven');
+3 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> select * from t5 ;
+C1         |C2         |C3         |C4                                                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------
+1          |2          |3          |one                                                                                                 
+11         |22         |33         |eleven                                                                                              
+111        |222        |333        |one hundred eleven                                                                                  
+ij> --check if constraits are intact.
+--following insert  should throw error because they violate constraints;
+insert into t5 values ( 1 , 2, 3 , 'one');
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T5'.
+ij> insert into t5 values ( 1111 , 2222, null , 'one again');
+ERROR 23502: Column 'C3'  cannot accept a NULL value.
+ij> insert into t5 values ( 1111 , 2222, 3333 , 'one');
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'UCONST' defined on 'T5'.
+ij> insert into t5 values ( 1111 , 2222, 3333 , 'four ones ..');
+1 row inserted/updated/deleted
+ij> select * from t5;
+C1         |C2         |C3         |C4                                                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------
+1          |2          |3          |one                                                                                                 
+11         |22         |33         |eleven                                                                                              
+111        |222        |333        |one hundred eleven                                                                                  
+1111       |2222       |3333       |four ones ..                                                                                        
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> select * from t5;
+C1         |C2         |C3         |C4                                                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------
+1          |2          |3          |one                                                                                                 
+11         |22         |33         |eleven                                                                                              
+111        |222        |333        |one hundred eleven                                                                                  
+1111       |2222       |3333       |four ones ..                                                                                        
+ij> --- Have to check long varchar/binary  recovery stuff.
+-- create a table with 5 rows, with 4K pageSize,
+-- this should expand over 3 pages
+create table testing 
+	(a varchar(2024), b varchar(1024), c varchar(1024), d varchar(2048), e varchar(300)) ;
+0 rows inserted/updated/deleted
+ij> -- insert 9 rows into the table
+insert into testing values (PADSTRING('1',2024),	PADSTRING('2',1024),        PADSTRING('3',1024),         PADSTRING('4',2048),         PADSTRING('5',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('10',2024),	PADSTRING('20',1024),	    PADSTRING('30',1024),        PADSTRING('40',2048),        PADSTRING('50',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('100',2024),	PADSTRING('200',1024),	    PADSTRING('300',1024),       PADSTRING('400',2048),       PADSTRING('500',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1000',2024),	PADSTRING('2000',1024),     PADSTRING('3000',1024),      PADSTRING('4000',2048),      PADSTRING('5000',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('10000',2024),	PADSTRING('20000',1024),    PADSTRING('30000',1024),     PADSTRING('40000',2048),     PADSTRING('50000',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('100000',2024),	PADSTRING('200000',1024),   PADSTRING('300000',1024),    PADSTRING('400000',2048),    PADSTRING('500000',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1000000',2024),  PADSTRING('2000000',1024),  PADSTRING('3000000',1024),   PADSTRING('4000000',2048),   PADSTRING('5000000',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('10000000',2024), PADSTRING('20000000',1024), PADSTRING('30000000',1024),  PADSTRING('40000000',2048),  PADSTRING('50000000',300));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('100000000',2024),PADSTRING('200000000',1024), PADSTRING('300000000',1024), PADSTRING('400000000',2048), PADSTRING('500000000',300));
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- select the whole row, or individual columns.
+-- 9 rows should be returned from each of the following selects
+select * from testing;
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                              &|2                                                                                                                              &|3                                                                                                                              &|4                                                                                                                              &|5                                                                                                                              &
+10                                                                                                                             &|20                                                                                                                             &|30                                                                                                                             &|40                                                                                                                             &|50                                                                                                                             &
+100                                                                                                                            &|200                                                                                                                            &|300                                                                                                                            &|400                                                                                                                            &|500                                                                                                                            &
+1000                                                                                                                           &|2000                                                                                                                           &|3000                                                                                                                           &|4000                                                                                                                           &|5000                                                                                                                           &
+10000                                                                                                                          &|20000                                                                                                                          &|30000                                                                                                                          &|40000                                                                                                                          &|50000                                                                                                                          &
+100000                                                                                                                         &|200000                                                                                                                         &|300000                                                                                                                         &|400000                                                                                                                         &|500000                                                                                                                         &
+1000000                                                                                                                        &|2000000                                                                                                                        &|3000000                                                                                                                        &|4000000                                                                                                                        &|5000000                                                                                                                        &
+10000000                                                                                                                       &|20000000                                                                                                                       &|30000000                                                                                                                       &|40000000                                                                                                                       &|50000000                                                                                                                       &
+100000000                                                                                                                      &|200000000                                                                                                                      &|300000000                                                                                                                      &|400000000                                                                                                                      &|500000000                                                                                                                      &
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                              &
+10                                                                                                                             &
+100                                                                                                                            &
+1000                                                                                                                           &
+10000                                                                                                                          &
+100000                                                                                                                         &
+1000000                                                                                                                        &
+10000000                                                                                                                       &
+100000000                                                                                                                      &
+ij> select b from testing;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+2                                                                                                                              &
+20                                                                                                                             &
+200                                                                                                                            &
+2000                                                                                                                           &
+20000                                                                                                                          &
+200000                                                                                                                         &
+2000000                                                                                                                        &
+20000000                                                                                                                       &
+200000000                                                                                                                      &
+ij> select c from testing;
+C                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+3                                                                                                                              &
+30                                                                                                                             &
+300                                                                                                                            &
+3000                                                                                                                           &
+30000                                                                                                                          &
+300000                                                                                                                         &
+3000000                                                                                                                        &
+30000000                                                                                                                       &
+300000000                                                                                                                      &
+ij> select d from testing;
+D                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+4                                                                                                                              &
+40                                                                                                                             &
+400                                                                                                                            &
+4000                                                                                                                           &
+40000                                                                                                                          &
+400000                                                                                                                         &
+4000000                                                                                                                        &
+40000000                                                                                                                       &
+400000000                                                                                                                      &
+ij> select e from testing;
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+5                                                                                                                              &
+50                                                                                                                             &
+500                                                                                                                            &
+5000                                                                                                                           &
+50000                                                                                                                          &
+500000                                                                                                                         &
+5000000                                                                                                                        &
+50000000                                                                                                                       &
+500000000                                                                                                                      &
+ij> -- insert some partial rows. 
+insert into testing (a) values (PADSTRING('a',2024));
+1 row inserted/updated/deleted
+ij> insert into testing (a, b) values (PADSTRING('a',2024), PADSTRING('b',1024));
+1 row inserted/updated/deleted
+ij> insert into testing (a, b, c) values (PADSTRING('a',2024), PADSTRING('b',1024), PADSTRING('c',1024));
+1 row inserted/updated/deleted
+ij> insert into testing (a, b, c, d) values (PADSTRING('a',2024), PADSTRING('b',1024), PADSTRING('c',1024), PADSTRING('d',2048));
+1 row inserted/updated/deleted
+ij> insert into testing (a, b, c, d, e) values (PADSTRING('a',2024), PADSTRING('b',1024), PADSTRING('c',1024), PADSTRING('d',2048), PADSTRING('e',300));
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- select some partial rows.
+-- should select 14 rows
+select * from testing;
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                              &|2                                                                                                                              &|3                                                                                                                              &|4                                                                                                                              &|5                                                                                                                              &
+10                                                                                                                             &|20                                                                                                                             &|30                                                                                                                             &|40                                                                                                                             &|50                                                                                                                             &
+100                                                                                                                            &|200                                                                                                                            &|300                                                                                                                            &|400                                                                                                                            &|500                                                                                                                            &
+1000                                                                                                                           &|2000                                                                                                                           &|3000                                                                                                                           &|4000                                                                                                                           &|5000                                                                                                                           &
+10000                                                                                                                          &|20000                                                                                                                          &|30000                                                                                                                          &|40000                                                                                                                          &|50000                                                                                                                          &
+100000                                                                                                                         &|200000                                                                                                                         &|300000                                                                                                                         &|400000                                                                                                                         &|500000                                                                                                                         &
+1000000                                                                                                                        &|2000000                                                                                                                        &|3000000                                                                                                                        &|4000000                                                                                                                        &|5000000                                                                                                                        &
+10000000                                                                                                                       &|20000000                                                                                                                       &|30000000                                                                                                                       &|40000000                                                                                                                       &|50000000                                                                                                                       &
+100000000                                                                                                                      &|200000000                                                                                                                      &|300000000                                                                                                                      &|400000000                                                                                                                      &|500000000                                                                                                                      &
+a                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|c                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &|NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &|e                                                                                                                              &
+ij> -- should select 5 rows
+select * from testing where a = PADSTRING('a',2024);
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+a                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|c                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &|NULL                                                                                                                            
+a                                                                                                                              &|b                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &|e                                                                                                                              &
+ij> -- should select 4 rows
+select a,c,d from testing where b = PADSTRING('b',1024);
+A                                                                                                                               |C                                                                                                                               |D                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+a                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|c                                                                                                                              &|NULL                                                                                                                            
+a                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &
+a                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &
+ij> -- should select 1 row
+select b, e from testing where e = PADSTRING('e',300);
+B                                                                                                                               |E                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+b                                                                                                                              &|e                                                                                                                              &
+ij> -- should select 14 rows
+select a,c,e from testing order by a;
+A                                                                                                                               |C                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                              &|3                                                                                                                              &|5                                                                                                                              &
+10                                                                                                                             &|30                                                                                                                             &|50                                                                                                                             &
+100                                                                                                                            &|300                                                                                                                            &|500                                                                                                                            &
+1000                                                                                                                           &|3000                                                                                                                           &|5000                                                                                                                           &
+10000                                                                                                                          &|30000                                                                                                                          &|50000                                                                                                                          &
+100000                                                                                                                         &|300000                                                                                                                         &|500000                                                                                                                         &
+1000000                                                                                                                        &|3000000                                                                                                                        &|5000000                                                                                                                        &
+10000000                                                                                                                       &|30000000                                                                                                                       &|50000000                                                                                                                       &
+100000000                                                                                                                      &|300000000                                                                                                                      &|500000000                                                                                                                      &
+a                                                                                                                              &|c                                                                                                                              &|e                                                                                                                              &
+a                                                                                                                              &|c                                                                                                                              &|NULL                                                                                                                            
+a                                                                                                                              &|c                                                                                                                              &|NULL                                                                                                                            
+a                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            
+a                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            
+ij> -- update 5 rows on the main data page
+update testing set a = PADSTRING('aa',2024) where a = PADSTRING('a',2024);
+5 rows inserted/updated/deleted
+ij> -- following select should return 0 rows
+select * from testing where a = PADSTRING('a',2024);
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- following select should return 5 rows
+select * from testing where a = PADSTRING('aa',2024);
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+aa                                                                                                                             &|NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            
+aa                                                                                                                             &|b                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            |NULL                                                                                                                            
+aa                                                                                                                             &|b                                                                                                                              &|c                                                                                                                              &|NULL                                                                                                                            |NULL                                                                                                                            
+aa                                                                                                                             &|b                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &|NULL                                                                                                                            
+aa                                                                                                                             &|b                                                                                                                              &|c                                                                                                                              &|d                                                                                                                              &|e                                                                                                                              &
+ij> -- update 3 rows on the overflow page
+update testing set c = PADSTRING('cc',1024) where c = PADSTRING('c',1024);
+3 rows inserted/updated/deleted
+ij> -- following should return 0 rows
+select * from testing where c = PADSTRING('c',1024);
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- followign should return 3 rows
+select a, b, c, d, e from testing where c = PADSTRING('cc',1024);
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+aa                                                                                                                             &|b                                                                                                                              &|cc                                                                                                                             &|NULL                                                                                                                            |NULL                                                                                                                            
+aa                                                                                                                             &|b                                                                                                                              &|cc                                                                                                                             &|d                                                                                                                              &|NULL                                                                                                                            
+aa                                                                                                                             &|b                                                                                                                              &|cc                                                                                                                             &|d                                                                                                                              &|e                                                                                                                              &
+ij> -- update 1 row on second overflow page
+update testing set e = PADSTRING('ee',300) where e = PADSTRING('e',300);
+1 row inserted/updated/deleted
+ij> -- following select should return 0 rows
+select e from testing where e = PADSTRING('e',300);
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+ij> -- following should return 1 row
+select e from testing where e = PADSTRING('ee',300);
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+ee                                                                                                                             &
+ij> -- update all columns for 2 rows
+update testing set a = PADSTRING('aaa',2024), b = PADSTRING('bbb',1024), c = PADSTRING('ccc',1024), d = PADSTRING('ddd',2048), e = PADSTRING('eee',300)
+	where d = PADSTRING('d',2048);
+2 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- following select should return 0 rows
+select * from testing where d = PADSTRING('d',2048);
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- following select should return 2 rows
+select * from testing where d = PADSTRING('ddd',2048);
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+aaa                                                                                                                            &|bbb                                                                                                                            &|ccc                                                                                                                            &|ddd                                                                                                                            &|eee                                                                                                                            &
+aaa                                                                                                                            &|bbb                                                                                                                            &|ccc                                                                                                                            &|ddd                                                                                                                            &|eee                                                                                                                            &
+ij> -- create a table with 6 rows
+drop table testing;
+0 rows inserted/updated/deleted
+ij> create table testing (a varchar(500), b varchar (500), c varchar(500), d varchar(500),
+	e varchar(500), f varchar(500), g varchar(500), z varchar(3900)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1',500), PADSTRING('2',500), PADSTRING('3',500), PADSTRING('4',500), PADSTRING('5',500), PADSTRING('6',500), PADSTRING('7',500), PADSTRING('1000',3900));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1',500), PADSTRING('2',500), PADSTRING('3',500), PADSTRING('4',500), PADSTRING('5',500), PADSTRING('6',500), PADSTRING('7',500), PADSTRING('2000',3900));
+1 row inserted/updated/deleted
+ij> select * from testing;
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               |F                                                                                                                               |G                                                                                                                               |Z                                                                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1                                                                                                                              &|2                                                                                                                              &|3                                                                                                                              &|4                                                                                                                              &|5                                                                                                                              &|6                                                                                                                              &|7                                                                                                                              &|1000                                                                                                                           &
+1                                                                                                                              &|2                                                                                                                              &|3                                                                                                                              &|4                                                                                                                              &|5                                                                                                                              &|6                                                                                                                              &|7                                                                                                                              &|2000                                                                                                                           &
+ij> select e from testing;
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+5                                                                                                                              &
+5                                                                                                                              &
+ij> select g from testing;
+G                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+7                                                                                                                              &
+7                                                                                                                              &
+ij> select z from testing;
+Z                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1000                                                                                                                           &
+2000                                                                                                                           &
+ij> -- create long rows which expand over 3 or more pages. Test that various
+-- qualifier work on the long row columns.
+drop table testing;
+0 rows inserted/updated/deleted
+ij> create table testing (
+    key1    int, 
+    filler1 varchar(2500), 
+    filler2 varchar(2500), 
+    key2    int,
+    filler3 varchar(2500), 
+    filler4 varchar(2500), 
+    key3    int,
+    filler5 varchar(2400),
+    filler6 varchar(2400),
+    key4    int) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (3, PADSTRING('fill1',2500), PADSTRING('fill2',2500), 30, PADSTRING('fill3',2500), PADSTRING('fill4',2500), 300, PADSTRING('fill5',2400), PADSTRING('fill6',2400), 3000);
+1 row inserted/updated/deleted
+ij> insert into testing values (4, PADSTRING('fill1',2500), PADSTRING('fill2',2500), 40, PADSTRING('fill3',2500), PADSTRING('fill4',2500), 400, PADSTRING('fill5',2400), PADSTRING('fill6',2400), 4000);
+1 row inserted/updated/deleted
+ij> insert into testing values (1, PADSTRING('fill1',2500), PADSTRING('fill2',2500), 10, PADSTRING('fill3',2500), PADSTRING('fill4',2500), 100, PADSTRING('fill5',2400), PADSTRING('fill6',2400), 1000);
+1 row inserted/updated/deleted
+ij> insert into testing values (2, PADSTRING('fill1',2500), PADSTRING('fill2',2500), 20, PADSTRING('fill3',2500), PADSTRING('fill4',2500), 200, PADSTRING('fill5',2400), PADSTRING('fill6',2400), 2000);
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> select * from testing;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3          |fill1                                                                                                                          &|fill2                                                                                                                          &|30         |fill3                                                                                                                          &|fill4                                                                                                                          &|300        |fill5                                                                                                                          &|fill6                                                                                                                          &|3000       
+4          |fill1                                                                                                                          &|fill2                                                                                                                          &|40         |fill3                                                                                                                          &|fill4                                                                                                                          &|400        |fill5                                                                                                                          &|fill6                                                                                                                          &|4000       
+1          |fill1                                                                                                                          &|fill2                                                                                                                          &|10         |fill3                                                                                                                          &|fill4                                                                                                                          &|100        |fill5                                                                                                                          &|fill6                                                                                                                          &|1000       
+2          |fill1                                                                                                                          &|fill2                                                                                                                          &|20         |fill3                                                                                                                          &|fill4                                                                                                                          &|200        |fill5                                                                                                                          &|fill6                                                                                                                          &|2000       
+ij> select key2 from testing;
+KEY2       
+-----------
+30         
+40         
+10         
+20         
+ij> select key3 from testing;
+KEY3       
+-----------
+300        
+400        
+100        
+200        
+ij> select key4 from testing;
+KEY4       
+-----------
+3000       
+4000       
+1000       
+2000       
+ij> select * from testing where key1 = 1;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |fill1                                                                                                                          &|fill2                                                                                                                          &|10         |fill3                                                                                                                          &|fill4                                                                                                                          &|100        |fill5                                                                                                                          &|fill6                                                                                                                          &|1000       
+ij> select * from testing where key2 = 20;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2          |fill1                                                                                                                          &|fill2                                                                                                                          &|20         |fill3                                                                                                                          &|fill4                                                                                                                          &|200        |fill5                                                                                                                          &|fill6                                                                                                                          &|2000       
+ij> select * from testing where key3 = 300;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3          |fill1                                                                                                                          &|fill2                                                                                                                          &|30         |fill3                                                                                                                          &|fill4                                                                                                                          &|300        |fill5                                                                                                                          &|fill6                                                                                                                          &|3000       
+ij> select * from testing where key4 = 4000;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4          |fill1                                                                                                                          &|fill2                                                                                                                          &|40         |fill3                                                                                                                          &|fill4                                                                                                                          &|400        |fill5                                                                                                                          &|fill6                                                                                                                          &|4000       
+ij> select * from testing where key1 = 1 and key2 = 10;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |fill1                                                                                                                          &|fill2                                                                                                                          &|10         |fill3                                                                                                                          &|fill4                                                                                                                          &|100        |fill5                                                                                                                          &|fill6                                                                                                                          &|1000       
+ij> select * from testing where key2 = 20 and key3 = 200;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2          |fill1                                                                                                                          &|fill2                                                                                                                          &|20         |fill3                                                                                                                          &|fill4                                                                                                                          &|200        |fill5                                                                                                                          &|fill6                                                                                                                          &|2000       
+ij> select * from testing where key3 = 300 and key4 = 3000;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3          |fill1                                                                                                                          &|fill2                                                                                                                          &|30         |fill3                                                                                                                          &|fill4                                                                                                                          &|300        |fill5                                                                                                                          &|fill6                                                                                                                          &|3000       
+ij> select * from testing where key4 = 4000 and key1 = 4;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4          |fill1                                                                                                                          &|fill2                                                                                                                          &|40         |fill3                                                                                                                          &|fill4                                                                                                                          &|400        |fill5                                                                                                                          &|fill6                                                                                                                          &|4000       
+ij> select * from testing where key1 = 1 or key2 = 20;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |fill1                                                                                                                          &|fill2                                                                                                                          &|10         |fill3                                                                                                                          &|fill4                                                                                                                          &|100        |fill5                                                                                                                          &|fill6                                                                                                                          &|1000       
+2          |fill1                                                                                                                          &|fill2                                                                                                                          &|20         |fill3                                                                                                                          &|fill4                                                                                                                          &|200        |fill5                                                                                                                          &|fill6                                                                                                                          &|2000       
+ij> select * from testing where key2 = 20 or key3 = 300;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3          |fill1                                                                                                                          &|fill2                                                                                                                          &|30         |fill3                                                                                                                          &|fill4                                                                                                                          &|300        |fill5                                                                                                                          &|fill6                                                                                                                          &|3000       
+2          |fill1                                                                                                                          &|fill2                                                                                                                          &|20         |fill3                                                                                                                          &|fill4                                                                                                                          &|200        |fill5                                                                                                                          &|fill6                                                                                                                          &|2000       
+ij> select * from testing where key3 = 300 or key4 = 4000;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3          |fill1                                                                                                                          &|fill2                                                                                                                          &|30         |fill3                                                                                                                          &|fill4                                                                                                                          &|300        |fill5                                                                                                                          &|fill6                                                                                                                          &|3000       
+4          |fill1                                                                                                                          &|fill2                                                                                                                          &|40         |fill3                                                                                                                          &|fill4                                                                                                                          &|400        |fill5                                                                                                                          &|fill6                                                                                                                          &|4000       
+ij> select * from testing where key4 = 4000 or key1 = 1;
+KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4          |fill1                                                                                                                          &|fill2                                                                                                                          &|40         |fill3                                                                                                                          &|fill4                                                                                                                          &|400        |fill5                                                                                                                          &|fill6                                                                                                                          &|4000       
+1          |fill1                                                                                                                          &|fill2                                                                                                                          &|10         |fill3                                                                                                                          &|fill4                                                                                                                          &|100        |fill5                                                                                                                          &|fill6                                                                                                                          &|1000       
+ij> drop table testing;
+0 rows inserted/updated/deleted
+ij> --END OF LONG ROW TEST
+-- test sinle long column table
+-- create table with one long column
+-- test 1: one long column
+create table testing (a varchar(8096)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0',8096));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a b c d e f g h i j',8096));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',8096));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',8096));
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- should return 4 rows
+select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 2: testing two column (1 short, 1 long) table
+create table testing (a int, b varchar(32384)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (1, PADSTRING('1 2 3 4 5 6 7 8 9 0',32384));
+1 row inserted/updated/deleted
+ij> insert into testing values (2, PADSTRING('a b c d e f g h i j',32384));
+1 row inserted/updated/deleted
+ij> insert into testing values (3, PADSTRING('11 22 33 44 55 66 77',32384));
+1 row inserted/updated/deleted
+ij> insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg',32384));
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- should return 4 rows
+select * from testing;
+A          |B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------
+1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &
+2          |a b c d e f g h i j                                                                                                            &
+3          |11 22 33 44 55 66 77                                                                                                           &
+4          |aa bb cc dd ee ff gg                                                                                                           &
+ij> select a from testing;
+A          
+-----------
+1          
+2          
+3          
+4          
+ij> select b from testing;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- should return 1 row
+select b from testing where a = 1;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 3: testing two column (1 long, 1 shor) table
+create table testing (a varchar(32384), b int) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1);
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a b c d e f g h i j',32384), 2);
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3);
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4);
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- should return 4 rows
+select * from testing;
+A                                                                                                                               |B          
+--------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          
+a b c d e f g h i j                                                                                                            &|2          
+11 22 33 44 55 66 77                                                                                                           &|3          
+aa bb cc dd ee ff gg                                                                                                           &|4          
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> select b from testing;
+B          
+-----------
+1          
+2          
+3          
+4          
+ij> -- should return 1 row
+select a from testing where b = 4;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 4: testing three column (1 short, 1 long, 1 short) table
+create table testing (z int, a varchar(32384), b int) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (0, PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1);
+1 row inserted/updated/deleted
+ij> insert into testing values (1, PADSTRING('a b c d e f g h i j',32384), 2);
+1 row inserted/updated/deleted
+ij> insert into testing values (2, PADSTRING('11 22 33 44 55 66 77',32384), 3);
+1 row inserted/updated/deleted
+ij> insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg',32384), 4);
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- should return 4 rows
+select * from testing;
+Z          |A                                                                                                                               |B          
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          
+1          |a b c d e f g h i j                                                                                                            &|2          
+2          |11 22 33 44 55 66 77                                                                                                           &|3          
+4          |aa bb cc dd ee ff gg                                                                                                           &|4          
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> select b from testing;
+B          
+-----------
+1          
+2          
+3          
+4          
+ij> select z from testing;
+Z          
+-----------
+0          
+1          
+2          
+4          
+ij> -- should return 1 row
+select b from testing where z = b;
+B          
+-----------
+4          
+ij> -- try creating index on long column, should fail
+create index zz on testing (a) ;
+ERROR XSCB6: Limitation: Record of a btree secondary index cannot be updated or inserted due to lack of space on the page.  Use the parameters derby.storage.pageSize and/or derby.storage.pageReservedSpace to work around this limitation.
+ij> -- update the long column 5 times
+update testing set a = PADSTRING('update once',32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update twice',32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update three times',32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update four times',32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update five times',32384);
+4 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- select should return 4 rows
+select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+update five times                                                                                                              &
+update five times                                                                                                              &
+update five times                                                                                                              &
+update five times                                                                                                              &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 5: testing three columns (1 long, 1 short, 1 long) table
+create table testing (a varchar(32384), b int, c varchar(32084)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1, PADSTRING('1 2 3 4 5 6 7 8 9 0',32084));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a b c d e f g h i j',32384), 2, PADSTRING('a b c d e f g h i j',32084));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3, PADSTRING('11 22 33 44 55 66 77',32084));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4, PADSTRING('aa bb cc dd ee ff gg',32084));
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- should return 4 rows
+select * from testing;
+A                                                                                                                               |B          |C                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &|2          |a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &|3          |11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &|4          |aa bb cc dd ee ff gg                                                                                                           &
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> select b from testing;
+B          
+-----------
+1          
+2          
+3          
+4          
+ij> select c from testing;
+C                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- should return one row
+select * from testing where b = 4;
+A                                                                                                                               |B          |C                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+aa bb cc dd ee ff gg                                                                                                           &|4          |aa bb cc dd ee ff gg                                                                                                           &
+ij> -- try creating index, should fail on long columns
+create index zz on testing (a) ;
+ERROR XSCB6: Limitation: Record of a btree secondary index cannot be updated or inserted due to lack of space on the page.  Use the parameters derby.storage.pageSize and/or derby.storage.pageReservedSpace to work around this limitation.
+ij> create index zz on testing (c) ;
+ERROR XSCB6: Limitation: Record of a btree secondary index cannot be updated or inserted due to lack of space on the page.  Use the parameters derby.storage.pageSize and/or derby.storage.pageReservedSpace to work around this limitation.
+ij> create index zz on testing (b);
+0 rows inserted/updated/deleted
+ij> -- update the last long column 10 times
+update testing set c = PADSTRING('update 0',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 1',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 2',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 3',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 4',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 5',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 6',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 7',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 8',32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 9',32084);
+4 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- select should return 4 rows
+select * from testing;
+A                                                                                                                               |B          |C                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          |update 9                                                                                                                       &
+a b c d e f g h i j                                                                                                            &|2          |update 9                                                                                                                       &
+11 22 33 44 55 66 77                                                                                                           &|3          |update 9                                                                                                                       &
+aa bb cc dd ee ff gg                                                                                                           &|4          |update 9                                                                                                                       &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 6: table with 5 columns (1 short, 1 long, 1 short, 1 long, 1 short) table
+create table testing (a int, b clob(64768), c int, d varchar(32384), e int) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (0, PADSTRING('1 2 3 4 5 6 7 8 9 0',64768),  1, PADSTRING('1 2 3 4 5 6 7 8 9 0',32384),  2);
+1 row inserted/updated/deleted
+ij> insert into testing values (1, PADSTRING('a b c d e f g h i j',64768),  2, PADSTRING('a b c d e f g h i j',32384),  3);
+1 row inserted/updated/deleted
+ij> insert into testing values (2, PADSTRING('11 22 33 44 55 66 77',64768), 3, PADSTRING('11 22 33 44 55 66 77',32384), 4);
+1 row inserted/updated/deleted
+ij> insert into testing values (3, PADSTRING('aa bb cc dd ee ff gg',64768), 4, PADSTRING('aa bb cc dd ee ff gg',32384), 5);
+1 row inserted/updated/deleted
+ij> insert into testing values (4, PADSTRING('1 2 3 4 5 6 7 8 9 0',64768),  5, PADSTRING('aa bb cc dd ee ff gg',32384), 6);
+1 row inserted/updated/deleted
+ij> insert into testing values (5, PADSTRING('a b c d e f g h i j',64768),  6, PADSTRING('aa bb cc dd ee ff gg',32384), 7);
+1 row inserted/updated/deleted
+ij> insert into testing values (6, PADSTRING('11 22 33 44 55 66 77',64768), 7, PADSTRING('aa bb cc dd ee ff gg',32384), 8);
+1 row inserted/updated/deleted
+ij> insert into testing values (7, PADSTRING('aa bb cc dd ee ff gg',64768), 8, PADSTRING('aa bb cc dd ee ff gg',32384), 9);
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- select shoudl return 8 rows
+select * from testing;
+A          |B                                                                                                                               |C          |D                                                                                                                               |E          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|2          
+1          |a b c d e f g h i j                                                                                                            &|2          |a b c d e f g h i j                                                                                                            &|3          
+2          |11 22 33 44 55 66 77                                                                                                           &|3          |11 22 33 44 55 66 77                                                                                                           &|4          
+3          |aa bb cc dd ee ff gg                                                                                                           &|4          |aa bb cc dd ee ff gg                                                                                                           &|5          
+4          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|5          |aa bb cc dd ee ff gg                                                                                                           &|6          
+5          |a b c d e f g h i j                                                                                                            &|6          |aa bb cc dd ee ff gg                                                                                                           &|7          
+6          |11 22 33 44 55 66 77                                                                                                           &|7          |aa bb cc dd ee ff gg                                                                                                           &|8          
+7          |aa bb cc dd ee ff gg                                                                                                           &|8          |aa bb cc dd ee ff gg                                                                                                           &|9          
+ij> select a from testing;
+A          
+-----------
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+ij> select b, d from testing;
+B                                                                                                                               |D                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &|a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &|11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &|aa bb cc dd ee ff gg                                                                                                           &
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|aa bb cc dd ee ff gg                                                                                                           &
+a b c d e f g h i j                                                                                                            &|aa bb cc dd ee ff gg                                                                                                           &
+11 22 33 44 55 66 77                                                                                                           &|aa bb cc dd ee ff gg                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &|aa bb cc dd ee ff gg                                                                                                           &
+ij> select a, c, d from testing;
+A          |C          |D                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &
+1          |2          |a b c d e f g h i j                                                                                                            &
+2          |3          |11 22 33 44 55 66 77                                                                                                           &
+3          |4          |aa bb cc dd ee ff gg                                                                                                           &
+4          |5          |aa bb cc dd ee ff gg                                                                                                           &
+5          |6          |aa bb cc dd ee ff gg                                                                                                           &
+6          |7          |aa bb cc dd ee ff gg                                                                                                           &
+7          |8          |aa bb cc dd ee ff gg                                                                                                           &
+ij> -- update column b 10 times
+update testing set b = PADSTRING('update 0',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 1',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 2',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 3',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 4',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 5',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 6',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 7',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 8',64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 9',64768);
+8 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- select should return 8 rows
+select b from testing;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+ij> select a, b, e from testing;
+A          |B                                                                                                                               |E          
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |update 9                                                                                                                       &|2          
+1          |update 9                                                                                                                       &|3          
+2          |update 9                                                                                                                       &|4          
+3          |update 9                                                                                                                       &|5          
+4          |update 9                                                                                                                       &|6          
+5          |update 9                                                                                                                       &|7          
+6          |update 9                                                                                                                       &|8          
+7          |update 9                                                                                                                       &|9          
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 7: table with 5 columns, all long columns
+create table testing (a clob(64768), b varchar(32384), c clob(64768), d varchar(32384), e clob(64768)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> -- select should return 10 rows
+select * from testing;
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+ij> select b from testing;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+ij> select c from testing;
+C                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+ij> select d from testing;
+D                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+ij> select e from testing;
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+ij> select a, c, e from testing;
+A                                                                                                                               |C                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+ij> select b, e from testing;
+B                                                                                                                               |E                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+ij> -- update the first and last column
+update testing set a = PADSTRING('1 1 1 1 1 1 1 1 1 1',64768);
+10 rows inserted/updated/deleted
+ij> update testing set e = PADSTRING('9 9 9 9 9 9 9 9 9 9',64768);
+10 rows inserted/updated/deleted
+ij> -- select should return 10 rows
+select a, e from testing;
+A                                                                                                                               |E                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+ij> select a, c, b, e from testing;
+A                                                                                                                               |C                                                                                                                               |B                                                                                                                               |E                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+ij> select e from testing;
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> --END OF LONG COL TEST WITH ROLLFORWARD RECOVERY.
+;
+ij> 

@@ -1,0 +1,376 @@
+ij> --------------------------------------------------------------------------------
+-- Test multi user lock interaction of ddl. 
+--------------------------------------------------------------------------------
+autocommit off;
+ij> connect 'wombat' as create1;
+ij(CREATE1)> connect 'wombat' as create2;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0: create1:serializable, create2:serializable
+--------------------------------------------------------------------------------
+-- set up
+set connection create1;
+ij(CREATE1)> autocommit off;
+ij(CREATE1)> drop table create1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CREATE1' because it does not exist.
+ij(CREATE1)> drop table data;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'DATA' because it does not exist.
+ij(CREATE1)> create table data (keycol int, data char(250));
+0 rows inserted/updated/deleted
+ij(CREATE1)> create unique index d1 on data (keycol);
+0 rows inserted/updated/deleted
+ij(CREATE1)> insert into data values (0, '0');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (10, '100');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (20, '200');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (30, '300');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (40, '400');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (50, '100');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (60, '200');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (70, '300');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (80, '400');
+1 row inserted/updated/deleted
+ij(CREATE1)> set isolation RR;
+0 rows inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> autocommit off;
+ij(CREATE2)> drop table create2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CREATE2' because it does not exist.
+ij(CREATE2)> set current isolation = serializable;
+0 rows inserted/updated/deleted
+ij(CREATE2)> commit;
+ij(CREATE2)> run resource 'cisco.subsql';
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.1: ddl interaction
+--------------------------------------------------------------------------------
+-- create 1st table.  Drop the table, which will get regular X locks on the
+-- rows in the system catalogs (which are different than insert locks).
+set connection create1;
+ij(CREATE1)> create table create1 (a int);
+0 rows inserted/updated/deleted
+ij(CREATE1)> drop table create1;
+0 rows inserted/updated/deleted
+ij(CREATE1)> -- create 2nd table
+--    The following should not block now that ddl work is done under 
+--    repeatable read no matter what the user isolation level.
+set connection create2;
+ij(CREATE2)> create table create2 (a int);
+0 rows inserted/updated/deleted
+ij(CREATE2)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.2: normal user data, previous key must block on serializable read,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+0          |0                                                                                                                              &
+10         |100                                                                                                                            &
+ij(CREATE1)> -- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+ij(CREATE2)> insert into data values (5, '50');
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CREATE2)> commit;
+ij(CREATE2)> -- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+0          |0                                                                                                                              &
+10         |100                                                                                                                            &
+ij(CREATE1)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> delete from data where keycol = 5;
+0 rows inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.3: normal user data, previous key must block on serializable delete,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+ij(CREATE1)> delete from data where keycol <= 10;
+2 rows inserted/updated/deleted
+ij(CREATE1)> -- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+ij(CREATE2)> insert into data values (6, '60');
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CREATE2)> commit;
+ij(CREATE2)> -- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+ij(CREATE1)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> delete from data where keycol = 6;
+0 rows inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 1: create1:serializable, create2:repeatable read
+--------------------------------------------------------------------------------
+-- set up
+set connection create1;
+ij(CREATE1)> autocommit off;
+ij(CREATE1)> drop table create1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CREATE1' because it does not exist.
+ij(CREATE1)> drop table data;
+0 rows inserted/updated/deleted
+ij(CREATE1)> create table data (keycol int, data char(250));
+0 rows inserted/updated/deleted
+ij(CREATE1)> create unique index d1 on data (keycol);
+0 rows inserted/updated/deleted
+ij(CREATE1)> insert into data values (0, '0');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (10, '100');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (20, '200');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (30, '300');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (40, '400');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (50, '100');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (60, '200');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (70, '300');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (80, '400');
+1 row inserted/updated/deleted
+ij(CREATE1)> set isolation to repeatable READ;
+0 rows inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> autocommit off;
+ij(CREATE2)> drop table create2;
+0 rows inserted/updated/deleted
+ij(CREATE2)> set isolation RS;
+0 rows inserted/updated/deleted
+ij(CREATE2)> commit;
+ij(CREATE2)> run resource 'cisco.subsql';
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.1: ddl interaction
+--------------------------------------------------------------------------------
+-- create 1st table.  Drop the table, which will get regular X locks on the
+-- rows in the system catalogs (which are different than insert locks).
+set connection create1;
+ij(CREATE1)> create table create1 (a int);
+0 rows inserted/updated/deleted
+ij(CREATE1)> drop table create1;
+0 rows inserted/updated/deleted
+ij(CREATE1)> -- create 2nd table
+--    The following should not block now that ddl work is done under 
+--    repeatable read no matter what the user isolation level.
+set connection create2;
+ij(CREATE2)> create table create2 (a int);
+0 rows inserted/updated/deleted
+ij(CREATE2)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.2: normal user data, previous key must block on serializable read,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+0          |0                                                                                                                              &
+10         |100                                                                                                                            &
+ij(CREATE1)> -- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+ij(CREATE2)> insert into data values (5, '50');
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CREATE2)> commit;
+ij(CREATE2)> -- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+0          |0                                                                                                                              &
+10         |100                                                                                                                            &
+ij(CREATE1)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> delete from data where keycol = 5;
+0 rows inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.3: normal user data, previous key must block on serializable delete,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+ij(CREATE1)> delete from data where keycol <= 10;
+2 rows inserted/updated/deleted
+ij(CREATE1)> -- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+ij(CREATE2)> insert into data values (6, '60');
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(CREATE2)> commit;
+ij(CREATE2)> -- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+ij(CREATE1)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> delete from data where keycol = 6;
+0 rows inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 1: create1:repeatable read, create2:serializable
+--------------------------------------------------------------------------------
+-- set up
+set connection create1;
+ij(CREATE1)> autocommit off;
+ij(CREATE1)> drop table create1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CREATE1' because it does not exist.
+ij(CREATE1)> drop table data;
+0 rows inserted/updated/deleted
+ij(CREATE1)> create table data (keycol int, data char(250));
+0 rows inserted/updated/deleted
+ij(CREATE1)> create unique index d1 on data (keycol);
+0 rows inserted/updated/deleted
+ij(CREATE1)> insert into data values (0, '0');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (10, '100');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (20, '200');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (30, '300');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (40, '400');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (50, '100');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (60, '200');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (70, '300');
+1 row inserted/updated/deleted
+ij(CREATE1)> insert into data values (80, '400');
+1 row inserted/updated/deleted
+ij(CREATE1)> set isolation to rs;
+0 rows inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> autocommit off;
+ij(CREATE2)> drop table create2;
+0 rows inserted/updated/deleted
+ij(CREATE2)> set isolation serializable;
+0 rows inserted/updated/deleted
+ij(CREATE2)> commit;
+ij(CREATE2)> run resource 'cisco.subsql';
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.1: ddl interaction
+--------------------------------------------------------------------------------
+-- create 1st table.  Drop the table, which will get regular X locks on the
+-- rows in the system catalogs (which are different than insert locks).
+set connection create1;
+ij(CREATE1)> create table create1 (a int);
+0 rows inserted/updated/deleted
+ij(CREATE1)> drop table create1;
+0 rows inserted/updated/deleted
+ij(CREATE1)> -- create 2nd table
+--    The following should not block now that ddl work is done under 
+--    repeatable read no matter what the user isolation level.
+set connection create2;
+ij(CREATE2)> create table create2 (a int);
+0 rows inserted/updated/deleted
+ij(CREATE2)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.2: normal user data, previous key must block on serializable read,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+0          |0                                                                                                                              &
+10         |100                                                                                                                            &
+ij(CREATE1)> -- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+ij(CREATE2)> insert into data values (5, '50');
+1 row inserted/updated/deleted
+ij(CREATE2)> commit;
+ij(CREATE2)> -- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+0          |0                                                                                                                              &
+5          |50                                                                                                                             &
+10         |100                                                                                                                            &
+ij(CREATE1)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> delete from data where keycol = 5;
+1 row inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- Test 0.3: normal user data, previous key must block on serializable delete,
+--           if create1 session isolation is serializable, otherwise it will
+--           not block.
+--------------------------------------------------------------------------------
+-- get lock on range of keys 0->10, iso level determines if phantoms allowed.
+set connection create1;
+ij(CREATE1)> delete from data where keycol <= 10;
+2 rows inserted/updated/deleted
+ij(CREATE1)> -- the following must block if create1 isolation level disallows phantoms
+set connection create2;
+ij(CREATE2)> insert into data values (6, '60');
+1 row inserted/updated/deleted
+ij(CREATE2)> commit;
+ij(CREATE2)> -- now do the select again from session one to see if a phantom showed up.
+set connection create1;
+ij(CREATE1)> select * from data where keycol <= 10;
+KEYCOL     |DATA                                                                                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+6          |60                                                                                                                             &
+ij(CREATE1)> set connection create1;
+ij(CREATE1)> commit;
+ij(CREATE1)> delete from data where keycol = 6;
+1 row inserted/updated/deleted
+ij(CREATE1)> commit;
+ij(CREATE1)> set connection create2;
+ij(CREATE2)> commit;
+ij(CREATE2)> --------------------------------------------------------------------------------
+-- cleanup
+--------------------------------------------------------------------------------
+set connection create1;
+ij(CREATE1)> disconnect;
+ij> set connection create2;
+ij(CREATE2)> disconnect;
+ij> exit;

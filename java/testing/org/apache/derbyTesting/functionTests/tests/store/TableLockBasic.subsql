@@ -1,0 +1,176 @@
+-- Very basic single user testing of table locking, verify that the right locks
+-- are obtained for simple operations.  This test only looks at table and
+-- row logical locks, it does not verify physical latches or lock ordering.
+--
+-- The basic methodology is:
+--    start transaction
+--    simple operation
+--    print lock table which should match the master
+--    end transation
+-- 
+
+run resource 'createTestProcedures.subsql';
+run resource 'LockTableQuery.subsql';
+
+autocommit off;
+
+create table heap_only (a int);
+
+commit;
+
+--------------------------------------------------------------------------------
+-- Test insert into empty heap, should just get table lock 
+--------------------------------------------------------------------------------
+insert into heap_only values (1);
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+
+--------------------------------------------------------------------------------
+-- Test insert into heap with one row, just get table lock 
+--------------------------------------------------------------------------------
+insert into heap_only values (2);
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test select from a heap, should get shared table lock.
+--------------------------------------------------------------------------------
+select a from heap_only where a = 1;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test delete from a heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+delete from heap_only where a = 1;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test update to heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+update heap_only set a = 1000 where a = 2;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test drop of heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+drop table heap_only;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+create table indexed_heap (a int, b varchar(1000));
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+create index a_idx on indexed_heap (a, b);
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test insert into indexed heap, should just get table lock 
+--------------------------------------------------------------------------------
+insert into indexed_heap (a) values (1);
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test insert into indexed heap with one row, just get table lock 
+--------------------------------------------------------------------------------
+insert into indexed_heap (a) values (2);
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test select from a indexed heap, should get shared table lock.
+--------------------------------------------------------------------------------
+select a from indexed_heap where a = 1;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test delete from a indexed heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+delete from indexed_heap where a = 1;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test update to indexed heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+update indexed_heap set a = 1000 where a = 2;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test drop of indexed heap, should get exclusive table lock.
+--------------------------------------------------------------------------------
+drop table indexed_heap;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test LOCK TABLE statement
+--------------------------------------------------------------------------------
+create table t1(c1 int);
+commit;
+
+prepare p1 as 'lock table t1 in exclusive mode';
+execute p1;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+-- verify that statement gets recompiled correctly
+drop table t1;
+create table t1(c1 int);
+execute p1;
+commit;
+
+lock table t1 in share mode;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+drop table t1;
+commit;
+
+-- verify that lock table not allowed in sys schema
+lock table sys.systables in exclusive mode;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test RTS output when table locking configured
+--------------------------------------------------------------------------------
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+maximumdisplaywidth 2000;
+create table rts(c1 int);
+insert into rts values 1;
+commit;
+select * from rts with cs;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+drop table rts;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test DDL TABLE LOCK MODE
+--------------------------------------------------------------------------------
+create table default_granularity(c1 int);
+create table row_granularity(c1 int);
+alter table row_granularity locksize row;
+create table table_granularity(c1 int);
+alter table table_granularity locksize table;
+select * from default_granularity with cs;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from default_granularity with rr;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from row_granularity with cs;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from row_granularity with rr;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from table_granularity with cs;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from table_granularity with rr;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+rollback;

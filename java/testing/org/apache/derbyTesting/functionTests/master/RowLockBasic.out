@@ -1,0 +1,386 @@
+ij> -- Very basic single user testing of row locking, verify that the right locks
+-- are obtained for simple operations.  This test only looks at table and
+-- row logical locks, it does not verify physical latches or lock ordering.
+-- The basic methodology is:
+--    start transaction
+--    simple operation
+--    print lock table which should match the master
+--    end transation
+-- 
+set isolation to RR;
+0 rows inserted/updated/deleted
+ij> run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> run resource 'LockTableQuery.subsql';
+ij> create view lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
+0 rows inserted/updated/deleted
+ij> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
+-- order by
+--     tabname, type desc, mode, cnt, lockname
+-- lock table with system catalog locks included.
+create view full_lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- lock table with no join.
+create view lock_table2 as
+select 
+    cast(l.xid as char(8)) as xid,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state
+from 
+    new org.apache.derby.diag.LockTable() l  
+where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- transaction table with no join.
+create view tran_table as
+select 
+    *
+from 
+    new org.apache.derby.diag.TransactionTable() t ;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> create table a (a int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into empty heap, should just get row lock on row being inserted
+--------------------------------------------------------------------------------
+insert into a values (1);
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(1,7)     |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into heap with one row, just get row lock on row being inserted
+--------------------------------------------------------------------------------
+insert into a values (2);
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(1,8)     |GRANT|ACTIVE  
+ij> commit;
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |3   |X   |*** TRANSIEN|Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> create table a (a int, b varchar(1000));
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> create index a_idx on a (a, b) ;
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |4   |S   |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into empty btree, should just get row lock on row being 
+-- inserted and an instant duration lock on "first key in table" row (id 3).
+--------------------------------------------------------------------------------
+insert into a values (1, PADSTRING('a',1000));
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(1,7)     |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Test insert into non-empty btree, should get row lock on row being 
+-- inserted and an instant duration lock on the one before it.
+--------------------------------------------------------------------------------
+insert into a values (2, PADSTRING('b',1000));
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(1,8)     |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Cause split and check locks that are obtained as part of inserting after
+-- the split.  This causes the code to get a previous lock on a previous page.
+-- 
+-- RESOLVE (mikem) - the row lock on (1,9) is a result of raw store getting
+-- a lock while it tries to fit the row on the original page record id, but
+-- there is not enough room, so it eventually allocates a new page/row and 
+-- locks that one - but the old lock is left around.
+--
+-- btree just before commit:
+-- leftmost leaf: (1,6), (1,7)
+-- next leaf:     (1,8), (2,6)
+--------------------------------------------------------------------------------
+insert into a values (3, PADSTRING('c',1000));
+1 row inserted/updated/deleted
+ij> commit;
+ij> insert into a values (4, PADSTRING('d',1000));
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(1,10)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(2,6)     |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Cause an insert on a new page that inserts into the 1st slot on the btree
+-- page.
+--
+-- btree just before commit:
+-- leftmost leaf: (1,6), (1,7)
+-- next leaf:     (2,7), (2,6)
+--------------------------------------------------------------------------------
+drop table a;
+0 rows inserted/updated/deleted
+ij> create table a (a int, b varchar(1000));
+0 rows inserted/updated/deleted
+ij> create unique index a_idx on a (a, b) ;
+0 rows inserted/updated/deleted
+ij> insert into a values (1, PADSTRING('a',1000));
+1 row inserted/updated/deleted
+ij> insert into a values (2, PADSTRING('b',1000));
+1 row inserted/updated/deleted
+ij> insert into a values (3, PADSTRING('c',1000));
+1 row inserted/updated/deleted
+ij> insert into a values (4, PADSTRING('d',1000));
+1 row inserted/updated/deleted
+ij> select a from a;
+A          
+-----------
+1          
+2          
+3          
+4          
+ij> delete from a where a = 3;
+1 row inserted/updated/deleted
+ij> select a from a;
+A          
+-----------
+1          
+2          
+4          
+ij> commit;
+ij> insert into a values (3, PADSTRING('c',1000));
+1 row inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |A           |(2,7)     |GRANT|ACTIVE  
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> create table a (a int, b char(200));
+0 rows inserted/updated/deleted
+ij> create unique index a_idx on a (a);
+0 rows inserted/updated/deleted
+ij> insert into a values (1, 'a');
+1 row inserted/updated/deleted
+ij> insert into a values (2, 'b');
+1 row inserted/updated/deleted
+ij> insert into a values (3, 'c');
+1 row inserted/updated/deleted
+ij> insert into a values (4, 'd');
+1 row inserted/updated/deleted
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Do full covered index scan.
+--------------------------------------------------------------------------------
+select a from a;
+A          
+-----------
+1          
+2          
+3          
+4          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |S   |A           |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Do single probe into covered index (first key in table).
+--------------------------------------------------------------------------------
+select a from a where a = 1;
+A          
+-----------
+1          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,7)     |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Do single probe into covered index (last key in table).
+--------------------------------------------------------------------------------
+select a from a where a = 4;
+A          
+-----------
+4          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,10)    |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Do set of range scans that all return 1 row from covered index.
+--------------------------------------------------------------------------------
+select a from a where a <= 1;
+A          
+-----------
+1          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,7)     |GRANT|ACTIVE  
+ij> commit;
+ij> select a from a where a >= 2 and a < 3;
+A          
+-----------
+2          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,8)     |GRANT|ACTIVE  
+ij> commit;
+ij> select a from a where a > 3;
+A          
+-----------
+4          
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,10)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,9)     |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Do range scans that all return 0 row from covered index.
+--------------------------------------------------------------------------------
+select a from a where a < 1;
+A          
+-----------
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,3)     |GRANT|ACTIVE  
+ij> commit;
+ij> select a from a where a > 4;
+A          
+-----------
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,10)    |GRANT|ACTIVE  
+ij> commit;
+ij> select a from a where a > 2 and a < 3;
+A          
+-----------
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |A           |(1,8)     |GRANT|ACTIVE  
+ij> commit;
+ij> --------------------------------------------------------------------------------
+-- Verify that create index does table level locking
+--------------------------------------------------------------------------------
+drop table a;
+0 rows inserted/updated/deleted
+ij> create table a (a int, b char(200));
+0 rows inserted/updated/deleted
+ij> create table b (a int, b char(200));
+0 rows inserted/updated/deleted
+ij> insert into a values (1, 'a');
+1 row inserted/updated/deleted
+ij> insert into a values (2, 'b');
+1 row inserted/updated/deleted
+ij> insert into a values (3, 'c');
+1 row inserted/updated/deleted
+ij> insert into a values (4, 'd');
+1 row inserted/updated/deleted
+ij> commit;
+ij> create unique index a_idx on a (a);
+0 rows inserted/updated/deleted
+ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |4   |S   |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> select a from a;
+A          
+-----------
+1          
+2          
+3          
+4          
+ij> select a from b;
+A          
+-----------
+ij> commit;
+ij> -- clean up
+autocommit on;
+ij> drop index a_idx;
+0 rows inserted/updated/deleted
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> drop table b;
+0 rows inserted/updated/deleted
+ij> 

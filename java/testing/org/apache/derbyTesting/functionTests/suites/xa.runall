@@ -1,0 +1,8 @@
+jdbcapi/dataSourcePermissions.java
+jdbcapi/xaAnotherTest.sql
+jdbcapi/xaSimplePositive.sql
+jdbcapi/xaSimpleNegative.sql
+jdbcapi/xaStateTran.sql
+jdbcapi/xaMorph.sql
+store/xaOffline1.sql
+store/xab2354.sql

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ==================================================================== -->
-<!--                       Cloudscape build file                          -->
+<!--                       Derby build file                          -->
 <!-- ==================================================================== -->
 
 <project default="FTOtestsubdir" basedir="../../../../../../../.." >
@@ -67,7 +67,6 @@
       </classpath>
       <include name="${this.dir}/*.java"/>
       <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
-      <exclude name="${this.dir}/jdbcBoolean.java"/>
       <exclude name="${this.dir}/holdCursorJavaReflection.java"/>
       <exclude name="${this.dir}/streams.java"/>
       <exclude name="${this.dir}/procedureJdbc30.java"/>
@@ -89,7 +88,6 @@
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
-      <include name="${this.dir}/jdbcBoolean.java"/>
       <include name="${this.dir}/holdCursorJavaReflection.java"/>
       <include name="${this.dir}/streams.java"/>
       <include name="${this.dir}/procedureJdbc30.java"/>

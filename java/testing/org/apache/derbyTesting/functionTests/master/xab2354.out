@@ -1,0 +1,41 @@
+ij> xa_datasource 'wombat' create;
+ij> xa_connect;
+ij> xa_start xa_noflags 1;
+ij> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> create table foo (a int);
+0 rows inserted/updated/deleted
+ij(XA)> insert into foo values (1);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_success 1;
+ij(XA)> xa_commit xa_1phase 1;
+ij(XA)> xa_start xa_noflags 1;
+ij(XA)> insert into foo values (2);
+1 row inserted/updated/deleted
+ij(XA)> select cast(global_xid as char(2)) as gxid, status from new org.apache.derby.diag.TransactionTable() t where gxid is not null order by gxid, status;
+ERROR 42X04: Column 'GXID' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'GXID' is not a column in the target table.
+ij(XA)> xa_end xa_success 1;
+ij(XA)> xa_prepare 1;
+ij(XA)> xa_getconnection ;
+ij(XA)> select cast(global_xid as char(2)) as gxid, status from new org.apache.derby.diag.TransactionTable() t where gxid is not null order by gxid, status;
+ERROR 42X04: Column 'GXID' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'GXID' is not a column in the target table.
+ij(XA)> xa_datasource 'wombat' shutdown;
+ERROR 08006: Database 'wombat' shutdown.
+ij(XA)> xa_datasource 'wombat';
+ij(XA)> xa_connect;
+ij(XA)> -- this works correctly
+xa_start xa_noflags 1;
+IJ ERROR: XAER_DUPID 
+ij(XA)> xa_getconnection;
+ij(XA)> -- this was the bug, this statement should also get DUPID error
+xa_start xa_noflags 1;
+IJ ERROR: XAER_DUPID 
+ij(XA)> -- should see two transactions, one global transaction and one local
+select cast(global_xid as char(2)) as gxid, status from new org.apache.derby.diag.TransactionTable() t where gxid is not null order by gxid, status;
+ERROR 42X04: Column 'GXID' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'GXID' is not a column in the target table.
+ij(XA)> 

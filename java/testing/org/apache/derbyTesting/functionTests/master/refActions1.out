@@ -1117,7 +1117,7 @@ ij> create view db2test.vempjoin12 (vname1, vname2, vname3, vname4, vname5,
   and e.dno = e12.dno;
 0 rows inserted/updated/deleted
 ij> commit;
-ij> -- FOLLOWING TWO QUERIES HANG IN CLOUDSCAPE NOW ..
+ij> -- FOLLOWING TWO QUERIES HANG IN DERBY NOW ..
 -- UNCOMMENT once they pass.
 -- select * from db2test.dept where dno in (select vdno from
 --  db2test.vempjoin12)

@@ -1,0 +1,485 @@
+ij> disconnect;
+ij> -- This test tests state transitons with XA
+xa_datasource 'wombat';
+ij> xa_connect;
+ij> xa_getconnection;
+ij> -- set up some stuff for the test
+xa_start xa_noflags 0;
+ij> run resource '/org/apache/derbyTesting/functionTests/tests/store/global_xactTable.view';
+ij> create view global_xactTable as
+select 
+    cast(global_xid as char(2)) as gxid,
+    status,
+    case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
+    cast (username as char(10)) as username,
+    type 
+from new org.apache.derby.diag.TransactionTable() t;
+0 rows inserted/updated/deleted
+ij> create table xastate(a int);
+0 rows inserted/updated/deleted
+ij> xa_end xa_success 0;
+ij> xa_commit xa_1phase 0;
+ij> ---------------------------------------------
+-- INIT STATE (Transaction not started)
+---------------------------------------------
+-- the following should work
+xa_start xa_noflags 10;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |IDLE    |NULL |APP       |UserTransaction               
+ij> xa_end xa_success 10;
+ij> xa_rollback 10;
+ij> -- the following should error XAER_NOTA
+xa_start xa_join 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_start xa_resume 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_end xa_success 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_end xa_fail 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_end xa_suspend 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_prepare 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_commit xa_1phase 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_commit xa_2phase 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_rollback 11;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA
+xa_forget 11;
+IJ ERROR: XAER_NOTA 
+ij> ---------------------------------------------
+-- NOTASSOCIATED (Transaction started but not associated with a resource)
+---------------------------------------------
+xa_start xa_noflags 20;
+ij> xa_end xa_success 20;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should error XAER_DUPID
+xa_start xa_noflags 20;
+IJ ERROR: XAER_DUPID 
+ij> -- the following should work
+xa_start xa_join 20;
+ij> xa_end xa_success 20;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should error (transaction wasn't suspended) XAER_PROTO
+xa_start xa_resume 20;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should work
+xa_start xa_join 20;
+ij> xa_end xa_suspend 20;
+ij> xa_start xa_resume 20;
+ij> xa_end xa_success 20;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should work (xa_success after xa_suspend assume xa_start xa_resume)
+xa_start xa_join 20;
+ij> xa_end xa_suspend 20;
+ij> xa_end xa_success 20;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should error XAER_PROTO
+xa_end xa_success 20;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_end xa_fail 20;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_end xa_suspend 20;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should work 
+xa_prepare 20;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij> -- the following should error (since xact was readonly we have already forgotten
+--	about the transaction) XAER_NOTA
+--
+xa_commit xa_1phase 20;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should work
+xa_start xa_noflags 21;
+ij> insert into xastate values(1);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 21;
+ij> xa_commit xa_1phase 21;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij> -- the following should error(since xact has been committed) XAER_NOTA
+xa_commit xa_2phase 21;
+IJ ERROR: XAER_NOTA 
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij> xa_start xa_noflags 22;
+ij> insert into xastate values(2);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 22;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |ACTIVE  |false|APP       |UserTransaction               
+ij> -- in not associated state, this should fail since we haven't done prepare XAER_PROTO
+xa_commit xa_2phase 22;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should work
+xa_rollback 22;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij> -- the following should error XAER_PROTO (transaction wasn't prepared)
+xa_start xa_noflags 23;
+ij> insert into xastate values(1);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 23;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |ACTIVE  |false|APP       |UserTransaction               
+ij> xa_forget 23;
+IJ ERROR: XAER_PROTO 
+ij> --
+-- clean up transaction
+xa_rollback 23;
+ij> ---------------------------------------------
+-- ASSOCIATED (Transaction started and associated with this resource)
+---------------------------------------------
+xa_start xa_noflags 40;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should error XAER_PROTO
+xa_start xa_noflags 40;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_start xa_join 40;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error (transaction wasn't suspended) XAER_PROTO
+xa_start xa_resume 40;
+IJ ERROR: XAER_PROTO 
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should work
+xa_end xa_success 40;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> xa_rollback 40;
+ij> -- get back in associated state
+xa_start xa_noflags 40;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should work
+xa_end xa_fail 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> xa_rollback 40;
+ij> -- get back in associated state
+xa_start xa_noflags 40;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should work
+xa_end xa_suspend 40;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> xa_end xa_success 40;
+ij> xa_rollback 40;
+ij> -- get back in associated state
+xa_start xa_noflags 40;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should error XAER_PROTO
+xa_prepare 40;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_commit xa_1phase 40;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_commit xa_2phase 40;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_rollback 40;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_forget 40;
+IJ ERROR: XAER_PROTO 
+ij> --
+-- clean up transaction
+xa_end xa_success 40;
+ij> xa_rollback 40;
+ij> ---------------------------------------------
+-- DEAD STATE (Transaction started and ended with a fail (rollback only))
+---------------------------------------------
+-- set up dead state
+xa_start xa_noflags 40;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> xa_end xa_fail 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> xa_rollback 40;
+ij> -- the following should work <transaction is rolled back and forgotten)
+xa_start xa_noflags 40;
+ij> select * from global_xactTable  where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- set up dead state
+xa_end xa_fail 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(4  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- the following should error XA_RBROLLBACK
+xa_start xa_join 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XA_RBROLLBACK
+xa_start xa_resume 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XA_RBROLLBACK
+xa_end xa_success 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XA_RBROLLBACK
+xa_end xa_fail 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XA_RBROLLBACK
+xa_end xa_suspend 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XA_RBROLLBACK
+xa_prepare 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XA_RBROLLBACK
+xa_commit xa_1phase 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XA_RBROLLBACK
+xa_commit xa_2phase 40;
+IJ ERROR: XA_RBROLLBACK 
+ij> -- the following should error XAER_PROTO
+xa_forget 40;
+IJ ERROR: XAER_PROTO 
+ij> xa_rollback 40;
+ij> --
+---------------------------------------------
+-- PREPARE STATE (Transaction started and prepared)
+---------------------------------------------
+-- set up prepare state
+xa_start xa_noflags 50;
+ij> insert into xastate values(2);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 50;
+ij> xa_prepare 50;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(5  |PREPARED|false|APP       |UserTransaction               
+ij> -- the following should error XAER_DUPID
+xa_start xa_noflags 50;
+IJ ERROR: XAER_DUPID 
+ij> -- the following should error XAER_PROTO
+xa_start xa_join 50;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_start xa_resume 50;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_end xa_success 50;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_end xa_fail 50;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_end xa_suspend 50;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_prepare 50;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should error XAER_PROTO
+xa_commit xa_1phase 50;
+IJ ERROR: XAER_PROTO 
+ij> -- the following should work 
+xa_commit xa_2phase 50;
+ij> -- get back into prepared state
+xa_start xa_noflags 50;
+ij> insert into xastate values(2);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 50;
+ij> xa_prepare 50;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(5  |PREPARED|false|APP       |UserTransaction               
+ij> -- the following should work
+xa_rollback 50;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij> -- get back into prepared state
+xa_start xa_noflags 50;
+ij> insert into xastate values(2);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 50;
+ij> xa_prepare 50;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(5  |PREPARED|false|APP       |UserTransaction               
+ij> -- the following should error XAER_NOTA 
+xa_forget 50;
+IJ ERROR: XAER_NOTA 
+ij> --
+-- clean up transaction
+xa_rollback 50;
+ij> ---------------------------------------------
+--  COMMIT STATE (Transaction started and commited)
+---------------------------------------------
+-- set up commit state
+xa_start xa_noflags 60;
+ij> insert into xastate values(3);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 60;
+ij> xa_commit xa_1phase 60;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij> -- the following should work starting a new transaction
+xa_start xa_noflags 60;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(6  |IDLE    |NULL |APP       |UserTransaction               
+ij> -- get back to commit state
+insert into xastate values(4);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 60;
+ij> xa_commit xa_1phase 60;
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_start xa_join 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_start xa_resume 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_end xa_success 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_end xa_fail 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_end xa_suspend 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_prepare 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_commit xa_1phase 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_commit xa_2phase 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_rollback 60;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction committed and forgotten)
+xa_forget 60;
+IJ ERROR: XAER_NOTA 
+ij> --
+---------------------------------------------
+--  ABORT STATE (Transaction started and rolledback)
+---------------------------------------------
+-- set up rollback state
+xa_start xa_noflags 70;
+ij> insert into xastate values(5);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 70;
+ij> xa_rollback 70;
+ij> select * from global_xactTable where gxid is not null order by gxid;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+ij> -- the following should work - start a new transaction
+xa_start xa_noflags 70;
+ij> -- get back to rollback state
+insert into xastate values(4);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 70;
+ij> xa_rollback 70;
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_start xa_join 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_start xa_resume 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_end xa_success 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_end xa_fail 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_end xa_suspend 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_prepare 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_commit xa_1phase 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_commit xa_2phase 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_rollback 70;
+IJ ERROR: XAER_NOTA 
+ij> -- the following should error XAER_NOTA (transaction rolled back and forgotten)
+xa_forget 70;
+IJ ERROR: XAER_NOTA 
+ij> --
+-- cleanup
+-- 
+drop table xastate;
+0 rows inserted/updated/deleted
+ij> drop view global_xactTable;
+0 rows inserted/updated/deleted
+ij> 

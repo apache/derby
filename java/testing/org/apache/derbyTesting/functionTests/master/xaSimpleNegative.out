@@ -1,0 +1,336 @@
+ij> -- 
+-- some negative test for error checking
+--
+xa_datasource 'wombat';
+ij> xa_connect user 'negativeTest';
+ij> -- start new transaction
+xa_start xa_noflags 0;
+ij> -- ERROR: cannot start without end
+xa_start xa_noflags 1;
+IJ ERROR: XAER_PROTO 
+ij> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> -- ERROR: cannot get connection again
+xa_getconnection;
+ERROR XJ059: Cannot close a connection while a global transaction is still active.
+ij(XA)> -- ERROR: connot commit/rollback an xa connection
+commit;
+ERROR XJ057: Cannot commit a global transaction using the Connection, commit processing must go thru XAResource interface.
+ij(XA)> -- ERROR: connot commit/rollback an xa connection
+rollback;
+ERROR XJ058: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+ij(XA)> drop table APP.negative;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'APP.NEGATIVE' because it does not exist.
+ij(XA)> create table APP.negative (a char(10), b int);
+0 rows inserted/updated/deleted
+ij(XA)> create unique index negativei on APP.negative(b);
+0 rows inserted/updated/deleted
+ij(XA)> run resource '/org/apache/derbyTesting/functionTests/tests/store/global_xactTable.view';
+ij(XA)> create view global_xactTable as
+select 
+    cast(global_xid as char(2)) as gxid,
+    status,
+    case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
+    cast (username as char(10)) as username,
+    type 
+from new org.apache.derby.diag.TransactionTable() t;
+0 rows inserted/updated/deleted
+ij(XA)> insert into APP.negative values ('xyz', 1);
+1 row inserted/updated/deleted
+ij(XA)> select * from APP.negative;
+A         |B          
+----------------------
+xyz       |1          
+ij(XA)> -- ERROR: cannot commit/prepare/rollback without end
+xa_commit xa_1phase 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: cannot commit/prepare/rollback without end
+xa_rollback 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: cannot commit/prepare/rollback without end
+xa_prepare 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- OK suspend it
+xa_end xa_suspend 0;
+ij(XA)> -- ERROR: duplicate xid
+xa_start xa_noflags 0;
+IJ ERROR: XAER_DUPID 
+ij(XA)> -- ERROR: cannot commit/prepare/rollback with suspended
+xa_commit xa_1phase 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: cannot commit/prepare/rollback with suspended
+xa_rollback 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: cannot commit/prepare/rollback with suspended
+xa_prepare 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: cannot commit/prepare/rollback with suspended
+xa_commit xa_2phase 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> xa_end xa_success 0;
+ij(XA)> xa_prepare 0;
+ij(XA)> xa_commit xa_2phase 0;
+ij(XA)> -- should be able to use this xid again
+xa_start xa_noflags 0;
+ij(XA)> -- ERROR: cannot start without end
+xa_start xa_noflags 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: duplicate key exception, statement level rollback
+insert into APP.negative values ('rollback', 1);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'NEGATIVEI' defined on 'NEGATIVE'.
+ij(XA)> select * from APP.negative;
+A         |B          
+----------------------
+xyz       |1          
+ij(XA)> insert into APP.negative values ('ok', 2);
+1 row inserted/updated/deleted
+ij(XA)> select * from global_xactTable order by gxid, status, username, type;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(0  |ACTIVE  |false|NEGATIVETE|UserTransaction               
+NULL|IDLE    |NULL |APP       |UserTransaction               
+ij(XA)> disconnect;
+ij> xa_end xa_fail 0;
+IJ ERROR: XA_RBROLLBACK 
+ij> xa_start xa_noflags 2;
+ij> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> insert into APP.negative values ('ok', 3);
+1 row inserted/updated/deleted
+ij(XA)> -- ERROR: cannot suspend some other xid
+xa_end xa_suspend 3;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: cannot end some other xid while I am still attached
+xa_end xa_success 0;
+IJ ERROR: XAER_PROTO 
+ij(XA)> xa_end xa_suspend 2;
+ij(XA)> -- ERROR: cannot join an xid I just suspended have to resume
+xa_start xa_join 2;
+IJ ERROR: XAER_PROTO 
+ij(XA)> xa_start xa_resume 2;
+ij(XA)> xa_end xa_suspend 2;
+ij(XA)> xa_rollback 0;
+ij(XA)> -- ERROR: should not find this xid any more
+xa_prepare 0;
+IJ ERROR: XAER_NOTA 
+ij(XA)> select * from global_xactTable order by gxid, status, username, type;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(2  |ACTIVE  |false|NEGATIVETE|UserTransaction               
+NULL|IDLE    |NULL |APP       |UserTransaction               
+NULL|IDLE    |NULL |NEGATIVETE|UserTransaction               
+ij(XA)> xa_end xa_success 2;
+ij(XA)> disconnect;
+ij> -- ERROR: can only join a successful branch, not resume 
+xa_start xa_resume 2;
+IJ ERROR: XAER_PROTO 
+ij> -- this is OK
+xa_start xa_join 2;
+ij> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> -- ERROR: another dup 
+insert into APP.negative values ('rollback', 3);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'NEGATIVEI' defined on 'NEGATIVE'.
+ij(XA)> xa_end xa_suspend 2;
+ij(XA)> xa_end xa_success 2;
+ij(XA)> -- ERROR: cannot call fail now
+xa_end xa_fail 2;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- rollback is OK
+xa_rollback 2;
+ij(XA)> -- ERROR: cannot join something that is not there
+xa_start xa_join 2;
+IJ ERROR: XAER_NOTA 
+ij(XA)> -- ERROR: cannot join something that is not there
+xa_start xa_resume 2;
+IJ ERROR: XAER_NOTA 
+ij(XA)> -- start one
+xa_start xa_noflags 1;
+ij(XA)> -- ERROR: can only forget heuristically completed transaction
+xa_forget 1;
+IJ ERROR: XAER_PROTO 
+ij(XA)> delete from APP.negative;
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_success 1;
+ij(XA)> -- ERROR: now try some bad flag 
+xa_start xa_suspend 1;
+IJ ERROR: XAER_INVAL 
+ij(XA)> -- ERROR: now try some bad flag 
+xa_start xa_fail 1;
+IJ ERROR: XAER_INVAL 
+ij(XA)> xa_prepare 1;
+ij(XA)> -- can only forget heuristically completed transaction
+xa_forget 1;
+IJ ERROR: XAER_NOTA 
+ij(XA)> xa_start xa_noflags 2;
+ij(XA)> -- ERROR: deadlock, transaction trashed
+select * from APP.negative;
+A         |B          
+----------------------
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(XA)> -- ERROR: should have no connection underneath
+select * from APP.negative;
+ERROR 08003: No current connection.
+ij(XA)> -- ERROR: should have no connection underneath and xid 2 is gone
+xa_end xa_suspend 2;
+IJ ERROR: XA_RBTIMEOUT 
+ij(XA)> -- ERROR: should have no connection underneath and xid 2 is gone
+xa_end xa_fail 2;
+IJ ERROR: XA_RBTIMEOUT 
+ij(XA)> xa_rollback 2;
+ij(XA)> disconnect;
+ij> xa_start xa_noflags 3;
+ij> xa_getconnection;
+ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
+-- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
+-- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
+-- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
+-- And that is why, in jkd13 master, we see an exception nosuchmethod 
+NoHoldForConnection;
+ij(XA)> select * from global_xactTable order by gxid, status, username, type;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |PREPARED|false|NEGATIVETE|UserTransaction               
+(3  |IDLE    |NULL |NEGATIVETE|UserTransaction               
+NULL|IDLE    |NULL |APP       |UserTransaction               
+ij(XA)> drop table foo;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO' because it does not exist.
+ij(XA)> create table foo (a int);
+0 rows inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 3;
+ij(XA)> -- ERROR: cannot join a prepared transaction
+xa_start xa_join 1;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: cannot resume a prepared transaction
+xa_start xa_resume 1;
+IJ ERROR: XAER_PROTO 
+ij(XA)> -- ERROR: bad flag
+xa_start xa_fail 1;
+IJ ERROR: XAER_INVAL 
+ij(XA)> -- ERROR: bad flag
+xa_start xa_noflags 1;
+IJ ERROR: XAER_DUPID 
+ij(XA)> -- rollback prepared transaction is OK
+xa_rollback 1;
+ij(XA)> -- ERROR: dup id
+xa_start xa_noflags 3;
+IJ ERROR: XAER_DUPID 
+ij(XA)> xa_start xa_resume 3;
+ij(XA)> -- now that 1 is rolled back, this should succeed
+select * from APP.negative;
+A         |B          
+----------------------
+xyz       |1          
+ij(XA)> select * from global_xactTable order by gxid, status, username, type;
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(3  |ACTIVE  |false|NEGATIVETE|UserTransaction               
+NULL|IDLE    |NULL |APP       |UserTransaction               
+ij(XA)> -- ERROR: bad flag
+xa_end xa_noflags 3;
+IJ ERROR: XAER_INVAL 
+ij(XA)> xa_end xa_fail 3;
+IJ ERROR: XA_RBROLLBACK 
+ij(XA)> xa_rollback 3;
+ij(XA)> -- ensure switching back and forward does not commit
+-- the xact due to the commit in setAutoCommit();
+AUTOCOMMIT ON;
+ij(XA)> create table t44g(a int);
+0 rows inserted/updated/deleted
+ij(XA)> insert into t44g values 1,2;
+2 rows inserted/updated/deleted
+ij(XA)> select * from t44g where a > 4000;
+A          
+-----------
+ij(XA)> create table t44(i int);
+0 rows inserted/updated/deleted
+ij(XA)> xa_start xa_noflags 44;
+ij(XA)> insert into t44g values(4400);
+1 row inserted/updated/deleted
+ij(XA)> insert into t44g values(4401);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_suspend 44;
+ij(XA)> values (1,2,3);
+1          |2          |3          
+-----------------------------------
+1          |2          |3          
+ij(XA)> commit;
+ij(XA)> AUTOCOMMIT OFF;
+ij(XA)> insert into t44 values(1);
+1 row inserted/updated/deleted
+ij(XA)> insert into t44 values(2);
+1 row inserted/updated/deleted
+ij(XA)> commit;
+ij(XA)> insert into t44 values(3);
+1 row inserted/updated/deleted
+ij(XA)> insert into t44 values(4);
+1 row inserted/updated/deleted
+ij(XA)> rollback;
+ij(XA)> AUTOCOMMIT ON;
+ij(XA)> -- fail with lock issues
+select * from t44g;
+A          
+-----------
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(XA)> xa_start xa_resume 44;
+ij(XA)> insert into t44g values(4500);
+1 row inserted/updated/deleted
+ij(XA)> insert into t44g values(4501);
+1 row inserted/updated/deleted
+ij(XA)> xa_end xa_success 44;
+ij(XA)> insert into t44 values(5);
+1 row inserted/updated/deleted
+ij(XA)> insert into t44 values(6);
+1 row inserted/updated/deleted
+ij(XA)> commit;
+ij(XA)> AUTOCOMMIT OFF;
+ij(XA)> insert into t44 values(7);
+1 row inserted/updated/deleted
+ij(XA)> insert into t44 values(8);
+1 row inserted/updated/deleted
+ij(XA)> commit;
+ij(XA)> AUTOCOMMIT ON;
+ij(XA)> xa_start xa_join 44;
+ij(XA)> select * from t44g where a > 4000;
+A          
+-----------
+4400       
+4401       
+4500       
+4501       
+ij(XA)> xa_end xa_success 44;
+ij(XA)> -- fail with lock issues
+select * from t44g;
+A          
+-----------
+ERROR 40XL1: A lock could not be obtained within the time requested
+ij(XA)> xa_rollback 44;
+ij(XA)> -- should be empty if no commit occurred in the middle;
+select * from t44g where a > 4000;
+A          
+-----------
+ij(XA)> select * from t44;
+I          
+-----------
+1          
+2          
+5          
+6          
+7          
+8          
+ij(XA)> 

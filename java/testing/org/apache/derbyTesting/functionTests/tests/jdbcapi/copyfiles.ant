@@ -6,3 +6,14 @@ metadata_sed.properties
 savepointJdbc30_app.properties
 savepointJdbc30_derby.properties
 parameterMetaDataJdbc30_app.properties
+xaAnotherTest.sql
+xaAnotherTest_app.properties
+xaAnotherTest_derby.properties
+xaAnotherTest_sed.properties
+xaMorph.sql
+xaSimpleNegative.sql
+xaSimpleNegative_derby.properties
+xaSimplePositive.sql
+xaSimplePositive_app.properties
+xaSimplePositive_sed.properties
+xaStateTran.sql

@@ -1,0 +1,222 @@
+------------------------------------------------------------------------------
+-- 2 CONCURRENT USER TESTS of READ UNCOMMITTED TESTS
+--
+-- each test assumes calling script has set up a writer connection, it is
+-- expected the calling script(s) will vary the isolation of the writer 
+-- connection to test the interaction of read uncommitted with various isolation
+-- levels.
+-- 
+-- overview:
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+--  TEST 2: test RU(read uncommitted) ddl interaction
+--
+------------------------------------------------------------------------------
+
+-- SCRIPT SETUP
+connect 'wombat' as iso_read_uncommitted;
+autocommit off;
+commit;
+
+------------------------------------------------------------------------------
+--  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+
+-- set up
+set connection iso_read_uncommitted;
+autocommit off;
+set isolation read uncommitted;
+create table test_0 (a int);
+insert into test_0 values (1);
+commit;
+
+-- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+select * from test_0;
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+get cursor scan_cursor as 
+    'select a from test_0'; 
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+next scan_cursor;
+
+-- WRITER CONNECTION:
+set connection writer;
+-- writer should not be blocked.
+insert into test_0 values (2);
+
+-- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+update test_0 set a = 3 where a = 1;
+
+-- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+next scan_cursor;
+
+-- full select should see the update and the new row.
+select * from test_0;
+
+-- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+
+-- serializable: update will get table level lock so will be blocked.
+-- other iso: writer should in no way be blocked by reader.
+delete from test_0 where a = 2;
+
+-- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+next scan_cursor;
+close scan_cursor;
+
+-- full select should see just one row.
+select * from test_0;
+
+-- WRITER CONNECTION:
+set connection writer;
+rollback;
+
+-- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+select * from test_0;
+
+-- cleanup
+set connection iso_read_uncommitted;
+commit;
+set connection writer;
+commit;
+drop table test_1;
+commit;
+
+------------------------------------------------------------------------------
+--  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
+------------------------------------------------------------------------------
+
+-- set up
+set connection iso_read_uncommitted;
+autocommit off;
+set isolation read uncommitted;
+create table test_1 (a int, b int);
+insert into test_1 values (1, 1);
+create index test_1_idx on test_1 (a);
+commit;
+
+-- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+select * from test_1;
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+get cursor scan_cursor as 
+    'select a from test_1'; 
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+next scan_cursor;
+
+-- WRITER CONNECTION:
+set connection writer;
+-- writer should not be blocked.
+insert into test_1 values (2, 2);
+
+-- writer should in no way be blocked by reader.
+update test_1 set b = 10 where a = 1;
+
+-- READ UNCOMMITTED CONNECTION:
+-- next in cursor should see the new uncommitted row just inserted (2)
+set connection iso_read_uncommitted;
+next scan_cursor;
+
+-- full select should see the update and the new row.
+select * from test_1;
+
+-- WRITER CONNECTION:
+-- delete the row that the read uncommitted connection is positioned on.
+set connection writer;
+
+-- writer should in no way be blocked by reader.
+delete from test_1 where a = 2;
+
+-- READ UNCOMMITTED CONNECTION:
+-- next in cursor should get to end of scan.
+set connection iso_read_uncommitted;
+next scan_cursor;
+close scan_cursor;
+
+-- full select should see just one row.
+select * from test_1;
+
+-- WRITER CONNECTION:
+set connection writer;
+rollback;
+
+-- READ UNCOMMITTED CONNECTION:
+-- should now see original rows - note all of this in same xact.
+set connection iso_read_uncommitted;
+select * from test_1;
+
+-- cleanup
+set connection iso_read_uncommitted;
+commit;
+set connection writer;
+commit;
+drop table test_1;
+commit;
+
+------------------------------------------------------------------------------
+--  TEST 2: test RU(read uncommitted) ddl interaction
+------------------------------------------------------------------------------
+
+-- set up
+set connection iso_read_uncommitted;
+autocommit off;
+set isolation read uncommitted;
+create table test_2 (a int);
+insert into test_2 values (1);
+commit;
+
+-- READ UNCOMMITTED CONNECTION:
+-- read uncommitted should maintain no lock on the row.
+set connection iso_read_uncommitted;
+select * from test_2;
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+get cursor scan_cursor as 
+    'select a from test_2'; 
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+next scan_cursor;
+
+-- WRITER CONNECTION:
+set connection writer;
+-- writer can't do ddl while reader has open cursor (reader blocks writer).
+drop table test_2;
+-- get lock on test_2, held to end of xact.
+insert into test_2 values (2);
+
+-- READ UNCOMMITTED CONNECTION:
+-- uncommitted reader is blocked from doing ddl while other xact has locks.
+-- (writer blocks reader).
+set connection iso_read_uncommitted;
+close scan_cursor;
+commit;
+-- should block on lock (writer blocks reader).
+drop table test_2;
+
+-- cleanup
+set connection iso_read_uncommitted;
+commit;
+set connection writer;
+commit;
+drop table test_2;
+commit;
+
+--------------------------------------------------------------------------------
+-- FINAL CLEANUP (only disconnect at end of script)
+set connection writer;
+commit;
+disconnect;
+set connection iso_read_uncommitted;
+commit;
+disconnect;

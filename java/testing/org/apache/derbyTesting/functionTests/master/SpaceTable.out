@@ -1,0 +1,368 @@
+ij> -- testing Space table
+-- unfilled pages column of space table is just a guess, thus it is
+-- not consistent across runs, in particular for indexes, but also for
+-- tables. 
+-- Therefore tests do not report the numunfilledpages column
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> create table ideleteu (a varchar(2000), b varchar(2000)) ;
+0 rows inserted/updated/deleted
+ij> insert into ideleteu values (PADSTRING('rrrrrrrrrr',2000), PADSTRING('ssssssssssssssss',2000));
+1 row inserted/updated/deleted
+ij> insert into ideleteu values (PADSTRING('rrrrrrrrrr',2000), PADSTRING('ssssssssssssssss',2000));
+1 row inserted/updated/deleted
+ij> insert into ideleteu values (PADSTRING('rrrrrrrrrr',2000), PADSTRING('ssssssssssssssss',2000));
+1 row inserted/updated/deleted
+ij> insert into ideleteu values (PADSTRING('rrrrrrrrrr',2000), PADSTRING('ssssssssssssssss',2000));
+1 row inserted/updated/deleted
+ij> insert into ideleteu values (PADSTRING('rrrrrrrrrr',2000), PADSTRING('ssssssssssssssss',2000));
+1 row inserted/updated/deleted
+ij> -- This query also tests the SpaceTable class alias
+select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('IDELETEU') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+IDELETEU                                                                                                                        |0     |6                   |0                   |4096       |0                   
+ij> delete from ideleteu;
+5 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('IDELETEU') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+IDELETEU                                                                                                                        |0     |1                   |5                   |4096       |20480               
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('PLATYPUS') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> create table platypus (a varchar(1000), b varchar(3500), c varchar(400), d varchar(100)) ;
+0 rows inserted/updated/deleted
+ij> create index kookaburra on platypus (a) ;
+0 rows inserted/updated/deleted
+ij> create index echidna on platypus (c) ;
+0 rows inserted/updated/deleted
+ij> create index wallaby on platypus (a,c,d) ;
+0 rows inserted/updated/deleted
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('PLATYPUS') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ECHIDNA                                                                                                                         |1     |1                   |0                   |4096       |0                   
+KOOKABURRA                                                                                                                      |1     |1                   |0                   |4096       |0                   
+PLATYPUS                                                                                                                        |0     |1                   |0                   |4096       |0                   
+WALLABY                                                                                                                         |1     |1                   |0                   |4096       |0                   
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('PLATYPUS') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ECHIDNA                                                                                                                         |1     |1                   |0                   |4096       |0                   
+KOOKABURRA                                                                                                                      |1     |4                   |0                   |4096       |0                   
+PLATYPUS                                                                                                                        |0     |13                  |0                   |4096       |0                   
+WALLABY                                                                                                                         |1     |8                   |0                   |4096       |0                   
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> insert into platypus values (PADSTRING('wwwwwww',1000), PADSTRING('xxx',3500), PADSTRING('yy',400), PADSTRING('zzz',100));
+1 row inserted/updated/deleted
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('PLATYPUS') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ECHIDNA                                                                                                                         |1     |3                   |0                   |4096       |0                   
+KOOKABURRA                                                                                                                      |1     |8                   |0                   |4096       |0                   
+PLATYPUS                                                                                                                        |0     |21                  |0                   |4096       |0                   
+WALLABY                                                                                                                         |1     |16                  |0                   |4096       |0                   
+ij> delete from platypus;
+10 rows inserted/updated/deleted
+ij> CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('PLATYPUS') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ECHIDNA                                                                                                                         |1     |1                   |2                   |4096       |8192                
+KOOKABURRA                                                                                                                      |1     |1                   |7                   |4096       |28672               
+PLATYPUS                                                                                                                        |0     |1                   |20                  |4096       |81920               
+WALLABY                                                                                                                         |1     |15                  |1                   |4096       |4096                
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, numunfilledpages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('NONEXISTING') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |NUMUNFILLEDPAGES    |PAGESIZE   |ESTIMSPACESAVING    
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> create table "platypus2" (a varchar(10), b varchar(1500), c varchar(400), d varchar(100)) ;
+0 rows inserted/updated/deleted
+ij> insert into "platypus2" (values (PADSTRING('wwwwwww',10), PADSTRING('xxx',1500), PADSTRING('yy',400), PADSTRING('zzz',100)));
+1 row inserted/updated/deleted
+ij> insert into "platypus2" (values (PADSTRING('wwwwwww',10), PADSTRING('xxx',1500), PADSTRING('yy',400), PADSTRING('zzz',100)));
+1 row inserted/updated/deleted
+ij> insert into "platypus2" (values (PADSTRING('wwwwwww',10), PADSTRING('xxx',1500), PADSTRING('yy',400), PADSTRING('zzz',100)));
+1 row inserted/updated/deleted
+ij> insert into "platypus2" (values (PADSTRING('wwwwwww',10), PADSTRING('xxx',1500), PADSTRING('yy',400), PADSTRING('zzz',100)));
+1 row inserted/updated/deleted
+ij> insert into "platypus2" (values (PADSTRING('wwwwwww',10), PADSTRING('xxx',1500), PADSTRING('yy',400), PADSTRING('zzz',100)));
+1 row inserted/updated/deleted
+ij> insert into "platypus2" (values (PADSTRING('wwwwwww',10), PADSTRING('xxx',1500), PADSTRING('yy',400), PADSTRING('zzz',100)));
+1 row inserted/updated/deleted
+ij> create index kookaburra2 on "platypus2" (a);
+0 rows inserted/updated/deleted
+ij> create index echidna2 on "platypus2" (c);
+0 rows inserted/updated/deleted
+ij> create index wallaby2 on "platypus2" (a,c,d) ;
+0 rows inserted/updated/deleted
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+	from new org.apache.derby.diag.SpaceTable('platypus2') t
+	order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ECHIDNA2                                                                                                                        |1     |1                   |0                   |4096       |0                   
+KOOKABURRA2                                                                                                                     |1     |1                   |0                   |4096       |0                   
+WALLABY2                                                                                                                        |1     |1                   |0                   |4096       |0                   
+platypus2                                                                                                                       |0     |6                   |0                   |4096       |0                   
+ij> select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving
+    from SYS.SYSSCHEMAS s,
+         SYS.SYSTABLES t,
+         new org.apache.derby.diag.SpaceTable(SCHEMANAME,TABLENAME) v
+    where s.SCHEMAID = t.SCHEMAID
+    and s.SCHEMANAME = 'APP'
+    order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ECHIDNA                                                                                                                         |1     |1                   |2                   |4096       |8192                
+ECHIDNA2                                                                                                                        |1     |1                   |0                   |4096       |0                   
+IDELETEU                                                                                                                        |0     |1                   |5                   |4096       |20480               
+KOOKABURRA                                                                                                                      |1     |1                   |7                   |4096       |28672               
+KOOKABURRA2                                                                                                                     |1     |1                   |0                   |4096       |0                   
+PLATYPUS                                                                                                                        |0     |1                   |20                  |4096       |81920               
+WALLABY                                                                                                                         |1     |15                  |1                   |4096       |4096                
+WALLABY2                                                                                                                        |1     |1                   |0                   |4096       |0                   
+platypus2                                                                                                                       |0     |6                   |0                   |4096       |0                   
+ij> drop table platypus;
+0 rows inserted/updated/deleted
+ij> drop table "platypus2";
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> drop table foo_int;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO_INT' because it does not exist.
+ij> create table foo_int (a int);
+0 rows inserted/updated/deleted
+ij> drop table foo_char;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO_CHAR' because it does not exist.
+ij> create table foo_char (a char(100)) ;
+0 rows inserted/updated/deleted
+ij> drop table foo_varchar;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO_VARCHAR' because it does not exist.
+ij> create table foo_varchar (a varchar(32000)) ;
+0 rows inserted/updated/deleted
+ij> -- let the foo_longxxx get created at 32K
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarchar;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO_LONGVARCHAR' because it does not exist.
+ij> create table foo_longvarchar (a long varchar);
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarbinary;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO_LONGVARBINARY' because it does not exist.
+ij> create table foo_longvarbinary (a long varchar for bit data);
+0 rows inserted/updated/deleted
+ij> -- Back to 4K
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> drop table foo_bit;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO_BIT' because it does not exist.
+ij> create table foo_bit (a CHAR(100) FOR BIT DATA) ;
+0 rows inserted/updated/deleted
+ij> drop table foo_varbinary;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO_VARBINARY' because it does not exist.
+ij> create table foo_varbinary (a VARCHAR(10000) FOR BIT DATA) ;
+0 rows inserted/updated/deleted
+ij> select v.CONGLOMERATENAME, PAGESIZE
+from SYS.SYSSCHEMAS s,
+SYS.SYSTABLES t,
+new org.apache.derby.diag.SpaceTable(SCHEMANAME,TABLENAME) v
+where s.SCHEMAID = t.SCHEMAID and CONGLOMERATENAME in  
+    ('FOO_INT', 'FOO_VARCHAR', 'FOO_CHAR', 'FOO_LONGVARCHAR', 'FOO_VARBINARY', 'FOO_LONGVARBINARY', 'FOO_BIT') order by 1;
+CONGLOMERATENAME                                                                                                                |PAGESIZE   
+--------------------------------------------------------------------------------------------------------------------------------------------
+FOO_BIT                                                                                                                         |4096       
+FOO_CHAR                                                                                                                        |4096       
+FOO_INT                                                                                                                         |4096       
+FOO_LONGVARBINARY                                                                                                               |32768      
+FOO_LONGVARCHAR                                                                                                                 |32768      
+FOO_VARBINARY                                                                                                                   |4096       
+FOO_VARCHAR                                                                                                                     |4096       
+ij> drop table foo_int;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageReservedSpace','65');
+0 rows inserted/updated/deleted
+ij> create table foo_int (a int);
+0 rows inserted/updated/deleted
+ij> drop table foo_char;
+0 rows inserted/updated/deleted
+ij> create table foo_char (a char(100));
+0 rows inserted/updated/deleted
+ij> drop table foo_varchar;
+0 rows inserted/updated/deleted
+ij> create table foo_varchar (a varchar(10000));
+0 rows inserted/updated/deleted
+ij> -- let the foo_longxxx get created at 32K
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarchar;
+0 rows inserted/updated/deleted
+ij> create table foo_longvarchar (a long varchar) ;
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarbinary;
+0 rows inserted/updated/deleted
+ij> create table foo_longvarbinary (a long varchar for bit data) ;
+0 rows inserted/updated/deleted
+ij> -- Back to 4K
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> drop table foo_bit;
+0 rows inserted/updated/deleted
+ij> create table foo_bit (a CHAR(100) FOR BIT DATA ) ;
+0 rows inserted/updated/deleted
+ij> drop table foo_varbinary;
+0 rows inserted/updated/deleted
+ij> create table foo_varbinary (a VARCHAR(10000) FOR BIT DATA) ;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageReservedSpace',NULL);
+0 rows inserted/updated/deleted
+ij> select v.CONGLOMERATENAME, PAGESIZE
+from SYS.SYSSCHEMAS s,
+SYS.SYSTABLES t,
+new org.apache.derby.diag.SpaceTable(SCHEMANAME,TABLENAME) v
+where s.SCHEMAID = t.SCHEMAID and CONGLOMERATENAME in  
+    ('FOO_INT', 'FOO_VARCHAR', 'FOO_CHAR', 'FOO_LONGVARCHAR', 'FOO_VARBINARY', 'FOO_LONGVARBINARY', 'FOO_BIT') order by 1;
+CONGLOMERATENAME                                                                                                                |PAGESIZE   
+--------------------------------------------------------------------------------------------------------------------------------------------
+FOO_BIT                                                                                                                         |4096       
+FOO_CHAR                                                                                                                        |4096       
+FOO_INT                                                                                                                         |4096       
+FOO_LONGVARBINARY                                                                                                               |32768      
+FOO_LONGVARCHAR                                                                                                                 |32768      
+FOO_VARBINARY                                                                                                                   |4096       
+FOO_VARCHAR                                                                                                                     |4096       
+ij> --  8K pagesize 
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '8192');
+0 rows inserted/updated/deleted
+ij> drop table foo_int;
+0 rows inserted/updated/deleted
+ij> create table foo_int (a int);
+0 rows inserted/updated/deleted
+ij> drop table foo_char;
+0 rows inserted/updated/deleted
+ij> create table foo_char (a char(100));
+0 rows inserted/updated/deleted
+ij> drop table foo_varchar;
+0 rows inserted/updated/deleted
+ij> create table foo_varchar (a varchar(10000));
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarchar;
+0 rows inserted/updated/deleted
+ij> create table foo_longvarchar (a long varchar);
+0 rows inserted/updated/deleted
+ij> drop table foo_bit;
+0 rows inserted/updated/deleted
+ij> create table foo_bit (a CHAR(100) FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> drop table foo_varbinary;
+0 rows inserted/updated/deleted
+ij> create table foo_varbinary (a varchar(10000) FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarbinary;
+0 rows inserted/updated/deleted
+ij> create table foo_longvarbinary (a long varchar for bit data);
+0 rows inserted/updated/deleted
+ij> select v.CONGLOMERATENAME, PAGESIZE
+from SYS.SYSSCHEMAS s,
+SYS.SYSTABLES t,
+new org.apache.derby.diag.SpaceTable(SCHEMANAME,TABLENAME) v
+where s.SCHEMAID = t.SCHEMAID and CONGLOMERATENAME in  
+    ('FOO_INT', 'FOO_VARCHAR', 'FOO_CHAR', 'FOO_LONGVARCHAR', 'FOO_VARBINARY', 'FOO_LONGVARBINARY', 'FOO_BIT') order by 1;
+CONGLOMERATENAME                                                                                                                |PAGESIZE   
+--------------------------------------------------------------------------------------------------------------------------------------------
+FOO_BIT                                                                                                                         |8192       
+FOO_CHAR                                                                                                                        |8192       
+FOO_INT                                                                                                                         |8192       
+FOO_LONGVARBINARY                                                                                                               |8192       
+FOO_LONGVARCHAR                                                                                                                 |8192       
+FOO_VARBINARY                                                                                                                   |8192       
+FOO_VARCHAR                                                                                                                     |8192       
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> commit;
+ij> drop table foo_int;
+0 rows inserted/updated/deleted
+ij> create table foo_int (a int);
+0 rows inserted/updated/deleted
+ij> drop table foo_char;
+0 rows inserted/updated/deleted
+ij> create table foo_char (a char(100)) ;
+0 rows inserted/updated/deleted
+ij> drop table foo_varchar;
+0 rows inserted/updated/deleted
+ij> create table foo_varchar (a varchar(10000));
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarchar;
+0 rows inserted/updated/deleted
+ij> create table foo_longvarchar (a long varchar);
+0 rows inserted/updated/deleted
+ij> drop table foo_bit;
+0 rows inserted/updated/deleted
+ij> create table foo_bit (a CHAR(100) for bit data);
+0 rows inserted/updated/deleted
+ij> drop table foo_varbinary;
+0 rows inserted/updated/deleted
+ij> create table foo_varbinary (a varchar(10000) for bit data);
+0 rows inserted/updated/deleted
+ij> drop table foo_longvarbinary;
+0 rows inserted/updated/deleted
+ij> create table foo_longvarbinary (a long varchar for bit data);
+0 rows inserted/updated/deleted
+ij> select v.CONGLOMERATENAME, PAGESIZE
+from SYS.SYSSCHEMAS s,
+SYS.SYSTABLES t,
+new org.apache.derby.diag.SpaceTable(SCHEMANAME,TABLENAME) v
+where s.SCHEMAID = t.SCHEMAID and CONGLOMERATENAME in  
+    ('FOO_INT', 'FOO_VARCHAR', 'FOO_CHAR', 'FOO_LONGVARCHAR', 'FOO_VARBINARY', 'FOO_LONGVARBINARY', 'FOO_BIT') order by 1;
+CONGLOMERATENAME                                                                                                                |PAGESIZE   
+--------------------------------------------------------------------------------------------------------------------------------------------
+FOO_BIT                                                                                                                         |4096       
+FOO_CHAR                                                                                                                        |4096       
+FOO_INT                                                                                                                         |4096       
+FOO_LONGVARBINARY                                                                                                               |4096       
+FOO_LONGVARCHAR                                                                                                                 |4096       
+FOO_VARBINARY                                                                                                                   |4096       
+FOO_VARCHAR                                                                                                                     |4096       
+ij> commit;
+ij> disconnect;
+ij> 

@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<!-- ==================================================================== -->
+<!--                       Derby build file                          -->
+<!-- ==================================================================== -->
+
+<project default="FTOtestsubdir" basedir="../../../../../../../.." >
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties" />
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/sane${sanity}.properties"/>
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <!--property file="${properties.dir}/parser.properties"/-->
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+  <!-- derby testing specific properties files -->
+  <property file="${ant.home}/properties/derbytesting.properties"/>
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/tests/store"/>
+
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="FTOtestsubdir" depends="copyfiles"/>
+
+  <!-- mkdir / init target should not be necessary, just here for reference... -->
+  <target name="init">
+    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/store"/>
+  </target>
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/store">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/store" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/store/copyfiles.ant"/>  
+    </copy>
+  </target> 
+
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
+</project>
+

@@ -1,0 +1,555 @@
+ij> -- test sinle long column table
+-- create table with one long column
+-- test 1: one long column
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> create table testing (a varchar(8096)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0', 8096));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a b c d e f g h i j', 8096));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77', 8096));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg', 8096));
+1 row inserted/updated/deleted
+ij> -- should return 4 rows
+select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 2: testing two column (1 short, 1 long) table
+create table testing (a int, b varchar(32384)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (1, PADSTRING('1 2 3 4 5 6 7 8 9 0', 32384));
+1 row inserted/updated/deleted
+ij> insert into testing values (2, PADSTRING('a b c d e f g h i j', 32384));
+1 row inserted/updated/deleted
+ij> insert into testing values (3, PADSTRING('11 22 33 44 55 66 77', 32384));
+1 row inserted/updated/deleted
+ij> insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg', 32384));
+1 row inserted/updated/deleted
+ij> -- should return 4 rows
+select * from testing;
+A          |B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------
+1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &
+2          |a b c d e f g h i j                                                                                                            &
+3          |11 22 33 44 55 66 77                                                                                                           &
+4          |aa bb cc dd ee ff gg                                                                                                           &
+ij> select a from testing;
+A          
+-----------
+1          
+2          
+3          
+4          
+ij> select b from testing;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- should return 1 row
+select b from testing where a = 1;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 3: testing two column (1 long, 1 shor) table
+create table testing (a varchar(32384), b int) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1);
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a b c d e f g h i j',32384), 2);
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3);
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4);
+1 row inserted/updated/deleted
+ij> -- should return 4 rows
+select * from testing;
+A                                                                                                                               |B          
+--------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          
+a b c d e f g h i j                                                                                                            &|2          
+11 22 33 44 55 66 77                                                                                                           &|3          
+aa bb cc dd ee ff gg                                                                                                           &|4          
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> select b from testing;
+B          
+-----------
+1          
+2          
+3          
+4          
+ij> -- should return 1 row
+select a from testing where b = 4;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 4: testing three column (1 short, 1 long, 1 short) table
+create table testing (z int, a varchar(32384), b int) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (0, PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1);
+1 row inserted/updated/deleted
+ij> insert into testing values (1, PADSTRING('a b c d e f g h i j',32384), 2);
+1 row inserted/updated/deleted
+ij> insert into testing values (2, PADSTRING('11 22 33 44 55 66 77',32384), 3);
+1 row inserted/updated/deleted
+ij> insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg',32384), 4);
+1 row inserted/updated/deleted
+ij> -- should return 4 rows
+select * from testing;
+Z          |A                                                                                                                               |B          
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          
+1          |a b c d e f g h i j                                                                                                            &|2          
+2          |11 22 33 44 55 66 77                                                                                                           &|3          
+4          |aa bb cc dd ee ff gg                                                                                                           &|4          
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> select b from testing;
+B          
+-----------
+1          
+2          
+3          
+4          
+ij> select z from testing;
+Z          
+-----------
+0          
+1          
+2          
+4          
+ij> -- should return 1 row
+select b from testing where z = b;
+B          
+-----------
+4          
+ij> -- try creating btree index on long column, should fail
+create index zz on testing (a) ;
+ERROR XSCB6: Limitation: Record of a btree secondary index cannot be updated or inserted due to lack of space on the page.  Use the parameters derby.storage.pageSize and/or derby.storage.pageReservedSpace to work around this limitation.
+ij> -- update the long column 5 times
+update testing set a = PADSTRING('update once', 32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update twice', 32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update three times', 32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update four times', 32384);
+4 rows inserted/updated/deleted
+ij> update testing set a = PADSTRING('update five times', 32384);
+4 rows inserted/updated/deleted
+ij> -- select should return 4 rows
+select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+update five times                                                                                                              &
+update five times                                                                                                              &
+update five times                                                                                                              &
+update five times                                                                                                              &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 5: testing three columns (1 long, 1 short, 1 long) table
+create table testing (a varchar(32384), b int, c varchar(32084)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1, PADSTRING('1 2 3 4 5 6 7 8 9 0',32084));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a b c d e f g h i j',32384), 2, PADSTRING('a b c d e f g h i j',32084));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3, PADSTRING('11 22 33 44 55 66 77',32084));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4, PADSTRING('aa bb cc dd ee ff gg',32084));
+1 row inserted/updated/deleted
+ij> -- should return 4 rows
+select * from testing;
+A                                                                                                                               |B          |C                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &|2          |a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &|3          |11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &|4          |aa bb cc dd ee ff gg                                                                                                           &
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> select b from testing;
+B          
+-----------
+1          
+2          
+3          
+4          
+ij> select c from testing;
+C                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &
+ij> -- should return one row
+select * from testing where b = 4;
+A                                                                                                                               |B          |C                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+aa bb cc dd ee ff gg                                                                                                           &|4          |aa bb cc dd ee ff gg                                                                                                           &
+ij> -- try creating btree index, should fail on long columns
+create index zz on testing (a) ;
+ERROR XSCB6: Limitation: Record of a btree secondary index cannot be updated or inserted due to lack of space on the page.  Use the parameters derby.storage.pageSize and/or derby.storage.pageReservedSpace to work around this limitation.
+ij> create index zz on testing (c) ;
+ERROR XSCB6: Limitation: Record of a btree secondary index cannot be updated or inserted due to lack of space on the page.  Use the parameters derby.storage.pageSize and/or derby.storage.pageReservedSpace to work around this limitation.
+ij> create index zz on testing (b);
+0 rows inserted/updated/deleted
+ij> -- update the last long column 10 times
+update testing set c = PADSTRING('update 0', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 1', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 2', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 3', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 4', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 5', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 6', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 7', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 8', 32084);
+4 rows inserted/updated/deleted
+ij> update testing set c = PADSTRING('update 9', 32084);
+4 rows inserted/updated/deleted
+ij> -- select should return 4 rows
+select * from testing;
+A                                                                                                                               |B          |C                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          |update 9                                                                                                                       &
+a b c d e f g h i j                                                                                                            &|2          |update 9                                                                                                                       &
+11 22 33 44 55 66 77                                                                                                           &|3          |update 9                                                                                                                       &
+aa bb cc dd ee ff gg                                                                                                           &|4          |update 9                                                                                                                       &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 6: table with 5 columns (1 short, 1 long, 1 short, 1 long, 1 short) table
+create table testing (a int, b clob(64768), c int, d varchar(32384), e int) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (0, PADSTRING('1 2 3 4 5 6 7 8 9 0', 64768),  1, PADSTRING('1 2 3 4 5 6 7 8 9 0', 32384),  2);
+1 row inserted/updated/deleted
+ij> insert into testing values (1, PADSTRING('a b c d e f g h i j', 64768),  2, PADSTRING('a b c d e f g h i j', 32384),  3);
+1 row inserted/updated/deleted
+ij> insert into testing values (2, PADSTRING('11 22 33 44 55 66 77', 64768), 3, PADSTRING('11 22 33 44 55 66 77', 32384), 4);
+1 row inserted/updated/deleted
+ij> insert into testing values (3, PADSTRING('aa bb cc dd ee ff gg', 64768), 4, PADSTRING('aa bb cc dd ee ff gg',32384), 5);
+1 row inserted/updated/deleted
+ij> insert into testing values (4, PADSTRING('1 2 3 4 5 6 7 8 9 0', 64768),  5, PADSTRING('aa bb cc dd ee ff gg',32384), 6);
+1 row inserted/updated/deleted
+ij> insert into testing values (5, PADSTRING('a b c d e f g h i j', 64768),  6, PADSTRING('aa bb cc dd ee ff gg',32384), 7);
+1 row inserted/updated/deleted
+ij> insert into testing values (6, PADSTRING('11 22 33 44 55 66 77', 64768), 7, PADSTRING('aa bb cc dd ee ff gg',32384), 8);
+1 row inserted/updated/deleted
+ij> insert into testing values (7, PADSTRING('aa bb cc dd ee ff gg', 64768), 8, PADSTRING('aa bb cc dd ee ff gg',32384), 9);
+1 row inserted/updated/deleted
+ij> -- select shoudl return 8 rows
+select * from testing;
+A          |B                                                                                                                               |C          |D                                                                                                                               |E          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|2          
+1          |a b c d e f g h i j                                                                                                            &|2          |a b c d e f g h i j                                                                                                            &|3          
+2          |11 22 33 44 55 66 77                                                                                                           &|3          |11 22 33 44 55 66 77                                                                                                           &|4          
+3          |aa bb cc dd ee ff gg                                                                                                           &|4          |aa bb cc dd ee ff gg                                                                                                           &|5          
+4          |1 2 3 4 5 6 7 8 9 0                                                                                                            &|5          |aa bb cc dd ee ff gg                                                                                                           &|6          
+5          |a b c d e f g h i j                                                                                                            &|6          |aa bb cc dd ee ff gg                                                                                                           &|7          
+6          |11 22 33 44 55 66 77                                                                                                           &|7          |aa bb cc dd ee ff gg                                                                                                           &|8          
+7          |aa bb cc dd ee ff gg                                                                                                           &|8          |aa bb cc dd ee ff gg                                                                                                           &|9          
+ij> select a from testing;
+A          
+-----------
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+ij> select b, d from testing;
+B                                                                                                                               |D                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|1 2 3 4 5 6 7 8 9 0                                                                                                            &
+a b c d e f g h i j                                                                                                            &|a b c d e f g h i j                                                                                                            &
+11 22 33 44 55 66 77                                                                                                           &|11 22 33 44 55 66 77                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &|aa bb cc dd ee ff gg                                                                                                           &
+1 2 3 4 5 6 7 8 9 0                                                                                                            &|aa bb cc dd ee ff gg                                                                                                           &
+a b c d e f g h i j                                                                                                            &|aa bb cc dd ee ff gg                                                                                                           &
+11 22 33 44 55 66 77                                                                                                           &|aa bb cc dd ee ff gg                                                                                                           &
+aa bb cc dd ee ff gg                                                                                                           &|aa bb cc dd ee ff gg                                                                                                           &
+ij> select a, c, d from testing;
+A          |C          |D                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |1          |1 2 3 4 5 6 7 8 9 0                                                                                                            &
+1          |2          |a b c d e f g h i j                                                                                                            &
+2          |3          |11 22 33 44 55 66 77                                                                                                           &
+3          |4          |aa bb cc dd ee ff gg                                                                                                           &
+4          |5          |aa bb cc dd ee ff gg                                                                                                           &
+5          |6          |aa bb cc dd ee ff gg                                                                                                           &
+6          |7          |aa bb cc dd ee ff gg                                                                                                           &
+7          |8          |aa bb cc dd ee ff gg                                                                                                           &
+ij> -- update column b 10 times
+update testing set b = PADSTRING('update 0', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 1', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 2', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 3', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 4', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 5', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 6', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 7', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 8', 64768);
+8 rows inserted/updated/deleted
+ij> update testing set b = PADSTRING('update 9', 64768);
+8 rows inserted/updated/deleted
+ij> -- select should return 8 rows
+select b from testing;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+update 9                                                                                                                       &
+ij> select a, b, e from testing;
+A          |B                                                                                                                               |E          
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+0          |update 9                                                                                                                       &|2          
+1          |update 9                                                                                                                       &|3          
+2          |update 9                                                                                                                       &|4          
+3          |update 9                                                                                                                       &|5          
+4          |update 9                                                                                                                       &|6          
+5          |update 9                                                                                                                       &|7          
+6          |update 9                                                                                                                       &|8          
+7          |update 9                                                                                                                       &|9          
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> -- test 7: table with 5 columns, all long columns
+create table testing (a clob(64768), b varchar(32384), c clob(64768), d varchar(32384), e clob(64768)) ;
+0 rows inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> insert into testing values (PADSTRING('a a a a a a a a a a', 64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c', 64768), PADSTRING('d d d d d d d d d d', 32384), PADSTRING('e e e e e e e e',64768));
+1 row inserted/updated/deleted
+ij> -- select should return 10 rows
+select * from testing;
+A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|b b b b b b b b b b                                                                                                            &|c c c c c c c c c c                                                                                                            &|d d d d d d d d d d                                                                                                            &|e e e e e e e e                                                                                                                &
+ij> select a from testing;
+A                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+a a a a a a a a a a                                                                                                            &
+ij> select b from testing;
+B                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+b b b b b b b b b b                                                                                                            &
+ij> select c from testing;
+C                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+c c c c c c c c c c                                                                                                            &
+ij> select d from testing;
+D                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+d d d d d d d d d d                                                                                                            &
+ij> select e from testing;
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+e e e e e e e e                                                                                                                &
+ij> select a, c, e from testing;
+A                                                                                                                               |C                                                                                                                               |E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+a a a a a a a a a a                                                                                                            &|c c c c c c c c c c                                                                                                            &|e e e e e e e e                                                                                                                &
+ij> select b, e from testing;
+B                                                                                                                               |E                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+b b b b b b b b b b                                                                                                            &|e e e e e e e e                                                                                                                &
+ij> -- update the first and last column
+update testing set a = PADSTRING('1 1 1 1 1 1 1 1 1 1', 64768);
+10 rows inserted/updated/deleted
+ij> update testing set e = PADSTRING('9 9 9 9 9 9 9 9 9 9',64768);
+10 rows inserted/updated/deleted
+ij> -- select should return 10 rows
+select a, e from testing;
+A                                                                                                                               |E                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+ij> select a, c, b, e from testing;
+A                                                                                                                               |C                                                                                                                               |B                                                                                                                               |E                                                                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+1 1 1 1 1 1 1 1 1 1                                                                                                            &|c c c c c c c c c c                                                                                                            &|b b b b b b b b b b                                                                                                            &|9 9 9 9 9 9 9 9 9 9                                                                                                            &
+ij> select e from testing;
+E                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+9 9 9 9 9 9 9 9 9 9                                                                                                            &
+ij> -- drop the table
+drop table testing;
+0 rows inserted/updated/deleted
+ij> exit;

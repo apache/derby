@@ -13,6 +13,7 @@ lang/arithmetic.sql
 lang/authorize.sql
 lang/autoincrement.sql
 lang/bit.sql
+lang/bit2.sql
 lang/bug4356.java
 lang/bug5052rts.java
 lang/bug5054.java
@@ -39,6 +40,7 @@ lang/dbManagerLimits.java
 lang/ddlTableLockMode.sql
 lang/deadlockMode.java
 lang/declareGlobalTempTableJava.java
+lang/declareGlobalTempTableJavaJDBC30.java
 lang/delete.sql
 lang/depend.sql
 lang/derived.sql
@@ -57,6 +59,7 @@ lang/forbitdata.java
 lang/forupdate.sql
 lang/functions.sql
 lang/groupBy.sql
+lang/holdCursorIJ.sql
 lang/identifier.sql
 lang/implicitConversions.sql
 lang/inbetween.sql
@@ -107,6 +110,7 @@ lang/staleplans.sql
 lang/stmtCache0.sql
 lang/stmtCache1.sql
 lang/stmtCache3.java
+lang/streams.java
 lang/stringtypes.sql
 lang/subquery.sql
 lang/subquery2.sql
