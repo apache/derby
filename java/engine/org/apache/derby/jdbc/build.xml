@@ -40,8 +40,44 @@
     </javac>
   </target>
 
-  <target name="compile_jdbc2" depends="compile_jsr169">
+  <target name="compile_jdbc2" depends="checkjikessource,compile_jdbc2_gump,compile_jdbc2_nosource"/>
 
+  <target name="checkjikessource">
+    <condition property="jikes.source.set">
+      <isset property="jikes.source"/>
+    </condition>
+  </target>
+
+  <target name="compile_jdbc2_gump" depends="compile_jsr169" if="jikes.source.set">
+    <!-- add source argument to get around a problem compiling with -->
+    <!-- Jikes 1.22 in the gump nightly build.                      -->
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      source="${jikes.source}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java13compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/jdbc/EmbeddedDriver.java"/>
+      <include name="${derby.dir}/jdbc/ReferenceableDataSource.java"/>
+      <include name="${derby.dir}/jdbc/EmbeddedDataSource.java"/>
+      <include name="${derby.dir}/jdbc/EmbeddedConnectionPoolDataSource.java"/>
+      <include name="${derby.dir}/jdbc/EmbedPooledConnection.java"/>
+	  <include name="${derby.dir}/jdbc/Driver20.java"/>
+    </javac>
+  </target>
+
+  <target name="compile_jdbc2_nosource" depends="compile_jsr169" unless="jikes.source.set">
+    <!-- Do not use source attribute on javac to remain compatible with versions -->
+    <!-- of Jikes that do not have the source option.                            -->
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -62,9 +98,7 @@
       <include name="${derby.dir}/jdbc/EmbeddedConnectionPoolDataSource.java"/>
       <include name="${derby.dir}/jdbc/EmbedPooledConnection.java"/>
 	  <include name="${derby.dir}/jdbc/Driver20.java"/>
-
     </javac>
-
  </target>
 
  <target name="compile_jdbc3">
