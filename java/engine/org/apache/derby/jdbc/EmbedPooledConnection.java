@@ -284,11 +284,11 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		{
 			ConnectionEvent errorEvent = new ConnectionEvent(this, exception);
 
-			for (Enumeration enum = eventListener.elements();
-				 enum.hasMoreElements(); )
+			for (Enumeration e = eventListener.elements();
+				 e.hasMoreElements(); )
 			{
 				ConnectionEventListener l =
-					(ConnectionEventListener)enum.nextElement(); 
+					(ConnectionEventListener)e.nextElement();
 				l.connectionErrorOccurred(errorEvent);
 			}
 		}
@@ -302,11 +302,11 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		{
 			ConnectionEvent closeEvent = new ConnectionEvent(this);
 
-			for (Enumeration enum = eventListener.elements();
-				 enum.hasMoreElements(); )
+			for (Enumeration e = eventListener.elements();
+				 e.hasMoreElements(); )
 			{
 				ConnectionEventListener l =
-					(ConnectionEventListener)enum.nextElement(); 
+					(ConnectionEventListener)e.nextElement();
 				l.connectionClosed(closeEvent);
 			}
 		}

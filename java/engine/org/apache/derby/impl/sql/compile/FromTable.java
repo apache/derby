@@ -412,10 +412,10 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		 *		invalid value for hashMaxCapacity
 		 */
 		boolean indexSpecified = false;
-		Enumeration enum = tableProperties.keys();
-		while (enum.hasMoreElements())
+		Enumeration e = tableProperties.keys();
+		while (e.hasMoreElements())
 		{
-			String key = (String) enum.nextElement();
+			String key = (String) e.nextElement();
 			String value = (String) tableProperties.get(key);
 
 			if (key.equals("joinStrategy"))

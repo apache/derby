@@ -116,13 +116,13 @@ class ConnectionEnv {
     int newNum = 0;
     boolean newConnectionNameOk = false;
     String newConnectionName = "";
-    Enumeration enum;
+    Enumeration e;
     while (!newConnectionNameOk){
       newConnectionName = Session.DEFAULT_NAME + newNum;
       newConnectionNameOk = true;
-      enum = sessions.keys();
-      while (enum.hasMoreElements() && newConnectionNameOk){
-        if (((String)enum.nextElement()).equals(newConnectionName))
+      e = sessions.keys();
+      while (e.hasMoreElements() && newConnectionNameOk){
+        if (((String)e.nextElement()).equals(newConnectionName))
            newConnectionNameOk = false;
       }
       newNum = newNum + 1;

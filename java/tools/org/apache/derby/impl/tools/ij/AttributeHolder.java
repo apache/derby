@@ -72,14 +72,14 @@ public class AttributeHolder {
     }
     public void displayErrors(){
       //If no error are found then nothing is displayed.
-      Enumeration enum = errors.elements();
+      Enumeration e = errors.elements();
       //In the first line, show the exact token that was parsed from
       //the URL.
-      if (enum.hasMoreElements())
+      if (e.hasMoreElements())
         display(LocalizedResource.getMessage("TL_urlLabel1", "[", getToken(), "]"));
       //Show all errors.  More than one error can be found for an attribute.
-      while (enum.hasMoreElements()){
-        String aString = (String)enum.nextElement();
+      while (e.hasMoreElements()){
+        String aString = (String)e.nextElement();
         displayIndented(aString);
       }
     }

@@ -526,7 +526,6 @@ public class RowUtil
             String str = new String();
 
             Object  row_or_vector;
-            Enumeration enum = hash_table.elements();
 
             for (Enumeration e = hash_table.elements(); e.hasMoreElements();)
             {

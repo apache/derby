@@ -632,7 +632,7 @@ public class BasicDependencyManager implements DependencyManager {
 	public ProviderInfo[] getPersistentProviderInfos(ProviderList pl)
 							throws StandardException
 	{
-		Enumeration enum = pl.elements();
+		Enumeration e = pl.elements();
 		int			numProviders = 0;
 		ProviderInfo[]	retval;
 
@@ -640,9 +640,9 @@ public class BasicDependencyManager implements DependencyManager {
 		** We make 2 passes - the first to count the number of persistent
  		** providers and the second to populate the array of ProviderInfos.
 		*/
-		while (enum != null && enum.hasMoreElements())
+		while (e != null && e.hasMoreElements())
 		{
-			Provider prov = (Provider) enum.nextElement();
+			Provider prov = (Provider) e.nextElement();
 
 			if (prov.isPersistent())
 			{
@@ -650,12 +650,12 @@ public class BasicDependencyManager implements DependencyManager {
 			}
 		}
 
-		enum = pl.elements();
+		e = pl.elements();
 		retval = new ProviderInfo[numProviders];
 		int piCtr = 0;
-		while (enum != null && enum.hasMoreElements())
+		while (e != null && e.hasMoreElements())
 		{
-			Provider prov = (Provider) enum.nextElement();
+			Provider prov = (Provider) e.nextElement();
 
 			if (prov.isPersistent())
 			{
@@ -681,10 +681,10 @@ public class BasicDependencyManager implements DependencyManager {
 	public void clearColumnInfoInProviders(ProviderList pl)
 					throws StandardException
 	{
-		Enumeration enum = pl.elements();
-		while (enum != null && enum.hasMoreElements())
+		Enumeration e = pl.elements();
+		while (e != null && e.hasMoreElements())
 		{
-			Provider pro = (Provider) enum.nextElement();
+			Provider pro = (Provider) e.nextElement();
 			if (pro instanceof TableDescriptor)
 				((TableDescriptor) pro).setReferencedColumnMap(null);
 		}

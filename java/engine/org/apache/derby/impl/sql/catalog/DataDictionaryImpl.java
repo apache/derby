@@ -8022,14 +8022,14 @@ public	class	DataDictionaryImpl
 		throws StandardException
 	{
 		Properties p = getQueryDescriptions(net);
-		Enumeration enum = p.keys();
+		Enumeration e = p.keys();
 		//statement will get compiled on first execution
 		//Note: Don't change this to FALSE LCC is not available for compiling
 		boolean nocompile = true;
 		
-		while (enum.hasMoreElements())
+		while (e.hasMoreElements())
 		{
-			String spsName = (String)enum.nextElement();
+			String spsName = (String)e.nextElement();
 			String spsText =  p.getProperty(spsName);
 			SPSDescriptor spsd = new SPSDescriptor(this, spsName,
 												   getUUIDFactory().createUUID(),

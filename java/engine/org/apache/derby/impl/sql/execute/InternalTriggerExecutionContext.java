@@ -260,10 +260,10 @@ public class InternalTriggerExecutionContext implements TriggerExecutionContext,
 		** Explicitly close all result sets that we have
 		** given out to the user.  
 	 	*/
-		for (Enumeration enum = resultSetVector.elements();
-			 enum.hasMoreElements(); )
+		for (Enumeration e = resultSetVector.elements();
+			 e.hasMoreElements(); )
 		{
-			java.sql.ResultSet rs = (java.sql.ResultSet)enum.nextElement();
+			java.sql.ResultSet rs = (java.sql.ResultSet)e.nextElement();
 			try
 			{
 				rs.close();

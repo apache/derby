@@ -864,10 +864,10 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		** there is nothing in this properties list that relies on binding
 		** or optimization to validate.
 		*/
-		Enumeration enum = properties.keys();
-		while (enum.hasMoreElements())
+		Enumeration e = properties.keys();
+		while (e.hasMoreElements())
 		{
-			String key = (String) enum.nextElement();
+			String key = (String) e.nextElement();
 			String value = (String) properties.get(key);
 
 			if (key.equals("joinOrder"))

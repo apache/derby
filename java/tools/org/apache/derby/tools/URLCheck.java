@@ -70,9 +70,9 @@ public class URLCheck {
     }
   }
   public void check(){
-    Enumeration enum = attributes.elements();
-    while (enum.hasMoreElements()) {
-      AttributeHolder anAttribute = (AttributeHolder)enum.nextElement();
+    Enumeration e = attributes.elements();
+    while (e.hasMoreElements()) {
+      AttributeHolder anAttribute = (AttributeHolder)e.nextElement();
       //The check for duplicate must be done at the URLCheck level
       //and not by each specific attribute.  Only URLCheck knowns about
       //all of the attributes and names.
@@ -82,9 +82,9 @@ public class URLCheck {
     }
   }
   public void checkForDuplicate(AttributeHolder anAttribute){
-    Enumeration enum = attributes.elements();
-    while (enum.hasMoreElements()) {
-      AttributeHolder aHolder = (AttributeHolder)enum.nextElement();
+    Enumeration e = attributes.elements();
+    while (e.hasMoreElements()) {
+      AttributeHolder aHolder = (AttributeHolder)e.nextElement();
       //If a duplicate is found, make sure that the message is only shown
       //once for each attribute.
       if (anAttribute != aHolder && anAttribute.getName().equals(aHolder.getName())) {

@@ -669,13 +669,13 @@ public class FromBaseTable extends FromTable
 		boolean indexSpecified = false;
 		boolean constraintSpecified = false;
 		ConstraintDescriptor consDesc = null;
-		Enumeration enum = tableProperties.keys();
+		Enumeration e = tableProperties.keys();
 
 			StringUtil.SQLEqualsIgnoreCase(tableDescriptor.getSchemaName(), 
 										   "SYS");
-		while (enum.hasMoreElements())
+		while (e.hasMoreElements())
 		{
-			String key = (String) enum.nextElement();
+			String key = (String) e.nextElement();
 			String value = (String) tableProperties.get(key);
 
 			if (key.equals("index"))
