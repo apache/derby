@@ -859,6 +859,13 @@
 <!-- - - - - - - - - - - - - - locale jar targets - - - - - - - - - - - -->
 
   <target name="derbylocalejars" depends="initjars">
+ 
+    <!-- copy license file to lists dir for inclusion in derbynet.jar -->
+
+    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
+    <copy todir="${derby.jar.dir}/lists/META-INF">
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
+    </copy>
 
     <!-- call localejar for each locale -->
 
@@ -919,6 +926,8 @@
 	       includes="org/apache/derby/info/*_${locale.iname}.properties,
 	                 org/apache/derby/loc/*_${locale.iname}.properties,
 	                 org/apache/derby/loc/drda/*_${locale.iname}.properties"/>
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="META-INF/**"/>
     </jar>
   </target>
     
