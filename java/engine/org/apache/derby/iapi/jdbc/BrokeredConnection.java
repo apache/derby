@@ -19,8 +19,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.impl.jdbc.Util;
 
 import java.io.ObjectOutput;
@@ -28,12 +26,7 @@ import java.io.ObjectInput;
 
 /**
  * This is a rudimentary connection that delegates
- * EVERYTHING to Connection.  Its sole purpose is to
- * provide a way to replicate connections.  It has special
- * logic to reconstitute a connection on a server other
- * than where it was first run.
- *
- * @author jamie
+ * EVERYTHING to Connection.
  */
 public class BrokeredConnection implements Connection
 {
@@ -43,7 +36,7 @@ public class BrokeredConnection implements Connection
 
 	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
-	protected BrokeredConnectionControl control;
+	protected final BrokeredConnectionControl control;
 	private boolean isClosed;
 
 	/**
@@ -59,13 +52,6 @@ public class BrokeredConnection implements Connection
 	//	CONSTRUCTORS
 	//
 	/////////////////////////////////////////////////////////////////////////
-
-	/**
-	 *	Public niladic constructor to satisfy Formatable interface.
-	 */
-	public	BrokeredConnection()
-	{
-	}
 
 	public	BrokeredConnection(BrokeredConnectionControl control)
 	{
@@ -379,7 +365,8 @@ public class BrokeredConnection implements Connection
 	}
 
 	protected final void notifyException(SQLException sqle) {
-		control.notifyException(sqle);
+		if (!isClosed)
+			control.notifyException(sqle);
 	}
 
 	/**
