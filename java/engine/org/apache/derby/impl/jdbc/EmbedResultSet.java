@@ -50,9 +50,7 @@ import java.sql.Types;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.ByteArrayInputStream;
 
-import java.math.BigDecimal;
 import java.util.Calendar;
 
 /**
@@ -737,42 +735,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
     /**
-     * Get the value of a column in the current row as a java.lang.BigDecimal object.
-     *
-     * @param columnIndex the first column is 1, the second is 2, ...
-     * @param scale the number of digits to the right of the decimal
-     * @return the column value; if the value is SQL NULL, the result is null
-	 * @exception SQLException thrown on failure.
-     */
-    public final BigDecimal getBigDecimal(int columnIndex, int scale) 
-        throws SQLException {
-
-
-		BigDecimal ret = getBigDecimal(columnIndex);
-		if (ret != null) {
-			return ret.setScale(scale, BigDecimal.ROUND_HALF_DOWN);
-		}
-		return null;
-	}
-
-    public final BigDecimal getBigDecimal(int columnIndex)
-        throws SQLException {
-
-		try {
-
-			DataValueDescriptor dvd = getColumn(columnIndex);
-
-			if (wasNull = dvd.isNull())
-				return null;
-
-			return dvd.getBigDecimal();
-
-		} catch (StandardException t) {
-			throw noStateChangeException(t);
-		}
-	}
-
-    /**
      * Get the value of a column in the current row as a Java byte array.
      * The bytes represent the raw values returned by the driver.
      *
@@ -1282,19 +1244,6 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public final double getDouble(String columnName) throws SQLException {
     	return (getDouble(findColumnName(columnName)));
-	}
-
-    /**
-     * Get the value of a column in the current row as a java.lang.BigDecimal object.
-     *
-     * @param columnName is the SQL name of the column
-     * @param scale the number of digits to the right of the decimal
-     * @return the column value; if the value is SQL NULL, the result is null
-	 * @exception SQLException thrown on failure.
-     */
-    public final BigDecimal getBigDecimal(String columnName, int scale) 
-		 throws	SQLException {
-    	return (getBigDecimal(findColumnName(columnName), scale));
 	}
 
     /**

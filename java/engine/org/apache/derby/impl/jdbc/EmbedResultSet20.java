@@ -16,11 +16,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.ConnectionChild;
-import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
@@ -28,11 +24,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import java.sql.Statement;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.ResultSetMetaData;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.sql.Types;
 
 /* ---- New jdbc 2.0 types ----- */
@@ -42,7 +33,6 @@ import java.sql.Clob;
 import java.sql.Ref;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.net.URL;
 
 /**
@@ -85,11 +75,63 @@ public class EmbedResultSet20
         }
 
 
+		/*
+		** Methods using java.math.BigDecimal, not supported in JSR169
+		*/
+		/**
+		 * Get the value of a column in the current row as a java.lang.BigDecimal object.
+		 *
+		 * @param columnIndex the first column is 1, the second is 2, ...
+		 * @param scale the number of digits to the right of the decimal
+		 * @return the column value; if the value is SQL NULL, the result is null
+		 * @exception SQLException thrown on failure.
+		 */
+		public final BigDecimal getBigDecimal(int columnIndex, int scale)
+			throws SQLException {
+
+			BigDecimal ret = getBigDecimal(columnIndex);
+			if (ret != null) {
+				return ret.setScale(scale, BigDecimal.ROUND_HALF_DOWN);
+			}
+			return null;
+		}
+
+		public final BigDecimal getBigDecimal(int columnIndex)
+			throws SQLException {
+
+			try {
+
+				DataValueDescriptor dvd = getColumn(columnIndex);
+
+				if (wasNull = dvd.isNull())
+					return null;
+
+				return dvd.getBigDecimal();
+
+			} catch (StandardException t) {
+				throw noStateChangeException(t);
+			}
+		}
+
+		/**
+		 * Get the value of a column in the current row as a java.lang.BigDecimal object.
+		 *
+		 * @param columnName is the SQL name of the column
+		 * @param scale the number of digits to the right of the decimal
+		 * @return the column value; if the value is SQL NULL, the result is null
+		 * @exception SQLException thrown on failure.
+		 */
+		public final BigDecimal getBigDecimal(String columnName, int scale)
+			throws SQLException {
+			return (getBigDecimal(findColumnName(columnName), scale));
+		}
+
         /////////////////////////////////////////////////////////////////////////
         //
         //      JDBC 2.0        -       New public methods
         //
         /////////////////////////////////////////////////////////////////////////
+
 
     //---------------------------------------------------------------------
     // Getter's and Setter's
