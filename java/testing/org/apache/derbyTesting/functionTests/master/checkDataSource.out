@@ -55,6 +55,11 @@ Changes rolled back OK in auto closed pooled connection
 EVENT(1):connectionClosed
 expected SQL Exception: No current connection.
 expected SQL Exception: No current connection.
+Start testPoolReset EmbeddedConnectionPoolDataSource
+IDENTITY_VAL_LOCAL=1
+IDENTITY_VAL_LOCAL=2
+IDENTITY_VAL_LOCAL=3
+End testPoolReset EmbeddedConnectionPoolDataSource
 Running connection checks on EmbeddedXADataSource
   isolation level 2
   auto commit     true
@@ -70,6 +75,11 @@ EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connectio
 EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Changes rolled back OK in auto closed local XAConnection
 EVENT(3):connectionClosed
+Start testPoolReset EmbeddedXADataSource
+IDENTITY_VAL_LOCAL=1
+IDENTITY_VAL_LOCAL=2
+IDENTITY_VAL_LOCAL=3
+End testPoolReset EmbeddedXADataSource
 ERROR XJ015: Derby system shutdown.
 Running connection checks on Nested
   isolation level 2

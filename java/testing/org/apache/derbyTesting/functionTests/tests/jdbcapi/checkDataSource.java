@@ -143,7 +143,7 @@ public class checkDataSource
 		pc.close();
 		pc = null;
 
-
+		testPoolReset("EmbeddedConnectionPoolDataSource", dsp.getPooledConnection());
 
 
 		EmbeddedXADataSource dscsx = new EmbeddedXADataSource();
@@ -182,6 +182,9 @@ public class checkDataSource
 		c1.close();
 		xac.close();
 		xac = null;
+
+		testPoolReset("EmbeddedXADataSource", dsx.getXAConnection());
+
 
 
 		try {
@@ -1214,6 +1217,57 @@ public class checkDataSource
 		return "unknown";
 	}
 
+	/**
+		When a connection is being pooled, the underlying JDBC embedded
+		connection object is re-used. As each application gets a new
+		Connection object, that is really a wrapper around the old connection
+		it should reset any connection spoecific state on the embedded connection
+		object.
+	*/
+	private static void testPoolReset(String type, PooledConnection pc) throws SQLException
+	{
+		System.out.println("Start testPoolReset " + type);
+		testPoolResetWork("C", pc.getConnection());
+		testPoolResetWork("", pc.getConnection());
+		testPoolResetWork("D", pc.getConnection());
+
+		pc.close();
+		System.out.println("End testPoolReset " + type);
+	}
+
+	private static void testPoolResetWork(String tableAction, Connection conn) throws SQLException
+	{
+		Statement s = conn.createStatement();
+		if (tableAction.equals("C"))
+		{
+			s.execute("CREATE TABLE testPoolResetWork (id int generated always as identity, name varchar(25))");
+		}
+
+		ResultSet rs = s.executeQuery("VALUES IDENTITY_VAL_LOCAL()");
+		rs.next();
+		String val = rs.getString(1);
+		if (!rs.wasNull() || (val != null))
+			System.out.println("FAIL - initial call to IDENTITY_VAL_LOCAL is not NULL!" + val);
+		rs.close();
+
+		s.executeUpdate("INSERT INTO testPoolResetWork(name) values ('derby-222')");
+
+		rs = s.executeQuery("VALUES IDENTITY_VAL_LOCAL()");
+		rs.next();
+		val = rs.getString(1);
+		System.out.println("IDENTITY_VAL_LOCAL=" + val);
+		rs.close();
+
+		if (tableAction.equals("D"))
+		{
+			s.execute("DROP TABLE testPoolResetWork");
+		}
+
+
+		s.close();
+		conn.close();
+
+	}
 
 }
 class cdsXid implements Xid, Serializable
