@@ -14,10 +14,6 @@ import com.sun.javadoc.*;
 import java.util.Map;
 
 public class FormatIdTaglet implements Taglet {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
     private String NAME = "format_id";
     private String ROWNAME = "Format ID";

@@ -16,10 +16,6 @@ import java.util.Map;
 // Adapted from ToDoTaglet.java, Copyright  2002.
 
 public class EndFormatTaglet implements Taglet {
-    /**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
     private String NAME = "end_format";
     private String ROWNAME = "end_format";
 
