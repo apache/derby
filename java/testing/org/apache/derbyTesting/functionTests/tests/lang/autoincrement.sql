@@ -60,6 +60,10 @@ drop table ai4;
 
 -- **** simple increment tests.
 
+-- should return null as no single insert has been executed
+values IDENTITY_VAL_LOCAL();
+
+
 create table ai_short (i int, 
 				       ais smallint generated always as identity (start with 0, increment by 2));
 insert into ai_short (i) values (0);

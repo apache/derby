@@ -32,7 +32,7 @@ insert into t1 values (1, 1, ''), (1, 1, ''), (1, 2, ''), (1, 2, ''),
 
 
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 2000;
+maximumdisplaywidth 20000;
 
 -- predicate should get pushed into scan
 select c1, c2 from sv1 where c1 = 1 order by c1, c2;
@@ -4174,7 +4174,7 @@ insert into xr.classification_value_ancestors (
 -- Now do really what I wanted (this gets NullPointerException before the fix):
 
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 20000;
+maximumdisplaywidth 40000;
 
 SELECT id, versionid, name, versionName, folderid, uri, versionuri, ownerid, ownername, ownerauthid,
        description, versionComment, objecttype, subtypeid, subtype, createdate,versiondate,

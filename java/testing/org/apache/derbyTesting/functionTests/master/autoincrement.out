@@ -97,7 +97,12 @@ ij> drop table ai3;
 ij> drop table ai4;
 0 rows inserted/updated/deleted
 ij> -- **** simple increment tests.
-create table ai_short (i int, 
+-- should return null as no single insert has been executed
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+NULL                           
+ij> create table ai_short (i int, 
 				       ais smallint generated always as identity (start with 0, increment by 2));
 0 rows inserted/updated/deleted
 ij> insert into ai_short (i) values (0);

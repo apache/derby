@@ -35,7 +35,7 @@ insert into t1 values (1, 1, ''), (1, 1, ''), (1, 2, ''), (1, 2, ''),
 8 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 2000;
+ij> maximumdisplaywidth 20000;
 ij> -- predicate should get pushed into scan
 select c1, c2 from sv1 where c1 = 1 order by c1, c2;
 C1         |C2         
@@ -109,7 +109,25 @@ Source result set:
 			Rows filtered = 0
 			Fetch Size = 1
 				constructor time (milliseconds) = 0
-				open time&
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=4
+				Number of rows visited=8
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select c1, c2 from sv1 where c1 = 1  + 1 order by c1, c2;
 C1         |C2         
 -----------------------
@@ -182,7 +200,24 @@ Source result set:
 			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
-				next time (mi&
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=4
+				Number of rows visited=8
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select x1, x2 from sv2 where x1 = 1 order by x1, x2;
 X1         |X2         
 -----------------------
@@ -255,7 +290,24 @@ Source result set:
 			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
-				next time (millise&
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=4
+				Number of rows visited=8
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select y1, y2 from sv3 where y1 = 1 order by y1, y2;
 Y1         |Y2         
 -----------------------
@@ -331,7 +383,34 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				res&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 4
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=4
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select z1, z2, z4, z5 from sv4 where z1 = z4 and z2 = z5
 order by z1, z2, z4, z5;
 Z1         |Z2         |Z4         |Z5         
@@ -419,7 +498,64 @@ Source result set:
 			Rows returned = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
-				next time (milliseco&
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 8
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=8
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
+				Number of opens = 8
+				Hash table size = 4
+				Hash keys are column numbers (0,1)
+				Rows seen = 16
+				Rows filtered = 0
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=8
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					scan qualifiers:
+None
+					next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Column[0][1] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select * from av1 where c1 = 1;
 C1         |C2         
 -----------------------
@@ -489,7 +625,23 @@ Source result set:
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
-				close ti&
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=4
+				Number of rows visited=8
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select * from av2 where x1 = 2;
 X1         |X2         
 -----------------------
@@ -561,7 +713,60 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (millisec&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Grouped Aggregate ResultSet:
+				Number of opens = 1
+				Rows input = 4
+				Has distinct aggregate = false
+				In sorted order = false
+				Sort information: 
+					Number of rows input=4
+					Number of rows output=1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Source result set:
+					Project-Restrict ResultSet (4):
+					Number of opens = 1
+					Rows seen = 4
+					Rows filtered = 0
+					restriction = false
+					projection = true
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						restriction time (milliseconds) = 0
+						projection time (milliseconds) = 0
+					Source result set:
+						Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+						Number of opens = 1
+						Rows seen = 4
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched={0, 1}
+							Number of columns fetched=2
+							Number of pages visited=1
+							Number of rows qualified=4
+							Number of rows visited=8
+							Scan type=heap
+							start position: 
+null							stop position: 
+null							qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select * from av3;
 Y1         |Y2         |Y3         |Y4         
 -----------------------------------------------
@@ -641,7 +846,70 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				rest&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Hash Join ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 8
+				Rows seen from the right = 32
+				Rows filtered = 0
+				Rows returned = 32
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Left result set:
+					Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 8
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0, 1}
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=8
+						Number of rows visited=8
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
+					Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
+					Number of opens = 8
+					Hash table size = 2
+					Hash key is column number 0
+					Rows seen = 32
+					Rows filtered = 0
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0, 1}
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=8
+						Number of rows visited=8
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						scan qualifiers:
+None
+						next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select * from cv1;
 C1         |C2         
 -----------------------
@@ -718,7 +986,34 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (millisec&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 4
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0, 1}
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=4
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> create index t1_c1 on t1(c1);
 0 rows inserted/updated/deleted
 ij> select c1, c2 from sv1 where c1 = 1 order by c1, c2;
@@ -794,7 +1089,33 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				optimizer estimated r&
+				Index Scan ResultSet for T1 using index T1_C1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 4
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=4
+					Number of rows visited=5
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
 ij> select x1, x2 from sv2 where x1 = 1 order by x1, x2;
 X1         |X2         
 -----------------------
@@ -868,7 +1189,33 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				optimizer estimated r&
+				Index Scan ResultSet for T1 using index T1_C1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 4
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=4
+					Number of rows visited=5
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
 ij> select y1, y2 from sv3 where y1 = 1 order by y1, y2;
 Y1         |Y2         
 -----------------------
@@ -944,7 +1291,44 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				res&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Index Row to Base Row ResultSet for T1:
+				Number of opens = 1
+				Rows seen = 4
+				Columns accessed from heap = {1, 2}
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					Index Scan ResultSet for T1 using index T1_C1 at serializable isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 4
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of deleted rows visited=0
+						Number of pages visited=1
+						Number of rows qualified=4
+						Number of rows visited=5
+						Scan type=btree
+						Tree height=1
+						start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+						stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+						qualifiers:
+None
 ij> select z1, z2, z4, z5 from sv4 where z1 = z4 and z2 = z5
 order by z1, z2, z4, z5;
 Z1         |Z2         |Z4         |Z5         
@@ -1032,7 +1416,64 @@ Source result set:
 			Rows returned = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
-				next time (milliseco&
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 8
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=8
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
+				Number of opens = 8
+				Hash table size = 4
+				Hash keys are column numbers (0,1)
+				Rows seen = 16
+				Rows filtered = 0
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=8
+					Number of rows visited=8
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					scan qualifiers:
+None
+					next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Column[0][1] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select * from av1 where c1 = 1;
 C1         |C2         
 -----------------------
@@ -1099,7 +1540,33 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				Index Scan ResultSet for T1 using index T1&
+				Index Scan ResultSet for T1 using index T1_C1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 4
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=4
+					Number of rows visited=5
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
 ij> select * from av2 where x1 = 2;
 X1         |X2         
 -----------------------
@@ -1171,7 +1638,67 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (millisec&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Grouped Aggregate ResultSet:
+				Number of opens = 1
+				Rows input = 4
+				Has distinct aggregate = false
+				In sorted order = true
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Source result set:
+					Project-Restrict ResultSet (5):
+					Number of opens = 1
+					Rows seen = 4
+					Rows filtered = 0
+					restriction = false
+					projection = true
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						restriction time (milliseconds) = 0
+						projection time (milliseconds) = 0
+					Source result set:
+						Index Row to Base Row ResultSet for T1:
+						Number of opens = 1
+						Rows seen = 4
+						Columns accessed from heap = {1}
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							Index Scan ResultSet for T1 using index T1_C1 at serializable isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 4
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of deleted rows visited=0
+								Number of pages visited=1
+								Number of rows qualified=4
+								Number of rows visited=4
+								Scan type=btree
+								Tree height=1
+								start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+								stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+								qualifiers:
+None
 ij> select y1, y2, y3, y4 + 0 from av3 where y1 = y2;
 Y1         |Y2         |Y3         |4          
 -----------------------------------------------
@@ -1244,7 +1771,70 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				rest&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Hash Join ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 8
+				Rows seen from the right = 32
+				Rows filtered = 0
+				Rows returned = 32
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Left result set:
+					Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 8
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0, 1}
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=8
+						Number of rows visited=8
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
+					Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
+					Number of opens = 8
+					Hash table size = 2
+					Hash key is column number 0
+					Rows seen = 32
+					Rows filtered = 0
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0, 1}
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=8
+						Number of rows visited=8
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						scan qualifiers:
+None
+						next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select * from cv1 where c1 = 1;
 C1         |C2         
 -----------------------
@@ -1316,7 +1906,44 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (millisec&
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Index Row to Base Row ResultSet for T1:
+				Number of opens = 1
+				Rows seen = 4
+				Columns accessed from heap = {1}
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					Index Scan ResultSet for T1 using index T1_C1 at serializable isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 4
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of deleted rows visited=0
+						Number of pages visited=1
+						Number of rows qualified=4
+						Number of rows visited=5
+						Scan type=btree
+						Tree height=1
+						start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+						stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+						qualifiers:
+None
 ij> -- cleanup
 drop view cv1;
 0 rows inserted/updated/deleted
@@ -5223,7 +5850,7 @@ ij> insert into xr.classification_value_ancestors (
 ij> -- Now do really what I wanted (this gets NullPointerException before the fix):
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 20000;
+ij> maximumdisplaywidth 40000;
 ij> SELECT id, versionid, name, versionName, folderid, uri, versionuri, ownerid, ownername, ownerauthid,
        description, versionComment, objecttype, subtypeid, subtype, createdate,versiondate,
        changedate, deletedate, versioncontrolled, currentversion, previousversion, checkedout,
@@ -5739,6 +6366,74 @@ Negate comparison result: false
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
-						close time (milliseco&
+						close time (milliseconds) = 0
+					scan information: 
+						start position: 
+null						stop position: 
+null						scan qualifiers:
+None
+						next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+			Right result set:
+				Hash Scan ResultSet for CLASSIFICATIONSCHEME at serializable isolation level using share table locking: 
+				Number of opens = 0
+				Hash table size = 0
+				Hash key is column number 0
+				Rows seen = 0
+				Rows filtered = 0
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				scan information: 
+					start position: 
+null					stop position: 
+null					scan qualifiers:
+None
+					next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Right result set:
+			Project-Restrict ResultSet (31):
+			Number of opens = 0
+			Rows seen = 0
+			Rows filtered = 0
+			restriction = true
+			projection = false
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Hash Scan ResultSet for VERSIONLABEL at serializable isolation level using share table locking: 
+				Number of opens = 0
+				Hash table size = 0
+				Hash key is column number 0
+				Rows seen = 0
+				Rows filtered = 0
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				scan information: 
+					start position: 
+null					stop position: 
+null					scan qualifiers:
+None
+					next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> rollback;
 ij> 
