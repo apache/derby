@@ -182,7 +182,7 @@ public class CurrentUserNode extends ValueNode
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Activation, "getLanguageConnectionContext",
 											 ClassName.LanguageConnectionContext, 0);
 		if (whichType == IDENTITY_VAL)
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getIdentityValue", "java.math.BigDecimal", 0);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getIdentityValue", "java.lang.Long", 0);
 		else if (whichType == SCHEMA)
 			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getCurrentSchemaName", "java.lang.String", 0);
 		else

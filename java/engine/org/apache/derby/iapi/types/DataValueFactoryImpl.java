@@ -286,8 +286,7 @@ public class DataValueFactoryImpl implements DataValueFactory
                 previous.setValue(value);
                 return previous;
         }
-
-        public NumberDataValue getDataValue(BigDecimal value)
+        public NumberDataValue getDecimalDataValue(BigDecimal value)
         {
                 if (value != null)
                         return new SQLDecimal(value);
@@ -295,17 +294,24 @@ public class DataValueFactoryImpl implements DataValueFactory
                         return new SQLDecimal();
         }
 
-        public NumberDataValue getDataValue(BigDecimal value,
-                                                                                NumberDataValue previous)
+        public NumberDataValue getDecimalDataValue(BigDecimal value, NumberDataValue previous)
                         throws StandardException
         {
                 if (previous == null)
-                        return getDataValue(value);
+                        return getDecimalDataValue(value);
 
                 previous.setValue(value);
                 return previous;
         }
+        public NumberDataValue getDecimalDataValue(Long value, NumberDataValue previous)
+                        throws StandardException
+        {
+                if (previous == null)
+                        previous = new SQLDecimal();
 
+                previous.setValue(value);
+                return previous;
+        }
         public NumberDataValue getDecimalDataValue(String value) throws StandardException
         {
                 if (value != null)
@@ -702,7 +708,7 @@ public class DataValueFactoryImpl implements DataValueFactory
                 }
         }
 
-        public NumberDataValue getNullBigDecimal(NumberDataValue dataValue)
+        public NumberDataValue getNullDecimal(NumberDataValue dataValue)
         {
                 if (dataValue == null)
                 {

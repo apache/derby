@@ -153,6 +153,10 @@ abstract class BaseTypeCompiler implements TypeCompiler
 
 	protected abstract String nullMethodName();
 
+	/**
+		Return the method name to get a Derby DataValueDescriptor
+		object of the correct type. This implementation returns "getDataValue".
+	*/
 	protected String dataValueMethodName()
 	{
 		return "getDataValue";

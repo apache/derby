@@ -334,13 +334,25 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		return numberStorable(getTypeId(), otherType, cf);
 	}
 
+	/**
+		Return the method name to get a Derby DataValueDescriptor
+		object of the correct type. This implementation returns "getDataValue".
+	*/
+	protected String dataValueMethodName()
+	{
+		if (getStoredFormatIdFromTypeId() == StoredFormatIds.DECIMAL_TYPE_ID)
+			return "getDecimalDataValue";
+		else
+			return super.dataValueMethodName();
+	}
+
 	protected String nullMethodName()
 	{
 		int formatId = getStoredFormatIdFromTypeId();
 		switch (formatId)
 		{
 			case StoredFormatIds.DECIMAL_TYPE_ID:
-				return "getNullBigDecimal";
+				return "getNullDecimal";
 
 			case StoredFormatIds.DOUBLE_TYPE_ID:
 				return "getNullDouble";

@@ -89,7 +89,6 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.Stack;
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * LanguageConnectionContext keeps the pool of prepared statements,
@@ -1727,9 +1726,9 @@ public class GenericLanguageConnectionContext
 	 *
 	 * @return the generated identity column value
 	 */
-	public BigDecimal getIdentityValue()
+	public Long getIdentityValue()
 	{
-		return identityNotNull ? BigDecimal.valueOf(identityVal) : null;
+		return identityNotNull ? new Long(identityVal) : null;
 	}
 
 	/**

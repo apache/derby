@@ -298,9 +298,19 @@ public interface DataValueFactory
          *
          * @exception StandardException         Thrown on error
          */
-        NumberDataValue         getDataValue(BigDecimal value) throws StandardException;
-        NumberDataValue         getDataValue(BigDecimal value, NumberDataValue previous)
+        NumberDataValue         getDecimalDataValue(BigDecimal value) throws StandardException;
+        NumberDataValue         getDecimalDataValue(BigDecimal value, NumberDataValue previous)
                                                         throws StandardException;
+
+
+        /**
+         * Get a SQL DECIMAL with the given value.
+         *
+         * @exception StandardException         Thrown on error
+         */
+        NumberDataValue         getDecimalDataValue(Long value, NumberDataValue previous)
+                                                        throws StandardException;
+
 
         /**
          * Get a SQL DECIMAL with the given value.  The second form re-uses the
@@ -482,7 +492,7 @@ public interface DataValueFactory
          * that value.
          *
          */
-        NumberDataValue getNullBigDecimal(NumberDataValue dataValue);
+        NumberDataValue getNullDecimal(NumberDataValue dataValue);
 
         /**
          * Get a SQL boolean with  a SQL null value. If the supplied value

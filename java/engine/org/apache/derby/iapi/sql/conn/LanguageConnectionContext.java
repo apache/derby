@@ -54,7 +54,6 @@ import org.apache.derby.catalog.UUID;
 import java.util.Locale;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.math.BigDecimal;
 
 /**
  * LanguageConnectionContext keeps the result sets,
@@ -515,7 +514,7 @@ public interface LanguageConnectionContext extends Context {
 	 *
 	 * @return the generated identity column value
 	 */
-	public BigDecimal getIdentityValue();
+	public Long getIdentityValue();
 
 	/**
 	 * Set the field of most recently generated identity column value.

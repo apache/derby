@@ -22,10 +22,6 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-
 public interface DateTimeDataValue extends DataValueDescriptor
 {
 	public static final int YEAR_FIELD = 0;
