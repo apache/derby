@@ -7,6 +7,7 @@
  */
 
 import java.sql.*;
+import java.lang.reflect.*;
 import javax.sql.DataSource;
 import java.util.Properties;
 import java.io.BufferedReader;
@@ -49,9 +50,10 @@ public class SimpleNetworkClientSample
 	private static int NETWORKSERVER_PORT=1527;
 
 	/**
-	 * DB2 JDBC UNIVERSAL DRIVER class name
+	 * DB2 JDBC UNIVERSAL DRIVER class names
 	 */
 	private static final String DB2_JDBC_UNIVERSAL_DRIVER = "com.ibm.db2.jcc.DB2Driver";
+	private static final String DB2_JCC_DS = "com.ibm.db2.jcc.DB2SimpleDataSource";
 
 	/**
 	 * This URL is used to connect to Derby Network Server using the DriverManager.
@@ -138,27 +140,42 @@ public class SimpleNetworkClientSample
 	 * @throws Exception if there is any error
 	 */
 	public static javax.sql.DataSource getClientDataSource(String database, String user, String
-									  password) throws SQLException
+									  password) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
 	{
-
-		com.ibm.db2.jcc.DB2SimpleDataSource ds = new com.ibm.db2.jcc.DB2SimpleDataSource();
+		Class nsDataSource = Class.forName(DB2_JCC_DS);
+		DataSource ds = (DataSource) nsDataSource.newInstance();
 
 		// can also include Derby URL attributes along with the database name
-		ds.setDatabaseName(database);
+		Class[] methodParams = new Class[] {String.class};
+		Method dbname = nsDataSource.getMethod("setDatabaseName", methodParams);
+		Object[] args = new Object[] {database};
+		dbname.invoke(ds, args);
 
-		if (user != null)
-			ds.setUser(user);
-		if (password != null)
-			ds.setPassword(password);
-
+		if (user != null) {
+			Method setuser = nsDataSource.getMethod("setUser", methodParams);
+			args = new Object[] {user};
+			setuser.invoke(ds, args);
+		}
+		if (password != null) {
+			Method setpw = nsDataSource.getMethod("setPassword", methodParams);
+			args = new Object[] {password};
+			setpw.invoke(ds, args);
+		}
 		// host on which network server is running
-		ds.setServerName("localhost");
+		Method servername = nsDataSource.getMethod("setServerName", methodParams);
+		args = new Object[] {"localhost"};
+		servername.invoke(ds, args);
 
 		// port on which Network Server is listening
-		ds.setPortNumber(1527);
+		methodParams = new Class[] {int.class};
+		Method portnumber = nsDataSource.getMethod("setPortNumber", methodParams);
+		args = new Object[] {new Integer(1527)};
+		portnumber.invoke(ds, args);
 
 		// driver type must be 4 to access Derby Network Server
-		ds.setDriverType(4);
+		Method drivertype = nsDataSource.getMethod("setDriverType", methodParams);
+		args = new Object[] {new Integer(4)};
+		drivertype.invoke(ds, args);
 
 		return ds;
 
@@ -193,7 +210,7 @@ public class SimpleNetworkClientSample
 		properties.setProperty("password","scape");
 
 		// Get database connection using the JCC client via DriverManager api
-		Connection conn =  (com.ibm.db2.jcc.DB2Connection) DriverManager.getConnection(CS_NS_DBURL, properties);
+		Connection conn = DriverManager.getConnection(CS_NS_DBURL,properties); 
 
 		return conn;
 	}
