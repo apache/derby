@@ -22,7 +22,7 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -227,7 +227,11 @@ public final class TypeId implements Formatable
         private static TypeId                   CLOB_ID;
         private static TypeId                   NCLOB_ID;
 
-
+        /**
+         * Implementation of DECIMAL datatype for generating holders through getNull.
+         * Set by the booted DataValueFactory implementation.
+         */
+        static DataValueDescriptor		decimalImplementation;
 
         /*
         ** Static methods to obtain TypeIds
@@ -1488,8 +1492,9 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.CHAR_TYPE_ID:
                                 return new SQLChar();
 
+                        // Implementation of DECIMAL can change.
                         case StoredFormatIds.DECIMAL_TYPE_ID:
-                                return new SQLDecimal();
+                        	return decimalImplementation.getNewNull();
 
                         case StoredFormatIds.DOUBLE_TYPE_ID:
                                 return new SQLDouble();

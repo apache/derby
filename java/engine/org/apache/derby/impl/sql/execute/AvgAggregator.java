@@ -114,7 +114,8 @@ public final class AvgAggregator extends SumAggregator
 		} else if (typeName.equals(TypeId.REAL_NAME)) {
 			newValue = new org.apache.derby.iapi.types.SQLDouble();
 		} else {
-			newValue = new org.apache.derby.iapi.types.SQLDecimal();
+			TypeId decimalTypeId = TypeId.getBuiltInTypeId(java.sql.Types.DECIMAL);
+			newValue = decimalTypeId.getNull();
 		}
 		
 		newValue.setValue(value);

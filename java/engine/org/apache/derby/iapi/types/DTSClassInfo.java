@@ -26,6 +26,10 @@ import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
 public class DTSClassInfo extends FormatableInstanceGetter {
 
         public Object getNewInstance() {
+        	
+        	
+        		// Does not handle StoredFormatIds.SQL_DECIMAL_ID as
+        		// different implementations are required for different VMs.
 
                 switch (fmtId) {
                 /* Wrappers */
@@ -33,7 +37,6 @@ public class DTSClassInfo extends FormatableInstanceGetter {
                 case StoredFormatIds.SQL_BOOLEAN_ID: return new SQLBoolean();
                 case StoredFormatIds.SQL_CHAR_ID: return new SQLChar();
                 case StoredFormatIds.SQL_DATE_ID: return new SQLDate();
-                case StoredFormatIds.SQL_DECIMAL_ID: return new SQLDecimal();
                 case StoredFormatIds.SQL_DOUBLE_ID: return new SQLDouble();
                 case StoredFormatIds.SQL_INTEGER_ID: return new SQLInteger();
                 case StoredFormatIds.SQL_LONGINT_ID: return new SQLLongint();

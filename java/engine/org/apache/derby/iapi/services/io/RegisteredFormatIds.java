@@ -251,7 +251,7 @@ String[] TwoByte = {
         /* 197 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 198 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 199 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
-        /* 200 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
+        /* 200 */       /*DECIMAL*/ null,  // set by DataValueFactoryImpl at boot time.
         /* 201 */       null,
         /* 202 */       "org.apache.derby.iapi.types.UserType",
         /* 203 */       "org.apache.derby.impl.sql.execute.rts.RealHashScanStatistics",

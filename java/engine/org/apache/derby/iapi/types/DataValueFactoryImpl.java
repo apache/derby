@@ -38,10 +38,14 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
+import org.apache.derby.iapi.services.io.RegisteredFormatIds;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.monitor.ModuleControl;
 
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Properties;
 
 
 import org.apache.derby.iapi.db.DatabaseContext;
@@ -54,14 +58,37 @@ import org.apache.derby.iapi.services.context.ContextService;
  *
  * @see DataValueFactory
  */
-abstract class DataValueFactoryImpl implements DataValueFactory
+abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 {
         LocaleFinder localeFinder;
 
         DataValueFactoryImpl()
         {
         }
+        
+        /*
+         ** ModuleControl methods.
+         */
+        
+    	/* (non-Javadoc)
+    	 * @see org.apache.derby.iapi.services.monitor.ModuleControl#boot(boolean, java.util.Properties)
+    	 */
+    	public void boot(boolean create, Properties properties) throws StandardException {
+    		
+    		DataValueDescriptor decimalImplementation = getNullDecimal(null);
+    		
+    		TypeId.decimalImplementation = decimalImplementation;
+    		RegisteredFormatIds.TwoByte[StoredFormatIds.SQL_DECIMAL_ID]
+    									= decimalImplementation.getClass().getName();
+    		
+    	}
 
+    	/* (non-Javadoc)
+    	 * @see org.apache.derby.iapi.services.monitor.ModuleControl#stop()
+    	 */
+    	public void stop() {
+    	}
+ 
         /**
          * @see DataValueFactory#getDataValue
          *
