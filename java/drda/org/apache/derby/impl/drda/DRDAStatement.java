@@ -484,7 +484,8 @@ class DRDAStatement
 		// save current prepare iso level
 		int saveIsolationLevel = -1;
 		boolean isolationSet = false;
-		if (pkgnamcsn !=null)
+		if (pkgnamcsn !=null && 
+			isolationLevel != Connection.TRANSACTION_NONE)
 		{
 			saveIsolationLevel = database.getPrepareIsolation();
 			database.setPrepareIsolation(isolationLevel);

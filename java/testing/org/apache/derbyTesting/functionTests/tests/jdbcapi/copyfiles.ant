@@ -39,6 +39,7 @@ secureUsersldap_derby.properties
 secureUsersldap_sed.properties
 searchclob.txt
 setTransactionIsolation_derby.properties
+setTransactionIsolation_sed.properties
 short.txt
 parameterMetaDataJdbc30_app.properties
 users.sql

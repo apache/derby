@@ -52,7 +52,6 @@ public class setTransactionIsolation{
 		Connection conn = ij.startJBMS();
 		
 		createAndPopulateTable(conn);
-
 		runTests(conn);
 		conn.rollback();
 		conn.close();
@@ -107,6 +106,7 @@ public class setTransactionIsolation{
 		   // on already prepared statements for network server
 		   conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 		   testIsolation(conn, false);
+		   testSetTransactionIsolationInHoldCursor(conn);
 
 		} catch (SQLException sqle) {
 			System.out.print("FAIL:");
@@ -168,7 +168,29 @@ public class setTransactionIsolation{
 
 	}
 	
-
+	/**
+	 *   Call setTransactionIsolation with holdable cursor open?
+	 */
+	public static void testSetTransactionIsolationInHoldCursor(Connection conn) 
+	{
+		try {
+			
+			PreparedStatement ps = conn.prepareStatement("SELECT * from TAB1");
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			// setTransactionIsolation should fail because we have 
+			// a holdable cursor open
+			conn.setTransactionIsolation(java.sql.Connection.TRANSACTION_SERIALIZABLE);
+		} catch (SQLException se)
+		{
+			System.out.println("EXPECTED EXCEPTION SQLSTATE:" + 
+							   se.getSQLState() + " " +
+							   se.getMessage());
+			return;
+		}
+		System.out.println("FAIL: setTransactionIsolation() did not throw exception with open hold cursor");
+	}
+	
 	public static void testLevelsAndPrintStatistics(Connection con, String sql,
 													boolean makeNewStatements)
 		throws SQLException
