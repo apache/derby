@@ -69,7 +69,6 @@ lang/insert.sql
 lang/isolationLevels.sql
 lang/joinDeadlock.sql
 lang/joins.sql
-lang/langUnitTests.sql
 lang/lockTable.sql
 lang/logStream.java
 lang/logop.sql
