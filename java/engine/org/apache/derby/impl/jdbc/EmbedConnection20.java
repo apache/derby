@@ -62,18 +62,19 @@ public class EmbedConnection20 extends EmbedConnection
 	}
 
 	/**
-	 * Drop all the declared global temporary tables associated with this connection. This gets called
-	 * when a getConnection() is done on a PooledConnection. This will ensure all the temporary tables
-	 * declared on earlier connection handle associated with this physical database connection are dropped
-	 * before a new connection handle is issued on that same physical database connection.
-	 *
+		Reset the connection before it is returned from a PooledConnection
+		to a new application request (wrapped by a BrokeredConnection).
+		Examples of reset covered here is dropping session temporary tables
+		and reseting IDENTITY_VAL_LOCAL.
+		Most JDBC level reset is handled by calling standard java.sql.Connection
+		methods from EmbedPooledConnection.
 	 */
-	public void dropAllDeclaredGlobalTempTables() throws SQLException {
+	public void resetFromPool() throws SQLException {
 		synchronized (getConnectionSynchronization())
 		{
 			setupContextStack();
 			try {
-				getLanguageConnection().dropAllDeclaredGlobalTempTables();
+				getLanguageConnection().resetFromPool();
 			} catch (StandardException t) {
 				throw handleException(t);
 			}

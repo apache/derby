@@ -233,12 +233,10 @@ public interface LanguageConnectionContext extends Context {
 	public TableDescriptor getTableDescriptorForDeclaredGlobalTempTable(String tableName);
 
 	/**
-	 * Drop all the declared global temporary tables associated with this connection. This gets called
-	 * when a getConnection() is done on a PooledConnection. This will ensure all the temporary tables
-	 * declared on earlier connection handle associated with this physical database connection are dropped
-	 * before a new connection handle is issued on that same physical database connection.
+		Reset the connection before it is returned (indirectly) by
+		a PooledConnection object. See EmbeddedConnection.
 	 */
-	public void dropAllDeclaredGlobalTempTables()
+	public void resetFromPool()
 		 throws StandardException;
 
 	/**

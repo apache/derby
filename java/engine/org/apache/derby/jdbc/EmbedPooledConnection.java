@@ -202,8 +202,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		if (realConnection.getHoldability() != JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
 			realConnection.setHoldability(JDBC30Translation.HOLD_CURSORS_OVER_COMMIT);
 
-		// drop any temporary tables that may have been declared by the previous user
-		realConnection.dropAllDeclaredGlobalTempTables();
+		// reset any remaining state of the connection
+		realConnection.resetFromPool();
 	}
 
 	/**
