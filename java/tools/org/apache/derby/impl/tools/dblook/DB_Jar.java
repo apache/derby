@@ -89,13 +89,13 @@ public class DB_Jar {
 			oldJarPath.append(schemaWithoutQuotes);
 			oldJarPath.append(jarFullName);
 
-			// Copy jar file to CSJARS directory.
+			// Copy jar file to DBJARS directory.
 			String absJarDir = null;
 			try {
 
-				// Create the CSJARS directory.
+				// Create the DBJARS directory.
 				File jarDir = new File(System.getProperty("user.dir") +
-					separator + "CSJARS" + separator + schemaWithoutQuotes);
+					separator + "DBJARS" + separator + schemaWithoutQuotes);
 				absJarDir = jarDir.getAbsolutePath();
 				jarDir.mkdirs();
 
@@ -126,7 +126,7 @@ public class DB_Jar {
 				continue;
 			}
 
-			// Now, add the DDL to read the jar from CSJARS.
+			// Now, add the DDL to read the jar from DBJARS.
 			StringBuffer loadJarString = new StringBuffer();
 			loadJarString.append("CALL SQLJ.INSTALL_JAR('file:");
 			loadJarString.append(absJarDir);

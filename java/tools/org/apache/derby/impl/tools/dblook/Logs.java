@@ -64,8 +64,8 @@ public class Logs {
 		try {
 
 			logFile = new PrintWriter(new FileOutputStream(logFileName, appendLogs));
-			if (ddlFileName != null)
-				ddlFile = new PrintWriter(new FileOutputStream(ddlFileName, appendLogs));
+			ddlFile = (ddlFileName == null) ? null
+					: new PrintWriter(new FileOutputStream(ddlFileName, appendLogs));
 			verbose = doVerbose;
 			stmtEnd = endOfStmt;
 			atLeastOneDebug = false;

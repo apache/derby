@@ -1,4 +1,4 @@
--= Start Test. =-
+-= Start dblook Functional Tests. =-
 Creating database 'wombat' from ddl script 'dblook_makeDB.sql'
 Dumping system tables for 'wombat'
 ----------------=================---------------
@@ -4628,7 +4628,11 @@ Database 'wombat_new' deleted.
 Dumping DDL w/ invalid url, and writing
 error to the log:
 *******************************************
-File dblook.log was NOT empty; refer to that file (in the test directory) to see its contents.
+File dblook.log was NOT empty.  Contents are:
+############## Begin File Contents ################
+java.sql.SQLException: No suitable driver
+-- **--> DEBUG: No suitable driver
+############## End File Contents ################
 Creating database 'wombat_new' from ddl script 'wombat.sql'
 Dumping system tables for 'wombat_new'
 ----------------=================---------------
@@ -4655,4 +4659,205 @@ APP
 ========== SYSTRIGGERS ==========
 ========== SYSVIEWS ==========
 Database 'wombat_new' deleted.
+-= Start dblook Message Tests =-
+Database 'wombat' deleted.
+Creating database 'wombat' from ddl script 'dblook_makeDB_2.sql'
+************
+Msg Test 1
+************
+--
+*******************************************
+Dumping full schema for 'wombat'
+to file 'wombat.sql':
+*******************************************
+File wombat.sql was NOT empty.  Contents are:
+############## Begin File Contents ################
+-- ============================
+-- This file was created using Derby's dblook utility.
+-- Timestamp: xxxxxxFILTERED-TIMESTAMPxxxxx
+-- Source database is: <dbPath>
+-- Connection URL is: <dbURL>
+-- appendLogs: false
+-- ----------------------------------------------
+-- DDL Statements for schemas
+-- ----------------------------------------------
+CREATE SCHEMA "BAR"
+-- ----------------------------------------------
+-- DDL Statements for jars
+-- **** NOTE **** In order for jar files to be loaded correctly,
+-- you must either 1) ensure that the DBJARS directory (created
+-- automatically by dblook) exists where it was created (i.e. at
+-- the path shown in the statements below), or else 2) change the
+-- path in the statements below to reflect the current location of
+-- DBJARS.  If the DBJARS directory does not exist, or if it
+-- has been moved and the path is not correct, the following DDL
+-- statements will throw errors, and the jar files will NOT be
+-- loaded.
+-- ----------------------------------------------
+CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
+-- ----------------------------------------------
+-- DDL Statements for stored procedures
+-- ----------------------------------------------
+CREATE PROCEDURE "APP"."PROC1" (INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3' 
+-- ----------------------------------------------
+-- DDL Statements for tables
+-- ----------------------------------------------
+CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "FKCHAR" CHAR(5))
+-- ----------------------------------------------
+-- DDL Statements for indexes
+-- ----------------------------------------------
+CREATE INDEX "BAR"."IX1" ON "BAR"."T1" ("I" DESC)
+-- ----------------------------------------------
+-- DDL Statements for keys
+-- ----------------------------------------------
+-- primary/unique
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" PRIMARY KEY ("C")
+-- foreign
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" FOREIGN KEY ("FKCHAR") REFERENCES "BAR"."T1" ("C") ON DELETE NO ACTION ON UPDATE NO ACTION
+-- ----------------------------------------------
+-- DDL Statements for checks
+-- ----------------------------------------------
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "NOTEVIL" CHECK (vc != 'evil')
+-- ----------------------------------------------
+-- DDL Statements for views
+-- ----------------------------------------------
+SET SCHEMA "APP"
+create view v1 (dum, dee, dokie) as select a.c, a.i, a.vc from bar.t1 as a
+-- Reverting back to default schema 'APP'
+SET SCHEMA "APP"
+-- ----------------------------------------------
+-- DDL Statements for triggers
+-- ----------------------------------------------
+CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW MODE DB2SQL update bar.t1 set i = 4 where i = 2
+############## End File Contents ################
+File dblook.log was empty.
+************
+Msg Test 2
+************
+File wombat.sql was NOT empty.  Contents are:
+############## Begin File Contents ################
+-- ============================
+-- This file was created using Derby's dblook utility.
+-- Timestamp: xxxxxxFILTERED-TIMESTAMPxxxxx
+-- Source database is: <dbPath>
+-- Connection URL is: <dbURL>
+-- The dblook utility will consider only specified tables.
+-- Specified schema is: bar
+-- appendLogs: false
+-- ----------------------------------------------
+-- DDL Statements for schemas
+-- ----------------------------------------------
+CREATE SCHEMA "BAR";
+-- ----------------------------------------------
+-- DDL Statements for tables
+-- ----------------------------------------------
+CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "FKCHAR" CHAR(5));
+-- ----------------------------------------------
+-- DDL Statements for indexes
+-- ----------------------------------------------
+CREATE INDEX "BAR"."IX1" ON "BAR"."T1" ("I" DESC);
+-- ----------------------------------------------
+-- DDL Statements for keys
+-- ----------------------------------------------
+-- primary/unique
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" PRIMARY KEY ("C");
+-- foreign
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" FOREIGN KEY ("FKCHAR") REFERENCES "BAR"."T1" ("C") ON DELETE NO ACTION ON UPDATE NO ACTION;
+-- ----------------------------------------------
+-- DDL Statements for checks
+-- ----------------------------------------------
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "NOTEVIL" CHECK (vc != 'evil');
+############## End File Contents ################
+File dblook.log was empty.
+************
+Msg Test 3
+************
+ USAGE:
+ java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]
+ 	where the source URL is the full URL, including the connection protocol
+ 	and any connection attributes that might apply.  For example, use
+ 	'jdbc:derby:myDB', or 'jdbc:derby:net://localhost:1527/myDB:user=usr;'. 
+ 	options include: 
+ 	-z <schemaName> to specify a schema to which the DDL generation
+ 	 should be limited.  Only database objects with that schema will have
+ 	 their DDL generated.
+ 	-t <tableOne> <tableTwo> ... to specify a list of tables for which
+ 	 the DDL will be generated; any tables not in the list will be ignored.
+ 	-td <value> to specify what should be appended to the end
+ 	 of each DDL statement.
+		This defaults to ';'.
+ 	-noview to prevent the generation of DDL for views.
+ 	-append to keep from overwriting the output files.
+ 	-verbose to have error messages printed to the console (in addition
+ 	 to the log file).  If not specified, errors will only be printed to the
+ 	 log file.
+ 	-o <filename> to specify the file name to which the generated DDL
+ 	 will be written.
+ 		If not specified, default is the console. 
+************
+Msg Test 4
+************
+-- Timestamp: xxxxxxFILTERED-TIMESTAMPxxxxx
+-- Source database is: <dbPath>
+-- Connection URL is: <dbURL>
+-- appendLogs: false
+-- ----------------------------------------------
+-- DDL Statements for schemas
+-- ----------------------------------------------
+CREATE SCHEMA "BAR" #
+-- ----------------------------------------------
+-- DDL Statements for jars
+-- **** NOTE **** In order for jar files to be loaded correctly,
+-- you must either 1) ensure that the DBJARS directory (created
+-- automatically by dblook) exists where it was created (i.e. at
+-- the path shown in the statements below), or else 2) change the
+-- path in the statements below to reflect the current location of
+-- DBJARS.  If the DBJARS directory does not exist, or if it
+-- has been moved and the path is not correct, the following DDL
+-- statements will throw errors, and the jar files will NOT be
+-- loaded.
+-- ----------------------------------------------
+CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
+-- ----------------------------------------------
+-- DDL Statements for stored procedures
+-- ----------------------------------------------
+CREATE PROCEDURE "APP"."PROC1" (INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3'  #
+-- ----------------------------------------------
+-- DDL Statements for tables
+-- ----------------------------------------------
+CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "FKCHAR" CHAR(5)) #
+-- ----------------------------------------------
+-- DDL Statements for indexes
+-- ----------------------------------------------
+CREATE INDEX "BAR"."IX1" ON "BAR"."T1" ("I" DESC) #
+-- ----------------------------------------------
+-- DDL Statements for keys
+-- ----------------------------------------------
+-- primary/unique
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" PRIMARY KEY ("C") #
+-- foreign
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" FOREIGN KEY ("FKCHAR") REFERENCES "BAR"."T1" ("C") ON DELETE NO ACTION ON UPDATE NO ACTION #
+-- ----------------------------------------------
+-- DDL Statements for checks
+-- ----------------------------------------------
+ALTER TABLE "BAR"."T1" ADD CONSTRAINT "NOTEVIL" CHECK (vc != 'evil') #
+-- ----------------------------------------------
+-- DDL Statements for views
+-- ----------------------------------------------
+SET SCHEMA "APP" #
+create view v1 (dum, dee, dokie) as select a.c, a.i, a.vc from bar.t1 as a #
+-- Reverting back to default schema 'APP'
+SET SCHEMA "APP" #
+-- ----------------------------------------------
+-- DDL Statements for triggers
+-- ----------------------------------------------
+CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW MODE DB2SQL update bar.t1 set i = 4 where i = 2 #
+************
+Msg Test 5
+************
+File dblook.log was NOT empty.  Contents are:
+############## Begin File Contents ################
+-- **--> DEBUG: Failed to load jar file <jarFilePath>
+java.io.FileNotFoundException: <filePath>
+############## End File Contents ################
 [ Done. ]
