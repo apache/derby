@@ -60,7 +60,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -777,7 +776,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			{
 				resourceAdapter = 
 					Monitor.bootServiceModule(create, this,
-											 ResourceAdapter.MODULE,
+											 org.apache.derby.iapi.reference.Module.ResourceAdapter,
 											 allParams);
 			}
 			catch (StandardException mse)

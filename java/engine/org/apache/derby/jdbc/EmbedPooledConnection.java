@@ -146,7 +146,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	}
 
 	protected final Connection getNewCurrentConnectionHandle() {
-		Connection applicationConnection = currentConnectionHandle =  realConnection.getLocalDriver().newBrokeredConnection(this);
+		Connection applicationConnection = currentConnectionHandle =
+			((org.apache.derby.jdbc.Driver20) (realConnection.getLocalDriver())).newBrokeredConnection(this);
 		realConnection.setApplicationConnection(applicationConnection);
 		return applicationConnection;
 

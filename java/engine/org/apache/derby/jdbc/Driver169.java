@@ -28,8 +28,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
-import org.apache.derby.iapi.jdbc.BrokeredConnection;
-import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -427,9 +425,6 @@ public abstract class Driver169 implements ModuleControl {
 	 *
 	 */
 	public abstract Connection getNewNestedConnection(EmbedConnection conn);
-
-
-	public abstract BrokeredConnection newBrokeredConnection(BrokeredConnectionControl control);
 
 	/*
 	** methods to be overridden by subimplementations wishing to insert

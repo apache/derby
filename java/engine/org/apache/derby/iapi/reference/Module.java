@@ -24,6 +24,6 @@ public interface Module {
 	String JavaFactory ="org.apache.derby.iapi.services.compiler.JavaFactory";
 	String LockFactory = "org.apache.derby.iapi.services.locks.LockFactory";
 	String PropertyFactory = "org.apache.derby.iapi.services.property.PropertyFactory";
-
+	String ResourceAdapter = "org.apache.derby.iapi.jdbc.ResourceAdapter";
 
 }

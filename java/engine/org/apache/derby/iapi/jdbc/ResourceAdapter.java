@@ -356,13 +356,6 @@ public interface ResourceAdapter {
 	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
-	 * Used to identify this interface when finding it with the Monitor.
-     **/
-	public static final String MODULE = 
-        "org.apache.derby.iapi.jdbc.ResourceAdapter";
-
-
-	/**
 		If a run time global transaction exists, the resource adapter will find
 		it and return a capsule of information so that a Connection can be
 		attached to the transaction. 
