@@ -46,6 +46,7 @@
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement30.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement.java"/>
+	  <exclude name="${derby.dir}/${cur.dir}/JDBCBoot.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/ResourceAdapter.java"/>
     </javac>
   </target>
