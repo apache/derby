@@ -52,10 +52,11 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-		<pathelement path="${jndi}"/>
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/jdbc/authentication/**"/>
+      <exclude name="${derby.dir}/impl/jdbc/authentication/JNDI**"/>
+      <exclude name="${derby.dir}/impl/jdbc/authentication/LDAP**"/>
     </javac>
     </target>
 
@@ -76,6 +77,24 @@
       </classpath>
 	  <include name="${derby.dir}/impl/jdbc/*20.java"/>
     </javac>
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+		<pathelement path="${jndi}"/>
+        <pathelement path="${java13compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/impl/jdbc/authentication/JNDI**"/>
+      <include name="${derby.dir}/impl/jdbc/authentication/LDAP**"/>
+   </javac>
   </target>
 
   <target name="compile_jdbc3" depends="compile_jdbc2">
