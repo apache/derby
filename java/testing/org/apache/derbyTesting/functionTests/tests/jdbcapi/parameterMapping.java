@@ -1959,7 +1959,8 @@ public class parameterMapping {
 				// Setting a java.sql.Clob value works with
 				// a character column but sets the value to
 				// be the object's toString. This is probably a bug with JCC.
-				if (s.startsWith("com.ibm.db2.jcc."))
+				if (s.startsWith("com.ibm.db2.jcc.") || 
+					s.startsWith("org.apache.derby.client"))
 					s = "<OBJECT.toString()>";
 
 
