@@ -18,12 +18,7 @@ import org.apache.derby.iapi.services.info.PropertyNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
 public class ZipInfoProperties // extends Properties
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-{ private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-
+{
 	private final ProductVersionHolder	version;
     /**
         full path to zip (or expanded zip)

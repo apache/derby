@@ -28,10 +28,6 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
  */
 public class utilMain14 extends utilMain
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
     private static final String JDBC_NOTSUPPORTED = "JDBC 3 method called - not yet supported";
 	/**
 	 * Set up the test to run with 'numConnections' connections/users.

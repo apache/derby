@@ -21,10 +21,6 @@ import java.sql.Connection;
  */
 interface xaAbstractHelper
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	void XADataSourceStatement(ij parser, Token dbname, Token shut, String create) throws SQLException;
 	void XAConnectStatement(ij parser, Token user, Token pass, String id) throws SQLException;

@@ -33,10 +33,6 @@ import java.sql.Types;
 
 
 public class LocalizedResource  implements java.security.PrivilegedAction {
-	/**
-			IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private ResourceBundle res;
 	private Locale locale;

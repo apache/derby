@@ -19,10 +19,6 @@ import java.sql.SQLWarning;
  * @author ames
  */
 class ijVectorResult extends ijResultImpl {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	Vector vec;
 	SQLWarning warns;

@@ -23,10 +23,6 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 
 public class AttributeHolder {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
     //This is an inner class.  This class hold the details about each
     //specific attribute which includes what the attribute is and

@@ -15,10 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 
 public class LocalizedInput extends InputStreamReader{
-	/**
-			IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 	private InputStream in;
 	public LocalizedInput(InputStream i){
 		super(i);

@@ -21,10 +21,6 @@ package org.apache.derby.impl.tools.ij;
  */
 public class ParseException extends Exception {
   /**
-			IBM Copyright &copy notice.
-   */
-  public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-  /**
    * This constructor is used by the method "generateParseException"
    * in the generated parser.  Calling this constructor generates
    * a new object of this type with the fields "currentToken",

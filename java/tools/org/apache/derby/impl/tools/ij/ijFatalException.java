@@ -18,10 +18,6 @@ import java.sql.SQLException;
  */
 
 public class ijFatalException extends RuntimeException {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	private final static String FatalException = LocalizedResource.getMessage("IJ_FataExceTerm");
 	private SQLException e;

@@ -25,10 +25,6 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
  */
 public class mtTester implements Runnable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private mtTestSuite	suite;
 	private String		name;
 	private LocalizedOutput	log;

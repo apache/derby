@@ -48,10 +48,6 @@ import java.util.*;
  *
  */
 public class Main {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public LocalizedOutput out;
 	public utilMain utilInstance;
 	public Class langUtilClass;

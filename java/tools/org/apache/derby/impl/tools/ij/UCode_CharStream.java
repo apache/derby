@@ -18,10 +18,6 @@ package org.apache.derby.impl.tools.ij;
 
 public final class UCode_CharStream implements CharStream
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
   public static final boolean staticFlag = false;
   public int bufpos = -1;
   int bufsize;

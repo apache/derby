@@ -49,10 +49,6 @@ import java.lang.reflect.*;
 	@author jerry
  */
 public class utilMain implements java.security.PrivilegedAction {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
   private static Class[] CONN_PARAM = { Integer.TYPE };
   private static Object[] CONN_ARG = { new Integer(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)};

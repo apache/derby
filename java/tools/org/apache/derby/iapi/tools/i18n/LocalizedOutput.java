@@ -15,10 +15,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 public class LocalizedOutput extends PrintWriter {
-	/**
-			IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 	private OutputStream out;
 	public LocalizedOutput(OutputStream o){
 		super(new OutputStreamWriter(o), true);

@@ -24,15 +24,6 @@ import org.apache.derby.tools.dblook;
 
 public class DB_Key {
 
-	/* 
-		IBM Copyright &copy notice.
-	*/
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
-
 	// Prepared statements used throughout the DDL
 	// generation process.
 	private static PreparedStatement getReferenceCols;

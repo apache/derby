@@ -31,10 +31,6 @@ import java.util.Hashtable;
 	@author ames
  */
 class Session {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	static final String DEFAULT_NAME="CONNECTION";
 
 	boolean singleSession = true;

@@ -65,10 +65,6 @@ import org.apache.derby.iapi.tools.i18n.*;
 
 
 public final class Main {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
   /**
     Application entry point for SysInfo.   This will print out

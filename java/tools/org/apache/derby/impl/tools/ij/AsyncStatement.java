@@ -16,10 +16,6 @@ import java.sql.SQLException;
 //import java.io.PrintStream;
 
 class AsyncStatement extends Thread {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	Connection conn;
 	String stmt;
 	ijResult result;

@@ -41,15 +41,6 @@ import org.apache.derby.impl.tools.cslook.Logs;
 
 public class dblook {
 
-	/* 
-		IBM Copyright &copy notice.
-	*/
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
-
 	// DB2 enforces a maximum of 30 tables to be specified as part of
 	// the table list.
 	public static final int DB2_MAX_NUMBER_OF_TABLES = 30;

@@ -31,10 +31,6 @@ import javax.sql.ConnectionPoolDataSource;
  */
 class xaHelper implements xaAbstractHelper
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	private XADataSource currentXADataSource;
 	private XAConnection currentXAConnection;

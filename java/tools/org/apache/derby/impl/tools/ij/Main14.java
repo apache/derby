@@ -36,10 +36,6 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 public class Main14 extends Main
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
-	/**
 	 * ij can be used directly on a shell command line through
 	 * its main program.
 	 * @param args allows 1 file name to be specified, from which

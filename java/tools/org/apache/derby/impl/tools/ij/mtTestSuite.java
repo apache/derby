@@ -21,10 +21,6 @@ import java.lang.Math;
  */
 public class mtTestSuite
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private Vector cases;
 	private Vector last;
 	private Vector init;

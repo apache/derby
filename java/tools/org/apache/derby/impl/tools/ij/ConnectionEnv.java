@@ -30,10 +30,6 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 	@author jerry
  */
 class ConnectionEnv {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	Hashtable sessions = new Hashtable();
 	private Session currSession;
 	private String tag;

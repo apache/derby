@@ -24,10 +24,6 @@ import java.io.IOException;
  */
 
 public class ijException extends RuntimeException {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private	final static String	IllegalStatementName="IJ_IllegalStatementName";
 	private final static String NotYetImplemented="IJ_NotYetImpl";

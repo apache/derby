@@ -24,10 +24,6 @@ import java.util.Vector;
  * @author ames
  */
 abstract class ijResultImpl implements ijResult {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	public boolean isConnection() { return false; }
 	public boolean isStatement() { return false; }
 	public boolean isResultSet() throws SQLException { return false; }

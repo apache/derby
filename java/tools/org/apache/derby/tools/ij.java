@@ -31,10 +31,6 @@ import java.io.IOException;
 	ij is can also be used with any database server that supports a JDBC driver.
 */
 public class ij {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
   /**
   	@exception IOException thrown if cannot access input or output files.

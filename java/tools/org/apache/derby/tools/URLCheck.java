@@ -31,10 +31,6 @@ import java.sql.SQLException;
  */
 
 public class URLCheck {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
   public Vector attributes;
   public static Vector booleanAttributes;

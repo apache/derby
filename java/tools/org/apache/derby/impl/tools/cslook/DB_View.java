@@ -21,15 +21,6 @@ import org.apache.derby.tools.dblook;
 
 public class DB_View {
 
-	/* 
-		IBM Copyright &copy notice.
-	*/
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
-
 	/* ************************************************
 	 * Generate the DDL for all views in a given
 	 * database.

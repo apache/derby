@@ -25,10 +25,6 @@ import org.apache.derby.iapi.tools.i18n.*;
  */
 public class mtTestCase
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	public String name = null;
 	public String file = null;
 	public String propFile = null;

@@ -14,10 +14,6 @@ package org.apache.derby.impl.tools.ij;
  */
 public class mtTime
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	public int hours;
 	public int minutes;
 	public int seconds;

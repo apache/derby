@@ -36,10 +36,6 @@ import java.io.Reader;
  */
 
 public class StatementFinder {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private Reader source; 
 	private StringBuffer statement = new StringBuffer();

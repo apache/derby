@@ -25,10 +25,6 @@ import java.util.Vector;
  * @author ames
  */
 class ijMultiResult extends ijResultImpl {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	Vector results = new Vector();
 	Statement statement;
