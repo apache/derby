@@ -47,7 +47,7 @@ Col # 500 = 500  Col 1000 = null
 Col # 500 = 500  Col 1000 = 1000
 Insert wrong column name
 insertTab ( bigtab,1001)
-SQLState: 42X14 message: 'C1001' is not a column in table or VTI 'CS.BIGTAB'.
+SQLState: 42X14 message: 'C1001' is not a column in table or VTI 'APP.BIGTAB'.
 Expected Syntax error 
 insertTab ( bigtab,0)
 SQLState: 42X01 message: Syntax error: Encountered "<EOF>" at line 1, column 29.
