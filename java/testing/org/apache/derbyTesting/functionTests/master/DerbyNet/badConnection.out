@@ -1,0 +1,18 @@
+No user/password  (Client error)
+passed SQLException all the way to client, then thrown by client...
+SQLState is: null
+vendorCode is: -99999
+nextException is: null
+reason is: null userid not supported
+Database not Found  (RDBNFNRM)
+passed SQLException all the way to client, then thrown by client...
+SQLState is: 08004
+vendorCode is: -4499
+nextException is: null
+reason is: The application server rejected establishment of the connection.  An attempt was made to access a database, notthere, which was not found.
+Invalid Attribute  value (RDBAFLRM)
+passed SQLException all the way to client, then thrown by client...
+SQLState is: XJ05B
+vendorCode is: -1
+nextException is: null
+reason is: DB2 SQL error: SQLCODE: -1, SQLSTATE: XJ05B, SQLERRMC: upgradenotValidValue{true |false}XJ05B.CJDBC attribute 'upgrade' has an invalid value 'notValidValue', valid values are '{true |false}'.((server log XXX)
