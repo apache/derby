@@ -45,12 +45,15 @@ import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.types.SQLDouble;
 import org.apache.derby.iapi.types.SQLTime;
 
+
+
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -65,7 +68,7 @@ import java.text.ParseException;
 /**
  * This contains an instance of a SQL Timestamp object.
  * <p>
- * SQLTimestamp is stored in 3 ints - an encoded date, an encoded time and 
+ * SQLTimestamp is stored in 3 ints - an encoded date, an encoded time and
  *		nanoseconds
  * encodedDate = 0 indicates a null WSCTimestamp
  *
@@ -989,5 +992,12 @@ public final class SQLTimestamp extends DataType
 		currentCal.setTime(value);
 		return SQLTime.computeEncodedTime(currentCal);
 	}
+
+    
+    public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
+
+                  ps.setTimestamp(position, getTimestamp((Calendar) null));
+     }
 }
+
 

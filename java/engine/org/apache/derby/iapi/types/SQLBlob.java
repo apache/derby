@@ -46,6 +46,7 @@ import java.io.ObjectInput;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 
 /**
  * SQLBlob satisfies the DataValueDescriptor,
@@ -186,4 +187,9 @@ public class SQLBlob extends SQLBinary
 			return TypeId.BLOB_PRECEDENCE; // not really used
 		}
 
-	}
+    public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
+        ps.setBlob(position,null);    
+    }
+}
+
+

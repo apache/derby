@@ -1,0 +1,6 @@
+Test prepStmtNull starting
+ResultSet is: work
+ResultSet is: null
+Test prepStmtNull starting
+ResultSet is: blob
+ResultSet is: null
