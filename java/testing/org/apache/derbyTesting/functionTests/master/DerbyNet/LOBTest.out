@@ -1,0 +1,3873 @@
+create table bit_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol char (8 ) for bit data )
+insert into bit_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS char (8 ) for bit data) )
+insert into bit_table ( col_0 ) values ( 'true' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+insert into bit_table ( col_1 ) values ( 'true' )
+insert into bit_table ( col_2 ) values ( 'true' )
+insert into bit_table ( col_3 ) values ( 'true' )
+insert into bit_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) for bit data)
+insert into bit_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
+insert into bit_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
+insert into bit_table ( typecol ) values cast ( X'0074007200750065'  AS char (8 ) for bit data)
+=== Columntype int
+select col_0 from bit_table
+	0 getObject            ->'100'    	: java.lang.Integer
+	0 getArray             ->		EXCEPTION (not yet implemented)
+	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
+	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBoolean           ->'true'    	: java.lang.Boolean
+	0 getByte              ->'100'    	: java.lang.Byte
+	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDouble            ->'100.0'    	: java.lang.Double
+	0 getFloat             ->'100.0'    	: java.lang.Float
+	0 getInt               ->'100'    	: java.lang.Integer
+	0 getLong              ->'100'    	: java.lang.Long
+	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getShort             ->'100'    	: java.lang.Short
+	0 getString            ->'100'    	: java.lang.String
+	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype char(10)
+select col_1 from bit_table
+	1 getObject            ->'101       '    	: java.lang.String
+	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getAsciiStream       ->Object'   	: java.io.InputStream
+	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
+	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBoolean           ->'true'    	: java.lang.Boolean
+	1 getByte              ->'101'    	: java.lang.Byte
+	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getCharacterStream   ->Object'   	: java.io.Reader
+	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->'101.0'    	: java.lang.Double
+	1 getFloat             ->'101.0'    	: java.lang.Float
+	1 getInt               ->'101'    	: java.lang.Integer
+	1 getLong              ->'101'    	: java.lang.Long
+	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getShort             ->'101'    	: java.lang.Short
+	1 getString            ->'101       '    	: java.lang.String
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+=== Columntype varchar(80)
+select col_2 from bit_table
+	2 getObject            ->'102'    	: java.lang.String
+	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getAsciiStream       ->Object'   	: java.io.InputStream
+	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
+	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBoolean           ->'true'    	: java.lang.Boolean
+	2 getByte              ->'102'    	: java.lang.Byte
+	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getCharacterStream   ->Object'   	: java.io.Reader
+	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDouble            ->'102.0'    	: java.lang.Double
+	2 getFloat             ->'102.0'    	: java.lang.Float
+	2 getInt               ->'102'    	: java.lang.Integer
+	2 getLong              ->'102'    	: java.lang.Long
+	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getShort             ->'102'    	: java.lang.Short
+	2 getString            ->'102'    	: java.lang.String
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype long varchar
+select col_3 from bit_table
+	3 getObject            ->'103'    	: java.lang.String
+	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getAsciiStream       ->Object'   	: java.io.InputStream
+	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
+	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBoolean           ->'true'    	: java.lang.Boolean
+	3 getByte              ->'103'    	: java.lang.Byte
+	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getCharacterStream   ->Object'   	: java.io.Reader
+	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDouble            ->'103.0'    	: java.lang.Double
+	3 getFloat             ->'103.0'    	: java.lang.Float
+	3 getInt               ->'103'    	: java.lang.Integer
+	3 getLong              ->'103'    	: java.lang.Long
+	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getShort             ->'103'    	: java.lang.Short
+	3 getString            ->'103'    	: java.lang.String
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype char(10) for bit data
+select col_4 from bit_table
+	4 getObject            ->Object'   	: byte[]
+	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getAsciiStream       ->Object'   	: java.io.InputStream
+	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBinaryStream      ->Object'   	: java.io.InputStream
+	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBytes             ->Object'   	: byte[]
+	4 getCharacterStream   ->Object'   	: java.io.Reader
+	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getRef               ->		EXCEPTION (not yet implemented)
+	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getString            ->'00310030003420202020'    	: java.lang.String
+	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype long varchar for bit data
+select col_5 from bit_table
+	5 getObject            ->Object'   	: byte[]
+	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getAsciiStream       ->Object'   	: java.io.InputStream
+	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBinaryStream      ->Object'   	: java.io.InputStream
+	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBytes             ->Object'   	: byte[]
+	5 getCharacterStream   ->Object'   	: java.io.Reader
+	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getRef               ->		EXCEPTION (not yet implemented)
+	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getString            ->'003100300035'    	: java.lang.String
+	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob(80)
+select col_6 from bit_table
+	6 getObject            ->Object'   	: java.sql.Blob
+	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getAsciiStream       ->Object'   	: java.io.InputStream
+	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBinaryStream      ->Object'   	: java.io.InputStream
+	6 getBlob              ->Object'   	: java.sql.Blob
+	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBytes             ->Object'   	: byte[]
+	6 getCharacterStream   ->Object'   	: java.io.Reader
+	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getRef               ->		EXCEPTION (not yet implemented)
+	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getString            ->'003100300036'    	: java.lang.String
+	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype char (8 ) for bit data
+select typecol from bit_table
+	7 getObject            ->Object'   	: byte[]
+	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getAsciiStream       ->Object'   	: java.io.InputStream
+	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBinaryStream      ->Object'   	: java.io.InputStream
+	7 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBytes             ->Object'   	: byte[]
+	7 getCharacterStream   ->Object'   	: java.io.Reader
+	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getRef               ->		EXCEPTION (not yet implemented)
+	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getString            ->'0031003000372020'    	: java.lang.String
+	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+-----< METADATA TESTS
+select col_0 from bit_table
+	---- 1
+	Column    : COL_0
+	Type      : 4
+	TypeName  : INTEGER
+	ClassName : java.lang.Integer
+	Label     : COL_0
+	DisplaySz : 11
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '100' : java.lang.Integer
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_1 from bit_table
+	---- 1
+	Column    : COL_1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : COL_1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '101       ' : java.lang.String
+	OUT = 'true      ' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_2 from bit_table
+	---- 1
+	Column    : COL_2
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_2
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '102' : java.lang.String
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_3 from bit_table
+	---- 1
+	Column    : COL_3
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_3
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '103' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_4 from bit_table
+	---- 1
+	Column    : COL_4
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_4
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_5 from bit_table
+	---- 1
+	Column    : COL_5
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_5
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select col_6 from bit_table
+	---- 1
+	Column    : COL_6
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : COL_6
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select typecol from bit_table
+	---- 1
+	Column    : TYPECOL
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : TYPECOL
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+-----< columns CAST TO type: METADATA TESTS
+select cast( col_0 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
+select cast( col_1 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
+select cast( col_2 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'VARCHAR' to 'CHAR () FOR BIT DATA'.
+select cast( col_3 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'LONG VARCHAR' to 'CHAR () FOR BIT DATA'.
+select cast( col_4 as char (8) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_5 as char (8) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select cast( col_6 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+select cast( typecol as char (8) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+-----< type CAST TO types: METADATA TESTS
+select cast( typecol as int ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'INTEGER'.
+select cast( typecol as char(10) ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+select cast( typecol as varchar(80) ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+select cast( typecol as long varchar ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
+select cast( typecol as char(10) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+select cast( typecol as long varchar for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+select cast( typecol as blob(80) ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+select cast( typecol as char (8 ) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+drop table bit_table
+create table bit_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol char (8 ) for bit data )
+insert into bit_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS char (8 ) for bit data) )
+insert into bit_table ( col_0 ) values ( 'true' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+insert into bit_table ( col_1 ) values ( 'true' )
+insert into bit_table ( col_2 ) values ( 'true' )
+insert into bit_table ( col_3 ) values ( 'true' )
+insert into bit_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) for bit data)
+insert into bit_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
+insert into bit_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
+insert into bit_table ( typecol ) values cast ( X'0074007200750065'  AS char (8 ) for bit data)
+=== Columntype int
+select col_0 from bit_table
+	0 getObject            ->'100'    	: java.lang.Integer
+	0 getArray             ->		EXCEPTION (not yet implemented)
+	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
+	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBoolean           ->'true'    	: java.lang.Boolean
+	0 getByte              ->'100'    	: java.lang.Byte
+	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDouble            ->'100.0'    	: java.lang.Double
+	0 getFloat             ->'100.0'    	: java.lang.Float
+	0 getInt               ->'100'    	: java.lang.Integer
+	0 getLong              ->'100'    	: java.lang.Long
+	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getShort             ->'100'    	: java.lang.Short
+	0 getString            ->'100'    	: java.lang.String
+	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype char(10)
+select col_1 from bit_table
+	1 getObject            ->'101       '    	: java.lang.String
+	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getAsciiStream       ->Object'   	: java.io.InputStream
+	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
+	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBoolean           ->'true'    	: java.lang.Boolean
+	1 getByte              ->'101'    	: java.lang.Byte
+	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getCharacterStream   ->Object'   	: java.io.Reader
+	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->'101.0'    	: java.lang.Double
+	1 getFloat             ->'101.0'    	: java.lang.Float
+	1 getInt               ->'101'    	: java.lang.Integer
+	1 getLong              ->'101'    	: java.lang.Long
+	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getShort             ->'101'    	: java.lang.Short
+	1 getString            ->'101       '    	: java.lang.String
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+=== Columntype varchar(80)
+select col_2 from bit_table
+	2 getObject            ->'102'    	: java.lang.String
+	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getAsciiStream       ->Object'   	: java.io.InputStream
+	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
+	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBoolean           ->'true'    	: java.lang.Boolean
+	2 getByte              ->'102'    	: java.lang.Byte
+	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getCharacterStream   ->Object'   	: java.io.Reader
+	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDouble            ->'102.0'    	: java.lang.Double
+	2 getFloat             ->'102.0'    	: java.lang.Float
+	2 getInt               ->'102'    	: java.lang.Integer
+	2 getLong              ->'102'    	: java.lang.Long
+	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getShort             ->'102'    	: java.lang.Short
+	2 getString            ->'102'    	: java.lang.String
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype long varchar
+select col_3 from bit_table
+	3 getObject            ->'103'    	: java.lang.String
+	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getAsciiStream       ->Object'   	: java.io.InputStream
+	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
+	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBoolean           ->'true'    	: java.lang.Boolean
+	3 getByte              ->'103'    	: java.lang.Byte
+	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getCharacterStream   ->Object'   	: java.io.Reader
+	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDouble            ->'103.0'    	: java.lang.Double
+	3 getFloat             ->'103.0'    	: java.lang.Float
+	3 getInt               ->'103'    	: java.lang.Integer
+	3 getLong              ->'103'    	: java.lang.Long
+	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getShort             ->'103'    	: java.lang.Short
+	3 getString            ->'103'    	: java.lang.String
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype char(10) for bit data
+select col_4 from bit_table
+	4 getObject            ->Object'   	: byte[]
+	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getAsciiStream       ->Object'   	: java.io.InputStream
+	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBinaryStream      ->Object'   	: java.io.InputStream
+	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBytes             ->Object'   	: byte[]
+	4 getCharacterStream   ->Object'   	: java.io.Reader
+	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getRef               ->		EXCEPTION (not yet implemented)
+	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getString            ->'00310030003420202020'    	: java.lang.String
+	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype long varchar for bit data
+select col_5 from bit_table
+	5 getObject            ->Object'   	: byte[]
+	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getAsciiStream       ->Object'   	: java.io.InputStream
+	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBinaryStream      ->Object'   	: java.io.InputStream
+	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBytes             ->Object'   	: byte[]
+	5 getCharacterStream   ->Object'   	: java.io.Reader
+	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getRef               ->		EXCEPTION (not yet implemented)
+	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getString            ->'003100300035'    	: java.lang.String
+	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob(80)
+select col_6 from bit_table
+	6 getObject            ->Object'   	: java.sql.Blob
+	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getAsciiStream       ->Object'   	: java.io.InputStream
+	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBinaryStream      ->Object'   	: java.io.InputStream
+	6 getBlob              ->Object'   	: java.sql.Blob
+	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBytes             ->Object'   	: byte[]
+	6 getCharacterStream   ->Object'   	: java.io.Reader
+	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getRef               ->		EXCEPTION (not yet implemented)
+	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getString            ->'003100300036'    	: java.lang.String
+	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype char (8 ) for bit data
+select typecol from bit_table
+	7 getObject            ->Object'   	: byte[]
+	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getAsciiStream       ->Object'   	: java.io.InputStream
+	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBinaryStream      ->Object'   	: java.io.InputStream
+	7 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBytes             ->Object'   	: byte[]
+	7 getCharacterStream   ->Object'   	: java.io.Reader
+	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getRef               ->		EXCEPTION (not yet implemented)
+	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getString            ->'0031003000372020'    	: java.lang.String
+	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+-----< METADATA TESTS
+select col_0 from bit_table
+	---- 1
+	Column    : COL_0
+	Type      : 4
+	TypeName  : INTEGER
+	ClassName : java.lang.Integer
+	Label     : COL_0
+	DisplaySz : 11
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '100' : java.lang.Integer
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_1 from bit_table
+	---- 1
+	Column    : COL_1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : COL_1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '101       ' : java.lang.String
+	OUT = 'true      ' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_2 from bit_table
+	---- 1
+	Column    : COL_2
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_2
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '102' : java.lang.String
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_3 from bit_table
+	---- 1
+	Column    : COL_3
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_3
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '103' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_4 from bit_table
+	---- 1
+	Column    : COL_4
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_4
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_5 from bit_table
+	---- 1
+	Column    : COL_5
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_5
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select col_6 from bit_table
+	---- 1
+	Column    : COL_6
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : COL_6
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select typecol from bit_table
+	---- 1
+	Column    : TYPECOL
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : TYPECOL
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+-----< columns CAST TO type: METADATA TESTS
+select cast( col_0 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
+select cast( col_1 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
+select cast( col_2 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'VARCHAR' to 'CHAR () FOR BIT DATA'.
+select cast( col_3 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'LONG VARCHAR' to 'CHAR () FOR BIT DATA'.
+select cast( col_4 as char (8) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_5 as char (8) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select cast( col_6 as char (8) for bit data ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+select cast( typecol as char (8) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+-----< type CAST TO types: METADATA TESTS
+select cast( typecol as int ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'INTEGER'.
+select cast( typecol as char(10) ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+select cast( typecol as varchar(80) ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+select cast( typecol as long varchar ) from bit_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
+select cast( typecol as char(10) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+select cast( typecol as long varchar for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+select cast( typecol as blob(80) ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+select cast( typecol as char (8 ) for bit data ) from bit_table
+	---- 1
+	Column    : 1
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : 1
+	DisplaySz : 16
+	Precision : 8
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+drop table bit_table
+create table blob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol blob (2 M) )
+insert into blob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS blob (2 M)) )
+insert into blob_table ( col_0 ) values ( 'true' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+insert into blob_table ( col_1 ) values ( 'true' )
+insert into blob_table ( col_2 ) values ( 'true' )
+insert into blob_table ( col_3 ) values ( 'true' )
+insert into blob_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) for bit data)
+insert into blob_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
+insert into blob_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
+insert into blob_table ( typecol ) values cast ( X'0074007200750065'  AS blob (2 M))
+=== Columntype int
+select col_0 from blob_table
+	0 getObject            ->'100'    	: java.lang.Integer
+	0 getArray             ->		EXCEPTION (not yet implemented)
+	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
+	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBoolean           ->'true'    	: java.lang.Boolean
+	0 getByte              ->'100'    	: java.lang.Byte
+	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDouble            ->'100.0'    	: java.lang.Double
+	0 getFloat             ->'100.0'    	: java.lang.Float
+	0 getInt               ->'100'    	: java.lang.Integer
+	0 getLong              ->'100'    	: java.lang.Long
+	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getShort             ->'100'    	: java.lang.Short
+	0 getString            ->'100'    	: java.lang.String
+	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype char(10)
+select col_1 from blob_table
+	1 getObject            ->'101       '    	: java.lang.String
+	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getAsciiStream       ->Object'   	: java.io.InputStream
+	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
+	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBoolean           ->'true'    	: java.lang.Boolean
+	1 getByte              ->'101'    	: java.lang.Byte
+	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getCharacterStream   ->Object'   	: java.io.Reader
+	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->'101.0'    	: java.lang.Double
+	1 getFloat             ->'101.0'    	: java.lang.Float
+	1 getInt               ->'101'    	: java.lang.Integer
+	1 getLong              ->'101'    	: java.lang.Long
+	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getShort             ->'101'    	: java.lang.Short
+	1 getString            ->'101       '    	: java.lang.String
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+=== Columntype varchar(80)
+select col_2 from blob_table
+	2 getObject            ->'102'    	: java.lang.String
+	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getAsciiStream       ->Object'   	: java.io.InputStream
+	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
+	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBoolean           ->'true'    	: java.lang.Boolean
+	2 getByte              ->'102'    	: java.lang.Byte
+	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getCharacterStream   ->Object'   	: java.io.Reader
+	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDouble            ->'102.0'    	: java.lang.Double
+	2 getFloat             ->'102.0'    	: java.lang.Float
+	2 getInt               ->'102'    	: java.lang.Integer
+	2 getLong              ->'102'    	: java.lang.Long
+	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getShort             ->'102'    	: java.lang.Short
+	2 getString            ->'102'    	: java.lang.String
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype long varchar
+select col_3 from blob_table
+	3 getObject            ->'103'    	: java.lang.String
+	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getAsciiStream       ->Object'   	: java.io.InputStream
+	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
+	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBoolean           ->'true'    	: java.lang.Boolean
+	3 getByte              ->'103'    	: java.lang.Byte
+	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getCharacterStream   ->Object'   	: java.io.Reader
+	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDouble            ->'103.0'    	: java.lang.Double
+	3 getFloat             ->'103.0'    	: java.lang.Float
+	3 getInt               ->'103'    	: java.lang.Integer
+	3 getLong              ->'103'    	: java.lang.Long
+	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getShort             ->'103'    	: java.lang.Short
+	3 getString            ->'103'    	: java.lang.String
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype char(10) for bit data
+select col_4 from blob_table
+	4 getObject            ->Object'   	: byte[]
+	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getAsciiStream       ->Object'   	: java.io.InputStream
+	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBinaryStream      ->Object'   	: java.io.InputStream
+	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBytes             ->Object'   	: byte[]
+	4 getCharacterStream   ->Object'   	: java.io.Reader
+	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getRef               ->		EXCEPTION (not yet implemented)
+	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getString            ->'00310030003420202020'    	: java.lang.String
+	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype long varchar for bit data
+select col_5 from blob_table
+	5 getObject            ->Object'   	: byte[]
+	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getAsciiStream       ->Object'   	: java.io.InputStream
+	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBinaryStream      ->Object'   	: java.io.InputStream
+	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBytes             ->Object'   	: byte[]
+	5 getCharacterStream   ->Object'   	: java.io.Reader
+	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getRef               ->		EXCEPTION (not yet implemented)
+	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getString            ->'003100300035'    	: java.lang.String
+	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob(80)
+select col_6 from blob_table
+	6 getObject            ->Object'   	: java.sql.Blob
+	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getAsciiStream       ->Object'   	: java.io.InputStream
+	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBinaryStream      ->Object'   	: java.io.InputStream
+	6 getBlob              ->Object'   	: java.sql.Blob
+	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBytes             ->Object'   	: byte[]
+	6 getCharacterStream   ->Object'   	: java.io.Reader
+	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getRef               ->		EXCEPTION (not yet implemented)
+	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getString            ->'003100300036'    	: java.lang.String
+	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob (2 M)
+select typecol from blob_table
+	7 getObject            ->Object'   	: java.sql.Blob
+	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getAsciiStream       ->Object'   	: java.io.InputStream
+	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBinaryStream      ->Object'   	: java.io.InputStream
+	7 getBlob              ->Object'   	: java.sql.Blob
+	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBytes             ->Object'   	: byte[]
+	7 getCharacterStream   ->Object'   	: java.io.Reader
+	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getRef               ->		EXCEPTION (not yet implemented)
+	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getString            ->'003100300037'    	: java.lang.String
+	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+-----< METADATA TESTS
+select col_0 from blob_table
+	---- 1
+	Column    : COL_0
+	Type      : 4
+	TypeName  : INTEGER
+	ClassName : java.lang.Integer
+	Label     : COL_0
+	DisplaySz : 11
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '100' : java.lang.Integer
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_1 from blob_table
+	---- 1
+	Column    : COL_1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : COL_1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '101       ' : java.lang.String
+	OUT = 'true      ' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_2 from blob_table
+	---- 1
+	Column    : COL_2
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_2
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '102' : java.lang.String
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_3 from blob_table
+	---- 1
+	Column    : COL_3
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_3
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '103' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_4 from blob_table
+	---- 1
+	Column    : COL_4
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_4
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_5 from blob_table
+	---- 1
+	Column    : COL_5
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_5
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select col_6 from blob_table
+	---- 1
+	Column    : COL_6
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : COL_6
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select typecol from blob_table
+	---- 1
+	Column    : TYPECOL
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : TYPECOL
+	DisplaySz : 4194304
+	Precision : 2097152
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+-----< columns CAST TO type: METADATA TESTS
+select cast( col_0 as blob(2 M) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'INTEGER' to 'BLOB'.
+select cast( col_1 as blob(2 M) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR' to 'BLOB'.
+select cast( col_2 as blob(2 M) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'VARCHAR' to 'BLOB'.
+select cast( col_3 as blob(2 M) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
+select cast( col_4 as blob(2 M) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4194304
+	Precision : 2097152
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_5 as blob(2 M) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4194304
+	Precision : 2097152
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+select cast( col_6 as blob(2 M) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4194304
+	Precision : 2097152
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select cast( typecol as blob(2 M) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4194304
+	Precision : 2097152
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+-----< type CAST TO types: METADATA TESTS
+select cast( typecol as int ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'INTEGER'.
+select cast( typecol as char(10) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR'.
+select cast( typecol as varchar(80) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'VARCHAR'.
+select cast( typecol as long varchar ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
+select cast( typecol as char(10) for bit data ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+select cast( typecol as long varchar for bit data ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
+select cast( typecol as blob(80) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+select cast( typecol as blob (2 M) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4194304
+	Precision : 2097152
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+drop table blob_table
+create table blob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol blob (2 K) )
+insert into blob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS blob (2 K)) )
+insert into blob_table ( col_0 ) values ( 'true' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+insert into blob_table ( col_1 ) values ( 'true' )
+insert into blob_table ( col_2 ) values ( 'true' )
+insert into blob_table ( col_3 ) values ( 'true' )
+insert into blob_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) for bit data)
+insert into blob_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
+insert into blob_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
+insert into blob_table ( typecol ) values cast ( X'0074007200750065'  AS blob (2 K))
+=== Columntype int
+select col_0 from blob_table
+	0 getObject            ->'100'    	: java.lang.Integer
+	0 getArray             ->		EXCEPTION (not yet implemented)
+	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
+	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBoolean           ->'true'    	: java.lang.Boolean
+	0 getByte              ->'100'    	: java.lang.Byte
+	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDouble            ->'100.0'    	: java.lang.Double
+	0 getFloat             ->'100.0'    	: java.lang.Float
+	0 getInt               ->'100'    	: java.lang.Integer
+	0 getLong              ->'100'    	: java.lang.Long
+	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getShort             ->'100'    	: java.lang.Short
+	0 getString            ->'100'    	: java.lang.String
+	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype char(10)
+select col_1 from blob_table
+	1 getObject            ->'101       '    	: java.lang.String
+	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getAsciiStream       ->Object'   	: java.io.InputStream
+	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
+	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBoolean           ->'true'    	: java.lang.Boolean
+	1 getByte              ->'101'    	: java.lang.Byte
+	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getCharacterStream   ->Object'   	: java.io.Reader
+	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->'101.0'    	: java.lang.Double
+	1 getFloat             ->'101.0'    	: java.lang.Float
+	1 getInt               ->'101'    	: java.lang.Integer
+	1 getLong              ->'101'    	: java.lang.Long
+	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getShort             ->'101'    	: java.lang.Short
+	1 getString            ->'101       '    	: java.lang.String
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+=== Columntype varchar(80)
+select col_2 from blob_table
+	2 getObject            ->'102'    	: java.lang.String
+	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getAsciiStream       ->Object'   	: java.io.InputStream
+	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
+	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBoolean           ->'true'    	: java.lang.Boolean
+	2 getByte              ->'102'    	: java.lang.Byte
+	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getCharacterStream   ->Object'   	: java.io.Reader
+	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDouble            ->'102.0'    	: java.lang.Double
+	2 getFloat             ->'102.0'    	: java.lang.Float
+	2 getInt               ->'102'    	: java.lang.Integer
+	2 getLong              ->'102'    	: java.lang.Long
+	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getShort             ->'102'    	: java.lang.Short
+	2 getString            ->'102'    	: java.lang.String
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype long varchar
+select col_3 from blob_table
+	3 getObject            ->'103'    	: java.lang.String
+	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getAsciiStream       ->Object'   	: java.io.InputStream
+	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
+	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBoolean           ->'true'    	: java.lang.Boolean
+	3 getByte              ->'103'    	: java.lang.Byte
+	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getCharacterStream   ->Object'   	: java.io.Reader
+	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDouble            ->'103.0'    	: java.lang.Double
+	3 getFloat             ->'103.0'    	: java.lang.Float
+	3 getInt               ->'103'    	: java.lang.Integer
+	3 getLong              ->'103'    	: java.lang.Long
+	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getShort             ->'103'    	: java.lang.Short
+	3 getString            ->'103'    	: java.lang.String
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype char(10) for bit data
+select col_4 from blob_table
+	4 getObject            ->Object'   	: byte[]
+	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getAsciiStream       ->Object'   	: java.io.InputStream
+	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBinaryStream      ->Object'   	: java.io.InputStream
+	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBytes             ->Object'   	: byte[]
+	4 getCharacterStream   ->Object'   	: java.io.Reader
+	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getRef               ->		EXCEPTION (not yet implemented)
+	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getString            ->'00310030003420202020'    	: java.lang.String
+	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype long varchar for bit data
+select col_5 from blob_table
+	5 getObject            ->Object'   	: byte[]
+	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getAsciiStream       ->Object'   	: java.io.InputStream
+	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBinaryStream      ->Object'   	: java.io.InputStream
+	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBytes             ->Object'   	: byte[]
+	5 getCharacterStream   ->Object'   	: java.io.Reader
+	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getRef               ->		EXCEPTION (not yet implemented)
+	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getString            ->'003100300035'    	: java.lang.String
+	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob(80)
+select col_6 from blob_table
+	6 getObject            ->Object'   	: java.sql.Blob
+	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getAsciiStream       ->Object'   	: java.io.InputStream
+	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBinaryStream      ->Object'   	: java.io.InputStream
+	6 getBlob              ->Object'   	: java.sql.Blob
+	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBytes             ->Object'   	: byte[]
+	6 getCharacterStream   ->Object'   	: java.io.Reader
+	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getRef               ->		EXCEPTION (not yet implemented)
+	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getString            ->'003100300036'    	: java.lang.String
+	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob (2 K)
+select typecol from blob_table
+	7 getObject            ->Object'   	: java.sql.Blob
+	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getAsciiStream       ->Object'   	: java.io.InputStream
+	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBinaryStream      ->Object'   	: java.io.InputStream
+	7 getBlob              ->Object'   	: java.sql.Blob
+	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBytes             ->Object'   	: byte[]
+	7 getCharacterStream   ->Object'   	: java.io.Reader
+	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getRef               ->		EXCEPTION (not yet implemented)
+	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getString            ->'003100300037'    	: java.lang.String
+	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+-----< METADATA TESTS
+select col_0 from blob_table
+	---- 1
+	Column    : COL_0
+	Type      : 4
+	TypeName  : INTEGER
+	ClassName : java.lang.Integer
+	Label     : COL_0
+	DisplaySz : 11
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '100' : java.lang.Integer
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_1 from blob_table
+	---- 1
+	Column    : COL_1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : COL_1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '101       ' : java.lang.String
+	OUT = 'true      ' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_2 from blob_table
+	---- 1
+	Column    : COL_2
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_2
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '102' : java.lang.String
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_3 from blob_table
+	---- 1
+	Column    : COL_3
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_3
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '103' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_4 from blob_table
+	---- 1
+	Column    : COL_4
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_4
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_5 from blob_table
+	---- 1
+	Column    : COL_5
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_5
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select col_6 from blob_table
+	---- 1
+	Column    : COL_6
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : COL_6
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select typecol from blob_table
+	---- 1
+	Column    : TYPECOL
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : TYPECOL
+	DisplaySz : 4096
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+-----< columns CAST TO type: METADATA TESTS
+select cast( col_0 as blob(2 K) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'INTEGER' to 'BLOB'.
+select cast( col_1 as blob(2 K) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR' to 'BLOB'.
+select cast( col_2 as blob(2 K) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'VARCHAR' to 'BLOB'.
+select cast( col_3 as blob(2 K) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
+select cast( col_4 as blob(2 K) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4096
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_5 as blob(2 K) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4096
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+select cast( col_6 as blob(2 K) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4096
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select cast( typecol as blob(2 K) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4096
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+-----< type CAST TO types: METADATA TESTS
+select cast( typecol as int ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'INTEGER'.
+select cast( typecol as char(10) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR'.
+select cast( typecol as varchar(80) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'VARCHAR'.
+select cast( typecol as long varchar ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
+select cast( typecol as char(10) for bit data ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+select cast( typecol as long varchar for bit data ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
+select cast( typecol as blob(80) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+select cast( typecol as blob (2 K) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 4096
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+drop table blob_table
+create table blob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol blob (64  ) )
+insert into blob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS blob (64  )) )
+insert into blob_table ( col_0 ) values ( 'true' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+insert into blob_table ( col_1 ) values ( 'true' )
+insert into blob_table ( col_2 ) values ( 'true' )
+insert into blob_table ( col_3 ) values ( 'true' )
+insert into blob_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) for bit data)
+insert into blob_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
+insert into blob_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
+insert into blob_table ( typecol ) values cast ( X'0074007200750065'  AS blob (64  ))
+=== Columntype int
+select col_0 from blob_table
+	0 getObject            ->'100'    	: java.lang.Integer
+	0 getArray             ->		EXCEPTION (not yet implemented)
+	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
+	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBoolean           ->'true'    	: java.lang.Boolean
+	0 getByte              ->'100'    	: java.lang.Byte
+	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getDouble            ->'100.0'    	: java.lang.Double
+	0 getFloat             ->'100.0'    	: java.lang.Float
+	0 getInt               ->'100'    	: java.lang.Integer
+	0 getLong              ->'100'    	: java.lang.Long
+	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getShort             ->'100'    	: java.lang.Short
+	0 getString            ->'100'    	: java.lang.String
+	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype char(10)
+select col_1 from blob_table
+	1 getObject            ->'101       '    	: java.lang.String
+	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getAsciiStream       ->Object'   	: java.io.InputStream
+	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
+	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBoolean           ->'true'    	: java.lang.Boolean
+	1 getByte              ->'101'    	: java.lang.Byte
+	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getCharacterStream   ->Object'   	: java.io.Reader
+	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->'101.0'    	: java.lang.Double
+	1 getFloat             ->'101.0'    	: java.lang.Float
+	1 getInt               ->'101'    	: java.lang.Integer
+	1 getLong              ->'101'    	: java.lang.Long
+	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getShort             ->'101'    	: java.lang.Short
+	1 getString            ->'101       '    	: java.lang.String
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+=== Columntype varchar(80)
+select col_2 from blob_table
+	2 getObject            ->'102'    	: java.lang.String
+	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getAsciiStream       ->Object'   	: java.io.InputStream
+	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
+	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBoolean           ->'true'    	: java.lang.Boolean
+	2 getByte              ->'102'    	: java.lang.Byte
+	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getCharacterStream   ->Object'   	: java.io.Reader
+	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDouble            ->'102.0'    	: java.lang.Double
+	2 getFloat             ->'102.0'    	: java.lang.Float
+	2 getInt               ->'102'    	: java.lang.Integer
+	2 getLong              ->'102'    	: java.lang.Long
+	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getShort             ->'102'    	: java.lang.Short
+	2 getString            ->'102'    	: java.lang.String
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype long varchar
+select col_3 from blob_table
+	3 getObject            ->'103'    	: java.lang.String
+	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getAsciiStream       ->Object'   	: java.io.InputStream
+	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
+	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBoolean           ->'true'    	: java.lang.Boolean
+	3 getByte              ->'103'    	: java.lang.Byte
+	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getCharacterStream   ->Object'   	: java.io.Reader
+	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDouble            ->'103.0'    	: java.lang.Double
+	3 getFloat             ->'103.0'    	: java.lang.Float
+	3 getInt               ->'103'    	: java.lang.Integer
+	3 getLong              ->'103'    	: java.lang.Long
+	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getShort             ->'103'    	: java.lang.Short
+	3 getString            ->'103'    	: java.lang.String
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+=== Columntype char(10) for bit data
+select col_4 from blob_table
+	4 getObject            ->Object'   	: byte[]
+	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getAsciiStream       ->Object'   	: java.io.InputStream
+	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBinaryStream      ->Object'   	: java.io.InputStream
+	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBytes             ->Object'   	: byte[]
+	4 getCharacterStream   ->Object'   	: java.io.Reader
+	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getRef               ->		EXCEPTION (not yet implemented)
+	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getString            ->'00310030003420202020'    	: java.lang.String
+	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype long varchar for bit data
+select col_5 from blob_table
+	5 getObject            ->Object'   	: byte[]
+	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getAsciiStream       ->Object'   	: java.io.InputStream
+	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBinaryStream      ->Object'   	: java.io.InputStream
+	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBytes             ->Object'   	: byte[]
+	5 getCharacterStream   ->Object'   	: java.io.Reader
+	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getRef               ->		EXCEPTION (not yet implemented)
+	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getString            ->'003100300035'    	: java.lang.String
+	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob(80)
+select col_6 from blob_table
+	6 getObject            ->Object'   	: java.sql.Blob
+	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getAsciiStream       ->Object'   	: java.io.InputStream
+	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBinaryStream      ->Object'   	: java.io.InputStream
+	6 getBlob              ->Object'   	: java.sql.Blob
+	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBytes             ->Object'   	: byte[]
+	6 getCharacterStream   ->Object'   	: java.io.Reader
+	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getRef               ->		EXCEPTION (not yet implemented)
+	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getString            ->'003100300036'    	: java.lang.String
+	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+=== Columntype blob (64  )
+select typecol from blob_table
+	7 getObject            ->Object'   	: java.sql.Blob
+	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getAsciiStream       ->Object'   	: java.io.InputStream
+	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBinaryStream      ->Object'   	: java.io.InputStream
+	7 getBlob              ->Object'   	: java.sql.Blob
+	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBytes             ->Object'   	: byte[]
+	7 getCharacterStream   ->Object'   	: java.io.Reader
+	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getRef               ->		EXCEPTION (not yet implemented)
+	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getString            ->'003100300037'    	: java.lang.String
+	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+-----< METADATA TESTS
+select col_0 from blob_table
+	---- 1
+	Column    : COL_0
+	Type      : 4
+	TypeName  : INTEGER
+	ClassName : java.lang.Integer
+	Label     : COL_0
+	DisplaySz : 11
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '100' : java.lang.Integer
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_1 from blob_table
+	---- 1
+	Column    : COL_1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : COL_1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '101       ' : java.lang.String
+	OUT = 'true      ' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_2 from blob_table
+	---- 1
+	Column    : COL_2
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_2
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '102' : java.lang.String
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_3 from blob_table
+	---- 1
+	Column    : COL_3
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_3
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = '103' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_4 from blob_table
+	---- 1
+	Column    : COL_4
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_4
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_5 from blob_table
+	---- 1
+	Column    : COL_5
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_5
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select col_6 from blob_table
+	---- 1
+	Column    : COL_6
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : COL_6
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select typecol from blob_table
+	---- 1
+	Column    : TYPECOL
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : TYPECOL
+	DisplaySz : 128
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+-----< columns CAST TO type: METADATA TESTS
+select cast( col_0 as blob(64  ) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'INTEGER' to 'BLOB'.
+select cast( col_1 as blob(64  ) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR' to 'BLOB'.
+select cast( col_2 as blob(64  ) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'VARCHAR' to 'BLOB'.
+select cast( col_3 as blob(64  ) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
+select cast( col_4 as blob(64  ) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 128
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_5 as blob(64  ) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 128
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+select cast( col_6 as blob(64  ) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 128
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+select cast( typecol as blob(64  ) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 128
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+-----< type CAST TO types: METADATA TESTS
+select cast( typecol as int ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'INTEGER'.
+select cast( typecol as char(10) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR'.
+select cast( typecol as varchar(80) ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'VARCHAR'.
+select cast( typecol as long varchar ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
+select cast( typecol as char(10) for bit data ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+select cast( typecol as long varchar for bit data ) from blob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
+select cast( typecol as blob(80) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+select cast( typecol as blob (64  ) ) from blob_table
+	---- 1
+	Column    : 1
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : 1
+	DisplaySz : 128
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Blob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+drop table blob_table
+create table clob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol clob (2 K) )
+insert into clob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS clob (2 K)) )
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+insert into clob_table ( col_0 ) values ( 'true' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+insert into clob_table ( col_1 ) values ( 'true' )
+insert into clob_table ( col_2 ) values ( 'true' )
+insert into clob_table ( col_3 ) values ( 'true' )
+insert into clob_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) for bit data)
+insert into clob_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
+insert into clob_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
+insert into clob_table ( typecol ) values cast ( X'0074007200750065'  AS clob (2 K))
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+=== Columntype int
+select col_0 from clob_table
+	0 getObject            ->		EXCEPTION (null)
+	0 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getAsciiStream       ->		EXCEPTION (null)
+	0 getBigDecimal        ->		EXCEPTION (null)
+	0 getBinaryStream      ->		EXCEPTION (null)
+	0 getBlob              ->		EXCEPTION (null)
+	0 getBoolean           ->'false'    	: java.lang.Boolean
+	0 getByte              ->'0'    	: java.lang.Byte
+	0 getBytes             ->		EXCEPTION (null)
+	0 getCharacterStream   ->		EXCEPTION (null)
+	0 getClob              ->		EXCEPTION (null)
+	0 getDate              ->		EXCEPTION (null)
+	0 getDouble            ->'0.0'    	: java.lang.Double
+	0 getFloat             ->'0.0'    	: java.lang.Float
+	0 getInt               ->'0'    	: java.lang.Integer
+	0 getLong              ->'0'    	: java.lang.Long
+	0 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getShort             ->'0'    	: java.lang.Short
+	0 getString            ->		EXCEPTION (null)
+	0 getTime              ->		EXCEPTION (null)
+	0 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype char(10)
+select col_1 from clob_table
+	1 getObject            ->'true      '    	: java.lang.String
+	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getAsciiStream       ->Object'   	: java.io.InputStream
+	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal.)
+	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBoolean           ->'true'    	: java.lang.Boolean
+	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
+	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getCharacterStream   ->Object'   	: java.io.Reader
+	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double.)
+	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float.)
+	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int.)
+	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long.)
+	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short.)
+	1 getString            ->'true      '    	: java.lang.String
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp.)
+=== Columntype varchar(80)
+select col_2 from clob_table
+	2 getObject            ->		EXCEPTION (null)
+	2 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getAsciiStream       ->		EXCEPTION (null)
+	2 getBigDecimal        ->		EXCEPTION (null)
+	2 getBinaryStream      ->		EXCEPTION (null)
+	2 getBlob              ->		EXCEPTION (null)
+	2 getBoolean           ->'false'    	: java.lang.Boolean
+	2 getByte              ->'0'    	: java.lang.Byte
+	2 getBytes             ->		EXCEPTION (null)
+	2 getCharacterStream   ->		EXCEPTION (null)
+	2 getClob              ->		EXCEPTION (null)
+	2 getDate              ->		EXCEPTION (null)
+	2 getDouble            ->'0.0'    	: java.lang.Double
+	2 getFloat             ->'0.0'    	: java.lang.Float
+	2 getInt               ->'0'    	: java.lang.Integer
+	2 getLong              ->'0'    	: java.lang.Long
+	2 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getShort             ->'0'    	: java.lang.Short
+	2 getString            ->		EXCEPTION (null)
+	2 getTime              ->		EXCEPTION (null)
+	2 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype long varchar
+select col_3 from clob_table
+	3 getObject            ->		EXCEPTION (null)
+	3 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getAsciiStream       ->		EXCEPTION (null)
+	3 getBigDecimal        ->		EXCEPTION (null)
+	3 getBinaryStream      ->		EXCEPTION (null)
+	3 getBlob              ->		EXCEPTION (null)
+	3 getBoolean           ->'false'    	: java.lang.Boolean
+	3 getByte              ->'0'    	: java.lang.Byte
+	3 getBytes             ->		EXCEPTION (null)
+	3 getCharacterStream   ->		EXCEPTION (null)
+	3 getClob              ->		EXCEPTION (null)
+	3 getDate              ->		EXCEPTION (null)
+	3 getDouble            ->'0.0'    	: java.lang.Double
+	3 getFloat             ->'0.0'    	: java.lang.Float
+	3 getInt               ->'0'    	: java.lang.Integer
+	3 getLong              ->'0'    	: java.lang.Long
+	3 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getShort             ->'0'    	: java.lang.Short
+	3 getString            ->		EXCEPTION (null)
+	3 getTime              ->		EXCEPTION (null)
+	3 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype char(10) for bit data
+select col_4 from clob_table
+	4 getObject            ->		EXCEPTION (null)
+	4 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getAsciiStream       ->		EXCEPTION (null)
+	4 getBigDecimal        ->		EXCEPTION (null)
+	4 getBinaryStream      ->		EXCEPTION (null)
+	4 getBlob              ->		EXCEPTION (null)
+	4 getBoolean           ->'false'    	: java.lang.Boolean
+	4 getByte              ->'0'    	: java.lang.Byte
+	4 getBytes             ->		EXCEPTION (null)
+	4 getCharacterStream   ->		EXCEPTION (null)
+	4 getClob              ->		EXCEPTION (null)
+	4 getDate              ->		EXCEPTION (null)
+	4 getDouble            ->'0.0'    	: java.lang.Double
+	4 getFloat             ->'0.0'    	: java.lang.Float
+	4 getInt               ->'0'    	: java.lang.Integer
+	4 getLong              ->'0'    	: java.lang.Long
+	4 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getShort             ->'0'    	: java.lang.Short
+	4 getString            ->		EXCEPTION (null)
+	4 getTime              ->		EXCEPTION (null)
+	4 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype long varchar for bit data
+select col_5 from clob_table
+	5 getObject            ->		EXCEPTION (null)
+	5 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getAsciiStream       ->		EXCEPTION (null)
+	5 getBigDecimal        ->		EXCEPTION (null)
+	5 getBinaryStream      ->		EXCEPTION (null)
+	5 getBlob              ->		EXCEPTION (null)
+	5 getBoolean           ->'false'    	: java.lang.Boolean
+	5 getByte              ->'0'    	: java.lang.Byte
+	5 getBytes             ->		EXCEPTION (null)
+	5 getCharacterStream   ->		EXCEPTION (null)
+	5 getClob              ->		EXCEPTION (null)
+	5 getDate              ->		EXCEPTION (null)
+	5 getDouble            ->'0.0'    	: java.lang.Double
+	5 getFloat             ->'0.0'    	: java.lang.Float
+	5 getInt               ->'0'    	: java.lang.Integer
+	5 getLong              ->'0'    	: java.lang.Long
+	5 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getShort             ->'0'    	: java.lang.Short
+	5 getString            ->		EXCEPTION (null)
+	5 getTime              ->		EXCEPTION (null)
+	5 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype blob(80)
+select col_6 from clob_table
+	6 getObject            ->		EXCEPTION (null)
+	6 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getAsciiStream       ->		EXCEPTION (null)
+	6 getBigDecimal        ->		EXCEPTION (null)
+	6 getBinaryStream      ->		EXCEPTION (null)
+	6 getBlob              ->		EXCEPTION (null)
+	6 getBoolean           ->'false'    	: java.lang.Boolean
+	6 getByte              ->'0'    	: java.lang.Byte
+	6 getBytes             ->		EXCEPTION (null)
+	6 getCharacterStream   ->		EXCEPTION (null)
+	6 getClob              ->		EXCEPTION (null)
+	6 getDate              ->		EXCEPTION (null)
+	6 getDouble            ->'0.0'    	: java.lang.Double
+	6 getFloat             ->'0.0'    	: java.lang.Float
+	6 getInt               ->'0'    	: java.lang.Integer
+	6 getLong              ->'0'    	: java.lang.Long
+	6 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getShort             ->'0'    	: java.lang.Short
+	6 getString            ->		EXCEPTION (null)
+	6 getTime              ->		EXCEPTION (null)
+	6 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype clob (2 K)
+select typecol from clob_table
+	7 getObject            ->		EXCEPTION (null)
+	7 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getAsciiStream       ->		EXCEPTION (null)
+	7 getBigDecimal        ->		EXCEPTION (null)
+	7 getBinaryStream      ->		EXCEPTION (null)
+	7 getBlob              ->		EXCEPTION (null)
+	7 getBoolean           ->'false'    	: java.lang.Boolean
+	7 getByte              ->'0'    	: java.lang.Byte
+	7 getBytes             ->		EXCEPTION (null)
+	7 getCharacterStream   ->		EXCEPTION (null)
+	7 getClob              ->		EXCEPTION (null)
+	7 getDate              ->		EXCEPTION (null)
+	7 getDouble            ->'0.0'    	: java.lang.Double
+	7 getFloat             ->'0.0'    	: java.lang.Float
+	7 getInt               ->'0'    	: java.lang.Integer
+	7 getLong              ->'0'    	: java.lang.Long
+	7 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getShort             ->'0'    	: java.lang.Short
+	7 getString            ->		EXCEPTION (null)
+	7 getTime              ->		EXCEPTION (null)
+	7 getTimeStamp         ->		EXCEPTION (null)
+-----< METADATA TESTS
+select col_0 from clob_table
+	---- 1
+	Column    : COL_0
+	Type      : 4
+	TypeName  : INTEGER
+	ClassName : java.lang.Integer
+	Label     : COL_0
+	DisplaySz : 11
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_1 from clob_table
+	---- 1
+	Column    : COL_1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : COL_1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = 'true      ' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_2 from clob_table
+	---- 1
+	Column    : COL_2
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_2
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_3 from clob_table
+	---- 1
+	Column    : COL_3
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_3
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_4 from clob_table
+	---- 1
+	Column    : COL_4
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_4
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select col_5 from clob_table
+	---- 1
+	Column    : COL_5
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_5
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+select col_6 from clob_table
+	---- 1
+	Column    : COL_6
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : COL_6
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+select typecol from clob_table
+	---- 1
+	Column    : TYPECOL
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : TYPECOL
+	DisplaySz : 2048
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+-----< columns CAST TO type: METADATA TESTS
+select cast( col_0 as clob(2 K) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'INTEGER' to 'CLOB'.
+select cast( col_1 as clob(2 K) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 2048
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Clob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_2 as clob(2 K) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 2048
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = Object : java.sql.Clob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_3 as clob(2 K) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 2048
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Clob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_4 as clob(2 K) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+select cast( col_5 as clob(2 K) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'CLOB'.
+select cast( col_6 as clob(2 K) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CLOB'.
+select cast( typecol as clob(2 K) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 2048
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+-----< type CAST TO types: METADATA TESTS
+select cast( typecol as int ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'INTEGER'.
+select cast( typecol as char(10) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : 1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( typecol as varchar(80) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : 1
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( typecol as long varchar ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : 1
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( typecol as char(10) for bit data ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'CHAR () FOR BIT DATA'.
+select cast( typecol as long varchar for bit data ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'LONG VARCHAR FOR BIT DATA'.
+select cast( typecol as blob(80) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'BLOB'.
+select cast( typecol as clob (2 K) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 2048
+	Precision : 2048
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+drop table clob_table
+create table clob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol clob (64  ) )
+insert into clob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS clob (64  )) )
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+insert into clob_table ( col_0 ) values ( 'true' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+insert into clob_table ( col_1 ) values ( 'true' )
+insert into clob_table ( col_2 ) values ( 'true' )
+insert into clob_table ( col_3 ) values ( 'true' )
+insert into clob_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) for bit data)
+insert into clob_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
+insert into clob_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
+insert into clob_table ( typecol ) values cast ( X'0074007200750065'  AS clob (64  ))
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+=== Columntype int
+select col_0 from clob_table
+	0 getObject            ->		EXCEPTION (null)
+	0 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getAsciiStream       ->		EXCEPTION (null)
+	0 getBigDecimal        ->		EXCEPTION (null)
+	0 getBinaryStream      ->		EXCEPTION (null)
+	0 getBlob              ->		EXCEPTION (null)
+	0 getBoolean           ->'false'    	: java.lang.Boolean
+	0 getByte              ->'0'    	: java.lang.Byte
+	0 getBytes             ->		EXCEPTION (null)
+	0 getCharacterStream   ->		EXCEPTION (null)
+	0 getClob              ->		EXCEPTION (null)
+	0 getDate              ->		EXCEPTION (null)
+	0 getDouble            ->'0.0'    	: java.lang.Double
+	0 getFloat             ->'0.0'    	: java.lang.Float
+	0 getInt               ->'0'    	: java.lang.Integer
+	0 getLong              ->'0'    	: java.lang.Long
+	0 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getShort             ->'0'    	: java.lang.Short
+	0 getString            ->		EXCEPTION (null)
+	0 getTime              ->		EXCEPTION (null)
+	0 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype char(10)
+select col_1 from clob_table
+	1 getObject            ->'true      '    	: java.lang.String
+	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getAsciiStream       ->Object'   	: java.io.InputStream
+	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal.)
+	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBoolean           ->'true'    	: java.lang.Boolean
+	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
+	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getCharacterStream   ->Object'   	: java.io.Reader
+	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double.)
+	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float.)
+	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int.)
+	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long.)
+	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short.)
+	1 getString            ->'true      '    	: java.lang.String
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp.)
+=== Columntype varchar(80)
+select col_2 from clob_table
+	2 getObject            ->		EXCEPTION (null)
+	2 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getAsciiStream       ->		EXCEPTION (null)
+	2 getBigDecimal        ->		EXCEPTION (null)
+	2 getBinaryStream      ->		EXCEPTION (null)
+	2 getBlob              ->		EXCEPTION (null)
+	2 getBoolean           ->'false'    	: java.lang.Boolean
+	2 getByte              ->'0'    	: java.lang.Byte
+	2 getBytes             ->		EXCEPTION (null)
+	2 getCharacterStream   ->		EXCEPTION (null)
+	2 getClob              ->		EXCEPTION (null)
+	2 getDate              ->		EXCEPTION (null)
+	2 getDouble            ->'0.0'    	: java.lang.Double
+	2 getFloat             ->'0.0'    	: java.lang.Float
+	2 getInt               ->'0'    	: java.lang.Integer
+	2 getLong              ->'0'    	: java.lang.Long
+	2 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getShort             ->'0'    	: java.lang.Short
+	2 getString            ->		EXCEPTION (null)
+	2 getTime              ->		EXCEPTION (null)
+	2 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype long varchar
+select col_3 from clob_table
+	3 getObject            ->		EXCEPTION (null)
+	3 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getAsciiStream       ->		EXCEPTION (null)
+	3 getBigDecimal        ->		EXCEPTION (null)
+	3 getBinaryStream      ->		EXCEPTION (null)
+	3 getBlob              ->		EXCEPTION (null)
+	3 getBoolean           ->'false'    	: java.lang.Boolean
+	3 getByte              ->'0'    	: java.lang.Byte
+	3 getBytes             ->		EXCEPTION (null)
+	3 getCharacterStream   ->		EXCEPTION (null)
+	3 getClob              ->		EXCEPTION (null)
+	3 getDate              ->		EXCEPTION (null)
+	3 getDouble            ->'0.0'    	: java.lang.Double
+	3 getFloat             ->'0.0'    	: java.lang.Float
+	3 getInt               ->'0'    	: java.lang.Integer
+	3 getLong              ->'0'    	: java.lang.Long
+	3 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getShort             ->'0'    	: java.lang.Short
+	3 getString            ->		EXCEPTION (null)
+	3 getTime              ->		EXCEPTION (null)
+	3 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype char(10) for bit data
+select col_4 from clob_table
+	4 getObject            ->		EXCEPTION (null)
+	4 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getAsciiStream       ->		EXCEPTION (null)
+	4 getBigDecimal        ->		EXCEPTION (null)
+	4 getBinaryStream      ->		EXCEPTION (null)
+	4 getBlob              ->		EXCEPTION (null)
+	4 getBoolean           ->'false'    	: java.lang.Boolean
+	4 getByte              ->'0'    	: java.lang.Byte
+	4 getBytes             ->		EXCEPTION (null)
+	4 getCharacterStream   ->		EXCEPTION (null)
+	4 getClob              ->		EXCEPTION (null)
+	4 getDate              ->		EXCEPTION (null)
+	4 getDouble            ->'0.0'    	: java.lang.Double
+	4 getFloat             ->'0.0'    	: java.lang.Float
+	4 getInt               ->'0'    	: java.lang.Integer
+	4 getLong              ->'0'    	: java.lang.Long
+	4 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getShort             ->'0'    	: java.lang.Short
+	4 getString            ->		EXCEPTION (null)
+	4 getTime              ->		EXCEPTION (null)
+	4 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype long varchar for bit data
+select col_5 from clob_table
+	5 getObject            ->		EXCEPTION (null)
+	5 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getAsciiStream       ->		EXCEPTION (null)
+	5 getBigDecimal        ->		EXCEPTION (null)
+	5 getBinaryStream      ->		EXCEPTION (null)
+	5 getBlob              ->		EXCEPTION (null)
+	5 getBoolean           ->'false'    	: java.lang.Boolean
+	5 getByte              ->'0'    	: java.lang.Byte
+	5 getBytes             ->		EXCEPTION (null)
+	5 getCharacterStream   ->		EXCEPTION (null)
+	5 getClob              ->		EXCEPTION (null)
+	5 getDate              ->		EXCEPTION (null)
+	5 getDouble            ->'0.0'    	: java.lang.Double
+	5 getFloat             ->'0.0'    	: java.lang.Float
+	5 getInt               ->'0'    	: java.lang.Integer
+	5 getLong              ->'0'    	: java.lang.Long
+	5 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getShort             ->'0'    	: java.lang.Short
+	5 getString            ->		EXCEPTION (null)
+	5 getTime              ->		EXCEPTION (null)
+	5 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype blob(80)
+select col_6 from clob_table
+	6 getObject            ->		EXCEPTION (null)
+	6 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getAsciiStream       ->		EXCEPTION (null)
+	6 getBigDecimal        ->		EXCEPTION (null)
+	6 getBinaryStream      ->		EXCEPTION (null)
+	6 getBlob              ->		EXCEPTION (null)
+	6 getBoolean           ->'false'    	: java.lang.Boolean
+	6 getByte              ->'0'    	: java.lang.Byte
+	6 getBytes             ->		EXCEPTION (null)
+	6 getCharacterStream   ->		EXCEPTION (null)
+	6 getClob              ->		EXCEPTION (null)
+	6 getDate              ->		EXCEPTION (null)
+	6 getDouble            ->'0.0'    	: java.lang.Double
+	6 getFloat             ->'0.0'    	: java.lang.Float
+	6 getInt               ->'0'    	: java.lang.Integer
+	6 getLong              ->'0'    	: java.lang.Long
+	6 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getShort             ->'0'    	: java.lang.Short
+	6 getString            ->		EXCEPTION (null)
+	6 getTime              ->		EXCEPTION (null)
+	6 getTimeStamp         ->		EXCEPTION (null)
+=== Columntype clob (64  )
+select typecol from clob_table
+	7 getObject            ->		EXCEPTION (null)
+	7 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getAsciiStream       ->		EXCEPTION (null)
+	7 getBigDecimal        ->		EXCEPTION (null)
+	7 getBinaryStream      ->		EXCEPTION (null)
+	7 getBlob              ->		EXCEPTION (null)
+	7 getBoolean           ->'false'    	: java.lang.Boolean
+	7 getByte              ->'0'    	: java.lang.Byte
+	7 getBytes             ->		EXCEPTION (null)
+	7 getCharacterStream   ->		EXCEPTION (null)
+	7 getClob              ->		EXCEPTION (null)
+	7 getDate              ->		EXCEPTION (null)
+	7 getDouble            ->'0.0'    	: java.lang.Double
+	7 getFloat             ->'0.0'    	: java.lang.Float
+	7 getInt               ->'0'    	: java.lang.Integer
+	7 getLong              ->'0'    	: java.lang.Long
+	7 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getShort             ->'0'    	: java.lang.Short
+	7 getString            ->		EXCEPTION (null)
+	7 getTime              ->		EXCEPTION (null)
+	7 getTimeStamp         ->		EXCEPTION (null)
+-----< METADATA TESTS
+select col_0 from clob_table
+	---- 1
+	Column    : COL_0
+	Type      : 4
+	TypeName  : INTEGER
+	ClassName : java.lang.Integer
+	Label     : COL_0
+	DisplaySz : 11
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_1 from clob_table
+	---- 1
+	Column    : COL_1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : COL_1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = 'true      ' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_2 from clob_table
+	---- 1
+	Column    : COL_2
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_2
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_3 from clob_table
+	---- 1
+	Column    : COL_3
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : COL_3
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = 'true' : java.lang.String
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select col_4 from clob_table
+	---- 1
+	Column    : COL_4
+	Type      : -2
+	TypeName  : CHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_4
+	DisplaySz : 20
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+	OUT = NULL
+select col_5 from clob_table
+	---- 1
+	Column    : COL_5
+	Type      : -4
+	TypeName  : LONG VARCHAR FOR BIT DATA
+	ClassName : byte[]
+	Label     : COL_5
+	DisplaySz : 65400
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : byte[]
+	OUT = NULL
+select col_6 from clob_table
+	---- 1
+	Column    : COL_6
+	Type      : 2004
+	TypeName  : BLOB
+	ClassName : java.sql.Blob
+	Label     : COL_6
+	DisplaySz : 160
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: false
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Blob
+select typecol from clob_table
+	---- 1
+	Column    : TYPECOL
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : TYPECOL
+	DisplaySz : 64
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+-----< columns CAST TO type: METADATA TESTS
+select cast( col_0 as clob(64  ) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'INTEGER' to 'CLOB'.
+select cast( col_1 as clob(64  ) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 64
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = Object : java.sql.Clob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_2 as clob(64  ) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 64
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = Object : java.sql.Clob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_3 as clob(64  ) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 64
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = Object : java.sql.Clob
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( col_4 as clob(64  ) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+select cast( col_5 as clob(64  ) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'CLOB'.
+select cast( col_6 as clob(64  ) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'BLOB' to 'CLOB'.
+select cast( typecol as clob(64  ) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 64
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+-----< type CAST TO types: METADATA TESTS
+select cast( typecol as int ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'INTEGER'.
+select cast( typecol as char(10) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 1
+	TypeName  : CHAR
+	ClassName : java.lang.String
+	Label     : 1
+	DisplaySz : 10
+	Precision : 10
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( typecol as varchar(80) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 12
+	TypeName  : VARCHAR
+	ClassName : java.lang.String
+	Label     : 1
+	DisplaySz : 80
+	Precision : 80
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( typecol as long varchar ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : -1
+	TypeName  : LONG VARCHAR
+	ClassName : java.lang.String
+	Label     : 1
+	DisplaySz : 32700
+	Precision : 32700
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+select cast( typecol as char(10) for bit data ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'CHAR () FOR BIT DATA'.
+select cast( typecol as long varchar for bit data ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'LONG VARCHAR FOR BIT DATA'.
+select cast( typecol as blob(80) ) from clob_table
+	com.ibm.db2.jcc.c.SqlException: Cannot convert types 'CLOB' to 'BLOB'.
+select cast( typecol as clob (64  ) ) from clob_table
+	---- 1
+	Column    : 1
+	Type      : 2005
+	TypeName  : CLOB
+	ClassName : java.sql.Clob
+	Label     : 1
+	DisplaySz : 64
+	Precision : 64
+	Scale     : 0
+	isCurrency: false
+	isCaseSens: true
+	isDefWrite: false
+	isWrite   : false
+	isSearchab: true
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+	OUT = NULL
+drop table clob_table
+-----< BLOB Insertion Tests
+create table blobCheck (bl blob(80)) 
+insert into blobCheck (bl ) values ('string' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR'. 
+insert into blobCheck (bl ) values (cast (X'0073007400720069006e0067' as blob(80)) )
+insert into blobCheck (bl ) values (X'48' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+insert into blobCheck (bl ) values (cast (X'C8' as blob(80)) )
+insert into blobCheck (bl ) values ( X'a78a' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+insert into blobCheck (bl ) values (cast (X'a78a' as blob(80)) )
+insert into blobCheck (bl ) values ('string' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR'. 
+insert into blobCheck (bl ) values (cast (X'0073007400720069006e0067' as blob(80)) )
+insert into blobCheck (bl ) values (X'48' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+insert into blobCheck (bl ) values (cast (X'C8' as blob(80)) )
+insert into blobCheck (bl ) values ( X'a78a' )
+	com.ibm.db2.jcc.c.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+insert into blobCheck (bl ) values (cast (X'a78a' as blob(80)) )
