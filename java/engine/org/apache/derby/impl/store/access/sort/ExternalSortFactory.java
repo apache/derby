@@ -322,6 +322,9 @@ public class ExternalSortFactory implements
 
 	public boolean canSupport(Properties startParams) {
 
+        if (startParams == null)
+            return false; 
+
 		String impl = startParams.getProperty("derby.access.Conglomerate.type");
 		if (impl == null)
 			return false;
