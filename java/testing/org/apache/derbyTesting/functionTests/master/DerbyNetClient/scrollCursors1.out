@@ -561,7 +561,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 -----
 Statement Name: 
-	SQL_CURSH200C3
+	SQL_CURSH000C3
 Statement Text: 
 	select * from t1
 Parse Time: 0
