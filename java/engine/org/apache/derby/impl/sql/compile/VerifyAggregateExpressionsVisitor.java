@@ -77,12 +77,12 @@ public class VerifyAggregateExpressionsVisitor implements Visitor
 		
 			if (groupByList == null)
 			{
-				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_NON_GROUPED_SELECT_LIST, cr.getFullColumnName());
+				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_NON_GROUPED_SELECT_LIST, cr.getSQLColumnName());
 			}
 
 			if (groupByList.containsColumnReference(cr) == null)
 			{
-				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_GROUPED_SELECT_LIST, cr.getFullColumnName());
+				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_GROUPED_SELECT_LIST, cr.getSQLColumnName());
 			}
 		} 
 		/*

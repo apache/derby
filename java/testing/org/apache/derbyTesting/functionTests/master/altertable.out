@@ -764,7 +764,7 @@ alter table x drop constraint app.newcons;
 0 rows inserted/updated/deleted
 ij> -- bad schema name
 alter table x add constraint badschema.newcons primary key (x);
-ERROR 42X85: Constraint 'BADSCHEMA.NEWCONS'is required to be in the same schema as table 'APP.X'.
+ERROR 42X85: Constraint 'BADSCHEMA.NEWCONS'is required to be in the same schema as table 'X'.
 ij> -- two constriants, same name, different schema (second will fail)
 drop table x;
 0 rows inserted/updated/deleted
@@ -773,7 +773,7 @@ ij> create table x (x int not null, y int not null);
 ij> alter table x add constraint con check (x > 1);
 0 rows inserted/updated/deleted
 ij> alter table x add constraint newschema.con check (x > 1);
-ERROR 42X85: Constraint 'NEWSCHEMA.CON'is required to be in the same schema as table 'APP.X'.
+ERROR 42X85: Constraint 'NEWSCHEMA.CON'is required to be in the same schema as table 'X'.
 ij> select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1;
 SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -842,7 +842,7 @@ ERROR 42X86: ALTER table failed. There is no constraint 'EMPTYSCHEMA.C1' on tabl
 ij> alter table t1 drop constraint nosuchschema.C2;
 ERROR 42Y07: Schema 'NOSUCHSCHEMA' does not exist
 ij> alter table t1 add constraint emptyschema.C1_PLUS_C2 check ((c1 + c2) < 100);
-ERROR 42X85: Constraint 'EMPTYSCHEMA.C1_PLUS_C2'is required to be in the same schema as table 'APP.T1'.
+ERROR 42X85: Constraint 'EMPTYSCHEMA.C1_PLUS_C2'is required to be in the same schema as table 'T1'.
 ij> alter table t1 add constraint C1_PLUS_C2 check ((c1 + c2) < 100);
 0 rows inserted/updated/deleted
 ij> prepare alplus as 'alter table t1 drop constraint C1_PLUS_C2';

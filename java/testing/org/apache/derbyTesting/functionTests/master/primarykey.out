@@ -20,13 +20,13 @@ create table neg (c1 int not null, c2 int not null, primary key(c1, c2, cx));
 ERROR 42X93: Table 'NEG' contains a constraint definition with column 'CX' which is not in the table.
 ij> -- invalid constraint schema name
 create table neg (c1 int not null, c2 int not null, constraint bar.pkneg primary key(c1, c2));
-ERROR 42X85: Constraint 'BAR.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ERROR 42X85: Constraint 'BAR.PKNEG'is required to be in the same schema as table 'NEG'.
 ij> create table neg (c1 int not null, c2 int not null, constraint sys.pkneg primary key(c1, c2));
-ERROR 42X85: Constraint 'SYS.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ERROR 42X85: Constraint 'SYS.PKNEG'is required to be in the same schema as table 'NEG'.
 ij> create table neg (c1 int not null constraint bar.pkneg primary key, c2 int);
-ERROR 42X85: Constraint 'BAR.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ERROR 42X85: Constraint 'BAR.PKNEG'is required to be in the same schema as table 'NEG'.
 ij> create table neg (c1 int not null constraint sys.pkneg primary key, c2 int);
-ERROR 42X85: Constraint 'SYS.PKNEG'is required to be in the same schema as table 'APP.NEG'.
+ERROR 42X85: Constraint 'SYS.PKNEG'is required to be in the same schema as table 'NEG'.
 ij> -- constraint names must be unique within a schema
 create table neg1(c1 int not null constraint asdf primary key);
 0 rows inserted/updated/deleted

@@ -46,6 +46,7 @@ public class TableName extends QueryTreeNode
 	*/
 	String	tableName;
 	String	schemaName;
+	private boolean hasSchema;
 
 	/*
 	** These fields are used to track the being and end
@@ -66,6 +67,7 @@ public class TableName extends QueryTreeNode
 
 	public void init(Object schemaName, Object tableName)
 	{
+		hasSchema = schemaName != null;
 		this.schemaName = (String) schemaName;
 		this.tableName = (String) tableName;
 	}
@@ -88,8 +90,7 @@ public class TableName extends QueryTreeNode
 		Object	tokEndOffset
 	)
 	{
-		this.schemaName = (String) schemaName;
-		this.tableName = (String) tableName;
+		init(schemaName, tableName);
 		this.tokBeginOffset = ((Integer) tokBeginOffset).intValue();
 		this.tokEndOffset = ((Integer) tokEndOffset).intValue();
 	}
@@ -177,7 +178,10 @@ public class TableName extends QueryTreeNode
 
 	public String toString()
 	{
-		return getFullTableName();
+		if (hasSchema)
+			return getFullTableName();
+		else
+			return tableName;
 	}
 
 	/**

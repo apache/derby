@@ -552,7 +552,7 @@ public class JoinNode extends TableOperatorNode
 			if (leftRC != null)
 			{
 				throw StandardException.newException(SQLState.LANG_AMBIGUOUS_COLUMN_NAME, 
-						 columnReference.getFullColumnName());
+						 columnReference.getSQLColumnName());
 			}
 			resultColumn = rightRC;
 		}

@@ -405,7 +405,7 @@ public class ColumnReference extends ValueNode
 		/* Error if no match found in fromList */
 		if (matchingRC == null)
 		{
-			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND, getFullColumnName());
+			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND, getSQLColumnName());
 		}
 
 		/* Set the columnNumber from the base table.
@@ -417,22 +417,20 @@ public class ColumnReference extends ValueNode
 	}
 
 	/**
-	 * Get the full column name of this column for purposes of error
-	 * messages or debugging.  The full column name includes the table
-	 * name and schema name, if any.
+	 * Get the column name for purposes of error
+	 * messages or debugging. This returns the column
+	 * name as used in the SQL statement. Thus if it was qualified
+	 * with a table, alias name that will be included.
 	 *
-	 * @return	The full column name in the form schema.table.column
+	 * @return	The  column name in the form [[schema.]table.]column
 	 */
 
-	public String getFullColumnName()
+	public String getSQLColumnName()
 	{
-		String	fullColumnName = "";
-
-		if (tableName != null)
-			fullColumnName += tableName.getFullTableName() + ".";
-		fullColumnName += columnName;
-
-		return fullColumnName;
+		if (tableName == null)
+			return columnName;
+		
+		return tableName.toString() + "." + columnName;
 	}
 
 	/**

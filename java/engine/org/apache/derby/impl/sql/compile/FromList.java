@@ -544,7 +544,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 				else
 				{
 					throw StandardException.newException(SQLState.LANG_AMBIGUOUS_COLUMN_NAME, 
-							 columnReference.getFullColumnName());
+							 columnReference.getSQLColumnName());
 				}
 			}
 
