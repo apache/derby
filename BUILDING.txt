@@ -523,7 +523,7 @@ following:
 
 (6) Derby also includes a suite of tests for more comprehensive verification.
     Information on how to run these tests can be found in the source tree,
-    in the file ${derby.source}/java/testing/org/apache/derbyTesting/readme.htm
+    in the file ${derby.source}/java/testing/readme.htm
 
 ---------------------------------------------------------------
 4     Derby build miscellaneous information
