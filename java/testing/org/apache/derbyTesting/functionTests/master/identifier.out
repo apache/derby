@@ -252,6 +252,29 @@ ZONE       |ZONE
 2          |2          
 ij> DROP TABLE ZONE;
 0 rows inserted/updated/deleted
+ij> CREATE TABLE LOCAL (LOCAL INT, A INT);
+0 rows inserted/updated/deleted
+ij> INSERT INTO LOCAL (LOCAL) VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO LOCAL VALUES (2, 2);
+1 row inserted/updated/deleted
+ij> SELECT * FROM LOCAL;
+LOCAL      |A          
+-----------------------
+1          |NULL       
+2          |2          
+ij> SELECT LOCAL.LOCAL, LOCAL FROM LOCAL;
+LOCAL      |LOCAL      
+-----------------------
+1          |1          
+2          |2          
+ij> SELECT LOCAL.LOCAL, LOCAL FROM LOCAL LOCAL;
+LOCAL      |LOCAL      
+-----------------------
+1          |1          
+2          |2          
+ij> DROP TABLE LOCAL;
+0 rows inserted/updated/deleted
 ij> -- Negative tests
 -- Novera wanted 0-length delimited identifiers but for db2-compatibility, we are going to stop supporting 0-length delimited identifiers
 -- test1
