@@ -62,7 +62,7 @@ public class DB_Check {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_Header", "checks");
+				Logs.reportMessage("CSLOOK_ChecksHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

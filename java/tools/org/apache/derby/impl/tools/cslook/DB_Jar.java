@@ -67,7 +67,7 @@ public class DB_Jar {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_Header", "jars");
+				Logs.reportMessage("CSLOOK_JarsHeader");
 				Logs.reportMessage("CSLOOK_Jar_Note");
 				Logs.reportString("----------------------------------------------\n");
 			}

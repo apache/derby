@@ -63,7 +63,7 @@ public class DB_Schema {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_Header", "schemas");
+				Logs.reportMessage("CSLOOK_SchemasHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

@@ -72,7 +72,7 @@ public class DB_Index {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_Header", "indexes");
+				Logs.reportMessage("CSLOOK_IndexesHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

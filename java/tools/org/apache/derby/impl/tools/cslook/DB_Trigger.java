@@ -73,7 +73,7 @@ public class DB_Trigger {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_Header", "triggers");
+				Logs.reportMessage("CSLOOK_TriggersHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

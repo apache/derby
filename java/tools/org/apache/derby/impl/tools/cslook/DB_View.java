@@ -58,7 +58,7 @@ public class DB_View {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("CSLOOK_Header", "views");
+				Logs.reportMessage("CSLOOK_ViewsHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 
