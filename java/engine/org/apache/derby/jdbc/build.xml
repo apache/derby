@@ -36,7 +36,9 @@
       <classpath>
         <pathelement path="${compile.classpath}"/>
       </classpath>
+      <include name="${derby.dir}/jdbc/InternalDriver.java"/>
       <include name="${derby.dir}/jdbc/Driver169.java"/>
+      <include name="${derby.dir}/jdbc/EmbeddedSimpleDataSource.java"/>
     </javac>
   </target>
 

@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 
@@ -88,6 +89,11 @@ public class checkDataSource
 		DataSource ds = dscs;
 
 		checkConnection("EmbeddedDataSource", ds.getConnection());
+		
+		EmbeddedSimpleDataSource dssimple = new EmbeddedSimpleDataSource();
+		dssimple.setDatabaseName("wombat");
+		ds = dssimple;
+		checkConnection("EmbeddedSimpleDataSource", ds.getConnection());		
 
 		EmbeddedConnectionPoolDataSource dscsp = new EmbeddedConnectionPoolDataSource();
 		dscsp.setDatabaseName("wombat");
@@ -202,8 +208,14 @@ public class checkDataSource
 
 		checkConnection("DriverManager ", dmc);
 
+		// reset ds back to the EmbeddedDataSource
+		ds = dscs;
 		checkConnection("EmbeddedDataSource", ds.getConnection());
-
+		
+		// and back to EmbeddedSimpleDataSource
+		ds = dssimple;
+		checkConnection("EmbeddedSimpleDataSource", dssimple.getConnection());
+		
 		pc = dsp.getPooledConnection();
 		pc.addConnectionEventListener(new EventCatcher(2));
 		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());

@@ -31,6 +31,21 @@ method calls on a closed connection
 EmbeddedDataSource <closedconn>.close() no error
 EmbeddedDataSource <closedconn>.createStatement() 08003 - No current connection.
 EmbeddedDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedSimpleDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedSimpleDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+EmbeddedSimpleDataSource <closedconn>.close() no error
+EmbeddedSimpleDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedSimpleDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Running JDBC 3.0 connection checks on EmbeddedConnectionPoolDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
@@ -129,6 +144,21 @@ method calls on a closed connection
 EmbeddedDataSource <closedconn>.close() no error
 EmbeddedDataSource <closedconn>.createStatement() 08003 - No current connection.
 EmbeddedDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedSimpleDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedSimpleDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+EmbeddedSimpleDataSource <closedconn>.close() no error
+EmbeddedSimpleDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedSimpleDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Running JDBC 3.0 connection checks on EmbeddedConnectionPoolDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
