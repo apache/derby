@@ -66,9 +66,17 @@ import java.util.StringTokenizer;
 
 public abstract class Driver169 implements ModuleControl {
 
+	private static final Object syncMe = new Object();
+	private static Driver169 activeDriver;
+
 	protected boolean active;
 	private ContextService contextServiceFactory;
 	private AuthenticationService	authenticationService;
+
+	public static final Driver169 activeDriver()
+	{
+		return activeDriver;
+	}
 
 	public Driver169() {
 		contextServiceFactory = ContextService.getFactory();
@@ -80,10 +88,20 @@ public abstract class Driver169 implements ModuleControl {
 
 	public void boot(boolean create, Properties properties) throws StandardException {
 
+		synchronized (Driver169.syncMe)
+		{
+			Driver169.activeDriver = this;
+		}
+
 		active = true;
 	}
 
 	public void stop() {
+
+		synchronized (Driver169.syncMe)
+		{
+			Driver169.activeDriver = null;
+		}
 
 		active = false;
 

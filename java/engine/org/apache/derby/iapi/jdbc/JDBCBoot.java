@@ -60,12 +60,8 @@ public class JDBCBoot {
 	*/
 	public void boot(String protocol, PrintStream logging) {
 
-		try {
-
-			// throws a SQLException if there is no driver
-			DriverManager.getDriver(protocol);
-
-		} catch (SQLException sqle) {
+		if (org.apache.derby.jdbc.Driver169.activeDriver() == null)
+		{
 
 			// request that the java.sql.Driver (JDBC) service and the
 			// authentication service be started.
