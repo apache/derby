@@ -209,14 +209,14 @@ The downloaded file should be copied to directory
 Note: After following the steps in sections 2.2.4-2.2.8 of this
 document, you should have the following:
 
-${derby.source}/tools/java/javacc.jar
+${derby.source}/tools/java/empty.jar
+${derby.source}/tools/java/geronimo-spec-jta-1.0.1B-rc4.jar
+${derby.source}/tools/java/geronimo-spec-servlet-2.4-rc4.jar
 ${derby.source}/tools/java/jakarta-oro-2.0.8.jar
-${derby.source}/tools/java/jce1_2_2.jar 
+${derby.source}/tools/java/javacc.jar
+${derby.source}/tools/java/jce1_2_2.jar
 ${derby.source}/tools/java/jdbc2_0-stdext.jar
-${derby.source}/tools/java/jta-1_0_1B-classes.zip 
-${derby.source}/tools/java/servlet.jar
 ${derby.source}/tools/java/osgi.jar
-
 
 
 2.2.6 Download and Install Jikes 1.14 (Optional)
