@@ -385,7 +385,7 @@
              packagenames="org.apache.derby.authentication,org.apache.derby.drda,org.apache.derby.jdbc.io,org.apache.derby.jdbc,org.apache.derby.tools"
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
-             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; IBM Corp. 1997,2004 All Rights Reserved.&lt;/i&gt;"/>
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2004 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"/>
 
     <delete dir="${out.javadoc.dir}/sourcedir"/>
 
@@ -406,7 +406,7 @@
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
         doctitle="Apache Derby V${major}.${minor} Engine Documentation"
-        bottom="Apache Derby V${major}.${minor} Engine Documentation - &lt;i&gt;Copyright &amp;copy; IBM Corp. 1997,2004 All Rights Reserved.&lt;/i&gt;"
+        bottom="Apache Derby V${major}.${minor} Engine Documentation - &lt;i&gt;Copyright &amp;copy; 1997,2004 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"
         source="1.4">
         <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
                 path="${basedir}/classes"/>
