@@ -11,7 +11,6 @@
 package org.apache.derby.impl.load;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.io.IOException;
 import java.sql.SQLException;

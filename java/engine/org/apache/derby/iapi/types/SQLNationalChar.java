@@ -36,7 +36,6 @@ import java.io.ObjectInput;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.io.EOFException;
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;

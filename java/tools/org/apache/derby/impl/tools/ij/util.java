@@ -31,8 +31,6 @@ import java.sql.Types;
 
 import java.util.Properties;
 import java.util.Vector;
-import java.util.Stack;
-import java.math.BigDecimal;
 
 /**
 	Methods used to control setup for apps as

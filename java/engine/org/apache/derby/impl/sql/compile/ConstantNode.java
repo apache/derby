@@ -32,7 +32,6 @@ import org.apache.derby.iapi.util.ReuseFactory;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.math.BigDecimal;
 
 import java.util.Vector;
 

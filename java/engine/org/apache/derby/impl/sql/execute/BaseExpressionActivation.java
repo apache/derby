@@ -34,7 +34,6 @@ import org.apache.derby.iapi.reference.Attribute;
 
 import org.apache.derby.iapi.sql.ResultSet;
 
-import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 

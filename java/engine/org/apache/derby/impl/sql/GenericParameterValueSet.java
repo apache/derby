@@ -30,7 +30,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.math.BigDecimal;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 /**
