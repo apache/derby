@@ -20,7 +20,6 @@
 
 package org.apache.derby.vti;
 
-import org.apache.derby.iapi.reference.Copyright;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 
 import java.sql.Connection;
