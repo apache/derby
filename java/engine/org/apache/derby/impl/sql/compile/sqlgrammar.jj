@@ -1682,7 +1682,6 @@ TOKEN [IGNORE_CASE] :
 |	<LAST: "last">
 |	<LEFT: "left">
 |	<LIKE: "like">
-|	<LOCAL: "local">
 |	<LOWER: "lower">
 |	<MATCH: "match">
 |	<MAX: "max">
@@ -11096,6 +11095,9 @@ reservedKeyword() :
 
 		NOTE: The same ones are commented out here as above in the token
 		rule, for the same reason.
+		
+		Derby-139 - LOCAL removed as reserved word as most other
+		databases do not enforce it. LOCAL not used at all in grammar so token removed.
 	 */
 	(
  	/* SQL92 reserved Keywords */
@@ -11210,7 +11212,6 @@ reservedKeyword() :
 |	tok = <LAST>
 |	tok = <LEFT>
 |	tok = <LIKE>
-|	tok = <LOCAL>
 |	tok = <LOWER>
 |	tok = <MATCH>
 |	tok = <MAX>

@@ -150,6 +150,13 @@ SELECT ZONE.ZONE, ZONE FROM ZONE;
 SELECT ZONE.ZONE, ZONE FROM ZONE ZONE;
 DROP TABLE ZONE;
 
+CREATE TABLE LOCAL (LOCAL INT, A INT);
+INSERT INTO LOCAL (LOCAL) VALUES (1);
+INSERT INTO LOCAL VALUES (2, 2);
+SELECT * FROM LOCAL;
+SELECT LOCAL.LOCAL, LOCAL FROM LOCAL;
+SELECT LOCAL.LOCAL, LOCAL FROM LOCAL LOCAL;
+DROP TABLE LOCAL;
 
 -- Negative tests
 -- Novera wanted 0-length delimited identifiers but for db2-compatibility, we are going to stop supporting 0-length delimited identifiers
