@@ -17,7 +17,7 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="jdbc" depends="compile_jdbc"/>
+  <target name="jdbc" depends="compile_jdbc2,compile_jdbc3"/>
 
 <!-- build targets which need jdbc2.0 libs in the end-->
 <!-- first build all non-special (non jdbc2.0) targets-->
@@ -40,7 +40,8 @@
     </javac>
   </target>
 
-  <target name="compile_jdbc" depends="compile_jsr169">
+  <target name="compile_jdbc2" depends="compile_jsr169">
+
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -63,6 +64,11 @@
 	  <include name="${derby.dir}/jdbc/Driver20.java"/>
 
     </javac>
+
+ </target>
+
+ <target name="compile_jdbc3">
+
     <javac
       bootclasspath="${empty}"
       nowarn="on"

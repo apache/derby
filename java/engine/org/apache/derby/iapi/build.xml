@@ -17,13 +17,12 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="iapi" depends="compile_iapi_error"/>
+  <target name="iapi" depends="compile_iapi_error,compile_iapi_jdbc"/>
 
   <target name="compile_iapi_error" depends="compile_iapi_error_jsr169" >
     <ant dir="${derby.engine.dir}/iapi/services"/>
     <ant dir="${derby.engine.dir}/iapi/store"/>
     <ant dir="${derby.engine.dir}/iapi/sql"/>
-    <ant dir="${derby.engine.dir}/iapi/jdbc"/>
   </target>
 
   <target name="compile_iapi_error_jsr169">
@@ -51,6 +50,13 @@
     <ant dir="${derby.engine.dir}/iapi/sql" target="compile_iapi_sql_jsr169" />
     <ant dir="${derby.engine.dir}/iapi/db"/>
     <ant dir="${derby.engine.dir}/iapi/jdbc" target="compile_iapi_jdbc_jsr169" />
+
+  </target>
+
+  <target name="compile_iapi_jdbc">
+ 
+    <ant dir="${derby.engine.dir}/iapi/jdbc"/>
+
   </target>
 
 </project>

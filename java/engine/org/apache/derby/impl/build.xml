@@ -17,15 +17,18 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="iapi" depends="compile"/>
+  <target name="iapi" depends="compile,compile_impl_jdbc"/>
 
   <target name="compile" depends="compile_impl_169">
     <ant dir="${derby.engine.dir}/impl/services"/>
     <ant dir="${derby.engine.dir}/impl/io"/>
     <ant dir="${derby.engine.dir}/impl/store"/>
     <ant dir="${derby.engine.dir}/impl/db"/>
-    <ant dir="${derby.engine.dir}/impl/jdbc"/>
     <ant dir="${derby.engine.dir}/impl/load"/>
+  </target>
+
+  <target name="compile_impl_jdbc">
+    <ant dir="${derby.engine.dir}/impl/jdbc"/>
   </target>
   
   <target name="compile_impl_169">

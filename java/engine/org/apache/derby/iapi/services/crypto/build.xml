@@ -17,7 +17,7 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="compile_jdbc2">
+  <target name="compile_crypto">
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -31,7 +31,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${jce1_2_1}"/>
-        <pathelement path="${java13compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/services/crypto/*.java"/>
     </javac>

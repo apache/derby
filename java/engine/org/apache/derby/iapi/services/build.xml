@@ -42,11 +42,11 @@
     <ant dir="${derby.engine.dir}/iapi/services/io"/>
   </target>
 
-  <target name="compile_jdbc2" depends="compile_iapi_services_jsr169">
-    <ant dir="${derby.engine.dir}/iapi/services/crypto" target="compile_jdbc2"/>
+  <target name="compile_crypto" depends="compile_iapi_services_jsr169">
+    <ant dir="${derby.engine.dir}/iapi/services/crypto" target="compile_crypto"/>
   </target>
 
-  <target name="compile_jdbc3" depends="compile_jdbc2">
+  <target name="compile_jdbc3" depends="compile_crypto">
   </target>
 
 </project>
