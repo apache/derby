@@ -8734,8 +8734,11 @@ public	class	DataDictionaryImpl
 
 						
 		/*  
-		 * SYSCS_BULK_INSERT (IN SCHEMANAME  VARCHAR(128), IN TABLENAME    VARCHAR(128),  
-		 *                    IN VTINAME VARCHAR(32762), IN VTIARG VARCHAR(32762))
+		 * SYSCS_BULK_INSERT(
+         *     IN SCHEMANAME VARCHAR(128), 
+         *     IN TABLENAME  VARCHAR(128),
+		 *     IN VTINAME    VARCHAR(32762), 
+         *     IN VTIARG     VARCHAR(32762))
 		 */
         {
             // procedure argument names
