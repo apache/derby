@@ -153,7 +153,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 			throw StandardException.newException(SQLState.LANG_DB2_LIKE_SYNTAX_ERROR);
 
 		// pattern must be a string or a parameter
-		if (!(leftOperand instanceof CharConstantNode) && !(leftOperand.isParameterNode()))
+
+		if (!(leftOperand.isParameterNode()) && !(leftOperand.getTypeId().isStringTypeId()))
 			throw StandardException.newException(SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE,
 													 "LIKE", "FUNCTION");
 
@@ -165,7 +166,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		}
 
 		// escape must be a string or a parameter
-		if (rightOperand != null && !(rightOperand instanceof CharConstantNode) && !(rightOperand.isParameterNode()))
+		if ((rightOperand != null) && 
+			!(rightOperand.isParameterNode()) && 
+			!(rightOperand.getTypeId().isStringTypeId()))
 		{
 			throw StandardException.newException(SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE,
 										 "LIKE", "FUNCTION");
