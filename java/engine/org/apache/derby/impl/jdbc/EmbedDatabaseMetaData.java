@@ -1045,8 +1045,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * @return true if cursors always remain open; false if they might not remain open
      */
+	//returns true because Derby can have cursors that are open across commits.
 	public boolean supportsOpenCursorsAcrossCommit() {
-		return false;
+		return true;
 	}
 
     /**

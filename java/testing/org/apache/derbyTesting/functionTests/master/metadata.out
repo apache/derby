@@ -119,7 +119,7 @@ supportsSubqueriesInQuantifieds(): true
 supportsCorrelatedSubqueries(): true
 supportsUnion(): true
 supportsUnionAll(): true
-supportsOpenCursorsAcrossCommit(): false
+supportsOpenCursorsAcrossCommit(): true
 supportsOpenCursorsAcrossRollback(): false
 supportsOpenStatementsAcrossCommit(): true
 supportsOpenStatementsAcrossRollback(): false
