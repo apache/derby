@@ -22,6 +22,7 @@
   <target name="compile" depends="compile_impl_169">
     <ant dir="${derby.engine.dir}/impl/services"/>
     <ant dir="${derby.engine.dir}/impl/io"/>
+    <ant dir="${derby.engine.dir}/impl/sql"/>
     <ant dir="${derby.engine.dir}/impl/store"/>
     <ant dir="${derby.engine.dir}/impl/db"/>
     <ant dir="${derby.engine.dir}/impl/load"/>
@@ -34,6 +35,5 @@
   <target name="compile_impl_169">
     <ant dir="${derby.engine.dir}/impl/services" target="compile_impl_services_169"/>
     <ant dir="${derby.engine.dir}/impl/io" target="compile_impl_io_169"/>
-    <ant dir="${derby.engine.dir}/impl/sql"/>
   </target>
 </project>
