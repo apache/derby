@@ -2419,4 +2419,42 @@ ij> values cast('1e30' as decimal(31))*cast('1e30' as decimal(31));
 1                               
 --------------------------------
 ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(31,0).
+ij> create table tiger(d decimal(12,11));
+0 rows inserted/updated/deleted
+ij> insert into tiger values (1.234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.1234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.01234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.001234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.001234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.0001234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.00001234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.000001234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.0000001234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.00000001234);
+1 row inserted/updated/deleted
+ij> insert into tiger values (0.00000001234);
+1 row inserted/updated/deleted
+ij> select d from tiger order by 1;
+D              
+---------------
+0.00000001234  
+0.00000001234  
+0.00000012340  
+0.00000123400  
+0.00001234000  
+0.00012340000  
+0.00123400000  
+0.00123400000  
+0.01234000000  
+0.12340000000  
+1.23400000000  
 ij> 

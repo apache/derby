@@ -32,10 +32,13 @@ import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.lang.Math;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -130,7 +133,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		value = val;
 	}
 
-	public SQLDecimal(BigDecimal val, int precision, int scale) 
+	public SQLDecimal(BigDecimal val, int nprecision, int scale)
 			throws StandardException
 	{
 		
@@ -309,9 +312,41 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		BigDecimal localValue = getBigDecimal();
 		if (localValue == null)
 			return null;
-		else
+		else if (JVMInfo.JDK_ID < 6)
 			return localValue.toString();
+        else
+        {
+            // use reflection so we can still compile using JDK1.4
+            // if we are prepared to require 1.5 to compile then this can be a direct call
+            try {
+                return (String) toPlainString.invoke(localValue, null);
+            } catch (IllegalAccessException e) {
+                // can't happen based on the JDK spec
+                throw new IllegalAccessError("toPlainString");
+            } catch (InvocationTargetException e) {
+                Throwable t = e.getTargetException();
+                if (t instanceof RuntimeException) {
+                    throw (RuntimeException) t;
+                } else if (t instanceof Error) {
+                    throw (Error) t;
+                } else {
+                    // can't happen
+                    throw new IncompatibleClassChangeError("toPlainString");
+                }
+            }
+        }
 	}
+
+    private static final Method toPlainString;
+    static {
+        Method m;
+        try {
+            m = BigDecimal.class.getMethod("toPlainString", null);
+        } catch (NoSuchMethodException e) {
+            m = null;
+        }
+        toPlainString = m;
+    }
 
 	public Object	getObject()
 	{

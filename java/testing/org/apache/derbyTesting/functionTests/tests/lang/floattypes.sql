@@ -1182,4 +1182,21 @@ values cast(1e30 as decimal(31))*cast(1e30 as decimal(31));
 values cast('1e30' as decimal(31))*cast('1e30' as decimal(31));
 
 
+create table tiger(d decimal(12,11));
+
+insert into tiger values (1.234);
+insert into tiger values (0.1234);
+insert into tiger values (0.01234);
+insert into tiger values (0.001234);
+insert into tiger values (0.001234);
+insert into tiger values (0.0001234);
+insert into tiger values (0.00001234);
+insert into tiger values (0.000001234);
+insert into tiger values (0.0000001234);
+insert into tiger values (0.00000001234);
+insert into tiger values (0.00000001234);
+
+select d from tiger order by 1;
+
+
 

@@ -33,6 +33,7 @@ public abstract class JVMInfo
 		<LI> 2 - JDK 1.2, 1.3
 		<LI> 4 - JDK 1.4.0 or 1.4.1
 		<LI> 5 - JDK 1.4.2
+		<LI> 6 - JDK 1.5
 		</UL>
 		@return The JVM's runtime environment.
 	*/
@@ -82,6 +83,10 @@ public abstract class JVMInfo
 			else
 				id = 5;
 		}
+        else if (javaVersion.equals("1.5"))
+        {
+            id = 6;
+        }
 		else
 		{
 			// aussme our lowest support unless the java spec
