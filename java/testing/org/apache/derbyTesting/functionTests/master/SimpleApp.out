@@ -1,0 +1,14 @@
+SimpleApp starting in embedded mode.
+Loaded the appropriate driver.
+Connected to and created database derbyDB
+Created table derbyDB
+Inserted 1956 Webster
+Inserted 1910 Union
+Updated 1956 Webster to 180 Grand
+Updated 180 Grand to 300 Lakeshore
+Verified the rows
+Dropped table derbyDB
+Closed result set and statement
+Committed transaction and closed connection
+Database shut down normally
+SimpleApp finished

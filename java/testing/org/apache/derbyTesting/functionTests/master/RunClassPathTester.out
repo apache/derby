@@ -1,0 +1,4 @@
+FOUND IN CLASS PATH:
+   Derby embedded engine library (derby.jar)
+   user-specified class (SimpleApp)
+SUCCESS: All Derby related classes found in class path.

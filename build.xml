@@ -275,7 +275,7 @@
     <ant dir="${derby.demo.src.dir}"/>
   </target>
 
-  <target name="testing">
+  <target name="testing" depends="demo">
     <ant dir="${derby.testing.src.dir}"/>
   </target>
 
@@ -974,7 +974,7 @@
 
   <target name="derbytestingjar" depends="initjars,ckderbytesting" if="derbyTesting.available">
     <zip destfile="${derby.jar.dir}/derbyTesting.jar" filesonly="true" compress="true">
-      <fileset dir="${out.dir}" includes="org/apache/derbyTesting/functionTests/**"/>
+      <fileset dir="${out.dir}" includes="org/apache/derbyTesting/functionTests/**,SimpleApp*"/>
     </zip>
   </target>
 
