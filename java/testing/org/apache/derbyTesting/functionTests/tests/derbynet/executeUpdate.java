@@ -25,6 +25,8 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
+import org.apache.derby.tools.ij;
 /**
 	This test tests the JDBC Statement executeUpdate method. Since IJ will eventually
 	just use execute rather then executeUpdate, I want to make sure that executeUpdate
@@ -40,14 +42,8 @@ class executeUpdate
 		{
 			System.out.println("executeUpdate Test Starts");
 			// Initialize JavaCommonClient Driver.
-			Class.forName("com.ibm.db2.jcc.DB2Driver");
-			Connection conn = null;
-
-			String databaseURL = "jdbc:derby:net://localhost/wombat;create=true";
-			java.util.Properties properties = new java.util.Properties();
-			properties.put ("user", "judy");
-			properties.put ("password", "judy");
-			conn = DriverManager.getConnection(databaseURL, properties);
+			ij.getPropertyArg(args); 
+			Connection conn = ij.startJBMS();
 			
 			if (conn == null)
 			{

@@ -97,7 +97,8 @@ public class URLCheck {
 		
 		String protocol = "";
 
-        if( url.startsWith( "jdbc:derby:net:"))
+        if( url.startsWith( "jdbc:derby:net:") ||
+			url.startsWith( "jdbc:derby://"))
 		{
             validProps = null;
 		}

@@ -30,6 +30,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.harness.jvm;
 import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
+import org.apache.derby.tools.ij;
 
 /**
 	This tests the timeslice command
@@ -38,8 +39,6 @@ import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
 public class timeslice
 {
 
-	private static String databaseURL = "jdbc:derby:net://localhost:1527/wombat;create=true";
-	private static Properties properties = new java.util.Properties();
 	private static jvm jvm;
 	private static Vector vCmd;
 	private static String[] timesliceCmd1 = new String[] {"org.apache.derby.drda.NetworkServerControl",
@@ -111,13 +110,6 @@ public class timeslice
 			System.out.println("FAIL - time slice value is " + timeSliceValue + " should be "
 				+ value);
 	}
-	private static Connection newConn() throws Exception
-	{
-		Connection conn = DriverManager.getConnection(databaseURL, properties); 
-		if (conn == null)
-			System.out.println("create connection didn't work");
-		return conn;
-	}
 
 	public static void main (String args[]) throws Exception
 	{
@@ -128,13 +120,7 @@ public class timeslice
 		vCmd = jvm.getCommandLine();
 		try
 		{
-			// Initialize JavaCommonClient Driver.
-			Class.forName("com.ibm.db2.jcc.DB2Driver");
-			properties.put ("user", "admin");
-			properties.put ("password", "admin");
-
-			Connection conn1 = newConn();
-
+			Connection conn1 = ij.startJBMS();
         	bos = new BufferedOutputStream(System.out, 1024);
 
 			server = new NetworkServerControl();

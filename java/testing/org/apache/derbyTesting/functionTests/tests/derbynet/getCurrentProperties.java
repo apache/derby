@@ -20,6 +20,8 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.tools.ij;
+
 import java.util.Properties;
 import java.sql.*;
 import java.util.Vector;
@@ -30,7 +32,6 @@ import java.util.Properties;
 
 public class getCurrentProperties
 {
-	private static String databaseURL = "jdbc:derby:net://localhost:1527/wombat;create=true";
 	private static Properties properties = new java.util.Properties();
 	private static Object joinsync = new Object();
 	private static boolean start = false;
@@ -41,6 +42,8 @@ public class getCurrentProperties
 			NetworkServerControl server = new NetworkServerControl();
 			Properties p = server.getCurrentProperties();
 			p.list(System.out);
+			ij.getPropertyArg(args); 
+
 			// create a connection in a different thread
 			startConnection();
 			// wait for connection
@@ -71,10 +74,7 @@ public class getCurrentProperties
 		Runnable service = new Runnable() {
 			public void run() {
 				try {
-					Class.forName("com.ibm.db2.jcc.DB2Driver");
-					properties.put ("user", "admin");
-					properties.put ("password", "admin");
-					Connection conn = DriverManager.getConnection(databaseURL, properties); 
+					Connection conn = ij.startJBMS();
 
 					// signal that connection has been established
 					joinsignal();

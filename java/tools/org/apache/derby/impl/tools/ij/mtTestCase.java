@@ -141,12 +141,20 @@ public class mtTestCase
 			// for network server need to alter url
 			String framework = p.getProperty("framework");
 			
-			if (framework != null && framework.equals("DB2jNet"))
-			{
-				String newURLPrefix= "jdbc:derby:net://localhost:1527/";
-				updateURLProperties(p,newURLPrefix);
-				p.setProperty("ij.user","APP");
-				p.setProperty("ij.password","PWD");
+			if (framework != null)
+				{
+					String newURLPrefix = null;
+					framework = framework.toUpperCase(java.util.Locale.ENGLISH);
+					if (framework.equals("DB2JNET") || framework.equals("DERBYNET"))
+						newURLPrefix= "jdbc:derby:net://localhost:1527/";
+					else if (framework.equals("DERBYNETCLIENT"))
+						newURLPrefix= "jdbc:derby://localhost:1527/";
+					if (newURLPrefix != null)
+					{
+						updateURLProperties(p,newURLPrefix);
+						p.setProperty("ij.user","APP");
+						p.setProperty("ij.password","PWD");
+					}
 			}
 			System.setProperties(p);
 		}

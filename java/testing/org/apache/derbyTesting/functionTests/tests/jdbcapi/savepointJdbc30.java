@@ -30,7 +30,7 @@ import java.sql.Types;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
-
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  * Test the new class Savepoint in jdbc 30.
  * Also, test some mix and match of defining savepoints through JDBC and sql
@@ -55,9 +55,7 @@ public class savepointJdbc30 {
 			// make the initial connection.
 			ij.getPropertyArg(args);
 			con = ij.startJBMS();
-			String framework = System.getProperty("framework");
-			if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-				isDerbyNet = true;
+			isDerbyNet = TestUtil.isNetFramework();
 
 			con.setAutoCommit(true); // make sure it is true
 			s = con.createStatement();

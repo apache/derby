@@ -32,7 +32,7 @@ import java.sql.SQLException;
 import java.sql.BatchUpdateException;
 import java.sql.DriverManager;
 import java.sql.Connection;
-
+import org.apache.derby.tools.ij;
 /**
 	This test tests the JDBC CallableStatement.
 */
@@ -45,17 +45,14 @@ public class callable
 		try
 		{
 			System.out.println("CallableStatement Test Starts");
-			// Initialize JavaCommonClient Driver.
-			Class.forName("com.ibm.db2.jcc.DB2Driver");
-			Connection conn = null;
+
+			ij.getPropertyArg(args); 
 
 			// This also tests quoted pathname in database name portion of URL, beetle 4781.
-			String databaseURL = "jdbc:derby:net://localhost/\"" + System.getProperty("derby.system.home") + java.io.File.separator + "wombat;create=true\"";
-			java.util.Properties properties = new java.util.Properties();
-			properties.put ("user", "I");
-			properties.put ("password", "mine");
-
-			conn = DriverManager.getConnection(databaseURL, properties);
+			String protocol = System.getProperty("ij.protocol");
+			System.setProperty("ij.database", protocol + "//localhost/\"" + System.getProperty("derby.system.home") + java.io.File.separator + "wombat;create=true\"");
+			ij.getPropertyArg(args); 
+			Connection conn = ij.startJBMS();
 			if (conn == null)
 			{
 				System.out.println("conn didn't work");

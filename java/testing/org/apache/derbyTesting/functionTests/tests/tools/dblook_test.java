@@ -38,7 +38,11 @@ import java.io.FileReader;
 import java.io.File;
 
 import org.apache.derby.tools.dblook;
+import org.apache.derby.tools.ij;
 import org.apache.derby.catalog.DependableFinder;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
+
 
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -68,7 +72,6 @@ public class dblook_test {
 
 	/* **********************************************
 	 * main:
-	 * @param args Ignored.
 	 ****/
 
 	public static void main (String[] args) {
@@ -383,9 +386,7 @@ public class dblook_test {
 
 		printAsHeader("\nDumping DDL for all objects, " +
 			"using\nNetwork Server:\n");
- 
-		jdbcProtocol = "jdbc:derby:net://localhost:" +
-			SERVER_PORT + "/";
+		jdbcProtocol = TestUtil.getJdbcUrlPrefix("localhost",SERVER_PORT);
 		String sourceDBUrl = jdbcProtocol + "\"" + dbPath +
 			separator + dbName + "\":user=someusr;password=somepwd;";
 

@@ -81,6 +81,17 @@ public class NetServer
 			   "shutdown"},
 	     null});                                        //shutdown2
 
+	m.put("DerbyNetClient", new Object[]
+	    {"jdbc:derby://localhost:1527/",                 //prefix
+	     "",                                            // suffix
+	     "org.apache.derby.jdbc.ClientDriver",           //driver
+	     "1527",                                        // port
+	     new String[] {NETWORK_SERVER_CLASS_NAME,  //start
+			   "start"},                        
+	     new String[] {NETWORK_SERVER_CLASS_NAME,  //shutdown
+			   "shutdown"},
+	     null});                                        //shutdown2
+
 	m.put("DB2jcc", new Object[]
 	    {"jdbc:db2://localhost:50000/",                //prefix
 	     "",                                            //suffix
@@ -352,12 +363,12 @@ public class NetServer
 
 	public static boolean isNetworkServerConnection(String fm)
 	{
-		return (fm.equals("DerbyNet"));
+		return (fm.startsWith("DerbyNet"));
 	}
 
-    public static boolean isJCCConnection(String fm)
+    public static boolean isClientConnection(String fm)
     {
-	return (fm.equals("DerbyNet") ||
+	return (fm.startsWith("DerbyNet") ||
 		fm.equals("DB2jcc"));
     }
 

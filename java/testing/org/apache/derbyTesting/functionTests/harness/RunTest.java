@@ -68,7 +68,7 @@ public class RunTest
     
     // Framework support
     static String[] validFrameworks = {"embedded","",
-				       "DerbyNet","DB2jcc",
+				       "DerbyNet","DerbyNetClient", "DB2jcc",
 				       "DB2app"};
     static NetServer ns;
     static boolean frameworkInitialized = false;
@@ -254,7 +254,7 @@ public class RunTest
 	    if ((driverName != null) && (!skiptest) )
 	    {
             System.out.println("Initialize for framework: "+ framework );
-            if (j9net && (framework.equals("DerbyNet"))) 
+            if (j9net && (framework.startsWith("DerbyNet"))) 
 			    ns = new NetServer(baseDir, "j9_13", classpathServer, null, jvmflags,framework);
             else
 			    ns = new NetServer(baseDir, jvmName, classpathServer, javaCmd, jvmflags,framework);
@@ -307,7 +307,7 @@ public class RunTest
                     {
                         Sed sed = new Sed();
                         sed.exec(tmpOutFile,finalOutFile, isSed, 
-                                        NetServer.isJCCConnection(framework));
+                                        NetServer.isClientConnection(framework));
 		    }
 		    catch (ClassFormatError cfe)
 		    {
@@ -715,7 +715,7 @@ public class RunTest
 
         // Create a .tmp file for doing sed later to create testBase.out
         tmpOutFile = new File(outDir, testOutName + ".tmp");
-		if (NetServer.isJCCConnection(framework))
+		if (NetServer.isClientConnection(framework))
 		{
 			JCCOutName = testOutName+".tmpmstr";
 		}
@@ -751,7 +751,7 @@ public class RunTest
         // Delete any old .out or .tmp files
         if (tmpOutFile.exists())
             status = tmpOutFile.delete();
-		if (NetServer.isJCCConnection(framework))
+		if (NetServer.isClientConnection(framework))
 		{
         	JCCOutFile = new File(outDir, JCCOutName);
         	if (JCCOutFile.exists())
@@ -1595,7 +1595,7 @@ clp.list(System.out);
 			
 		}
 		// Temporary until jcc supports null userid
-		if (NetServer.isJCCConnection(framework))
+		if (NetServer.isClientConnection(framework))
 		{
 			String user = System.getProperty("ij.user");
 			String password = System.getProperty("ij.password");
@@ -1727,7 +1727,7 @@ clp.list(System.out);
             if (skiptest == false)
                 status = diffFile.delete();
 			// delete JCC filtered master file
-			if (NetServer.isJCCConnection(framework))
+			if (NetServer.isClientConnection(framework))
 			{
         		JCCOutFile = new File(outDir, JCCOutName);
             	status = JCCOutFile.delete();

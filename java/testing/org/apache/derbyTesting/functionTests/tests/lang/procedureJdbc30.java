@@ -27,7 +27,7 @@ import java.math.BigInteger;
 import java.math.BigDecimal;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.parameterMetaDataJdbc30;
-
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 public class procedureJdbc30
 { 
 
@@ -37,10 +37,7 @@ public class procedureJdbc30
 	{
    		ij.getPropertyArg(argv); 
         Connection conn = ij.startJBMS();
-
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
+		isDerbyNet = TestUtil.isNetFramework();
 
         runTests( conn);
     }

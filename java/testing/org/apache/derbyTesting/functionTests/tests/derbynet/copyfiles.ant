@@ -8,5 +8,6 @@ default_derby.properties
 runtimeinfo_sed.properties
 sysinfo_sed.properties
 testij.sql
+testclientij.sql
 testij_app.properties
 testij_sed.properties

@@ -45,10 +45,10 @@ public class FileCompare
     private boolean searchJdk12 = false;
     private boolean searchJdk13 = false;
     private boolean searchJdk14 = false;
-    private int jccMajor = 0;
-    private int jccMinor = 0;
+    private int driverVersionMajor = 0;
+    private int driverVersionMinor = 0;
     private boolean searchFrame;
-    private boolean searchJCC;
+    private boolean searchDriverVersion;
     private InputStream master = null;
     private boolean verbose;
     
@@ -76,9 +76,9 @@ public class FileCompare
         StringBuffer sb = new StringBuffer();
  
         // If framework is DerbyNet, we may need to check subdirs of the master canon dir
-        // for specific masters by version of JCC we're running against. So, get JCC version
+        // for specific masters by client  we're running against. So, get version
         // for later use if that is the case.
-        if (framework.equals("DerbyNet"))
+        if (framework.startsWith("DerbyNet"))
         {
 	  Class c = null;
 	  Method m = null;
@@ -86,22 +86,24 @@ public class FileCompare
 	  Integer i = null;
 	  try	
 	  {
-	    c = Class.forName("com.ibm.db2.jcc.DB2Driver");
+	    c = Class.forName(NetServer.getDriverName(framework));
 	    o = c.newInstance();
 	    m = c.getMethod("getMajorVersion", null);
 	    i = (Integer)m.invoke(o, null);
-	    jccMajor = i.intValue();
+	    driverVersionMajor = i.intValue();
 	    m = c.getMethod("getMinorVersion", null);
 	    i = (Integer)m.invoke(o, null);
-	    jccMinor = i.intValue();
-            if (framework.equals("DerbyNet")) searchJCC = true;
+	    driverVersionMinor = i.intValue();
+            if (framework.startsWith("DerbyNet")) searchDriverVersion = true;
 	  } catch ( Exception e )
 	  {
-	    //if anything goes wrong, make sure the JCC version values are set to zero
+	    //if anything goes wrong, make sure the driver version values are set to zero
 	    //forget about it.
-	   jccMinor = 0;
-	   jccMajor = 0;
-           searchJCC = false;
+		  
+		  System.out.println("Cannot determine driver version:" + e);
+		  driverVersionMinor = 0;
+		  driverVersionMajor = 0;
+		  searchDriverVersion = false;
  	  }
         }
         
@@ -187,7 +189,7 @@ public class FileCompare
         }
 		// compress blanks in output columns to make up for column width differences
 		// for JCC output
-		if (NetServer.isJCCConnection(framework))
+		if (NetServer.isClientConnection(framework))
 		{
             try
             {
@@ -358,7 +360,7 @@ public class FileCompare
 	String prefix = canondir + '/';
 	if (master == null && searchFrame) searchFramework(prefix);
         if (master == null) searchJvm(prefix);
-	if (master == null && searchJCC) searchJCCVersion(prefix);
+	if (master == null && searchDriverVersion) searchDriverVersion(prefix);
 	if (master == null) getmaster(prefix);
 	if (master == null && canondir != "master") searchCanondir("master");
     }
@@ -368,7 +370,7 @@ public class FileCompare
 	// The JVM search follows the following pattern, with one exception:
 	// first search jvmName (to support unnamed/non-IBM or Sun JVMs)
 	// if vendor == IBM, search ibm+rev then jdk+rev, decrementing rev by one until rev=13,
-	// in each dir, search framework and jcc version if applicable.
+	// in each dir, search framework and driver version if applicable.
 	// BUT, if it's j9, search j9_foundation then j9_13 if j9_foundation, or j9_13 for j9_13, then 	       // the normal ibm13 search pattern: ibm13 then jdk13.
 
 	String newprefix;
@@ -377,11 +379,11 @@ public class FileCompare
 	    if (jvmName.startsWith("j9_foundation"))
             {
                 newprefix = prefix + "j9_foundation" + '/';
-		if (master == null && searchJCC) searchJCCVersion(newprefix);
+		if (master == null && searchDriverVersion) searchDriverVersion(newprefix);
 		if (master == null) getmaster(newprefix);
             }
             newprefix = prefix + "j9_13" + '/';
-	    if (master == null && searchJCC) searchJCCVersion(newprefix);
+	    if (master == null && searchDriverVersion) searchDriverVersion(newprefix);
 	    if (master == null) getmaster(newprefix);
 	    
 	}
@@ -390,11 +392,11 @@ public class FileCompare
 	    if (jvmName.startsWith("ibm"))
             {
 		newprefix = prefix + "ibm1" + i + '/';
-		if (master == null && searchJCC) searchJCCVersion(newprefix);
+		if (master == null && searchDriverVersion) searchDriverVersion(newprefix);
 		if (master == null) getmaster(newprefix);
 	    }
 	    newprefix = prefix + "jdk1" + i + '/';
-	    if (master == null && searchJCC) searchJCCVersion(newprefix);
+	    if (master == null && searchDriverVersion) searchDriverVersion(newprefix);
 	    if (master == null) getmaster(newprefix);
         } 
     }
@@ -404,20 +406,20 @@ public class FileCompare
         String newprefix;
 	newprefix = prefix + framework + '/';
 	if (master == null) searchJvm(newprefix);
-	if (master == null && searchJCC) searchJCCVersion(newprefix);
+	if (master == null && searchDriverVersion) searchDriverVersion(newprefix);
 	if (master == null) getmaster(newprefix);
     }
 
-    private void searchJCCVersion(String prefix)
+    private void searchDriverVersion(String prefix)
     {
-	// It is not sufficient to simply search the current JCC version. 
-	// We must search down through the JCC versions to find the newest applicable master. 
+	// It is not sufficient to simply search the current driver version. 
+	// We must search down through the versions to find the newest applicable master. 
         
 	String newprefix;
 	
-	for (int j = ((jccMajor * 10) + jccMinor); j >= 10; j--)
+	for (int j = ((driverVersionMajor * 10) + driverVersionMinor); j >= 10; j--)
 	{
-            newprefix = prefix + "jcc" + j / 10 + "." + j % 10 + '/';
+            newprefix = prefix + "ver" + j / 10 + "." + j % 10 + '/';
 	    if (master == null) getmaster(newprefix); 
         }
     }

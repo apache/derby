@@ -57,9 +57,7 @@ public class resultset {
 
 	public static void main(String[] args) {
 
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
+		isDerbyNet = TestUtil.isNetFramework();
 
 		Connection con;
 		ResultSetMetaData met;

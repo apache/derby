@@ -37,6 +37,7 @@ import java.io.*;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class characterStreams { 
 
@@ -44,10 +45,7 @@ public class characterStreams {
 
 	public static void main(String[] args) {
 
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
-
+		isDerbyNet = TestUtil.isNetFramework();
 		if (isDerbyNet) {
 			System.out.println("SKIP TEST FOR NOW");
 			return;

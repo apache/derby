@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.sql.*;
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import java.net.InetAddress;
 import java.io.PrintWriter;
 
@@ -35,7 +36,7 @@ public class NSinSameJVM {
 
         // Load the Derby driver
         try {
-            Class.forName("com.ibm.db2.jcc.DB2Driver").newInstance();
+			TestUtil.loadDriver();
             dbg("Derby drivers loaded");
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,6 +46,7 @@ public class NSinSameJVM {
 
 		NetworkServerControl serverControl = null;
 		boolean started = false;
+
 
 		try {
 
@@ -75,14 +77,15 @@ public class NSinSameJVM {
 			System.out.println("FAIL Network Server did not start");
 			return;
 		}
+		String jdbcUrlPrefix = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT);
 
-        String url = "jdbc:derby:net://localhost:" + NETWORKSERVER_PORT + "/\"" + databaseFileName + "\"" + ":user=dummyUser;password=dummyPw;";
+        String url = jdbcUrlPrefix + "/" + databaseFileName;
+
         Connection connection = null;
 		   
         try {
 			// Just connect, do something and close the connection
-            connection = DriverManager.getConnection(url);
-
+            connection = DriverManager.getConnection(url, "user", "password");
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("Select  tablename   from  sys.systables");
 			

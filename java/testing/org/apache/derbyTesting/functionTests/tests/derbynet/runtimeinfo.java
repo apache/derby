@@ -39,7 +39,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 public class runtimeinfo
 {
 
-	private static String databaseURL = "jdbc:derby:net://localhost:1527/wombat;create=true";
 	private static Properties properties = new java.util.Properties();
 	private static jvm jvm;
 	private static Vector vCmd;

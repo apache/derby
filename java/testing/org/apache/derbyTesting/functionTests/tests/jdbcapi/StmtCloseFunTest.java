@@ -33,6 +33,7 @@ import java.sql.Date;
 import java.sql.Types;
 import java.util.GregorianCalendar;
 import org.apache.derby.iapi.reference.JDBC20Translation;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class StmtCloseFunTest {
     
@@ -42,10 +43,8 @@ public class StmtCloseFunTest {
     public static void main(String[] args) {
 
 		System.out.println("Statement Close Fun Test starting ");
+		isDerbyNet= TestUtil.isNetFramework();
 
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
 
 		try {
 			// use the ij utility to read the property file and

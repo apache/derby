@@ -23,13 +23,189 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.sql.*;
 import java.io.*;
+import java.util.Locale;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 
 /**
-	Utility methods for tests, in order to bring some consistency to test output.
+	Utility methods for tests, in order to bring some consistency to test
+	output and handle testing framework differences
+
 */
 public class TestUtil {
+
+	public static final int UNKNOWN_FRAMEWORK = -1;
+
+	/**
+	   framework = embedded (or null) jdbc:derby:
+	*/
+	public static final int EMBEDDED_FRAMEWORK = 0;
+	
+	/**
+	   framework = DerbyNet for JCC  jdbc:derby:net:
+	*/
+	public static final int DERBY_NET_FRAMEWORK = 1;
+
+	/**
+	   framework = DB2JCC  for testing JCC against DB2 for 
+	   debugging jcc problems jdbc:db2://
+	*/
+
+	public  static final int DB2JCC_FRAMEWORK = 2; // jdbc:db2//
+	
+	/**
+	   framework = DerbyNetClient  for Derby cient  jdbc:derby://
+	*/
+	public static final int DERBY_NET_CLIENT_FRAMEWORK = 3; // jdbc:derby://
+
+
+	/**
+	   framework = DB2jNet 
+	   OLD_NET_FRAMEWORK is for tests that have not yet been contributed.
+	   it can be removed once all tests are at apache
+	*/
+	public  static final int OLD_NET_FRAMEWORK = 4;          // jdbc:derby:net:
+
+
+	private static int framework = UNKNOWN_FRAMEWORK;
+
+	// Methods for making framework dependent decisions in tests.
+
+	/**
+	 * Is this a network testingframework? 
+	 * return true if the System Property framework is set to Derby Network
+	 * client or JCC
+	 *
+	 * @return true if this is a Network Server test
+	 */
+	public static boolean isNetFramework()
+	{
+		framework = getFramework();
+		switch (framework)
+		{
+			case DERBY_NET_FRAMEWORK:
+			case DERBY_NET_CLIENT_FRAMEWORK:
+			case DB2JCC_FRAMEWORK:
+			case OLD_NET_FRAMEWORK:
+				return true;
+			default:
+				return false;
+		}
+	}
+			
+	/** 
+		Is the JCC driver being used
+	  
+		@return true for JCC driver
+	*/
+	public static boolean isJCCFramework()
+	{
+		int framework = getFramework();
+		switch (framework)
+		{
+			case DERBY_NET_FRAMEWORK:
+			case DB2JCC_FRAMEWORK:
+			case OLD_NET_FRAMEWORK:
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	   Get the framework from the System Property framework
+	   @return  constant for framework being used
+	       TestUtil.EMBEDDED_FRAMEWORK  for embedded
+		   TestUtil.DERBY_NET_CLIENT_FRAMEWORK  for Derby Network Client 
+		   TestUtil.DERBY_NET_FRAMEWORK for JCC to Network Server
+		   TestUtil.DB2JCC_FRAMEWORK for JCC to DB2
+	*/
+	private static int getFramework()
+	{
+		if (framework != UNKNOWN_FRAMEWORK)
+			return framework;
+		String frameworkString = System.getProperty("framework");
+		if (frameworkString == null || 
+		   frameworkString.toUpperCase(Locale.ENGLISH).equals("EMBEDDED"))
+			framework = EMBEDDED_FRAMEWORK;
+		else if (frameworkString.toUpperCase(Locale.ENGLISH).equals("DERBYNETCLIENT"))
+			framework = DERBY_NET_CLIENT_FRAMEWORK;
+		else if (frameworkString.toUpperCase(Locale.ENGLISH).equals("DERBYNET"))
+			framework = DERBY_NET_FRAMEWORK;
+		else if (frameworkString.toUpperCase(Locale.ENGLISH).indexOf("DB2JNET") != -1)
+			framework = OLD_NET_FRAMEWORK;
+
+		return framework;
+
+	}
+
+	/**
+	    Get URL prefix for current framework.
+		
+		@return url, assume localhost and port 1527 for Network Tests
+		@see getJdbcUrlPrefix(String server, int port)
+		
+	*/
+	public static String getJdbcUrlPrefix()
+	{
+		return getJdbcUrlPrefix("localhost", 1527);
+	}
+
+	/** 
+		Get URL prefix for current framework		
+		
+		@param server  host to connect to with client driver 
+		               ignored for embedded driver
+		@param port    port to connect to with client driver
+		               ignored with embedded driver
+		@return URL prefix
+		        EMBEDDED_FRAMEWORK returns "jdbc:derby"
+				DERBY_NET_FRAMEWORK = "jdbc:derby:net://<server>:port/"
+				DERBY_NET_CLIENT_FRAMEWORK = "jdbc:derby://<server>:port/"
+				DB2_JCC_FRAMEWORK = "jdbc:db2://<server>:port/"
+	*/
+	public static String getJdbcUrlPrefix(String server, int port)
+	{
+		int framework = getFramework();
+		switch (framework)
+		{
+			case EMBEDDED_FRAMEWORK:
+				return "jdbc:derby:";
+			case DERBY_NET_FRAMEWORK:
+			case OLD_NET_FRAMEWORK:								
+				return "jdbc:derby:net://" + server + ":" + port + "/";
+			case DERBY_NET_CLIENT_FRAMEWORK:
+				return "jdbc:derby://" + server + ":" + port + "/";
+			case DB2JCC_FRAMEWORK:				
+				return "jdbc:db2://" + server + ":" + port + "/";
+		}
+		// Unknown framework
+		return null;
+		
+	}
+
+	/**
+	   Load the appropriate driver for the current framework
+	*/
+	public static void loadDriver() throws Exception
+	{
+		String driverName = null;
+		framework = getFramework();
+		switch (framework)
+		{
+			case EMBEDDED_FRAMEWORK:
+				driverName =  "org.apache.derby.jdbc.EmbeddedDriver";
+				break;
+			case DERBY_NET_FRAMEWORK:
+			case OLD_NET_FRAMEWORK:				
+			case DB2JCC_FRAMEWORK:				
+				driverName = "com.ibm.db2.jcc.DB2Driver";
+				break;
+			case DERBY_NET_CLIENT_FRAMEWORK:
+				driverName = "org.apache.derby.jdbc.ClientDriver";
+				break;
+		}
+		Class.forName(driverName).newInstance();
+	}
 
 	public static void dumpSQLExceptions(SQLException sqle) {
 		TestUtil.dumpSQLExceptions(sqle, false);
@@ -288,6 +464,11 @@ public class TestUtil {
 
 
 }
+
+
+
+
+
 
 
 

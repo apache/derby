@@ -33,6 +33,7 @@ import java.io.*;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  *This Program Test getConnection()/getStatement().
@@ -46,9 +47,7 @@ public class connectionJdbc20{
 	public static void main(String[] args) {
 		Connection conn, connreturn;
 		Statement stmt, stmtreturn;
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
+
 
 		System.out.println("Test connection20 starting");
 		try
@@ -57,6 +56,7 @@ public class connectionJdbc20{
 			// make the initial connection.
 			 ij.getPropertyArg(args);
 			 conn = ij.startJBMS();
+			 isDerbyNet = TestUtil.isNetFramework();
 			 stmt = conn.createStatement();
             //create a table, insert a row, do a select from the table,
 			 stmt.execute("create table tab1("+

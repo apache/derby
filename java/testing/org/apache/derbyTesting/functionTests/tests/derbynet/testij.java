@@ -28,19 +28,23 @@ import java.io.BufferedOutputStream;
 
 import org.apache.derbyTesting.functionTests.harness.jvm;
 import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import org.apache.derby.drda.NetworkServerControl;
+
 
 public class testij
 {
 
-	private static String databaseURL = "jdbc:derby:net://localhost:1527/wombat";
+
 	private static Properties properties = new java.util.Properties();
 	private static jvm jvm;
 	private static Vector vCmd;
-	private static String[] ijCmd = new String[] {"org.apache.derby.tools.ij",
+	private static String[] jccIjCmd = new String[] {"org.apache.derby.tools.ij",
 		"extin/testij.sql"};
 
+	private static String[] clientIjCmd = new String[] {"org.apache.derby.tools.ij",
+													 "extin/testclientij.sql"};
 	private static void execCmd (String[] args) throws Exception
 	{
 		int totalSize = vCmd.size() + args.length;
@@ -127,7 +131,10 @@ public class testij
 			//create wombat database
 			NetworkServerControl server = new NetworkServerControl();
 			System.out.println("Testing various ij connections and comments in front of selects");
-			execCmdDumpResults(ijCmd);	
+			if (TestUtil.isJCCFramework())
+				execCmdDumpResults(jccIjCmd);	
+			else   // Derby Client
+				execCmdDumpResults(clientIjCmd);	
 			System.out.println("End test");
 		}
 		catch (Exception e)

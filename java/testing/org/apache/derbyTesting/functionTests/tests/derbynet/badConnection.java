@@ -26,6 +26,7 @@ import java.io.File;
 
 import java.io.BufferedOutputStream;
 import org.apache.derbyTesting.functionTests.harness.TimedProcess;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
 	This tests various bad connection states
@@ -37,15 +38,17 @@ public class badConnection
 	
 	private static Properties properties = new java.util.Properties();
 
-	private static String dbNotFoundUrl =
-		"jdbc:derby:net://localhost:1527/notthere";
-	private static String  invalidAttrUrl = "jdbc:derby:net://localhost:1527/testbase;upgrade=notValidValue";
-	private static String  derbynetUrl = "jdbc:derby:net://localhost:1527/testbase";
+	private static String dbNotFoundDB = "notthere";
+	private static String  invalidAttrDB = "testbase;upgrade=notValidValue";
+	private static String  derbynetDB = "testbase";
 
 
-	private static Connection newConn(String databaseURL,Properties properties) throws Exception
+	private static Connection newConn(String database,Properties properties) throws Exception
 	{
 		Connection conn = null;
+		String databaseURL = TestUtil.getJdbcUrlPrefix() + database;
+		//System.out.println("URL is: " + databaseURL);
+
 		try {
 			conn = DriverManager.getConnection(databaseURL, properties); 
 			if (conn == null)
@@ -76,21 +79,19 @@ public class badConnection
 		
 		try
 		{
-			// Initialize JavaCommonClient Driver.
-			Class.forName("com.ibm.db2.jcc.DB2Driver");
-
+			TestUtil.loadDriver();
 			System.out.println("No user/password  (Client error)");
-			Connection conn1 = newConn(derbynetUrl, properties);
+			Connection conn1 = newConn(derbynetDB, properties);
 
 			System.out.println("Database not Found  (RDBNFNRM)");
 			properties.put ("user", "admin");
 			properties.put ("password", "admin");
-			conn1 = newConn(dbNotFoundUrl, properties);
+			conn1 = newConn(dbNotFoundDB, properties);
 			if (conn1 != null)
 				conn1.close();
 
 			System.out.println("Invalid Attribute  value (RDBAFLRM)");
-			conn1 = newConn(invalidAttrUrl, properties);
+			conn1 = newConn(invalidAttrDB, properties);
 			if (conn1 != null)
 				conn1.close();
 		

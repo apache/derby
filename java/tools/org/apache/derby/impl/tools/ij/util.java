@@ -41,6 +41,7 @@ import java.sql.Types;
 
 import java.util.Properties;
 import java.util.Vector;
+import java.util.Locale;
 
 /**
 	Methods used to control setup for apps as
@@ -449,14 +450,12 @@ public class util implements java.security.PrivilegedAction {
 
 	public static Properties updateConnInfo(String user, String password, Properties connInfo)
 	{
-		String framework = util.getSystemProperty("framework");
 		String ijGetMessages = util.getSystemProperty("ij.retrieveMessagesFromServerOnGetMessage");
 		boolean retrieveMessages = false;
 		
 		
 		// For JCC make sure we set it to retrieve messages
-		if (framework != null  && ((framework.equals("DB2jNet") 
-									|| framework.equals("DB2jcc"))))
+		if (isNetFramework())
 			retrieveMessages = true;
 		
 		if (ijGetMessages != null)
@@ -700,6 +699,8 @@ AppUI.out.println("SIZE="+l);
 	private static final String[][] protocolDrivers =
 		{
 		  { "jdbc:derby:net:",			"com.ibm.db2.jcc.DB2Driver"},
+		  { "jdbc:derby://",            "org.apache.derby.jdbc.ClientDriver"},
+
 		  { "jdbc:derby:",				"org.apache.derby.jdbc.EmbeddedDriver" },
 		};
 
@@ -736,4 +737,24 @@ AppUI.out.println("SIZE="+l);
 	public static void loadDriver(String driverClass) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Class.forName(driverClass).newInstance();
 	}
+
+	/**
+	 * Used to determine if this is a network testing framework 
+	 * So that retrieveMessages can be sent.  The plan is to have  
+	 * ij will retrieve messages by default and not look at the testing 
+	 * frameworks. So, ulitmately  this function will look at the driver
+	 * rather than the framework.
+	 * 
+	 * @ return true if the framework contains Net or JCC.
+	 */
+	private static boolean isNetFramework()
+	{
+		String framework = util.getSystemProperty("framework");
+		return ((framework != null)  &&
+			((framework.toUpperCase(Locale.ENGLISH).indexOf("NET") != -1) ||
+			 (framework.toUpperCase(Locale.ENGLISH).indexOf("JCC") != -1)));
+	}
+	
+
 }
+

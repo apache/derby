@@ -311,6 +311,8 @@ public class dblook {
 		if (derbyDriver == null) {
 			if (sourceDBUrl.indexOf(":net://") != -1)
 				derbyDriver = "com.ibm.db2.jcc.DB2Driver";
+			else if (sourceDBUrl.startsWith("jdbc:derby://"))
+			   derbyDriver = "org.apache.derby.jdbc.ClientDriver";
 			else
 				derbyDriver = "org.apache.derby.jdbc.EmbeddedDriver";
 	    }
@@ -352,7 +354,7 @@ public class dblook {
 		// will be thrown when we try to connect).
 			return "";
 
-		start = dbUrl.indexOf("net://");
+		start = dbUrl.indexOf("://");
 		if (start == -1)
 		// standard url (jdbc:derby:<dbname>).  Database
 		// name starts right after "derby:".  The "6" in
@@ -361,9 +363,9 @@ public class dblook {
 		else
 		// Network Server url.  Database name starts right
 		// after next slash (":net://hostname:port/<dbname>).
-		// The "6" in the following line is the length of
-		// "net://".
-			start = dbUrl.indexOf("/", start+6) + 1;
+		// The "3" in the following line is the length of
+		// "://".
+			start = dbUrl.indexOf("/", start+3) + 1;
 
 		int stop = -1;
 		if (dbUrl.charAt(start) == '"') {
@@ -506,7 +508,6 @@ public class dblook {
 
 		try
 		{
-
 			// Connect to the database, prepare statements,
 			// and load id-to-name mappings.
 			this.conn = DriverManager.getConnection(sourceDBUrl);

@@ -34,6 +34,8 @@ import java.sql.Clob;
 import java.sql.Blob;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
 import java.io.*;
 import java.sql.PreparedStatement;
 import java.util.Properties;
@@ -87,9 +89,7 @@ public class blobclob4BLOB {
     {
 		System.out.println("Test blobclob starting");
 
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
+		isDerbyNet = TestUtil.isNetFramework();
 
 		try
         {

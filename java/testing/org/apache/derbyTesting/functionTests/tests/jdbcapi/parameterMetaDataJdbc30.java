@@ -32,6 +32,7 @@ import java.sql.Types;
 import java.math.BigDecimal;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * Test the new class ParameterMetaData in jdbc 30.
@@ -59,9 +60,7 @@ public class parameterMetaDataJdbc30 {
 			ij.getPropertyArg(args);
 			con = ij.startJBMS();
 			con.setAutoCommit(true); // make sure it is true
-			String framework = System.getProperty("framework");
-			if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
+			isDerbyNet = TestUtil.isNetFramework();
 
 			s = con.createStatement();
 

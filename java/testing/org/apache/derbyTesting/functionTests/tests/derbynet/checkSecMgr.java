@@ -29,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.derbyTesting.functionTests.util.JDBCTestDisplayUtil;
 import org.apache.derby.impl.tools.ij.util;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
 	This tests to see if the security manager is running.
@@ -70,7 +71,7 @@ public class checkSecMgr
 			//    We seem to be able to create the database.
 			// Ideally this test should attempt to create the database
 			// ../wombat;create=true and get the security exception.
-			String databaseURL = "jdbc:derby:net://localhost/" + 
+			String databaseURL = TestUtil.getJdbcUrlPrefix() + "localhost/" + 
 				"\"D:/wombat;create=true\"";
 			System.out.println(databaseURL);
 			java.util.Properties properties = new java.util.Properties();

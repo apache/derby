@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.io.ByteArrayInputStream; 
 import java.io.InputStreamReader;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derby.tools.ij;
 
 /**
 	This test tests the JDBC PreparedStatement.
@@ -49,17 +50,8 @@ class csPrepStmt
 			System.out.println("csPrepStmt Test Starts");
 			// Initialize JavaCommonClient Driver.
 			// Initialize JavaCommonClient Driver.
-			Class.forName("com.ibm.db2.jcc.DB2Driver");
-			
-
-			// test attribute passing in quoted string, beetle 4789
-			String databaseURL = "jdbc:derby:net://localhost/\"wombat2;create=true;upgrade=true\"";
-			java.util.Properties properties = new java.util.Properties();
-			properties.put ("user", "cs");
-			properties.put ("password", "cs");
-			properties.put("retrieveMessagesFromServerOnGetMessage", "true");
-
-			conn = DriverManager.getConnection(databaseURL, properties);
+			ij.getPropertyArg(args); 
+			conn = ij.startJBMS();
 			if (conn == null)
 			{
 				System.out.println("conn didn't work");

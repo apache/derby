@@ -45,9 +45,7 @@ public class procedure
 	{
    		ij.getPropertyArg(argv); 
         Connection conn = ij.startJBMS();
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
+		isDerbyNet = TestUtil.isNetFramework();
 
 		// DB2 !!
 		// com.ibm.db2.jcc.DB2DataSource ds = new com.ibm.db2.jcc.DB2DataSource();

@@ -32,6 +32,7 @@ import java.io.*;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  *This Program Test SetMaxFieldsize()/getMaxFieldsize().
@@ -62,10 +63,7 @@ public class maxfieldsize {
 
 		System.out.println("Test MaxFieldSize  starting");
 
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
-		
+		isDerbyNet = TestUtil.isNetFramework();
 		try
 		{
 			// use the ij utility to read the property file and

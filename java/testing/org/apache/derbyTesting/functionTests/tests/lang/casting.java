@@ -23,7 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derby.tools.JDBCDisplayUtil;
-
+ 
 import java.sql.*;
 import java.math.*;
 import java.io.*;
@@ -261,12 +261,10 @@ public class casting {
  
 	public static void main(String[] args) throws Exception {
 		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-			isDerbyNet = true;
-
 		if (framework != null && framework.toUpperCase().equals("DB2JCC"))
 			isDB2 = true;
 
+		isDerbyNet = TestUtil.isNetFramework();
 		try {
 			// use the ij utility to read the property file and
 			// make the initial connection.

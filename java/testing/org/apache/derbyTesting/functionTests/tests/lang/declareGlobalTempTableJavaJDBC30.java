@@ -35,7 +35,7 @@ import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
-
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  * Test for declared global temporary tables (introduced in Cloudscape 5.2) and pooled connection close and jdbc 3.0 specific features
  * The jdbc3.0 specific featuers are holdable cursors, savepoints.
@@ -70,9 +70,7 @@ public class declareGlobalTempTableJavaJDBC30 {
       
 			ij.getPropertyArg(args);
 			con = ij.startJBMS();
-			String framework = System.getProperty("framework");
-			if (framework != null && framework.toUpperCase().equals("DERBYNET"))
-				isDerbyNet = true;
+			isDerbyNet = TestUtil.isNetFramework();
 
 			con.setAutoCommit(false);
 			s = con.createStatement();
