@@ -231,16 +231,20 @@ public class dblook {
 			case 'd':
 				if (!haveVal)
 					return -1;
-				if (args[start].length() == 2)
-					sourceDBUrl = args[++start];
-				return start;
+				if (args[start].length() == 2) {
+					sourceDBUrl = stripQuotes(args[++start]);
+					return start;
+				}
+				return -1;
 
 			case 'z':
 				if (!haveVal)
 					return -1;
-				if (args[start].length() == 2)
+				if (args[start].length() == 2) {
 					schemaParam = args[++start];
-				return start;
+					return start;
+				}
+				return -1;
 
 			case 't':
 				if (!haveVal)
@@ -256,9 +260,11 @@ public class dblook {
 			case 'o':
 				if (!haveVal)
 					return -1;
-				if ((args[start].length() == 2) && (args[start+1].length() > 0))
+				if ((args[start].length() == 2) && (args[start+1].length() > 0)){
 					ddlFileName = args[++start];
-				return start;
+					return start;
+				}
+				return -1;
 
 			case 'a':
 				if (args[start].equals("-append")) {
@@ -342,9 +348,9 @@ public class dblook {
 		start = dbUrl.indexOf("net://");
 		if (start == -1)
 		// standard url (jdbc:derby:<dbname>).  Database
-		// name starts right after "cloudscape:".  The "11" in
-		// the following line is the length of "cloudscape:".
-			start = dbUrl.indexOf("cloudscape:") + 11;
+		// name starts right after "derby:".  The "6" in
+		// the following line is the length of "derby:".
+			start = dbUrl.indexOf("derby:") + 6;
 		else
 		// Network Server url.  Database name starts right
 		// after next slash (":net://hostname:port/<dbname>).
