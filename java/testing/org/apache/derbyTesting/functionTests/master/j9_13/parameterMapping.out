@@ -1,0 +1,2550 @@
+Test parameterMapping starting
+STILL TO RESOLVE -- Cloudscape getBoolean() allow conversion on strings to match JCC
+STILL TO RESOLVE -- Cloudscape getXXX() disable on LOBs.
+getXXX on : -6
+  skipping
+getXXX on : SMALLINT
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Integer was null false
+setNull() with all JDBC Types on SMALLINT
+  setNull(Types.TINYINT) getShort=0 was null true
+  setNull(SMALLINT) getShort=0 was null true
+  setNull(INTEGER) getShort=0 was null true
+  setNull(BIGINT) getShort=0 was null true
+  setNull(REAL) getShort=0 was null true
+  setNull(Types.FLOAT) getShort=0 was null true
+  setNull(DOUBLE) getShort=0 was null true
+  setNull(DECIMAL) getShort=0 was null true
+  setNull(Types.NUMERIC) getShort=0 was null true
+  setNull(Types.BIT) getShort=0 was null true
+  setNull(CHAR) getShort=0 was null true
+  setNull(VARCHAR) getShort=0 was null true
+  setNull(LONG VARCHAR) getShort=0 was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on SMALLINT
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getShort=98 was null false JDBC MATCH(OK)
+  setShort() getShort=98 was null false JDBC MATCH(OK)
+  setInt() getShort=98 was null false JDBC MATCH(OK)
+  setLong() getShort=98 was null false JDBC MATCH(OK)
+  setFloat() getShort=98 was null false JDBC MATCH(OK)
+  setDouble() getShort=98 was null false JDBC MATCH(OK)
+  setBigDecimal() getShort=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getShort=0 was null true JDBC MATCH(OK)
+  setBoolean() getShort=1 was null false JDBC MATCH(OK)
+  setString() getShort=97 was null false JDBC MATCH(OK)
+  setString(null) getShort=0 was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'null'.
+  setObject(java.lang.String) getShort=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getShort=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getShort=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getShort=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getShort=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getShort=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getShort=12 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 SMALLINT, INOUT P2 SMALLINT, OUT P3 SMALLINT) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT SMALLINT registerOutParameter(Types.TINYINT) -- OK
+OUT SMALLINT registerOutParameter(Types.TINYINT) -- OK
+P2=cs.getByte=38 was null false
+P3=cs.getByte=77 was null false
+INOUT SMALLINT registerOutParameter(Types.SMALLINT) -- OK
+OUT SMALLINT registerOutParameter(Types.SMALLINT) -- OK
+P2=cs.getShort=38 was null false
+P3=cs.getShort=77 was null false
+INOUT SMALLINT registerOutParameter(Types.INTEGER) -- OK
+OUT SMALLINT registerOutParameter(Types.INTEGER) -- OK
+P2=cs.getInt=38 was null false
+P3=cs.getInt=77 was null false
+INOUT SMALLINT registerOutParameter(Types.BIGINT) -- OK
+OUT SMALLINT registerOutParameter(Types.BIGINT) -- OK
+P2=cs.getLong=38 was null false
+P3=cs.getLong=77 was null false
+INOUT SMALLINT registerOutParameter(Types.REAL) -- OK
+OUT SMALLINT registerOutParameter(Types.REAL) -- OK
+P2=cs.getFloat=38.0 was null false
+P3=cs.getFloat=77.0 was null false
+INOUT SMALLINT registerOutParameter(Types.FLOAT) -- OK
+OUT SMALLINT registerOutParameter(Types.FLOAT) -- OK
+P2=cs.getDouble=38.0 was null false
+P3=cs.getDouble=77.0 was null false
+INOUT SMALLINT registerOutParameter(Types.DOUBLE) -- OK
+OUT SMALLINT registerOutParameter(Types.DOUBLE) -- OK
+P2=cs.getDouble=38.0 was null false
+P3=cs.getDouble=77.0 was null false
+INOUT SMALLINT registerOutParameter(Types.DECIMAL) -- OK
+OUT SMALLINT registerOutParameter(Types.DECIMAL) -- OK
+P2=cs.getBigDecimal=38 was null false
+P3=cs.getBigDecimal=77 was null false
+INOUT SMALLINT registerOutParameter(Types.NUMERIC) -- OK
+OUT SMALLINT registerOutParameter(Types.NUMERIC) -- OK
+INOUT SMALLINT registerOutParameter(Types.BIT) -- OK
+OUT SMALLINT registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT SMALLINT registerOutParameter(Types.CHAR) -- OK
+OUT SMALLINT registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=38 was null false
+P3=cs.getString=77 was null false
+INOUT SMALLINT registerOutParameter(Types.VARCHAR) -- OK
+OUT SMALLINT registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=38 was null false
+P3=cs.getString=77 was null false
+INOUT SMALLINT registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT SMALLINT registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=38 was null false
+P3=cs.getString=77 was null false
+INOUT SMALLINT registerOutParameter(Types.VARBINARY) -- XCL25
+OUT SMALLINT registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT SMALLINT registerOutParameter(Types.DATE) -- XCL25
+OUT SMALLINT registerOutParameter(Types.DATE) -- XCL25
+INOUT SMALLINT registerOutParameter(Types.TIME) -- XCL25
+OUT SMALLINT registerOutParameter(Types.TIME) -- XCL25
+INOUT SMALLINT registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT SMALLINT registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT SMALLINT registerOutParameter(Types.CLOB) -- XCL25
+OUT SMALLINT registerOutParameter(Types.CLOB) -- XCL25
+INOUT SMALLINT registerOutParameter(Types.BLOB) -- XCL25
+OUT SMALLINT registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : INTEGER
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Integer was null false
+setNull() with all JDBC Types on INTEGER
+  setNull(Types.TINYINT) getInt=0 was null true
+  setNull(SMALLINT) getInt=0 was null true
+  setNull(INTEGER) getInt=0 was null true
+  setNull(BIGINT) getInt=0 was null true
+  setNull(REAL) getInt=0 was null true
+  setNull(Types.FLOAT) getInt=0 was null true
+  setNull(DOUBLE) getInt=0 was null true
+  setNull(DECIMAL) getInt=0 was null true
+  setNull(Types.NUMERIC) getInt=0 was null true
+  setNull(Types.BIT) getInt=0 was null true
+  setNull(CHAR) getInt=0 was null true
+  setNull(VARCHAR) getInt=0 was null true
+  setNull(LONG VARCHAR) getInt=0 was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on INTEGER
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getInt=98 was null false JDBC MATCH(OK)
+  setShort() getInt=98 was null false JDBC MATCH(OK)
+  setInt() getInt=98 was null false JDBC MATCH(OK)
+  setLong() getInt=98 was null false JDBC MATCH(OK)
+  setFloat() getInt=98 was null false JDBC MATCH(OK)
+  setDouble() getInt=98 was null false JDBC MATCH(OK)
+  setBigDecimal() getInt=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getInt=0 was null true JDBC MATCH(OK)
+  setBoolean() getInt=1 was null false JDBC MATCH(OK)
+  setString() getInt=97 was null false JDBC MATCH(OK)
+  setString(null) getInt=0 was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'INTEGER' from a data value of type 'null'.
+  setObject(java.lang.String) getInt=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getInt=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getInt=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getInt=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getInt=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getInt=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getInt=12 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 INTEGER, INOUT P2 INTEGER, OUT P3 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT INTEGER registerOutParameter(Types.TINYINT) -- OK
+OUT INTEGER registerOutParameter(Types.TINYINT) -- OK
+P2=cs.getByte=41 was null false
+P3=cs.getByte=88 was null false
+INOUT INTEGER registerOutParameter(Types.SMALLINT) -- OK
+OUT INTEGER registerOutParameter(Types.SMALLINT) -- OK
+P2=cs.getShort=41 was null false
+P3=cs.getShort=88 was null false
+INOUT INTEGER registerOutParameter(Types.INTEGER) -- OK
+OUT INTEGER registerOutParameter(Types.INTEGER) -- OK
+P2=cs.getInt=41 was null false
+P3=cs.getInt=88 was null false
+INOUT INTEGER registerOutParameter(Types.BIGINT) -- OK
+OUT INTEGER registerOutParameter(Types.BIGINT) -- OK
+P2=cs.getLong=41 was null false
+P3=cs.getLong=88 was null false
+INOUT INTEGER registerOutParameter(Types.REAL) -- OK
+OUT INTEGER registerOutParameter(Types.REAL) -- OK
+P2=cs.getFloat=41.0 was null false
+P3=cs.getFloat=88.0 was null false
+INOUT INTEGER registerOutParameter(Types.FLOAT) -- OK
+OUT INTEGER registerOutParameter(Types.FLOAT) -- OK
+P2=cs.getDouble=41.0 was null false
+P3=cs.getDouble=88.0 was null false
+INOUT INTEGER registerOutParameter(Types.DOUBLE) -- OK
+OUT INTEGER registerOutParameter(Types.DOUBLE) -- OK
+P2=cs.getDouble=41.0 was null false
+P3=cs.getDouble=88.0 was null false
+INOUT INTEGER registerOutParameter(Types.DECIMAL) -- OK
+OUT INTEGER registerOutParameter(Types.DECIMAL) -- OK
+P2=cs.getBigDecimal=41 was null false
+P3=cs.getBigDecimal=88 was null false
+INOUT INTEGER registerOutParameter(Types.NUMERIC) -- OK
+OUT INTEGER registerOutParameter(Types.NUMERIC) -- OK
+INOUT INTEGER registerOutParameter(Types.BIT) -- OK
+OUT INTEGER registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT INTEGER registerOutParameter(Types.CHAR) -- OK
+OUT INTEGER registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=41 was null false
+P3=cs.getString=88 was null false
+INOUT INTEGER registerOutParameter(Types.VARCHAR) -- OK
+OUT INTEGER registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=41 was null false
+P3=cs.getString=88 was null false
+INOUT INTEGER registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT INTEGER registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=41 was null false
+P3=cs.getString=88 was null false
+INOUT INTEGER registerOutParameter(Types.VARBINARY) -- XCL25
+OUT INTEGER registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT INTEGER registerOutParameter(Types.DATE) -- XCL25
+OUT INTEGER registerOutParameter(Types.DATE) -- XCL25
+INOUT INTEGER registerOutParameter(Types.TIME) -- XCL25
+OUT INTEGER registerOutParameter(Types.TIME) -- XCL25
+INOUT INTEGER registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT INTEGER registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT INTEGER registerOutParameter(Types.CLOB) -- XCL25
+OUT INTEGER registerOutParameter(Types.CLOB) -- XCL25
+INOUT INTEGER registerOutParameter(Types.BLOB) -- XCL25
+OUT INTEGER registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : BIGINT
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Long was null false
+setNull() with all JDBC Types on BIGINT
+  setNull(Types.TINYINT) getLong=0 was null true
+  setNull(SMALLINT) getLong=0 was null true
+  setNull(INTEGER) getLong=0 was null true
+  setNull(BIGINT) getLong=0 was null true
+  setNull(REAL) getLong=0 was null true
+  setNull(Types.FLOAT) getLong=0 was null true
+  setNull(DOUBLE) getLong=0 was null true
+  setNull(DECIMAL) getLong=0 was null true
+  setNull(Types.NUMERIC) getLong=0 was null true
+  setNull(Types.BIT) getLong=0 was null true
+  setNull(CHAR) getLong=0 was null true
+  setNull(VARCHAR) getLong=0 was null true
+  setNull(LONG VARCHAR) getLong=0 was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on BIGINT
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getLong=98 was null false JDBC MATCH(OK)
+  setShort() getLong=98 was null false JDBC MATCH(OK)
+  setInt() getLong=98 was null false JDBC MATCH(OK)
+  setLong() getLong=98 was null false JDBC MATCH(OK)
+  setFloat() getLong=98 was null false JDBC MATCH(OK)
+  setDouble() getLong=98 was null false JDBC MATCH(OK)
+  setBigDecimal() getLong=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getLong=0 was null true JDBC MATCH(OK)
+  setBoolean() getLong=1 was null false JDBC MATCH(OK)
+  setString() getLong=97 was null false JDBC MATCH(OK)
+  setString(null) getLong=0 was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'BIGINT' from a data value of type 'null'.
+  setObject(java.lang.String) getLong=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getLong=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getLong=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getLong=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getLong=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getLong=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getLong=12 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 BIGINT, INOUT P2 BIGINT, OUT P3 BIGINT) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT BIGINT registerOutParameter(Types.TINYINT) -- OK
+OUT BIGINT registerOutParameter(Types.TINYINT) -- OK
+P2=cs.getByte=40 was null false
+P3=cs.getByte=99 was null false
+INOUT BIGINT registerOutParameter(Types.SMALLINT) -- OK
+OUT BIGINT registerOutParameter(Types.SMALLINT) -- OK
+P2=cs.getShort=40 was null false
+P3=cs.getShort=99 was null false
+INOUT BIGINT registerOutParameter(Types.INTEGER) -- OK
+OUT BIGINT registerOutParameter(Types.INTEGER) -- OK
+P2=cs.getInt=40 was null false
+P3=cs.getInt=99 was null false
+INOUT BIGINT registerOutParameter(Types.BIGINT) -- OK
+OUT BIGINT registerOutParameter(Types.BIGINT) -- OK
+P2=cs.getLong=40 was null false
+P3=cs.getLong=99 was null false
+INOUT BIGINT registerOutParameter(Types.REAL) -- OK
+OUT BIGINT registerOutParameter(Types.REAL) -- OK
+P2=cs.getFloat=40.0 was null false
+P3=cs.getFloat=99.0 was null false
+INOUT BIGINT registerOutParameter(Types.FLOAT) -- OK
+OUT BIGINT registerOutParameter(Types.FLOAT) -- OK
+P2=cs.getDouble=40.0 was null false
+P3=cs.getDouble=99.0 was null false
+INOUT BIGINT registerOutParameter(Types.DOUBLE) -- OK
+OUT BIGINT registerOutParameter(Types.DOUBLE) -- OK
+P2=cs.getDouble=40.0 was null false
+P3=cs.getDouble=99.0 was null false
+INOUT BIGINT registerOutParameter(Types.DECIMAL) -- OK
+OUT BIGINT registerOutParameter(Types.DECIMAL) -- OK
+P2=cs.getBigDecimal=40 was null false
+P3=cs.getBigDecimal=99 was null false
+INOUT BIGINT registerOutParameter(Types.NUMERIC) -- OK
+OUT BIGINT registerOutParameter(Types.NUMERIC) -- OK
+INOUT BIGINT registerOutParameter(Types.BIT) -- OK
+OUT BIGINT registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT BIGINT registerOutParameter(Types.CHAR) -- OK
+OUT BIGINT registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=40 was null false
+P3=cs.getString=99 was null false
+INOUT BIGINT registerOutParameter(Types.VARCHAR) -- OK
+OUT BIGINT registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=40 was null false
+P3=cs.getString=99 was null false
+INOUT BIGINT registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT BIGINT registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=40 was null false
+P3=cs.getString=99 was null false
+INOUT BIGINT registerOutParameter(Types.VARBINARY) -- XCL25
+OUT BIGINT registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT BIGINT registerOutParameter(Types.DATE) -- XCL25
+OUT BIGINT registerOutParameter(Types.DATE) -- XCL25
+INOUT BIGINT registerOutParameter(Types.TIME) -- XCL25
+OUT BIGINT registerOutParameter(Types.TIME) -- XCL25
+INOUT BIGINT registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT BIGINT registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT BIGINT registerOutParameter(Types.CLOB) -- XCL25
+OUT BIGINT registerOutParameter(Types.CLOB) -- XCL25
+INOUT BIGINT registerOutParameter(Types.BLOB) -- XCL25
+OUT BIGINT registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : REAL
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.0 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Float was null false
+setNull() with all JDBC Types on REAL
+  setNull(Types.TINYINT) getFloat=0.0 was null true
+  setNull(SMALLINT) getFloat=0.0 was null true
+  setNull(INTEGER) getFloat=0.0 was null true
+  setNull(BIGINT) getFloat=0.0 was null true
+  setNull(REAL) getFloat=0.0 was null true
+  setNull(Types.FLOAT) getFloat=0.0 was null true
+  setNull(DOUBLE) getFloat=0.0 was null true
+  setNull(DECIMAL) getFloat=0.0 was null true
+  setNull(Types.NUMERIC) getFloat=0.0 was null true
+  setNull(Types.BIT) getFloat=0.0 was null true
+  setNull(CHAR) getFloat=0.0 was null true
+  setNull(VARCHAR) getFloat=0.0 was null true
+  setNull(LONG VARCHAR) getFloat=0.0 was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on REAL
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getFloat=98.0 was null false JDBC MATCH(OK)
+  setShort() getFloat=98.0 was null false JDBC MATCH(OK)
+  setInt() getFloat=98.0 was null false JDBC MATCH(OK)
+  setLong() getFloat=98.0 was null false JDBC MATCH(OK)
+  setFloat() getFloat=98.4 was null false JDBC MATCH(OK)
+  setDouble() getFloat=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getFloat=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getFloat=0.0 was null true JDBC MATCH(OK)
+  setBoolean() getFloat=1.0 was null false JDBC MATCH(OK)
+  setString() getFloat=97.0 was null false JDBC MATCH(OK)
+  setString(null) getFloat=0.0 was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'REAL' from a data value of type 'null'.
+  setObject(java.lang.String) getFloat=46.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getFloat=72.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getFloat=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getFloat=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getFloat=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getFloat=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getFloat=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 REAL, INOUT P2 REAL, OUT P3 REAL) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT REAL registerOutParameter(Types.TINYINT) -- OK
+OUT REAL registerOutParameter(Types.TINYINT) -- OK
+P2=cs.getByte=41 was null false
+P3=cs.getByte=88 was null false
+INOUT REAL registerOutParameter(Types.SMALLINT) -- OK
+OUT REAL registerOutParameter(Types.SMALLINT) -- OK
+P2=cs.getShort=41 was null false
+P3=cs.getShort=88 was null false
+INOUT REAL registerOutParameter(Types.INTEGER) -- OK
+OUT REAL registerOutParameter(Types.INTEGER) -- OK
+P2=cs.getInt=41 was null false
+P3=cs.getInt=88 was null false
+INOUT REAL registerOutParameter(Types.BIGINT) -- OK
+OUT REAL registerOutParameter(Types.BIGINT) -- OK
+P2=cs.getLong=41 was null false
+P3=cs.getLong=88 was null false
+INOUT REAL registerOutParameter(Types.REAL) -- OK
+OUT REAL registerOutParameter(Types.REAL) -- OK
+P2=cs.getFloat=41.9 was null false
+P3=cs.getFloat=88.8 was null false
+INOUT REAL registerOutParameter(Types.FLOAT) -- OK
+OUT REAL registerOutParameter(Types.FLOAT) -- OK
+P2=cs.getDouble=41.900001525878906 was null false
+P3=cs.getDouble=88.80000305175781 was null false
+INOUT REAL registerOutParameter(Types.DOUBLE) -- OK
+OUT REAL registerOutParameter(Types.DOUBLE) -- OK
+P2=cs.getDouble=41.900001525878906 was null false
+P3=cs.getDouble=88.80000305175781 was null false
+INOUT REAL registerOutParameter(Types.DECIMAL) -- OK
+OUT REAL registerOutParameter(Types.DECIMAL) -- OK
+P2=cs.getBigDecimal=41.9 was null false
+P3=cs.getBigDecimal=88.8 was null false
+INOUT REAL registerOutParameter(Types.NUMERIC) -- OK
+OUT REAL registerOutParameter(Types.NUMERIC) -- OK
+INOUT REAL registerOutParameter(Types.BIT) -- OK
+OUT REAL registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT REAL registerOutParameter(Types.CHAR) -- OK
+OUT REAL registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=41.9 was null false
+P3=cs.getString=88.8 was null false
+INOUT REAL registerOutParameter(Types.VARCHAR) -- OK
+OUT REAL registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=41.9 was null false
+P3=cs.getString=88.8 was null false
+INOUT REAL registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT REAL registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=41.9 was null false
+P3=cs.getString=88.8 was null false
+INOUT REAL registerOutParameter(Types.VARBINARY) -- XCL25
+OUT REAL registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT REAL registerOutParameter(Types.DATE) -- XCL25
+OUT REAL registerOutParameter(Types.DATE) -- XCL25
+INOUT REAL registerOutParameter(Types.TIME) -- XCL25
+OUT REAL registerOutParameter(Types.TIME) -- XCL25
+INOUT REAL registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT REAL registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT REAL registerOutParameter(Types.CLOB) -- XCL25
+OUT REAL registerOutParameter(Types.CLOB) -- XCL25
+INOUT REAL registerOutParameter(Types.BLOB) -- XCL25
+OUT REAL registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : FLOAT
+FAIL - mismatch column type 8 expected 6
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.0 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Double was null false
+setNull() with all JDBC Types on FLOAT
+  setNull(Types.TINYINT) getDouble=0.0 was null true
+  setNull(SMALLINT) getDouble=0.0 was null true
+  setNull(INTEGER) getDouble=0.0 was null true
+  setNull(BIGINT) getDouble=0.0 was null true
+  setNull(REAL) getDouble=0.0 was null true
+  setNull(Types.FLOAT) getDouble=0.0 was null true
+  setNull(DOUBLE) getDouble=0.0 was null true
+  setNull(DECIMAL) getDouble=0.0 was null true
+  setNull(Types.NUMERIC) getDouble=0.0 was null true
+  setNull(Types.BIT) getDouble=0.0 was null true
+  setNull(CHAR) getDouble=0.0 was null true
+  setNull(VARCHAR) getDouble=0.0 was null true
+  setNull(LONG VARCHAR) getDouble=0.0 was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on FLOAT
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getDouble=98.0 was null false JDBC MATCH(OK)
+  setShort() getDouble=98.0 was null false JDBC MATCH(OK)
+  setInt() getDouble=98.0 was null false JDBC MATCH(OK)
+  setLong() getDouble=98.0 was null false JDBC MATCH(OK)
+  setFloat() getDouble=98.4000015258789 was null false JDBC MATCH(OK)
+  setDouble() getDouble=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getDouble=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setBoolean() getDouble=1.0 was null false JDBC MATCH(OK)
+  setString() getDouble=97.0 was null false JDBC MATCH(OK)
+  setString(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'null'.
+  setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getDouble=72.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getDouble=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getDouble=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getDouble=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getDouble=76.30000305175781 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getDouble=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 FLOAT, INOUT P2 FLOAT, OUT P3 FLOAT) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT FLOAT registerOutParameter(Types.TINYINT) -- OK
+OUT FLOAT registerOutParameter(Types.TINYINT) -- OK
+P2=cs.getByte=35 was null false
+P3=cs.getByte=66 was null false
+INOUT FLOAT registerOutParameter(Types.SMALLINT) -- OK
+OUT FLOAT registerOutParameter(Types.SMALLINT) -- OK
+P2=cs.getShort=35 was null false
+P3=cs.getShort=66 was null false
+INOUT FLOAT registerOutParameter(Types.INTEGER) -- OK
+OUT FLOAT registerOutParameter(Types.INTEGER) -- OK
+P2=cs.getInt=35 was null false
+P3=cs.getInt=66 was null false
+INOUT FLOAT registerOutParameter(Types.BIGINT) -- OK
+OUT FLOAT registerOutParameter(Types.BIGINT) -- OK
+P2=cs.getLong=35 was null false
+P3=cs.getLong=66 was null false
+INOUT FLOAT registerOutParameter(Types.REAL) -- OK
+OUT FLOAT registerOutParameter(Types.REAL) -- OK
+P2=cs.getFloat=35.9 was null false
+P3=cs.getFloat=66.8 was null false
+INOUT FLOAT registerOutParameter(Types.FLOAT) -- OK
+OUT FLOAT registerOutParameter(Types.FLOAT) -- OK
+P2=cs.getDouble=35.9 was null false
+P3=cs.getDouble=66.8 was null false
+INOUT FLOAT registerOutParameter(Types.DOUBLE) -- OK
+OUT FLOAT registerOutParameter(Types.DOUBLE) -- OK
+P2=cs.getDouble=35.9 was null false
+P3=cs.getDouble=66.8 was null false
+INOUT FLOAT registerOutParameter(Types.DECIMAL) -- OK
+OUT FLOAT registerOutParameter(Types.DECIMAL) -- OK
+P2=cs.getBigDecimal=35.9 was null false
+P3=cs.getBigDecimal=66.8 was null false
+INOUT FLOAT registerOutParameter(Types.NUMERIC) -- OK
+OUT FLOAT registerOutParameter(Types.NUMERIC) -- OK
+INOUT FLOAT registerOutParameter(Types.BIT) -- OK
+OUT FLOAT registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT FLOAT registerOutParameter(Types.CHAR) -- OK
+OUT FLOAT registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=35.9 was null false
+P3=cs.getString=66.8 was null false
+INOUT FLOAT registerOutParameter(Types.VARCHAR) -- OK
+OUT FLOAT registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=35.9 was null false
+P3=cs.getString=66.8 was null false
+INOUT FLOAT registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT FLOAT registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=35.9 was null false
+P3=cs.getString=66.8 was null false
+INOUT FLOAT registerOutParameter(Types.VARBINARY) -- XCL25
+OUT FLOAT registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT FLOAT registerOutParameter(Types.DATE) -- XCL25
+OUT FLOAT registerOutParameter(Types.DATE) -- XCL25
+INOUT FLOAT registerOutParameter(Types.TIME) -- XCL25
+OUT FLOAT registerOutParameter(Types.TIME) -- XCL25
+INOUT FLOAT registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT FLOAT registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT FLOAT registerOutParameter(Types.CLOB) -- XCL25
+OUT FLOAT registerOutParameter(Types.CLOB) -- XCL25
+INOUT FLOAT registerOutParameter(Types.BLOB) -- XCL25
+OUT FLOAT registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : DOUBLE
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.0 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Double was null false
+setNull() with all JDBC Types on DOUBLE
+  setNull(Types.TINYINT) getDouble=0.0 was null true
+  setNull(SMALLINT) getDouble=0.0 was null true
+  setNull(INTEGER) getDouble=0.0 was null true
+  setNull(BIGINT) getDouble=0.0 was null true
+  setNull(REAL) getDouble=0.0 was null true
+  setNull(Types.FLOAT) getDouble=0.0 was null true
+  setNull(DOUBLE) getDouble=0.0 was null true
+  setNull(DECIMAL) getDouble=0.0 was null true
+  setNull(Types.NUMERIC) getDouble=0.0 was null true
+  setNull(Types.BIT) getDouble=0.0 was null true
+  setNull(CHAR) getDouble=0.0 was null true
+  setNull(VARCHAR) getDouble=0.0 was null true
+  setNull(LONG VARCHAR) getDouble=0.0 was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on DOUBLE
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getDouble=98.0 was null false JDBC MATCH(OK)
+  setShort() getDouble=98.0 was null false JDBC MATCH(OK)
+  setInt() getDouble=98.0 was null false JDBC MATCH(OK)
+  setLong() getDouble=98.0 was null false JDBC MATCH(OK)
+  setFloat() getDouble=98.4000015258789 was null false JDBC MATCH(OK)
+  setDouble() getDouble=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getDouble=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setBoolean() getDouble=1.0 was null false JDBC MATCH(OK)
+  setString() getDouble=97.0 was null false JDBC MATCH(OK)
+  setString(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'null'.
+  setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getDouble=72.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getDouble=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getDouble=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getDouble=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getDouble=76.30000305175781 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getDouble=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 DOUBLE, INOUT P2 DOUBLE, OUT P3 DOUBLE) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT DOUBLE registerOutParameter(Types.TINYINT) -- OK
+OUT DOUBLE registerOutParameter(Types.TINYINT) -- OK
+P2=cs.getByte=35 was null false
+P3=cs.getByte=66 was null false
+INOUT DOUBLE registerOutParameter(Types.SMALLINT) -- OK
+OUT DOUBLE registerOutParameter(Types.SMALLINT) -- OK
+P2=cs.getShort=35 was null false
+P3=cs.getShort=66 was null false
+INOUT DOUBLE registerOutParameter(Types.INTEGER) -- OK
+OUT DOUBLE registerOutParameter(Types.INTEGER) -- OK
+P2=cs.getInt=35 was null false
+P3=cs.getInt=66 was null false
+INOUT DOUBLE registerOutParameter(Types.BIGINT) -- OK
+OUT DOUBLE registerOutParameter(Types.BIGINT) -- OK
+P2=cs.getLong=35 was null false
+P3=cs.getLong=66 was null false
+INOUT DOUBLE registerOutParameter(Types.REAL) -- OK
+OUT DOUBLE registerOutParameter(Types.REAL) -- OK
+P2=cs.getFloat=35.9 was null false
+P3=cs.getFloat=66.8 was null false
+INOUT DOUBLE registerOutParameter(Types.FLOAT) -- OK
+OUT DOUBLE registerOutParameter(Types.FLOAT) -- OK
+P2=cs.getDouble=35.9 was null false
+P3=cs.getDouble=66.8 was null false
+INOUT DOUBLE registerOutParameter(Types.DOUBLE) -- OK
+OUT DOUBLE registerOutParameter(Types.DOUBLE) -- OK
+P2=cs.getDouble=35.9 was null false
+P3=cs.getDouble=66.8 was null false
+INOUT DOUBLE registerOutParameter(Types.DECIMAL) -- OK
+OUT DOUBLE registerOutParameter(Types.DECIMAL) -- OK
+P2=cs.getBigDecimal=35.9 was null false
+P3=cs.getBigDecimal=66.8 was null false
+INOUT DOUBLE registerOutParameter(Types.NUMERIC) -- OK
+OUT DOUBLE registerOutParameter(Types.NUMERIC) -- OK
+INOUT DOUBLE registerOutParameter(Types.BIT) -- OK
+OUT DOUBLE registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT DOUBLE registerOutParameter(Types.CHAR) -- OK
+OUT DOUBLE registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=35.9 was null false
+P3=cs.getString=66.8 was null false
+INOUT DOUBLE registerOutParameter(Types.VARCHAR) -- OK
+OUT DOUBLE registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=35.9 was null false
+P3=cs.getString=66.8 was null false
+INOUT DOUBLE registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT DOUBLE registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=35.9 was null false
+P3=cs.getString=66.8 was null false
+INOUT DOUBLE registerOutParameter(Types.VARBINARY) -- XCL25
+OUT DOUBLE registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT DOUBLE registerOutParameter(Types.DATE) -- XCL25
+OUT DOUBLE registerOutParameter(Types.DATE) -- XCL25
+INOUT DOUBLE registerOutParameter(Types.TIME) -- XCL25
+OUT DOUBLE registerOutParameter(Types.TIME) -- XCL25
+INOUT DOUBLE registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT DOUBLE registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT DOUBLE registerOutParameter(Types.CLOB) -- XCL25
+OUT DOUBLE registerOutParameter(Types.CLOB) -- XCL25
+INOUT DOUBLE registerOutParameter(Types.BLOB) -- XCL25
+OUT DOUBLE registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : DECIMAL(10,5)
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.00000 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.00000 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.math.BigDecimal was null false
+setNull() with all JDBC Types on DECIMAL(10,5)
+  setNull(Types.TINYINT) getBigDecimal=null was null true
+  setNull(SMALLINT) getBigDecimal=null was null true
+  setNull(INTEGER) getBigDecimal=null was null true
+  setNull(BIGINT) getBigDecimal=null was null true
+  setNull(REAL) getBigDecimal=null was null true
+  setNull(Types.FLOAT) getBigDecimal=null was null true
+  setNull(DOUBLE) getBigDecimal=null was null true
+  setNull(DECIMAL) getBigDecimal=null was null true
+  setNull(Types.NUMERIC) getBigDecimal=null was null true
+  setNull(Types.BIT) getBigDecimal=null was null true
+  setNull(CHAR) getBigDecimal=null was null true
+  setNull(VARCHAR) getBigDecimal=null was null true
+  setNull(LONG VARCHAR) getBigDecimal=null was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on DECIMAL(10,5)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setShort() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setInt() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setLong() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setFloat() getBigDecimal=98.40000 was null false JDBC MATCH(OK)
+  setDouble() getBigDecimal=98.50000 was null false JDBC MATCH(OK)
+  setBigDecimal() getBigDecimal=99.00000 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getBigDecimal=null was null true JDBC MATCH(OK)
+  setBoolean() getBigDecimal=1.00000 was null false JDBC MATCH(OK)
+  setString() getBigDecimal=97.00000 was null false JDBC MATCH(OK)
+  setString(null) getBigDecimal=null was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'null'.
+  setObject(java.lang.String) getBigDecimal=46.00000 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getBigDecimal=72.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getBigDecimal=1.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getBigDecimal=74.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getBigDecimal=79.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getBigDecimal=76.30000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getBigDecimal=12.33000 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 DECIMAL(10,5), INOUT P2 DECIMAL(10,5), OUT P3 DECIMAL(10,5)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT DECIMAL(10,5) registerOutParameter(Types.TINYINT) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.TINYINT) -- OK
+P2=cs.getByte=34 was null false
+P3=cs.getByte=84 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.SMALLINT) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.SMALLINT) -- OK
+P2=cs.getShort=34 was null false
+P3=cs.getShort=84 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.INTEGER) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.INTEGER) -- OK
+P2=cs.getInt=34 was null false
+P3=cs.getInt=84 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.BIGINT) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.BIGINT) -- OK
+P2=cs.getLong=34 was null false
+P3=cs.getLong=84 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.REAL) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.REAL) -- OK
+P2=cs.getFloat=34.3 was null false
+P3=cs.getFloat=84.1 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.FLOAT) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.FLOAT) -- OK
+P2=cs.getDouble=34.3 was null false
+P3=cs.getDouble=84.1 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.DOUBLE) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.DOUBLE) -- OK
+P2=cs.getDouble=34.3 was null false
+P3=cs.getDouble=84.1 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.DECIMAL) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.DECIMAL) -- OK
+P2=cs.getBigDecimal=34.30000 was null false
+P3=cs.getBigDecimal=84.10000 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.NUMERIC) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.NUMERIC) -- OK
+INOUT DECIMAL(10,5) registerOutParameter(Types.BIT) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.CHAR) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=34.30000 was null false
+P3=cs.getString=84.10000 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.VARCHAR) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=34.30000 was null false
+P3=cs.getString=84.10000 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT DECIMAL(10,5) registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=34.30000 was null false
+P3=cs.getString=84.10000 was null false
+INOUT DECIMAL(10,5) registerOutParameter(Types.VARBINARY) -- XCL25
+OUT DECIMAL(10,5) registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT DECIMAL(10,5) registerOutParameter(Types.DATE) -- XCL25
+OUT DECIMAL(10,5) registerOutParameter(Types.DATE) -- XCL25
+INOUT DECIMAL(10,5) registerOutParameter(Types.TIME) -- XCL25
+OUT DECIMAL(10,5) registerOutParameter(Types.TIME) -- XCL25
+INOUT DECIMAL(10,5) registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT DECIMAL(10,5) registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT DECIMAL(10,5) registerOutParameter(Types.CLOB) -- XCL25
+OUT DECIMAL(10,5) registerOutParameter(Types.CLOB) -- XCL25
+INOUT DECIMAL(10,5) registerOutParameter(Types.BLOB) -- XCL25
+OUT DECIMAL(10,5) registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : 2
+  skipping
+getXXX on : -7
+  skipping
+getXXX on : 0
+  skipping
+getXXX on : CHAR(60)
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32                                                           was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=22007 JDBC MATCH(OK)
+  getTime=22007 JDBC MATCH(OK)
+  getTimestamp=22007 JDBC MATCH(OK)
+  getAsciiStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.String was null false
+setNull() with all JDBC Types on CHAR(60)
+  setNull(Types.TINYINT) getString=null was null true
+  setNull(SMALLINT) getString=null was null true
+  setNull(INTEGER) getString=null was null true
+  setNull(BIGINT) getString=null was null true
+  setNull(REAL) getString=null was null true
+  setNull(Types.FLOAT) getString=null was null true
+  setNull(DOUBLE) getString=null was null true
+  setNull(DECIMAL) getString=null was null true
+  setNull(Types.NUMERIC) getString=null was null true
+  setNull(Types.BIT) getString=null was null true
+  setNull(CHAR) getString=null was null true
+  setNull(VARCHAR) getString=null was null true
+  setNull(LONG VARCHAR) getString=null was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) getString=null was null true
+  setNull(TIME) getString=null was null true
+  setNull(TIMESTAMP) getString=null was null true
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on CHAR(60)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getString=98                                                           was null false JDBC MATCH(OK)
+  setShort() getString=98                                                           was null false JDBC MATCH(OK)
+  setInt() getString=98                                                           was null false JDBC MATCH(OK)
+  setLong() getString=98                                                           was null false JDBC MATCH(OK)
+  setFloat() getString=98.4                                                         was null false JDBC MATCH(OK)
+  setDouble() getString=98.5                                                         was null false JDBC MATCH(OK)
+  setBigDecimal() getString=99                                                           was null false JDBC MATCH(OK)
+  setBigDecimal(null) getString=null was null true JDBC MATCH(OK)
+  setBoolean() getString=1                                                            was null false JDBC MATCH(OK)
+  setString() getString=97                                                           was null false JDBC MATCH(OK)
+  setString(null) getString=null was null true JDBC MATCH(OK)
+  setBytes() getString=EncodedString: > 1027 64963 29440 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 < was null false CLOUD EXT (OK)
+  setBytes(null) getString=null was null true CLOUD EXT (OK)
+  setDate() getString=2004-02-14                                                   was null false JDBC MATCH(OK)
+  setDate(null) getString=null was null true JDBC MATCH(OK)
+  setTime() getString=13:26:42                                                     was null false JDBC MATCH(OK)
+  setTime(null) getString=null was null true JDBC MATCH(OK)
+  setTimestamp() getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp(null) getString=null was null true JDBC MATCH(OK)
+  setAsciiStream() getString=eg012d                                                       was null false JDBC MATCH(OK)
+  setAsciiStream(null) getString=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() getString=89                                                           was null false JDBC MATCH(OK)
+  setCharacterStream(null) getString=null was null true JDBC MATCH(OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'CHAR' from a data value of type 'null'.
+  setObject(java.lang.String) getString=46                                                           was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getString=72                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getString=1                                                            was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getString=74                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getString=79                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getString=76.3                                                         was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getString=12.33                                                        was null false JDBC MATCH(OK)
+  setObject(byte[]) getString=EncodedString: > 12857 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 < was null false CLOUD EXT (OK)
+  setObject(java.sql.Date) getString=2004-02-14                                                   was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) getString=13:26:42                                                     was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 CHAR(60), INOUT P2 CHAR(60), OUT P3 CHAR(60)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT CHAR(60) registerOutParameter(Types.TINYINT) -- OK
+OUT CHAR(60) registerOutParameter(Types.TINYINT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type byte.
+INOUT CHAR(60) registerOutParameter(Types.SMALLINT) -- OK
+OUT CHAR(60) registerOutParameter(Types.SMALLINT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type short.
+INOUT CHAR(60) registerOutParameter(Types.INTEGER) -- OK
+OUT CHAR(60) registerOutParameter(Types.INTEGER) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type int.
+INOUT CHAR(60) registerOutParameter(Types.BIGINT) -- OK
+OUT CHAR(60) registerOutParameter(Types.BIGINT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type long.
+INOUT CHAR(60) registerOutParameter(Types.REAL) -- OK
+OUT CHAR(60) registerOutParameter(Types.REAL) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type float.
+INOUT CHAR(60) registerOutParameter(Types.FLOAT) -- OK
+OUT CHAR(60) registerOutParameter(Types.FLOAT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+INOUT CHAR(60) registerOutParameter(Types.DOUBLE) -- OK
+OUT CHAR(60) registerOutParameter(Types.DOUBLE) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+INOUT CHAR(60) registerOutParameter(Types.DECIMAL) -- OK
+OUT CHAR(60) registerOutParameter(Types.DECIMAL) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type java.math.BigDecimal.
+INOUT CHAR(60) registerOutParameter(Types.NUMERIC) -- OK
+OUT CHAR(60) registerOutParameter(Types.NUMERIC) -- OK
+INOUT CHAR(60) registerOutParameter(Types.BIT) -- OK
+OUT CHAR(60) registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT CHAR(60) registerOutParameter(Types.CHAR) -- OK
+OUT CHAR(60) registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=32P2-PMAP                                                    was null false
+P3=cs.getString=P3-PMAP                                                      was null false
+INOUT CHAR(60) registerOutParameter(Types.VARCHAR) -- OK
+OUT CHAR(60) registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=32P2-PMAP                                                    was null false
+P3=cs.getString=P3-PMAP                                                      was null false
+INOUT CHAR(60) registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT CHAR(60) registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=32P2-PMAP                                                    was null false
+P3=cs.getString=P3-PMAP                                                      was null false
+INOUT CHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
+OUT CHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT CHAR(60) registerOutParameter(Types.DATE) -- OK
+OUT CHAR(60) registerOutParameter(Types.DATE) -- OK
+P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT CHAR(60) registerOutParameter(Types.TIME) -- OK
+OUT CHAR(60) registerOutParameter(Types.TIME) -- OK
+P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT CHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
+OUT CHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
+P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT CHAR(60) registerOutParameter(Types.CLOB) -- XCL25
+OUT CHAR(60) registerOutParameter(Types.CLOB) -- XCL25
+INOUT CHAR(60) registerOutParameter(Types.BLOB) -- XCL25
+OUT CHAR(60) registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : VARCHAR(60)
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=22007 JDBC MATCH(OK)
+  getTime=22007 JDBC MATCH(OK)
+  getTimestamp=22007 JDBC MATCH(OK)
+  getAsciiStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.String was null false
+setNull() with all JDBC Types on VARCHAR(60)
+  setNull(Types.TINYINT) getString=null was null true
+  setNull(SMALLINT) getString=null was null true
+  setNull(INTEGER) getString=null was null true
+  setNull(BIGINT) getString=null was null true
+  setNull(REAL) getString=null was null true
+  setNull(Types.FLOAT) getString=null was null true
+  setNull(DOUBLE) getString=null was null true
+  setNull(DECIMAL) getString=null was null true
+  setNull(Types.NUMERIC) getString=null was null true
+  setNull(Types.BIT) getString=null was null true
+  setNull(CHAR) getString=null was null true
+  setNull(VARCHAR) getString=null was null true
+  setNull(LONG VARCHAR) getString=null was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) getString=null was null true
+  setNull(TIME) getString=null was null true
+  setNull(TIMESTAMP) getString=null was null true
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on VARCHAR(60)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getString=98 was null false JDBC MATCH(OK)
+  setShort() getString=98 was null false JDBC MATCH(OK)
+  setInt() getString=98 was null false JDBC MATCH(OK)
+  setLong() getString=98 was null false JDBC MATCH(OK)
+  setFloat() getString=98.4 was null false JDBC MATCH(OK)
+  setDouble() getString=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getString=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getString=null was null true JDBC MATCH(OK)
+  setBoolean() getString=1 was null false JDBC MATCH(OK)
+  setString() getString=97 was null false JDBC MATCH(OK)
+  setString(null) getString=null was null true JDBC MATCH(OK)
+  setBytes() getString=EncodedString: > 1027 64963 29440 < was null false CLOUD EXT (OK)
+  setBytes(null) getString=null was null true CLOUD EXT (OK)
+  setDate() getString=2004-02-14 was null false JDBC MATCH(OK)
+  setDate(null) getString=null was null true JDBC MATCH(OK)
+  setTime() getString=13:26:42 was null false JDBC MATCH(OK)
+  setTime(null) getString=null was null true JDBC MATCH(OK)
+  setTimestamp() getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp(null) getString=null was null true JDBC MATCH(OK)
+  setAsciiStream() getString=eg012d was null false JDBC MATCH(OK)
+  setAsciiStream(null) getString=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() getString=89 was null false JDBC MATCH(OK)
+  setCharacterStream(null) getString=null was null true JDBC MATCH(OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'null'.
+  setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getString=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getString=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getString=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getString=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getString=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getString=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) getString=EncodedString: > 12857 < was null false CLOUD EXT (OK)
+  setObject(java.sql.Date) getString=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) getString=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 VARCHAR(60), INOUT P2 VARCHAR(60), OUT P3 VARCHAR(60)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT VARCHAR(60) registerOutParameter(Types.TINYINT) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.TINYINT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type byte.
+INOUT VARCHAR(60) registerOutParameter(Types.SMALLINT) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.SMALLINT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type short.
+INOUT VARCHAR(60) registerOutParameter(Types.INTEGER) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.INTEGER) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type int.
+INOUT VARCHAR(60) registerOutParameter(Types.BIGINT) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.BIGINT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type long.
+INOUT VARCHAR(60) registerOutParameter(Types.REAL) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.REAL) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type float.
+INOUT VARCHAR(60) registerOutParameter(Types.FLOAT) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.FLOAT) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+INOUT VARCHAR(60) registerOutParameter(Types.DOUBLE) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.DOUBLE) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+INOUT VARCHAR(60) registerOutParameter(Types.DECIMAL) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.DECIMAL) -- OK
+P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type java.math.BigDecimal.
+INOUT VARCHAR(60) registerOutParameter(Types.NUMERIC) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.NUMERIC) -- OK
+INOUT VARCHAR(60) registerOutParameter(Types.BIT) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.BIT) -- OK
+P2=cs.getBoolean=true was null false
+P3=cs.getBoolean=true was null false
+INOUT VARCHAR(60) registerOutParameter(Types.CHAR) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.CHAR) -- OK
+P2=cs.getString=32P2-PMAP was null false
+P3=cs.getString=P3-PMAP was null false
+INOUT VARCHAR(60) registerOutParameter(Types.VARCHAR) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.VARCHAR) -- OK
+P2=cs.getString=32P2-PMAP was null false
+P3=cs.getString=P3-PMAP was null false
+INOUT VARCHAR(60) registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.LONGVARCHAR) -- OK
+P2=cs.getString=32P2-PMAP was null false
+P3=cs.getString=P3-PMAP was null false
+INOUT VARCHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
+OUT VARCHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT VARCHAR(60) registerOutParameter(Types.DATE) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.DATE) -- OK
+P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT VARCHAR(60) registerOutParameter(Types.TIME) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.TIME) -- OK
+P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT VARCHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
+OUT VARCHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
+P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT VARCHAR(60) registerOutParameter(Types.CLOB) -- XCL25
+OUT VARCHAR(60) registerOutParameter(Types.CLOB) -- XCL25
+INOUT VARCHAR(60) registerOutParameter(Types.BLOB) -- XCL25
+OUT VARCHAR(60) registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : LONG VARCHAR
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=22007 JDBC MATCH(OK)
+  getTime=22007 JDBC MATCH(OK)
+  getTimestamp=22007 JDBC MATCH(OK)
+  getAsciiStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.String was null false
+setNull() with all JDBC Types on LONG VARCHAR
+  setNull(Types.TINYINT) getString=null was null true
+  setNull(SMALLINT) getString=null was null true
+  setNull(INTEGER) getString=null was null true
+  setNull(BIGINT) getString=null was null true
+  setNull(REAL) getString=null was null true
+  setNull(Types.FLOAT) getString=null was null true
+  setNull(DOUBLE) getString=null was null true
+  setNull(DECIMAL) getString=null was null true
+  setNull(Types.NUMERIC) getString=null was null true
+  setNull(Types.BIT) getString=null was null true
+  setNull(CHAR) getString=null was null true
+  setNull(VARCHAR) getString=null was null true
+  setNull(LONG VARCHAR) getString=null was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) getString=null was null true
+  setNull(TIME) getString=null was null true
+  setNull(TIMESTAMP) getString=null was null true
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on LONG VARCHAR
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getString=98 was null false JDBC MATCH(OK)
+  setShort() getString=98 was null false JDBC MATCH(OK)
+  setInt() getString=98 was null false JDBC MATCH(OK)
+  setLong() getString=98 was null false JDBC MATCH(OK)
+  setFloat() getString=98.4 was null false JDBC MATCH(OK)
+  setDouble() getString=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getString=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getString=null was null true JDBC MATCH(OK)
+  setBoolean() getString=1 was null false JDBC MATCH(OK)
+  setString() getString=97 was null false JDBC MATCH(OK)
+  setString(null) getString=null was null true JDBC MATCH(OK)
+  setBytes() getString=EncodedString: > 1027 64963 29440 < was null false CLOUD EXT (OK)
+  setBytes(null) getString=null was null true CLOUD EXT (OK)
+  setDate() getString=2004-02-14 was null false JDBC MATCH(OK)
+  setDate(null) getString=null was null true JDBC MATCH(OK)
+  setTime() getString=13:26:42 was null false JDBC MATCH(OK)
+  setTime(null) getString=null was null true JDBC MATCH(OK)
+  setTimestamp() getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp(null) getString=null was null true JDBC MATCH(OK)
+  setAsciiStream() getString=eg012d was null false JDBC MATCH(OK)
+  setAsciiStream(null) getString=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() getString=89 was null false JDBC MATCH(OK)
+  setCharacterStream(null) getString=null was null true JDBC MATCH(OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'null'.
+  setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getString=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getString=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getString=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getString=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getString=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getString=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) getString=EncodedString: > 12857 < was null false CLOUD EXT (OK)
+  setObject(java.sql.Date) getString=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) getString=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 LONG VARCHAR, INOUT P2 LONG VARCHAR, OUT P3 LONG VARCHAR) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+42962:Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
+getXXX on : CHAR(60) FOR BIT DATA
+  skipping
+getXXX on : VARCHAR(60) FOR BIT DATA
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true JDBC MATCH(OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=null was null true JDBC MATCH(OK)
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=0403fdc373 was null false JDBC MATCH(OK)
+  getBytes=0x4,0x3 was null false JDBC MATCH(OK)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=0x4,0x3 was null false JDBC MATCH(OK)
+  getBinaryStream=0x4,0x3 was null false JDBC MATCH(OK)
+  getCharacterStream=0x403,0xfdc3 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :[B was null false
+setNull() with all JDBC Types on VARCHAR(60) FOR BIT DATA
+  setNull(Types.TINYINT) IC
+  setNull(SMALLINT) IC
+  setNull(INTEGER) IC
+  setNull(BIGINT) IC
+  setNull(REAL) IC
+  setNull(Types.FLOAT) IC
+  setNull(DOUBLE) IC
+  setNull(DECIMAL) IC
+  setNull(Types.NUMERIC) IC
+  setNull(Types.BIT) IC
+  setNull(CHAR) IC
+  setNull(VARCHAR) IC
+  setNull(LONG VARCHAR) IC
+  setNull(VARCHAR () FOR BIT DATA) getBytes=null was null true
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on VARCHAR(60) FOR BIT DATA
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal(null) IC JDBC MATCH (INVALID)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setString() IC JDBC MATCH (INVALID)
+  setString(null) IC JDBC MATCH (INVALID)
+  setBytes() getBytes=0x4,0x3 was null false JDBC MATCH(OK)
+  setBytes(null) getBytes=null was null true JDBC MATCH(OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() getBytes=0x82,0x43 was null false JDBC MATCH(OK)
+  setBinaryStream(null) getBytes=null was null true JDBC MATCH(OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setObject(null)  OK An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'null'.
+  setObject(java.lang.String)  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(byte[]) getBytes=0x32,0x39 was null false JDBC MATCH(OK)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 VARCHAR(60) FOR BIT DATA, INOUT P2 VARCHAR(60) FOR BIT DATA, OUT P3 VARCHAR(60) FOR BIT DATA) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.TINYINT) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.TINYINT) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.SMALLINT) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.SMALLINT) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.INTEGER) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.INTEGER) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.BIGINT) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.BIGINT) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.REAL) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.REAL) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.FLOAT) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.FLOAT) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.DOUBLE) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.DOUBLE) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.DECIMAL) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.DECIMAL) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.NUMERIC) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.NUMERIC) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.BIT) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.BIT) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.CHAR) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.CHAR) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.VARCHAR) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.VARCHAR) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.LONGVARCHAR) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.LONGVARCHAR) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.VARBINARY) -- OK
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.VARBINARY) -- OK
+P2=cs.getBytes=0x4,0x3 was null false
+P3=cs.getBytes=0x9,0xfe was null false
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.DATE) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.DATE) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.TIME) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.TIME) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.TIMESTAMP) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.TIMESTAMP) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.CLOB) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.CLOB) -- XCL25
+INOUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.BLOB) -- XCL25
+OUT VARCHAR(60) FOR BIT DATA registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : LONG VARCHAR FOR BIT DATA
+  skipping
+getXXX on : DATE
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=2004-02-14 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=2004-02-14 was null false JDBC MATCH(OK)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Date was null false
+setNull() with all JDBC Types on DATE
+  setNull(Types.TINYINT) IC
+  setNull(SMALLINT) IC
+  setNull(INTEGER) IC
+  setNull(BIGINT) IC
+  setNull(REAL) IC
+  setNull(Types.FLOAT) IC
+  setNull(DOUBLE) IC
+  setNull(DECIMAL) IC
+  setNull(Types.NUMERIC) IC
+  setNull(Types.BIT) IC
+  setNull(CHAR) getDate=null was null true
+  setNull(VARCHAR) getDate=null was null true
+  setNull(LONG VARCHAR) getDate=null was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) getDate=null was null true
+  setNull(TIME) IC
+  setNull(TIMESTAMP) getDate=null was null true
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on DATE
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal(null) IC JDBC MATCH (INVALID)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
+  setString(null) getDate=null was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() getDate=2004-02-14 was null false JDBC MATCH(OK)
+  setDate(null) getDate=null was null true JDBC MATCH(OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() getDate=2004-02-23 was null false JDBC MATCH(OK)
+  setTimestamp(null) getDate=null was null true JDBC MATCH(OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'DATE' from a data value of type 'null'.
+  setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) getDate=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) getDate=2004-02-23 was null false JDBC MATCH(OK)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 DATE, INOUT P2 DATE, OUT P3 DATE) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT DATE registerOutParameter(Types.TINYINT) -- XCL25
+OUT DATE registerOutParameter(Types.TINYINT) -- XCL25
+INOUT DATE registerOutParameter(Types.SMALLINT) -- XCL25
+OUT DATE registerOutParameter(Types.SMALLINT) -- XCL25
+INOUT DATE registerOutParameter(Types.INTEGER) -- XCL25
+OUT DATE registerOutParameter(Types.INTEGER) -- XCL25
+INOUT DATE registerOutParameter(Types.BIGINT) -- XCL25
+OUT DATE registerOutParameter(Types.BIGINT) -- XCL25
+INOUT DATE registerOutParameter(Types.REAL) -- XCL25
+OUT DATE registerOutParameter(Types.REAL) -- XCL25
+INOUT DATE registerOutParameter(Types.FLOAT) -- XCL25
+OUT DATE registerOutParameter(Types.FLOAT) -- XCL25
+INOUT DATE registerOutParameter(Types.DOUBLE) -- XCL25
+OUT DATE registerOutParameter(Types.DOUBLE) -- XCL25
+INOUT DATE registerOutParameter(Types.DECIMAL) -- XCL25
+OUT DATE registerOutParameter(Types.DECIMAL) -- XCL25
+INOUT DATE registerOutParameter(Types.NUMERIC) -- XCL25
+OUT DATE registerOutParameter(Types.NUMERIC) -- XCL25
+INOUT DATE registerOutParameter(Types.BIT) -- XCL25
+OUT DATE registerOutParameter(Types.BIT) -- XCL25
+INOUT DATE registerOutParameter(Types.CHAR) -- OK
+OUT DATE registerOutParameter(Types.CHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT DATE registerOutParameter(Types.VARCHAR) -- OK
+OUT DATE registerOutParameter(Types.VARCHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT DATE registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT DATE registerOutParameter(Types.LONGVARCHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT DATE registerOutParameter(Types.VARBINARY) -- XCL25
+OUT DATE registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT DATE registerOutParameter(Types.DATE) -- OK
+OUT DATE registerOutParameter(Types.DATE) -- OK
+P2=cs.getDate=2004-03-08 was null false
+P3=cs.getDate=2005-03-08 was null false
+INOUT DATE registerOutParameter(Types.TIME) -- XCL25
+OUT DATE registerOutParameter(Types.TIME) -- XCL25
+INOUT DATE registerOutParameter(Types.TIMESTAMP) -- OK
+OUT DATE registerOutParameter(Types.TIMESTAMP) -- OK
+P2=SQLSTATE(22005): SQL Exception: An attempt was made to get a data value of type 'java.sql.Time' from a data value of type 'DATE'.
+INOUT DATE registerOutParameter(Types.CLOB) -- XCL25
+OUT DATE registerOutParameter(Types.CLOB) -- XCL25
+INOUT DATE registerOutParameter(Types.BLOB) -- XCL25
+OUT DATE registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : TIME
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=13:26:42 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=13:26:42 was null false JDBC MATCH(OK)
+  getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Time was null false
+setNull() with all JDBC Types on TIME
+  setNull(Types.TINYINT) IC
+  setNull(SMALLINT) IC
+  setNull(INTEGER) IC
+  setNull(BIGINT) IC
+  setNull(REAL) IC
+  setNull(Types.FLOAT) IC
+  setNull(DOUBLE) IC
+  setNull(DECIMAL) IC
+  setNull(Types.NUMERIC) IC
+  setNull(Types.BIT) IC
+  setNull(CHAR) getTime=null was null true
+  setNull(VARCHAR) getTime=null was null true
+  setNull(LONG VARCHAR) getTime=null was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) getTime=null was null true
+  setNull(TIMESTAMP) getTime=null was null true
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on TIME
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal(null) IC JDBC MATCH (INVALID)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
+  setString(null) getTime=null was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() getTime=13:26:42 was null false JDBC MATCH(OK)
+  setTime(null) getTime=null was null true JDBC MATCH(OK)
+  setTimestamp() getTime=17:14:24 was null false JDBC MATCH(OK)
+  setTimestamp(null) getTime=null was null true JDBC MATCH(OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'TIME' from a data value of type 'null'.
+  setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) getTime=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getTime=17:14:24 was null false JDBC MATCH(OK)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 TIME, INOUT P2 TIME, OUT P3 TIME) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT TIME registerOutParameter(Types.TINYINT) -- XCL25
+OUT TIME registerOutParameter(Types.TINYINT) -- XCL25
+INOUT TIME registerOutParameter(Types.SMALLINT) -- XCL25
+OUT TIME registerOutParameter(Types.SMALLINT) -- XCL25
+INOUT TIME registerOutParameter(Types.INTEGER) -- XCL25
+OUT TIME registerOutParameter(Types.INTEGER) -- XCL25
+INOUT TIME registerOutParameter(Types.BIGINT) -- XCL25
+OUT TIME registerOutParameter(Types.BIGINT) -- XCL25
+INOUT TIME registerOutParameter(Types.REAL) -- XCL25
+OUT TIME registerOutParameter(Types.REAL) -- XCL25
+INOUT TIME registerOutParameter(Types.FLOAT) -- XCL25
+OUT TIME registerOutParameter(Types.FLOAT) -- XCL25
+INOUT TIME registerOutParameter(Types.DOUBLE) -- XCL25
+OUT TIME registerOutParameter(Types.DOUBLE) -- XCL25
+INOUT TIME registerOutParameter(Types.DECIMAL) -- XCL25
+OUT TIME registerOutParameter(Types.DECIMAL) -- XCL25
+INOUT TIME registerOutParameter(Types.NUMERIC) -- XCL25
+OUT TIME registerOutParameter(Types.NUMERIC) -- XCL25
+INOUT TIME registerOutParameter(Types.BIT) -- XCL25
+OUT TIME registerOutParameter(Types.BIT) -- XCL25
+INOUT TIME registerOutParameter(Types.CHAR) -- OK
+OUT TIME registerOutParameter(Types.CHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT TIME registerOutParameter(Types.VARCHAR) -- OK
+OUT TIME registerOutParameter(Types.VARCHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT TIME registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT TIME registerOutParameter(Types.LONGVARCHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT TIME registerOutParameter(Types.VARBINARY) -- XCL25
+OUT TIME registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT TIME registerOutParameter(Types.DATE) -- XCL25
+OUT TIME registerOutParameter(Types.DATE) -- XCL25
+INOUT TIME registerOutParameter(Types.TIME) -- OK
+OUT TIME registerOutParameter(Types.TIME) -- OK
+P2=cs.getTime=19:44:42 was null false
+P3=cs.getTime=20:44:42 was null false
+INOUT TIME registerOutParameter(Types.TIMESTAMP) -- OK
+OUT TIME registerOutParameter(Types.TIMESTAMP) -- OK
+P2=cs.getTimestamp=19:44:42 was null false
+P3=cs.getTimestamp=20:44:42 was null false
+INOUT TIME registerOutParameter(Types.CLOB) -- XCL25
+OUT TIME registerOutParameter(Types.CLOB) -- XCL25
+INOUT TIME registerOutParameter(Types.BLOB) -- XCL25
+OUT TIME registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : TIMESTAMP
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=2004-02-23 was null false JDBC MATCH(OK)
+  getTime=17:14:24 was null false JDBC MATCH(OK)
+  getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Timestamp was null false
+setNull() with all JDBC Types on TIMESTAMP
+  setNull(Types.TINYINT) IC
+  setNull(SMALLINT) IC
+  setNull(INTEGER) IC
+  setNull(BIGINT) IC
+  setNull(REAL) IC
+  setNull(Types.FLOAT) IC
+  setNull(DOUBLE) IC
+  setNull(DECIMAL) IC
+  setNull(Types.NUMERIC) IC
+  setNull(Types.BIT) IC
+  setNull(CHAR) getTimestamp=null was null true
+  setNull(VARCHAR) getTimestamp=null was null true
+  setNull(LONG VARCHAR) getTimestamp=null was null true
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) getTimestamp=null was null true
+  setNull(TIME) IC
+  setNull(TIMESTAMP) getTimestamp=null was null true
+  setNull(CLOB) IC
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on TIMESTAMP
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal(null) IC JDBC MATCH (INVALID)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
+  setString(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() getTimestamp=00:00:00 was null false JDBC MATCH(OK)
+  setDate(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setTime() getTimestamp=13:26:42 was null false JDBC MATCH(OK)
+  setTime(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setTimestamp() getTimestamp=17:14:24 was null false JDBC MATCH(OK)
+  setTimestamp(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'null'.
+  setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) getTimestamp=00:00:00 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) getTimestamp=13:26:42 was null false CLOUD EXT (OK)
+  setObject(java.sql.Timestamp) getTimestamp=17:14:24 was null false JDBC MATCH(OK)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 TIMESTAMP, INOUT P2 TIMESTAMP, OUT P3 TIMESTAMP) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+INOUT TIMESTAMP registerOutParameter(Types.TINYINT) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.TINYINT) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.SMALLINT) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.SMALLINT) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.INTEGER) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.INTEGER) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.BIGINT) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.BIGINT) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.REAL) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.REAL) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.FLOAT) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.FLOAT) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.DOUBLE) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.DOUBLE) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.DECIMAL) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.DECIMAL) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.NUMERIC) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.NUMERIC) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.BIT) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.BIT) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.CHAR) -- OK
+OUT TIMESTAMP registerOutParameter(Types.CHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT TIMESTAMP registerOutParameter(Types.VARCHAR) -- OK
+OUT TIMESTAMP registerOutParameter(Types.VARCHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT TIMESTAMP registerOutParameter(Types.LONGVARCHAR) -- OK
+OUT TIMESTAMP registerOutParameter(Types.LONGVARCHAR) -- OK
+SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+INOUT TIMESTAMP registerOutParameter(Types.VARBINARY) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.VARBINARY) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.DATE) -- OK
+OUT TIMESTAMP registerOutParameter(Types.DATE) -- OK
+P2=cs.getDate=2004-03-12 was null false
+P3=cs.getDate=2004-04-12 was null false
+INOUT TIMESTAMP registerOutParameter(Types.TIME) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.TIME) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.TIMESTAMP) -- OK
+OUT TIMESTAMP registerOutParameter(Types.TIMESTAMP) -- OK
+P2=cs.getTimestamp=21:14:24 was null false
+P3=cs.getTimestamp=04:25:26 was null false
+INOUT TIMESTAMP registerOutParameter(Types.CLOB) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.CLOB) -- XCL25
+INOUT TIMESTAMP registerOutParameter(Types.BLOB) -- XCL25
+OUT TIMESTAMP registerOutParameter(Types.BLOB) -- XCL25
+getXXX on : CLOB(1k)
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true CLOUD EXT (OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream= CLOUD EXT (OK)
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream= CLOUD EXT (OK)
+  getClob=null was null true JDBC MATCH(OK)
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=67 was null false CLOUD EXT (OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=0x36,0x37 was null false CLOUD EXT (OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x36,0x37 was null false CLOUD EXT (OK)
+  getClob=67 was null false JDBC MATCH(OK)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Clob was null false
+setNull() with all JDBC Types on CLOB(1k)
+  setNull(Types.TINYINT) IC
+  setNull(SMALLINT) IC
+  setNull(INTEGER) IC
+  setNull(BIGINT) IC
+  setNull(REAL) IC
+  setNull(Types.FLOAT) IC
+  setNull(DOUBLE) IC
+  setNull(DECIMAL) IC
+  setNull(Types.NUMERIC) IC
+  setNull(Types.BIT) IC
+  setNull(CHAR) IC
+  setNull(VARCHAR) IC
+  setNull(LONG VARCHAR) IC
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) getClob=null was null true
+  setNull(BLOB) IC
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on CLOB(1k)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() java.lang.Throwable: FRED
+IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal(null) IC JDBC MATCH (INVALID)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setString() getClob=0x39,0x37 was null false CLOUD EXT (OK)
+  setString(null) getClob=null was null true CLOUD EXT (OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes(null) IC JDBC MATCH (INVALID)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() getClob=0x65,0x67 was null false JDBC MATCH(OK)
+  setAsciiStream(null) getClob=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream(null) IC JDBC MATCH (INVALID)
+  setCharacterStream() getClob=0x38,0x39 was null false JDBC MATCH(OK)
+  setCharacterStream(null) getClob=null was null true JDBC MATCH(OK)
+  setClob() getClob=0x37,0x32 was null false JDBC MATCH(OK)
+  setClob(null) getClob=null was null true JDBC MATCH(OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob(null) IC JDBC MATCH (INVALID)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setObject(null)  OK An attempt was made to get a data value of type 'CLOB' from a data value of type 'null'.
+  setObject(java.lang.String) getClob=0x34,0x36 was null false CLOUD EXT (OK)
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Clob) getClob=0x37,0x32 was null false JDBC MATCH(OK)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 CLOB(1k), INOUT P2 CLOB(1k), OUT P3 CLOB(1k)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+42962:Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
+getXXX on : BLOB(1k)
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true CLOUD EXT (OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream= CLOUD EXT (OK)
+  getBinaryStream= CLOUD EXT (OK)
+  getCharacterStream= CLOUD EXT (OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=null was null true JDBC MATCH(OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=8243cafe0032 was null false CLOUD EXT (OK)
+  getBytes=0x82,0x43 was null false CLOUD EXT (OK)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=0x82,0x43 was null false CLOUD EXT (OK)
+  getBinaryStream=0x82,0x43 was null false CLOUD EXT (OK)
+  getCharacterStream=0x8243,0xcafe was null false CLOUD EXT (OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=0x82,0x43 was null false JDBC MATCH(OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Blob was null false
+setNull() with all JDBC Types on BLOB(1k)
+  setNull(Types.TINYINT) IC
+  setNull(SMALLINT) IC
+  setNull(INTEGER) IC
+  setNull(BIGINT) IC
+  setNull(REAL) IC
+  setNull(Types.FLOAT) IC
+  setNull(DOUBLE) IC
+  setNull(DECIMAL) IC
+  setNull(Types.NUMERIC) IC
+  setNull(Types.BIT) IC
+  setNull(CHAR) IC
+  setNull(VARCHAR) IC
+  setNull(LONG VARCHAR) IC
+  setNull(VARCHAR () FOR BIT DATA) IC
+  setNull(DATE) IC
+  setNull(TIME) IC
+  setNull(TIMESTAMP) IC
+  setNull(CLOB) IC
+  setNull(BLOB) getBlob=null was null true
+  setNull(Types.NULL) IC
+  setNull(235350345) IC
+setXXX() with all JDBC Types on BLOB(1k)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal(null) IC JDBC MATCH (INVALID)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setString() IC JDBC MATCH (INVALID)
+  setString(null) IC JDBC MATCH (INVALID)
+  setBytes() getBlob=0x4,0x3 was null false CLOUD EXT (OK)
+  setBytes(null) getBlob=null was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate(null) IC JDBC MATCH (INVALID)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime(null) IC JDBC MATCH (INVALID)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp(null) IC JDBC MATCH (INVALID)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream(null) IC JDBC MATCH (INVALID)
+  setBinaryStream() getBlob=0x82,0x43 was null false JDBC MATCH(OK)
+  setBinaryStream(null) getBlob=null was null true JDBC MATCH(OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream(null) IC JDBC MATCH (INVALID)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob(null) IC JDBC MATCH (INVALID)
+  setBlob() getBlob=0x32,0x43 was null false JDBC MATCH(OK)
+  setBlob(null) getBlob=null was null true JDBC MATCH(OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL BLOB(1k)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL BLOB(1k)
+  setObject(null)  OK An attempt was made to get a data value of type 'BLOB' from a data value of type 'null'.
+  setObject(java.lang.String) IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(byte[]) getBlob=0x32,0x39 was null false CLOUD EXT (OK)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Blob) getBlob=0x32,0x43 was null false JDBC MATCH(OK)
+  setObject(java.sql.Clob) IC JDBC MATCH (INVALID)
+CREATE PROCEDURE PMP.TYPE_AS(IN P1 BLOB(1k), INOUT P2 BLOB(1k), OUT P3 BLOB(1k)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'
+42962:Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 

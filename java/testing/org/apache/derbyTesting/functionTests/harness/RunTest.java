@@ -2063,7 +2063,7 @@ clp.list(System.out);
                 v.addElement(javaPath + "." + testBase);
             else
                 v.addElement(testBase);
-            if ( (propString.length() > 0) && (usesystem == null))
+            if (propString.length() > 0)
             {
                 v.addElement("-p");
                 v.addElement(propString);

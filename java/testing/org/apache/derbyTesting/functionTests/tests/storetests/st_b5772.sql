@@ -85,4 +85,5 @@ insert into b5772 values (1, 1);
 
 -- cleanup
 drop table b5772;
+drop table foo;
 commit;

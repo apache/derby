@@ -42,12 +42,33 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="copyfiles"/>
+  <target name="FTOtestsubdir" depends="compile,copyfiles"/>
 
   <!-- mkdir / init target should not be necessary, just here for reference... -->
   <target name="init">
     <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/storetests"/>
   </target>
+
+  <target name="compile">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <!--pathelement location="${oro}"/-->
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${this.dir}/*.java"/>
+    </javac>
+  </target>
+
 
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/storetests">

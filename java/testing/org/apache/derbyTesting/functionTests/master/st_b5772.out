@@ -152,5 +152,7 @@ insert into b5772 values (1, 1);
 ij> -- cleanup
 drop table b5772;
 0 rows inserted/updated/deleted
+ij> drop table foo;
+0 rows inserted/updated/deleted
 ij> commit;
 ij> 
