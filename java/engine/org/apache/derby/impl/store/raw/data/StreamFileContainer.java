@@ -76,11 +76,6 @@ import java.io.Externalizable;
 
 public class StreamFileContainer implements TypedFormat
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
     /**************************************************************************
      * Constant Fields of the class

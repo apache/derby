@@ -18,10 +18,6 @@ import org.apache.derby.iapi.store.raw.PageTimeStamp;
 
 public class PageVersion implements PageTimeStamp
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private long pageNumber;
 	private long pageVersion;
 

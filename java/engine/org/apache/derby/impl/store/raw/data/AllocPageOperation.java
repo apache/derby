@@ -34,10 +34,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 // Allocation page operation - to allocate, deallocate or free a page
 public final class AllocPageOperation extends PhysicalPageOperation
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected long newPageNumber; // new page's number
 	protected int doStatus;		// what the doMe operation should set the status to

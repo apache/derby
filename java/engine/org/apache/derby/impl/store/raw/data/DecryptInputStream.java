@@ -24,10 +24,6 @@ import java.io.IOException;
 	stream of bytes.
 */
 public class DecryptInputStream extends BufferedByteHolderInputStream {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	// if database is encrypted, bytes to reserve at the beginning of the buffer
 	//protected static final int ENCRYPTION_RESERVE = dataFactory.getEncryptionBlockSize() - 1;

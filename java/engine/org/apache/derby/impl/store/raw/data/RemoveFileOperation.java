@@ -39,10 +39,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 public class RemoveFileOperation implements Undoable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private String name;
 	private long generationId;
 	private boolean removeAtOnce;

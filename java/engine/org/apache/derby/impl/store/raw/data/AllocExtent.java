@@ -103,10 +103,6 @@ import java.io.ObjectInput;
 
 public class AllocExtent implements Externalizable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private long extentOffset;	// begin physical offset
 	private long extentStart;	// first logical page number
 	private long extentEnd;		// last logical page number

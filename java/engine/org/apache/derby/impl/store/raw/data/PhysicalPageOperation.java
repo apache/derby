@@ -47,10 +47,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 public abstract class PhysicalPageOperation extends PageBasicOperation implements Undoable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected PhysicalPageOperation(BasePage page)
 	{
 		super(page);

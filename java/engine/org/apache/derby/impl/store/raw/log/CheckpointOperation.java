@@ -42,10 +42,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 public class CheckpointOperation implements Loggable 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	// redo LWM
 	protected long	redoLWM;

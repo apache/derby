@@ -35,10 +35,6 @@ import java.io.DataInputStream;
 */
 
 public class InputStreamContainer extends FileContainer  {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     private StorageFile containerPath;
     

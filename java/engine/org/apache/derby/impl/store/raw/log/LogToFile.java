@@ -200,11 +200,6 @@ import java.util.zip.CRC32;
 public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 								  Serviceable, java.security.PrivilegedExceptionAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private static int fid = StoredFormatIds.FILE_STREAM_LOG_FILE; 
 

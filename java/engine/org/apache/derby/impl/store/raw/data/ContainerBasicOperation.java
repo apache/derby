@@ -40,10 +40,6 @@ A ContainerBasicOperation is the base class for all container operations.
 
 public abstract class ContainerBasicOperation implements Loggable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/* page info this operation changed */
 	private long containerVersion;
 	protected ContainerKey containerId;

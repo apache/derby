@@ -64,10 +64,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
    @see Page#purgeAtSlot
 */
 public final class PurgeOperation extends PhysicalPageOperation {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected int	slot;	// purge num_rows records starting at this slot
 							// caller must guarentee that during undo of the

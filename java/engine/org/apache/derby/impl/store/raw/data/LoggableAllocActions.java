@@ -23,10 +23,6 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.error.StandardException;
 
 public class LoggableAllocActions implements AllocationActions {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**
 		Set the allocation status of pageNumber to doStatus.  To undo this

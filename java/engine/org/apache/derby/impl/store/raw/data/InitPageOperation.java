@@ -54,10 +54,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public final class InitPageOperation extends PhysicalPageOperation
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected int	nextRecordId; // next recordId
 	protected int	initFlag;
 	protected int	pageFormatId;

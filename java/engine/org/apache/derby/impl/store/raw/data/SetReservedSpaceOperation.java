@@ -42,10 +42,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	This operation is not undoable.
 */
 public class SetReservedSpaceOperation extends PageBasicOperation {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	protected int	doMeSlot;	// slot where record is at
 	protected int	recordId;	// recordId

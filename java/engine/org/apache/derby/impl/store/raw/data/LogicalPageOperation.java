@@ -63,11 +63,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 public abstract class LogicalPageOperation 
     extends PageBasicOperation implements LogicalUndoable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected LogicalUndo undo; // Callback to access for logical undo.
 								// If non-null, then logical undo is necessary

@@ -64,10 +64,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 
 public final class UpdateOperation extends PhysicalPageOperation {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected int			doMeSlot;	// record slot - only valid during a doMe() operation
 	protected int			recordId;	// record id

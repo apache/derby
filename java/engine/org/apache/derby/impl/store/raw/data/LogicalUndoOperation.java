@@ -57,10 +57,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 */
 public class LogicalUndoOperation extends PageBasicOperation implements Compensation {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected int recordId;				// the record id to call undoOp.undoMe with
 

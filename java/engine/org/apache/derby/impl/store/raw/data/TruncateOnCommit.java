@@ -36,10 +36,6 @@ import java.util.Observable;
 */
 
 public class TruncateOnCommit extends ContainerHandleActionOnCommit {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**
 		Truncate on a commit as well.

@@ -50,10 +50,6 @@ import java.util.Hashtable;
 	<BR> MT - Mutable - mutable identity : 
 */
 public abstract class BaseContainer implements Lockable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Identity of the container.

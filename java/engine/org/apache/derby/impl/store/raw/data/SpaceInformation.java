@@ -21,11 +21,6 @@ ConglomerateController.getSpaceInfo().
 
 public class SpaceInformation implements SpaceInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
     private long numAllocatedPages;
     private long numFreePages;

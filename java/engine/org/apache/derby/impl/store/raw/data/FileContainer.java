@@ -74,11 +74,6 @@ import java.util.zip.CRC32;
 public abstract class FileContainer 
     extends BaseContainer implements Cacheable, TypedFormat
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/*
 	 * typed format

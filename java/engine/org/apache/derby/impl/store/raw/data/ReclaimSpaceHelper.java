@@ -207,10 +207,6 @@ to make sure the entire row chain is stable.
 public class ReclaimSpaceHelper
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 		Reclaim space based on work.
 	 */
 	public static int reclaimSpace(BaseDataFileFactory dataFactory,

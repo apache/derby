@@ -44,10 +44,6 @@ import java.io.IOException;
 
 public abstract class CachedPage extends BasePage implements Cacheable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected boolean		alreadyReadPage;	// set to true when the page was read by another class
 
 	protected byte[]		pageData;		// the actual page data - this is

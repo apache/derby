@@ -46,10 +46,6 @@ import java.io.IOException;
 */
 
 public class Scan implements StreamLogScan {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	// value for scanDirection
 	public static final byte FORWARD = 1;

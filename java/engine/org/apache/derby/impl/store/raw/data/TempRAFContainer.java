@@ -39,10 +39,6 @@ import java.io.IOException;
 	file descriptor is never synced
 */
 class TempRAFContainer extends RAFContainer {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected int inUseCount;
 

@@ -35,10 +35,6 @@ import java.io.ObjectInput;
 // Allocation page operation - to allocate, deallocate or free a page
 public final class ChainAllocPageOperation extends PhysicalPageOperation
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected long newAllocPageNum;	// the next alloc page's page number
 	protected long newAllocPageOffset; // the next alloc page's page offset 

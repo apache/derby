@@ -36,10 +36,6 @@ import java.util.Observable;
 */
 
 public class SyncOnCommit extends ContainerHandleActionOnCommit {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	public SyncOnCommit(ContainerKey identity) {
 

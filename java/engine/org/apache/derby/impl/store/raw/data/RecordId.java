@@ -34,10 +34,6 @@ import java.util.Hashtable;
 
 */
 public final class RecordId implements RecordHandle {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Page the record lives in.

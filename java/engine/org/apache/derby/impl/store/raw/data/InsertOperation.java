@@ -67,11 +67,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public final class InsertOperation extends LogicalPageOperation 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected int			doMeSlot;	// insert slot - only valid during doMe()
 	protected byte			insertFlag;	// see page insertFlag

@@ -27,10 +27,6 @@ import java.io.IOException;
 */
 
 public interface StreamLogScan extends LogScan {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		Get the next record in the scan and place its data in the passed in

@@ -20,10 +20,6 @@ public class D_FlushedScan
 extends DiagnosticableGeneric
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	  @exception StandardException Oops.
 	  @see Diagnosticable#diag
 	  */

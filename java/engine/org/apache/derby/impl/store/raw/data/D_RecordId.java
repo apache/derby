@@ -30,10 +30,6 @@ BaseContainerHandle class.  Currently this info is a single string of the form
 
 public class D_RecordId extends DiagnosticableGeneric
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /**
      * Return string identifying the underlying container.

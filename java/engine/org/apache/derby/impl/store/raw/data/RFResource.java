@@ -33,10 +33,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class RFResource implements FileResource {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	protected final BaseDataFileFactory factory;
 

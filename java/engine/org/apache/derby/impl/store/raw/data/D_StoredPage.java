@@ -44,10 +44,6 @@ class.  Currently this info includes:
 
 public class D_StoredPage implements Diagnosticable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     protected StoredPage page;
 
     public D_StoredPage()

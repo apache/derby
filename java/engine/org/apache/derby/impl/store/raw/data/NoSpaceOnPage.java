@@ -18,10 +18,6 @@ import org.apache.derby.iapi.error.StandardException;
 	various layers of software.
 */
 class NoSpaceOnPage extends StandardException {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private final boolean onOverflowPage;
 

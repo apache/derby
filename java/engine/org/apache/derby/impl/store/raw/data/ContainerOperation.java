@@ -58,10 +58,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public class ContainerOperation extends ContainerBasicOperation implements Undoable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected byte operation;		// create, drop, or remove
 
 	// in previous version of contianerOperation, there may not

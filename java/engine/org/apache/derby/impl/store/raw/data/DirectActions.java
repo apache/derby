@@ -36,12 +36,6 @@ import java.io.IOException;
 
 
 public class DirectActions implements PageActions  {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected DynamicByteArrayOutputStream outBytes;	
 	protected ArrayInputStream	limitIn;

@@ -37,10 +37,6 @@ import org.apache.derby.impl.store.raw.data.BaseContainerHandle;
 */
 class AllocationCache
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private int numExtents;
 	private long[] lowRange;	// lowRange[i] to hiRange[i] defines the
 	private long[] hiRange;		// smallest and largest logical page number

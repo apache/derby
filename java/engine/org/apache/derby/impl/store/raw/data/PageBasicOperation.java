@@ -70,11 +70,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 public abstract class PageBasicOperation implements Loggable, RePreparable 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 
 	/* page info this operation changed */

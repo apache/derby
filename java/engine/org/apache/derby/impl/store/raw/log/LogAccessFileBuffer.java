@@ -19,10 +19,6 @@ A single buffer of data.
 
 final class LogAccessFileBuffer
 {
-    /**
-       IBM Copyright &copy notice.
-    */
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 
     /**************************************************************************

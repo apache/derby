@@ -22,11 +22,6 @@ import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 */
 public class LongColumnException extends StandardException 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	// YYZ? may need to make it a DynamicByteArrayOutputStream, or a ByteArray
 	protected DynamicByteArrayOutputStream    logBuffer;

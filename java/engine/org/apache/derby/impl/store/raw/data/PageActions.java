@@ -25,12 +25,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 public interface PageActions 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     /**
      * Set the Delete status of the record at the given slot.

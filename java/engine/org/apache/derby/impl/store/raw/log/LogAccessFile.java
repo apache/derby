@@ -49,11 +49,6 @@ import java.util.LinkedList;
 */
 public class LogAccessFile extends OutputStream 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
     /**
      * The fixed size of a log record is 16 bytes:

@@ -81,10 +81,6 @@ import java.security.PrivilegedExceptionAction;
 
 public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private static final String BACKUP_HISTORY = "BACKUP.HISTORY";
 	private static final String[] BACKUP_FILTER =
 	{ DataFactory.TEMP_SEGMENT_NAME, DataFactory.DB_LOCKFILE_NAME, DataFactory.DB_EX_LOCKFILE_NAME, LogFactory.LOG_DIRECTORY_NAME };

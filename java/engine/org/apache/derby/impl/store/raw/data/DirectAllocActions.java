@@ -23,10 +23,6 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.error.StandardException;
 
 public class DirectAllocActions implements AllocationActions {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	public DirectAllocActions() {
 	}

@@ -67,11 +67,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public final class UpdateFieldOperation extends LogicalPageOperation 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected int			doMeSlot;	// insert slot - only valid during a doMe() operation
 	protected int			fieldId;

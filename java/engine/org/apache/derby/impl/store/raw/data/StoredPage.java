@@ -219,8 +219,6 @@ public class StoredPage extends CachedPage
      **************************************************************************
      */
 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-
 	/*
 	 * typed format
 	 */
