@@ -1,0 +1,1014 @@
+Test resultset starting
+getColumnCount(): 16
+isAutoIncrement(1): false
+isCaseSensitive(1): false
+isSearchable(1): true
+isCurrency(1): false
+isNullable(1): 1
+isSigned(1): true
+getColumnDisplaySize(1): 11
+getColumnLabel(1): I
+getColumnName(1): I
+getTableName(1): T
+getSchemaName(1): 
+getCatalogName(1): 
+getColumnType(1): 4
+getPrecision(1): 10
+getScale(1): 0
+getColumnTypeName(1): INTEGER
+isReadOnly(1): true
+isDefinitelyWritable(1): false
+isAutoIncrement(2): false
+isCaseSensitive(2): false
+isSearchable(2): true
+isCurrency(2): false
+isNullable(2): 1
+isSigned(2): true
+getColumnDisplaySize(2): 6
+getColumnLabel(2): S
+getColumnName(2): S
+getTableName(2): T
+getSchemaName(2): 
+getCatalogName(2): 
+getColumnType(2): 5
+getPrecision(2): 5
+getScale(2): 0
+getColumnTypeName(2): SMALLINT
+isReadOnly(2): true
+isDefinitelyWritable(2): false
+isAutoIncrement(3): false
+isCaseSensitive(3): false
+isSearchable(3): true
+isCurrency(3): false
+isNullable(3): 1
+isSigned(3): true
+getColumnDisplaySize(3): 13
+getColumnLabel(3): R
+getColumnName(3): R
+getTableName(3): T
+getSchemaName(3): 
+getCatalogName(3): 
+getColumnType(3): 7
+getPrecision(3): 7
+getScale(3): 0
+getColumnTypeName(3): REAL
+isReadOnly(3): true
+isDefinitelyWritable(3): false
+isAutoIncrement(4): false
+isCaseSensitive(4): false
+isSearchable(4): true
+isCurrency(4): false
+isNullable(4): 1
+isSigned(4): true
+getColumnDisplaySize(4): 22
+getColumnLabel(4): D
+getColumnName(4): D
+getTableName(4): T
+getSchemaName(4): 
+getCatalogName(4): 
+getColumnType(4): 8
+getPrecision(4): 15
+getScale(4): 0
+getColumnTypeName(4): DOUBLE
+isReadOnly(4): true
+isDefinitelyWritable(4): false
+isAutoIncrement(5): false
+isCaseSensitive(5): false
+isSearchable(5): true
+isCurrency(5): false
+isNullable(5): 1
+isSigned(5): false
+getColumnDisplaySize(5): 10
+getColumnLabel(5): DT
+getColumnName(5): DT
+getTableName(5): T
+getSchemaName(5): 
+getCatalogName(5): 
+getColumnType(5): 91
+getPrecision(5): 10
+getScale(5): 0
+getColumnTypeName(5): DATE
+isReadOnly(5): true
+isDefinitelyWritable(5): false
+isAutoIncrement(6): false
+isCaseSensitive(6): false
+isSearchable(6): true
+isCurrency(6): false
+isNullable(6): 1
+isSigned(6): false
+getColumnDisplaySize(6): 8
+getColumnLabel(6): T
+getColumnName(6): T
+getTableName(6): T
+getSchemaName(6): 
+getCatalogName(6): 
+getColumnType(6): 92
+getPrecision(6): 8
+getScale(6): 0
+getColumnTypeName(6): TIME
+isReadOnly(6): true
+isDefinitelyWritable(6): false
+isAutoIncrement(7): false
+isCaseSensitive(7): false
+isSearchable(7): true
+isCurrency(7): false
+isNullable(7): 1
+isSigned(7): false
+getColumnDisplaySize(7): 26
+getColumnLabel(7): TS
+getColumnName(7): TS
+getTableName(7): T
+getSchemaName(7): 
+getCatalogName(7): 
+getColumnType(7): 93
+getPrecision(7): 26
+getScale(7): 6
+getColumnTypeName(7): TIMESTAMP
+isReadOnly(7): true
+isDefinitelyWritable(7): false
+isAutoIncrement(8): false
+isCaseSensitive(8): true
+isSearchable(8): true
+isCurrency(8): false
+isNullable(8): 1
+isSigned(8): false
+getColumnDisplaySize(8): 10
+getColumnLabel(8): C
+getColumnName(8): C
+getTableName(8): T
+getSchemaName(8): 
+getCatalogName(8): 
+getColumnType(8): 1
+getPrecision(8): 10
+getScale(8): 0
+getColumnTypeName(8): CHAR
+isReadOnly(8): true
+isDefinitelyWritable(8): false
+isAutoIncrement(9): false
+isCaseSensitive(9): true
+isSearchable(9): true
+isCurrency(9): false
+isNullable(9): 0
+isSigned(9): false
+getColumnDisplaySize(9): 40
+getColumnLabel(9): V
+getColumnName(9): V
+getTableName(9): T
+getSchemaName(9): 
+getCatalogName(9): 
+getColumnType(9): 12
+getPrecision(9): 40
+getScale(9): 0
+getColumnTypeName(9): VARCHAR
+isReadOnly(9): true
+isDefinitelyWritable(9): false
+isAutoIncrement(10): false
+isCaseSensitive(10): false
+isSearchable(10): true
+isCurrency(10): false
+isNullable(10): 1
+isSigned(10): true
+getColumnDisplaySize(10): 12
+getColumnLabel(10): DC
+getColumnName(10): DC
+getTableName(10): T
+getSchemaName(10): 
+getCatalogName(10): 
+getColumnType(10): 3
+getPrecision(10): 10
+getScale(10): 2
+getColumnTypeName(10): DECIMAL
+isReadOnly(10): true
+isDefinitelyWritable(10): false
+isAutoIncrement(11): false
+isCaseSensitive(11): false
+isSearchable(11): true
+isCurrency(11): false
+isNullable(11): 1
+isSigned(11): true
+getColumnDisplaySize(11): 20
+getColumnLabel(11): BI
+getColumnName(11): BI
+getTableName(11): T
+getSchemaName(11): 
+getCatalogName(11): 
+getColumnType(11): -5
+getPrecision(11): 19
+getScale(11): 0
+getColumnTypeName(11): BIGINT
+isReadOnly(11): true
+isDefinitelyWritable(11): false
+isAutoIncrement(12): false
+isCaseSensitive(12): false
+isSearchable(12): true
+isCurrency(12): false
+isNullable(12): 1
+isSigned(12): false
+getColumnDisplaySize(12): 20
+getColumnLabel(12): CBD
+getColumnName(12): CBD
+getTableName(12): T
+getSchemaName(12): 
+getCatalogName(12): 
+getColumnType(12): -2
+getPrecision(12): 10
+getScale(12): 0
+getColumnTypeName(12): CHAR FOR BIT DATA
+isReadOnly(12): true
+isDefinitelyWritable(12): false
+isAutoIncrement(13): false
+isCaseSensitive(13): false
+isSearchable(13): true
+isCurrency(13): false
+isNullable(13): 1
+isSigned(13): false
+getColumnDisplaySize(13): 20
+getColumnLabel(13): VBD
+getColumnName(13): VBD
+getTableName(13): T
+getSchemaName(13): 
+getCatalogName(13): 
+getColumnType(13): -3
+getPrecision(13): 10
+getScale(13): 0
+getColumnTypeName(13): VARCHAR FOR BIT DATA
+isReadOnly(13): true
+isDefinitelyWritable(13): false
+isAutoIncrement(14): false
+isCaseSensitive(14): false
+isSearchable(14): true
+isCurrency(14): false
+isNullable(14): 1
+isSigned(14): false
+getColumnDisplaySize(14): 65400
+getColumnLabel(14): LVBD
+getColumnName(14): LVBD
+getTableName(14): T
+getSchemaName(14): 
+getCatalogName(14): 
+getColumnType(14): -4
+getPrecision(14): 32700
+getScale(14): 0
+getColumnTypeName(14): LONG VARCHAR FOR BIT DATA
+isReadOnly(14): true
+isDefinitelyWritable(14): false
+isAutoIncrement(15): false
+isCaseSensitive(15): true
+isSearchable(15): true
+isCurrency(15): false
+isNullable(15): 1
+isSigned(15): false
+getColumnDisplaySize(15): 2147483647
+getColumnLabel(15): CL
+getColumnName(15): CL
+getTableName(15): T
+getSchemaName(15): 
+getCatalogName(15): 
+getColumnType(15): 2005
+getPrecision(15): 2147483647
+getScale(15): 0
+getColumnTypeName(15): CLOB
+isReadOnly(15): true
+isDefinitelyWritable(15): false
+isAutoIncrement(16): false
+isCaseSensitive(16): false
+isSearchable(16): true
+isCurrency(16): false
+isNullable(16): 1
+isSigned(16): false
+getColumnDisplaySize(16): -2147483648
+getColumnLabel(16): BL
+getColumnName(16): BL
+getTableName(16): T
+getSchemaName(16): 
+getCatalogName(16): 
+getColumnType(16): 2004
+getPrecision(16): 1073741824
+getScale(16): 0
+getColumnTypeName(16): BLOB
+isReadOnly(16): true
+isDefinitelyWritable(16): false
+getBigDecimal(1,1): 1.0
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(i,1): 1.0
+getBoolean(1): true
+getBoolean(i): true
+getByte(1): 1
+getByte(i): 1
+getBytes(1) got exception 
+Data Conversion SQLException
+getBytes(i) got exception 
+Data Conversion SQLException
+getDate(1) got exception 
+Data Conversion SQLException
+getDate(i) got exception 
+Data Conversion SQLException
+getDouble(1): 1.0
+getDouble(i): 1.0
+getFloat(1): 1.0
+getFloat(i): 1.0
+getInt(1): 1
+getInt(i): 1
+getLong(1): 1
+getLong(i): 1
+getObject(1): 1
+getObject(i): 1
+getShort(1): 1
+getShort(i): 1
+getString(1): 1
+getString(i): 1
+getTime(1) got exception 
+Data Conversion SQLException
+getTime(i) got exception 
+Data Conversion SQLException
+getTimestamp(1) got exception 
+Data Conversion SQLException
+getTimestamp(i) got exception 
+Data Conversion SQLException
+getBigDecimal(2,1): 2.0
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(s,1): 2.0
+getBoolean(2): true
+getBoolean(s): true
+getByte(2): 2
+getByte(s): 2
+getBytes(2) got exception 
+Data Conversion SQLException
+getBytes(s) got exception 
+Data Conversion SQLException
+getDate(2) got exception 
+Data Conversion SQLException
+getDate(s) got exception 
+Data Conversion SQLException
+getDouble(2): 2.0
+getDouble(s): 2.0
+getFloat(2): 2.0
+getFloat(s): 2.0
+getInt(2): 2
+getInt(s): 2
+getLong(2): 2
+getLong(s): 2
+getObject(2): 2
+getObject(s): 2
+getShort(2): 2
+getShort(s): 2
+getString(2): 2
+getString(s): 2
+getTime(2) got exception 
+Data Conversion SQLException
+getTime(s) got exception 
+Data Conversion SQLException
+getTimestamp(2) got exception 
+Data Conversion SQLException
+getTimestamp(s) got exception 
+Data Conversion SQLException
+getBigDecimal(3,1): 3.3
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(r,1): 3.3
+getBoolean(3): true
+getBoolean(r): true
+getByte(3): 3
+getByte(r): 3
+getBytes(3) got exception 
+Data Conversion SQLException
+getBytes(r) got exception 
+Data Conversion SQLException
+getDate(3) got exception 
+Data Conversion SQLException
+getDate(r) got exception 
+Data Conversion SQLException
+getDouble(3): 3.299999952316284
+getDouble(r): 3.299999952316284
+getFloat(3): 3.3
+getFloat(r): 3.3
+getInt(3): 3
+getInt(r): 3
+getLong(3): 3
+getLong(r): 3
+getObject(3): 3.3
+getObject(r): 3.3
+getShort(3): 3
+getShort(r): 3
+getString(3): 3.3
+getString(r): 3.3
+getTime(3) got exception 
+Data Conversion SQLException
+getTime(r) got exception 
+Data Conversion SQLException
+getTimestamp(3) got exception 
+Data Conversion SQLException
+getTimestamp(r) got exception 
+Data Conversion SQLException
+getBigDecimal(4,1): 4.4
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(d,1): 4.4
+getBoolean(4): true
+getBoolean(d): true
+getByte(4): 4
+getByte(d): 4
+getBytes(4) got exception 
+Data Conversion SQLException
+getBytes(d) got exception 
+Data Conversion SQLException
+getDate(4) got exception 
+Data Conversion SQLException
+getDate(d) got exception 
+Data Conversion SQLException
+getDouble(4): 4.4
+getDouble(d): 4.4
+getFloat(4): 4.4
+getFloat(d): 4.4
+getInt(4): 4
+getInt(d): 4
+getLong(4): 4
+getLong(d): 4
+getObject(4): 4.4
+getObject(d): 4.4
+getShort(4): 4
+getShort(d): 4
+getString(4): 4.4
+getString(d): 4.4
+getTime(4) got exception 
+Data Conversion SQLException
+getTime(d) got exception 
+Data Conversion SQLException
+getTimestamp(4) got exception 
+Data Conversion SQLException
+getTimestamp(d) got exception 
+Data Conversion SQLException
+getBigDecimal(5,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(dt,1) got exception 
+Data Conversion SQLException
+getBoolean(5) got exception 
+Data Conversion SQLException
+getBoolean(dt) got exception 
+Data Conversion SQLException
+getByte(5) got exception 
+Data Conversion SQLException
+getByte(dt) got exception 
+Data Conversion SQLException
+getBytes(5) got exception 
+Data Conversion SQLException
+getBytes(dt) got exception 
+Data Conversion SQLException
+getDate(5): 1990-05-05
+getDate(dt): 1990-05-05
+getDouble(5) got exception 
+Data Conversion SQLException
+getDouble(dt) got exception 
+Data Conversion SQLException
+getFloat(5) got exception 
+Data Conversion SQLException
+getFloat(dt) got exception 
+Data Conversion SQLException
+getInt(5) got exception 
+Data Conversion SQLException
+getInt(dt) got exception 
+Data Conversion SQLException
+getLong(5) got exception 
+Data Conversion SQLException
+getLong(dt) got exception 
+Data Conversion SQLException
+getObject(5): 1990-05-05
+getObject(dt): 1990-05-05
+getShort(5) got exception 
+Data Conversion SQLException
+getShort(dt) got exception 
+Data Conversion SQLException
+getString(5): 1990-05-05
+getString(dt): 1990-05-05
+getTime(5) got exception 
+Data Conversion SQLException
+getTime(dt) got exception 
+Data Conversion SQLException
+getTimestamp(5): xxxxxxFILTERED-TIMESTAMPxxxxx
+getTimestamp(dt): xxxxxxFILTERED-TIMESTAMPxxxxx
+getBigDecimal(6,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(t,1) got exception 
+Data Conversion SQLException
+getBoolean(6) got exception 
+Data Conversion SQLException
+getBoolean(t) got exception 
+Data Conversion SQLException
+getByte(6) got exception 
+Data Conversion SQLException
+getByte(t) got exception 
+Data Conversion SQLException
+getBytes(6) got exception 
+Data Conversion SQLException
+getBytes(t) got exception 
+Data Conversion SQLException
+getDate(6) got exception 
+Data Conversion SQLException
+getDate(t) got exception 
+Data Conversion SQLException
+getDouble(6) got exception 
+Data Conversion SQLException
+getDouble(t) got exception 
+Data Conversion SQLException
+getFloat(6) got exception 
+Data Conversion SQLException
+getFloat(t) got exception 
+Data Conversion SQLException
+getInt(6) got exception 
+Data Conversion SQLException
+getInt(t) got exception 
+Data Conversion SQLException
+getLong(6) got exception 
+Data Conversion SQLException
+getLong(t) got exception 
+Data Conversion SQLException
+getObject(6): 12:06:06
+getObject(t): 12:06:06
+getShort(6) got exception 
+Data Conversion SQLException
+getShort(t) got exception 
+Data Conversion SQLException
+getString(6): 12:06:06
+getString(t): 12:06:06
+getTime(6): 12:06:06
+getTime(t): 12:06:06
+getTimestamp(6): xxxxxxFILTERED-TIMESTAMPxxxxx
+getTimestamp(t): xxxxxxFILTERED-TIMESTAMPxxxxx
+getBigDecimal(7,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(ts,1) got exception 
+Data Conversion SQLException
+getBoolean(7) got exception 
+Data Conversion SQLException
+getBoolean(ts) got exception 
+Data Conversion SQLException
+getByte(7) got exception 
+Data Conversion SQLException
+getByte(ts) got exception 
+Data Conversion SQLException
+getBytes(7) got exception 
+Data Conversion SQLException
+getBytes(ts) got exception 
+Data Conversion SQLException
+getDate(7): 1990-07-07
+getDate(ts): 1990-07-07
+getDouble(7) got exception 
+Data Conversion SQLException
+getDouble(ts) got exception 
+Data Conversion SQLException
+getFloat(7) got exception 
+Data Conversion SQLException
+getFloat(ts) got exception 
+Data Conversion SQLException
+getInt(7) got exception 
+Data Conversion SQLException
+getInt(ts) got exception 
+Data Conversion SQLException
+getLong(7) got exception 
+Data Conversion SQLException
+getLong(ts) got exception 
+Data Conversion SQLException
+getObject(7): xxxxxxFILTERED-TIMESTAMPxxxxx
+getObject(ts): xxxxxxFILTERED-TIMESTAMPxxxxx
+getShort(7) got exception 
+Data Conversion SQLException
+getShort(ts) got exception 
+Data Conversion SQLException
+getString(7): xxxxxxFILTERED-TIMESTAMPxxxxx
+getString(ts): xxxxxxFILTERED-TIMESTAMPxxxxx
+getTime(7): 07:07:07
+getTime(ts): 07:07:07
+getTimestamp(7): xxxxxxFILTERED-TIMESTAMPxxxxx
+getTimestamp(ts): xxxxxxFILTERED-TIMESTAMPxxxxx
+getBigDecimal(8,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(c,1) got exception 
+Data Conversion SQLException
+getBoolean(8): true
+getBoolean(c): true
+getByte(8) got exception 
+Data Conversion SQLException
+getByte(c) got exception 
+Data Conversion SQLException
+getBytes(8) got exception 
+Data Conversion SQLException
+getBytes(c) got exception 
+Data Conversion SQLException
+getDate(8) got exception 
+Data Conversion SQLException
+getDate(c) got exception 
+Data Conversion SQLException
+getDouble(8) got exception 
+Data Conversion SQLException
+getDouble(c) got exception 
+Data Conversion SQLException
+getFloat(8) got exception 
+Data Conversion SQLException
+getFloat(c) got exception 
+Data Conversion SQLException
+getInt(8) got exception 
+Data Conversion SQLException
+getInt(c) got exception 
+Data Conversion SQLException
+getLong(8) got exception 
+Data Conversion SQLException
+getLong(c) got exception 
+Data Conversion SQLException
+getObject(8): eight     
+getObject(c): eight     
+getShort(8) got exception 
+Data Conversion SQLException
+getShort(c) got exception 
+Data Conversion SQLException
+getString(8): eight     
+getString(c): eight     
+getTime(8) got exception 
+Data Conversion SQLException
+getTime(c) got exception 
+Data Conversion SQLException
+getTimestamp(8) got exception 
+Data Conversion SQLException
+getTimestamp(c) got exception 
+Data Conversion SQLException
+getBigDecimal(9,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(v,1) got exception 
+Data Conversion SQLException
+getBoolean(9): true
+getBoolean(v): true
+getByte(9) got exception 
+Data Conversion SQLException
+getByte(v) got exception 
+Data Conversion SQLException
+getBytes(9) got exception 
+Data Conversion SQLException
+getBytes(v) got exception 
+Data Conversion SQLException
+getDate(9) got exception 
+Data Conversion SQLException
+getDate(v) got exception 
+Data Conversion SQLException
+getDouble(9) got exception 
+Data Conversion SQLException
+getDouble(v) got exception 
+Data Conversion SQLException
+getFloat(9) got exception 
+Data Conversion SQLException
+getFloat(v) got exception 
+Data Conversion SQLException
+getInt(9) got exception 
+Data Conversion SQLException
+getInt(v) got exception 
+Data Conversion SQLException
+getLong(9) got exception 
+Data Conversion SQLException
+getLong(v) got exception 
+Data Conversion SQLException
+getObject(9): nine
+getObject(v): nine
+getShort(9) got exception 
+Data Conversion SQLException
+getShort(v) got exception 
+Data Conversion SQLException
+getString(9): nine
+getString(v): nine
+getTime(9) got exception 
+Data Conversion SQLException
+getTime(v) got exception 
+Data Conversion SQLException
+getTimestamp(9) got exception 
+Data Conversion SQLException
+getTimestamp(v) got exception 
+Data Conversion SQLException
+getBigDecimal(10,1): 10.1
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(dc,1): 10.1
+getBoolean(10): true
+getBoolean(dc): true
+getByte(10): 10
+getByte(dc): 10
+getBytes(10) got exception 
+Data Conversion SQLException
+getBytes(dc) got exception 
+Data Conversion SQLException
+getDate(10) got exception 
+Data Conversion SQLException
+getDate(dc) got exception 
+Data Conversion SQLException
+getDouble(10): 10.1
+getDouble(dc): 10.1
+getFloat(10): 10.1
+getFloat(dc): 10.1
+getInt(10): 10
+getInt(dc): 10
+getLong(10): 10
+getLong(dc): 10
+getObject(10): 10.10
+getObject(dc): 10.10
+getShort(10): 10
+getShort(dc): 10
+getString(10): 10.10
+getString(dc): 10.10
+getTime(10) got exception 
+Data Conversion SQLException
+getTime(dc) got exception 
+Data Conversion SQLException
+getTimestamp(10) got exception 
+Data Conversion SQLException
+getTimestamp(dc) got exception 
+Data Conversion SQLException
+getBigDecimal(11,1): 11.0
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(bi,1): 11.0
+getBoolean(11): true
+getBoolean(bi): true
+getByte(11): 11
+getByte(bi): 11
+getBytes(11) got exception 
+Data Conversion SQLException
+getBytes(bi) got exception 
+Data Conversion SQLException
+getDate(11) got exception 
+Data Conversion SQLException
+getDate(bi) got exception 
+Data Conversion SQLException
+getDouble(11): 11.0
+getDouble(bi): 11.0
+getFloat(11): 11.0
+getFloat(bi): 11.0
+getInt(11): 11
+getInt(bi): 11
+getLong(11): 11
+getLong(bi): 11
+getObject(11): 11
+getObject(bi): 11
+getShort(11): 11
+getShort(bi): 11
+getString(11): 11
+getString(bi): 11
+getTime(11) got exception 
+Data Conversion SQLException
+getTime(bi) got exception 
+Data Conversion SQLException
+getTimestamp(11) got exception 
+Data Conversion SQLException
+getTimestamp(bi) got exception 
+Data Conversion SQLException
+getBigDecimal(12,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(cbd,1) got exception 
+Data Conversion SQLException
+getBoolean(12) got exception 
+Data Conversion SQLException
+getBoolean(cbd) got exception 
+Data Conversion SQLException
+getByte(12) got exception 
+Data Conversion SQLException
+getByte(cbd) got exception 
+Data Conversion SQLException
+getBytes(12): 0x007400770065006C0076
+getBytes(cbd): 0x007400770065006C0076
+getDate(12) got exception 
+Data Conversion SQLException
+getDate(cbd) got exception 
+Data Conversion SQLException
+getDouble(12) got exception 
+Data Conversion SQLException
+getDouble(cbd) got exception 
+Data Conversion SQLException
+getFloat(12) got exception 
+Data Conversion SQLException
+getFloat(cbd) got exception 
+Data Conversion SQLException
+getInt(12) got exception 
+Data Conversion SQLException
+getInt(cbd) got exception 
+Data Conversion SQLException
+getLong(12) got exception 
+Data Conversion SQLException
+getLong(cbd) got exception 
+Data Conversion SQLException
+getObject(12) is ok
+getObject(cbd) is ok 
+getShort(12) got exception 
+Data Conversion SQLException
+getShort(cbd) got exception 
+Data Conversion SQLException
+getString(12): 007400770065006c0076
+getString(cbd): 007400770065006c0076
+getTime(12) got exception 
+Data Conversion SQLException
+getTime(cbd) got exception 
+Data Conversion SQLException
+getTimestamp(12) got exception 
+Data Conversion SQLException
+getTimestamp(cbd) got exception 
+Data Conversion SQLException
+getBigDecimal(13,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(vbd,1) got exception 
+Data Conversion SQLException
+getBoolean(13) got exception 
+Data Conversion SQLException
+getBoolean(vbd) got exception 
+Data Conversion SQLException
+getByte(13) got exception 
+Data Conversion SQLException
+getByte(vbd) got exception 
+Data Conversion SQLException
+getBytes(13): 0x0033007400650065006E
+getBytes(vbd): 0x0033007400650065006E
+getDate(13) got exception 
+Data Conversion SQLException
+getDate(vbd) got exception 
+Data Conversion SQLException
+getDouble(13) got exception 
+Data Conversion SQLException
+getDouble(vbd) got exception 
+Data Conversion SQLException
+getFloat(13) got exception 
+Data Conversion SQLException
+getFloat(vbd) got exception 
+Data Conversion SQLException
+getInt(13) got exception 
+Data Conversion SQLException
+getInt(vbd) got exception 
+Data Conversion SQLException
+getLong(13) got exception 
+Data Conversion SQLException
+getLong(vbd) got exception 
+Data Conversion SQLException
+getObject(13) is ok
+getObject(vbd) is ok 
+getShort(13) got exception 
+Data Conversion SQLException
+getShort(vbd) got exception 
+Data Conversion SQLException
+getString(13): 0033007400650065006e
+getString(vbd): 0033007400650065006e
+getTime(13) got exception 
+Data Conversion SQLException
+getTime(vbd) got exception 
+Data Conversion SQLException
+getTimestamp(13) got exception 
+Data Conversion SQLException
+getTimestamp(vbd) got exception 
+Data Conversion SQLException
+getBigDecimal(14,1) got exception 
+Data Conversion SQLException
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(lvbd,1) got exception 
+Data Conversion SQLException
+getBoolean(14) got exception 
+Data Conversion SQLException
+getBoolean(lvbd) got exception 
+Data Conversion SQLException
+getByte(14) got exception 
+Data Conversion SQLException
+getByte(lvbd) got exception 
+Data Conversion SQLException
+getBytes(14): 0x0034007400650065006E
+getBytes(lvbd): 0x0034007400650065006E
+getDate(14) got exception 
+Data Conversion SQLException
+getDate(lvbd) got exception 
+Data Conversion SQLException
+getDouble(14) got exception 
+Data Conversion SQLException
+getDouble(lvbd) got exception 
+Data Conversion SQLException
+getFloat(14) got exception 
+Data Conversion SQLException
+getFloat(lvbd) got exception 
+Data Conversion SQLException
+getInt(14) got exception 
+Data Conversion SQLException
+getInt(lvbd) got exception 
+Data Conversion SQLException
+getLong(14) got exception 
+Data Conversion SQLException
+getLong(lvbd) got exception 
+Data Conversion SQLException
+getObject(14) is ok
+getObject(lvbd) is ok 
+getShort(14) got exception 
+Data Conversion SQLException
+getShort(lvbd) got exception 
+Data Conversion SQLException
+getString(14): 0034007400650065006e
+getString(lvbd): 0034007400650065006e
+getTime(14) got exception 
+Data Conversion SQLException
+getTime(lvbd) got exception 
+Data Conversion SQLException
+getTimestamp(14) got exception 
+Data Conversion SQLException
+getTimestamp(lvbd) got exception 
+Data Conversion SQLException
+getBigDecimal(15,1): null
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(cl,1): null
+getBoolean(15): false
+getBoolean(cl): false
+getByte(15): 0
+getByte(cl): 0
+getBytes(15): null
+getBytes(cl): null
+getDate(15): null
+getDate(cl): null
+getDouble(15): 0.0
+getDouble(cl): 0.0
+getFloat(15): 0.0
+getFloat(cl): 0.0
+getInt(15): 0
+getInt(cl): 0
+getLong(15): 0
+getLong(cl): 0
+getObject(15) is ok
+getObject(cl) is ok 
+getShort(15): 0
+getShort(cl): 0
+getString(15): null
+getString(cl): null
+getTime(15): null
+getTime(cl): null
+getTimestamp(15): null
+getTimestamp(cl): null
+getBigDecimal(16,1): null
+beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
+getBigDecimal(bl,1): null
+getBoolean(16): false
+getBoolean(bl): false
+getByte(16): 0
+getByte(bl): 0
+getBytes(16): null
+getBytes(bl): null
+getDate(16): null
+getDate(bl): null
+getDouble(16): 0.0
+getDouble(bl): 0.0
+getFloat(16): 0.0
+getFloat(bl): 0.0
+getInt(16): 0
+getInt(bl): 0
+getLong(16): 0
+getLong(bl): 0
+getObject(16) is ok
+getObject(bl) is ok 
+getShort(16): 0
+getShort(bl): 0
+getString(16): null
+getString(bl): null
+getTime(16): null
+getTime(bl): null
+getTimestamp(16): null
+getTimestamp(bl): null
+rs.next() on closed result set got exception 
+Result Set Closed Exception
+just auto commit
+  bug4810 1, 1
+  bug4810 1, 2
+  LOCK TABLE
+Locks are held
+  bug4810 1, 3
+  LOCK TABLE
+Locks are held
+  LOCK TABLE
+commit with auto commit
+  bug4810 1, 1
+  bug4810 1, 2
+commit
+  LOCK TABLE
+Result Set Closed Exception
+  LOCK TABLE
+  LOCK TABLE
+rollback with auto commit
+  bug4810 1, 1
+  bug4810 1, 2
+rollback
+  LOCK TABLE
+Result Set Closed Exception
+  LOCK TABLE
+  LOCK TABLE
+START testMutableValues
+CHECKING on getXXX()
+ROW 1
+ROW 2
+ROW 3
+OK EQUALITY OBJECT RETURNED column 4 existing 1
+OK EQUALITY OBJECT RETURNED column 5 existing 1
+OK EQUALITY OBJECT RETURNED column 6 existing 1
+CHECKING on getObject()
+ROW 1
+ROW 2
+ROW 3
+OK EQUALITY OBJECT RETURNED column 4 existing 1
+OK EQUALITY OBJECT RETURNED column 5 existing 1
+OK EQUALITY OBJECT RETURNED column 6 existing 1
+COMPLETE testMutableValues
+Test resultset finished

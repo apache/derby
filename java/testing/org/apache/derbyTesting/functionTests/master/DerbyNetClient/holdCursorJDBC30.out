@@ -1,0 +1,1579 @@
+ij> ------------------------------------------------------------------------------
+----- TEST CASES SPECIFIC TO STORE IMPLEMENTATION OF HOLD CURSOR:
+----- overview:
+-----    TEST  0: basic heap  scan tests (0 rows).
+-----    TEST  1: basic heap  scan tests (multiple rows)
+-----    TEST  2: basic btree scan tests (zero rows/update nonkey field)
+-----    TEST  3: basic btree scan tests (multiple rows/update nonkey field)
+-----    TEST  4: basic btree scan tests (zero rows/read only/no group fetch)
+-----    TEST  5: basic btree scan tests (multiple rows/read only/no group fetch)
+-----    TEST  6: basic tests for cursors with order by
+-----    TEST  7: test of hold cursor code in DistinctScalarAggregateResultSet.java
+-----    TEST  8: test of hold cursor code in GroupedAggregateResultSet.java
+-----    TEST  9: test scan positioned on a row which has been purged.
+-----    TEST 10: test scan positioned on a page which has been purged
+-----
+-----
+-----
+----- TEST 0: basic heap scan tests (0 rows).
+-----     The following tests that no matter where commit comes in the state of
+-----     the scan that the scan will continue after the commit.  Tests various
+-----     states of scan like: before first next, after first next, before close,
+-----     after close.
+-----
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> create table foo (a int, data int);
+0 rows inserted/updated/deleted
+ij> -- the following for update cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '1');
+Statement executed.
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> commit;
+ij> next  test1;
+No current row
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 1: basic heap scan tests (multiple rows)
+-----     The following tests that no matter where commit comes in the state of
+-----     the scan that the scan will continue after the commit.  Tests various
+-----     states of scan like: before first next, after first next, before close,
+-----     after close.
+-----
+insert into foo values (1, 10);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 20);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 30);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 40);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 50);
+1 row inserted/updated/deleted
+ij> -- the following for update cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.
+get with hold cursor test1 as 'select * from foo for update';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 2: basic btree scan tests (zero rows/update nonkey field)
+-----     The following tests that no matter where commit comes in the state of
+-----     the scan that the scan will continue after the commit.  Tests various
+-----     states of scan like: before first next, after first next, before close,
+-----     after close.
+-----
+autocommit off;
+ij> drop table foo;
+0 rows inserted/updated/deleted
+ij> create table foo (a int, data int);
+0 rows inserted/updated/deleted
+ij> create index foox on foo (a);
+0 rows inserted/updated/deleted
+ij> -- the following for update cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.
+get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> commit;
+ij> next  test1;
+No current row
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 3: basic btree scan tests (multiple rows/update nonkey field)
+-----     The following tests that no matter where commit comes in the state of
+-----     the scan that the scan will continue after the commit.  Tests various
+-----     states of scan like: before first next, after first next, before close,
+-----     after close.
+-----
+insert into foo values (1, 10);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 20);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 30);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 40);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 50);
+1 row inserted/updated/deleted
+ij> -- the following for update of data cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.
+get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> --  test negative case of trying non next operations after commit
+get with hold cursor test1 as 
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> delete from foo where current of test1;
+ERROR 24000: Invalid cursor state - no current row.
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> update foo set data=-3000 where current of test1;
+ERROR 24000: Invalid cursor state - no current row.
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> --  test positive case of trying delete/update after commit and next.
+get with hold cursor test1 as 
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> delete from foo where current of test1;
+1 row inserted/updated/deleted
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> update foo set data=-3000 where current of test1;
+1 row inserted/updated/deleted
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> --  make sure above deletes/updates worked.
+get with hold cursor test1 as 
+    'select * from foo for update of data';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |-3000      
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 4: basic btree scan tests (zero rows/read only/no group fetch)
+-----     The following tests that no matter where commit comes in the state of
+-----     the scan that the scan will continue after the commit.  Tests various
+-----     states of scan like: before first next, after first next, before close,
+-----     after close.
+-----
+----- basic tests for btree
+autocommit off;
+ij> drop table foo;
+0 rows inserted/updated/deleted
+ij> create table foo (a int, data int);
+0 rows inserted/updated/deleted
+ij> create index foox on foo (a);
+0 rows inserted/updated/deleted
+ij> -- the following for read cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.  This select should only use the
+----- index with no interaction with the base table.
+get with hold cursor test1 as
+    'select a from foo ';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> commit;
+ij> next  test1;
+No current row
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 5: basic btree scan tests (multiple rows/read only/no group fetch)
+-----     The following tests that no matter where commit comes in the state of
+-----     the scan that the scan will continue after the commit.  Tests various
+-----     states of scan like: before first next, after first next, before close,
+-----     after close.
+-----
+insert into foo values (1, 10);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 20);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 30);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 40);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 50);
+1 row inserted/updated/deleted
+ij> -- the following for read cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.  This select should only use the
+----- index with no interaction with the base table.
+get with hold cursor test1 as
+    'select * from foo ';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 
+    'select * from foo ';
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> next  test1;
+No current row
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 6: basic tests for cursors with order by
+-----     The following tests that no matter where commit comes in the state of
+-----     the scan that the scan will continue after the commit.  Tests various
+-----     states of scan like: before first next, after first next, before close,
+-----     after close.
+-----
+----- basic tests for cursors which include an order by
+autocommit off;
+ij> drop table foo;
+0 rows inserted/updated/deleted
+ij> create table foo (a int, data int);
+0 rows inserted/updated/deleted
+ij> create index foox on foo (a);
+0 rows inserted/updated/deleted
+ij> -- the following for update cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.  This select should only use the
+----- index with no interaction with the base table.
+get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> commit;
+ij> next  test1;
+No current row
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> commit;
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> next  test1;
+ERROR (no SQLState): Invalid operation: result set closed
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> insert into foo values (1, 10);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 20);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 30);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 40);
+1 row inserted/updated/deleted
+ij> insert into foo values (1, 50);
+1 row inserted/updated/deleted
+ij> -- insert into foo (select a + 5, data + 50 from foo);
+----- the following for update of data cursors will all use group fetch = 1, thus each
+----- next passes straight through to store.
+get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> next  test1;
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 
+    'select a,data from foo order by data desc';
+ij> next  test1;
+A |DATA       
+-----
+1 |50         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |40         
+ij> commit;
+ij> next  test1;
+A |DATA       
+-----
+1 |30         
+ij> next  test1;
+A |DATA       
+-----
+1 |20         
+ij> next  test1;
+A |DATA       
+-----
+1 |10         
+ij> next  test1;
+No current row
+ij> close test1;
+ij> commit;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 7: test of hold cursor code in DistinctScalarAggregateResultSet.java
+-----     Directed test of hold cursor as applies to sort scans opened by
+-----     DistinctScalarAggregateResultSet.java.
+-----
+drop table t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> create table t1 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (null, null), (1,1), (null, null), (2,1), (3,1), (10,10);
+6 rows inserted/updated/deleted
+ij> select * from t1;
+C1 |C2         
+-----
+NULL |NULL       
+1 |1          
+NULL |NULL       
+2 |1          
+3 |1          
+10 |10         
+ij> select sum(distinct c1) from t1;
+1          
+-----
+16         
+WARNING 01003: Null values were eliminated from the argument of a column function. : 
+ij> get with hold cursor test1 as 'select sum(distinct c1) from t1';
+ij> commit;
+ij> next test1;
+1          
+-----
+16         
+WARNING 01003: Null values were eliminated from the argument of a column function. : 
+ij> close test1;
+ij> get with hold cursor test1 as 'select sum(distinct c1) from t1';
+ij> next test1;
+1          
+-----
+16         
+WARNING 01003: Null values were eliminated from the argument of a column function. : 
+ij> commit;
+ij> next test1;
+No current row
+ij> commit;
+ij> close test1;
+ij> commit;
+ij> ------------------------------------------------------------------------------
+----- TEST 8: test of hold cursor code in GroupedAggregateResultSet.java
+-----     Directed test of hold cursor as applies to sort scans opened by
+-----     GroupedAggregateResultSet.java.
+-----
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (null, null), (1,1), (null, null), (2,1), (3,1), (10,10);
+6 rows inserted/updated/deleted
+ij> select * from t1;
+C1 |C2         
+-----
+NULL |NULL       
+1 |1          
+NULL |NULL       
+2 |1          
+3 |1          
+10 |10         
+ij> select sum(distinct c1) from t1 group by c2;
+1          
+-----
+6          
+10         
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function. : 
+ij> commit;
+ij> get with hold cursor test1 as 'select sum(distinct c1) from t1 group by c2';
+ij> commit;
+ij> next test1;
+1          
+-----
+6          
+ij> next test1;
+1          
+-----
+10         
+ij> commit;
+ij> next test1;
+1          
+-----
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function. : 
+ij> close test1;
+ij> get with hold cursor test1 as 'select sum(distinct c1) from t1 group by c2';
+ij> next test1;
+1          
+-----
+6          
+ij> commit;
+ij> next test1;
+1          
+-----
+10         
+ij> commit;
+ij> next test1;
+1          
+-----
+NULL       
+WARNING 01003: Null values were eliminated from the argument of a column function. : 
+ij> close test1;
+ij> ------------------------------------------------------------------------------
+----- TEST 9: test scan positioned on a row which has been purged.
+-----
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create index tx on t1 (c1);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6);
+6 rows inserted/updated/deleted
+ij> get with hold cursor test1 as 
+    'select c1 from t1';
+ij> next test1;
+C1         
+-----
+1          
+ij> commit;
+ij> -- at this point the btree scan is positioned by "key" on (1,1).  Make sure
+----- deleting this key doesn't cause any problems.
+delete from t1 where c1 = 1 or c1 = 2;
+2 rows inserted/updated/deleted
+ij> next test1;
+C1         
+-----
+2          
+ij> -- at this point the btree scan is positioned on (3, 3), let's see what happens
+----- if we delete (3,3) and look at current scan.
+delete from t1 where c1 = 3;
+1 row inserted/updated/deleted
+ij> -- position on (4,4)
+next test1;
+C1         
+-----
+3          
+ij> commit;
+ij> -- delete all the rows and hopefully get all rows to be purged by the time
+----- the scan does the next.
+delete from t1;
+3 rows inserted/updated/deleted
+ij> commit;
+ij> next test1;
+C1         
+-----
+4          
+ij> close test1;
+ij> ------------------------------------------------------------------------------
+----- TEST 10: test scan positioned on a page which has been purged (should really
+-----          not be any different than a row being purged).
+-----
+drop table t1;
+0 rows inserted/updated/deleted
+ij> create table t1 (c1 varchar(1000), c2 int);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+Statement executed.
+ij> create index tx on t1 (c1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+Statement executed.
+ij> insert into t1 values (PADSTRING('1',1000), 1), (PADSTRING('2',1000), 2), (PADSTRING('3',1000), 3), (PADSTRING('4',1000), 4), (PADSTRING('5',1000), 5), (PADSTRING('6',1000), 6), (PADSTRING('7',1000), 7);
+7 rows inserted/updated/deleted
+ij> get with hold cursor test1 as 
+    'select c1 from t1';
+ij> next test1;
+C1                                                                                                                              
+-----
+1                                                                                                                              &
+ij> commit;
+ij> -- at this point the btree scan is positioned by "key" on (1,1).  Make sure
+----- deleting this key doesn't cause any problems.
+delete from t1 where c1 = PADSTRING('1',1000) or c1 = PADSTRING('2',1000);
+2 rows inserted/updated/deleted
+ij> next test1;
+C1                                                                                                                              
+-----
+2                                                                                                                              &
+ij> -- at this point the btree scan is positioned on (3, 3), let's see what happens
+----- if we delete (3,3) and look at current scan.
+delete from t1 where c1 = PADSTRING('3',1000);
+1 row inserted/updated/deleted
+ij> -- position on (4,4)
+next test1;
+C1                                                                                                                              
+-----
+3                                                                                                                              &
+ij> commit;
+ij> -- delete all the rows and hopefully get all rows to be purged by the time
+----- the scan does the next.
+delete from t1;
+4 rows inserted/updated/deleted
+ij> commit;
+ij> next test1;
+C1                                                                                                                              
+-----
+4                                                                                                                              &
+ij> close test1;
+ij> ------------------------------------------------------------------------------
+----- TEST 11: beetle 4902: test query plans which use reopenScan() on a btree to 
+-----          do the inner table processing of a join.  Prior to the fix a null
+-----          pointer exception would be thrown after the commit, as the code
+-----          did not handle keeping the resultset used for the inner table
+-----          open across commits in this case.
+-----
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> create table t1 (i1 int, i2 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (i1 int, i2 int);
+0 rows inserted/updated/deleted
+ij> create index t1_idx on t1 (i1);
+0 rows inserted/updated/deleted
+ij> create index t2_idx on t2 (i1);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 10), (2, 20), (3, 30), (4, 40), (5, 50);
+5 rows inserted/updated/deleted
+ij> insert into t2 values (1, 10), (2, 20),          (4, 40), (5, 50);
+4 rows inserted/updated/deleted
+ij> commit;
+ij> -- force nestedLoop to make sure reopenScan() is used on inner table.
+get with hold cursor test11 as
+'select * from
+    t1, t2
+        where t1.i1 = t2.i1';
+ij> commit;
+ij> next test11;
+I1 |I2 |I1 |I2         
+-----
+1 |10 |1 |10         
+ij> commit;
+ij> next test11;
+I1 |I2 |I1 |I2         
+-----
+2 |20 |2 |20         
+ij> commit;
+ij> next test11;
+I1 |I2 |I1 |I2         
+-----
+4 |40 |4 |40         
+ij> next test11;
+I1 |I2 |I1 |I2         
+-----
+5 |50 |5 |50         
+ij> commit;
+ij> commit;
+ij> next test11;
+No current row
+ij> commit;
+ij> close test11;
+ij> ------------------------------------------------------------------------------
+----- TEST 12: beetle 4902: test query plans which use reopenScan() on a base table
+-----          to do the inner table processing of a join.  Prior to the fix a null
+-----          pointer exception would be thrown after the commit, as the code
+-----          did not handle keeping the resultset used for the inner table
+-----          open across commits in this case.
+-----
+drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> create table t1 (i1 int, i2 int);
+0 rows inserted/updated/deleted
+ij> create table t2 (i1 int, i2 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 10), (2, 20), (3, 30), (4, 40), (5, 50);
+5 rows inserted/updated/deleted
+ij> insert into t2 values (1, 10), (2, 20),          (4, 40), (5, 50);
+4 rows inserted/updated/deleted
+ij> commit;
+ij> -- force nestedLoop to make sure reopenScan() is used on inner table.
+get with hold cursor test12 as
+'select * from
+    t1, t2
+        where t1.i1 = t2.i1';
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+Statement executed.
+ij> commit;
+ij> next test12;
+I1 |I2 |I1 |I2         
+-----
+1 |10 |1 |10         
+ij> commit;
+ij> next test12;
+I1 |I2 |I1 |I2         
+-----
+2 |20 |2 |20         
+ij> commit;
+ij> next test12;
+I1 |I2 |I1 |I2         
+-----
+4 |40 |4 |40         
+ij> next test12;
+I1 |I2 |I1 |I2         
+-----
+5 |50 |5 |50         
+ij> commit;
+ij> commit;
+ij> next test12;
+No current row
+ij> commit;
+ij> close test12;
+ij> exit;

@@ -1,0 +1,21 @@
+Statement Close Fun Test starting 
+Statement test begin
+beetle 5524
+Statement Test failed (12)
+beetle 5524
+Statement Test failed (13)
+Statement test end
+Prepared Statement test begin
+beetle 5524
+Prepared Statement Test failed
+beetle 5524
+Prepared Statement Test failed
+Prepared Statement test end
+Callable Statement test begin
+The result is 3
+beetle 5524
+Callable Statement Test failed
+beetle 5524
+Callable Statement Test failed
+Callable Statement test end
+Statement Close Fun Test finished

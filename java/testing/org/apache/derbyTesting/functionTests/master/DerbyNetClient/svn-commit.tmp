@@ -1,0 +1,8 @@
+
+--This line, and those below, will be ignored--
+
+AM   csPrepStmt.out
+M    metadata.out
+AM   prepstmt.out
+MM   resultset.out
+AM   testij.out

@@ -1,0 +1,721 @@
+Test blobclob starting
+===> inserting extin/short.txt length = 56
+===> inserting extin/littleclob.txt length = 10000
+===> inserting extin/empty.txt length = 0
+===> inserting extin/searchclob.txt length = 5000
+===> inserting extin/aclob.txt length = 300000
+===> inserting extin/short.txt length = 56
+===> inserting extin/littleclob.txt length = 10000
+===> inserting extin/empty.txt length = 0
+===> inserting extin/searchclob.txt length = 5000
+===> inserting extin/aclob.txt length = 300000
+unicode string 0 correct
+unicode string 1 correct
+unicode string 2 correct
+Finished prepareUnicodeFile
+Length of clob is 5009
+unicode string 0 matched
+unicode string 1 matched
+unicode string 2 matched
+EOF matched
+setCharacterStreamTest finished
+clobTest0 finished
+clobTest11 finished
+Succeeded to match, row 1
+PASSED, row 1, length was 3
+Succeeded to match, row 2
+PASSED, row 2, length was 3
+Succeeded to match, row 3
+PASSED, row 3, length was 3
+Succeeded to match, row 4
+PASSED, row 4, length was 5016
+Succeeded to match, row 5
+PASSED, row 5, length was 5016
+Succeeded to match, row 6
+PASSED, row 6, length was 5016
+clobTest12 finished
+CLOB getSubString 9905 > 0
+Known JCC Bug 5914 - String index out of range: -9904
+CLOB getSubString 5910 > 0
+Known JCC Bug 5914 - String index out of range: -5909
+CLOB getSubString 5910 > 0
+Known JCC Bug 5914 - String index out of range: -5909
+CLOB getSubString 204 > 0
+Known JCC Bug 5914 - String index out of range: -203
+CLOB getSubString 68 > 0
+Known JCC Bug 5914 - String index out of range: -67
+CLOB getSubString 1 > 0
+1(5) (len 50) 
+CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
+CLOB getSubString 1 > 0
+1(6) (len 1) 
+CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
+CLOB getSubString 9905 > 65
+Known JCC Bug 5914 - String index out of range: -9839
+CLOB getSubString 5910 > 65
+Known JCC Bug 5914 - String index out of range: -5844
+CLOB getSubString 5910 > 65
+Known JCC Bug 5914 - String index out of range: -5844
+CLOB getSubString 204 > 65
+Known JCC Bug 5914 - String index out of range: -138
+CLOB getSubString 68 > 65
+Known JCC Bug 5914 - String index out of range: -2
+2(5) (len 50) you can lead a horse to water but you can't form i
+2(6) (len 1) y
+CLOB getSubString 9905 > 26
+Known JCC Bug 5914 - String index out of range: -9878
+CLOB getSubString 5910 > 26
+Known JCC Bug 5914 - String index out of range: -5883
+CLOB getSubString 5910 > 26
+Known JCC Bug 5914 - String index out of range: -5883
+CLOB getSubString 204 > 26
+Known JCC Bug 5914 - String index out of range: -177
+CLOB getSubString 68 > 26
+Known JCC Bug 5914 - String index out of range: -41
+3(5) (len 50) a stitch in time says ouch
+3(6) (len 1) a
+CLOB getSubString 9905 > 42
+Known JCC Bug 5914 - String index out of range: -9862
+CLOB getSubString 5910 > 42
+Known JCC Bug 5914 - String index out of range: -5867
+CLOB getSubString 5910 > 42
+Known JCC Bug 5914 - String index out of range: -5867
+CLOB getSubString 204 > 42
+Known JCC Bug 5914 - String index out of range: -161
+CLOB getSubString 68 > 42
+Known JCC Bug 5914 - String index out of range: -25
+4(5) (len 50) here is a string with a return 
+ character
+4(6) (len 1) h
+CLOB getSubString 9905 > 56
+Known JCC Bug 5914 - String index out of range: -9848
+CLOB getSubString 5910 > 56
+Known JCC Bug 5914 - String index out of range: -5853
+CLOB getSubString 5910 > 56
+Known JCC Bug 5914 - String index out of range: -5853
+CLOB getSubString 204 > 56
+Known JCC Bug 5914 - String index out of range: -147
+CLOB getSubString 68 > 56
+Known JCC Bug 5914 - String index out of range: -11
+5(5) (len 50) test data: a string column inserted as an Ascii st
+5(6) (len 1) t
+6(0) (len 50) wwPosition-9907-behold-the-end-of-the-clob-is-nigh
+6(1) (len 150) I-am-hiding-here-at-position-5910-in-this-little-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+6(2) (len 50) I-am-hiding-here-at-position-5910-in-this-little-c
+6(3) (len 50) This-is-position-204wwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+6(4) (len 50) wposition-69-end-of-the-first-l
+ine-we-are-now-on
+6(5) (len 50) Beginning-this-is-itwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+6(6) (len 1) B
+6(7) 
+wwwwwwPosition-9907-behold-the-end-of-the-clob-is-nighwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+CLOB getSubString 9905 > 0
+Known JCC Bug 5914 - String index out of range: -9904
+CLOB getSubString 5910 > 0
+Known JCC Bug 5914 - String index out of range: -5909
+CLOB getSubString 5910 > 0
+Known JCC Bug 5914 - String index out of range: -5909
+CLOB getSubString 204 > 0
+Known JCC Bug 5914 - String index out of range: -203
+CLOB getSubString 68 > 0
+Known JCC Bug 5914 - String index out of range: -67
+CLOB getSubString 1 > 0
+7(5) (len 50) 
+CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
+CLOB getSubString 1 > 0
+7(6) (len 1) 
+CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
+CLOB getSubString 9905 > 5000
+Known JCC Bug 5914 - String index out of range: -4904
+CLOB getSubString 5910 > 5000
+Known JCC Bug 5914 - String index out of range: -909
+CLOB getSubString 5910 > 5000
+Known JCC Bug 5914 - String index out of range: -909
+8(3) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+8(4) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwww
+8(5) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+8(6) (len 1) w
+8(7) 
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(0) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(1) (len 150) I-am-hiding-here-at-position-5910-in-this-humungus-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(2) (len 50) I-am-hiding-here-at-position-5910-in-this-humungus
+9(3) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(4) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwww
+9(5) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(6) (len 1) w
+9(7) 
+wwHere-I-am-at-position-299003-near-the-end-of-the-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+clobTest2 finished
+Row 1 : Succeeded
+Row 2 : Succeeded
+Row 3 : Succeeded
+Row 4 : Succeeded
+Second time Succeeded
+Row 5 : Succeeded
+Second time Succeeded
+Row 6 : Succeeded
+Second time Succeeded
+clobTest22 finished
+Found horse in row 1 starting from position 1 at position  NOTFOUND 
+Found ouch in row 1 starting from position 1 at position  NOTFOUND 
+Found 
+ in row 1 starting from position 1 at position  NOTFOUND 
+Found  in row 1 starting from position 1 at position 1
+Found Beginning in row 1 starting from position 1 at position  NOTFOUND 
+Found Beginning in row 1 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 1 starting from position 1 at position  NOTFOUND 
+Found This-is-position-204 in row 1 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 1 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 1 starting from position 5910 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 1 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 1 starting from position 1 at position  NOTFOUND 
+Found horse in row 2 starting from position 1 at position 16
+Found ouch in row 2 starting from position 1 at position  NOTFOUND 
+Found 
+ in row 2 starting from position 1 at position  NOTFOUND 
+Found  in row 2 starting from position 1 at position 1
+Found Beginning in row 2 starting from position 1 at position  NOTFOUND 
+Found Beginning in row 2 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 2 starting from position 1 at position  NOTFOUND 
+Found This-is-position-204 in row 2 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 2 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 2 starting from position 5910 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 2 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 2 starting from position 1 at position  NOTFOUND 
+Found horse in row 3 starting from position 1 at position  NOTFOUND 
+Found ouch in row 3 starting from position 1 at position 23
+Found 
+ in row 3 starting from position 1 at position  NOTFOUND 
+Found  in row 3 starting from position 1 at position 1
+Found Beginning in row 3 starting from position 1 at position  NOTFOUND 
+Found Beginning in row 3 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 3 starting from position 1 at position  NOTFOUND 
+Found This-is-position-204 in row 3 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 3 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 3 starting from position 5910 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 3 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 3 starting from position 1 at position  NOTFOUND 
+Found horse in row 4 starting from position 1 at position  NOTFOUND 
+Found ouch in row 4 starting from position 1 at position  NOTFOUND 
+Found 
+ in row 4 starting from position 1 at position 32
+Found  in row 4 starting from position 1 at position 1
+Found Beginning in row 4 starting from position 1 at position  NOTFOUND 
+Found Beginning in row 4 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 4 starting from position 1 at position  NOTFOUND 
+Found This-is-position-204 in row 4 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 4 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 4 starting from position 5910 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 4 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 4 starting from position 1 at position  NOTFOUND 
+Found horse in row 5 starting from position 1 at position  NOTFOUND 
+Found ouch in row 5 starting from position 1 at position  NOTFOUND 
+Found 
+ in row 5 starting from position 1 at position 56
+Found  in row 5 starting from position 1 at position 1
+Found Beginning in row 5 starting from position 1 at position  NOTFOUND 
+Found Beginning in row 5 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 5 starting from position 1 at position  NOTFOUND 
+Found This-is-position-204 in row 5 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 5 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 5 starting from position 5910 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 5 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 5 starting from position 1 at position  NOTFOUND 
+Found horse in row 6 starting from position 1 at position  NOTFOUND 
+Found ouch in row 6 starting from position 1 at position  NOTFOUND 
+Found 
+ in row 6 starting from position 1 at position 100
+Found  in row 6 starting from position 1 at position 1
+Found Beginning in row 6 starting from position 1 at position 1
+Found Beginning in row 6 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 6 starting from position 1 at position 69
+Found This-is-position-204 in row 6 starting from position 1 at position 204
+Found I-am-hiding-here-at-position-5910 in row 6 starting from position 1 at position 5910
+Found I-am-hiding-here-at-position-5910 in row 6 starting from position 5910 at position 5910
+Found I-am-hiding-here-at-position-5910 in row 6 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 6 starting from position 1 at position 9907
+Found horse in row 7 starting from position 1 at position  NOTFOUND 
+Found ouch in row 7 starting from position 1 at position  NOTFOUND 
+Found 
+ in row 7 starting from position 1 at position  NOTFOUND 
+Found  in row 7 starting from position 1 at position 1
+Found Beginning in row 7 starting from position 1 at position  NOTFOUND 
+Found Beginning in row 7 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 7 starting from position 1 at position  NOTFOUND 
+Found This-is-position-204 in row 7 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 7 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 7 starting from position 5910 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 7 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 7 starting from position 1 at position  NOTFOUND 
+Found horse in row 8 starting from position 1 at position  NOTFOUND 
+Found ouch in row 8 starting from position 1 at position  NOTFOUND 
+Found 
+ in row 8 starting from position 1 at position 100
+Found  in row 8 starting from position 1 at position 1
+Found Beginning in row 8 starting from position 1 at position  NOTFOUND 
+Found Beginning in row 8 starting from position 2 at position  NOTFOUND 
+Found position-69 in row 8 starting from position 1 at position  NOTFOUND 
+Found This-is-position-204 in row 8 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 8 starting from position 1 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 8 starting from position 5910 at position  NOTFOUND 
+Found I-am-hiding-here-at-position-5910 in row 8 starting from position 5911 at position  NOTFOUND 
+Found Position-9907 in row 8 starting from position 1 at position  NOTFOUND 
+clobTest3 finished
+Succeeded: Found unicode string 0 at position 1,row 1
+Succeeded: Found unicode string 0 at position -1,row 1
+Succeeded: Found unicode string 1 at position 1,row 2
+Succeeded: Found unicode string 1 at position -1,row 2
+Succeeded: Found unicode string 2 at position 1,row 3
+Succeeded: Found unicode string 2 at position -1,row 3
+Succeeded: Found unicode string 0 at position 1,row 4
+Succeeded: Found unicode string 0 at position 5004,row 4
+Succeeded: Found unicode string 1 at position 1,row 5
+Succeeded: Found unicode string 1 at position 5004,row 5
+Succeeded: Found unicode string 2 at position 1,row 6
+Succeeded: Found unicode string 2 at position 5004,row 6
+clobTest32 finished
+position(clob) NOT FOUND 1 searchStr horse
+position(clob) NOT FOUND 1 searchStr ouch
+position(clob) NOT FOUND 1 searchStr 
+position(clob) FOUND @ 1 with empty search clob in clob of length 0
+position(clob) NOT FOUND 1 searchStr Beginning
+position(clob) NOT FOUND 1 searchStr position-69
+position(clob) NOT FOUND 1 searchStr I-am-hiding-here-at-position-5910
+position(clob) NOT FOUND 1 searchStr Position-9907
+position(clob) NOT FOUND 1 searchStr test data: a string column inserted as an Ascii stream
+position(clob) NOT FOUND 1 searchStr >150chars
+position(clob) FOUND @ 1 with empty search clob in clob of length 0
+position(clob) NOT FOUND 1 searchStr >150chars
+searchClob row 13 skipped (too large)
+Found horse in row 2 at position 16
+position(clob) NOT FOUND 2 searchStr ouch
+position(clob) NOT FOUND 2 searchStr 
+position(clob) FOUND @ 1 with empty search clob in clob of length 65
+position(clob) NOT FOUND 2 searchStr Beginning
+position(clob) NOT FOUND 2 searchStr position-69
+position(clob) NOT FOUND 2 searchStr I-am-hiding-here-at-position-5910
+position(clob) NOT FOUND 2 searchStr Position-9907
+position(clob) NOT FOUND 2 searchStr test data: a string column inserted as an Ascii stream
+position(clob) NOT FOUND 2 searchStr >150chars
+position(clob) FOUND @ 1 with empty search clob in clob of length 65
+position(clob) NOT FOUND 2 searchStr >150chars
+searchClob row 13 skipped (too large)
+position(clob) NOT FOUND 3 searchStr horse
+Found ouch in row 3 at position 23
+position(clob) NOT FOUND 3 searchStr 
+position(clob) FOUND @ 1 with empty search clob in clob of length 26
+position(clob) NOT FOUND 3 searchStr Beginning
+position(clob) NOT FOUND 3 searchStr position-69
+position(clob) NOT FOUND 3 searchStr I-am-hiding-here-at-position-5910
+position(clob) NOT FOUND 3 searchStr Position-9907
+position(clob) NOT FOUND 3 searchStr test data: a string column inserted as an Ascii stream
+position(clob) NOT FOUND 3 searchStr >150chars
+position(clob) FOUND @ 1 with empty search clob in clob of length 26
+position(clob) NOT FOUND 3 searchStr >150chars
+searchClob row 13 skipped (too large)
+position(clob) NOT FOUND 4 searchStr horse
+position(clob) NOT FOUND 4 searchStr ouch
+Found 
+ in row 4 at position 32
+position(clob) FOUND @ 1 with empty search clob in clob of length 42
+position(clob) NOT FOUND 4 searchStr Beginning
+position(clob) NOT FOUND 4 searchStr position-69
+position(clob) NOT FOUND 4 searchStr I-am-hiding-here-at-position-5910
+position(clob) NOT FOUND 4 searchStr Position-9907
+position(clob) NOT FOUND 4 searchStr test data: a string column inserted as an Ascii stream
+position(clob) NOT FOUND 4 searchStr >150chars
+position(clob) FOUND @ 1 with empty search clob in clob of length 42
+position(clob) NOT FOUND 4 searchStr >150chars
+searchClob row 13 skipped (too large)
+position(clob) NOT FOUND 5 searchStr horse
+position(clob) NOT FOUND 5 searchStr ouch
+Found 
+ in row 5 at position 56
+position(clob) FOUND @ 1 with empty search clob in clob of length 56
+position(clob) NOT FOUND 5 searchStr Beginning
+position(clob) NOT FOUND 5 searchStr position-69
+position(clob) NOT FOUND 5 searchStr I-am-hiding-here-at-position-5910
+position(clob) NOT FOUND 5 searchStr Position-9907
+Found test data: a string column inserted as an Ascii stream
+ in row 5 at position 1
+position(clob) NOT FOUND 5 searchStr >150chars
+position(clob) FOUND @ 1 with empty search clob in clob of length 56
+position(clob) NOT FOUND 5 searchStr >150chars
+searchClob row 13 skipped (too large)
+position(clob) NOT FOUND 6 searchStr horse
+position(clob) NOT FOUND 6 searchStr ouch
+Found 
+ in row 6 at position 100
+position(clob) FOUND @ 1 with empty search clob in clob of length 10000
+Found Beginning in row 6 at position 1
+Found position-69 in row 6 at position 69
+Found I-am-hiding-here-at-position-5910 in row 6 at position 5910
+Found Position-9907 in row 6 at position 9907
+position(clob) NOT FOUND 6 searchStr test data: a string column inserted as an Ascii stream
+Found clob (row 10)  in row 6 at position 1
+position(clob) FOUND @ 1 with empty search clob in clob of length 10000
+Found clob (row 12)  in row 6 at position 301
+searchClob row 13 skipped (too large)
+position(clob) NOT FOUND 7 searchStr horse
+position(clob) NOT FOUND 7 searchStr ouch
+position(clob) NOT FOUND 7 searchStr 
+position(clob) FOUND @ 1 with empty search clob in clob of length 0
+position(clob) NOT FOUND 7 searchStr Beginning
+position(clob) NOT FOUND 7 searchStr position-69
+position(clob) NOT FOUND 7 searchStr I-am-hiding-here-at-position-5910
+position(clob) NOT FOUND 7 searchStr Position-9907
+position(clob) NOT FOUND 7 searchStr test data: a string column inserted as an Ascii stream
+position(clob) NOT FOUND 7 searchStr >150chars
+position(clob) FOUND @ 1 with empty search clob in clob of length 0
+position(clob) NOT FOUND 7 searchStr >150chars
+searchClob row 13 skipped (too large)
+position(clob) NOT FOUND 8 searchStr horse
+position(clob) NOT FOUND 8 searchStr ouch
+Found 
+ in row 8 at position 100
+position(clob) FOUND @ 1 with empty search clob in clob of length 5000
+position(clob) NOT FOUND 8 searchStr Beginning
+position(clob) NOT FOUND 8 searchStr position-69
+position(clob) NOT FOUND 8 searchStr I-am-hiding-here-at-position-5910
+position(clob) NOT FOUND 8 searchStr Position-9907
+position(clob) NOT FOUND 8 searchStr test data: a string column inserted as an Ascii stream
+position(clob) NOT FOUND 8 searchStr >150chars
+position(clob) FOUND @ 1 with empty search clob in clob of length 5000
+Found clob (row 12)  in row 8 at position 1
+searchClob row 13 skipped (too large)
+testCLOB_MAIN row 9 skipped (too large)
+clobTest4 finished
+Succeeded: Found clob at position 1,row 0
+Succeeded: Found clob at position 1,row 1
+Succeeded: Found clob at position 1,row 2
+clobTest42 finished
+clobTest51 finished
+create table testInteger (a integer)
+insert into testInteger values('158')
+select a from testInteger
+getClob(1)
+52: SQLException
+EXPECTED SQL Exception: Invalid data conversion: Wrong result column type for requested conversion.
+clobTest53 finished
+start clobTest54
+EXPECTED SQLSTATE(22018): Invalid character string format for type INTEGER.
+end clobTest54
+ negative tests for clob.getSubstring won't run  for network server  until 5243 is fixed
+start clobTest7
+clobTest7 finished
+start clobTest8
+small string pattern
+@1  position MATCH(129)
+@2  position MATCH(2074)
+@3  position MATCH(4595)
+@4  position MATCH(34584)
+@5  position MATCH(67918)
+@6  position MATCH(-1)
+@7  position MATCH(-1)
+@8  position MATCH(-1)
+@9  position MATCH(-1)
+@10  position MATCH(-1)
+small java.sql.Clob pattern
+@1  position MATCH(129)
+@2  position MATCH(2074)
+@3  position MATCH(4595)
+@4  position MATCH(34584)
+@5  position MATCH(67918)
+@6  position MATCH(-1)
+@7  position MATCH(-1)
+@8  position MATCH(-1)
+@9  position MATCH(-1)
+@10  position MATCH(-1)
+medium string pattern
+@1  position MATCH(11253)
+@2  position MATCH(12225)
+@3  position MATCH(13478)
+@4  position MATCH(43467)
+@5  position MATCH(76801)
+@6  position MATCH(-1)
+@7  position MATCH(-1)
+@8  position MATCH(-1)
+@9  position MATCH(-1)
+@10  position MATCH(-1)
+medium java.sql.Clob pattern
+@1  position MATCH(11253)
+@2  position MATCH(12225)
+@3  position MATCH(13478)
+@4  position MATCH(43467)
+@5  position MATCH(76801)
+@6  position MATCH(-1)
+@7  position MATCH(-1)
+@8  position MATCH(-1)
+@9  position MATCH(-1)
+@10  position MATCH(-1)
+long string pattern
+@1  position MATCH(287875)
+@2  position MATCH(288847)
+@3  position MATCH(290108)
+@4  position MATCH(305102)
+@5  position MATCH(321769)
+@6  position MATCH(-1)
+@7  position MATCH(-1)
+@8  position MATCH(-1)
+@9  position MATCH(-1)
+@10  position MATCH(-1)
+long java.sql.Clob pattern
+@1  position MATCH(287875)
+@2  position MATCH(288847)
+@3  position MATCH(290108)
+@4  position MATCH(305102)
+@5  position MATCH(321769)
+@6  position MATCH(-1)
+@7  position MATCH(-1)
+@8  position MATCH(-1)
+@9  position MATCH(-1)
+@10  position MATCH(-1)
+complete clobTest8
+done row 0, length was 0
+done row 1, length was 65
+done row 2, length was 26
+done row 3, length was 42
+done row 4, length was 56
+done row 5, length was 10000
+done row 6, length was 0
+done row 7, length was 5000
+done row 8, length was 300000
+row 9 is null, skipped
+clobTest91 finished
+FAIL -- unexpected exception ****************
+SQLSTATE(40XL1): A lock could not be obtained within the time requested
+clobTest92 finished
+shortClob length after commit is 26
+clobTest94 finished
+shortClob length after closing connection is 26
+EXPECTED SQL Exception: Lob method called after connection was closed
+EXPECTED SQL Exception: Lob method called after connection was closed
+EXPECTED SQL Exception: Lob method called after connection was closed
+EXPECTED SQL Exception: Lob method called after connection was closed
+clobTest95 finished
+clobTest96 finished
+===> inserting extin/short.txt length = 56
+===> inserting extin/littleclob.txt length = 10000
+===> inserting extin/empty.txt length = 0
+===> inserting extin/searchclob.txt length = 5000
+===> inserting extin/aclob.txt length = 300000
+===> inserting extin/short.txt length = 56
+===> inserting extin/littleclob.txt length = 10000
+===> inserting extin/empty.txt length = 0
+===> inserting extin/searchclob.txt length = 5000
+===> inserting extin/aclob.txt length = 300000
+blobTest0 finished
+testing Blob.getBytes() with pos 9905 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 204 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 68 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 1 > 0
+1(5) 
+FAIL testing Blob.getBytes() with pos 1 > 0
+testing Blob.getBytes() with pos 1 > 0
+1(6) 
+FAIL testing Blob.getBytes() with pos 1 > 0
+testing Blob.getBytes() with pos 9905 > 65
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 65
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 65
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 204 > 65
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 68 > 65
+Known JCC Bug 5914
+2(5) you can lead a horse to water but you can't form i
+2(6) y
+testing Blob.getBytes() with pos 9905 > 26
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 26
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 26
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 204 > 26
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 68 > 26
+Known JCC Bug 5914
+3(5) a stitch in time says ouch
+3(6) a
+testing Blob.getBytes() with pos 9905 > 42
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 42
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 42
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 204 > 42
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 68 > 42
+Known JCC Bug 5914
+4(5) here is a string with a return 
+ character
+4(6) h
+testing Blob.getBytes() with pos 9905 > 56
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 56
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 56
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 204 > 56
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 68 > 56
+Known JCC Bug 5914
+5(5) test data: a string column inserted as an Ascii st
+5(6) t
+6(0) wwPosition-9907-behold-the-end-of-the-clob-is-nigh
+6(1) I-am-hiding-here-at-position-5910-in-this-little-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+6(2) I-am-hiding-here-at-position-5910-in-this-little-c
+6(3) This-is-position-204wwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+6(4) wposition-69-end-of-the-first-l
+ine-we-are-now-on
+6(5) Beginning-this-is-itwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+6(6) B
+6(7) 
+wwwwwwPosition-9907-behold-the-end-of-the-clob-is-nighwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+testing Blob.getBytes() with pos 9905 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 204 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 68 > 0
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 1 > 0
+7(5) 
+FAIL testing Blob.getBytes() with pos 1 > 0
+testing Blob.getBytes() with pos 1 > 0
+7(6) 
+FAIL testing Blob.getBytes() with pos 1 > 0
+testing Blob.getBytes() with pos 9905 > 5000
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 5000
+Known JCC Bug 5914
+testing Blob.getBytes() with pos 5910 > 5000
+Known JCC Bug 5914
+8(3) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+8(4) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwww
+8(5) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+8(6) w
+8(7) 
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(0) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(1) I-am-hiding-here-at-position-5910-in-this-humungus-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(2) I-am-hiding-here-at-position-5910-in-this-humungus
+9(3) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(4) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+wwwwwwwwwwwwwwwww
+9(5) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+9(6) w
+9(7) 
+wwHere-I-am-at-position-299003-near-the-end-of-the-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+blobTest2 finished
+Found horse in row 2 starting from position 1 at position 16
+Found ouch in row 3 starting from position 1 at position 23
+Found 
+ in row 4 starting from position 1 at position 32
+Found 
+ in row 5 starting from position 1 at position 56
+Found 
+ in row 6 starting from position 1 at position 100
+Found Beginning in row 6 starting from position 1 at position 1
+Found position-69 in row 6 starting from position 1 at position 69
+Found This-is-position-204 in row 6 starting from position 1 at position 204
+Found I-am-hiding-here-at-position-5910 in row 6 starting from position 1 at position 5910
+Found I-am-hiding-here-at-position-5910 in row 6 starting from position 5910 at position 5910
+Found Position-9907 in row 6 starting from position 1 at position 9907
+Found 
+ in row 8 starting from position 1 at position 100
+blobTest3 finished
+searchBlob row 13 skipped (too large)
+Found horse in row 2 at position 16
+searchBlob row 13 skipped (too large)
+Found ouch in row 3 at position 23
+searchBlob row 13 skipped (too large)
+Found 
+ in row 4 at position 32
+searchBlob row 13 skipped (too large)
+Found 
+ in row 5 at position 56
+Found test data: a string column inserted as an Ascii stream
+ in row 5 at position 1
+searchBlob row 13 skipped (too large)
+Found 
+ in row 6 at position 100
+Found Beginning in row 6 at position 1
+Found position-69 in row 6 at position 69
+Found I-am-hiding-here-at-position-5910 in row 6 at position 5910
+Found Position-9907 in row 6 at position 9907
+Found blob (row 10)  in row 6 at position 1
+Found blob (row 12)  in row 6 at position 301
+searchBlob row 13 skipped (too large)
+searchBlob row 13 skipped (too large)
+Found 
+ in row 8 at position 100
+Found blob (row 12)  in row 8 at position 1
+searchBlob row 13 skipped (too large)
+testBlob row 9 skipped (too large)
+blobTest4 finished
+blobTest51 finished
+EXPECTED SQLSTATE(null): Invalid data conversion: Wrong result column type for requested conversion.
+blobTest53 finished
+EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
+EXPECTED SQLSTATE(null): Invalid position 0 or length 5
+EXPECTED SQLSTATE(null): Invalid position 1 or length -76
+EXPECTED SQLSTATE(null): Search pattern cannot be null.
+EXPECTED SQLSTATE(null): Search pattern cannot be null.
+blobTest6 finished
+blobTest7 finished
+done row 0, length was 0
+done row 1, length was 65
+done row 2, length was 26
+done row 3, length was 42
+done row 4, length was 56
+done row 5, length was 10000
+done row 6, length was 0
+done row 7, length was 5000
+done row 8, length was 300000
+row 9 is null, skipped
+blobTest91 finished
+FAIL -- unexpected exception ****************
+SQLSTATE(40XL1): A lock could not be obtained within the time requested
+blobTest93 finished
+shortBlob length after commit is 26
+blobTest94 finished
+EXPECTED SQLSTATE(null): Lob method called after connection was closed
+EXPECTED SQLSTATE(null): Lob method called after connection was closed
+EXPECTED SQLSTATE(null): Lob method called after connection was closed
+EXPECTED SQLSTATE(null): Lob method called after connection was closed
+EXPECTED SQLSTATE(null): Lob method called after connection was closed
+EXPECTED SQLSTATE(null): Lob method called after connection was closed
+blobTest95 finished
+blobTest96 finished
+length of clob chosen is 10000
+After update
+Row 1 value.substring(0,50) is jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
+10000 total bytes read
+clobTestSelfDestructive finished
+length of clob chosen is 10000
+After drop
+Expect to get an IOException, container has been closed
+10000 total bytes read
+clobTestSelfDestructive2 finished
+FINISHED TEST blobclob :-)
+Test blobclob finished

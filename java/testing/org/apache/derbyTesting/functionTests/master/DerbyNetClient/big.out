@@ -1,0 +1,174 @@
+ij> -- create table with row greater than 32K
+----- try with just one row of data - JCC may handle those differently?
+create table big(c1 varchar(10000), c2 varchar(10000), c3 varchar(10000), c4 varchar(10000));
+0 rows inserted/updated/deleted
+ij> create procedure INSERTDATA1(IN a int) language java parameter style java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.bigTestData';
+0 rows inserted/updated/deleted
+ij> prepare p1 as 'call INSERTDATA1(?)';
+ij> execute p1 using 'values 1';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> select * from big;
+C1 |C2 |C3 |C4                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa& |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb& |ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc& |ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd&
+ij> -- multiple rows of data
+execute p1 using 'values 2';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> select * from big;
+C1 |C2 |C3 |C4                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa& |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb& |ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc& |ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd&
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee& |fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff& |ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg& |hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh&
+ij> -- the overhead for DSS on QRYDTA is 15 bytes
+----- let's try a row which is exactly 32767 (default JCC queryblock size)
+drop table big;
+0 rows inserted/updated/deleted
+ij> create table big(c1 varchar(30000), c2 varchar(2752));
+0 rows inserted/updated/deleted
+ij> execute p1 using 'values 5';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> select * from big;
+C1 |C2                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa& |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&
+ij> -- what happens when the row + the ending SQLCARD is too big
+drop table big;
+0 rows inserted/updated/deleted
+ij> create table big(c1 varchar(30000), c2 varchar(2750));
+0 rows inserted/updated/deleted
+ij> execute p1 using 'values 6';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> select * from big;
+C1 |C2                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa& |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&
+ij> -- let's try scrolling
+drop table big;
+0 rows inserted/updated/deleted
+ij> create table big(c1 varchar(10000), c2 varchar(10000), c3 varchar(10000), c4 varchar(10000));
+0 rows inserted/updated/deleted
+ij> execute p1 using 'values 1';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> execute p1 using 'values 2';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> execute p1 using 'values 3';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> execute p1 using 'values 4';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> get scroll insensitive cursor c1 as 'select * from big';
+ij> first c1;
+C1 |C2 |C3 |C4                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa& |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb& |ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc& |ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd&
+ij> next c1;
+C1 |C2 |C3 |C4                                                                                                                              
+-----
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee& |fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff& |ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg& |hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh&
+ij> previous c1;
+C1 |C2 |C3 |C4                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa& |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb& |ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc& |ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd&
+ij> last c1;
+C1 |C2 |C3 |C4                                                                                                                              
+-----
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm& |nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn& |ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo& |ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp&
+ij> close c1;
+ij> -- try going directly to the last row
+get scroll insensitive cursor c1 as 'select * from big';
+ij> last c1;
+C1 |C2 |C3 |C4                                                                                                                              
+-----
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm& |nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn& |ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo& |ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp&
+ij> close c1;
+ij> drop table big;
+0 rows inserted/updated/deleted
+ij> -- try a column which is > 32767
+create table big (c1 clob(40000));
+0 rows inserted/updated/deleted
+ij> execute p1 using 'values 7';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> select * from big;
+C1                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&
+ij> drop table big;
+0 rows inserted/updated/deleted
+ij> -- try several columns > 32767
+create table big (c1 clob(40000), c2 clob(40000), c3 clob(40000));
+0 rows inserted/updated/deleted
+ij> execute p1 using 'values 8';
+IJ WARNING: Autocommit may close using result set
+Statement executed.
+ij> select * from big;
+C1 |C2 |C3                                                                                                                              
+-----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa& |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb& |ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc&
+ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd& |eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee& |fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff&
+ij> drop table big;
+0 rows inserted/updated/deleted
+ij> -- The tests below won't run with db2 compat mode.
+----- try java objects of different sizes
+----- create table big(s java.lang.String);
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',1000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',2000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',3000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',32000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',33000));
+----- select * from big;
+----- drop table big;
+----- big long varchar
+----- create table big(lvc long varchar );
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',1000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',2000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',3000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',32000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',33000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',64000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',64499));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',65500));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',64501));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',66000));
+----- select * from big;
+----- drop table big;
+----- create table big(vc varchar(32767));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',1000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',2000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',3000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',32000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',33000));
+----- select * from big;
+----- drop table big;
+----- create table big(lvc long bit varying );
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',1000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',2000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',3000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',32000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',33000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',64000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',64499));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',65500));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',64501));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',66000));
+----- select * from big;
+----- drop table big;
+----- create table big(vb bit varying(131072));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',1000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',2000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',3000));
+----- These cannot be run until 4662 is fixed because we send 
+----- a big arg to the localization method..
+-----  insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',32000));
+----- insert into big values(org.apache.derbyTesting.functionTests.util.Formatters::repeatChar('a',33000));
+----- select * from big;
+----- drop table big;
+;
+ij> 

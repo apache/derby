@@ -1,0 +1,260 @@
+Test parameterMetaDataJdbc30 starting
+parameters count for callable statement is 4
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 3
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_OUT
+Parameter number : 4
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN_OUT
+Bug 4450 - generate metadata for return parameter
+param count is: 2
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 31
+parameter getScale 0
+parameter getParameterType 3
+parameter getParameterTypeName DECIMAL
+parameter getParameterClassName java.math.BigDecimal
+parameter getParameterMode PARAMETER_MODE_OUT
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+parameters count for prepared statement is 5
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 5
+parameter getScale 0
+parameter getParameterType 1
+parameter getParameterTypeName CHAR
+parameter getParameterClassName java.lang.String
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 3
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 4
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 5
+parameter getScale 0
+parameter getParameterType 3
+parameter getParameterTypeName DECIMAL
+parameter getParameterClassName java.math.BigDecimal
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 5
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 91
+parameter getParameterTypeName DATE
+parameter getParameterClassName java.sql.Date
+parameter getParameterMode PARAMETER_MODE_IN
+Bug 4533 - hide associated parameters
+parameters count for prepared statement is 2
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 128
+parameter getScale 0
+parameter getParameterType 12
+parameter getParameterTypeName VARCHAR
+parameter getParameterClassName java.lang.String
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 36
+parameter getScale 0
+parameter getParameterType 1
+parameter getParameterTypeName CHAR
+parameter getParameterClassName java.lang.String
+parameter getParameterMode PARAMETER_MODE_IN
+variation 1, testing jira 44
+parameters count for prepared statement is 2
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 128
+parameter getScale 0
+parameter getParameterType 12
+parameter getParameterTypeName VARCHAR
+parameter getParameterClassName java.lang.String
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned false
+parameter getPrecision 128
+parameter getScale 0
+parameter getParameterType 12
+parameter getParameterTypeName VARCHAR
+parameter getParameterClassName java.lang.String
+parameter getParameterMode PARAMETER_MODE_IN
+parameters count for prepared statement is 0
+Bug 4654 - fill in where clause parameter type info
+parameters count for prepared statement is 1
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+PASS -- expected exception
+SQLSTATE(null): SQL Exception: Invalid argument: column index -1 is out of range.
+PASS -- expected exception
+SQLSTATE(null): SQL Exception: Invalid argument: column index 0 is out of range.
+PASS -- expected exception
+SQLSTATE(null): SQL Exception: Invalid argument: column index 2 is out of range.
+test: no parameter for the statement and then do getParameterMetaData()
+parameters count for prepared statement is 0
+test: the scale returned should be the one set by registerOutParameter
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 30
+parameter getScale 15
+parameter getParameterType 3
+parameter getParameterTypeName DECIMAL
+parameter getParameterClassName java.math.BigDecimal
+parameter getParameterMode PARAMETER_MODE_OUT
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 30
+parameter getScale 15
+parameter getParameterType 3
+parameter getParameterTypeName DECIMAL
+parameter getParameterClassName java.math.BigDecimal
+parameter getParameterMode PARAMETER_MODE_OUT
+Behaviour of meta data and out params after re-compile
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 3
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_OUT
+Parameter number : 4
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN_OUT
+DUMMYINT alias returned 11111
+Parameter number : 1
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 2
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN
+Parameter number : 3
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_OUT
+Parameter number : 4
+parameter isNullable PARAMETER_NULLABLE
+parameter isSigned true
+parameter getPrecision 10
+parameter getScale 0
+parameter getParameterType 4
+parameter getParameterTypeName INTEGER
+parameter getParameterClassName java.lang.Integer
+parameter getParameterMode PARAMETER_MODE_IN_OUT
+DUMMYINT alias returned 22222
+DUMMYINT alias returned 22222
+Test parameterMetaDataJdbc30 finished

@@ -1,0 +1,38 @@
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+Checking authentication with DriverManager
+EXPECTED CONNFAIL null userid not supported
+EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+DS connected as EDWARD
+DS connected as FRANCES
+Checking connections with DataSource
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+data source with no default user
+EXPECTED CONNFAIL null userid not supported
+EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+DS connected as EDWARD
+DS connected as FRANCES
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+data source with invalid default user
+EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+DS connected as FRANCES
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+data source with valid default user
+DS connected as EDWARD
+DS connected as FRANCES
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+Checking connections with ConnectionPoolDataSource
+ConnectionPoolDataSource with no default user
+EXPECTED CONNFAIL null userid not supported
+EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+CP connected as EDWARD
+CP connected as FRANCES
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ConnectionPoolDataSource with invalid default user
+EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+CP connected as FRANCES
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ConnectionPoolDataSource with valid default user
+CP connected as EDWARD
+CP connected as FRANCES
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+Completed dataSourcePermissions_net
