@@ -669,7 +669,7 @@
 
     <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
     <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
     </copy>
 
     <!-- the next two targets are orthogonal. Only one will be executed, -->
@@ -773,7 +773,7 @@
 
     <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
     <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
     </copy>
 
     <delete file="${derby.jar.dir}/derbytools.jar"/>
@@ -825,7 +825,7 @@
 
     <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
     <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
     </copy>
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
