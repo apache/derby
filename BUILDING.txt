@@ -17,8 +17,9 @@ Contents
 2.2.4 Download extensions for Java Development Kit release 1.3.x
 2.2.5 Download Java Compiler Compiler (JavaCC) version 3.1
 2.2.6 Download jakarta-servlet API 4 (Servlet 2.4)
-2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
-2.2.8 Download Jikes 1.14 (Optional)
+2.2.7 Download Jakarta-ORO 2.0.8
+2.2.8 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
+2.2.9 Download Jikes 1.14 (Optional)
 
 3     Build instructions
 3.1   Set required environmental variables
@@ -233,7 +234,23 @@ file to directory
 
 
 
-2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
+2.2.7 Download Jakarta-ORO 2.0.8
+
+The Derby tests require the Jakarta-ORO classes for text processing.
+Jakarta-ORO 2.0.8 can be downloaded from:
+
+http://www.signal42.com/mirrors/apache/jakarta/oro/source/jakarta-oro-2.0.8.zip
+or
+http://www.signal42.com/mirrors/apache/jakarta/oro/source/jakarta-oro-2.0.8.tar.gz
+
+The downloaded file contains documentation and other files. After downloading
+the zip or tar file, unzip or untar the file and copy only the 
+jakarta-oro-2.0.8.jar file to the directory
+   ${derby.source}/tools/java
+
+
+
+2.2.8 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
 
 This is an optional section.
 The reason is that osgi.jar is required to only build the 
@@ -254,10 +271,11 @@ The downloaded file should be copied to directory
 
 
 
-Note: After following the steps in sections 2.2.4-2.2.7 of this
+Note: After following the steps in sections 2.2.4-2.2.8 of this
 document, you should have the following:
 
 ${derby.source}/tools/java/javacc.jar
+${derby.source}/tools/java/jakarta-oro-2.0.8.jar
 ${derby.source}/tools/java/jce1_2_2.jar 
 ${derby.source}/tools/java/jdbc2_0-stdext.jar
 ${derby.source}/tools/java/jta-1_0_1B-classes.zip 
@@ -266,7 +284,7 @@ ${derby.source}/tools/java/osgi.jar
 
 
 
-2.2.8 Download and Install Jikes 1.14 (Optional)
+2.2.9 Download and Install Jikes 1.14 (Optional)
 
 This is an optional section.
 
@@ -400,6 +418,11 @@ to specify your environment and options:
     in your classpath, you will have full functionality
     of engine, tools, and network server. 
 
+    In addition, if you would like to build the Derby test
+    framework and related files, run the following command:
+
+    >ant testing
+
 (3) Run the following command to build all jars:
     
     >ant buildjars
@@ -408,12 +431,17 @@ to specify your environment and options:
     - derby.jar (database engine), 
     - derbytools.jar (utilities: sysinfo, dblook, ij) 
     - derbynet.jar (network server).
+    - derbyLocale_*.jar (9 jar files with locale support).
+    If the tests were built, the following jar file will also be built:
+    - derbyTesting.jar (the test framework and related files)
 
     You can run the ant command to build an individual jar
     file as following:
     - command "ant derbyjar" to build derby.jar
     - command "ant derbytoolsjar" to build derbytools.jar
     - command "ant derbynetjar" to build derbynet.jar
+    - command "ant derbylocalejars" to build the derby locale jar files.
+    - command "ant derbytestingjar" to build derbyTesting.jar
 
 Notes: 
 (1) The estimated total time for build completion is ~5-10 minutes.
@@ -493,6 +521,9 @@ following:
     database with no errors.
 
 
+(6) Derby also includes a suite of tests for more comprehensive verification.
+    Information on how to run these tests can be found in the source tree,
+    in the file ${derby.source}/java/testing/org/apache/derbyTesting/readme.htm
 
 ---------------------------------------------------------------
 4     Derby build miscellaneous information
@@ -507,7 +538,14 @@ Derby builds.
 Some of the main targets that can be called as
 "ant targetname" are as the  following:
 
-  source: to build source code. This is default target.
+  all: builds the source code, demos, and tests.
+
+  buildsource: to build source code. This is default target.
+
+  demo: builds the simple demos in java/demo
+
+  testing: builds the tests in java/testing. For additional information on
+           testing, please see java/testing/org/apache/derbyTesting/readme.htm
 
   javadoc: to create javadoc for all source code.
 
