@@ -36,7 +36,7 @@ ij> insert into tab1 values (34, 66, 1.2, 'yty', 'wer');
 1 row inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 2500;
+ij> maximumdisplaywidth 20000;
 ij> -- should use index i4
 select c1, c3 from tab1 where c2 > 40 and c3 <= 5.3;
 C1         |C3                    
@@ -730,7 +730,6 @@ Source result set:
 	Ordered null semantics on the following columns: 
 				qualifiers:
 None
-				optimizer estimated r&
 ij> -- should use i5
 select max(c2) from tab1 where c1 = 34;
 1     

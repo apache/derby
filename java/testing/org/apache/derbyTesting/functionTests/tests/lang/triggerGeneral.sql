@@ -413,7 +413,7 @@ create trigger "tt1" after insert on trigtable
 referencing NEW as NEW for each row mode db2sql
 insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values
 (new."cOlUmN1" + 5, "NEW"."cOlUmN2  " * new."cOlUmN3""""  ", 5);
-maximumdisplaywidth 700;
+maximumdisplaywidth 2000;
 select cast(triggername as char(10)), text from sys.systriggers t, sys.sysstatements s 
 		where s.stmtid = t.actionstmtid and triggername = 'tt1';
 insert into trigtable values (1, 2, 3);

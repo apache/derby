@@ -25,7 +25,7 @@ insert into tab1 values (34, 68, 2.7, 'srg', 'iur');
 insert into tab1 values (34, 66, 1.2, 'yty', 'wer');
 
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 2500;
+maximumdisplaywidth 20000;
 
 -- should use index i4
 select c1, c3 from tab1 where c2 > 40 and c3 <= 5.3;
