@@ -169,7 +169,11 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 
 	private Properties addRequiredAttributes(Properties attrs)
 	{
-		attrs.setProperty("driverType","4");
+		if (TestUtil.isJCCFramework())
+		{
+			attrs.setProperty("driverType","4");
+		}
+
 		attrs.setProperty("serverName","localhost");
 		attrs.setProperty("portNumber","20000");
 		//attrs.setProperty("retrieveMessagesFromServerOnGetMessage","true");
