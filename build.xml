@@ -538,6 +538,13 @@
           append="true"
           message="org/apache/derby/info/DBMS.properties"/>
 
+    <!-- copy license file to lists dir for inclusion in derby.jar -->
+
+    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
+    <copy todir="${derby.jar.dir}/lists/META-INF">
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
+    </copy>
+
     <!-- the next two targets are orthogonal. Only one will be executed, -->
     <!-- depending on whether or not osgi.jar is available.              -->
     <antcall target="derbyjarwithosgi"/>
@@ -557,7 +564,8 @@
                          org/apache/derby/impl/sql/catalog/metadata_net.properties,
                          org/apache/derby/info/DBMS.properties"/>
       <fileset dir="${derby.jar.dir}/lists"
-               includes="org/apache/derby/modules.properties"/>
+               includes="META-INF/**,
+                         org/apache/derby/modules.properties"/>
     </jar>
 
   </target>
@@ -634,6 +642,13 @@
       <param name="info.file" value="${out.dir}/org/apache/derby/info/tools.properties"/>
     </antcall>
 
+    <!-- copy license file to lists dir for inclusion in derbytools.jar -->
+
+    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
+    <copy todir="${derby.jar.dir}/lists/META-INF">
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
+    </copy>
+
     <delete file="${derby.jar.dir}/derbytools.jar"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          basedir="${out.dir}"
@@ -648,6 +663,8 @@
                includes="org/apache/derby/loc/sysinfoMessages.properties,
                          org/apache/derby/loc/toolsmessages.properties,
                          org/apache/derby/info/tools.properties"/>
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="META-INF/**"/>
     </jar>
 
   </target>
@@ -677,6 +694,13 @@
       <param name="info.file" value="${out.dir}/org/apache/derby/info/net.properties"/>
     </antcall>
 
+    <!-- copy license file to lists dir for inclusion in derbynet.jar -->
+
+    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
+    <copy todir="${derby.jar.dir}/lists/META-INF">
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
+    </copy>
+
     <delete file="${derby.jar.dir}/derbynet.jar"/>
     <jar destfile="${derby.jar.dir}/derbynet.jar"
          basedir="${out.dir}"
@@ -690,6 +714,8 @@
       <fileset dir="${out.dir}"
                includes="org/apache/derby/loc/drda/**,
                          org/apache/derby/info/net.properties"/>
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="META-INF/**"/>
     </jar>
 
   </target>
