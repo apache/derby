@@ -79,7 +79,7 @@ public class NSinSameJVM {
 		}
 		String jdbcUrlPrefix = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT);
 
-        String url = jdbcUrlPrefix + "/" + databaseFileName;
+        String url = jdbcUrlPrefix + databaseFileName;
 
         Connection connection = null;
 		   
