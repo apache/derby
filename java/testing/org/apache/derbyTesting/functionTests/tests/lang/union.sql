@@ -27,6 +27,8 @@ insert into dups select * from t1 union all select * from t2;
 -- simple cases
 values (1, 2, 3, 4) union values (5, 6, 7, 8);
 values (1, 2, 3, 4) union values (1, 2, 3, 4);
+values (1, 2, 3, 4) union distinct values (5, 6, 7, 8);
+values (1, 2, 3, 4) union distinct values (1, 2, 3, 4);
 
 values (1, 2, 3, 4) union values (5, 6, 7, 8) union values (9, 10, 11, 12);
 values (1, 2, 3, 4) union values (1, 2, 3, 4) union values (1, 2, 3, 4);

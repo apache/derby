@@ -4151,14 +4151,14 @@ unionOrExcept(ResultSetNode term) throws StandardException :
 	Token 			tok = null;
 }
 {
-	<UNION> [ tok = <ALL> ] expression =
+	<UNION> [ tok = <ALL> | <DISTINCT> ] expression =
 				queryExpression(term,
 								(tok != null) ? UNION_ALL_OP : UNION_OP)
 	{
 		return expression;
 	}
 |
-	<EXCEPT> [ tok = <ALL> ] expression =
+	<EXCEPT> [ tok = <ALL> | <DISTINCT> ] expression =
 				queryExpression(term,
 								(tok != null) ? EXCEPT_ALL_OP : EXCEPT_OP)
 	{
@@ -4272,7 +4272,7 @@ intersect(ResultSetNode term) throws StandardException :
 	Token 			tok = null;
 }
 {
-	<INTERSECT> [ tok = <ALL> ] expression =
+	<INTERSECT> [ tok = <ALL> | <DISTINCT> ] expression =
 				nonJoinQueryTerm(term, (tok != null) ? INTERSECT_ALL_OP : INTERSECT_OP)
 	{
 		return expression;

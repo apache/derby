@@ -19,6 +19,7 @@ insert into t2(id,i1,i2,vc20,d) values
 
 -- no duplicates
 select id,i1,i2 from t1 intersect select id,i1,i2 from t2 order by id DESC,i1,i2;
+select id,i1,i2 from t1 intersect distinct select id,i1,i2 from t2 order by id DESC,i1,i2;
 select id,i1,i2 from t1 intersect all select id,i1,i2 from t2 order by 1,2,3;
 
 -- Only specify order by on some columns
@@ -27,6 +28,7 @@ select id,i1,i2 from t1 intersect all select id,i1,i2 from t2 order by 3 DESC, 1
 
 -- duplicates
 select i1,i2 from t1 intersect select i1,i2 from t2 order by 1,2;
+select i1,i2 from t1 intersect distinct select i1,i2 from t2 order by 1,2;
 select i1,i2 from t1 intersect all select i1,i2 from t2 order by 1,2;
 
 -- right side is empty
@@ -83,11 +85,13 @@ select i1 from t1 intersect select ? from t2;
 
 -- except tests
 select id,i1,i2 from t1 except select id,i1,i2 from t2 order by id,i1,i2;
+select id,i1,i2 from t1 except distinct select id,i1,i2 from t2 order by id,i1,i2;
 select id,i1,i2 from t1 except all select id,i1,i2 from t2 order by 1 DESC,2,3;
 select id,i1,i2 from t2 except select id,i1,i2 from t1 order by 1,2,3;
 select id,i1,i2 from t2 except all select id,i1,i2 from t1 order by 1,2,3;
 
 select i1,i2 from t1 except select i1,i2 from t2 order by 1,2;
+select i1,i2 from t1 except distinct select i1,i2 from t2 order by 1,2;
 select i1,i2 from t1 except all select i1,i2 from t2 order by 1,2;
 select i1,i2 from t2 except select i1,i2 from t1 order by 1,2;
 select i1,i2 from t2 except all select i1,i2 from t1 order by 1,2;
