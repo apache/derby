@@ -83,6 +83,8 @@ call AMBIGIOUS01(?, ?)
 EXPECTED SQL Exception: (42X73) Method resolution for signature org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious1(int, java.lang.String, [Ljava.sql.ResultSet;) was ambiguous. (No single maximally specific method.)
 call AMBIGIOUS02(?, ?)
 EXPECTED SQL Exception: (42X50) No method was found to be able to match method call org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(int, int, java.sql.ResultSet[]), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+No ResultSet or update count returned
+No ResultSet or update count returned
 zeroArgProcedures
 No ResultSet or update count returned
 No ResultSet or update count returned
