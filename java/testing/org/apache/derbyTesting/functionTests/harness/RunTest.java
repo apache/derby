@@ -54,6 +54,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.net.URL;
 
+
 public class RunTest
 {
 
@@ -595,9 +596,6 @@ public class RunTest
 		        
 	    fileSep = File.separatorChar;
 
-        // for now, only addressing java, sql and multi threaded tests; other possible test 
-        // contributions will be unittests.
-
         // For multi tests, the user should have specified mtestdir (full path)
         // unless this is a Suite, in which case outDir is used for mtestdir
         if ( testType.equals("multi") )
@@ -608,6 +606,7 @@ public class RunTest
         // For certain test types, locate script file based on scriptName
         // Then determine the actual test name and directory
         if ( (!testType.equals("java")) && 
+             (!testType.equals("unit")) && 
              (!testType.equals("multi")) ) 
         {
             // NOTE: cannot use getResource because the urls returned
@@ -2070,7 +2069,12 @@ clp.list(System.out);
                 v.addElement(propString);
             }
         }
-           
+        else if (testType.equals("unit"))
+        {
+            v.addElement("org.apache.derbyTesting.unitTests.harness.UnitTestMain");
+            v.addElement("-p");
+            v.addElement(propString);
+        }
         else if ( testType.equals("multi") )
         {
 	System.out.println("scriptiflename is: " + scriptFileName);
@@ -2083,7 +2087,6 @@ clp.list(System.out);
             v.addElement("-p");
             v.addElement(propString);
         }
-        // here would be placed calls to and set properties for e.g. unittests methods
 
         // Now convert the vector into a string array
         String[] sCmd = new String[v.size()];
@@ -2321,7 +2324,17 @@ clp.list(System.out);
             System.exit(1);
             org.apache.derbyTesting.functionTests.harness.MultiTest.main(args);
         }
-        // here would be placed messages re unittests not working with useprocess false
+        else if (testType.equals("unit"))
+        {
+            System.out.println("Unit tests not implemented yet with useprocess=false");
+            System.exit(1);
+            /*
+            String[] args = new String[2];
+            args[0] = "-p";
+            args[1] = propString;
+            org.apache.derbyTesting.unitTests.harness.UnitTestMain.main(args);
+            */
+        }
         ps.close();
         // Reset System.out and System.err
         System.setOut(stdout);

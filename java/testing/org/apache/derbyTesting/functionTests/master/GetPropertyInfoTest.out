@@ -1,0 +1,36 @@
+Test GetPropertyInfoTest starting
+databaseName: EncryptedDB
+encryptionProvider: null
+encryptionAlgorithm: null
+encryptionKeyLength: null
+encryptionKey: null
+territory: null
+user: null
+logDevice: null
+rollForwardRecoveryFrom: null
+createFrom: null
+restoreFrom: null
+bootPassword: 
+password: 
+shutdown: false
+create: true
+dataEncryption: true
+upgrade: false
+databaseName: 
+encryptionProvider: null
+encryptionAlgorithm: null
+encryptionKeyLength: null
+encryptionKey: null
+territory: null
+user: null
+logDevice: null
+rollForwardRecoveryFrom: null
+createFrom: null
+restoreFrom: null
+bootPassword: ****
+password: 
+shutdown: false
+create: true
+dataEncryption: true
+upgrade: false
+Test GetPropertyInfoTest finished

@@ -974,7 +974,7 @@
 
   <target name="derbytestingjar" depends="initjars,ckderbytesting" if="derbyTesting.available">
     <zip destfile="${derby.jar.dir}/derbyTesting.jar" filesonly="true" compress="true">
-      <fileset dir="${out.dir}" includes="org/apache/derbyTesting/functionTests/**,SimpleApp*,org/apache/derby/impl/tools/ij/mt*.class,org/apache/derby/impl/tools/ij/SimpleCharStream.class,org/apache/derby/impl/drda/TestProto.class"/>
+      <fileset dir="${out.dir}" includes="org/apache/derbyTesting/functionTests/**,SimpleApp*,org/apache/derby/impl/tools/ij/mt*.class,org/apache/derby/impl/tools/ij/SimpleCharStream.class,org/apache/derby/impl/drda/TestProto.class,org/apache/derbyTesting/unitTests/*/*,org/apache/derby/iapi/services/diag/DiagnosticUtil.class,org/apache/derby/iapi/services/diag/Diagnosticable.class,org/apache/derby/iapi/services/diag/DiagnosticableGeneric.class,org/apache/derby/impl/store/access/conglomerate/QualifierUtil.class"/>
     </zip>
   </target>
 

@@ -26,6 +26,9 @@ TransactionTable_derby.properties
 access.sql
 access_app.properties
 access_derby.properties
+aes.sql
+aes_app.properties
+aes_sed.properties
 backupRestore.sql
 backupRestore_app.properties
 backupRestore1_app.properties
@@ -47,6 +50,12 @@ createTestProcedures.subsql
 databaseProperties.sql
 default_app.properties
 default_derby.properties
+encryptDatabase.sql
+encryptDatabase_app.properties
+encryptParams.sql
+encryptParams_app.properties
+encryptionKey.sql
+encryptionKey_app.properties
 global_xactTable.view
 heapscan.sql
 heapscan_app.properties

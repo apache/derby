@@ -1,0 +1,117 @@
+ij> -- test database encryption parameters such as the encryption algorithm and the encryption provider
+connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> connect 'jdbc:derby:wombatDESede;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=DESede/CBC/NoPadding';
+ij> create table t1 ( a char(20));
+0 rows inserted/updated/deleted
+ij> insert into t1 values ('hello world');
+1 row inserted/updated/deleted
+ij> select * from t1;
+A                   
+--------------------
+hello world         
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- algorithm is not specified, doesn't matter since algorithm is stored in the database
+connect 'jdbc:derby:wombatDESede;bootPassword=ThursdaySaturday';
+ij> select * from t1;
+A                   
+--------------------
+hello world         
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- wrong algorithm, doesn't matter since algorithm is stored in the database
+connect 'jdbc:derby:wombatDESede;bootPassword=ThursdaySaturday;encryptionAlgorithm=Blowfish/CBC/NoPadding';
+ij> select * from t1;
+A                   
+--------------------
+hello world         
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- create new databases with different encryption algorithms
+connect 'jdbc:derby:wombatDES;create=true;dataEncryption=true;bootPassword=ThursdaySaturdayfoobarpo;encryptionAlgorithm=DES/CBC/NoPadding';
+ij> create table t2 ( a char(20));
+0 rows inserted/updated/deleted
+ij> insert into t2 values ('hot air');
+1 row inserted/updated/deleted
+ij> select * from t2;
+A                   
+--------------------
+hot air             
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> connect 'jdbc:derby:wombatBlowfish;create=true;dataEncryption=true;bootPassword=SundayMondayFriday;encryptionAlgorithm=Blowfish/CBC/NoPadding';
+ij> create table t3 ( a char(20));
+0 rows inserted/updated/deleted
+ij> insert into t3 values ('blow hot air on fish');
+1 row inserted/updated/deleted
+ij> select * from t3;
+A                   
+--------------------
+blow hot air on fish
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- have 3 connections open to 3 databases, each datababase uses a different encryption algorithm
+connect 'jdbc:derby:wombatDESede;bootPassword=ThursdaySaturday' AS C1;
+ij> connect 'jdbc:derby:wombatDES;bootPassword=ThursdaySaturdayfoobarpo' AS C2;
+ij(C2)> connect 'jdbc:derby:wombatBlowfish;bootPassword=SundayMondayFriday' AS C3;
+ij(C3)> set connection C1;
+ij(C1)> select * from t1;
+A                   
+--------------------
+hello world         
+ij(C1)> set connection C2;
+ij(C2)> select * from t2;
+A                   
+--------------------
+hot air             
+ij(C2)> set connection C3;
+ij(C3)> select * from t3;
+A                   
+--------------------
+blow hot air on fish
+ij(C3)> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- create a new database with an algorithm which uses padding
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=DESede/CBC/PKCS5Padding';
+ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBCXB: Bad encryption padding 'PKCS5Padding' or padding not specified. 'NoPadding' must be used.
+ij> -- create a new database with a bad algorithm
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=Fungus/CBC/NoPadding';
+ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBCXC: Encryption algorithm 'Fungus/CBC/NoPadding' does not exist. Please check that the chosen provider 'default' supports this algorithm.
+ij> -- create a new database with another bad algorithm (bad feedback mode)
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=DES/CNN/NoPadding';
+ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBCXI: The feedback mode 'CNN' is not supported. Supported feedback modes are CBC, CFB, OFB and ECB.
+ij> -- create a new database with a bad provider
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionProvider=com.foo.bar';
+ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
+ERROR XBM0G: Failed to start encryption engine. Please make sure you are running Java 2 and have downloaded an encryption provider such as jce and put it in your classpath.
+ERROR XBCXF: The class 'com.foo.bar' representing the encryption provider cannot be found.
+ij> -- create a new database with a bad encryption algorithm format
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=DES';
+ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBCXH: The encryptionAlgorithm 'DES' is not in the correct format. The correct format is algorithm/feedbackMode/NoPadding.
+ij> -- create a new database with a non supported feedback mode (PCBC)
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=DES/PCBC/NoPadding';
+ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBCXI: The feedback mode 'PCBC' is not supported. Supported feedback modes are CBC, CFB, OFB and ECB.
+ij> 

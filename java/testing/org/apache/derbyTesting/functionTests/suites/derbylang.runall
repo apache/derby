@@ -52,6 +52,7 @@ lang/dropTable.sql
 lang/dynamicLikeOptimization.sql
 lang/ejbql.sql
 lang/ejbql_nonSPS.sql
+lang/emptyStatistics.sql
 lang/errorCode.sql
 lang/fk_nonSPS.sql
 lang/floattypes.sql
@@ -71,6 +72,7 @@ lang/intersect.sql
 lang/isolationLevels.sql
 lang/joinDeadlock.sql
 lang/joins.sql
+lang/langUnitTests.sql
 lang/lockTable.sql
 lang/logStream.java
 lang/logop.sql

@@ -1,0 +1,119 @@
+ij> -- test database encryption
+-- for bug 3668 - you couldn't change the password without exiting out of db create session
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday, Wednesday');
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- test for bug 3668
+-- try the old password, should fail
+connect 'jdbc:derby:wombat;bootPassword=Thursday';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ij> connect 'jdbc:derby:wombat;bootPassword=Wednesday';
+ij> -- switch back to old password
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Wednesday, Thursday');
+0 rows inserted/updated/deleted
+ij> create table t1 ( a char(20));
+0 rows inserted/updated/deleted
+ij> -- make sure we cannot access the secret key
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('bootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('encryptedBootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> insert into t1 values ('hello world');
+1 row inserted/updated/deleted
+ij> -- change the secret key
+-- these should fail
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', null);
+ERROR XBCX5: Cannot change boot password to null.
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'wrongkey, ');
+ERROR XBCX2: Initializing cipher with a boot password that is too short, must be at least 8 characters long
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday');
+ERROR XBCX7: Wrong format for changing boot password.  Format must be : old_boot_password, new_boot_password.
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday , ');
+ERROR XBCX2: Initializing cipher with a boot password that is too short, must be at least 8 characters long
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday , short');
+ERROR XBCX2: Initializing cipher with a boot password that is too short, must be at least 8 characters long
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursdya , derbypwd');
+ERROR XBCXA: Wrong boot password.
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursdayx , derbypwd');
+ERROR XBCXA: Wrong boot password.
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'xThursday , derbypwd');
+ERROR XBCXA: Wrong boot password.
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'thursday , derbypwd');
+ERROR XBCXA: Wrong boot password.
+ij> -- this should work
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', ' Thursday , Saturday');
+0 rows inserted/updated/deleted
+ij> -- this should fail
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday , derbypwd');
+ERROR XBCXA: Wrong boot password.
+ij> -- change it again
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Saturday,derbypwd');
+0 rows inserted/updated/deleted
+ij> -- make sure we cannot access the secret key
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('bootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('encryptedBootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> connect 'jdbc:derby:wombat';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ij> connect 'jdbc:derby:wombat;bootPassword=Thursday';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ij> connect 'jdbc:derby:wombat;bootPassword=Saturday';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ij> connect 'jdbc:derby:wombat;bootPassword=derbypwd';
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('bootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('encryptedBootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- change it again, make sure it trims white spaces
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', '   derbypwd   ,  bbderbypwdx  ');
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'bbderbypwdx, derbypwdxx ');
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('bootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('encryptedBootPassword');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> connect 'jdbc:derby:wombat;bootPassword=derbypwd';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ij> connect 'jdbc:derby:wombat;bootPassword=derbypwdxx';
+ij> select * from t1;
+A                   
+--------------------
+hello world         
+ij> -- test that you cannot change the encryption provider or algorithm after database creation
+-- this should not work
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('encryptionAlgorithm', 'DES/blabla/NoPadding');
+ERROR XBCXD: The encryption algorithm cannot be changed after the database is created.
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('encryptionProvider', 'com.pom.aplomb');
+ERROR XBCXE: The encryption provider cannot be changed after the database is created.
+ij> 

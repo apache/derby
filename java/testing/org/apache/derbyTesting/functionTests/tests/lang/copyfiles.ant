@@ -72,6 +72,8 @@ dynamicLikeOptimization_derby.properties
 ejbql.sql
 ejbql_app.properties
 ejbql_nonSPS.sql
+emptyStatistics_derby.properties
+emptyStatistics.sql
 errorCode.sql
 errorCode_app.properties
 fk_nonSPS.sql
