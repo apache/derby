@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app PUBLIC
+	"-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+	"http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+
+<web-app id = "DERBYNET_ID">
+
+<display-name>Apache Derby Network Server</display-name>
+<description> Apache Network Server Administration </description>
+
+<servlet>
+	<servlet-name> derbynet </servlet-name>
+	<servlet-class> org.apache.derby.drda.NetServlet </servlet-class>
+	<init-param>
+	  <param-name>  startNetworkServerOnInit </param-name>
+	  <param-value> true </param-value>
+	  <description> Starts the Network Server at servlet 
+				initialization if 'true'. </description>
+	</init-param>
+	<init-param>
+	  <param-name>  portNumber </param-name>
+	  <param-value> 1527 </param-value>
+	  <description> Port number to use. The default is 1527. </description>
+	</init-param>
+	<init-param>
+	  <param-name>  tracingDirectory </param-name>
+	  <param-value></param-value>
+	  <description> Port number to use. The default is 1527. </description>
+	</init-param>
+</servlet>
+
+<servlet-mapping>
+	<servlet-name> derbynet </servlet-name>
+	<url-pattern> /derbynet </url-pattern>
+</servlet-mapping>
+
+<welcome-file-list>
+     <welcome-file>/derbynet</welcome-file>
+</welcome-file-list>
+
+</web-app>

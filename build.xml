@@ -467,8 +467,8 @@
 <!--                               Jar targets                           -->
 <!-- =================================================================== -->
 
-  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar"/>
-  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar"/>
+  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar"/>
+  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar"/>
 
   <target name="initjars" depends="setsanityname,getsvnversion">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
@@ -692,6 +692,14 @@
                          org/apache/derby/info/net.properties"/>
     </jar>
 
+  </target>
+
+<!-- - - - - - - - - - - - - - derby.war target - - - - - - - - - - - -->
+ <target name="derbywar" depends="initjars">
+
+    <echo message="Beginning derby.war  build"/>
+    <delete file="${derby.jar.dir}/derby.war"/>
+    <zip zipfile="${derby.jar.dir}/derby.war" compress="true" basedir="tools/j2ee/derby"/>
   </target>
 
 <!-- - - - - - - - - - - -  jar build helper targets  - - - - - - - - - -->
