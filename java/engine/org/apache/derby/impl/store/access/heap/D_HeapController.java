@@ -32,10 +32,6 @@ import java.util.Properties;
 
 class TableStats
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     public int num_pages          = 0; // number of pages in heap.
     public int num_overflow_pgs   = 0; // number of overflow pages heap.
     public int num_entries        = 0; // number recs on page

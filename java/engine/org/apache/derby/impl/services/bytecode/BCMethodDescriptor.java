@@ -20,10 +20,6 @@ import org.apache.derby.iapi.services.classfile.VMDescriptor;
 	This has no generated class specific state.
  */
 class BCMethodDescriptor {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	static final String[] EMPTY = new String[0];
 

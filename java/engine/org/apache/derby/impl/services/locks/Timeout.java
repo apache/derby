@@ -37,10 +37,6 @@ import java.util.Hashtable;
 
 public final class Timeout
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     public static final int TABLE_AND_ROWLOCK = VirtualLockTable.TABLE_AND_ROWLOCK;
     public static final int ALL = VirtualLockTable.ALL;
 

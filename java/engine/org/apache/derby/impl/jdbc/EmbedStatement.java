@@ -40,12 +40,7 @@ import java.sql.ResultSet;
  * @author ames
  */
 public class EmbedStatement extends ConnectionChild
-    implements java.sql.Statement { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+    implements java.sql.Statement {
 
 	private final java.sql.Connection applicationConnection;
 

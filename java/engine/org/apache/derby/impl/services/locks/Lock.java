@@ -25,10 +25,6 @@ import java.util.List;
 */
 
 public class Lock implements Latch, Control {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Compatibility space the object is locked in.

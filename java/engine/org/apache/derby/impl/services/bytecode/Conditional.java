@@ -30,10 +30,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 	 end:
 */
 class Conditional {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	private final Conditional parent;
 	private final int   ifOffset;

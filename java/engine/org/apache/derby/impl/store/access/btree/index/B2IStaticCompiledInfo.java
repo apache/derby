@@ -44,11 +44,6 @@ index and the Conglomerate for the base table of this conglomerate.
 
 public class B2IStaticCompiledInfo implements StaticCompiledOpenConglomInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
     /**************************************************************************
      * Fields of the class 

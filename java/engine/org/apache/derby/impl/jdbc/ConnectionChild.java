@@ -23,12 +23,7 @@ import java.sql.SQLException;
 	refer back to the EmbedConnection object extends this class.
 */
 
-public abstract class ConnectionChild { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public abstract class ConnectionChild {
 
 	// parameters to handleException
 	protected static final boolean CLOSE = true;

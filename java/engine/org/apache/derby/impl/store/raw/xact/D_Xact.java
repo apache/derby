@@ -25,10 +25,6 @@ The D_Xact class provides diagnostic information about the Xact class.
 
 public class D_Xact extends DiagnosticableGeneric
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /**
      * Default implementation of diagnostic on the object.

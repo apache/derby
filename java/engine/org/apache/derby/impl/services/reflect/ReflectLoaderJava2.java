@@ -12,12 +12,8 @@ package org.apache.derby.impl.services.reflect;
 
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.sql.compile.CodeGeneration;
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-final class ReflectLoaderJava2 extends ClassLoader { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
+final class ReflectLoaderJava2 extends ClassLoader {
 
 	/*
 	**	Fields

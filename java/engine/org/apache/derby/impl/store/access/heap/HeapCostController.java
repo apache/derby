@@ -68,10 +68,6 @@ The StoreCostController gives 2 kinds of cost information
 public class HeapCostController 
     extends GenericCostController implements StoreCostController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     /**
      * Only lookup these estimates from raw store once.
      **/

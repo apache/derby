@@ -25,10 +25,6 @@ import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 public class SortBufferScan extends SortScan
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	The sorter we're returning rows from.
 	**/
 	protected SortBuffer sortBuffer;

@@ -29,10 +29,6 @@ import org.apache.derby.impl.store.access.conglomerate.RowPosition;
 
 public class BTreeRowPosition extends RowPosition
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     /**************************************************************************
      * Fields of the class
      **************************************************************************

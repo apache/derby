@@ -46,11 +46,6 @@ import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 
 public class B2IMaxScan extends BTreeMaxScan
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/*
 	** Fields of B2IMaxScan.

@@ -69,10 +69,6 @@ A branch row contains key fields and the pointer to the child page.
 **/
 public class BranchControlRow extends ControlRow
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     protected SQLLongint    left_child_page = null;
 
 

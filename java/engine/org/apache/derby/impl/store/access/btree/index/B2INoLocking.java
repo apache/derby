@@ -40,11 +40,6 @@ import org.apache.derby.impl.store.access.btree.WaitError;
 
 public class B2INoLocking implements BTreeLockingPolicy
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /**************************************************************************
      * Constructors for This class:

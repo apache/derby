@@ -38,10 +38,6 @@ import org.apache.derby.iapi.error.StandardException;
 */
 public class RowLocking2nohold extends RowLocking2
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected RowLocking2nohold(LockFactory lf) 
     {
 		super(lf);

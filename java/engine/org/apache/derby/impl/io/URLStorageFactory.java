@@ -27,10 +27,6 @@ import java.io.IOException;
 
 public class URLStorageFactory extends BaseStorageFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
     
     /**
      * Construct a persistent StorageFile from a path name.

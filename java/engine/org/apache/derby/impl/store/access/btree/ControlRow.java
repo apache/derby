@@ -77,10 +77,6 @@ which keep Object versions of the control row.
 
 public abstract class ControlRow implements AuxObject, TypedFormat
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     /**
      * Version indentifier of the control row within the page.  
      * <p>

@@ -98,10 +98,6 @@ import java.text.DateFormat;
 
 public class BasicDatabase implements ModuleControl, ModuleSupportable, PropertySetCallback, Database, JarReader
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private boolean		active;
 	private AuthenticationService authenticationService;
 	protected AccessFactory af;

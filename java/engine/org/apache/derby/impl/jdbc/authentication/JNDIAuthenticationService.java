@@ -34,10 +34,6 @@ import java.util.Properties;
 
 public class JNDIAuthenticationService
 	extends AuthenticationServiceBase {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	private String authenticationProvider;
 

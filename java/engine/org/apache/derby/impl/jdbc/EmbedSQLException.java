@@ -26,12 +26,7 @@ import java.io.PrintWriter;
     on the server side and it also decreases the size of client
     jar file tremendously.
 */
-public class EmbedSQLException extends SQLException { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class EmbedSQLException extends SQLException {
 
 	private Object[] arguments;
 	private String messageId;

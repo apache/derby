@@ -18,10 +18,6 @@ package org.apache.derby.impl.store.access.sort;
 
 final class NodeAllocator
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private static final int DEFAULT_INIT_SIZE = 128;
 	private static final int GROWTH_MULTIPLIER = 2;
 	private static final int DEFAULT_MAX_SIZE = 1024;

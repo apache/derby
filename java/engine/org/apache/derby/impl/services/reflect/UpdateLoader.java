@@ -35,10 +35,6 @@ import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 public class UpdateLoader {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	private JarLoader[] jarList;
 	private HeaderPrintWriter vs;

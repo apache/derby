@@ -20,10 +20,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * debugging).  We even leave out the initialization in that case.
  */
 class OpcodeDebug {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	static final String Name[];
 
 	static {

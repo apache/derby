@@ -29,10 +29,6 @@ import java.io.IOException;
  * would be a forward reference.
  */
 class CodeChunk {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	// The use of ILOAD for the non-integer types is correct.
 	// We have to assume that the appropriate checks/conversions
 	// are defined on math operation results to ensure that

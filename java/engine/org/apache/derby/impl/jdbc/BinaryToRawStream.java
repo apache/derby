@@ -23,11 +23,7 @@ import java.io.EOFException;
 */
 final class BinaryToRawStream
 extends java.io.FilterInputStream
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
+{
 
     // used by caller to insure that parent can not be GC'd until this
     // stream is no longer being used.

@@ -24,10 +24,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import java.util.Hashtable;
 
 public class TableNameInfo {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	// things to look up table name etc
 	private DataDictionary dd;

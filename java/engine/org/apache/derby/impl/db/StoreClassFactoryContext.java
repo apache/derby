@@ -20,12 +20,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 
 /**
 */
-final class StoreClassFactoryContext extends ClassFactoryContext { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+final class StoreClassFactoryContext extends ClassFactoryContext {
 
 	private final AccessFactory store;
 	private final JarReader	jarReader;

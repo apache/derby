@@ -27,10 +27,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 public final class TemplateRow
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/*
 	** Constructors of TemplateRow

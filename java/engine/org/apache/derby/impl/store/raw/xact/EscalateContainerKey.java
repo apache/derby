@@ -17,10 +17,6 @@ import org.apache.derby.iapi.util.Matchable;
 
 public final class EscalateContainerKey implements Matchable
 {
-    /**
-       IBM Copyright &copy notice.
-    */
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
     /**************************************************************************
      * Fields of the class

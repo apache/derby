@@ -18,10 +18,6 @@ import org.apache.derby.iapi.util.ByteArray;
 public final class ReflectClassesJava2 extends DatabaseClasses
 	implements java.security.PrivilegedAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	private java.util.HashMap preCompiled;
 

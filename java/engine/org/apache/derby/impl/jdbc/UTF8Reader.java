@@ -21,10 +21,6 @@ import java.sql.SQLException;
 */
 public final class UTF8Reader extends Reader
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private InputStream in;
 	private final long         utfLen;	// bytes

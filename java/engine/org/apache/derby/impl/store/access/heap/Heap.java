@@ -118,11 +118,6 @@ public final class Heap
     extends    GenericConglomerate
     implements Conglomerate, StaticCompiledOpenConglomInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/*
 	** Fields of Heap.

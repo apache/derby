@@ -12,12 +12,7 @@ package org.apache.derby.impl.services.cache;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-class CacheStat { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+class CacheStat {
 
 	/*
 	** Fields

@@ -54,12 +54,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
      * Fields of the class
      **************************************************************************
      */
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
     /**************************************************************************
      * Constructors for This class:

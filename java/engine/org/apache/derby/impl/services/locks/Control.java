@@ -15,10 +15,6 @@ import org.apache.derby.iapi.services.locks.Latch;
 import java.util.List;
 
 public interface Control {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	public Lockable getLockable();
 

@@ -59,10 +59,6 @@ import java.sql.SQLException;
 public final class LDAPAuthenticationSchemeImpl
 extends JNDIAuthenticationSchemeBase
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private static final String dfltLDAPURL = "ldap://";
 
 	private String searchBaseDN;

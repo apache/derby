@@ -25,10 +25,6 @@ import org.apache.derby.iapi.services.io.LimitReader;
 final class ReaderToUTF8Stream
 	extends InputStream
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private LimitReader reader;
 

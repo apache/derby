@@ -22,10 +22,6 @@ import java.util.Properties;
 //redirecting system err to that message file
 class ControlInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
   static final String ESCAPE = "Escape";
   static final String DEFAULT_ESCAPE = "\\";

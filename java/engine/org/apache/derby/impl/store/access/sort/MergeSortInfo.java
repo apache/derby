@@ -33,10 +33,6 @@ import java.util.Properties;
 **/
 class MergeSortInfo implements SortInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     /**
      * Performance counters ...
      */

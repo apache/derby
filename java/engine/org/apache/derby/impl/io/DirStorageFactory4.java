@@ -21,10 +21,6 @@ import java.io.IOException;
  */
 public class DirStorageFactory4 extends DirStorageFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private static final boolean	rwsOK = JVMInfo.JDK_ID >= 5;
     

@@ -24,10 +24,6 @@ import org.apache.derby.iapi.reference.SQLState;
 	length of the value. In this case 0 is always written.
 */
 class RawToBinaryFormatStream extends LimitInputStream {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private int dummyBytes = 4;
 

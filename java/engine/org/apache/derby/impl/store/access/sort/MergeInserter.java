@@ -35,10 +35,6 @@ import org.apache.derby.iapi.types.RowLocation;
 public final class MergeInserter implements SortController
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	The sort this inserter is for.
 	**/
 	protected MergeSort sort = null;

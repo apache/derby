@@ -25,10 +25,6 @@ import java.io.StringReader;
 
 public class BasicUUID implements UUID, Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** Fields of BasicUUID
 	*/

@@ -62,12 +62,7 @@ import org.apache.derby.impl.store.access.conglomerate.TemplateRow;
 **/
 
 public class BTreeController extends OpenBTree implements ConglomerateController
-{ 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+{
 
     transient DataValueDescriptor[] scratch_template = null;
 

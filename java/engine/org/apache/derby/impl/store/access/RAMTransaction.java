@@ -81,11 +81,6 @@ import org.apache.derby.iapi.services.stream.InfoStreams;
 public class RAMTransaction 
     implements XATransactionController, TransactionManager
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	The corresponding raw store transaction.

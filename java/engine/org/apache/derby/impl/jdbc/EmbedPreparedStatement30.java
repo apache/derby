@@ -27,12 +27,7 @@ import java.net.URL;
  *
  */
 public class EmbedPreparedStatement30 extends EmbedPreparedStatement20
-{ 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
+{
 
 	//////////////////////////////////////////////////////////////
 	//

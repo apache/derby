@@ -36,10 +36,6 @@ import org.apache.derby.impl.store.access.btree.WaitError;
 
 class B2ITableLocking3 extends B2INoLocking
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     /**************************************************************************
      * Constructors for This class:
      **************************************************************************

@@ -35,10 +35,6 @@ import java.sql.Timestamp;
 public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 	implements CallableStatement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** True if we are of the form ? = CALL() -- i.e. true
 	** if we have a return output parameter.

@@ -54,12 +54,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 	@see org.apache.derby.impl.services.cache
 	@see Cacheable
 */
-public final class CachedItem { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public final class CachedItem {
 
 	private static final int VALID            = 0x00000001;
 	private static final int REMOVE_REQUESTED = 0x00000002;

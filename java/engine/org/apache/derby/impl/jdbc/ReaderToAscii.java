@@ -20,10 +20,6 @@ import java.sql.SQLException;
 */
 public final class ReaderToAscii extends InputStream
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private final Reader data;
 	private char[]	conv;

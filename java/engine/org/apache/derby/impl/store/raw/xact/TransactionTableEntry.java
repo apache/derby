@@ -42,10 +42,6 @@ import java.io.IOException;
 
 public class TransactionTableEntry implements Formatable, TransactionInfo, Cloneable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// These fields are only populated if this TTE has been read in from the
 	// log.  Otherwise, they are gotten from the transaction object myxact.
 	private TransactionId           xid;

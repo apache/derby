@@ -62,11 +62,6 @@ import java.util.Calendar;
 public abstract class EmbedResultSet extends ConnectionChild 
     implements java.sql.ResultSet, Comparable {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-
 	// cursor movement
 	protected static final int FIRST = 1;
 	protected static final int NEXT = 2;

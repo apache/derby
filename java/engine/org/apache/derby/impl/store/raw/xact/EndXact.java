@@ -37,10 +37,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 
 public class EndXact implements Loggable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private int transactionStatus;
 	private GlobalTransactionId xactId;

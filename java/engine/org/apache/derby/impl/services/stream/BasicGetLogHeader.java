@@ -23,10 +23,6 @@ import org.apache.derby.iapi.util.CheapDateFormatter;
 
 class BasicGetLogHeader implements PrintWriterGetHeader
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	
 	private boolean doThreadId;
 	private boolean doTimeStamp;

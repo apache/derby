@@ -19,10 +19,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 	stop cleanup on the stack at this point.
 */
 class ServiceBootContext extends ContextImpl {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	ServiceBootContext(ContextManager cm) {
 		super(cm, "ServiceBoot");

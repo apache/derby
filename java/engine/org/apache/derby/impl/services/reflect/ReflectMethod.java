@@ -18,10 +18,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 class ReflectMethod implements GeneratedMethod {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	private final Method	realMethod;
 

@@ -45,10 +45,6 @@ import java.util.Properties;
 
 public abstract class Scan implements ScanManager, ScanInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	 * Methods of ScanController
 	 */

@@ -48,10 +48,6 @@ import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 
 public class B2IForwardScan extends BTreeForwardScan
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/*
 	** Fields of B2IForwardScan.

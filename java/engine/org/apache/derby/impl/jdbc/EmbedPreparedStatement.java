@@ -67,10 +67,6 @@ public abstract class EmbedPreparedStatement
 	extends EmbedStatement
 	implements java.sql.PreparedStatement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	//Moving jdbc2.0 batch related code in this class because callableStatement in jdbc 20 needs
 	//this code too and it doesn't derive from prepared statement in jdbc 20 in our implementation.

@@ -34,11 +34,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 public abstract class SortScan extends Scan
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	The sort that this class is scanning.

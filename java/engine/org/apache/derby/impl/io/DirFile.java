@@ -30,10 +30,6 @@ import java.io.RandomAccessFile;
  */
 class DirFile extends File implements StorageFile
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice =  org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
     /**
      * Construct a DirFile from a path name.

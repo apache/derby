@@ -26,11 +26,6 @@ import java.sql.ParameterMetaData;
  */
 class EmbedParameterMetaData30 extends org.apache.derby.impl.jdbc.EmbedParameterSetMetaData
     implements ParameterMetaData {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
 	//////////////////////////////////////////////////////////////
 	//

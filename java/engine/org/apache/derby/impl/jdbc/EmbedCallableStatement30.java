@@ -29,10 +29,6 @@ import org.apache.derby.impl.jdbc.EmbedConnection;
  */
 public class EmbedCallableStatement30 extends EmbedCallableStatement20
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	//////////////////////////////////////////////////////////////
 	//

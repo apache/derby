@@ -47,11 +47,6 @@ import java.util.Properties;
  **/
 public final class ConglomerateUtil
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /* Public Methods of This class: (arranged Alphabetically ) */
 

@@ -25,10 +25,6 @@ import java.nio.channels.ClosedChannelException;
  */
 class DirRandomAccessFile4 extends DirRandomAccessFile
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 
     /**

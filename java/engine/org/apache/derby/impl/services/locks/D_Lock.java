@@ -21,10 +21,6 @@ import java.util.Properties;
 
 public class D_Lock implements Diagnosticable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     protected Lock lock;
 
     public D_Lock()

@@ -33,10 +33,6 @@ Implements the row level locking accessmanager.
 
 public class RllRAMAccessManager extends RAMAccessManager
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     private int system_lock_level = TransactionController.MODE_RECORD;
 
     /**************************************************************************

@@ -45,12 +45,7 @@ import java.net.URL;
  */
 
 public class EmbedResultSet20
-        extends org.apache.derby.impl.jdbc.EmbedResultSet { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+        extends org.apache.derby.impl.jdbc.EmbedResultSet {
 
         private int fetchDirection ;
         private int fetchSize  ;

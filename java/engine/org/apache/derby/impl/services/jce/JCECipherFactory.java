@@ -58,10 +58,6 @@ import org.apache.derby.io.StorageRandomAccessFile;
  */
 public final class JCECipherFactory implements CipherFactory, ModuleControl, java.security.PrivilegedExceptionAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     private final static String MESSAGE_DIGEST = "MD5";
 
 	private final static String DEFAULT_PROVIDER = "com.sun.crypto.provider.SunJCE";

@@ -56,10 +56,6 @@ import java.util.Properties;
 
 public class HeapConglomerateFactory implements ConglomerateFactory, ModuleControl, ModuleSupportable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	// RESOLVE (mikem) (STO062) 
     // The heap implementation id should be "heap table".

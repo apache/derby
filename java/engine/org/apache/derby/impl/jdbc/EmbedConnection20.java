@@ -34,10 +34,6 @@ import java.util.Properties;
  */
 public class EmbedConnection20 extends EmbedConnection
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	//////////////////////////////////////////////////////////
 	// CONSTRUCTORS

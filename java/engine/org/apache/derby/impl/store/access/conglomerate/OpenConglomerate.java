@@ -54,10 +54,6 @@ by raw store.
 
 public abstract class OpenConglomerate
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     /**************************************************************************
      * Fields of the class
      **************************************************************************

@@ -73,10 +73,6 @@ import java.util.Properties;
  */
 public abstract class EmbedConnection implements java.sql.Connection
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private static final StandardException exceptionClose = StandardException.closeException();
 

@@ -70,11 +70,6 @@ query while another query is optimizing.
 public class BTreeCostController extends OpenBTree 
     implements StoreCostController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     // 1.5 numbers on mikem old machine:
     //

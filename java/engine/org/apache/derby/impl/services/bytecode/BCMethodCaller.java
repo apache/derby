@@ -13,10 +13,6 @@ package org.apache.derby.impl.services.bytecode;
 /**
  */
 class BCMethodCaller extends BCLocalField {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	final short opcode;
 

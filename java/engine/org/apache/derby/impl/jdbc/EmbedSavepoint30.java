@@ -35,11 +35,6 @@ import java.sql.SQLException;
 final class EmbedSavepoint30 extends ConnectionChild
     implements Savepoint {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
-
     //In order to avoid name conflict, the external names are prepanded
     //with "e." and internal names always start with "i." This is for bug 4467
     private final String savepointName;

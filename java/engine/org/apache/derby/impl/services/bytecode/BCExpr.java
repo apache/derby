@@ -17,12 +17,7 @@ package org.apache.derby.impl.services.bytecode;
  * it if so.
  *
  */
-interface BCExpr { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+interface BCExpr {
 
 	// maybe these should go into Declarations, instead?
 	// note there is no vm_boolean; boolean is an int

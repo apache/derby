@@ -59,10 +59,6 @@ import java.util.Hashtable;
 
 public class XactFactory implements TransactionFactory, ModuleControl, ModuleSupportable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected static final String USER_CONTEXT_ID        = "UserTransaction";
 	protected static final String NESTED_READONLY_USER_CONTEXT_ID = 
         "NestedRawReadOnlyUserTransaction";

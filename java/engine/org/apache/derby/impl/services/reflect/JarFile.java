@@ -22,10 +22,6 @@ import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 
 class JarFile {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	final String[] name;
 	protected ZipFile zip;
 	boolean isStream;

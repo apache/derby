@@ -15,10 +15,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 class BCLocalField implements LocalField {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	final int	   cpi; // of the Field Reference
 	final Type     type;

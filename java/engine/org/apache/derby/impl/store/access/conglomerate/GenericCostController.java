@@ -34,11 +34,6 @@ controller.
 public class GenericCostController 
     extends GenericController implements StoreCostController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
     /**************************************************************************
      * Fields of the class

@@ -67,10 +67,6 @@ or ISBN 1 872630 24 3.
 
 public class XactXAResourceManager implements XAResourceManager
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     /**************************************************************************
      * Fields of the class
      **************************************************************************

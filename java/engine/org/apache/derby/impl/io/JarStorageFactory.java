@@ -32,10 +32,6 @@ import java.util.zip.ZipFile;
 
 public class JarStorageFactory extends BaseStorageFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
     ZipFile zipData;
     
     /**

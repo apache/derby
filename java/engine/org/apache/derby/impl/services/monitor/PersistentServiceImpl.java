@@ -53,10 +53,6 @@ import java.security.PrivilegedActionException;
  */
 public class PersistentServiceImpl implements PersistentService
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
     private String home; // the path of the database home directory. Can be null
     private String canonicalHome; // will be null if home is null

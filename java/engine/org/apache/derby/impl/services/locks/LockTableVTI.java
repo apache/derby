@@ -27,10 +27,6 @@ import java.util.List;
  */
 class LockTableVTI implements Enumeration
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	// the clonedLockTable temporarily holds a copy of the lock table.
 	//
 	// The copy is necessary because the real lock manager needs to be single

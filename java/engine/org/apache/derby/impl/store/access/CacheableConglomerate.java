@@ -35,10 +35,6 @@ created.
 
 class CacheableConglomerate implements Cacheable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     private Long            conglomid;
     private Conglomerate    conglom;
 

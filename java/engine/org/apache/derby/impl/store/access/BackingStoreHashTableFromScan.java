@@ -43,11 +43,6 @@ Transactions are obtained from an AccessFactory.
 
 class BackingStoreHashTableFromScan extends BackingStoreHashtable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
     /**************************************************************************
      * Fields of the class

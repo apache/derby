@@ -54,10 +54,6 @@ rows from the page (RESOLVE - not done yet).
 
 class BTreePostCommit implements Serviceable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     private     AccessFactory access_factory  = null;
     private     long          page_number = ContainerHandle.INVALID_PAGE_NUMBER;
 

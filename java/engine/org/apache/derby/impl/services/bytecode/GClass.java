@@ -31,10 +31,6 @@ import java.io.IOException;
  * @author ames
  */
 public abstract class GClass implements ClassBuilder {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	protected ByteArray bytecode;
 	protected final ClassFactory cf;

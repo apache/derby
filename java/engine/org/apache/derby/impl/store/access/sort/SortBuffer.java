@@ -32,10 +32,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 class SortBuffer
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	Returned from insert when the row was inserted
 	without incident.
 	**/

@@ -25,10 +25,6 @@ import java.util.Iterator;
 
 public class D_LockControl implements Diagnosticable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     protected LockControl control;
 
     public D_LockControl()

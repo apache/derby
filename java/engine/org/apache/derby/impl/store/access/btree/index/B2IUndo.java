@@ -85,10 +85,6 @@ in the log record of the insert/delete.
 public class B2IUndo implements LogicalUndo, Formatable
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Find the page and record to undo.  If no logical undo is necessary,
 	 * i.e., row has not moved, then just return the latched page where undo
 	 * should go.  If the record has moved, it has a new recordId on the new

@@ -63,11 +63,6 @@ import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 
 public abstract class BTreeScan extends OpenBTree implements ScanManager
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/*
 	** Fields of BTreeScan

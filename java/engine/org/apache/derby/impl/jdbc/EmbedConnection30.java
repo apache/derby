@@ -38,10 +38,6 @@ import java.util.Vector;
  */
 public class EmbedConnection30 extends EmbedConnection20
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	//////////////////////////////////////////////////////////
 	// CONSTRUCTORS

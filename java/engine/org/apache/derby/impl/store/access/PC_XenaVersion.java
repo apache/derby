@@ -30,10 +30,6 @@ import java.util.Properties;
 
 public class PC_XenaVersion implements Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private static final int XENA_MAJOR_VERSION = 1;
 	private static final int XENA_MINOR_VERSION_0 = 0;
 

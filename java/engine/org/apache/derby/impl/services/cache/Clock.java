@@ -86,12 +86,7 @@ import java.util.Properties;
 
 */
 
-final class Clock extends Hashtable implements CacheManager, Serviceable { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 	/*
 	** Fields

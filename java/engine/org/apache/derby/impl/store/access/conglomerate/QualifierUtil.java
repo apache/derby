@@ -16,10 +16,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 public class QualifierUtil implements Qualifier 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     private int                 column_id;
     private DataValueDescriptor key_val;
     private int                 operator;

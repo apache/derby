@@ -42,10 +42,6 @@ import org.apache.derby.catalog.UUID;
 public class ExternalSortFactory implements 
     SortFactory, ModuleControl, ModuleSupportable, SortCostController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private boolean userSpecified; // did the user specify sortBufferMax
 	private int defaultSortBufferMax; 

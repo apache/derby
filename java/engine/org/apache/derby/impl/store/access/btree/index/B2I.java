@@ -120,11 +120,6 @@ import org.apache.derby.iapi.services.cache.ClassSize;
 
 public class B2I extends BTree
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     public    static final String PROPERTY_BASECONGLOMID = "baseConglomerateId";
     public    static final String PROPERTY_ROWLOCCOLUMN  = "rowLocationColumn";
 

@@ -33,11 +33,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 public class SearchParameters
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     /**
      * Position on key just left of a sequence of partial key matches.

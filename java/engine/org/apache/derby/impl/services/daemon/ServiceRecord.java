@@ -15,10 +15,6 @@ import org.apache.derby.iapi.services.daemon.Serviceable;
 /** wrapper class for basic daemon's clients */
 class ServiceRecord
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// immutable fields
 	final Serviceable client;	
 	private final boolean onDemandOnly;

@@ -53,10 +53,6 @@ import java.sql.Clob;
  */
 final class EmbedClob extends ConnectionChild implements Clob
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     // clob is either a string or stream
     private boolean         isString;
     private InputStream     myStream;

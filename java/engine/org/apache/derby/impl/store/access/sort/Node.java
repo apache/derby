@@ -22,10 +22,6 @@ import org.apache.derby.impl.sql.execute.RowUtil;
 
 final class Node
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public int balance;
 	public Node leftLink;
 	public Node rightLink;

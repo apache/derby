@@ -69,10 +69,6 @@ import java.io.Serializable;
 public abstract class DatabaseClasses
 	implements ClassFactory, ModuleControl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/*
 	** Fields
 	*/

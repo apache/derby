@@ -45,10 +45,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 public class B2IController extends BTreeController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/*
 	** Fields of B2IController.

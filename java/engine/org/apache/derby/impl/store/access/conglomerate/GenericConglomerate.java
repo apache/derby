@@ -36,10 +36,6 @@ the Conglomerate interface.
 public abstract class GenericConglomerate 
     extends DataType implements Conglomerate
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
     /**************************************************************************
      * Public Methods implementing DataValueDescriptor interface.

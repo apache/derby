@@ -32,10 +32,6 @@ import java.util.Properties;
 **/
 class HeapScanInfo implements ScanInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     /**
      * Performance counters ...
      */

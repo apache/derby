@@ -44,10 +44,6 @@ import java.io.IOException;
 
 */
 public class FlushedScan implements StreamLogScan {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private StorageRandomAccessFile scan;		// an output stream to the log file
 	LogToFile logFactory; 				// log factory knows how to to skip

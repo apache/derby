@@ -42,10 +42,6 @@ import java.sql.SQLException;
 
 public abstract class JNDIAuthenticationSchemeBase implements UserAuthenticator
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected  final JNDIAuthenticationService authenticationService;
 	protected String providerURL;
 

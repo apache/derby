@@ -85,10 +85,6 @@ them to services.properties.
 **/
 class PropertyConglomerate
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	protected long propertiesConglomId;
 	protected Properties serviceProperties;
 	private LockFactory lf;

@@ -52,10 +52,6 @@ import java.io.IOException;
 
 class EmbedBlob extends ConnectionChild implements Blob
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     // clob is either bytes or stream
     private boolean         isBytes;
     private InputStream     myStream;

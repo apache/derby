@@ -56,10 +56,6 @@ import java.util.Enumeration;
 
 public final class LockSet extends Hashtable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	** Fields
 	*/

@@ -66,10 +66,6 @@ import org.apache.derby.impl.store.access.btree.OpenBTree;
 
 public class B2IFactory implements ConglomerateFactory, ModuleControl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private static final String IMPLEMENTATIONID = "BTREE";
 	private static final String FORMATUUIDSTRING = "C6CEEEF0-DAD3-11d0-BB01-0060973F0942";

@@ -25,10 +25,6 @@ import org.apache.derby.iapi.services.loader.ClassInfo;
 public abstract class LoadedGeneratedClass
 	implements GeneratedClass
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/*
 	** Fields

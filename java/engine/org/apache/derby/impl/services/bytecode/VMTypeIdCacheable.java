@@ -22,10 +22,6 @@ import org.apache.derby.iapi.services.classfile.ClassHolder;
  * VMTypeIds.  It maps a Java class or type name to a VM type ID.
  */
 class VMTypeIdCacheable implements Cacheable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/* The VM name of the Java class name */
 	// either a Type (java type) or a String (method descriptor)
 	private Object descriptor;

@@ -66,10 +66,6 @@ the lock if the interface returns that the latch was released.
 
 public interface BTreeLockingPolicy
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     /**************************************************************************
      * Abstract Protected lockScan*() locking methods of BTree:
      *     lockScan                 - lock the scan page

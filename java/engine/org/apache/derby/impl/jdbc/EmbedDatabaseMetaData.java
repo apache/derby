@@ -88,12 +88,7 @@ import java.io.InputStream;
  * @author ames
  */
 public class EmbedDatabaseMetaData extends ConnectionChild 
-	implements DatabaseMetaData, java.security.PrivilegedAction { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+	implements DatabaseMetaData, java.security.PrivilegedAction {
 
 	/*
 	** Property and values related to using

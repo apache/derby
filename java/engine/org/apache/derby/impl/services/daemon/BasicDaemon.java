@@ -64,10 +64,6 @@ import java.util.List;
 */
 public class BasicDaemon implements DaemonService, Runnable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private int numClients;		// number of clients that needs services
 
 	private static final int OPTIMAL_QUEUE_SIZE = 100;

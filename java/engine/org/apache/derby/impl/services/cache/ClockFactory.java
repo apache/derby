@@ -27,10 +27,6 @@ import java.util.Properties;
 */
 
 public class ClockFactory implements CacheFactory {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Trace flag to display cache statistics

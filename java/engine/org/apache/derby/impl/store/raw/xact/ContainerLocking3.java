@@ -27,10 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
 	@see org.apache.derby.iapi.store.raw.LockingPolicy
 */
 public class ContainerLocking3 extends NoLocking {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	protected final LockFactory	lf;
 

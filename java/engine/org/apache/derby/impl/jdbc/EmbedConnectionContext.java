@@ -29,10 +29,6 @@ import java.util.Enumeration;
 public class EmbedConnectionContext extends ContextImpl 
 		implements ConnectionContext
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		We hold a soft reference to the connection so that when the application

@@ -55,10 +55,6 @@ import java.io.IOException;
  *
  */
 public class BCMethod implements MethodBuilder {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	final BCClass		cb;
 	protected final ClassHolder modClass; // the class it is in (modifiable fmt)

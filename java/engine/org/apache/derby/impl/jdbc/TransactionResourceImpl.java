@@ -98,10 +98,6 @@ import java.sql.SQLException;
  */
 public final class TransactionResourceImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/*
 	** instance variables set up in the constructor.
 	*/

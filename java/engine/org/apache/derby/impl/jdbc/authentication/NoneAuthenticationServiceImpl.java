@@ -33,10 +33,6 @@ import java.util.Properties;
  */
 public final class NoneAuthenticationServiceImpl
 	extends AuthenticationServiceBase implements UserAuthenticator {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	//
 	// ModuleControl implementation (overriden)

@@ -33,10 +33,6 @@ import java.security.GeneralSecurityException;
 */
 
 final class JarFileJava2 extends JarFile {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	JarFileJava2() {
 		super();

@@ -34,11 +34,6 @@ import java.net.URL;
 public final class FileMonitor extends BaseMonitor implements java.security.PrivilegedExceptionAction
 {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-
 	/* Fields */
 	private File home;
 

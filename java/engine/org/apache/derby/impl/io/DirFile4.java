@@ -29,10 +29,6 @@ import java.nio.channels.FileLock;
  */
 class DirFile4 extends DirFile
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
     private RandomAccessFile lockFileOpen;
     private FileChannel lockFileChannel;

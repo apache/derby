@@ -23,10 +23,6 @@ import java.lang.reflect.Method;
 import java.util.Hashtable;
 
 public final class ReflectGeneratedClass extends LoadedGeneratedClass {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	private final Hashtable methodCache;
 	private static final GeneratedMethod[] directs;

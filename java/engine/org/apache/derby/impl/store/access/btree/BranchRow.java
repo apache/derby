@@ -43,10 +43,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 public class BranchRow
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     /* a dummy page number value (should not be compressable) */
     public static final long DUMMY_PAGE_NUMBER = 0xffffffffffffffffL;
 

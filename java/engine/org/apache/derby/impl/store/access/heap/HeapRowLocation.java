@@ -66,10 +66,6 @@ import java.io.IOException;
 public class HeapRowLocation extends DataType implements RowLocation
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	The HeapRowLocation simply maintains a raw store record handle.
 	**/
     private long         pageno;

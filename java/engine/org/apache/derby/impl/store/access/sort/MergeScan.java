@@ -34,10 +34,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 public class MergeScan extends SortScan
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	The sort buffer we will use.
 	**/
 	protected SortBuffer sortBuffer;

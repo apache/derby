@@ -41,10 +41,6 @@ import java.sql.ResultSet;
  */
 public class EmbedResultSetMetaData
 	implements ResultSetMetaData {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private final ResultColumnDescriptor[] columnInfo;
 

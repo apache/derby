@@ -35,10 +35,6 @@ import java.util.Properties;
 public class DirStorageFactory extends BaseStorageFactory
     implements WritableStorageFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
     /**
      * Construct a StorageFile from a path name.
      *

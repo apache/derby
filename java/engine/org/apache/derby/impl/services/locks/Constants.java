@@ -14,10 +14,6 @@ package org.apache.derby.impl.services.locks;
 */
 
 public class Constants {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		Trace flag to display lock requests, grants and unlocks.

@@ -26,10 +26,6 @@ import java.io.FileNotFoundException;
  */
 class CPFile extends InputStreamFile
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
     private final CPStorageFactory storageFactory;
     private int actionCode;

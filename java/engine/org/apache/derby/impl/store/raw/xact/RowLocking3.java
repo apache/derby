@@ -33,10 +33,6 @@ import org.apache.derby.iapi.error.StandardException;
 */
 public class RowLocking3 extends NoLocking 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	// no locking has no state, so it's safe to hold
 	// it as a static
 	private static final LockingPolicy NO_LOCK = new NoLocking();
