@@ -371,7 +371,8 @@ public class FileCompare
 	// first search jvmName (to support unnamed/non-IBM or Sun JVMs)
 	// if vendor == IBM, search ibm+rev then jdk+rev, decrementing rev by one until rev=13,
 	// in each dir, search framework and driver version if applicable.
-	// BUT, if it's j9, search j9_foundation then j9_13 if j9_foundation, or j9_13 for j9_13, then 	       // the normal ibm13 search pattern: ibm13 then jdk13.
+	// BUT, if it's j9, first j9_foundation, then search j9_22 for 22, otherwise, j9_13 then
+	// the normal ibm13 search pattern: ibm13 then jdk13.
 
 	String newprefix;
 	if (jvmName.startsWith("j9") || (serverJvm != null && serverJvm.startsWith("j9")))
@@ -382,7 +383,22 @@ public class FileCompare
 		if (master == null && searchDriverVersion) searchDriverVersion(newprefix);
 		if (master == null) getmaster(newprefix);
             }
-            newprefix = prefix + "j9_13" + '/';
+	    else
+            {
+                newprefix = prefix + jvmName + '/';
+                if ((!jvmName.equals("j9_13")) && (iminor  > 1))
+                {
+                    for (int i = iminor; i > 1; i--)
+                    {
+                        if (master == null) 
+                        {
+                            newprefix = prefix + "j9_2" + i + '/'; 
+                            getmaster(newprefix);
+                        }
+                    }
+                }
+                if (master == null) newprefix = prefix + "j9_13" + '/';
+            }
 	    if (master == null && searchDriverVersion) searchDriverVersion(newprefix);
 	    if (master == null) getmaster(newprefix);
 	    

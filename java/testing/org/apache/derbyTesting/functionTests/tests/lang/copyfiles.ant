@@ -132,6 +132,7 @@ precedence.sql
 predicatesIntoViews.sql
 predicatesIntoViews_derby.properties
 primarykey.sql
+procedure_app.properties
 procedure_derby.properties
 refActions.sql
 refActions1.sql

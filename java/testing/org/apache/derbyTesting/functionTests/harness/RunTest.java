@@ -72,7 +72,8 @@ public class RunTest
 				       "DB2app"};
     static NetServer ns;
     static boolean frameworkInitialized = false;
-    static boolean j9net = false;
+    static boolean jvmnet = false; // switch to see if we need have client & server in a different jvm
+    static String jvmnetjvm; // string for class name of server jvm if different from client jvm
     static String driverName;
     static String dbName;
 
@@ -254,8 +255,18 @@ public class RunTest
 	    if ((driverName != null) && (!skiptest) )
 	    {
             System.out.println("Initialize for framework: "+ framework );
-            if (j9net && (framework.startsWith("DerbyNet"))) 
-			    ns = new NetServer(baseDir, "j9_13", classpathServer, null, jvmflags,framework);
+            if (jvmnet && (framework.equals("DB2jNet")  || framework.startsWith("DerbyNet")))
+            {
+                // first check to see if properties were set to use a different jvm for server/client
+                String jvmnetjvm = System.getProperty("serverJvmName");
+                if (jvmnetjvm == null) 
+                {
+                    // default to the latest one we know 
+                    jvmnetjvm = "j9_22";
+                }
+			
+                ns = new NetServer(baseDir, jvmnetjvm, classpathServer, null, jvmflags,framework);
+            }
             else
 			    ns = new NetServer(baseDir, jvmName, classpathServer, javaCmd, jvmflags,framework);
 		    ns.start();
@@ -341,11 +352,19 @@ public class RunTest
 
     	boolean status;
 
-    	// only with j9 may the serverJvm be different from jvmName
-    	if (j9net)
+    	// allow for server jvmName to be different from client jvmName
+    	if (jvmnet)
+    	{
+            // first check to see if properties were set to use a different jvm for server/client
+            if (jvmnetjvm == null) 
+            {
+                // default to the latest one we know 
+                jvmnetjvm = "j9_22";
+            }
     	    status = diff.exec(outName, outDir, pwDiff, testOutName,
     		    frameworkMaster, jvmName, iminor, useprocess, systemdiff, canondir, 
-			    canonpath, "j9_13");
+			    canonpath, jvmnetjvm);
+        }
     	else
       	    status = diff.exec(outName, outDir, pwDiff, testOutName,
     		    frameworkMaster, jvmName, iminor, useprocess, systemdiff, canondir, 
@@ -822,6 +841,14 @@ public class RunTest
 		else
 		    javaVersion = jvmName;
 
+		//hang on a minute - if j9, we need to check further
+		String javavmVersion;
+		if (sp.getProperty("java.vm.name").equals("J9"))
+			javavmVersion = (sp.getProperty("java.vm.version"));
+		else
+			javavmVersion = javaVersion;
+
+
 		JavaVersionHolder jvh = new JavaVersionHolder(javaVersion);
 		majorVersion = jvh.getMajorVersion();
 		minorVersion = jvh.getMinorVersion();
@@ -841,7 +868,20 @@ public class RunTest
                         if (System.getProperty("com.ibm.oti.configuration").equals("foun"))
                             jvmName = "j9_foundation";
                         else
+                        {
+                            // for reporting; first extend javaVersion
+                            javaVersion = javaVersion + " - " + majorVersion + "." + minorVersion;
+                            // up to j9 2.1 (jdk 1.3.1 subset) the results are the same for all versions,
+                            // or we don't care about it anymore. Switch back to 1.3. (java.version) values.
+                            if ((imajor <= 2) && (iminor < 2)) 
+                            { 
+                                majorVersion = "1"; 
+                                minorVersion = "3"; 
+                                imajor = 1; 
+                                iminor = 3; 
+                            } 
                             jvmName = "j9_" + majorVersion + minorVersion;
+                        }
                     }
                     else
                         jvmName = "ibm" + majorVersion + minorVersion;
@@ -1385,8 +1425,8 @@ clp.list(System.out);
 	        }
 
             String srvJvm = System.getProperty("serverJvm");
-            if ((srvJvm !=null) && ((srvJvm.toUpperCase().startsWith("J9")) || (srvJvm.equalsIgnoreCase("wsdd5.6"))))
-                j9net = true;
+            if (srvJvm !=null) 
+                jvmnet = true;
 
             String excludeJcc = ap.getProperty("excludeJCC");
             if ( framework.startsWith("DB2") )
@@ -1412,7 +1452,7 @@ clp.list(System.out);
 		
 
             // for now we want just want to have a single property
-            // for all j9 versions; use j9_13 for the jvmname
+            // for all j9 versions
             String testJVM = (jvmName.startsWith("j9") ? "j9" : jvmName);
             runwithjvm = ap.getProperty("runwith" + testJVM);
             if  ((runwithjvm != null) && (runwithjvm.equalsIgnoreCase("false")))

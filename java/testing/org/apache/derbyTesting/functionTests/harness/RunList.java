@@ -108,7 +108,8 @@ public class RunList
 	static String topreportdir; // where to place the .pass and .fail files
 	static String canondir; // location of masters (default is master)
 	static String bootcp; // for j9 bootclasspath
-	static String serverJvm; // for starting another jvm for networkserver, j9 only for now.
+	static String serverJvm; // for starting another jvm for networkserver, j9 default.
+	static String serverJvmName; // for starting another jvm for networkserver, j9_22 default.
     static File outDir; // test out dir
     static File outFile; // suite output file
     static File runDir; // location of suite.runall (list of tests)
@@ -148,7 +149,7 @@ public class RunList
         //System.out.println("RunList topSuiteName= " + topSuiteName);
         this.topParentSuite = topParentSuite;
         //System.out.println("topParentSuite= " + topParentSuite);
-        
+
         // Run the suites
         runSuites(suitesToRun);
     }
@@ -163,7 +164,7 @@ public class RunList
         userdir = System.getProperty("user.dir");
         //System.out.println("Number of suites in list = " + suitesToRun.size());
         Properties p = null;
-        
+
         // First get the top level suiteProperties since some
         // special properties might need to be used by all sub-suites
         setTopSuiteProperties();
@@ -171,7 +172,7 @@ public class RunList
         Properties topParentSuiteProps = 
             locateSuiteProperties(topParentSuite, suiteProperties, true, true);
         setSuiteProperties(topParentSuiteProps, topParentSuite, suiteProperties, true, true);
-            
+
         // Now handle the list of child suites under this parent
         for (int i = 0; i < suitesToRun.size(); i++)
         {
@@ -195,11 +196,11 @@ public class RunList
                 subProps = topParentSuiteProps;
             }
             setSuiteProperties(subProps, subSuite, topParentSuiteProps, true, false);
-            
+
             // Now handle the child suite of this subSuite
             suiteName = fullsuiteName.substring(fullsuiteName.lastIndexOf(":")+1);
             //System.out.println("child suiteName: " + suiteName);
-                
+
             p = locateSuiteProperties(suiteName, subProps, false, false);
             setSuiteProperties(p, suiteName, subProps, false, false);
 
@@ -236,7 +237,7 @@ public class RunList
                 }
                 else
                     pwOut.println("Framework: No special framework.");
-                
+
                 // Create the file to list the suites that get skipped
 	            File f = new File(outDir, topSuiteName);
 	            File skipFile = new File(f, topSuiteName+".skip");
@@ -254,7 +255,7 @@ public class RunList
 
                 System.out.println("Now run the suite's tests");
                 //System.out.println("shutdownurl: " + shutdownurl);
-                
+
                 if (skip) // Skip a suite under certain environments
 				{
 				    addToSkipFile(topSuiteName+":"+fullsuiteName, ps);
@@ -296,11 +297,11 @@ public class RunList
                             //System.out.println("renamed: " + renamed);
                         }
                     }
-                    
+
                     // Run the tests for this suite
                     runTests(p, fullsuiteName);
                 }
-                
+
                 String endTime = CurrentTime.getTime();
                 pwOut.println("**** End SubSuite: " + fullsuiteName +
                     " jdk" + javaVersion +
@@ -355,14 +356,14 @@ public class RunList
             jvmProps.addElement("verbose=true");
         if ( (reportstderr != null) && (reportstderr.length()>0) )
             jvmProps.addElement("reportstderr=" + reportstderr);
-        
+
         if ( (jvmflags != null) && (jvmflags.length()>0) )
         {
             // We want to pass this down to RunTest so it will
             // run an individual test with jvmflags like -nojit
             jvmProps.addElement("jvmflags=" + '"' + jvmflags + '"');
         }
-        
+
         if ( (timeout != null) && (timeout.length()>0) )
         {
             if (useprocess)
@@ -407,6 +408,8 @@ public class RunList
             jvmProps.addElement("bootcp=" + bootcp);
         if ( (serverJvm != null) && (serverJvm.length()>0) )
             jvmProps.addElement("serverJvm=" + serverJvm);
+        if ( (serverJvmName != null) && (serverJvmName.length()>0) )
+            jvmProps.addElement("serverJvmName=" + serverJvmName);
         if ( useprocess == false )
             jvmProps.addElement("useprocess=false");
         if ( skipsed.equals("true") )
@@ -429,7 +432,7 @@ public class RunList
             jvmProps.addElement("testSpecialProps=" + otherSpecialProps);
 
         jvmProps.addElement("suitename=" + suite);
-        
+
         if ( (topSuiteName != null) && (topSuiteName.length()>0) )
             jvmProps.addElement("topsuitename=" + topSuiteName);
 
@@ -468,13 +471,13 @@ public class RunList
             verboseSb.append(str + " ");
             //if (verbose) 
                 //System.out.println("Execute command: " + verboseSb.toString());
-            
+
 	        String uc = System.getProperties().getProperty("useCommonDB");
 		    if (uc == null) uc = "false";
             if ( useprocess == true && uc.equals("true")==false)
             {
                 System.out.println("Execute command: " + verboseSb.toString());
-                
+
                 // Now execute the command to run the test
         		Process pr = null;
         		try
@@ -544,7 +547,7 @@ public class RunList
 	    lastTest = str;
         }
     }
-    
+
     /**
     * Locate the suite's properties file
     */
@@ -587,6 +590,7 @@ public class RunList
             // because framework may have been set by previous suite
             framework = parentProps.getProperty("framework");
             serverJvm = parentProps.getProperty("serverJvm");
+            serverJvmName = parentProps.getProperty("serverJvmName");
             // Do the same for ij.defaultResourcePackage
             ijdefaultResourcePackage =
                 parentProps.getProperty("ij.defaultResourcePackage");
@@ -606,7 +610,7 @@ public class RunList
         }                
         return p;
     }
-                
+
 
     /**
     * Properties which may be defined for all suites
@@ -639,13 +643,21 @@ public class RunList
 		    javaCmd = "java";
 		else if (javaCmd.equals("jview"))
 		    jvmName = "jview";
-        
-        JavaVersionHolder jvh = new JavaVersionHolder(javaVersion);
+
+		// if j9, we need to check further
+		String javavmVersion;
+		if (System.getProperty("java.vm.name").equals("J9"))
+			javavmVersion = (System.getProperty("java.vm.version"));
+		else
+			javavmVersion = javaVersion;
+
+
+        JavaVersionHolder jvh = new JavaVersionHolder(javavmVersion);
         majorVersion = jvh.getMajorVersion();
         minorVersion = jvh.getMinorVersion();
         iminor = jvh.getMinorNumber();
         imajor = jvh.getMajorNumber();
-        
+
 		if ( (jvmName == null) || (jvmName.equals("jview")) )
 		{
 		    if ( (iminor < 2) && (imajor < 2) )
@@ -653,7 +665,24 @@ public class RunList
 		    else
 		        jvmName = "jdk" + majorVersion + minorVersion;
 		}
-		
+	
+		if (jvmName.equals("j9_13"))
+		{ 
+			javaVersion = javaVersion + " - " + majorVersion + "." + minorVersion;
+			System.out.println("javaVersion now: " + javaVersion);
+			// up to j9 2.1 (jdk 1.3.1. subset) the results are the same for all versions, or
+			// we don't care about it anymore. So switch back to 1.3 (java.version values).
+			if ((imajor <= 2) && (iminor < 2))
+			{
+				majorVersion = "1";
+				minorVersion = "3";
+				imajor = 1;
+				iminor = 3;
+			}
+			else 
+				jvmName = "j9_" + majorVersion + minorVersion;
+		}
+
 		jvmflags = suiteProperties.getProperty("jvmflags");
 		testJavaFlags = suiteProperties.getProperty("testJavaFlags");
 		classpath = suiteProperties.getProperty("classpath");
@@ -682,6 +711,7 @@ public class RunList
 		    topsuitedir = outputdir;
 		bootcp = suiteProperties.getProperty("bootcp");
 		serverJvm = suiteProperties.getProperty("serverJvm");
+		serverJvmName = suiteProperties.getProperty("serverJvmName");
 		canondir = suiteProperties.getProperty("canondir");
 		mtestdir = suiteProperties.getProperty("mtestdir");
 		String usepr = suiteProperties.getProperty("useprocess");
@@ -722,7 +752,7 @@ public class RunList
     		jvmName = "currentjvm";
     	else
     		p.put("jvm", jvmName);
-        
+
         if ( javaCmd == null )
             javaCmd = "java";
         else
@@ -741,7 +771,7 @@ public class RunList
             p.put("bootcp", "bootcp");
         if ( canondir != null )
             p.put("canondir", canondir);
-            
+
 		if ( (outputdir == null) || (outputdir.length() == 0) )
 		{
 		    outputdir = p.getProperty("outputdir");
@@ -756,48 +786,52 @@ public class RunList
 		else
             framework = p.getProperty("framework");
 
-		// same for serverJvm 
+		// same for serverJvm and serverJvmName
         if ( parentProperties.getProperty("serverJvm") != null )
             p.put("serverJvm", serverJvm);
 		else
             serverJvm = p.getProperty("serverJvm");
+        if ( parentProperties.getProperty("serverJvmName") != null )
+            p.put("serverJvmName", serverJvmName);
+		else
+            serverJvmName = p.getProperty("serverJvmName");
 
         // Encryption may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("encryption") != null )
 		    p.put("encryption", encryption);
 		else
             encryption = p.getProperty("encryption");
-        
+
 	// Encryption provider may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("testEncryptionProvider") != null )
 		    p.put("testEncryptionProvider", testEncryptionProvider);
 		else
             testEncryptionProvider = p.getProperty("testEncryptionProvider");
-        
+
         // jdk12test may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("jdk12test") != null )
 		    p.put("jdk12test", jdk12test);
 		else
             jdk12test = p.getProperty("jdk12test");
-       
+
         // jdk12exttest may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("jdk12exttest") != null )
 		    p.put("jdk12exttest", jdk12exttest);
 		else
             jdk12exttest = p.getProperty("jdk12exttest");
-        
+
         // jdk14test may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("jdk14test") != null )
 		    p.put("jdk14test", jdk14test);
 		else
             jdk14test = p.getProperty("jdk14test");
-       
+
         // runwithibmjvm may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("runwithibmjvm") != null )
 		    p.put("runwithibmjvm", runwithibmjvm);
 		else
             runwithibmjvm = p.getProperty("runwithibmjvm");
-       
+
         // runwithjvm may be set at the top or just for a subsuite
 	    String testJVM = (jvmName.startsWith("j9") ? "j9" : jvmName);
 	    if ( parentProperties.getProperty("runwith" + testJVM) != null )
@@ -816,7 +850,7 @@ public class RunList
 		    p.put("excludeJCC", excludeJCC);
 		else
             excludeJCC = p.getProperty("excludeJCC");
-       
+
         // useprocess may be set at the top or just for a subsuite
         String upr = parentProperties.getProperty("useprocess");
 	    if ( upr != null )
@@ -841,9 +875,9 @@ public class RunList
             skipsed = "false";
 		if ( "true".equals(keepfiles) )
 		    p.put("keepfiles", keepfiles);
-            
+
         // testJavaFlags should get appended
-        
+
         String testflags = p.getProperty("testJavaFlags");
         if ( parentProperties.getProperty("testJavaFlags") != null )
         {
@@ -855,7 +889,7 @@ public class RunList
         }
         else
             testJavaFlags = p.getProperty("testJavaFlags");
-            
+
 		// The following could change between suites or
 		// may be set for the whole set of suites
 
@@ -863,15 +897,15 @@ public class RunList
             p.put("reportstderr", reportstderr);
         else
             reportstderr = p.getProperty("reportstderr");
-            
+
         if ( parentProperties.getProperty("timeout") != null )
             p.put("timeout", timeout);
         else
             timeout = p.getProperty("timeout");
-                   
+
         // outcopy is very specific to a single suite
         outcopy = p.getProperty("outcopy");
-        
+
 		// useoutput is very specific to a single suite
 		useoutput = p.getProperty("useoutput");
 
@@ -891,7 +925,7 @@ public class RunList
 		    
         // Set the suite subdir under top outputdir
         setSuiteDir(suiteName, isParent, isTop);
-        
+
         // This individual suite may also have special flags
         // Reset otherSpecialProps in case another suite had any set
         otherSpecialProps = "";
@@ -940,7 +974,7 @@ public class RunList
 	needJdk14 = false;
 	excludedFromJCC = false;
 	needIBMjvm = null;
-        
+
 	// Determine if this is jdk12 or higher (with or without extensions)
         if (iminor >= 2) isJdk12 = true;
 	if ( System.getProperty("java.version").startsWith("1.1.8") ) isJdk118 = true;
@@ -1113,7 +1147,7 @@ public class RunList
 	return result; // last test result is returned
     }
 
-    
+
     public static void setSuiteDir(String suiteName, boolean isParent, boolean isTop)
         throws IOException
     {
@@ -1143,7 +1177,7 @@ public class RunList
             //System.out.println("RunList topsuitedir: " + outputdir);
             //System.out.println("RunList outputdir: " + outputdir);
             //System.out.println("RunList topreportdir: " + topreportdir);
-            
+
             // Modify outputdir for special framework
             if ( (framework != null) && (framework.length()>0) )
             {
@@ -1176,7 +1210,7 @@ public class RunList
                 }
             }
         }
-        
+
 		else if ( upgradetest == null ) // this is a child suite of a parent
 		{
             File suitedir = new File(outputdir, suiteName);
@@ -1185,7 +1219,7 @@ public class RunList
             //System.out.println("Child outputdir: " + outputdir);
         }
     }
-    
+
 	private static void setSpecialProps(Properties p, boolean isTop)
 	{
         // Just build  string for RunTest to parse (^ is the separator)
@@ -1216,3 +1250,4 @@ public class RunList
     }
 	
 }
+
