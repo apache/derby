@@ -115,13 +115,17 @@ public class RowLocking2 extends RowLockingRR
             //
 
 
-			if (lf.isLockHeld(t.getCompatibilitySpace(), t, container.getId(), ContainerLock.CX) ||
-				((!forUpdate) && 
-                 lf.isLockHeld(t.getCompatibilitySpace(), t, container.getId(), ContainerLock.CS)))
+			if (lf.isLockHeld(t.getCompatibilitySpace(), t, container.getId(),
+							  ContainerLock.CX))
+			{
+				//release any container group locks becuase CX container lock will cover everthing.
+				lf.unlockGroup(t.getCompatibilitySpace(), container.getUniqueId());
+				container.setLockingPolicy(NO_LOCK);
+			}else if ((!forUpdate) && 
+					 lf.isLockHeld(t.getCompatibilitySpace(), t, container.getId(), ContainerLock.CS))
             {
-                // move lock from container group to transaction group.
-                if (!forUpdate)
-                    lf.transfer(t.getCompatibilitySpace(), group, t);
+                // move locks from container group to transaction group.
+				lf.transfer(t.getCompatibilitySpace(), group, t);
 				container.setLockingPolicy(NO_LOCK);
 			}
 		}
