@@ -11,4 +11,18 @@ getUDTs() with user-named types in ('DISTINCT') :
 TYPE_CAT,TYPE_SCHEM,TYPE_NAME,CLASS_NAME,DATA_TYPE,REMARKS
 getUDTs() with user-named types in ('JAVA_OBJECT', 'STRUCT') :
 TYPE_CAT,TYPE_SCHEM,TYPE_NAME,CLASS_NAME,DATA_TYPE,REMARKS
+Test the metadata calls related to visibility of changes made by others for different resultset types
+Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes
+made by others and hence following 3 metadata calls will return true for forward only ResultSets.
+othersUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? true
+othersDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? true
+othersInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY)? true
+Scroll insensitive ResultSet by their definition do not see changes made by others and hence following metadata calls return false
+othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+othersInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+Derby does not yet implement scroll sensitive resultsets and hence following metadata calls return false
+othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 Test metadataJdbc20 finished
