@@ -572,10 +572,8 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 								writeNullSQLCARDobject();
 							}
 							// Send any warnings if JCC can handle them
-							checkWarning(null, null, stmt.getResultSet(), true, 0, false, sendWarningsOnCNTQRY);
+							checkWarning(null, null, stmt.getResultSet(), 0, false, sendWarningsOnCNTQRY);
 						}
-						send();
-
 					}
 					catch(SQLException e)
 					{
@@ -595,12 +593,12 @@ public class DRDAConnThread extends Thread { private static final String copyrig
  										trace("Warning: Error closing statement");
 								}
 								writeABNUOWRM();
-								writeSQLCARD(true,e,CodePoint.SVRCOD_ERROR,0,0);
+								writeSQLCARD(e,CodePoint.SVRCOD_ERROR,0,0);
 							}
 						}
 						else 
 						{
-							writeSQLCARDs(e, false, 0);
+							writeSQLCARDs(e, 0);
 						}
 						errorInChain(e);
 					}
@@ -618,18 +616,17 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 						// builtin method to check(expensive)
 						// For now we will assume that every execute immediate
 						// does an update (that is the most conservative thing)
-						boolean reuseCorrID = false;
 						if (database.RDBUPDRM_sent == false)
 						{
 							writeRDBUPDRM();
-							reuseCorrID = true;
 						}
 
 						// we need to set update count in SQLCARD
-						checkWarning(null, database.getDefaultStatement().getStatement(), null, reuseCorrID, updateCount, true, true);
+						checkWarning(null, database.getDefaultStatement().getStatement(),
+							null, updateCount, true, true);
 					} catch (SQLException e)
 					{
-						writeSQLCARDs(e, false, 0);
+						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
 					break;
@@ -638,21 +635,15 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					try {
 						if (parseEXCSQLSET())
 						// all went well.
-							writeSQLCARDs(null,true,0);
-						writer.endDss();
-						send();
+							writeSQLCARDs(null,0);
 					}
 					catch (SQLWarning w)
 					{
-						writeSQLCARD(true, w, CodePoint.SVRCOD_WARNING, 0, 0);
-						writer.endDss();
-						send();
+						writeSQLCARD(w, CodePoint.SVRCOD_WARNING, 0, 0);
 					}
 					catch (SQLException e)
 					{
-						writeSQLCARDs(e,false,0);
-						writer.endDss();
-						send();
+						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
 					break;
@@ -668,11 +659,11 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 										 (sqldaType ==  CodePoint.TYPSQLDA_LIGHT_OUTPUT),
 										 database.getConnection().getWarnings());
 						else
-							checkWarning(database.getConnection(), null, null, false, 0, true, true);
+							checkWarning(database.getConnection(), null, null, 0, true, true);
 
 					} catch (SQLException e)
 					{
-						writeSQLCARDs(e, false, 0, true);
+						writeSQLCARDs(e, 0, true);
 						PRPSQLSTTfailed = true;
 						errorInChain(e);
 					}
@@ -681,15 +672,11 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					PreparedStatement ps = null;
 					try {
 						if (PRPSQLSTTfailed) {
-							reader.skipBytes();
 							// read the command objects
 							// for ps with parameter
-							// Skip parameters too
-							if (reader.isChainedWithSameID())
-							{
-								correlationID = reader.readDssHeader();
-								reader.skipDss();
-							}
+							// Skip objects/parameters
+							skipRemainder(true);
+
 							// If we failed to prepare, then we fail
 							// to open, which  means OPNQFLRM.
 							writeOPNQFLRM(null);
@@ -703,7 +690,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 							ps.clearWarnings();
 							stmt.execute();
 							writeOPNQRYRM(false, stmt);
-							checkWarning(null, ps, null, true, 0, false, true);
+							checkWarning(null, ps, null, 0, false, true);
 
 							writeQRYDSC(stmt, false);
 							// We could send QRYDTA here if there's no LOB data
@@ -729,7 +716,6 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 						catch (SQLException pse) {}
 						errorInChain(e);
 					}
-					send();
 					break;
 				case CodePoint.RDBCMM:
 					try
@@ -741,7 +727,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 							database.getConnection().clearWarnings();
 							database.commit();
 							writeENDUOWRM(COMMIT);
-							checkWarning(database.getConnection(), null, null, true, 0, true, true);
+							checkWarning(database.getConnection(), null, null, 0, true, true);
 						}
 						// we only want to write one of these per transaction
 						// so set to false in preparation for next command
@@ -751,7 +737,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					{
 						// Even in case of error, we have to write the ENDUOWRM.
 						writeENDUOWRM(COMMIT);
-						writeSQLCARDs(e, true, 0);
+						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
 					break;
@@ -763,7 +749,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 						database.getConnection().clearWarnings();
 						database.rollback();
 						writeENDUOWRM(ROLLBACK);
-						checkWarning(database.getConnection(), null, null, true, 0, true, true);
+						checkWarning(database.getConnection(), null, null, 0, true, true);
 						// we only want to write one of these per transaction
 						// so set to false in preparation for next command
 						database.RDBUPDRM_sent = false;
@@ -772,7 +758,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					{
 						// Even in case of error, we have to write the ENDUOWRM.
 						writeENDUOWRM(ROLLBACK);
-						writeSQLCARDs(e, true, 0);
+						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
 					break;
@@ -780,11 +766,11 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 					try{
 						stmt = parseCLSQRY();
 						stmt.rsClose();
-						writeSQLCARDs(null, false, 0);
+						writeSQLCARDs(null, 0);
 					}
 					catch (SQLException e)
 					{
-						writeSQLCARDs(e, false, 0);
+						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
 					break;
@@ -797,24 +783,25 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 				 */
 				case CodePoint.BGNBND:
 					reader.skipBytes();
-					writeSQLCARDs(null, false, 0);
+					writeSQLCARDs(null, 0);
 					break;
 				case CodePoint.BNDSQLSTT:
 					reader.skipBytes();
 					parseSQLSTTDss();
-					writeSQLCARDs(null, false, 0);
+					writeSQLCARDs(null, 0);
 					break;
 				case CodePoint.SQLSTTVRB:
+					// optional
 					reader.skipBytes();
 					break;
 				case CodePoint.ENDBND:
 					reader.skipBytes();
-					writeSQLCARDs(null, false, 0);
+					writeSQLCARDs(null, 0);
 					break;
 				case CodePoint.DSCSQLSTT:
 					if (PRPSQLSTTfailed) {
 						reader.skipBytes();
-						writeSQLCARDs(null, false, 0);
+						writeSQLCARDs(null, 0);
 						break;
 					}
 					try {
@@ -832,18 +819,12 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 						}
 						errorInChain(e);
 					}
-					send();
 					break;
 				case CodePoint.EXCSQLSTT:
 					if (PRPSQLSTTfailed) {
-						reader.skipBytes();
 						// Skip parameters too if they are chained Beetle 4867
-						while(reader.isChainedWithSameID())
-						{
-							correlationID = reader.readDssHeader();
-							reader.skipDss();
-						}
-						writeSQLCARDs(null, false, 0);
+						skipRemainder(true);
+						writeSQLCARDs(null, 0);
 						break;
 					}
 					try {
@@ -858,16 +839,22 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 						{
 							server.consoleExceptionPrint(e);
 						}
-						writeSQLCARDs(e, false, 0);
+						writeSQLCARDs(e, 0);
 						errorInChain(e);
 					}
 					break;
 				default:
 					codePointNotSupported(codePoint);
 			}
+
+			// Set the correct chaining bits for whatever
+			// reply DSS(es) we just wrote.  If we've reached
+			// the end of the chain, this method will send
+			// the DSS(es) across.
+			finalizeChain();
+
 		}
 		while (reader.isChainedWithSameID() || reader.isChainedWithDiffID());
-		send();
 	}
 
 	/**
@@ -890,11 +877,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		if (reader.terminateChainOnErr() && (getExceptionSeverity(e) > CodePoint.SVRCOD_ERROR))
 		{
 			if (SanityManager.DEBUG)  trace("terminating the chain on error...");
-			while(reader.isChainedWithSameID() || reader.isChainedWithDiffID())
-			{
-				correlationID = reader.readDssHeader();
-				reader.skipDss();
-			}
+			skipRemainder(false);
 		}
 	}
 
@@ -935,7 +918,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		appRequester = new AppRequester();
 		parseEXCSAT();
 		writeEXCSATRD();
-		send();
+		finalizeChain();
 
 		//we may have to do the access security more than once if we don't
 		//provide the requested security mechanism or we run into errors
@@ -981,7 +964,6 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		//at this point if the security check failed, we're done, the session failed
 		if (securityCheckCode != 0)
 		{
-			send();
 			return false;
 		}
 
@@ -1000,30 +982,46 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 				|| failureType == CodePoint.RDBATHRM)
 			{
 				writeRDBfailure(failureType);
-				writeSQLCARD(true,databaseAccessException,
+				writeSQLCARD(databaseAccessException,
 					CodePoint.SVRCOD_ERROR,0,0);
 			}
 			else
 			{
 				writeRDBfailure(CodePoint.RDBAFLRM);
+
 				// RDBAFLRM requires TYPDEFNAM and TYPDEFOVR
+				writer.createDssObject();
 				writer.writeScalarString(CodePoint.TYPDEFNAM,
 										 CodePoint.TYPDEFNAM_QTDSQLASC);
 				writeTYPDEFOVR();
-				writeSQLCARD(true,databaseAccessException,
+				writer.endDss();
+
+				// Finally, per DDM spec, "an SQLCARD always follows
+				// the RDBAFLRM".
+				writeSQLCARD(databaseAccessException,
 							 CodePoint.SVRCOD_ERROR,0,0);
 			}
 
-			send();
+			// Ignore anything that was chained to the ACCRDB.
+			skipRemainder(false);
+
+			// Finalize chain state for whatever we wrote in
+			// response to ACCRDB.
+			finalizeChain();
 			return false;
 		}
 		else if (database.accessCount > 1 )	// already in conversation with database
 		{
 			writeRDBfailure(CodePoint.RDBACCRM);
-			send();
+
+			// Ignore anything that was chained to the ACCRDB.
+			skipRemainder(false);
+
+			// Finalize chain state for RDBACCRM
+			finalizeChain();
 			return false;
 		}
-		else // everything is fine
+		else // everything is fine 
 			writeACCRDBRM(svrcod);
 
 		// compare this application requester with previously stored
@@ -2131,7 +2129,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		if (stmt.rsIsClosed())
 		{
 			writeQRYNOPRM(CodePoint.SVRCOD_ERROR);
-			skipRemainder();
+			skipRemainder(true);
 			return null;
 		}
 		stmt.setQueryOptions(blksize,qryrelscr,qryrownbr,qryrfrtbl,nbrrow,maxblkext,
@@ -2145,12 +2143,17 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 	/**
 	 * Skip remainder of current DSS and all chained DSS'es
 	 *
+	 * @param onlySkipSameIds True if we _only_ want to skip DSS'es
+	 *   that are chained with the SAME id as the current DSS.
+	 *   False means skip ALL chained DSSes, whether they're
+	 *   chained with same or different ids.
 	 * @exception DRDAProtocolException
 	 */
-	private void skipRemainder() throws DRDAProtocolException
+	private void skipRemainder(boolean onlySkipSameIds) throws DRDAProtocolException
 	{
 		reader.skipDss();
-		while (reader.isChainedWithSameID())
+		while (reader.isChainedWithSameID() ||
+			(!onlySkipSameIds && reader.isChainedWithDiffID()))
 		{
 			reader.readDssHeader();
 			reader.skipDss();
@@ -2390,7 +2393,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 	 * 
 	 * @exception DRDAProtocolException
 	 */
-	private void writeACCSECRD(int securityCheckCode) 
+	private void writeACCSECRD(int securityCheckCode)
 		throws DRDAProtocolException
 	{
 		writer.createDssReply();
@@ -2415,14 +2418,14 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		}
     	writer.endDdmAndDss ();
 
-		/* The chaining status in reader is for the latest request DSS ACCSEC.
-		 * There's a difference between JCC and CCC here.  CCC chains ACCSEC, SECCHK,
-		 * and ACCRDB together, whereas JCC sends ACCSEC separately.  DRDA spec
-		 * requires that if requests are chained, replies must be chained.  When we
-		 * call "send", we terminate the chain.  So can't do it if ACCSEC is chained.
-		 */
-		if (! (reader.isChainedWithSameID() || reader.isChainedWithDiffID()))
-			send();
+		if (securityCheckCode != 0) {
+		// then we have an error and so can ignore the rest of the
+		// DSS request chain.
+			skipRemainder(false);
+		}
+
+		finalizeChain();
+
 	}
 	/**
 	 * Parse security check
@@ -2592,8 +2595,16 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		writer.startDdm(CodePoint.SECCHKRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, svrcodFromSecchkcd(securityCheckCode));
 		writer.writeScalar1Byte(CodePoint.SECCHKCD, securityCheckCode);
-
     	writer.endDdmAndDss ();
+
+		if (securityCheckCode != 0) {
+		// then we have an error and are going to end up ignoring the rest
+		// of the DSS request chain.
+			skipRemainder(false);
+		}
+
+		finalizeChain();
+
 	}
 	/**
 	 * Calculate SVRCOD value from SECCHKCD
@@ -2840,7 +2851,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 								 CodePoint.TYPDEFNAM_QTDSQLASC);
 		writeTYPDEFOVR();
 		writer.endDdmAndDss ();
-		send();
+		finalizeChain();
 	}
 	
 	private void writeTYPDEFOVR() throws DRDAProtocolException
@@ -3439,7 +3450,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 			database.getConnection().clearWarnings();
 			CallableStatement cs = (CallableStatement) stmt.prepare(prepareString);
 		}
-		
+
 		stmt.ps.clearWarnings();
 
 		boolean hasResultSet = stmt.execute();
@@ -3501,7 +3512,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 			//indicate that we are going to return data
 			stmt.setQryrtndta(true);
 			if (! isProcedure)
-				checkWarning(null, ps, null, true, -1, true, true);
+				checkWarning(null, ps, null, -1, true, true);
 			if (rsNum == 0)
 				writeSQLRSLRD(stmt);
 			writeOPNQRYRM(true, stmt);
@@ -3520,21 +3531,14 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		else  if (! sendSQLDTARD)
 		{
 			int updateCount = ps.getUpdateCount();
-			boolean reuseCorrID = false;			// RESOLVE:  We should send this but get protocol err if
-			// we do!!!
 			if (false && (database.RDBUPDRM_sent == false) &&
 				! isProcedure)
 			{
 				writeRDBUPDRM();
-				//following SQLCARD has to be in a continued DSS
-				reuseCorrID = true;
 			}
 
-
-			checkWarning(database.getConnection(), stmt.ps, null, false, updateCount, true, true);
+			checkWarning(database.getConnection(), stmt.ps, null, updateCount, true, true);
 		}
-		else
-			writer.endDss();
 
 		} while(hasResultSet && (++rsNum < numResults));
 		
@@ -3723,14 +3727,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		} 
 		catch (SQLException se)
 		{
-			reader.skipDss();
-			while (reader.isChainedWithSameID() || 
-				   reader.isChainedWithDiffID())
-			{
-				correlationID = reader.readDssHeader();
-				reader.skipDss();
-				
-			}
+			skipRemainder(false);
 			throw se;
 		}
 	}
@@ -3924,7 +3921,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 				else
 					ps.setShort(i+1, paramVal);
 				break;
-		}
+			}
 			case  FdocaConstants.DRDA_TYPE_NINTEGER:
 			{
 				int paramVal = reader.readInt(getByteOrder());
@@ -4792,20 +4789,20 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 
 	}
 
-	private void writeSQLCARDs(SQLException e, boolean reuseCorrID, int updateCount)
+	private void writeSQLCARDs(SQLException e, int updateCount)
 									throws DRDAProtocolException
 	{
-		writeSQLCARDs(e, reuseCorrID, updateCount, false);
+		writeSQLCARDs(e, updateCount, false);
 	}
 
-	private void writeSQLCARDs(SQLException e, boolean reuseCorrID, int updateCount, boolean sendSQLERRRM)
+	private void writeSQLCARDs(SQLException e, int updateCount, boolean sendSQLERRRM)
 									throws DRDAProtocolException
 	{
 
 		int severity = CodePoint.SVRCOD_INFO;
 		if (e == null)
 		{
-			writeSQLCARD(reuseCorrID, e,severity, updateCount, 0);
+			writeSQLCARD(e,severity, updateCount, 0);
 			return;
 		}
 
@@ -4817,9 +4814,8 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		if (sendSQLERRRM || (severity > CodePoint.SVRCOD_ERROR))
 		{
 			writeSQLERRRM(severity);
-			reuseCorrID = true;
 		}
-		writeSQLCARD(reuseCorrID, e,severity, updateCount, 0);
+		writeSQLCARD(e,severity, updateCount, 0);
 	}
 
 	private int getSqlCode(int severity)
@@ -4832,10 +4828,10 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 			return -1;
 	}
 
-	private void writeSQLCARD(boolean reuseCorrID, SQLException e,int severity, 
+	private void writeSQLCARD(SQLException e,int severity, 
 		int updateCount, long rowCount ) throws DRDAProtocolException
 	{
-		writer.createDssObject(reuseCorrID);
+		writer.createDssObject();
 		writer.startDdm(CodePoint.SQLCARD);
 		writeSQLCAGRP(e, getSqlCode(severity), updateCount, rowCount);
 		writer.endDdmAndDss();
@@ -5388,7 +5384,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 				numElems = pmeta.getParameterCount();
 		}
 
-		writer.createDssObject(false);
+		writer.createDssObject();
 
 		// all went well we will just write a null SQLCA
 		writer.startDdm(CodePoint.SQLDARD);
@@ -5671,7 +5667,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 
 			if (stmt.getExtDtaObjects() != null)
 			{
-				writer.endDdm();
+				writer.endDdmAndDss();
 				writeEXTDTA(stmt);
 				getMoreData=false;
 				sentExtData = true;
@@ -5930,7 +5926,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		{
 			// finish off query block and send
 			writer.endDdmAndDss();
-			send();
+			finalizeChain();
 			// read CNTQRY - not sure why JCC sends this
 			correlationID = reader.readDssHeader();
 			int codePoint = reader.readLengthAndCodePoint();
@@ -6331,25 +6327,6 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		
 	}
 
-	
-	/**
-	 * Send data to application requester
-	 *
-	 * @exception DRDAProtocolException
-	 */
-	private void send() throws DRDAProtocolException
-	{
-		//check if there is data to send
-		if (writer.getOffset() == 0)
-			return;
-		if (SanityManager.DEBUG) trace("Sending data");
-		try {
-			writer.flush();
-		} catch (IOException ioe) {
-			markCommunicationsFailure("flush","","","");
-		}
-	}
-
   /**
    * Write Fdoca Value to client 
    * @param index     Index of column being returned
@@ -6732,7 +6709,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 				server.consoleExceptionPrintTrace(e);
 				reader.clearBuffer();
 				de.write(writer);
-				send();
+				finalizeChain();
 				closeSession();
 				close();
 			}
@@ -6778,7 +6755,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		
 			reader.clearBuffer();
 			unExpDe.write(writer);
-			send();
+			finalizeChain();
 		}
 		catch (DRDAProtocolException nde) 
 		{
@@ -7014,8 +6991,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
         if (o instanceof Blob) {
 			Blob b = (Blob) o;
 			long blobLength = b.length();
-			writer.writeScalarStream (chainFlag,
-									  chainedWithSameCorrelator,
+			writer.writeScalarStream (chainedWithSameCorrelator,
 									  CodePoint.EXTDTA,
 									  (int) Math.min(blobLength,
 													 Integer.MAX_VALUE),
@@ -7028,8 +7004,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 			long[] outlen = {-1};
 			ByteArrayInputStream  unicodeStream =
 				convertClobToUnicodeStream(c, outlen);
-			writer.writeScalarStream (chainFlag,
-									  chainedWithSameCorrelator,
+			writer.writeScalarStream (chainedWithSameCorrelator,
 									  CodePoint.EXTDTA,
 									  (int) Math.min(outlen[0],
 													 Integer.MAX_VALUE),		 
@@ -7038,8 +7013,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		}
 		else if (o instanceof  byte[]) {
 			byte[] b = (byte []) o;
-			writer.writeScalarStream (chainFlag,
-									  chainedWithSameCorrelator,
+			writer.writeScalarStream (chainedWithSameCorrelator,
 									  CodePoint.EXTDTA,
 									  (int) b.length,
 									  new ByteArrayInputStream(b),
@@ -7095,7 +7069,6 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 	 * @param conn 		connection to check
 	 * @param stmt 		statement to check
 	 * @param rs 		result set to check
-	 * @param reuseCorrID 	whether send SQLCARD using previous correlation ID
 	 * @param updateCount 	update count to include in SQLCARD
 	 * @param alwaysSend 	whether always send SQLCARD regardless of
 	 *						the existance of warnings
@@ -7104,7 +7077,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 	 * @exception DRDAProtocolException
 	 */
 	private void checkWarning(Connection conn, Statement stmt, ResultSet rs,
-						  boolean reuseCorrID, int updateCount, boolean alwaysSend, boolean sendWarn)
+						  int updateCount, boolean alwaysSend, boolean sendWarn)
 		throws DRDAProtocolException, SQLException
 	{
 		// instead of writing a chain of sql warning, we send the first one, this is
@@ -7152,7 +7125,7 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 
 
 		if ((alwaysSend || reportWarning != null) && sendWarn)
-			writeSQLCARDs(reportWarning, reuseCorrID, updateCount);
+			writeSQLCARDs(reportWarning, updateCount);
 	}
 
 
@@ -7166,6 +7139,18 @@ public class DRDAConnThread extends Thread { private static final String copyrig
 		s += "\n";
 		return s;
 	}
+
+	/**
+	 * Finalize the current DSS chain and send it if
+	 * needed.
+	 */
+	private void finalizeChain() throws DRDAProtocolException {
+
+		writer.finalizeChain(reader.getCurrChainState(), getOutputStream());
+		return;
+
+	}
+
 }
 
 

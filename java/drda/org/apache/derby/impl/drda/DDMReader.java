@@ -1368,6 +1368,8 @@ class DDMReader
 	protected void clearBuffer() throws DRDAProtocolException
 	{
 		skipBytes(java.lang.Math.min(dssLength, count - pos));
+    	dssIsChainedWithSameID = false;
+    	dssIsChainedWithDiffID = false;
 	}
 
 	/**
@@ -1751,4 +1753,20 @@ class DDMReader
 	   s += indent + "Reader buffer length = " + buffer.length + "\n";
 	   return s;
 	}
+
+	/**
+	 * Return chaining bit for current DSS.
+	 */
+	protected byte getCurrChainState() {
+
+		if (!dssIsChainedWithSameID && !dssIsChainedWithDiffID)
+			return DssConstants.DSS_NOCHAIN;
+
+		if (dssIsChainedWithSameID)
+			return DssConstants.DSSCHAIN_SAME_ID;
+
+		return DssConstants.DSSCHAIN;
+
+	}
+
 }

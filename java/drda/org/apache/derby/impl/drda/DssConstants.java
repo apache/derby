@@ -29,13 +29,14 @@ class DssConstants
   protected static final int DSS_ID = 0xD0;
 
   // DSS chaining bit.
+  protected static final int DSS_NOCHAIN = 0x00;
   protected static final int DSSCHAIN = 0x40;
 
   // DSS chaining bit for continuation on error
   protected static final int DSSCHAIN_ERROR_CONTINUE = 0x20;
 
   // DSS chaining bit where next DSS has same correlation ID.
-  protected static final int DSSCHAIN_SAME_ID = 0x10;
+  protected static final int DSSCHAIN_SAME_ID = 0x50;
 
   // DSS formatter for an OBJDSS.
   protected static final int DSSFMT_OBJDSS = 0x03;
@@ -59,7 +60,7 @@ class DssConstants
   static final int GDSCHAIN = 0x40;
 
   // GDS chaining bits where next DSS has different correlation ID.
-  static final int GDSCHAIN_SAME_ID = 0x10;
+  static final int GDSCHAIN_SAME_ID = 0x50;
 
   // GDS formatter for an OBJDSS.
   static final int GDSFMT_OBJDSS = 0x03;

@@ -310,7 +310,6 @@ public class TestProto { private static final String copyrightNotice = org.apach
 	private void processCommand()
 		throws IOException, DRDAProtocolException
 	{
-		int correlationId;
 		Integer icmd  = (Integer)commandTable.get(tkn.sval.toLowerCase(Locale.ENGLISH));
 		if (icmd == null)
 		{
@@ -330,8 +329,7 @@ public class TestProto { private static final String copyrightNotice = org.apach
 				processIncludeFile();
 				break;
 			case CREATE_DSS_REQUEST:
-				correlationId = getInt();
-				writer.createDssRequest(correlationId);
+				writer.createDssRequest();
 				break;
 			case CREATE_DSS_OBJECT:
 				writer.createDssObject();
@@ -340,7 +338,14 @@ public class TestProto { private static final String copyrightNotice = org.apach
 				writer.createDssReply();
 				break;
 			case END_DSS:
-				writer.endDss();
+				tkn.nextToken();
+				tkn.pushBack();
+				if ((tkn.sval != null) && tkn.sval.startsWith("0x"))
+				// use specified chaining.
+					writer.endDss((getBytes())[0]);
+				else
+				// use default chaining
+					writer.endDss();
 				break;
 			case END_DDM:
 				writer.endDdm();
@@ -448,7 +453,7 @@ public class TestProto { private static final String copyrightNotice = org.apach
 				checkIntOrCP(val);
 				break;
 			case FLUSH:
-				writer.flush(monitorOs);
+				writer.finalizeChain(reader.getCurrChainState(), monitorOs);
 				writer.reset(null);
 				break;
 			case DISPLAY:
@@ -622,7 +627,7 @@ public class TestProto { private static final String copyrightNotice = org.apach
 	 * in hex format or it can just be a string, in which case each char is
 	 * interpreted as  2 byte UNICODE
 	 *
-	 * @param byte array
+	 * @return byte array
 	 */
 	private byte []  getBytes() throws IOException
 	{

@@ -55,8 +55,6 @@ class DDMWriter
 	// top of the stack
 	private int top;
 
-	private boolean simpleDssFinalize = false;
-
 	// CCSID manager for translation of strings in the protocol to EBCDIC
 	private CcsidManager ccsidManager;
 
@@ -80,14 +78,29 @@ class DDMWriter
 	// trace object of the associated session
 	private DssTrace dssTrace;
 
+	// Location within the "bytes" array of the start of the header
+	// of the DSS most recently written to the buffer.
+	private int prevHdrLocation;
 
+	// Correlation id of the last DSS that was written to buffer.
+	private int previousCorrId;
 
+	// Chaining bit of the last DSS that was written to buffer.
+	private byte previousChainByte;
+
+	// Whether or not the current DSS is a continuation DSS.
+	private boolean isContinuationDss;
+	
 	// Constructors
 	DDMWriter (int minSize, CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
 	{
 		this.bytes = new byte[minSize];
 		this.ccsidManager = ccsidManager;
 		this.agent = agent;
+		this.prevHdrLocation = -1;
+		this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
+		this.previousChainByte = DssConstants.DSS_NOCHAIN;
+		this.isContinuationDss = false;
 		reset(dssTrace);
 	}
 
@@ -96,6 +109,10 @@ class DDMWriter
 		this.bytes = new byte[DEFAULT_BUFFER_SIZE];
 		this.ccsidManager = ccsidManager;
 		this.agent = agent;
+		this.prevHdrLocation = -1;
+		this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
+		this.previousChainByte = DssConstants.DSS_NOCHAIN;
+		this.isContinuationDss = false;
 		reset(dssTrace);
 	}
 
@@ -127,53 +144,123 @@ class DDMWriter
 	 */
 	protected void createDssReply()
 	{
-		// finish off previous DSS
-    	if (offset != 0)
-    		finalizePreviousChainedDss(false);
-		beginDss(DssConstants.DSSFMT_RPYDSS, nextCorrelationID++);
-		simpleDssFinalize = false;
+		beginDss(DssConstants.DSSFMT_RPYDSS, true);
 	}
 
 	/**
 	 * Create DSS request object
+	 * NOTE: This is _ONLY_ used for testing the protocol
+	 * (via the TestProto.java file in this package)!
+	 * We should never create a DSS request in normal
+	 * DRDA processing (we should only create DSS replies
+	 * and DSS objects).
 	 */
-	protected void createDssRequest(int corrID)
+	protected void createDssRequest()
 	{
-		// finish off previous DSS
-    	if (offset != 0)
-    		finalizePreviousChainedDss((correlationID == corrID));
-		beginDss(DssConstants.DSSFMT_RQSDSS, corrID);
-		simpleDssFinalize = false;
+		beginDss(DssConstants.DSSFMT_RQSDSS, true);
 	}
-	/**
-	 * Create DSS data object
-	 */
-	protected void createDssObject(boolean reuseCorrID)
-	{
-		// finish off previous DSS - objects are always part of a previous
-		// DSS reply - so correlation id should be the same
-    	if (offset != 0)
-    		finalizePreviousChainedDss (reuseCorrID);
-		beginDss(DssConstants.DSSFMT_OBJDSS, (reuseCorrID ? correlationID : nextCorrelationID++));
-		simpleDssFinalize = false;
-	}
+
 	/**
 	 * Create DSS data object
 	 */
 	protected void createDssObject()
 	{
-		createDssObject(true);
+		beginDss(DssConstants.DSSFMT_OBJDSS, true);
+	}
+
+	/**
+	 * Mark the DSS that we're currently writing as
+	 * a continued DSS, which is done by setting
+	 * the high-order bit to "1", per DDM spec.
+	 * This means:
+	 *
+	 *	1. One or more continuation DSSes will immediately
+	 * 		follow the current (continued) DSS.
+	 *	2. All continuation DSSes will have a 2-byte
+	 * 		continuation header, followed by data; in
+	 * 		other words, chaining state, correlation
+	 *		id, dss format info, and code point will
+	 * 		NOT be included.  All of that info is 
+	 * 		present ONLY in the FIRST DSS in the
+	 *		list of continued DSSes.
+	 *
+	 *	NOTE: A DSS can be a "continuation" DSS _and_
+	 * 	a "continued" DSS at the same time.  However,
+	 * 	the FIRST DSS to be continued canNOT be
+	 *	a continuation DSS.
+	 */
+	private void markDssAsContinued(boolean forLob)
+	{
+
+		if (!forLob) {
+		// continuation bit defaults to '1' for lobs, so
+		// we only have to switch it if we're not writing
+		// lobs.
+			bytes[dssLengthLocation] |= 0x80;
+		}
+
+		// We need to set the chaining state, but ONLY
+		// IF this is the FIRST DSS in the continuation
+		// list (only the first one has chaining state
+		// in it's header; the others do not).
+		if (!isContinuationDss)
+			endDss(!forLob);
+
 	}
 
 	/**
 	 * End DSS header by writing the length in the length location
-	 *
+	 * and setting the chain bit.  Unlike the other two endDss
+	 * methods, this one overrides the default chaining byte
+	 * (which is set in beginDss) with the chaining byte that
+	 * is passed in.  NOTE: This method is only used in
+	 * association with createDssRequest, and thus is for
+	 * TESTING purposes only (via TestProto.java).  No calls
+	 * should be made to this method in normal DRDA processing
+	 * (because for normal processing, chaining must be
+	 * determined automatically based on DSS requests).
 	 */
-	protected void endDss ()
+	protected void endDss(byte chainByte)
 	{
-		int val = offset - dssLengthLocation;
-		bytes[dssLengthLocation] = (byte) ((val >>> 8) & 0xff);
-		bytes[dssLengthLocation + 1] = (byte) (val & 0xff);
+
+		// Do regular endDss processing.
+		endDss(true);
+
+		// Now override default chain state.
+		bytes[dssLengthLocation + 3] &= 0x0F;	// Zero out default
+		bytes[dssLengthLocation + 3] |= chainByte;
+		previousChainByte = chainByte;
+
+	}
+
+	/**
+	 * End DSS header by writing the length in the length location
+	 * and setting the chain bit.
+	 */
+	protected void endDss() {
+		endDss(true);
+	}
+
+	/**
+	 * End DSS header by writing the length in the length location
+	 * and setting the chain bit.
+	 */
+	private void endDss (boolean finalizeLength)
+	{
+
+		if (finalizeLength)
+			finalizeDssLength();
+
+		if (isContinuationDss) {
+		// no chaining information for this DSS; so we're done.
+			isContinuationDss = false;
+			return;
+		}
+
+		previousCorrId = correlationID;
+		prevHdrLocation = dssLengthLocation;
+		previousChainByte = DssConstants.DSSCHAIN_SAME_ID;
+
 	}
 
 	/**
@@ -236,6 +323,7 @@ class DDMWriter
 		top = 0;
 		dssLengthLocation = 0;
 		correlationID = DssConstants.CORRELATION_ID_UNKNOWN;
+		nextCorrelationID = 1;
 		isDRDAProtocol = true;
 	}
 
@@ -536,21 +624,21 @@ class DDMWriter
 	}
 
 
-	protected int  writeScalarStream (boolean chained,
-									  boolean chainedWithSameCorrelator,
+	protected int  writeScalarStream (boolean chainedWithSameCorrelator,
 									  int codePoint,
 									  int length,
 									  java.io.InputStream in,
 									  boolean writeNullByte) 
 		throws DRDAProtocolException
 	{
+
+		// Stream equivalent of "beginDss"...
 		int leftToRead = length;
-		int bytesToRead = prepScalarStream (chained,
-											chainedWithSameCorrelator,
+		int bytesToRead = prepScalarStream (chainedWithSameCorrelator,
 											codePoint,
 											writeNullByte,
 											leftToRead);
-		
+
 		if (length == 0)
 			return 0;
 
@@ -577,7 +665,7 @@ class DDMWriter
 					leftToRead -= bytesRead;
 				}
 			} while (bytesToRead > 0);
-			
+
 			bytesToRead = flushScalarStreamSegment (leftToRead, bytesToRead);
 		} while (leftToRead > 0);
 		
@@ -595,60 +683,35 @@ class DDMWriter
 		return totalBytesRead;
 	}
 	
-	
-	private void beginDss (boolean dssHasSameCorrelator,
-						   boolean chainedToNextStructure,
-						   boolean nextHasSameCorrelator,
-						   int dssType,
-						   int corrId,
-						   boolean simpleFinalizeBuildingNextDss)
-  {
-	  if (doesRequestContainData()) {
-		  if (simpleDssFinalize)
-		  {
-			  finalizeDssLength();
+	/**
+	 * Begins a DSS stream (for writing LOB data).
+	 */
+	private void beginDss (boolean chainedToNextStructure,
+						   int dssType)
+	{
+		beginDss(dssType, false);	// false => don't ensure length.
 
-		  }
-		  else
-			  finalizePreviousChainedDss (dssHasSameCorrelator);
-	  }
+		// always turn on continuation flags... this is helpful for lobs...
+		// these bytes will get rest if dss lengths are finalized.
+  		bytes[dssLengthLocation] = (byte) 0xFF;
+  		bytes[dssLengthLocation + 1] = (byte) 0xFF;
 
-	  ensureLength (6);
+		// Set whether or not this DSS should be chained to
+		// the next one.  If it's chained, it has to be chained
+		// with same id (that's the nature of EXTDTA chaining).
+		if (chainedToNextStructure) {
+			dssType |= DssConstants.GDSCHAIN_SAME_ID;
+		}
 
-	  // save the length position and skip
-	  // note: the length position is saved so it can be updated
-	  // with a different value later.
-	  dssLengthLocation = offset;
-	  // always turn on chaining flags... this is helpful for lobs...
-	  // these bytes will get rest if dss lengths are finalized.
-	  bytes[offset] = (byte) 0xFF;
-	  bytes[offset + 1] = (byte) 0xFF;
-
-	  // insert the manditory 0xD0 and the dssType
-	  bytes[offset + 2] = (byte) 0xD0;
-
-    if (chainedToNextStructure) {
-      dssType |= DssConstants.GDSCHAIN;
-      if (nextHasSameCorrelator)
-        dssType |= DssConstants.GDSCHAIN_SAME_ID;
-    }
-    bytes[offset + 3] = (byte) (dssType & 0xff);
-
-    // write the request correlation id
-    // use method that writes a short !!!
-    bytes[offset + 4] = (byte) ((corrId >>> 8) & 0xff);
-    bytes[offset + 5] = (byte) (corrId & 0xff);
-	offset +=6;
-    simpleDssFinalize = simpleFinalizeBuildingNextDss;
-  }
+		bytes[dssLengthLocation + 3] = (byte) (dssType & 0xff);
+	}
 
 
   // prepScalarStream does the following prep for writing stream data:
   // 1.  Flushes an existing DSS segment, if necessary
   // 2.  Determines if extended length bytes are needed
   // 3.  Creates a new DSS/DDM header and a null byte indicator, if applicable
-  protected int prepScalarStream  (boolean chained,
-                                   boolean chainedWithSameCorrelator,
+  protected int prepScalarStream  (boolean chainedWithSameCorrelator,
                                    int codePoint,
                                    boolean writeNullByte,
                                    int leftToRead) throws DRDAProtocolException
@@ -663,10 +726,8 @@ class DDMWriter
     // flush the existing DSS segment if this stream will not fit in the send buffer
     if (10 + extendedLengthByteCount + nullIndicatorSize + leftToRead + offset > DssConstants.MAX_DSS_LENGTH) {
       try {
-        if (simpleDssFinalize)
-          finalizeDssLength();
-        else
-          finalizePreviousChainedDss (true);
+	    // The existing DSS segment was finalized by endDss; all
+	    // we have to do is send it across the wire.
         sendBytes(agent.getOutputStream());
       }
       catch (java.io.IOException e) {
@@ -677,12 +738,7 @@ class DDMWriter
     }
 
     // buildStreamDss should not call ensure length.
-    beginDss (true,
-			  chained,
-			  chainedWithSameCorrelator,
-			  DssConstants.GDSFMT_OBJDSS,
-			  correlationID,
-			  true);
+	beginDss(chainedWithSameCorrelator, DssConstants.GDSFMT_OBJDSS);
 
     if (extendedLengthByteCount > 0) {
       // method should never ensure length
@@ -728,31 +784,48 @@ class DDMWriter
 	protected int flushScalarStreamSegment (int leftToRead,
 											int bytesToRead)
 		throws DRDAProtocolException
-  {
-	  int newBytesToRead = bytesToRead;
+	{
+		int newBytesToRead = bytesToRead;
 
-	  // either at end of data, end of dss segment, or both.
-	  if (leftToRead != 0) {
-		  // 32k segment filled and not at end of data.
-		  if ((Math.min (2 + leftToRead, 32767)) > (bytes.length - offset)) {
-        try {
-          sendBytes (agent.getOutputStream());
-        }
-        catch (java.io.IOException ioe) {
-			agent.markCommunicationsFailure ("DDMWriter.flushScalarStreamSegment()",
+		// either at end of data, end of dss segment, or both.
+		if (leftToRead != 0) {
+		// 32k segment filled and not at end of data.
+
+			if ((Math.min (2 + leftToRead, 32767)) > (bytes.length - offset)) {
+				try {
+				// Mark current DSS as continued, set its chaining state,
+				// then send the data across.
+					markDssAsContinued(true); 	// true => for lobs
+					sendBytes (agent.getOutputStream());
+				}
+				catch (java.io.IOException ioe) {
+					agent.markCommunicationsFailure ("DDMWriter.flushScalarStreamSegment()",
                                                "",
                                                ioe.getMessage(),
                                                "*");
-        }
-      }
-      dssLengthLocation = offset;
-      bytes[offset++] = (byte) (0xff);
-      bytes[offset++] = (byte) (0xff);
-      newBytesToRead = Math.min (leftToRead,32765);
-    }
+				}
+			}
+			else {
+			// DSS is full, but we still have space in the buffer.  So
+			// end the DSS, then start the next DSS right after it.
+				endDss(false);		// false => don't finalize length.
+			}
 
-    return newBytesToRead;
-  }
+			// Prepare a DSS continuation header for next DSS.
+			dssLengthLocation = offset;
+			bytes[offset++] = (byte) (0xff);
+			bytes[offset++] = (byte) (0xff);
+			newBytesToRead = Math.min (leftToRead,32765);
+			isContinuationDss = true;
+  		}
+		else {
+		// we're done writing the data, so end the DSS.
+			endDss();
+		}
+
+		return newBytesToRead;
+
+	}
 
   // the offset must not be updated when an error is encountered
   // note valid data may be overwritten
@@ -1193,12 +1266,20 @@ class DDMWriter
 	 */
 	protected void flush () throws java.io.IOException
 	{
-		OutputStream socketOutputStream = agent.getOutputStream();
+		flush(agent.getOutputStream());
+	}
+
+	/**
+	 * Flush buffer to specified stream
+	 *
+	 * @param socketOutputStream
+	 *
+	 * @exception IOException
+	 */
+	protected void flush(OutputStream socketOutputStream)
+		throws java.io.IOException
+	{
 		try {
-			if (isDRDAProtocol)
-			{
-				finalizeDssLength();
-			}
 			socketOutputStream.write (bytes, 0, offset);
 			socketOutputStream.flush();
 		}
@@ -1214,18 +1295,6 @@ class DDMWriter
 			}
 			reset(dssTrace);
 		}
-	}
-	/**
-	 * Flush buffer to specified stream
-	 *
-	 * @param socketOutputStream
-	 *
-	 * @exception IOException
-	 */
-	protected void flush(OutputStream os) throws java.io.IOException
-	{
-		os.write(bytes, 0, offset);
-		os.flush();
 	}
 
 	// private methods
@@ -1252,40 +1321,40 @@ class DDMWriter
 	 *			 - 4 - Communications DSS
 	 *			 - 5 - Request DSS where no reply is expected
 	 */
-	private void beginDss (int dssType, int corrID)
+	private void beginDss (int dssType, boolean ensureLen)
 	{
-		// save correlationID for use in error messages while processing
-		// this DSS
-		correlationID = corrID;
+
 		// save length position, the length will be written at the end
 		dssLengthLocation = offset;
 
-		ensureLength(6);
+		// Should this really only be for non-stream DSSes?
+		if (ensureLen)
+			ensureLength(6);
+
+		// Skip past length; we'll come back and set it later.
 		offset += 2;
 
 		// write gds info
 		bytes[offset] = (byte) 0xD0;
-		bytes[offset + 1] = (byte) dssType;
 
-		// write the request correlation id
-		bytes[offset + 2] = (byte) ((corrID >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (corrID & 0xff);
+		// Write DSS type, and default chain bit to be 
+		// DssConstants.DSSCHAIN_SAME_ID.  This default
+		// will be overridden by calls to "finalizeChain()"
+		// and/or calls to "beginDss(boolean, int)" for
+		// writing LOB data.
+		bytes[offset + 1] = (byte) dssType;
+		bytes[offset + 1] |= DssConstants.DSSCHAIN_SAME_ID;
+
+		// save correlationID for use in error messages while processing
+		// this DSS
+		correlationID = getCorrelationID();
+
+		// write the reply correlation id
+		bytes[offset + 2] = (byte) ((correlationID >>> 8) & 0xff);
+		bytes[offset + 3] = (byte) (correlationID & 0xff);
 		offset += 4;
 	}
 
-	/**
-	 * finish the DSS in the buffer by updating the length and chaining bits
-	 *
-	 * @param nextDssHasSameCorrelator - how to set chaining bits
-	 */
-  	private void finalizePreviousChainedDss (boolean nextDssHasSameCorrelator)
-	{
-		finalizeDssLength();
-		bytes[dssLengthLocation + 3] |= 0x40;
-		if (nextDssHasSameCorrelator)
-			bytes[dssLengthLocation + 3] |= 0x10;
-		
-	}
 	/**
      * Finish a DSS Layer A object.
 	 * The length of dss object will be calculated based on the difference between the
@@ -1616,6 +1685,7 @@ class DDMWriter
 
   private void sendBytes (java.io.OutputStream socketOutputStream) throws java.io.IOException
   {
+	resetChainState();
     try {
       socketOutputStream.write (bytes, 0, offset);
       socketOutputStream.flush();
@@ -1635,43 +1705,6 @@ class DDMWriter
   }
 
 
-private void buildStreamDssObject (boolean chainedToNextStructure,
-								   boolean nextHasSameCorrelator,
-								   int corrID)
-  {
-	int dssType =   DssConstants.GDSFMT_OBJDSS;
-    if (offset != 0) {
-        finalizePreviousChainedDss (true);
-	}
-
-    ensureLength (6);
-
-    // save the length position and skip
-    // note: the length position is saved so it can be updated
-    // with a different value later.
-    dssLengthLocation = offset;
-    // always turn on chaining flags... this is helpful for lobs...
-    // these bytes will get rest if dss lengths are finalized.
-    bytes[offset] = (byte) 0xFF;
-    bytes[offset + 1] = (byte) 0xFF;
-
-    // insert the manditory 0xD0 and the dssType
-    bytes[offset + 2] = (byte) 0xD0;
-    if (chainedToNextStructure) {
-      dssType |= DssConstants.GDSCHAIN;
-      if (nextHasSameCorrelator)
-        dssType |= DssConstants.GDSCHAIN_SAME_ID;
-    }
-    bytes[offset + 3] = (byte) (  dssType & 0xff);
-
-    // write the request correlation id
-    // use method that writes a short !!!
-    bytes[offset + 4] = (byte) ((corrID >>> 8) & 0xff);
-    bytes[offset + 5] = (byte) (corrID & 0xff);
-	offset += 6;
-	}
-
-
 	private static int min (int i, int j)
 	{
 		return (i < j) ? i : j;
@@ -1687,8 +1720,97 @@ private void buildStreamDssObject (boolean chainedToNextStructure,
 		return s;
 	}
 
+	/**
+	 * Reset any chaining state that needs to be reset
+	 * at time of the send
+	 */
+	protected void resetChainState()
+	{
+		prevHdrLocation = -1;
+	}
+
+	/**
+	 * Looks at chaining info for previous DSS written, and use
+	 * that to figure out what the correlation id for the current
+	 * DSS should be.  Return that correlation id.
+	 */
+	private int getCorrelationID() {
+
+		int cId;
+		if (previousCorrId != DssConstants.CORRELATION_ID_UNKNOWN) {
+			if (previousChainByte == DssConstants.DSSCHAIN_SAME_ID)
+			// then we have to use the last correlation id we sent.
+				cId = previousCorrId;
+			else
+			// get correlation id as normal.
+				cId = nextCorrelationID++;
+		}
+		else {
+		// must be the case that this is the first DSS we're
+		// writing for this connection (because we haven't
+		// called "endDss" yet).  So, get the corr id as
+		// normal.
+			cId = nextCorrelationID++;
+		}
+
+		return cId;
+
+	}
+
+	/**
+	 * Finalize the current DSS chain and send it if
+	 * needed.
+	 *
+	 * Updates the chaining state of the most recently-written-
+	 * to-buffer DSS to correspond to the most recently-read-
+	 * from-client request.  If that chaining state indicates
+	 * we've reached the end of a chain, then we go ahead
+	 * and send the buffer across the wire.
+	 * @param socketOutputStream Output stream to which we're flushing.
+	 */
+	protected void finalizeChain(byte currChainByte,
+		OutputStream socketOutputStream) throws DRDAProtocolException
+	{
+
+		// Go back to previous DSS and override the default
+		// chain state (WITH_SAME_ID) with whatever the last
+		// request dictates.
+
+		if (prevHdrLocation != -1) {
+		// Note: == -1 => the previous DSS was already sent; this
+		// should only happen in cases where the buffer filled up
+		// and we had to send it (which means we were probably
+		// writing EXTDTA).  In such cases, proper chaining
+		// should already have been handled @ time of send.
+			bytes[prevHdrLocation + 3] &= 0x0F;	// Zero out old chain value.
+			bytes[prevHdrLocation + 3] |= currChainByte;
+		}
+
+		// previousChainByte needs to match what we just did.
+		previousChainByte = currChainByte;
+
+		if (currChainByte != DssConstants.DSS_NOCHAIN)
+		// then we're still inside a chain, so don't send.
+			return;
+
+		// Else, we just ended the chain, so send it across.
+
+		if ((SanityManager.DEBUG) && (agent != null))
+			agent.trace("Sending data");
+
+		resetChainState();
+		if (offset != 0) {
+			try {
+				flush(socketOutputStream);
+			} catch (java.io.IOException e) {
+				agent.markCommunicationsFailure(
+					"DDMWriter.finalizeChain()",
+					"OutputStream.flush()",
+					e.getMessage(),"*");
+			}
+		}
+
+	}
+
 }
-
-
-
 
