@@ -15,11 +15,8 @@ Contents
 2.2.2 Download and install Java Development Kit release 1.4.x
 2.2.3 Download and install Java Development Kit release 1.3.x
 2.2.4 Download extensions for Java Development Kit release 1.3.x
-2.2.5 Download Java Compiler Compiler (JavaCC) version 3.1
-2.2.6 Download jakarta-servlet API 4 (Servlet 2.4)
-2.2.7 Download Jakarta-ORO 2.0.8
-2.2.8 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
-2.2.9 Download Jikes 1.14 (Optional)
+2.2.5 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
+2.2.6 Download Jikes 1.14 (Optional)
 
 3     Build instructions
 3.1   Set required environmental variables
@@ -173,17 +170,7 @@ installed on your system.
       ${derby.source}/tools/java 
 
 
-(2) Java Transaction API (JTA) 1.0.1B
-
-    Download JTA 1.0.1B (jta-1_0_1B-classes.zip) from:
-      http://java.sun.com/products/jta/ 
-    by selecting "Class files".
-
-    Save jta-1_0_1B-classes.zip file in directory
-      ${derby.source}/tools/java 
-
-
-(3) Java Cryptography Extension (JCE) version 1.2.2
+(2) Java Cryptography Extension (JCE) version 1.2.2
 
     Download JCE 1.2.2 (jce-1_2_2.zip) from:
       http://java.sun.com/products/jce/index-122.html
@@ -198,59 +185,7 @@ installed on your system.
 
 
 
-2.2.5 Download Java Compiler Compiler (JavaCC) version 3.1
-
-JavaCC 3.1 (javacc-3.1.zip or javacc-3.1.tar.gz) can be 
-downloaded from:
-    https://javacc.dev.java.net/
-
-Note: The latest available version of JavaCC is 3.2.
-However, JavaCC 3.1 is the requirement for Derby build
-environment.
-
-The downloaded file (javacc-3.1.zip or javacc-3.1.tar.gz) 
-contains documentation and other files. After downloading 
-the zip or tar file, unzip or untar the file and copy only 
-javacc-3.1/bin/lib/javacc.jar file to directory 
-   ${derby.source}/tools/java 
-
-
-
-2.2.6 Download jakarta-servlet API 4 (Servlet 2.4)
-
-jakarta-servlet API 4 (jakarta-servletapi-4-yyyymmdd.zip or
-jakarta-servletapi-4-yyyymmdd.tar.gz) can be downloaded from:
-   http://cvs.apache.org/builds/jakarta-servletapi-4/nightly/
-
-Note: There is zip and tar file for nightly build for every day.
-Download the zip or tar file for latest day.
- 
-The downloaded file (jakarta-servletapi-4-yyyymmdd.zip or
-jakarta-servletapi-4-yyyymmdd.tar.gz) contains documentation and 
-other files. After downloading the zip or tar file, unzip or 
-untar the file and copy only jakarta-servletapi-4/lib/servlet.jar 
-file to directory 
-   ${derby.source}/tools/java 
-
-
-
-2.2.7 Download Jakarta-ORO 2.0.8
-
-The Derby tests require the Jakarta-ORO classes for text processing.
-Jakarta-ORO 2.0.8 can be downloaded from:
-
-http://www.signal42.com/mirrors/apache/jakarta/oro/source/jakarta-oro-2.0.8.zip
-or
-http://www.signal42.com/mirrors/apache/jakarta/oro/source/jakarta-oro-2.0.8.tar.gz
-
-The downloaded file contains documentation and other files. After downloading
-the zip or tar file, unzip or untar the file and copy only the 
-jakarta-oro-2.0.8.jar file to the directory
-   ${derby.source}/tools/java
-
-
-
-2.2.8 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
+2.2.5 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
 
 This is an optional section.
 The reason is that osgi.jar is required to only build the 
@@ -284,7 +219,7 @@ ${derby.source}/tools/java/osgi.jar
 
 
 
-2.2.9 Download and Install Jikes 1.14 (Optional)
+2.2.6 Download and Install Jikes 1.14 (Optional)
 
 This is an optional section.
 
