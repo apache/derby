@@ -62,7 +62,7 @@ Project Setup
 Identify the codebase
 
 date        item
-....-..-..  If applicable, make sure that any associated name does not already 
+2004-08-30  If applicable, make sure that any associated name does not already 
             exist and check www.nameprotect.com to be sure that the name is not
             already trademarked for an existing software product.
 
@@ -97,8 +97,9 @@ Organizational acceptance of responsibility for the project
 
 Releases:
 
-None so far. A first release is in progress. This first release will be
-versioned 10.0.2.1.
+The first release, versioned 10.0.2.1, was announced on December 8, 2005.
+See
+http://mail-archives.apache.org/eyebrowse/ReadMsg?listName=derby-user@db.apache.org&msgNo=284 .
 
 PENDING ISSUES
 ==============
@@ -110,6 +111,8 @@ Derby documentation in PDF format:
   documentation with Forrest. A proposal was made by Jeff Levitt 
   <jlevitt@mutagen.net> to convert the documentation into XML DITA format.
 
+  The Getting Started and Reference Manual were converted to DITA and are
+  available for review from http://incubator.apache.org/derby/manuals/index.html
  
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
@@ -286,7 +289,8 @@ Bug tracking has been set up at http://issues.apache.org/jira/browse/DERBY
 RELEASE STATUS
 ==============
 
-A baseline release is in progress. This first release will be versioned 10.0.2.1.
+The first release, versioned 10.0.2.1, was announced on December 8, 2005.
+
 Any release must be approved by the Incubator PMC and must clearly be marked as
 an incubator release, according to the Apache Incubator guidelines:
 
