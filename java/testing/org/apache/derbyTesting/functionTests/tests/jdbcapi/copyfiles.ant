@@ -54,6 +54,7 @@ xaAnotherTest_sed.properties
 xaMorph.sql
 xaSimpleNegative.sql
 xaSimpleNegative_derby.properties
+xaSimpleNegative_sed.properties
 xaSimplePositive.sql
 xaSimplePositive_app.properties
 xaSimplePositive_sed.properties
