@@ -21,10 +21,6 @@ import org.apache.derby.catalog.UUID;
 
 final class TableKey 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private final String	tableName;
 	private final UUID	schemaId;
 

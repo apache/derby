@@ -52,10 +52,6 @@ import java.util.Properties;
 */
 public class TabInfoImpl implements TabInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private IndexInfoImpl[]				indexes;
 	private String						name;
 	private long						heapConglomerate;

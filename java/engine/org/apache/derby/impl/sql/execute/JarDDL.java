@@ -19,10 +19,6 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 public class JarDDL
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	  Add a jar file to the current connection's database.
 
  	  @exception StandardException Opps

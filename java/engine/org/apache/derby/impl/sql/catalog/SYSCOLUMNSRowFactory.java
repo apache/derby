@@ -73,10 +73,6 @@ import java.util.Properties;
 
 public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001;
 	static final String		TABLENAME_STRING = "SYSCOLUMNS";
 
 	/**

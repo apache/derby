@@ -23,10 +23,6 @@ import org.apache.derby.iapi.reference.SQLState;
 public class RealHashLeftOuterJoinStatistics 
 	extends RealNestedLoopLeftOuterJoinStatistics
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 
 	// CONSTRUCTORS

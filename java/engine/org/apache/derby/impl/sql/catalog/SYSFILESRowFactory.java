@@ -48,10 +48,6 @@ import java.util.Properties;
 
 public class SYSFILESRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	protected static final String	TABLENAME_STRING = "SYSFILES";
 
 	protected static final int		SYSFILES_COLUMN_COUNT = 4;

@@ -69,10 +69,6 @@ import org.apache.derby.catalog.UUID;
 
 class SYSALIASESRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private static final int		SYSALIASES_COLUMN_COUNT = 9;
 	private static final int		SYSALIASES_ALIASID = 1;

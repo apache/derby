@@ -70,10 +70,6 @@ import java.util.Enumeration;
  */
 class SetConstraintsConstantAction extends DDLConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	private boolean 					enable;
 	private	boolean						unconditionallyEnforce;

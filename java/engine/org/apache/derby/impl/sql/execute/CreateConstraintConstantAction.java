@@ -63,10 +63,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 public class CreateConstraintConstantAction extends ConstraintConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public	String[]		columnNames;
 	public	String			constraintText;
 

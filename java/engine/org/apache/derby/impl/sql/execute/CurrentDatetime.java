@@ -32,10 +32,6 @@ import java.sql.Timestamp;
 	@author ames
  */
 public class CurrentDatetime {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Holds the current datetime on the first evaluation of a current function

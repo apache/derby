@@ -58,10 +58,6 @@ import java.sql.SQLWarning;
 abstract class BasicNoPutResultSetImpl
 implements NoPutResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Modified during the life of this object */
     protected boolean isOpen;
     protected boolean finished;

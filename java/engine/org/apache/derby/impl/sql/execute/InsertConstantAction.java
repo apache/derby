@@ -49,10 +49,6 @@ import java.util.Properties;
 
 public class InsertConstantAction extends WriteCursorConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/********************************************************
 	**
 	**	This class implements Formatable. But it is NOT used

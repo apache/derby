@@ -33,10 +33,6 @@ import java.util.Vector;
  */
 public class BasicSortObserver implements SortObserver
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected boolean 	doClone;
 	protected boolean	distinct;
 	private	  boolean	reuseWrappers;

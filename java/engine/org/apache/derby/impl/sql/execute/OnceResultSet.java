@@ -41,10 +41,6 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public class OnceResultSet extends NoPutResultSetImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Statics for cardinality check */
 	public static final int DO_CARDINALITY_CHECK		= 1;
 	public static final int NO_CARDINALITY_CHECK		= 2;

@@ -26,10 +26,6 @@ import java.util.Dictionary;
  */
 public class LanguageDbPropertySetter implements PropertySetCallback
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	public void init(boolean dbOnly, Dictionary p) {
 		// not called yet ...
 	}

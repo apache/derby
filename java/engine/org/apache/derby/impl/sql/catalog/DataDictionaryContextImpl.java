@@ -32,10 +32,6 @@ public class DataDictionaryContextImpl
 	extends ContextImpl
 	implements DataDictionaryContext
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	//
 	// True means this is a nested data dictionary. We pop a nested data dictionary
 	// when we clean up an error.

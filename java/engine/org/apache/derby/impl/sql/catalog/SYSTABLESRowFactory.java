@@ -47,10 +47,6 @@ import org.apache.derby.iapi.services.uuid.UUIDFactory;
 
 public class SYSTABLESRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001;
 	private static final String		TABLENAME_STRING = "SYSTABLES";
 
 	protected static final int		SYSTABLES_COLUMN_COUNT = 5;

@@ -43,10 +43,6 @@ import org.apache.derby.catalog.AliasInfo;
 
 class DropAliasConstantAction extends DDLConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	private SchemaDescriptor	sd;
 	private final String schemaName;

@@ -33,10 +33,6 @@ import java.util.*;
  * @author suresht
  */
 class ColumnInfo {
-	/**
-	   IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	private ArrayList vtiColumnNames ;
 	private ArrayList insertColumnNames;

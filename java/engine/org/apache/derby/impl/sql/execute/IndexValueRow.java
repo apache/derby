@@ -30,10 +30,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 	@author ames
  */
 class IndexValueRow implements ExecIndexRow {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private ExecRow valueRow;
 

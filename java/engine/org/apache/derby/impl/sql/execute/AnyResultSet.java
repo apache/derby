@@ -37,10 +37,6 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public class AnyResultSet extends NoPutResultSetImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/* Used to cache row with nulls for case when subquery result set
 	 * is empty.

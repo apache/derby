@@ -98,10 +98,6 @@ import java.util.Vector;
  */
 public class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// RESOLVE. Embarassingly large public state. If we could move the Replication
 	// code into the same package, then these variables could be protected.
 

@@ -44,10 +44,6 @@ import java.util.Properties;
  */
 public class TemporaryRowHolderImpl implements TemporaryRowHolder
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	public static final int DEFAULT_OVERFLOWTHRESHOLD = 5;
 
 	protected static final int STATE_UNINIT = 0;

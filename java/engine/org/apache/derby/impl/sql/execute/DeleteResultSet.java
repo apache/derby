@@ -53,10 +53,6 @@ import org.apache.derby.iapi.sql.execute.ExecIndexRow;
  */
 public class DeleteResultSet extends DMLWriteResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public TransactionController   	tc;
 	public DeleteConstantAction		constants;
     protected ResultDescription 				resultDescription;

@@ -54,10 +54,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 public class SYSDEPENDSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001;
 	private static final String		TABLENAME_STRING = "SYSDEPENDS";
 
 	protected static final int		SYSDEPENDS_COLUMN_COUNT = 4;

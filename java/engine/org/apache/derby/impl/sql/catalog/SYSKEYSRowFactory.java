@@ -53,10 +53,6 @@ import org.apache.derby.catalog.IndexDescriptor;
 
 public class SYSKEYSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001;
 	private static final String		TABLENAME_STRING = "SYSKEYS";
 
 	protected static final int		SYSKEYS_COLUMN_COUNT = 2;

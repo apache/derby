@@ -36,11 +36,7 @@ import org.apache.derby.catalog.UUID;
  */
 
 public class SYSDUMMY1RowFactory extends CatalogRowFactory
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-{ private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
+{
 	static final String TABLENAME_STRING = "SYSDUMMY1";
 
 	/* column #s for sysstatistics (1 based) */

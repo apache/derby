@@ -32,10 +32,6 @@ import org.apache.derby.iapi.types.RowLocation;
 
 public class CardinalityCounter implements RowLocationRetRowSource
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	private RowLocationRetRowSource rowSource;
 	private DataValueDescriptor[] prevKey;
 	private long[] cardinality;

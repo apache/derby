@@ -69,10 +69,6 @@ import java.sql.SQLWarning;
  */
 abstract class NoRowsResultSetImpl implements ResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	protected final Activation    activation;
 	private boolean isTopResultSet = true;
 	private boolean dumpedStats;

@@ -46,10 +46,6 @@ import java.util.Enumeration;
 
 class DropIndexConstantAction extends IndexConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private String				fullIndexName;
 	private long				tableConglomerateId;

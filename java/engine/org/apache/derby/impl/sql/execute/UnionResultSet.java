@@ -40,10 +40,6 @@ import org.apache.derby.iapi.types.RowLocation;
  */
 public class UnionResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/* Run time statistics variables */
 	public int rowsSeenLeft;

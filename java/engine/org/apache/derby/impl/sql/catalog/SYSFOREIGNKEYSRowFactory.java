@@ -56,10 +56,6 @@ import org.apache.derby.catalog.IndexDescriptor;
 
 public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001;
 	private  static final String	TABLENAME_STRING = "SYSFOREIGNKEYS";
 
 	protected static final int		SYSFOREIGNKEYS_COLUMN_COUNT = 5;

@@ -50,10 +50,6 @@ import org.apache.derby.catalog.UUID;
  */
 public abstract class DDLConstantAction extends GenericConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	//TransactionController 		tc;
 	//protected LanguageConnectionContext 	lcc;
 	//DataDescriptorGenerator 	ddg;

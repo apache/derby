@@ -43,10 +43,6 @@ import org.apache.derby.catalog.UUID;
 abstract class GenericConstantAction implements ConstantAction
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Does this constant action modify the passed in table
 	 * uuid?  By modify we mean add or drop things tied to
 	 * this table (e.g. index, trigger, constraint).  Things

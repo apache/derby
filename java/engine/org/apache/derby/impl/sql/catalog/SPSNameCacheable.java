@@ -40,10 +40,6 @@ import java.util.Hashtable;
  */
 class SPSNameCacheable implements Cacheable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private TableKey 			identity;
 	private SPSDescriptor		spsd;
 	private final DataDictionaryImpl	dd;

@@ -30,10 +30,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  */
 class UniqueIndexSortObserver extends BasicSortObserver 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private boolean		isConstraint;
 	private String		indexOrConstraintName;
 	private String 		tableName;

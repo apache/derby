@@ -36,10 +36,6 @@ import java.io.IOException;
  */
 public class ConstraintInfo implements ConsInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/********************************************************
 	**
 	**	This class implements Formatable. That means that it

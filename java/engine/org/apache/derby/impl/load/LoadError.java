@@ -24,10 +24,6 @@ import org.apache.derby.iapi.error.PublicAPI;
 	@see SQLException
  */
 class LoadError {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	
 	/**
 	 Raised if, the Cloudscape database connection is null.

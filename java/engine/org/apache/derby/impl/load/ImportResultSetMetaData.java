@@ -16,10 +16,6 @@ import org.apache.derby.vti.VTIMetaDataTemplate;
 import org.apache.derby.iapi.reference.DB2Limit;
 
 class ImportResultSetMetaData extends VTIMetaDataTemplate {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
   private final int numberOfColumns;
   private final String[] columnNames;

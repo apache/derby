@@ -21,10 +21,6 @@ import java.net.URL;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 final class ImportReadData implements java.security.PrivilegedExceptionAction {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
   //Read data from this file
   private String inputFileName;
 

@@ -64,10 +64,6 @@ import java.util.Hashtable;
 public class TableScanResultSet extends NoPutResultSetImpl
 	implements CursorResultSet, Cloneable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     protected ScanController scanController;
 	protected boolean		scanControllerOpened;
 	protected boolean		isKeyed;

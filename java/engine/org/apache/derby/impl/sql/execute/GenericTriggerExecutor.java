@@ -29,10 +29,6 @@ import org.apache.derby.iapi.reference.SQLState;
  */
 public abstract class GenericTriggerExecutor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected InternalTriggerExecutionContext	tec;
 	protected TriggerDescriptor					triggerd;
 	protected Activation						activation;

@@ -21,10 +21,6 @@ package org.apache.derby.impl.sql.execute;
  */
 public class TriggerEvent
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	static final int BEFORE_INSERT = 0;	
 	static final int BEFORE_DELETE = 1;	
 	static final int BEFORE_UPDATE = 2;	

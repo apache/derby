@@ -42,10 +42,6 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 
 final class GenericParameterValueSet implements ParameterValueSet 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
   //all this has to be copied in the clone constructor
 	private final GenericParameter[]				parms;
 	final ClassInspector 			ci;

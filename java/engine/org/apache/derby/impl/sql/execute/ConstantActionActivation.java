@@ -24,10 +24,6 @@ import java.util.Vector;
  */
 public final class ConstantActionActivation extends BaseActivation
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	public int getExecutionCount() { return 0;}
 	public void setExecutionCount(int count) {}

@@ -21,10 +21,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 public interface KeyToBaseRowConstantAction
 extends ConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public ExecRow getEmptyHeapRow(LanguageConnectionContext lcc)
 		 throws StandardException;
 	public ExecRow getEmptyKeyRow()

@@ -11,10 +11,6 @@
 package org.apache.derby.impl.load;
 
 abstract class ExportWriteDataAbstract {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
   protected ControlInfo controlFileReader;
   protected int[] columnLengths;

@@ -52,10 +52,6 @@ import java.sql.Timestamp;
 
 public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	static	final	String	TABLENAME_STRING = "SYSTRIGGERS";
 
 	/* Column #s for sysinfo (1 based) */

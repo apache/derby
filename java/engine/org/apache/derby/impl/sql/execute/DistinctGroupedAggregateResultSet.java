@@ -57,10 +57,6 @@ import java.util.Enumeration;
  */
 public class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /**
 	 * Constructor

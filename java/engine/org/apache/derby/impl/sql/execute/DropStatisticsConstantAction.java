@@ -31,10 +31,6 @@ import org.apache.derby.catalog.UUID;
 
 class DropStatisticsConstantAction extends DDLConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	private final String objectName;
 	private final boolean forTable;
 	private final SchemaDescriptor sd;

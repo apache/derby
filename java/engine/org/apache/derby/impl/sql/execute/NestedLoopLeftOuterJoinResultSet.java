@@ -39,10 +39,6 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
  */
 public class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected GeneratedMethod emptyRowFun;
 	/* Was this originally a right outer join? */
 	private boolean wasRightOuterJoin;

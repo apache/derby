@@ -94,10 +94,6 @@ import java.util.Vector;
 public class GenericPreparedStatement
 	implements ExecPreparedStatement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	///////////////////////////////////////////////
 	//
 	// WARNING: when adding members to this class, be

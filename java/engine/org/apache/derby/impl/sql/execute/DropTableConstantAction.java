@@ -51,10 +51,6 @@ import java.util.Enumeration;
 
 class DropTableConstantAction extends DDLSingleTableConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private final long				conglomerateNumber;
 	private final String				fullTableName;

@@ -51,10 +51,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  */
 public class RIBulkChecker 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	private static final int EQUAL = 0;
 	private static final int GREATER_THAN = 1;
 	private static final int LESS_THAN = -1;

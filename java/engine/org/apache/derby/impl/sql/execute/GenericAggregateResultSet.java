@@ -60,10 +60,6 @@ import java.sql.SQLException;
  */
 abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected GenericAggregator[]		aggregates;	
 	protected GeneratedMethod			rowAllocator;
 	protected AggregatorInfoList	aggInfoList;	

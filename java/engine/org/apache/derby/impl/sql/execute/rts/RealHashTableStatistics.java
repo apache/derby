@@ -35,10 +35,6 @@ import java.util.Properties;
 public class RealHashTableStatistics
 	extends RealNoPutResultSetStatistics
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/* Leave these fields public for object inspectors */
 	public int hashtableSize;

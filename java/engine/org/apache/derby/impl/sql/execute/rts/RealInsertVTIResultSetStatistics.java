@@ -30,10 +30,6 @@ import java.io.IOException;
 public class RealInsertVTIResultSetStatistics
 	extends RealNoRowsResultSetStatistics
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	/* Leave these fields public for object inspectors */
     public	int 					rowCount;

@@ -26,10 +26,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 
 public class SystemColumnImpl implements SystemColumn
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private	String	name;
 	private	int		id;
 	private	int		precision;

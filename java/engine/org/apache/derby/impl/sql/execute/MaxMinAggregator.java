@@ -31,10 +31,6 @@ import java.io.IOException;
 public final class MaxMinAggregator 
 	extends OrderableAggregator
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private boolean isMax; // true for max, false for min
 

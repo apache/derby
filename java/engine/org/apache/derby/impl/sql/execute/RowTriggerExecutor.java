@@ -25,10 +25,6 @@ import org.apache.derby.iapi.sql.Activation;
 public class RowTriggerExecutor extends GenericTriggerExecutor
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Constructor
 	 *
 	 * @param tec the execution context

@@ -39,10 +39,6 @@ import org.apache.derby.iapi.reference.SQLState;
  */
 public class AutoincrementCounter 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	private Long start;
 	private long increment;

@@ -35,10 +35,6 @@ import java.sql.Timestamp;
 */
 public final class RunTimeStatisticsImpl implements RunTimeStatistics
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 
 	/* Leave these fields public for object inspectors */

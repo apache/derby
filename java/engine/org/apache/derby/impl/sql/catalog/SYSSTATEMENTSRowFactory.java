@@ -59,10 +59,6 @@ import java.util.Properties;
 
 public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	static	final	String	TABLENAME_STRING = "SYSSTATEMENTS";
 
 	/* Column #s for sysinfo (1 based) */

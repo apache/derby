@@ -31,11 +31,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 public class GenericScanQualifier implements ScanQualifier
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private int                 columnId        = -1;
 	private DataValueDescriptor orderable       = null;

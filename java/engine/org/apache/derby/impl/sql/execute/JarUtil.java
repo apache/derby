@@ -39,10 +39,6 @@ import java.sql.SQLException;
 
 public class JarUtil
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	public static final String ADD_JAR_DDL = "ADD JAR";
 	public static final String DROP_JAR_DDL = "DROP JAR";
 	public static final String REPLACE_JAR_DDL = "REPLACE JAR";

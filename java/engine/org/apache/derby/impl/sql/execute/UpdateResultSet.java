@@ -60,10 +60,6 @@ import java.util.Hashtable;
  */
 public class UpdateResultSet extends DMLWriteResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public TransactionController 	tc;
 	public ExecRow					newBaseRow;
 	public ExecRow 					row;

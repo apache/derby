@@ -51,10 +51,6 @@ import java.util.Properties;
 
 public class SYSVIEWSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001;
 	private  static final String	TABLENAME_STRING = "SYSVIEWS";
 
 	protected static final int		SYSVIEWS_COLUMN_COUNT = 4;

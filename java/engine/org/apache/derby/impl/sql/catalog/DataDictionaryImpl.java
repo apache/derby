@@ -154,10 +154,6 @@ import java.sql.Types;
 public	class	DataDictionaryImpl
 	implements DataDictionary, CacheableFactory, ModuleControl, ModuleSupportable,java.security.PrivilegedAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     private static final String		CFG_SYSTABLES_ID = "SystablesIdentifier";
 	private static final String		CFG_SYSTABLES_INDEX1_ID = "SystablesIndex1Identifier";

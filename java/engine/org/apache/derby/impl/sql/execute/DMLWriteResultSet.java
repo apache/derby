@@ -31,10 +31,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  */
 abstract class DMLWriteResultSet extends NoRowsResultSetImpl 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected WriteCursorConstantAction constantAction;
 	protected int[] baseRowReadMap;
 	protected int[] streamStorableHeapColIds;

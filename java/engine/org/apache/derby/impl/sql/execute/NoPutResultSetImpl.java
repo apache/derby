@@ -66,10 +66,6 @@ import java.sql.Timestamp;
 abstract class NoPutResultSetImpl
 extends BasicNoPutResultSetImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Set in constructor and not modified */
 	public final int				resultSetNumber;
 

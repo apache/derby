@@ -44,10 +44,6 @@ import java.sql.Timestamp;
 
 public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	static final String TABLENAME_STRING = "SYSSTATISTICS";
 
 	/* column #s for sysstatistics (1 based) */

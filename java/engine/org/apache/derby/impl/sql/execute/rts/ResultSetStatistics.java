@@ -22,10 +22,6 @@ package org.apache.derby.impl.sql.execute.rts;
 public interface ResultSetStatistics 
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Return the statement execution plan as a String.
 	 *
 	 * @param depth	Indentation level.

@@ -33,10 +33,6 @@ import java.io.IOException;
  */
 public class IndexRow extends ValueRow implements ExecIndexRow
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/********************************************************
 	**
 	**	This class implements Formatable. That means that it

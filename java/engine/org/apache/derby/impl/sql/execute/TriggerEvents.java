@@ -19,10 +19,6 @@ package org.apache.derby.impl.sql.execute;
  */
 public class TriggerEvents
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	public static final TriggerEvent BEFORE_INSERT = new TriggerEvent(TriggerEvent.BEFORE_INSERT);
 	public static final TriggerEvent BEFORE_DELETE = new TriggerEvent(TriggerEvent.BEFORE_DELETE);
 	public static final TriggerEvent BEFORE_UPDATE = new TriggerEvent(TriggerEvent.BEFORE_UPDATE);

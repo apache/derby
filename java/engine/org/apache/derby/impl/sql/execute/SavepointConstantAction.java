@@ -28,10 +28,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 class SavepointConstantAction extends DDLConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	private final String savepointName; //name of the savepoint
 	private final int	savepointStatementType; //Type of savepoint statement ie rollback, release or set savepoint

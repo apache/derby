@@ -59,10 +59,6 @@ import java.util.Enumeration;
  */
 public class GroupedAggregateResultSet extends GenericAggregateResultSet
 	implements CursorResultSet {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/* Run time statistics variables */
 	public int rowsInput;

@@ -36,10 +36,6 @@ import java.util.Hashtable;
  */
 public abstract class GenericRIChecker
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	protected FKInfo					fkInfo;
 	protected DynamicCompiledOpenConglomInfo[] fkDcocis;
 	protected StaticCompiledOpenConglomInfo[] fkScocis;

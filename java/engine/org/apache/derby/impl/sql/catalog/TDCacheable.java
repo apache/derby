@@ -44,10 +44,6 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
  */
 abstract class TDCacheable implements Cacheable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected TableDescriptor	td;
 	protected final DataDictionaryImpl	dd;
 

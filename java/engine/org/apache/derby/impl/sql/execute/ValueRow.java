@@ -46,10 +46,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  */
 public class ValueRow implements ExecRow, Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/********************************************************
 	**
 	**	This class implements Formatable. That means that it

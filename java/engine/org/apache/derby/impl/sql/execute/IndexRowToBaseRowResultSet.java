@@ -55,10 +55,6 @@ import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
  */
 public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     // set in constructor and not altered during
     // life of object.

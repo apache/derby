@@ -26,10 +26,6 @@ import org.apache.derby.catalog.UUID;
  */
 class OIDTDCacheable extends TDCacheable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private UUID	identity;
 
 	OIDTDCacheable(DataDictionaryImpl dd) {

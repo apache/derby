@@ -24,10 +24,6 @@ import java.io.IOException;
 
 final class ExportWriteData extends ExportWriteDataAbstract
 	implements java.security.PrivilegedExceptionAction {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
   private String outputFileName;
   // i18n support - instead of using DataOutputStream.writeBytes - use

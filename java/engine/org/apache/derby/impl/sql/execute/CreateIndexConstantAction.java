@@ -74,10 +74,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 class CreateIndexConstantAction extends IndexConstantAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private boolean			unique;
 	private String			indexType;
