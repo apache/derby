@@ -1819,24 +1819,12 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		/////////////////////////////////////////////////////
 		synchronized (this)
 		{
-			// we have an empty log file here, refuse to switch.
-			if (endPosition == LOG_FILE_HEADER_SIZE)
-			{
-				if (SanityManager.DEBUG)
-				{
-					Monitor.logMessage("not switching from an empty log file (" +
-						   logFileNumber + ")");
-				}	
-				return;
-			}
-
 
 			// Make sure that this thread of control is guaranteed to complete
             // it's work of switching the log file without having to give up
             // the semaphore to a backup or another flusher.  Do this by looping
             // until we have the semaphore, the log is not being flushed, and
             // the log is not frozen for backup.  Track (2985). 
-			boolean waited = false;
 			while(logBeingFlushed | isFrozen)
 			{
 				try
@@ -1847,6 +1835,17 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 				{
 					throw StandardException.interrupt(ie);
 				}	
+			}
+
+			// we have an empty log file here, refuse to switch.
+			if (endPosition == LOG_FILE_HEADER_SIZE)
+			{
+				if (SanityManager.DEBUG)
+				{
+					Monitor.logMessage("not switching from an empty log file (" +
+						   logFileNumber + ")");
+				}	
+				return;
 			}
 
 			// log file isn't being flushed right now and logOut is not being
@@ -3721,11 +3720,14 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		if ((logWrittenFromLastCheckPoint + potentialLastFlush) > checkpointInterval &&
 					checkpointDaemon != null &&	!checkpointDaemonCalled && !inLogSwitch)
 		{
-			//following synchronized block is required to make
-			//sure only one checkpoint request get scheduled.
+			// following synchronized block is required to make 
+			// sure only one checkpoint request get scheduled.
 			synchronized(this)
 			{
-				if(!checkpointDaemonCalled)
+				// recheck if checkpoint is still required, it is possible some other
+				// thread might have already scheduled a checkpoint and completed it. 
+				if ((logWrittenFromLastCheckPoint + potentialLastFlush) > checkpointInterval &&
+					checkpointDaemon != null &&	!checkpointDaemonCalled && !inLogSwitch)
 				{
 					checkpointDaemonCalled = true;
 					checkpointDaemon.serviceNow(myClientNumber);
@@ -3741,11 +3743,14 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			if (potentialLastFlush > logSwitchInterval &&
 				!checkpointDaemonCalled && !inLogSwitch)
 			{
-				//following synchronized block is required
-				//to make sure only one thread switches the log file at a time.
+				// following synchronized block is required to make sure only
+				// one thread switches the log file at a time.
 				synchronized(this)
 				{
-					if(!inLogSwitch)
+					// recheck if log switch is still required, it is possible some other
+					// thread might have already switched the log file. 
+					if (potentialLastFlush > logSwitchInterval &&
+						!checkpointDaemonCalled && !inLogSwitch)
 					{
 						inLogSwitch = true;
 						switchLogFile();

@@ -328,6 +328,14 @@ public class Scan implements StreamLogScan {
 				// end of the file header, in other words, there is at least
 				// one log record in this log file.
 				curpos = scan.getFilePointer();
+
+				// if the log file happens to be empty skip and proceed. 
+				// ideally this case should never occur because log switch is
+				// not suppose to happen on an empty log file. 
+				// But it is safer to put following check incase if it ever
+				// happens to avoid any recovery issues. 
+				if (curpos == LogToFile.LOG_FILE_HEADER_SIZE)
+					continue;
 			}
 
 			scan.seek(curpos - 4);
