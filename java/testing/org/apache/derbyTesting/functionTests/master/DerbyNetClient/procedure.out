@@ -89,7 +89,7 @@ zeroArgProcedures
 No ResultSet or update count returned
 No ResultSet or update count returned
 No ResultSet or update count returned
-FAIL - prepareStatement call za(?)
+EXPECTED SQL Exception: 'ZA' is not recognized as a function or procedure.
 No ResultSet or update count returned
 No ResultSet or update count returned
 DEFINED PROCEDURES FOR ZA
@@ -264,7 +264,6 @@ EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which 
 EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
 p_inout 9 p_out 6
 p_inout 9 null?false p_out 6 null?false
-p_inout 9 null?false p_out 6 null?false
 outparams
 DEFINED PROCEDURES FOR OP1
   APP.OP1 AS org.apache.derbyTesting.functionTests.util.ProcedureTest.outparams1(OUT A INTEGER,IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
@@ -312,7 +311,7 @@ EXPECTED SQL Exception: The resulting value is outside the range for the data ty
 No ResultSet or update count returned
 OP4 49.345 >66.34< null ? false
 EXPECTED SQL Exception: Invalid argument: parameter index 2 is not an OUT or INOUT parameter.
-EXPECTED SQL Exception: (<NULL>) Invalid operation: parameter 1 not set or registered
+EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 DEFINED PROCEDURES FOR OP4INOUT
   APP.OP4INOUT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams4(INOUT A DECIMAL(4,2),IN B VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
 DATABASE METATDATA PROCEDURES FOR OP4INOUT
@@ -330,7 +329,7 @@ No ResultSet or update count returned
 OP4INOUT 9+23.505 >32.50< null ? false
 EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2).
 EXPECTED SQL Exception: BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "102.33".. See attached Throwable.
-EXPECTED SQL Exception: (<NULL>) Invalid operation: parameter 1 not set or registered
+EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 SQL Control
 CREATE PROCEDURE SQLC.SQLCONTROL1_0 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128))  PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl'
 CREATE PROCEDURE SQLC.SQLCONTROL2_0 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128))  PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl2'
@@ -835,7 +834,7 @@ CALL ** MODIFIES SQL DATA
          CREATE SCHEMA S-UPDATE 0-EXECUTE OK
          DROP SCHEMA SQL-UPDATE 0-EXECUTE OK
 CALL SQLCONTROL3_0 (?, ?, ?, ?, ?, ?, ?)
-EXPECTED SQL Exception: (07004) Parameter 1 is an OUT procedure parameter and must be registered with CallableStatement.registerOutParameter before execution.
+EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 literals
 DEFINED PROCEDURES FOR TY_%
   LITT.TY_BIGINT AS org.apache.derbyTesting.functionTests.util.ProcedureTest.literalTest(IN P1 BIGINT,OUT P2 VARCHAR(256)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL

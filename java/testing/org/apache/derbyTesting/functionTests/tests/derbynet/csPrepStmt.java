@@ -434,12 +434,12 @@ class csPrepStmt
 		catch(SQLException sqle)
 		{
 			logErr("SQL Exception: " + sqle.getMessage());
-			throw new Exception("Call to setObject is Failed!");
+			throw sqle;
 		}
 		catch(Exception e)
 		{
 			logErr("Unexpected Exception: " + e.getMessage());
-			throw new Exception("Call to setObject is Failed!");
+			throw e;
 		}
 
 		finally
@@ -500,7 +500,7 @@ class csPrepStmt
 
 		try {
 			ps = conn.prepareStatement(insertSql);
-			
+			//System.out.println("Prepared statement" + insertSql);
 			for (i = 1; i <= numCols; i++)
 				ps.setInt(i,i);
 			ps.executeUpdate();
@@ -508,6 +508,7 @@ class csPrepStmt
 		{
 			System.out.println("SQLState: " + e.getSQLState() + 
 							   " message: " + e.getMessage());			
+			//e.printStackTrace();
 		}
 		
 	}

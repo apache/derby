@@ -68,7 +68,7 @@ select col_2 from bit_table
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -77,7 +77,7 @@ select col_2 from bit_table
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
 	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 from bit_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -91,7 +91,7 @@ select col_3 from bit_table
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -100,7 +100,7 @@ select col_3 from bit_table
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
 	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 from bit_table
 	4 getObject            ->Object'   	: byte[]
@@ -630,7 +630,7 @@ select col_2 from bit_table
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -639,7 +639,7 @@ select col_2 from bit_table
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
 	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 from bit_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -653,7 +653,7 @@ select col_3 from bit_table
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -662,7 +662,7 @@ select col_3 from bit_table
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
 	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 from bit_table
 	4 getObject            ->Object'   	: byte[]
@@ -1192,7 +1192,7 @@ select col_2 from blob_table
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -1201,7 +1201,7 @@ select col_2 from blob_table
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
 	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -1215,7 +1215,7 @@ select col_3 from blob_table
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -1224,7 +1224,7 @@ select col_3 from blob_table
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
 	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 from blob_table
 	4 getObject            ->Object'   	: byte[]
@@ -1733,7 +1733,7 @@ select col_2 from blob_table
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -1742,7 +1742,7 @@ select col_2 from blob_table
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
 	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -1756,7 +1756,7 @@ select col_3 from blob_table
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -1765,7 +1765,7 @@ select col_3 from blob_table
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
 	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 from blob_table
 	4 getObject            ->Object'   	: byte[]
@@ -2274,7 +2274,7 @@ select col_2 from blob_table
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (String index out of range: 3)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -2283,7 +2283,7 @@ select col_2 from blob_table
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
 	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -2297,7 +2297,7 @@ select col_3 from blob_table
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (String index out of range: 3)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -2306,7 +2306,7 @@ select col_3 from blob_table
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
 	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (String index out of range: 3)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 from blob_table
 	4 getObject            ->Object'   	: byte[]
