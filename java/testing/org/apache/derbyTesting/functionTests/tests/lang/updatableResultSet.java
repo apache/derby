@@ -247,7 +247,6 @@ public class updatableResultSet {
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
 
-			if (TestUtil.isEmbeddedFramework()) {
 			System.out.println("Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset");
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			while (warnings != null)
@@ -257,6 +256,7 @@ public class updatableResultSet {
 			}
 			conn.clearWarnings();
       System.out.println("requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported");
+			System.out.println("Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets"); 
       System.out.println("Make sure that we got TYPE_SCROLL_INSENSITIVE? " +  (stmt.getResultSetType() == ResultSet.TYPE_SCROLL_INSENSITIVE));
       System.out.println("Make sure that we got CONCUR_READ_ONLY? " +  (stmt.getResultSetConcurrency() == ResultSet.CONCUR_READ_ONLY));
 			System.out.println("JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset");
@@ -281,7 +281,6 @@ public class updatableResultSet {
 			rs.next();
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
-			}
 
 			System.out.println("Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it");
 			stmt = conn.createStatement();//the default is a read only forward only resultset

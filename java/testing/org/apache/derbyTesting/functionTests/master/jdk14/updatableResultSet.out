@@ -14,6 +14,7 @@ SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
+Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
 Make sure that we got CONCUR_READ_ONLY? true
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset

@@ -12,6 +12,16 @@ SQL State : null
 Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 SQL State : null
 Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
+requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
+Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
+Make sure that we got TYPE_SCROLL_INSENSITIVE? true
+Make sure that we got CONCUR_READ_ONLY? true
+JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : null
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset.
