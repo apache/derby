@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Date;
@@ -356,24 +355,6 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 			DataValueDescriptor param = getParms().getParameterForGet(parameterIndex-1);
 			double v = param.getDouble();
 			wasNull = (v == 0.0) && param.isNull();
-			return v;
-		} catch (StandardException e)
-		{
-			throw EmbedResultSet.noStateChangeException(e);
-		}
-
-	}
-
-    /**
-	 * @see CallableStatement#getBigDecimal
-     * @exception SQLException NoOutputParameters thrown.
-     */
-    public BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException
-	{
-		checkStatus();
-		try {
-			BigDecimal v =  getParms().getParameterForGet(parameterIndex-1).getBigDecimal();
-			wasNull = (v == null);
 			return v;
 		} catch (StandardException e)
 		{

@@ -1199,6 +1199,39 @@ public abstract class EmbedConnection implements java.sql.Connection
 		topWarning = null;
 	}
 
+ 	/////////////////////////////////////////////////////////////////////////
+	//
+	//	JDBC 2.0	-	New public methods
+	//
+	/////////////////////////////////////////////////////////////////////////
+
+    /**
+     *
+	 * Get the type-map object associated with this connection.
+	 * By default, the map returned is empty.
+	 * JDBC 2.0 - java.util.Map requires JDK 1
+     *
+     */
+    public final java.util.Map getTypeMap() {
+		// just return an immuntable empty map
+		return java.util.Collections.EMPTY_MAP;
+    }
+
+    /** 
+	 * Install a type-map object as the default type-map for
+	 * this connection.
+	 * JDBC 2.0 - java.util.Map requires JDK 1
+     *
+     * @exception SQLException Feature not implemented for now.
+	 */
+    public final void setTypeMap(java.util.Map map) throws SQLException {
+
+        if( map == null)
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
+                                              "java.sql.Connection.setTypeMap");
+        if(!(map.isEmpty()))
+            throw Util.notImplemented();
+    }
 
 	/////////////////////////////////////////////////////////////////////////
 	//

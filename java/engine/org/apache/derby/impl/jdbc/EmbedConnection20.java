@@ -84,40 +84,6 @@ public class EmbedConnection20 extends EmbedConnection
 		}
 	}
 
- 	/////////////////////////////////////////////////////////////////////////
-	//
-	//	JDBC 2.0	-	New public methods
-	//
-	/////////////////////////////////////////////////////////////////////////
-
-    /**
-     *
-	 * Get the type-map object associated with this connection.
-	 * By default, the map returned is empty.
-	 * JDBC 2.0 - java.util.Map requires JDK 1
-     *
-     */
-    public java.util.Map getTypeMap() {
-		// just return an empty map
-		return new java.util.Hashtable(0);
-    }
-
-    /** 
-	 * Install a type-map object as the default type-map for
-	 * this connection.
-	 * JDBC 2.0 - java.util.Map requires JDK 1
-     *
-     * @exception SQLException Feature not implemented for now.
-	 */
-    public void setTypeMap(java.util.Map map) throws SQLException {
-
-        if( map == null)
-            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
-                                              "java.sql.Connection.setTypeMap");
-        if(!(map.isEmpty()))
-            throw Util.notImplemented();
-    }
-
 	/*
 	** methods to be overridden by subimplementations wishing to insert
 	** their classes into the mix.
