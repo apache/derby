@@ -268,8 +268,6 @@ public class RunList
                     	pwOut.println("Cannot run the suite, requires jdk12 or higher, have jdk" + javaVersion);
 					else if(needJdk14)
                     	pwOut.println("Cannot run the suite, requires jdk14 or higher, have jdk" + javaVersion);
-					else if(needJdk14)
-                    	pwOut.println("Cannot run the suite, requires jdk14 or higher, have jdk" + javaVersion);
 					else if(excludedFromJCC)
                     	pwOut.println("Cannot run the suite on JCC version " + excludeJCC + " or lower.");                                     
                                         else if((needIBMjvm == null || needIBMjvm.booleanValue() == false))
@@ -921,6 +919,7 @@ public class RunList
 	boolean isIBridge = false;
 	boolean isJdk12 = false; // really now 'isJdk12orHigher'
 	boolean isJdk14 = false;
+	boolean isJdk15 = false;
 	boolean isJdk118 = false;
 	boolean isJdk117 = false;
 	boolean isEncryption = false;
@@ -947,6 +946,7 @@ public class RunList
 	if ( System.getProperty("java.version").startsWith("1.1.8") ) isJdk118 = true;
         if ( System.getProperty("java.version").startsWith("1.1.7") ) isJdk117 = true;
         if ( System.getProperty("java.version").startsWith("1.4.") ) isJdk14 = true;
+        if ( System.getProperty("java.version").startsWith("1.5.") ) isJdk15 = true;
 
         if ( (framework != null) && (framework.length()>0) )
 	{
@@ -1002,7 +1002,7 @@ public class RunList
  	}		
 
         // Skip any suite if jvm is not jdk14 or higher for jdk14test
-        if (!isJdk14 &&  isJdk14Test)
+        if ((!isJdk14 && !isJdk15) &&  isJdk14Test)
 	{
 		needJdk14 = true;
   		return true;
