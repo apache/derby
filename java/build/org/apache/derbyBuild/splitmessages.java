@@ -14,13 +14,8 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-public class splitmessages { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
-
+public class splitmessages {
 	/**
 		arg[0] is the destination directory
 		arg[1] is the source file.

@@ -69,8 +69,6 @@ import java.util.Date;
  */
 public class ClassSizeCrawler
 {
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
-
     public static void main( String[] arg)
     {
         String[] classAndInterfaceList = {"org.apache.derby.iapi.types.DataValueDescriptor"};
@@ -190,7 +188,6 @@ public class ClassSizeCrawler
                        "import java.util.Hashtable;\n" +
                        "class ClassSizeCatalog extends java.util.Hashtable\n" +
                        "{\n" +
-                       "    public static final String copyrightNotice = \"(c) Copyright IBM Corp. 2003. All Rights Reserved.\";\n" +
                        "    ClassSizeCatalog()\n" +
                        "    {\n");
             for( Enumeration e = classSizes.keys();

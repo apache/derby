@@ -52,13 +52,8 @@ import java.io.*;
     [-DportingOnly=true] [-Doutputfile=<filename>] org.apache.derbyBuild.classlister 
     property_file [ property_file ... ]
 **/
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-
-public class classlister { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public class classlister {
 
 	protected String[] sets;
 	protected Hashtable foundClasses;

@@ -46,12 +46,8 @@ import java.util.Enumeration;
  * if we are generating for the cloud or cloudscape configuration.
  * 
  */
-	/**
-		IBM Copyright &copy notice.
-	*/
 
-
-public class propertyconfig { private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public class propertyconfig {
 
 	public static String header = 
 		"######## This is a generated file, do not edit.\n" +
