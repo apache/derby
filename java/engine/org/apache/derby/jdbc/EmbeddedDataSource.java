@@ -34,6 +34,11 @@ import javax.sql.DataSource;
 
 
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.impl.jdbc.Util;
 
 /** 
 	
@@ -450,6 +455,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 
 		if (attributesAsPassword && requestPassword && password != null) {
 
+
 			StringBuffer sb = new StringBuffer(url.length() + password.length() + 1);
 
 			sb.append(url);
@@ -459,8 +465,14 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 			url = sb.toString();
 
 		}
+		Connection conn =  findDriver().connect(url, info);
 
-		return findDriver().connect(url, info);
+	// JDBC driver's getConnection method returns null if
+	// the driver does not handle the request's URL.
+        if (conn == null)
+           throw Util.generateCsSQLException(SQLState.PROPERTY_INVALID_VALUE,Attribute.DBNAME_ATTR,getDatabaseName());
+
+        return conn;
 	}
    
 	Driver169 findDriver() throws SQLException
