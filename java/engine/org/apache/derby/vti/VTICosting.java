@@ -34,10 +34,6 @@ import java.sql.SQLException;
 public interface VTICosting
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * A useful constant: the default estimated number of rows returned by a VTI.
 	 */
 	public static final double defaultEstimatedRowCount		= 10000d;

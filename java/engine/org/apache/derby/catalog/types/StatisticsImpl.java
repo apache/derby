@@ -22,10 +22,6 @@ import java.io.IOException;
 
 public class StatisticsImpl	implements Statistics, Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	/* total count of rows for which this statistic was created-- this
 	   is not the same as the total number of rows in the conglomerate
 	   currently, but a snapshot; i.e the  number of rows when this

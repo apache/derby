@@ -25,10 +25,6 @@ package org.apache.derby.catalog;
 public interface AliasInfo
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Public statics for the various alias types as both char and String.
 	 */
 	public static final char ALIAS_TYPE_PROCEDURE_AS_CHAR		= 'P';

@@ -74,12 +74,7 @@ import org.apache.derby.vti.VTIEnvironment;
 	</UL>
 
  */
-public class LockTable extends VTITemplate implements VTICosting  { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class LockTable extends VTITemplate implements VTICosting  {
 
 	/** return only latches */
 	public static final int LATCH = VirtualLockTable.LATCH;

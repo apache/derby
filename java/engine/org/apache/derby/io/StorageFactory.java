@@ -65,10 +65,6 @@ import java.io.IOException;
  */
 public interface StorageFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
     /**
      * Classes implementing the StorageFactory interface must have a null

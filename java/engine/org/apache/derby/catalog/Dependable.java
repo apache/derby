@@ -29,10 +29,6 @@ package org.apache.derby.catalog;
   */
 public interface Dependable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	  *	Universe of known Dependables. 
 	  */

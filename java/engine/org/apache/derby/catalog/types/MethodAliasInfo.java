@@ -26,10 +26,6 @@ import java.io.ObjectOutput;
 public class MethodAliasInfo
 implements AliasInfo, Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/********************************************************
 	**
 	**	This class implements Formatable. That means that it

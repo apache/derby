@@ -36,11 +36,6 @@ import java.util.Properties;
 public class Driver30 extends Driver20 {
 
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
-
-	/**
  	 * Get a new nested connection.
 	 *
 	 * @param conn	The EmbedConnection.

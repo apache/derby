@@ -36,10 +36,6 @@ import java.math.BigDecimal;
  */
 public class TriggerOldTransitionRows extends org.apache.derby.vti.VTITemplate
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	private ResultSet resultSet;
 

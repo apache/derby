@@ -67,11 +67,6 @@ import java.sql.SQLException;
 public interface DeferModification
 {
 
-    /**
-       IBM Copyright &copy notice.
-    */
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
-
     public static final int INSERT_STATEMENT = 1;
     public static final int UPDATE_STATEMENT = 2;
     public static final int DELETE_STATEMENT = 3;

@@ -34,10 +34,6 @@ import org.apache.derby.iapi.error.PublicAPI;
   */
 public abstract class UserUtility
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/** Enumeration value for read access permission ("READ_ACCESS_PERMISSION"). */
 	public final static String READ_ACCESS_PERMISSION = "READ_ACCESS_PERMISSION";
 	/** Enumeration value for full access permission ("FULL_ACCESS_PERMISSION"). */

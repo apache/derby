@@ -71,10 +71,6 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	private boolean isProcedure;
 	// state for procedures.

@@ -63,10 +63,6 @@ import org.apache.derby.iapi.util.StringUtil;
  */
 public class StatementDuration extends VTITemplate
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	/*
 	** private 
 	*/

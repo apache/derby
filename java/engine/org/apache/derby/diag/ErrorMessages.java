@@ -53,11 +53,6 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  * 
  */
 public class ErrorMessages extends VTITemplate implements VTICosting, java.security.PrivilegedAction  {
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	
 	/* The name of the file containing all the SQLSTate codes.
 	 * The class gets the SQLState code from the messages

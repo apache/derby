@@ -24,10 +24,6 @@ import java.io.SyncFailedException;
  */
 public interface WritableStorageFactory extends StorageFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 
     /**

@@ -95,12 +95,7 @@ import org.apache.derby.vti.VTIEnvironment;
     where s.SCHEMAID = t.SCHEMAID;
     </PRE>
 */
-public class SpaceTable extends VTITemplate implements VTICosting { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public class SpaceTable extends VTITemplate implements VTICosting {
 
 	private ConglomInfo[] conglomTable;
 	boolean initialized;

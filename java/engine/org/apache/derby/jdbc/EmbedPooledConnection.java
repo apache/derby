@@ -46,10 +46,6 @@ import javax.sql.ConnectionEvent;
  */
 class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private Vector eventListener; // who wants to know I am closed or error
 

@@ -173,11 +173,6 @@ import org.apache.derby.iapi.reference.Attribute;
 public class EmbeddedDataSource extends ReferenceableDataSource implements
 				javax.sql.DataSource
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private static final long serialVersionUID = -4945135214995641181L;
 

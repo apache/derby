@@ -39,12 +39,7 @@ import java.sql.ResultSetMetaData;
 	developing in a Java 2 environment.
  */
 
-public abstract class VTIMetaDataTemplate implements ResultSetMetaData { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public abstract class VTIMetaDataTemplate implements ResultSetMetaData {
 
     /**
      * Is the column automatically numbered, and thus read-only?

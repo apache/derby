@@ -44,11 +44,6 @@ import java.io.EOFException;
  */
 public class BaseTypeIdImpl implements Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /********************************************************
     **

@@ -54,12 +54,7 @@ import java.util.StringTokenizer;
 	@author djd
 */
 
-public abstract class Driver169 implements ModuleControl { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public abstract class Driver169 implements ModuleControl {
 
 	protected boolean active;
 	private ContextService contextServiceFactory;

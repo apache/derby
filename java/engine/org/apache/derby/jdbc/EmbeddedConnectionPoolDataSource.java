@@ -39,10 +39,6 @@ import javax.sql.PooledConnection;
 public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 		implements	javax.sql.ConnectionPoolDataSource
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private static final long serialVersionUID = 7852784308039674160L;
 

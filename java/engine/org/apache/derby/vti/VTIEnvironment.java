@@ -22,11 +22,6 @@ package org.apache.derby.vti;
   */
 public interface VTIEnvironment
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		Return true if this instance of the VTI has been created for compilation,

@@ -18,10 +18,6 @@ package org.apache.derby.catalog;
 public interface DefaultInfo
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Get the text of a default.
 	 *
 	 * @return The text of the default.

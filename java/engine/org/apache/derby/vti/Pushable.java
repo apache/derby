@@ -24,11 +24,6 @@ import java.sql.SQLException;
 */
 public interface Pushable {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
-
 
 	/**
 		Indicates the columns that must be returned by a read-write VTI's ResultSet.

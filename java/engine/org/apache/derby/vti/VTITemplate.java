@@ -49,12 +49,7 @@ import java.sql.Array;
 	Classes that implement a JDBC 2.0 conformant java.sql.ResultSet can be used
 	as virtual tables.
  */
-public abstract class VTITemplate implements ResultSet { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public abstract class VTITemplate implements ResultSet {
 
     //
     // java.sql.ResultSet calls, passed through to our result set.

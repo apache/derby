@@ -23,10 +23,6 @@ package org.apache.derby.catalog;
 public interface IndexDescriptor
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Returns true if the index is unique.
 	 */
 	boolean			isUnique();

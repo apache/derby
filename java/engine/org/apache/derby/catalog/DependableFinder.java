@@ -30,10 +30,6 @@ import java.sql.SQLException;
 public interface DependableFinder
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	  *	Get the in-memory object associated with the passed-in object ID.
 	  *
 	  *	@param	dependableObjectID the ID of a Dependable. Used to locate that Dependable.

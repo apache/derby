@@ -67,10 +67,6 @@ import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
  */
 public class ErrorLogReader extends VTITemplate
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	/*
 	** private 
 	*/

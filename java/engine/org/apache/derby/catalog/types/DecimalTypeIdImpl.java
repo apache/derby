@@ -17,10 +17,6 @@ import java.sql.Types;
 
 public class DecimalTypeIdImpl extends BaseTypeIdImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	/* this class is needed because writeexternal for this class stores
 	   extra information; when the object is sent over the wire the niladic
 	   constructor is first called and then we call the readExternal method. 

@@ -26,11 +26,6 @@ import javax.transaction.xa.XAException;
 */
 public final class XATransactionState extends ContextImpl {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
-
 	/** Rollback-only due to deadlock */
 	final static int TRO_DEADLOCK				= -2;
 	/** Rollback-only due to end(TMFAIL) */

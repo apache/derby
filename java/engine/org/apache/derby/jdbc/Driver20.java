@@ -45,11 +45,6 @@ import java.util.Properties;
 
 public class Driver20 extends Driver169 implements Driver {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-
 	private static final String[] BOOLEAN_CHOICES = {"false", "true"};
 
 	private Class  antiGCDriverManager;

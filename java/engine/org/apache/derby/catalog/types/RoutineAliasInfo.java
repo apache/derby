@@ -29,11 +29,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  */
 public class RoutineAliasInfo extends MethodAliasInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	private static final String[] SQL_CONTROL = {"MODIFIES SQL DATA", "READS SQL DATA", "CONTAINS SQL", "NO SQL"};
 	public static final short MODIFIES_SQL_DATA = 0;

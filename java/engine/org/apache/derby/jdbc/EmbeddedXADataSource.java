@@ -59,10 +59,6 @@ import javax.sql.XAConnection;
 public class EmbeddedXADataSource extends EmbeddedDataSource implements
 				javax.sql.XADataSource
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private static final long serialVersionUID = -5715798975598379738L;
 

@@ -74,12 +74,7 @@ import java.sql.Types;
 	statement currently being executed in the database.</LI>
 	</UL>
 */
-public class TransactionTable extends VTITemplate implements VTICosting { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public class TransactionTable extends VTITemplate implements VTICosting {
 
 	private TransactionInfo[] transactionTable;
 	boolean initialized;

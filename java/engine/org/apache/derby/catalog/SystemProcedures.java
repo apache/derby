@@ -46,11 +46,6 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 	ftp://ftp.software.ibm.com/ps/products/db2/info/vr8/pdf/letter/db2l2e80.pdf
 */
 public class SystemProcedures  {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 
 	private final static int SQL_BEST_ROWID = 1;

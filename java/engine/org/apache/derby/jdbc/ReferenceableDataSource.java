@@ -56,10 +56,6 @@ public class ReferenceableDataSource implements
 				java.io.Serializable,
 				ObjectFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 
 	private static final long serialVersionUID = 1872877359127597176L;

@@ -35,10 +35,6 @@ import java.io.IOException;
  */
 public interface StorageFile
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	//constant values related to exclusive lock mechanism
 	public static final int NO_FILE_LOCK_SUPPORT              = 0;

@@ -47,10 +47,6 @@ final class EmbedXAConnection extends EmbedPooledConnection
 		implements XAConnection, XAResource
 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 
 	final ResourceAdapter ra;

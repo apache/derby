@@ -22,11 +22,6 @@ import java.sql.SQLException;
 	query engine without a conversion through a JDBC ResultSet.
 */
 public interface IFastPath {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-    public static String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
 	/**
 		Indicates nextRow() has completed its scan.

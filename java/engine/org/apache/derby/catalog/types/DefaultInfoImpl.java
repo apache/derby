@@ -27,10 +27,6 @@ import java.io.IOException;
 
 public class DefaultInfoImpl implements DefaultInfo, Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/********************************************************
 	**
 	**	This class implements Formatable. That means that it

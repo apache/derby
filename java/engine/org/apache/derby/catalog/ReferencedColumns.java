@@ -21,10 +21,6 @@ package org.apache.derby.catalog;
 public interface ReferencedColumns
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Returns an array of 1-based column positions in the table that the
 	 * check constraint is on.  
 	 *

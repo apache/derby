@@ -23,10 +23,6 @@ package org.apache.derby.catalog;
 public interface Statistics
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
-	/**
 	 * @return the selectivity for a set of predicates.
 	 */
 	double selectivity(Object[] predicates);

@@ -41,10 +41,6 @@ import java.io.File;
  */
 public interface Database
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**
 	 * Tells whether the Database is configured as read-only, or the
