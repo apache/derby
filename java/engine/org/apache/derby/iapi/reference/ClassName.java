@@ -24,10 +24,6 @@ package org.apache.derby.iapi.reference;
 
 public interface ClassName
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	String STORE_CONGLOMDIR =
 		"org.apache.derby.impl.store.access.ConglomerateDirectory";

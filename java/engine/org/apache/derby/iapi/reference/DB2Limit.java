@@ -15,11 +15,6 @@ public interface DB2Limit
 	/**
      * Various fixed numbers related to DB2 limits.
      */
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	public static final int DB2_MAX_TRIGGER_RECURSION = 16; /* Maximum nesting level for triggers */
 
