@@ -1419,7 +1419,34 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getProcedures(String catalog, String schemaPattern,
 			String procedureNamePattern) throws SQLException {
 
-		PreparedStatement s = getPreparedQuery("getProcedures");
+		return doGetProcs(catalog, schemaPattern,
+			procedureNamePattern, "getProcedures");
+	}
+
+	/**
+	 * Get a description of stored procedures available in a
+	 * catalog.  Same as getProcedures() above, except that
+	 * the result set will conform to ODBC specifications.
+	 */
+	public ResultSet getProceduresForODBC(String catalog, String schemaPattern,
+			String procedureNamePattern) throws SQLException {
+
+		return doGetProcs(catalog, schemaPattern,
+			procedureNamePattern, "odbc_getProcedures");
+	}
+
+	/**
+	 * Does the actual work for the getProcedures metadata calls.
+	 * See getProcedures() method above for parameter descriptions.
+	 * @param queryName Name of the query to execute; is used
+	 *	to determine whether the result set should conform to
+	 *	JDBC or ODBC specifications.
+	 */
+	private ResultSet doGetProcs(String catalog, String schemaPattern,
+		String procedureNamePattern, String queryName)
+		throws SQLException {
+
+		PreparedStatement s = getPreparedQuery(queryName);
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schemaPattern));
 		s.setString(3, swapNull(procedureNamePattern));
@@ -1487,8 +1514,38 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			String procedureNamePattern,
 			String columnNamePattern) throws SQLException {
 
+		return doGetProcCols(catalog, schemaPattern,
+			procedureNamePattern, columnNamePattern,
+			"getProcedureColumns");
+	}
 
-		PreparedStatement s = getPreparedQuery("getProcedureColumns");
+	/**
+	 * Get a description of a catalog's stored procedure parameters
+	 * and result columns.  Same as getProcedureColumns() above,
+	 * except that the result set will conform to ODBC specifications.
+	 */
+	public ResultSet getProcedureColumnsForODBC(String catalog,
+			String schemaPattern, String procedureNamePattern,
+			String columnNamePattern) throws SQLException {
+
+		return doGetProcCols(catalog, schemaPattern,
+			procedureNamePattern, columnNamePattern,
+			"odbc_getProcedureColumns");
+	}
+
+	/**
+	 * Does the actual work for the getProcedureColumns metadata
+	 * calls. See getProcedureColumns() method above for parameter
+	 * descriptions.
+	 * @param queryName Name of the query to execute; is used
+	 *	to determine whether the result set should conform to
+	 *	JDBC or ODBC specifications.
+	 */
+	private ResultSet doGetProcCols(String catalog, String schemaPattern,
+			String procedureNamePattern, String columnNamePattern,
+			String queryName) throws SQLException {
+
+		PreparedStatement s = getPreparedQuery(queryName);
 		// 
                 // catalog is not part of the query
                 //
@@ -1687,7 +1744,36 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getColumns(String catalog, String schemaPattern,
 		String tableNamePattern, String columnNamePattern)
 					throws SQLException {
-		PreparedStatement s = getPreparedQuery("getColumns");
+
+		return doGetCols(catalog, schemaPattern, tableNamePattern,
+			columnNamePattern, "getColumns");
+	}
+
+	/**
+	 * Get a description of table columns available in a catalog.
+	 * Same as getColumns() above, except that the result set
+	 * will conform to ODBC specifications.
+	 */
+	public ResultSet getColumnsForODBC(String catalog, String schemaPattern,
+		String tableNamePattern, String columnNamePattern)
+		throws SQLException {
+
+		return doGetCols(catalog, schemaPattern, tableNamePattern,
+			columnNamePattern, "odbc_getColumns");
+	}
+
+	/**
+	 * Does the actual work for the getColumns metadata calls.
+	 * See getColumns() method above for parameter descriptions.
+	 * @param queryName Name of the query to execute; is used
+	 *	to determine whether the result set should conform to
+	 *	JDBC or ODBC specifications.
+	 */
+	private ResultSet doGetCols(String catalog, String schemaPattern,
+		String tableNamePattern, String columnNamePattern,
+		String queryName) throws SQLException {
+
+		PreparedStatement s = getPreparedQuery(queryName);
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schemaPattern));
 		s.setString(3, swapNull(tableNamePattern));
@@ -1821,6 +1907,37 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		boolean nullable
 	) throws SQLException
 	{
+		return doGetBestRowId(catalogPattern, schemaPattern, tablePattern,
+			scope, nullable, "");
+	}
+
+	/**
+	 * Get a description of a table's optimal set of columns that
+	 * uniquely identifies a row. They are ordered by SCOPE.
+	 * Same as getBestRowIdentifier() above, except that the result
+	 * set will conform to ODBC specifications.
+	 */
+	public ResultSet getBestRowIdentifierForODBC(String catalogPattern,
+		String schemaPattern, String tablePattern, int scope,
+		boolean nullable) throws SQLException {
+
+		return doGetBestRowId(catalogPattern, schemaPattern, tablePattern,
+			scope, nullable, "odbc_");
+	}
+
+	/**
+	 * Does the actual work for the getBestRowIdentifier metadata
+	 * calls.  See getBestRowIdentifier() method above for parameter
+	 * descriptions.
+	 * @param queryPrefix Prefix to be appended to the names of
+	 *	the queries used in this method.  This is used
+	 *	to determine whether the result set should conform to
+	 *	JDBC or ODBC specifications.
+	 */
+	private ResultSet doGetBestRowId(String catalogPattern,
+		String schemaPattern, String tablePattern, int scope,
+		boolean nullable, String queryPrefix) throws SQLException {
+
 		int nullableInIntForm = 0;
 		if (nullable)
 			nullableInIntForm = 1;
@@ -1868,7 +1985,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				// this one's it, do the real thing and return it.
 				// we don't need to check catalog, schema, table name
 				// or scope again.
-				ps = getPreparedQuery("getBestRowIdentifierPrimaryKeyColumns");
+				ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierPrimaryKeyColumns");
 				ps.setString(1,constraintId);
 				ps.setString(2,constraintId);
 				// note, primary key columns aren't nullable,
@@ -1897,7 +2014,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			if (done) 
 			{
 				// this one's it, do the real thing and return it.
-				ps = getPreparedQuery("getBestRowIdentifierUniqueKeyColumns");
+				ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierUniqueKeyColumns");
 				ps.setString(1,constraintId);
 				ps.setString(2,constraintId);
 				ps.setInt(3,nullableInIntForm);
@@ -1927,7 +2044,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			ps.close();
 			if (done) {
 				// this one's it, do the real thing and return it.
-				ps = getPreparedQuery("getBestRowIdentifierUniqueIndexColumns");
+				ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierUniqueIndexColumns");
 				ps.setLong(1,indexNum);
 				ps.setInt(2,nullableInIntForm);
 				return ps.executeQuery();
@@ -1935,7 +2052,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 			// last try -- just return all columns of the table
 			// the not null ones if that restriction is upon us.
-			ps = getPreparedQuery("getBestRowIdentifierAllColumns");
+			ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierAllColumns");
 			ps.setString(1,catalogPattern);
 			ps.setString(2,schemaPattern);
 			ps.setString(3,tablePattern);
@@ -1976,7 +2093,32 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getVersionColumns(String catalog, String schema,
 				String table) throws SQLException {
-		PreparedStatement s = getPreparedQuery("getVersionColumns");
+		return doGetVersionCols(catalog, schema, table, "getVersionColumns");
+	}
+
+	/**
+	 * Get a description of a table's columns that are automatically
+	 * updated when any value in a row is updated.  They are
+	 * unordered.  Same as getVersionColumns() above, except that
+	 * the result set will conform to ODBC specifications.
+	 */
+	public ResultSet getVersionColumnsForODBC(String catalog, String schema,
+				String table) throws SQLException {
+		return doGetVersionCols(catalog, schema, table, "odbc_getVersionColumns");
+	}
+
+	/**
+	 * Does the actual work for the getVersionColumns metadata
+	 * calls.  See getVersionColumns() method above for parameter
+	 * descriptions.
+	 * @param queryName Name of the query to execute; is used
+	 *	to determine whether the result set should conform to
+	 *	JDBC or ODBC specifications.
+	 */
+	private ResultSet doGetVersionCols(String catalog, String schema,
+		String table, String queryName) throws SQLException {
+
+		PreparedStatement s = getPreparedQuery(queryName);
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
 		s.setString(3, swapNull(table));
@@ -2007,7 +2149,31 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getPrimaryKeys(String catalog, String schema,
 				String table) throws SQLException {
-		PreparedStatement s = getPreparedQuery("getPrimaryKeys");
+		return doGetPrimaryKeys(catalog, schema, table, "getPrimaryKeys");
+	}
+
+	/**
+	 * Get a description of a table's primary key columns.  They
+	 * are ordered by COLUMN_NAME.  Same as getPrimaryKeys above,
+	 * except that the result set will conform to ODBC specifications.
+	 */
+	public ResultSet getPrimaryKeysForODBC(String catalog, String schema,
+				String table) throws SQLException {
+		return doGetPrimaryKeys(catalog, schema, table, "odbc_getPrimaryKeys");
+	}
+
+	/**
+	 * Does the actual work for the getPrimaryKeys metadata
+	 * calls.  See getPrimaryKeys() method above for parameter
+	 * descriptions.
+	 * @param queryName Name of the query to execute; is used
+	 *	to determine whether the result set should conform to
+	 *	JDBC or ODBC specifications.
+	 */
+	private ResultSet doGetPrimaryKeys(String catalog, String schema,
+		String table, String queryName) throws SQLException {
+
+		PreparedStatement s = getPreparedQuery(queryName);
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
 		s.setString(3, swapNull(table));
@@ -2312,6 +2478,17 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		return getSimpleQuery("getTypeInfo");
 	}
 
+	/**
+	 * Get a description of all the standard SQL types supported by
+	 * this database. They are ordered by DATA_TYPE and then by how
+	 * closely the data type maps to the corresponding JDBC SQL type.
+	 * Same as getTypeInfo above, except that the result set will
+	 * conform to ODBC specifications.
+	 */
+	public ResultSet getTypeInfoForODBC() throws SQLException {
+		return getSimpleQuery("odbc_getTypeInfo");
+	}
+
     /**
      * Get a description of a table's indices and statistics. They are
      * ordered by NON_UNIQUE, TYPE, INDEX_NAME, and ORDINAL_POSITION.
@@ -2367,9 +2544,36 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getIndexInfo(String catalog, String schema, String table,
 			boolean unique, boolean approximate)
 					throws SQLException {
+		return doGetIndexInfo(catalog, schema, table, unique, approximate, "getIndexInfo");
+	}
+
+	/**
+	 * Get a description of a table's indices and statistics. They are
+	 * ordered by NON_UNIQUE, TYPE, INDEX_NAME, and ORDINAL_POSITION.
+	 * Same as getIndexInfo above, except that the result set will
+	 * conform to ODBC specifications.
+	 */
+	public ResultSet getIndexInfoForODBC(String catalog, String schema, String table,
+		boolean unique, boolean approximate) throws SQLException
+	{
+		return doGetIndexInfo(catalog, schema, table, unique, approximate, "odbc_getIndexInfo");
+	}
+
+	/**
+	 * Does the actual work for the getIndexInfo metadata
+	 * calls.  See getIndexInfo() method above for parameter
+	 * descriptions.
+	 * @param queryName Name of the query to execute; is used
+	 *	to determine whether the result set should conform to
+	 *	JDBC or ODBC specifications.
+	 */
+	private ResultSet doGetIndexInfo(String catalog, String schema, String table,
+		boolean unique, boolean approximate, String queryName)
+		throws SQLException {
+
 		int approximateInInt = 0;
 		if (approximate) approximateInInt = 1;
-		PreparedStatement s = getPreparedQuery("getIndexInfo");
+		PreparedStatement s = getPreparedQuery(queryName);
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
 		s.setString(3, swapNull(table));

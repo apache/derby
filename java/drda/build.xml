@@ -38,8 +38,64 @@
     <ant dir="${derby.drda.dir}/impl/drda"/>
     <ant dir="${derby.drda.dir}/drda"/>
     <ant dir="${derby.drda.dir}/loc/drda"/>
+    <antcall target="odbcMeta"/>
   </target>
 
+<!-- Generate ODBC-compliant metadata statements from JDBC metadata       -->
+<!-- Doing so involves three steps:                                       -->
+<!-- 1. Get a fresh copy of the metadata.properties file (from the source -->
+<!--    dir, since that one hasn't been modified by the ODBC generation   -->
+<!--    code), to be safe.                                                -->
+<!-- 2. Run the ODBC metadata generator program, which reads the metadata -->
+<!--    file from step 1 and creates an output file that has all of the   -->
+<!--    queries from metadata.properties PLUS any ODBC versions of those  -->
+<!--    queries that are required for ODBC compliance.  The name of this  -->
+<!--    output file is "odbc_metadata.properties".                        -->
+<!-- 3. Move odbc_metadata.properties to clobber the metadata.properties  -->
+<!--    file that is in the BUILD directory (not the one in the source    -->
+<!--    dir).                                                             -->
+
+  <target name="odbcMeta" depends="odbcprops,verifyodbcgen,noODBC,chkodbcgen" unless="odbcgen.done">
+    <delete file="${metadata.out.dir}/metadata.properties"/>
+    <copy file="${derby.metadata.src.dir}/metadata.properties" tofile="${metadata.out.dir}/metadata.properties"/>
+    <java classname="org.apache.derbyBuild.ODBCMetadataGenerator"
+          classpath="${out.dir}"
+          dir="${metadata.out.dir}"
+          fork="yes"
+          failonerror="true">
+    </java>
+    <move file="${metadata.out.dir}/odbc_metadata.properties" tofile="${metadata.out.dir}/metadata.properties"/>
+    <touch file="${odbc.donefile}"/>
+  </target>
+
+  <target name="odbcprops">
+    <property name="odbc.donefile" value="${metadata.out.dir}/odbcmeta.done"/>
+  </target>
+
+  <target name="chkodbcgen">
+    <uptodate property="odbcgen.done"
+              targetfile="${odbc.donefile}" >
+      <srcfiles dir="${metadata.out.dir}" includes="metadata.properties" />
+      <srcfiles dir="${out.dir}/org/apache/derbyBuild" includes="ODBCMetadataGenerator.class,odbcgen_fragments.properties" />
+    </uptodate>
+  </target>
+
+  <target name="verifyodbcgen">
+    <available classname="org.apache.derbyBuild.ODBCMetadataGenerator"
+               property="odbcgen.available">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+      </classpath>
+    </available>
+  </target>
+
+  <target name="noODBC" unless="odbcgen.available">
+    <echo message=""/>
+    <echo message="***** ODBC Metadata not available *****"/>
+    <echo message=" ***** Run &quot;all&quot; target first *****"/>
+    <echo message=""/>
+    <fail message="  Exiting ant build..."/>
+  </target>
 
 <!--             ============= End Targets ==============                -->
 

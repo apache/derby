@@ -1,5 +1,6 @@
 jdbcapi/metadata.java
 jdbcapi/metadataMultiConn.java
+jdbcapi/odbc_metadata.java
 lang/AIjdbc.java
 lang/CharUTF8.java
 lang/DB2IsolationLevels.sql

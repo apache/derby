@@ -40,6 +40,7 @@ import org.apache.derby.iapi.db.PropertyInfo;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.load.Export;
 import org.apache.derby.impl.load.Import;
+import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
 
 import org.apache.derby.impl.sql.execute.JarDDL;
 import org.apache.derby.iapi.util.IdUtil;
@@ -60,6 +61,8 @@ public class SystemProcedures  {
 
 	private final static int SQL_BEST_ROWID = 1;
 	private final static int SQL_ROWVER = 2;
+	private final static String DRIVER_TYPE_OPTION = "DATATYPE";
+	private final static String ODBC_DRIVER_OPTION = "'ODBC'";
 
 	/**
 	  Method used by Cloudscape Network Server to get localized message (original call
@@ -178,11 +181,16 @@ public class SystemProcedures  {
 	 *  @param schemaName  SYSIBM.SQLProcedures SchemaName  varchar(128),
 	 *  @param procName    SYSIBM.SQLProcedures ProcName    varchar(128),
 	 *  @param options     SYSIBM.SQLProcedures Options     varchar(4000))
+	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
+	 *  	version of this procedure.
 	 */
 	public static void SQLPROCEDURES (String catalogName, String schemaName, String procName,
 										String options, ResultSet[] rs) throws SQLException
 	{
-		rs[0] = getDMD().getProcedures(catalogName, schemaName, procName);
+		rs[0] = isForODBC(options)
+			? ((EmbedDatabaseMetaData)getDMD()).getProceduresForODBC(
+				catalogName, schemaName, procName)
+			: getDMD().getProcedures(catalogName, schemaName, procName);
 	}
 
 	/**
@@ -306,8 +314,7 @@ public class SystemProcedures  {
 		else
 			return options.substring(valueStart + 1, valueEnd);
 	}
-
-
+	
 	/**
 	 *  Map SQLProcedureCols to EmbedDatabaseMetaData.getProcedureColumns
 	 *
@@ -318,12 +325,17 @@ public class SystemProcedures  {
 	 *  @param procName    SYSIBM.SQLProcedureCols ProcName    varchar(128),
 	 *  @param paramName   SYSIBM.SQLProcedureCols ParamName   varchar(128),
 	 *  @param options     SYSIBM.SQLProcedureCols Options     varchar(4000))
+	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
+	 *  	version of this procedure.
 	 */
 	public static void SQLPROCEDURECOLS (String catalogName, String schemaName, String procName,
 										String paramName, String options, ResultSet[] rs)
 		throws SQLException
 	{
-		rs[0] = getDMD().getProcedureColumns(catalogName, schemaName, procName, paramName);
+		rs[0] = isForODBC(options)
+			? ((EmbedDatabaseMetaData)getDMD()).getProcedureColumnsForODBC(
+				catalogName, schemaName, procName, paramName)
+			: getDMD().getProcedureColumns(catalogName, schemaName, procName, paramName);
 	}
 
 	/**
@@ -336,12 +348,17 @@ public class SystemProcedures  {
 	 *  @param tableName   SYSIBM.SQLColumns TableName   varchar(128),
 	 *  @param columnName  SYSIBM.SQLColumns ColumnName  varchar(128),
 	 *  @param options     SYSIBM.SQLColumns Options     varchar(4000))
+	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
+	 *  	version of this procedure.
 	 */
 	public static void SQLCOLUMNS (String catalogName, String schemaName, String tableName,
 										String columnName, String options, ResultSet[] rs)
 		throws SQLException
 	{
-		rs[0] = getDMD().getColumns(catalogName, schemaName, tableName, columnName);
+		rs[0] = isForODBC(options)
+			? ((EmbedDatabaseMetaData)getDMD()).getColumnsForODBC(
+				catalogName, schemaName, tableName, columnName)
+			: getDMD().getColumns(catalogName, schemaName, tableName, columnName);
 	}
 
 	/**
@@ -388,11 +405,16 @@ public class SystemProcedures  {
 	 *  @param schemaName  SYSIBM.SQLPrimaryKeys SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLPrimaryKeys TableName   varchar(128),
 	 *  @param options     SYSIBM.SQLPrimaryKeys Options     varchar(4000))
+	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
+	 *  	version of this procedure.
 	 */
 	public static void SQLPRIMARYKEYS (String catalogName, String schemaName, String tableName, String options, ResultSet[] rs)
 		throws SQLException
 	{
-		rs[0] = getDMD().getPrimaryKeys(catalogName, schemaName, tableName);
+		rs[0] = isForODBC(options)
+			? ((EmbedDatabaseMetaData)getDMD()).getPrimaryKeysForODBC(
+				catalogName, schemaName, tableName)
+			: getDMD().getPrimaryKeys(catalogName, schemaName, tableName);
 	}
 
 	/**
@@ -401,11 +423,15 @@ public class SystemProcedures  {
 	 *  @param resultset output parameter, the resultset object containing the result of getTypeInfo
 	 *  @param datatType SYSIBM.SQLGetTypeInfo DataType smallint,
 	 *  @param options   SYSIBM.SQLGetTypeInfo Options  varchar(4000))
+	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
+	 *  	version of this procedure.
 	 */
 	public static void SQLGETTYPEINFO (short dataType, String options, ResultSet[] rs)
 		throws SQLException
 	{
-		rs[0] = getDMD().getTypeInfo();
+		rs[0] = isForODBC(options)
+			? ((EmbedDatabaseMetaData)getDMD()).getTypeInfoForODBC()
+			: getDMD().getTypeInfo();
 	}
 
 	/**
@@ -419,6 +445,8 @@ public class SystemProcedures  {
 	 *  @param unique      SYSIBM.SQLStatistics Unique      smallint; 0=SQL_INDEX_UNIQUE(0); 1=SQL_INDEX_ALL(1),
 	 *  @param approximate SYSIBM.SQLStatistics Approximate smallint; 1=true; 0=false,
 	 *  @param options     SYSIBM.SQLStatistics Options     varchar(4000))
+	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
+	 *  	version of this procedure.
 	 */
 	public static void SQLSTATISTICS (String catalogName, String schemaName, String tableName,
 										short unique, short approximate, String options, ResultSet[] rs)
@@ -427,7 +455,10 @@ public class SystemProcedures  {
 		boolean boolUnique = (unique == 0) ? true: false;
 		boolean boolApproximate = (approximate == 1) ? true: false;
 			
-		rs[0] = getDMD().getIndexInfo(catalogName, schemaName, tableName, boolUnique, boolApproximate);
+		rs[0] = isForODBC(options)
+			? ((EmbedDatabaseMetaData)getDMD()).getIndexInfoForODBC(
+				catalogName, schemaName, tableName, boolUnique, boolApproximate)
+			: getDMD().getIndexInfo(catalogName, schemaName, tableName, boolUnique, boolApproximate);
 	}
 
 	/**
@@ -443,6 +474,8 @@ public class SystemProcedures  {
 	 *  @param scope       SYSIBM.SQLSpecialColumns Scope       smallint,
 	 *  @param nullable    SYSIBM.SQLSpecialColumns Nullable    smallint; 0=false, 1=true,
 	 *  @param options     SYSIBM.SQLSpecialColumns Options     varchar(4000))
+	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
+	 *  	version of this procedure.
 	 */
 	public static void SQLSPECIALCOLUMNS (short colType, String catalogName, String schemaName, String tableName,
 										short scope, short nullable, String options, ResultSet[] rs)
@@ -452,11 +485,17 @@ public class SystemProcedures  {
 		boolean boolNullable = (nullable == 1) ? true: false;
 		if (colType == SQL_BEST_ROWID)
 		{
-			rs[0] = getDMD().getBestRowIdentifier(catalogName, schemaName, tableName, scope, boolNullable);
+			rs[0] = isForODBC(options)
+				? ((EmbedDatabaseMetaData)getDMD()).getBestRowIdentifierForODBC(
+					catalogName, schemaName, tableName, scope, boolNullable)
+				: getDMD().getBestRowIdentifier(catalogName, schemaName, tableName, scope, boolNullable);
 		}
 		else // colType must be SQL_ROWVER
 		{
-			rs[0] = getDMD().getVersionColumns(catalogName, schemaName, tableName);
+			rs[0] = isForODBC(options)
+				? ((EmbedDatabaseMetaData)getDMD()).getVersionColumnsForODBC(
+					catalogName, schemaName, tableName)
+				: getDMD().getVersionColumns(catalogName, schemaName, tableName);
 		}
 	}
 
@@ -517,6 +556,18 @@ public class SystemProcedures  {
 		PreparedStatement ps = conn.prepareStatement("execute statement SYSIBM.METADATA");
 		rs[0] = ps.executeQuery();
 		conn.close();
+	}
+
+	/**
+	 * Helper for ODBC metadata calls.
+	 * @param options	String containig the options to search through.
+	 * @return True if options contain ODBC indicator; false otherwise.
+	 */
+	private static boolean isForODBC(String options) {
+
+		String optionValue = getOption(DRIVER_TYPE_OPTION, options);
+		return ((optionValue != null) && optionValue.toUpperCase().equals(ODBC_DRIVER_OPTION));
+
 	}
 
     /**
