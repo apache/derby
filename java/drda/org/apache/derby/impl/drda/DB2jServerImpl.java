@@ -1352,9 +1352,9 @@ public class DB2jServerImpl {
 		Session retval = null;
 		if (shutdown == true)
 			return retval;
-		try {
-			synchronized (runQueue)
-			{
+		synchronized (runQueue)
+		{
+			try {
 				// nobody waiting - go on with current session
 				if (runQueue.size() == 0)
 				{
@@ -1379,8 +1379,14 @@ public class DB2jServerImpl {
 				runQueue.removeElementAt(0);
 				if (currentSession != null)
 					runQueueAdd(currentSession);
+			} catch (InterruptedException e) {
+			// If for whatever reason (ex. database shutdown) a waiting thread is
+			// interrupted while in this method, that thread is going to be
+			// closed down, so we need to decrement the number of threads
+			// that will be available for use.
+				freeThreads--;
 			}
-		}catch (InterruptedException e) {}
+		}
 		return retval;
 	}
 	/**
