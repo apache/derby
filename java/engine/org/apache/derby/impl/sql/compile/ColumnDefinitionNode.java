@@ -611,24 +611,27 @@ public class ColumnDefinitionNode extends TableElementNode
 				(colType == StoredFormatIds.VARCHAR_TYPE_ID) ||
 				(colType == StoredFormatIds.LONGVARCHAR_TYPE_ID));
 
-			if (defaultNode instanceof CurrentUserNode) {
+			if (defaultNode instanceof SpecialFunctionNode) {
 
-				defaultText = defaultText.toLowerCase(java.util.Locale.ENGLISH);
-				if (defaultText.indexOf("user") != -1)
+				switch (defaultNode.getNodeType())
+				{
+				case C_NodeTypes.USER_NODE:
+				case C_NodeTypes.CURRENT_USER_NODE:
+				case C_NodeTypes.SESSION_USER_NODE:
+				case C_NodeTypes.SYSTEM_USER_NODE:
 				// DB2 enforces min length of 8.
 				// Note also: any size under 30 gives a warning in DB2.
 					return (charCol && (columnDesc.getMaximumWidth() >=
 						DB2Limit.MIN_COL_LENGTH_FOR_CURRENT_USER));
 
-				if ((defaultText.indexOf("schema") != -1) ||
-					(defaultText.indexOf("sqlid") != -1))
+				case C_NodeTypes.CURRENT_SCHEMA_NODE:
 				// DB2 enforces min length of 128.
 					return (charCol && (columnDesc.getMaximumWidth() >=
 						DB2Limit.MIN_COL_LENGTH_FOR_CURRENT_SCHEMA));
-
-				// else, function not allowed.
-				return false;
-
+				default:
+					// else, function not allowed.
+					return false;
+				}
 			}
 
 		}

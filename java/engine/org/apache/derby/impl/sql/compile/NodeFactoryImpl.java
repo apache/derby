@@ -197,9 +197,6 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.GROUP_BY_LIST:
 		  	return C_NodeNames.GROUP_BY_LIST_NAME;
 
-          case C_NodeTypes.CURRENT_ISOLATION_NODE:
-            return C_NodeNames.CURRENT_ISOLATION_NAME;
-
 		  case C_NodeTypes.ORDER_BY_LIST:
 		  	return C_NodeNames.ORDER_BY_LIST_NAME;
 
@@ -420,8 +417,14 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE:
 		  	return C_NodeNames.CURRENT_DATETIME_OPERATOR_NODE_NAME;
 
+		  case C_NodeTypes.USER_NODE:
 		  case C_NodeTypes.CURRENT_USER_NODE:
-		  	return C_NodeNames.CURRENT_USER_NODE_NAME;
+		  case C_NodeTypes.SESSION_USER_NODE:
+		  case C_NodeTypes.SYSTEM_USER_NODE:
+		  case C_NodeTypes.CURRENT_ISOLATION_NODE:
+		  case C_NodeTypes.IDENTITY_VAL_NODE:
+		  case C_NodeTypes.CURRENT_SCHEMA_NODE:
+		  	return C_NodeNames.SPECIAL_FUNCTION_NODE_NAME;
 
 		  case C_NodeTypes.IS_NODE:
 		  	return C_NodeNames.IS_NODE_NAME;

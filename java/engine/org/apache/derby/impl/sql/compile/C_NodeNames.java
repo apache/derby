@@ -94,13 +94,11 @@ public interface C_NodeNames
 
 	static final String CURRENT_DATETIME_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.CurrentDatetimeOperatorNode";
 
-	static final String CURRENT_ISOLATION_NAME = "org.apache.derby.impl.sql.compile.CurrentIsolationNode";
-
 	static final String CURRENT_OF_NODE_NAME = "org.apache.derby.impl.sql.compile.CurrentOfNode";
 
 	static final String CURRENT_ROW_LOCATION_NODE_NAME = "org.apache.derby.impl.sql.compile.CurrentRowLocationNode";
 
-	static final String CURRENT_USER_NODE_NAME = "org.apache.derby.impl.sql.compile.CurrentUserNode";
+	static final String SPECIAL_FUNCTION_NODE_NAME = "org.apache.derby.impl.sql.compile.SpecialFunctionNode";
 
 	static final String CURSOR_NODE_NAME = "org.apache.derby.impl.sql.compile.CursorNode";
 

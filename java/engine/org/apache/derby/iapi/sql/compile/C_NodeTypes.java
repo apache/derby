@@ -34,8 +34,8 @@ public interface C_NodeTypes
 	static final int CURRENT_ROW_LOCATION_NODE = 2;
 	static final int GROUP_BY_LIST = 3;
     static final int CURRENT_ISOLATION_NODE = 4;
-	// 5 available;
-	// 6 available
+	static final int IDENTITY_VAL_NODE = 5;
+	static final int CURRENT_SCHEMA_NODE = 6;
 	static final int ORDER_BY_LIST = 7;
 	static final int PREDICATE_LIST = 8;
 	static final int RESULT_COLUMN_LIST = 9;
@@ -137,8 +137,8 @@ public interface C_NodeTypes
 	// 106 is available
 	static final int VIRTUAL_COLUMN_NODE = 107;
 	static final int CURRENT_DATETIME_OPERATOR_NODE = 108;
-	static final int CURRENT_USER_NODE = 109;
-	// 110 is available
+	static final int CURRENT_USER_NODE = 109; // special function CURRENT_USER
+	static final int USER_NODE = 110; // // special function USER
 	static final int IS_NODE = 111;
 	static final int LOCK_TABLE_NODE = 112;
 	// 113
@@ -153,8 +153,8 @@ public interface C_NodeTypes
 	static final int NORMALIZE_RESULT_SET_NODE = 122;
 	static final int SCROLL_INSENSITIVE_RESULT_SET_NODE = 123;
 	static final int DISTINCT_NODE = 124;
-	// 125 available
-	// 126 available
+	static final int SESSION_USER_NODE = 125; // // special function SESSION_USER
+	static final int SYSTEM_USER_NODE = 126; // // special function SYSTEM_USER
 	static final int TRIM_OPERATOR_NODE = 127;
 	// 128 is available
 	static final int SELECT_NODE = 129;

@@ -92,7 +92,6 @@ import org.apache.derby.impl.sql.compile.UserTypeConstantNode;
 import org.apache.derby.impl.sql.compile.ValueNode;
 import org.apache.derby.impl.sql.compile.ValueNodeList;
 import org.apache.derby.impl.sql.compile.GroupByColumn;
-import org.apache.derby.impl.sql.compile.CurrentUserNode;
 import org.apache.derby.impl.sql.compile.CurrentDatetimeOperatorNode;
 import org.apache.derby.impl.sql.compile.CreateStatementNode;
 import org.apache.derby.impl.sql.compile.AlterTableNode;
@@ -5511,8 +5510,7 @@ numericValueFunction() throws StandardException :
 	<IDENTITY_VAL_LOCAL> <LEFT_PAREN> <RIGHT_PAREN>
 	{
 		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_USER_NODE,
-						ReuseFactory.getInteger(CurrentUserNode.IDENTITY_VAL),
+						C_NodeTypes.IDENTITY_VAL_NODE,
 						getContextManager());
 	}
 }
@@ -5742,8 +5740,7 @@ valueExpressionPrimary(boolean inSelectClause) throws StandardException :
 	<CURRENT> (<SCHEMA> | <SQLID>)
 	{
 		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_USER_NODE,
-						ReuseFactory.getInteger(CurrentUserNode.SCHEMA),
+						C_NodeTypes.CURRENT_SCHEMA_NODE,
 						getContextManager());
 	}
 |
@@ -6170,8 +6167,7 @@ userNode() throws StandardException :
 	<USER>
 	{
 		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.CURRENT_USER_NODE,
-								ReuseFactory.getInteger(CurrentUserNode.USER),
+								C_NodeTypes.USER_NODE,
 								getContextManager());
 	}
 |
@@ -6179,15 +6175,13 @@ userNode() throws StandardException :
 	{
 		return (ValueNode) nodeFactory.getNode(
 						C_NodeTypes.CURRENT_USER_NODE,
-						ReuseFactory.getInteger(CurrentUserNode.CURRENT_USER),
 						getContextManager());
 	}
 |
 	<SESSION_USER>
 	{
 		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_USER_NODE,
-						ReuseFactory.getInteger(CurrentUserNode.SESSION_USER),
+						C_NodeTypes.SESSION_USER_NODE,
 						getContextManager());
 	}
 }
@@ -9210,16 +9204,14 @@ DB2DefaultOption(String columnName) throws StandardException :
 	<CURRENT> (<SCHEMA> | <SQLID>)
 	{
 		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_USER_NODE,
-						ReuseFactory.getInteger(CurrentUserNode.SCHEMA),
+						C_NodeTypes.CURRENT_SCHEMA_NODE,
 						getContextManager());
 	}
 |
 	<USER>
 	{
 		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.CURRENT_USER_NODE,
-								ReuseFactory.getInteger(CurrentUserNode.USER),
+								C_NodeTypes.USER_NODE,
 								getContextManager());
 	}
 |
