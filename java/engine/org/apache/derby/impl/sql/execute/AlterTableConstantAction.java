@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.execute.AlterTableConstantAction
 
-   Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1998, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -648,35 +648,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								columnInfo[ix].name,
 								columnInfo[ix].defaultInfo.getDefaultText(),
 								lcc);
-				
-			DefaultDescriptor defaultDescriptor = new DefaultDescriptor(dd, defaultUUID, td.getUUID(), 
-										 colNumber + 1);
-
-			/* Create stored dependencies for each provider to default */
-			ProviderInfo[] providerInfo = ((DefaultInfoImpl) columnInfo[ix].defaultInfo).getProviderInfo();
-			int providerInfoLength = (providerInfo == null) ? 0 : providerInfo.length;
-			for (int provIndex = 0; provIndex < providerInfoLength; 
-				 provIndex++)
-			{
-				Provider provider = null;
-				
-				/* We should always be able to find the Provider */
-				try 
-				{
-					provider = (Provider) providerInfo[provIndex].
-						getDependableFinder().
-						getDependable(
-									  providerInfo[provIndex].getObjectId());
-				}	
-				catch (java.sql.SQLException te)
-				{	
-					if (SanityManager.DEBUG)
-					{
-						SanityManager.THROWASSERT("unexpected java.sql.SQLException - " + te);
-					}	
-				}	
-				dm.addDependency(defaultDescriptor, provider, lcc.getContextManager());
-			}	
 		}	
 	}
 
@@ -1085,41 +1056,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 										 columnInfo[ix].autoincStart);
 			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
 									 maxValue, true);
-		}
-
-		// Add default info for new default, if non-null
-		if (columnDescriptor.hasNonNullDefault())
-		{
-			DefaultDescriptor defaultDescriptor =
-				new DefaultDescriptor(dd, defaultUUID, 
-										 td.getUUID(), 
-										 columnPosition);
-		
-			/* Create stored dependencies for each provider to default */
-			ProviderInfo[] providerInfo = ((DefaultInfoImpl) columnInfo[ix].defaultInfo).getProviderInfo();
-			int providerInfoLength = (providerInfo == null) ? 0 : providerInfo.length;
-			for (int provIndex = 0; provIndex < providerInfoLength; provIndex++)
-			{
-				Provider provider = null;
-				
-				/* We should always be able to find the Provider */
-				try 
-				{
-					provider = (Provider) providerInfo[provIndex].
-						getDependableFinder().
-						getDependable(
-									  providerInfo[provIndex].getObjectId());
-				}	
-				catch(java.sql.SQLException te)
-				{
-					if (SanityManager.DEBUG)
-					{
-						SanityManager.THROWASSERT("unexpected java.sql.SQLException - " + te);
-					}
-				}
-				dm.addDependency(defaultDescriptor, provider, 
-								 lcc.getContextManager());
-			}
 		}
 	}
 

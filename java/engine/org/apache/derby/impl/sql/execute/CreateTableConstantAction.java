@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.execute.CreateTableConstantAction
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -270,36 +270,6 @@ class CreateTableConstantAction extends DDLConstantAction
 							   );
 
 			cdlArray[ix] = columnDescriptor;
-
-			if (columnInfo[ix].defaultInfo != null)
-			{
-				DefaultDescriptor defaultDescriptor = new DefaultDescriptor(dd, defaultUUID, td.getUUID(), ix + 1);
-
-				/* Create stored dependencies for each provider to default */
-				ProviderInfo[] providerInfo = ((DefaultInfoImpl) columnInfo[ix].defaultInfo).getProviderInfo();
-				int providerInfoLength = (providerInfo == null) ? 0 : providerInfo.length;
-				for (int provIndex = 0; provIndex < providerInfoLength; provIndex++)
-				{
-					Provider provider = null;
-
-					/* We should always be able to find the Provider */
-					try 
-					{
-						provider = (Provider) providerInfo[provIndex].
-												getDependableFinder().
-													getDependable(
-														providerInfo[provIndex].getObjectId());
-					}
-					catch(java.sql.SQLException te)
-					{
-						if (SanityManager.DEBUG)
-						{
-							SanityManager.THROWASSERT("unexpected java.sql.SQLException - " + te);
-						}
-					}
-					dm.addDependency(defaultDescriptor, provider, lcc.getContextManager());
-				}
-			}
 		}
 
 		if ( tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE )

@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ConstraintDefinitionNode
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -246,16 +246,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 			backingIndexName = dd.getSystemSQLName();
 
 		return	backingIndexName;
-	}
-
-	/**
-	 * Get the constraint name
-	 *
-	 * @return constraintName	The constraint name.
-	 */
-	public TableName getXXRConstraintName()
-	{
-		return constraintName;
 	}
 
 	/**

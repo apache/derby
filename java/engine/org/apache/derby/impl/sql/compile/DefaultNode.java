@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.DefaultNode
 
-   Copyright 1999, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1999, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,8 +39,6 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
-import org.apache.derby.iapi.sql.depend.ProviderList;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
@@ -54,7 +52,6 @@ import java.util.Vector;
  */
 public  class DefaultNode extends ValueNode
 {
-	private ProviderList apl;
 	private String		columnName;
 	private String		defaultText;
 	private ValueNode	defaultTree;
@@ -98,16 +95,6 @@ public  class DefaultNode extends ValueNode
 	ValueNode getDefaultTree()
 	{
 		return defaultTree;
-	}
-
-	void setAuxiliaryProviderList(ProviderList apl)
-	{
-		this.apl = apl;
-	}
-
-	public ProviderList getAuxiliaryProviderList()
-	{
-		return apl;
 	}
 
 	/**

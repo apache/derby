@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.depend.BasicDependencyManager
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -682,7 +682,7 @@ public class BasicDependencyManager implements DependencyManager {
 					throws StandardException
 	{
 		Enumeration e = pl.elements();
-		while (e != null && e.hasMoreElements())
+		while (e.hasMoreElements())
 		{
 			Provider pro = (Provider) e.nextElement();
 			if (pro instanceof TableDescriptor)

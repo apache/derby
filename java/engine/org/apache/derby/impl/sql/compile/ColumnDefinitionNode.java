@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.ColumnDefinitionNode
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -472,12 +472,10 @@ public class ColumnDefinitionNode extends TableElementNode
 	void validateDefault(DataDictionary dd, TableDescriptor td)
 		throws StandardException
 	{
-		CompilerContext cc;
-
 		if (defaultNode == null)
 			return;
 
-		cc = getCompilerContext();
+		CompilerContext cc = getCompilerContext();
 
 		ValueNode defaultTree = defaultNode.getDefaultTree();
 
@@ -488,19 +486,21 @@ public class ColumnDefinitionNode extends TableElementNode
 		final int previousReliability = cc.getReliability();
 		try
 		{
-			/* Each default can have its own set of dependencies.
-			 * These dependencies need to be shared with the prepared
-			 * statement as well.  We create a new auxiliary provider list
-			 * for the default, "push" it on the compiler context
-			 * by swapping it with the current auxiliary provider list
-			 * and the "pop" it when we're done by restoring the old 
-			 * auxiliary provider list.
+			/*
+				Defaults cannot have dependencies as they
+				should just be constants. Code used to exist
+				to handle dependencies in defaults, now this
+				is under sanity to ensure no dependencies exist.
 			 */
-			ProviderList apl = new ProviderList();
+			ProviderList apl = null;
+			ProviderList prevAPL = null;
 
-			ProviderList prevAPL = cc.getCurrentAuxiliaryProviderList();
-			cc.setCurrentAuxiliaryProviderList(apl);
-
+			if (SanityManager.DEBUG) {
+				apl = new ProviderList();
+				prevAPL = cc.getCurrentAuxiliaryProviderList();
+				cc.setCurrentAuxiliaryProviderList(apl);
+			}
+			
 			// Tell the compiler context to only allow deterministic nodes
 			cc.setReliability( CompilerContext.DEFAULT_RESTRICTION );
 			defaultTree = defaultTree.bindExpression(
@@ -537,24 +537,18 @@ public class ColumnDefinitionNode extends TableElementNode
 			// RESOLVEDEFAULT - Convert to constant if possible
 			defaultInfo = new DefaultInfoImpl(defaultNode.getDefaultText(), defaultValue);
 
-			/* Save the APL off in the constraint node */
-			if (apl.size() > 0)
+			if (SanityManager.DEBUG)
 			{
-				defaultNode.setAuxiliaryProviderList(apl);
-				// Add info on any providers to DefaultInfo
-				ProviderInfo[]	providerInfos = null;
+				/* Save the APL off in the constraint node */
+				if (apl.size() > 0)
+				{
 
-				/* Get all the dependencies for the current statement and transfer
-				 * them to this view.
-				 */
-				DependencyManager dm;
-				dm = dd.getDependencyManager();
-				providerInfos = dm.getPersistentProviderInfos(apl);
-				defaultInfo.setProviderInfo(providerInfos);
+					SanityManager.THROWASSERT("DEFAULT clause has unexpected dependencies");
+				}
+				// Restore the previous AuxiliaryProviderList
+				cc.setCurrentAuxiliaryProviderList(prevAPL);
 			}
 
-			// Restore the previous AuxiliaryProviderList
-			cc.setCurrentAuxiliaryProviderList(prevAPL);
 		}
 		finally
 		{

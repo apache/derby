@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.catalog.types.DefaultInfoImpl
 
-   Copyright 1999, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1999, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 
 	private DataValueDescriptor	defaultValue;
 	private String				defaultText;
-	private ProviderInfo[]		providerInfo;
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
@@ -102,15 +101,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	{
 		defaultText = (String) in.readObject();
 		defaultValue = (DataValueDescriptor) in.readObject();
-		int providerInfoLength = in.readInt();
-		if (providerInfoLength > 0)
-		{
-			providerInfo = new ProviderInfo[providerInfoLength];
-			for (int index = 0; index < providerInfoLength; index++)
-			{
-				providerInfo[index] = (ProviderInfo) in.readObject();
-			}
-		}
+		in.readInt(); // old provider info count - always 0.
 	}
 
 	/**
@@ -125,18 +116,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	{
 		out.writeObject( defaultText );
 		out.writeObject( defaultValue );
-		if (providerInfo != null)
-		{
-			out.writeInt(providerInfo.length);
-			for (int index = 0; index < providerInfo.length; index++)
-			{
-				out.writeObject(providerInfo[index]);
-			}
-		}
-		else
-		{
-			out.writeInt(0);
-		}
+		out.writeInt(0); // old provider info count - always 0.
 	}
  
 	/**
@@ -168,27 +148,5 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	public void setDefaultValue(DataValueDescriptor defaultValue)
 	{
 		this.defaultValue = defaultValue;
-	}
-
-	/**
-	 * Set the ProviderInfo. (Providers that default is dependent on.)
-	 *
-	 * @param providerInfo	Providers that default is dependent on.
-	 *
-	 * @return Nothing.
-	 */
-	public void setProviderInfo(ProviderInfo[] providerInfo)
-	{
-		this.providerInfo = providerInfo;
-	}
-
-	/**
-	 * Get the ProviderInfo. (Providers that default is dependent on.)
-	 *
-	 * @return Providers that default is dependent on.
-	 */
-	public ProviderInfo[] getProviderInfo()
-	{
-		return providerInfo;
 	}
 }

@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.catalog.TabInfoImpl
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.RowList;
 import org.apache.derby.iapi.sql.dictionary.TabInfo;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -415,13 +414,10 @@ public class TabInfoImpl implements TabInfo
 	public int insertRow( ExecRow row, TransactionController tc, boolean wait)
 		throws StandardException
 	{
-		RowList					rowList = new RowList( this );
-
-		rowList.add(row);
 
 		RowLocation[] 			notUsed = new RowLocation[1]; 
 
-		return insertRowListImpl(rowList,tc,notUsed, wait);
+		return insertRowListImpl(new ExecRow[] {row},tc,notUsed, wait);
 	}
 
 
@@ -440,11 +436,7 @@ public class TabInfoImpl implements TabInfo
 	public int insertRow( ExecRow row, LanguageConnectionContext lcc )
 		throws StandardException
 	{
-		RowList					rowList = new RowList( this );
-
-		rowList.add(row);
-
-		return	insertRowList( rowList, lcc );
+		return	insertRowList(new ExecRow[] {row}, lcc.getTransactionExecute());
 	}
 
 	/**
@@ -454,10 +446,8 @@ public class TabInfoImpl implements TabInfo
 	public RowLocation insertRowAndFetchRowLocation(ExecRow row, TransactionController tc)
 		throws StandardException
 	{
-		RowList	rowList = new RowList( this );
-		rowList.add(row);
 		RowLocation[] rowLocationOut = new RowLocation[1]; 
-		insertRowListImpl(rowList,tc,rowLocationOut, true);
+		insertRowListImpl(new ExecRow[] {row},tc,rowLocationOut, true);
 		return rowLocationOut[0];
 	}
 
@@ -474,33 +464,12 @@ public class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public int insertRowList( RowList rowList, TransactionController tc )
+	public int insertRowList(ExecRow[] rowList, TransactionController tc )
 		throws StandardException
 	{
 		RowLocation[] 			notUsed = new RowLocation[1]; 
 
 		return insertRowListImpl(rowList,tc,notUsed, true);
-	}
-
-	/**
-	 * Inserts a list of base rows into a catalog and inserts all the corresponding
-	 * index rows.
-	 *
-	 *	@param	rowList		List of rows to insert
-	 *	@param	lcc			language state variable
-	 *
-	 *
-	 *	@return	row  number (>= 0) if duplicate row inserted into an index
-	 *			ROWNOTDUPLICATE otherwise
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	private int insertRowList( RowList rowList, LanguageConnectionContext lcc )
-		throws StandardException
-	{
-		TransactionController	tc = lcc.getTransactionExecute();
-
-		return insertRowList(rowList,tc);
 	}
 
 	/**
@@ -519,7 +488,7 @@ public class TabInfoImpl implements TabInfo
 	  @return row number (>= 0) if duplicate row inserted into an index
 	  			ROWNOTDUPLICATE otherwise
 	 */
-	private int insertRowListImpl( RowList rowList, TransactionController tc, RowLocation[] rowLocationOut,
+	private int insertRowListImpl(ExecRow[] rowList, TransactionController tc, RowLocation[] rowLocationOut,
 								   boolean wait)
 		throws StandardException
 	{
@@ -530,8 +499,6 @@ public class TabInfoImpl implements TabInfo
 		int							retCode = ROWNOTDUPLICATE;
 		int							indexCount = crf.getNumIndexes();
 		ConglomerateController[]	indexControllers = new ConglomerateController[ indexCount ];
-		Enumeration	       			iterator;
-		ExecRow						row;
 
 		// Open the conglomerates
 		heapController = 
@@ -571,10 +538,9 @@ public class TabInfoImpl implements TabInfo
 		rowLocationOut[0]=heapLocation;
 
 		// loop through rows on this list, inserting them into system table
-		int rowNumber = 0;
-		for (iterator =  rowList.elements(); iterator.hasMoreElements(); rowNumber++)
+		for (int rowNumber = 0; rowNumber < rowList.length; rowNumber++)
 		{
-			row = (ExecRow) iterator.nextElement();
+			ExecRow row = rowList[rowNumber];
 			// insert the base row and get its new location 
 			heapController.insertAndFetchLocation(row.getRowArray(), heapLocation);
 			

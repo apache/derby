@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.catalog.DataDictionaryImpl
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RowList;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -1529,12 +1528,13 @@ public	class	DataDictionaryImpl
 		TabInfo ti =  (catalogNumber < NUM_CORE) ? coreInfo[catalogNumber] :
 			getNonCoreTI(catalogNumber);
 		CatalogRowFactory crf = ti.getCatalogRowFactory();
-		RowList rl = new RowList();
+
+		ExecRow[] rl = new ExecRow[td.length];
 
 		for (int index = 0; index < td.length; index++)
 		{
 			ExecRow row = crf.makeRow(td[index], parent);
-			rl.add(row);
+			rl[index] = row;
 		}
 
 		int insertRetCode = ti.insertRowList( rl, tc );

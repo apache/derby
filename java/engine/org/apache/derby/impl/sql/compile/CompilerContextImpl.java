@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.compile.CompilerContextImpl
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -311,10 +311,8 @@ public class CompilerContextImpl extends ContextImpl
 	 *
 	 * @return Nothing.
 	 *
-	 * @exception StandardException thrown on failure.
 	 */
 	private void addProviderToAuxiliaryList(Provider p)
-		throws StandardException
 	{
 		if (currentAPL != null)
 		{

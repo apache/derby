@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.iapi.sql.dictionary.TabInfo
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -256,7 +256,7 @@ public interface TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public int insertRowList( RowList rowList, TransactionController tc )
+	public int insertRowList(ExecRow[] rowList, TransactionController tc )
 		throws StandardException;
 
 	/**
