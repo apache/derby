@@ -35,6 +35,7 @@ import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
 import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.DB2Limit;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
@@ -1102,7 +1103,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max literal length
      */
 	public int getMaxColumnNameLength() {
-		return 128;
+		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30;
 	}
 
     /**
@@ -1167,7 +1168,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max cursor name length in bytes
      */
 	public int getMaxCursorNameLength() {
-		return 128;
+		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18;
 	}
 
     /**
@@ -1185,7 +1186,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length in bytes
      */
 	public int getMaxSchemaNameLength()  {
-		return 128;
+		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30;
 	}
 
     /**
@@ -1194,7 +1195,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length in bytes
      */
 	public int getMaxProcedureNameLength() {
-		return 128;
+		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128;
 	}
 
     /**
@@ -1250,7 +1251,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length in bytes
      */
 	public int getMaxTableNameLength() {
-		return 128;
+		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128;
 	}
 
     /**
@@ -1268,7 +1269,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length  in bytes
      */
 	public int getMaxUserNameLength() {
-		return 128;
+		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30;
 	}
 
     //----------------------------------------------------------------------
