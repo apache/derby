@@ -1822,6 +1822,7 @@ TOKEN [IGNORE_CASE] :
 |	<LARGE: "large">
 |	<LENGTH: "length">
 |	<LEVEL: "level">
+|	<LOCKS: "locks">
 |	<LOCKSIZE: "locksize">
 |	<LOGGED: "logged">
 |       <MOD: "mod">
@@ -1903,7 +1904,6 @@ TOKEN [IGNORE_CASE] :
 |   <LCASE: "lcase">
 |   <LOCATE: "locate">
 |	<LOCK: "lock">
-|	<LOCKS: "locks">
 |	<MESSAGE_LOCALE: "message_locale">
 |	<METHOD: "method">
 |	<MODE: "mode">
@@ -11351,6 +11351,7 @@ nonReservedKeyword()  :
 	|	tok = <LEVEL>
     |   tok = <LOCATE>
 	|	tok = <LOCK>
+	|	tok = <LOCKS>
 	|	tok = <LOCKSIZE>
 	|	tok = <LOGGED>
 	|	tok = <LONG>
