@@ -65,6 +65,20 @@ xa_prepare 2;
 -- both transactions should be prepared
 select * from APP.global_xactTable where gxid is not null order by gxid;
 
+-- NOTE: The following call to "xa_recover xa_startrscan" is apt to
+-- return the result set rows in reverse order when changes to
+-- the Derby engine affect the number of transactions that it takes
+-- to create a database.  The transactions are stored in a hash table
+-- based on a global and local id, and when the number of transactions
+-- changes, the (internal) local id can change, which may lead to a
+-- change in the result set order.  This order is determined by the
+-- JVM's hashing algorithm. Examples of changes to the engine that
+-- can affect this include ones that cause more commits or that
+-- change the amount of data being stored, such as changes to the
+-- metadata statements (which is what prompted this explanation in
+-- the first place).  Ultimately, the problem is that there is no
+-- way to order the return values from "xa_recover" since it is an
+-- ij internal statement, not SQL...
 xa_recover xa_startrscan;
 xa_recover xa_noflags;
 
