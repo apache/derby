@@ -47,7 +47,7 @@ public class dblook_test_net extends dblook_test {
 
 		try {
 
-			createTestDatabase();
+			createTestDatabase(dbCreationScript_1);
 
 			// Don't let error stream ruin the diff.
 			System.err.close();

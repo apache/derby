@@ -89,12 +89,14 @@ public class dblook {
 
 	public static void main(String[] args) {
 
-		dblook looker = new dblook(args);
 		try {
-			looker.go(sourceDBUrl, sourceDBName);
+			new dblook(args);
 		} catch (Exception e) {
-		// Errors are logged and printed to console according
-		// to command line arguments, so just ignore here.
+		// All "normal" errors are logged and printed to
+		// console according to command line arguments,
+		// so if we get here, something unexpected must
+		// have happened; print to error stream.
+			e.printStackTrace();
 		}
 
 	}
@@ -103,11 +105,10 @@ public class dblook {
 	 * Constructor:
 	 * Parse the command line, initialize logs, echo program variables,
 	 * and load the Derby driver.
-	 * @param args args[0] is the database URL.  All other command-line
-	 *  parameters are read as system properties.
+	 * @param args Array of dblook command-line arguments.
 	 * ****/
 
-	public dblook(String[] args) {
+	public dblook(String[] args) throws Exception {
 
         // Adjust the application in accordance with derby.ui.locale
 		// and derby.ui.codeset
@@ -119,19 +120,22 @@ public class dblook {
 		// Parse the command line.
 		if (!parseArgs(args)) {
 			System.out.println(lookupMessage("DBLOOK_Usage"));
-			System.exit(1);
+			return;
 		}
 
 		showVariables();
 
 		if (!loadDriver()) {
-		// Failed when loading the driver.  We already printed
+		// Failed when loading the driver.  We already logged
 		// the exception, so just return.
 			return;
 		}
 
 		schemaMap = new HashMap();
 		tableIdToNameMap = new HashMap();
+
+		// Now run the utility.
+		go();
 
 	}
 
@@ -158,9 +162,7 @@ public class dblook {
 
 	/* ************************************************
 	 * parseArgs:
-	 * Parse the command-line arguments.  There is only one
-	 * actual argument (database url); the rest of the parameters
-	 * are read in as System properties.
+	 * Parse the command-line arguments.
 	 * @param args args[0] is the url for the source database.
 	 * @return true if all parameters were loaded and the output
 	 *  files were successfully created; false otherwise.
@@ -258,10 +260,11 @@ public class dblook {
 				// list of tables.
 					return extractTableNamesFromList(args, start+1);
 				return -1;
+
 			case 'o':
 				if (!haveVal)
 					return -1;
-				if ((args[start].length() == 2) && (args[start+1].length() > 0)){
+				if ((args[start].length() == 2) && (args[start+1].length() > 0)) {
 					ddlFileName = args[++start];
 					return start;
 				}
@@ -492,18 +495,12 @@ public class dblook {
 	 * line), then we enforce that here.
 	 * @precondition all user-specified parameters have
 	 *  been loaded.
-	 * @param srcUrl The full url of the database, as obtained
-	 *  from parseArgs().
-	 * @param srcName The name of the database (as opposed to
-	 *  the URL), as obtained from parseArgs().  This is
-	 *  needed for locating any jar files that might'
-	 *  exist in the source database.
 	 * @return DDL for the source database has been
 	 *  generated and printed to output, subject to
 	 *  user-specified restrictions.
 	 * ****/
 
-	public void go(String srcUrl, String srcName)
+	private void go()
 		throws Exception
 	{
 
@@ -512,20 +509,8 @@ public class dblook {
 
 			// Connect to the database, prepare statements,
 			// and load id-to-name mappings.
-			this.conn = DriverManager.getConnection(srcUrl);
-			try {
-				prepForDump();
-			} catch (SQLException sqlE) {
-				Logs.debug(sqlE);
-				Logs.debug(Logs.unRollExceptions(sqlE), (String)null);
-				Logs.cleanup();
-				return;
-			}
-			catch (Exception e) {
-				Logs.debug(e);
-				Logs.cleanup();
-				return;
-			}
+			this.conn = DriverManager.getConnection(sourceDBUrl);
+			prepForDump();
 
 			// Generate DDL.
 
@@ -536,7 +521,7 @@ public class dblook {
 
 			if (tableList == null) {
 			// Don't do these if user just wants table-related objects.
-				DB_Jar.doJars(srcName, this.conn);
+				DB_Jar.doJars(sourceDBName, this.conn);
 				DB_StoredProcedure.doStoredProcedures(this.conn);
 			}
 
@@ -561,18 +546,20 @@ public class dblook {
 			Logs.debug(sqlE);
 			Logs.debug(Logs.unRollExceptions(sqlE), (String)null);
 			Logs.cleanup();
-			throw sqlE;
+			return;
 		}
 		catch (Exception e)
 		{
 			Logs.debug(e);
 			Logs.cleanup();
-			throw e;
+			return;
 		}
 		finally {
 		// Close our connection.
-			conn.commit();
-			conn.close();
+			if (conn != null) {
+				conn.commit();
+				conn.close();
+			}
 		}
 
 	}
@@ -757,11 +744,15 @@ public class dblook {
 		if (quotedName == null)
 			return null;
 
-		if ((quotedName.indexOf("\"") == -1) &&
-			(quotedName.indexOf("'") == -1))
-		// nothing to do.
+		if (!(quotedName.startsWith("'") || quotedName.startsWith("\"")))
+		// name doesn't _start_ with a quote, so we do nothing.
 			return quotedName;
 
+		if (!(quotedName.endsWith("'") || quotedName.endsWith("\"")))
+		// name doesn't _end_ with a quote, so we do nothing.
+			return quotedName;
+
+		// Remove starting and ending quotes.
 		return quotedName.substring(1, quotedName.length() - 1);
 
 	}
@@ -1127,7 +1118,7 @@ public class dblook {
 		} catch (Exception e) {
 		// if something went wrong, just return the string as is--
 		// worst case is that the generated DDL is correct, it just
-		// can't be run in a DB2 CLP script (because of the newline
+		// can't be run in some SQL script apps (because of the newline
 		// characters).
 			return str;
 		}
