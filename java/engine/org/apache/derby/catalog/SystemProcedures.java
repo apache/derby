@@ -137,6 +137,11 @@ public class SystemProcedures  {
 			}
 		}
 	}
+	
+	private static Connection getDefaultConn()throws SQLException
+	{
+		return DriverManager.getConnection("jdbc:default:connection");
+	}
 
 	/**
 	 *  Get the DatabaseMetaData for the current connection for use in
@@ -145,7 +150,7 @@ public class SystemProcedures  {
 	 *  @return The DatabaseMetaData object of the current connection
 	 */
 	private static DatabaseMetaData getDMD() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 		return conn.getMetaData();
 	}
 
@@ -493,7 +498,7 @@ public class SystemProcedures  {
 		throws SQLException
 	{
 		
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 		PreparedStatement ps = conn.prepareStatement("execute statement SYSIBM.METADATA");
 		rs[0] = ps.executeQuery();
 		conn.close();
@@ -564,8 +569,7 @@ public class SystemProcedures  {
             "alter table " + schema + "." + tablename + " compress" + 
             (sequential != 0 ? " sequential" : "");
 
-		Connection conn = 
-            DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 
 		conn.prepareStatement(query).executeUpdate();
 
@@ -826,8 +830,7 @@ public class SystemProcedures  {
 	String  codeset)
         throws SQLException
     {
-		Connection conn = 
-            DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 		Export.exportTable(conn, schemaName , tableName , fileName ,
 							  columnDelimiter , characterDelimiter, codeset);
 		//export finished successfully, issue a commit 
@@ -854,8 +857,7 @@ public class SystemProcedures  {
 	String  codeset)
         throws SQLException
     {
-		Connection conn = 
-            DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 		Export.exportQuery(conn, selectStatement, fileName ,
 							   columnDelimiter , characterDelimiter, codeset);
 		
@@ -883,8 +885,7 @@ public class SystemProcedures  {
 	short   replace)
         throws SQLException
     {
-		Connection conn = 
-            DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 		try{
 			Import.importTable(conn, schemaName , tableName , fileName ,
 								   columnDelimiter , characterDelimiter, codeset, replace);
@@ -924,8 +925,7 @@ public class SystemProcedures  {
 	short   replace)
         throws SQLException
     {
-		Connection conn = 
-            DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 		try{
 			Import.importData(conn, schemaName , tableName ,
 								  insertColumnList, columnIndexes, fileName,
@@ -959,8 +959,7 @@ public class SystemProcedures  {
 	)
         throws SQLException
     {
-		Connection conn = 
-            DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = getDefaultConn();
 		
 		String entityName = (schemaName == null ? tableName : schemaName + "." + tableName); 
 		String binsertSql = 
