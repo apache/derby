@@ -69,8 +69,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 * Add a TableElementNode to this TableElementList
 	 *
 	 * @param tableElement	The TableElementNode to add to this list
-	 *
-	 * @return	Nothing
 	 */
 
 	public void addTableElement(TableElementNode tableElement)
@@ -116,8 +114,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 * @param ddlStmt	DDLStatementNode which contains this list
 	 * @param dd		DataDictionary to use
 	 * @param td		TableDescriptor for table, if existing table.
-	 *
-	 * @return	None
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -418,8 +414,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @param table		The table in question.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void appendNewColumnsToRCL(FromBaseTable table)
@@ -460,9 +454,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 * Bind and validate all of the check constraints in this list against
 	 * the specified FromList.  
 	 *
-	 * @param FromList		The FromList in question.
-	 *
-	 * @return Nothing.
+	 * @param fromList		The FromList in question.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -588,10 +580,8 @@ public class TableElementList extends QueryTreeNodeVector
 	 * 
 	 * @param conActions	The ConstraintConstantAction[] to be filled in.
 	 * @param tableName		The name of the Table being created.
-	 * @param sd			The schema for that table.
-	 * @param dd		The DataDictionary
-	 *
-	 * @return Nothing.
+	 * @param tableSd		The schema for that table.
+	 * @param dd	    	The DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -607,7 +597,6 @@ public class TableElementList extends QueryTreeNodeVector
 		for (int index = 0; index < size; index++)
 		{
 			String[]	columnNames = null;
-			String		generatedConstraintName;
 			TableElementNode ten = (TableElementNode) elementAt(index);
 			IndexConstantAction indexAction = null;
 
@@ -711,7 +700,6 @@ public class TableElementList extends QueryTreeNodeVector
 
       //check if one array is same as another 
 	private boolean columnsMatch(String[] columnNames1, String[] columnNames2)
-		throws StandardException
 	{
 		int srcCount, srcSize, destCount,destSize;
 		boolean match = true;
@@ -794,8 +782,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 * @param ht		Hashtable for enforcing uniqueness.
 	 * @param colName	Column name to check for.
 	 *
-	 * @return	None
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	private void checkForDuplicateColumns(DDLStatementNode ddlStmt,
@@ -822,12 +808,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 * RESOLVE: This check will also be performed by alter table.
 	 *
 	 * @param ddlStmt	DDLStatementNode which contains this list
-	 * @param outer		The element to check against.  Only check
-	 *						TableElements that come after this one, since this
-	 *						one has been checked against the TableElements
-	 *						before it.
-	 *
-	 * @return	None
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -858,8 +838,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @param ddlStmt	The outer DDLStatementNode
 	 * @param cdn		The ConstraintDefinitionNode
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception	StandardException	Thrown if the column list is invalid
 	 */
@@ -899,8 +877,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @param cdn		The ConstraintDefinitionNode
 	 * @param td		TableDescriptor for the table
-	 *
-	 * @return Nothing.
 	 */
 	private void setColumnListToNotNull(ConstraintDefinitionNode cdn, TableDescriptor td)
 		throws StandardException
@@ -930,8 +906,6 @@ public class TableElementList extends QueryTreeNodeVector
 	 * a create table statement to NOT NULL (but only in Cloudscape mode).
 	 *
 	 * @param colName	The column name
-	 *
-	 * @return Nothing.
 	 */
 	private void setColumnToNotNull(String colName) throws StandardException
 	{
