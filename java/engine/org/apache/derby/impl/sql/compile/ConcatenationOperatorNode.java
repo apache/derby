@@ -98,19 +98,21 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 		{
 			if (rightOperand.isParameterNode())
 			{
-				throw StandardException.newException(SQLState.LANG_BINARY_OPERANDS_BOTH_PARMS, 
+				throw StandardException.newException(SQLState.LANG_BINARY_OPERANDS_BOTH_PARMS,
 																	operator);
 			}
 
 			TypeId 	leftType;
 
 			/*
-			** A ? on the left gets its type from the right.  There are six
+			** A ? on the left gets its type from the right.  There are eight
 			** legal types for the concatenation operator: CHAR, VARCHAR,
-			** LONG VARCHAR, BIT, BIT VARYING, and LONG BIT VARYING.  If the
-			** right type is one of the bit types, set the parameter type to
+			** LONG VARCHAR, CLOB, BIT, BIT VARYING, LONG BIT VARYING, and BLOB.
+			** If the right type is BLOB, set the parameter type to BLOB with max length.
+			** If the right type is one of the other bit types, set the parameter type to
 			** BIT VARYING with maximum length.
 			**
+			** If the right type is CLOB, set parameter type to CLOB with max length.
 			** If the right type is anything else, set it to VARCHAR with
 			** maximum length.  We count on the resolveConcatOperation method to
 			** catch an illegal type.
@@ -118,19 +120,23 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 			** NOTE: When I added the long types, I could have changed the
 			** resulting parameter types to LONG VARCHAR and LONG BIT VARYING,
 			** but they were already VARCHAR and BIT VARYING, and it wasn't
-			** clear to me what effect it would have to change it.
-			**
-			**				-	Jeff
+			** clear to me what effect it would have to change it. -	Jeff
 			*/
 			if (rightOperand.getTypeId().isBitTypeId())
 			{
-				leftType = TypeId.getBuiltInTypeId(Types.VARBINARY);
+				if (rightOperand.getTypeId().isBlobTypeId())
+					leftType = TypeId.getBuiltInTypeId(Types.BLOB);
+				else
+					leftType = TypeId.getBuiltInTypeId(Types.VARBINARY);
 			}
 			else
 			{
-				leftType = TypeId.getBuiltInTypeId(Types.VARCHAR);
+				if (rightOperand.getTypeId().isClobTypeId())
+					leftType = TypeId.getBuiltInTypeId(Types.CLOB);
+				else
+					leftType = TypeId.getBuiltInTypeId(Types.VARCHAR);
 			}
-		
+
 		((ParameterNode) leftOperand).setDescriptor(new DataTypeDescriptor(leftType, true));
 		}
 
@@ -142,28 +148,36 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 			TypeId 	rightType;
 
 			/*
-			** A ? on the right gets its type from the left.  There are six
+			** A ? on the right gets its type from the left.  There are eight
 			** legal types for the concatenation operator: CHAR, VARCHAR,
-			** LONG VARCHAR, BIT, BIT VARYING, and LONG BIT VARYING.  If the
-			** left type is one of the bit types, set the parameter type to
-			** BIT VARYING with maximum length.  If the left type is anything
-			** else, set it to VARCHAR with maximum length.  We count on the
-			** resolveConcatOperation method to catch an illegal type.
+			** LONG VARCHAR, CLOB, BIT, BIT VARYING, LONG BIT VARYING, and BLOB.
+			** If the left type is BLOB, set the parameter type to BLOB with max length.
+			** If the left type is one of the other bit types, set the parameter type to
+			** BIT VARYING with maximum length.
+			**
+			** If the left type is CLOB, set parameter type to CLOB with max length.
+			** If the left type is anything else, set it to VARCHAR with
+			** maximum length.  We count on the resolveConcatOperation method to
+			** catch an illegal type.
 			**
 			** NOTE: When I added the long types, I could have changed the
 			** resulting parameter types to LONG VARCHAR and LONG BIT VARYING,
 			** but they were already VARCHAR and BIT VARYING, and it wasn't
-			** clear to me what effect it would have to change it.
-			**
-			**				-	Jeff
+			** clear to me what effect it would have to change it. -	Jeff
 			*/
 			if (leftOperand.getTypeId().isBitTypeId())
 			{
-				rightType = TypeId.getBuiltInTypeId(Types.VARBINARY);
+				if (leftOperand.getTypeId().isBlobTypeId())
+					rightType = TypeId.getBuiltInTypeId(Types.BLOB);
+				else
+					rightType = TypeId.getBuiltInTypeId(Types.VARBINARY);
 			}
 			else
 			{
-				rightType = TypeId.getBuiltInTypeId(Types.VARCHAR);
+				if (leftOperand.getTypeId().isClobTypeId())
+					rightType = TypeId.getBuiltInTypeId(Types.CLOB);
+				else
+					rightType = TypeId.getBuiltInTypeId(Types.VARCHAR);
 			}
 		
 		((ParameterNode) rightOperand).setDescriptor(

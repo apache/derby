@@ -398,8 +398,33 @@ public class concateTests
 			dumpSomeMetaDataInfo(s.executeQuery("values('' || '')"), concatenatedSQLTypesNames[0]);
 			verifyStringData(s.executeQuery("values('' || '')"), "");
 
+			System.out.println("Test13 - Prepared statement with CLOB(A) and ? concatenations will give result type of CLOB(A+length of ?)");
+			System.out.println("  Prior to Derby-124 fix, ? parameter was getting bound to VARCHAR of length 32672 rather than CLOB.");
+			try {
+			s.executeUpdate("drop table ct");
+			} catch(Exception ex) {}
+			s.executeUpdate("create table ct (c CLOB(100K))");
+			String cData = Formatters.repeatChar("c",32700);
+			String cData1 = "aa";
+			String cConcatenatedData = cData1 + cData;
+			//Prior to fix for Derby-124, the ? was getting bound to VARCHAR with max length of 32670
+			//As a fix for this, if one of the operands of concatenation is CLOB, then the ? parameter would be bound to CLOB as well
+			System.out.println("  preapre statement with clob||?");
+			ps = conn.prepareStatement("insert into ct values (cast ('aa' as CLOB) || ?)");
+			ps.setString(1, cData);
+			ps.execute();
+			verifyStringData(s.executeQuery("select c from ct"), cConcatenatedData);
+			s.executeUpdate("delete from ct");
+			System.out.println("  Test - preapre statement with clob||cast(? to cLOB)");
+			ps = conn.prepareStatement("insert into ct values (cast ('aa' as CLOB) || cast(? as CLOB))");
+			ps.setString(1, cData);
+			ps.execute();
+			verifyStringData(s.executeQuery("select c from ct"), cConcatenatedData);
+			s.executeUpdate("delete from ct");
+
 			s.executeUpdate("drop table testCLOB_MAIN");
 			s.executeUpdate("drop table t1");
+			s.executeUpdate("drop table ct");
 			System.out.println("Test1 finished - CHAR, VARCHAR, LONGVARCHAR and CLOB concatenation tests");
 		} catch (SQLException sqle) {
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
@@ -844,8 +869,41 @@ public class concateTests
 			System.out.println("Test22 - try 2 empty char for bit data concatenation and verify that length comes back as 0 for the result");
 			dumpSomeMetaDataInfo(s.executeQuery("values(X'' || X'')"), concatenatedSQLTypesNames[4]);
 
+			System.out.println("Test23 - Derby-124 try concatenation in a prepared statement with one operand casted to BLOB and other as ? parameter");
+			System.out.println("  Prior to Derby-124 fix, ? parameter was getting bound to VARCHAR TO BIT DATA of length 32672 rather than BLOB.");
+			System.out.println("  That caused truncation exception when ? parameter was set to > 32672 bytes");
+			try {
+			s.executeUpdate("drop table bt");
+			} catch(Exception ex) {}
+			s.executeUpdate("create table bt (b BLOB(100K))");
+			byte [] bData = new byte[32700];
+			for (int i = 0; i < bData.length; i++)
+        bData[i] = (byte)(i % 10);
+			byte [] bData1 = new byte[2];
+			bData1[0] = (byte) 0x10;
+			bData1[1] = (byte) 0x10;
+			byte [] bConcatenatedData = new byte[32702];
+			System.arraycopy(bData1, 0, bConcatenatedData, 0, bData1.length);
+			System.arraycopy(bData, 0, bConcatenatedData, bData1.length, bData.length);
+			//Prior to fix for Derby-124, the ? was getting bound to VARCHAR FOR BIT DATA with max length of 32670
+			//And when ps.setBytes() set 32700 bytes into the ? parameter, at ps.execute() time, you got following exception
+			//ERROR 22001: A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 32672.
+			//As a fix for this, if one of the operands of concatenation is BLOB, then the ? parameter would be bound to BLOB as well      
+			System.out.println("  preapre statement with blob||?");
+			ps = conn.prepareStatement("insert into bt values (cast (x'1010' as BLOB) || ?)");
+			ps.setBytes(1, bData);
+			ps.execute();
+			verifyByteData(s.executeQuery("select b from bt"), bConcatenatedData);
+			s.executeUpdate("delete from bt");
+			System.out.println("  Test - preapre statement with blob||cast(? to BLOB)");
+			ps = conn.prepareStatement("insert into bt values (cast (x'1010' as BLOB) || cast(? as BLOB))");
+			ps.setBytes(1, bData);
+			ps.execute();
+			verifyByteData(s.executeQuery("select b from bt"), bConcatenatedData);
+
 			s.executeUpdate("drop table testBLOB_MAIN");  
 			s.executeUpdate("drop table t2");
+			s.executeUpdate("drop table bt");
 			System.out.println("Test2 finished - CHAR FOR BIT DATA, VARCHAR FOR BIT DATA, LONGVARCHAR FOR BIT DATA and BLOB concatenation tests");
 		} catch (SQLException sqle) {
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);

@@ -149,6 +149,12 @@ Test12 - try 2 empty string concatenation and verify that length comes back as 0
 datatype of concatenated string is : CHAR
 precision of concatenated string is : 0
 Successful CHAR read of 0 characters
+Test13 - Prepared statement with CLOB(A) and ? concatenations will give result type of CLOB(A+length of ?)
+  Prior to Derby-124 fix, ? parameter was getting bound to VARCHAR of length 32672 rather than CLOB.
+  preapre statement with clob||?
+Successful CLOB read of 32702 characters
+  Test - preapre statement with clob||cast(? to cLOB)
+Successful CLOB read of 32702 characters
 Test1 finished - CHAR, VARCHAR, LONGVARCHAR and CLOB concatenation tests
 Test2 - CHAR FOR BIT DATA, VARCHAR FOR BIT DATA, LONGVARCHAR FOR BIT DATA and BLOB concatenation tests
 Test2a - CHAR FOR BIT DATA concatenations will give result type of CHAR FOR BIT DATA when concatenated string < 255
@@ -306,4 +312,11 @@ Successful BLOB read of 150 bytes
 Test22 - try 2 empty char for bit data concatenation and verify that length comes back as 0 for the result
 datatype of concatenated string is : CHAR () FOR BIT DATA
 precision of concatenated string is : 0
+Test23 - Derby-124 try concatenation in a prepared statement with one operand casted to BLOB and other as ? parameter
+  Prior to Derby-124 fix, ? parameter was getting bound to VARCHAR TO BIT DATA of length 32672 rather than BLOB.
+  That caused truncation exception when ? parameter was set to > 32672 bytes
+  preapre statement with blob||?
+Successful BLOB read of 32702 bytes
+  Test - preapre statement with blob||cast(? to BLOB)
+Successful BLOB read of 32702 bytes
 Test2 finished - CHAR FOR BIT DATA, VARCHAR FOR BIT DATA, LONGVARCHAR FOR BIT DATA and BLOB concatenation tests
