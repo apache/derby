@@ -6584,71 +6584,20 @@ sortSpecification(OrderByList orderCols) throws StandardException :
 	orderCol = sortKey() /* [ collateClause() ] */ [ orderingSpecification(orderCol) ]
 	{
 		orderCols.addOrderByColumn(orderCol);
-	}
+	} 
 }
 
 OrderByColumn
 sortKey() throws StandardException :
 {
-	String firstName;
-	String secondName = null;
-	String thirdName = null;
-	String columnName = null;
-	String correlationName = null;
-	String schemaName = null;
-	int columnPosition;
+	ValueNode columnExpression;
 } 
 {
-	firstName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
-	[
-		<PERIOD> secondName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
-		[
-			<PERIOD> thirdName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
-		]
-	]
-	{
-		// Figure out what each name stands for
-		if (thirdName == null)
-		{
-			if (secondName == null)
-			{
-				// only one name, so must be column name
-				columnName = firstName;
-			}
-			else
-			{
-				// Two names: correlation.column
-				correlationName = firstName;
-				columnName = secondName;
-			}
-		}
-		else
-		{
-			// Three names: schema.correlation.column
-			schemaName = firstName;
-			correlationName = secondName;
-			columnName = thirdName;
-		}
-
-		//column name and schema name can not be longer than 30 characters and correlation name can not be longer than 128 characters
-		checkIdentifierLengthLimit(columnName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30);
-		if (schemaName != null)
-			checkIdentifierLengthLimit(schemaName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30);
-		if (correlationName != null)
-			checkIdentifierLengthLimit(correlationName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128);
-		return (OrderByColumn) nodeFactory.getNode(
-								C_NodeTypes.ORDER_BY_COLUMN,
-								columnName,
-								correlationName,
-								schemaName,
-								getContextManager());
-	}
-|
-	columnPosition = uint_value()
+	columnExpression = additiveExpression(null,0,true)
 	{
 		return (OrderByColumn) nodeFactory.getNode(
 								C_NodeTypes.ORDER_BY_COLUMN,
-								ReuseFactory.getInteger(columnPosition),
+								columnExpression,
 								getContextManager());
 	}
 }

@@ -42,36 +42,20 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 public class OrderByColumn extends OrderedColumn {
 
 	private ResultColumn	resultCol;
-	private String			columnName;
-	private	String			correlationName;
-	private String	schemaName;
 	private boolean			ascending = true;
+	private ValueNode expression;
 
-	/**
+
+    	/**
 	 * Initializer.
 	 *
-	 * @param columnName		The name of the column being referenced
-	 * @param correlationName	The correlation name, if any
+	 * @param expression            Expression of this column
 	 */
-	public void init(
-						Object columnName, 
-						Object correlationName,
-						Object schemaName) 
+	public void init(Object expression)
 	{
-		this.columnName = (String) columnName;
-		this.correlationName = (String) correlationName;
-		this.schemaName = (String) schemaName;
+		this.expression = (ValueNode)expression;
 	}
-
-	/**
-	 * Initializer.
-	 *
-	 * @param columnPosition	The position of the column being referenced
-	 */
-	public void init(Object columnPosition) {
-		this.columnPosition = ((Integer) columnPosition).intValue();
-	}
-
+	
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
@@ -80,22 +64,10 @@ public class OrderByColumn extends OrderedColumn {
 	 */
 	public String toString() {
 		if (SanityManager.DEBUG) {
-			return "columnName: " + columnName + "\n" +
-				"correlationName: " + correlationName + "\n" +
-				"schemaName: " + schemaName + "\n" +
-				super.toString();
+			return expression.toString();
 		} else {
 			return "";
 		}
-	}
-
-	/**
-	 * Get the name of this column
-	 *
-	 * @return	The name of this column
-	 */
-	public String getColumnName() {
-		return columnName;
 	}
 
 	/**
@@ -168,80 +140,46 @@ public class OrderByColumn extends OrderedColumn {
 	public void bindOrderByColumn(ResultSetNode target)
 				throws StandardException 
 	{
-		int					sourceTableNumber = -1;
-		ResultColumnList	targetCols = target.getResultColumns();
+		if(expression instanceof ColumnReference){
+		
+			ColumnReference cr = (ColumnReference) expression;
+			
+			resultCol = resolveColumnReference(target,
+							   cr);
+			
+			columnPosition = resultCol.getColumnPosition();
 
-		//bug 5716 - for db2 compatibility - no qualified names allowed in order by clause when union/union all operator is used 
-		if (target instanceof SetOperatorNode && correlationName != null)
-		{
-			String fullName = (schemaName != null) ?
-				(schemaName + "." + correlationName + "." + columnName) :
-				(correlationName + "." + columnName);
-			throw StandardException.newException(SQLState.LANG_QUALIFIED_COLUMN_NAME_NOT_ALLOWED, fullName);
-		}
-		/* If the correlation name is non-null then we need to verify that it
-		 * is a valid exposed name.  
-		 */
-		if (correlationName != null)
-		{
-			/* Find the matching FromTable visible in the current scope.
-			 * We first try a full match on both schema and table name.  If no
-			 * match, then we go for same table id.
-			 */
-			FromTable fromTable = target.getFromTableByName(correlationName, schemaName, true);
-			if (fromTable == null)
-			{
-				fromTable = target.getFromTableByName(correlationName, schemaName, false);
-				if (fromTable == null)
-				{
-					String fullName = (schemaName != null) ?
-										(schemaName + "." + correlationName) : 
-										correlationName;
-					// correlation name is not an exposed name in the current scope
-					throw StandardException.newException(SQLState.LANG_EXPOSED_NAME_NOT_FOUND, fullName);
+		}else if(isReferedColByNum(expression)){
+			
+			ResultColumnList targetCols = target.getResultColumns();
+			columnPosition = ((Integer)expression.getConstantValueAsObject()).intValue();
+			resultCol = targetCols.getOrderByColumn(columnPosition);
+			
+			if (resultCol == null) {
+				throw StandardException.newException(SQLState.LANG_COLUMN_OUT_OF_RANGE, 
+								     String.valueOf(columnPosition));
+			}
+
+		}else{
+			ResultColumnList targetCols = target.getResultColumns();
+			ResultColumn col = null;
+			int i = 1;
+			
+			for(i = 1;
+			    i <= targetCols.size();
+			    i  ++){
+				
+				col = targetCols.getOrderByColumn(i);
+				if(col != null && 
+				   col.getExpression() == expression){
+					
+					break;
 				}
 			}
 			
-			/* HACK - if the target is a UnionNode, then we have to
-			 * have special code to get the sourceTableNumber.  This is
-			 * because of the gyrations we go to with building the RCLs
-			 * for a UnionNode.
-			 */
-			if (target instanceof SetOperatorNode)
-			{
-				sourceTableNumber = ((FromTable) target).getTableNumber();
-			}
-			else
-			{
-				sourceTableNumber = fromTable.getTableNumber();
-			}
-		}
-
-		if (columnName != null) 
-		{
-			/* If correlation name is not null, then we look an RC whose expression is a
-			 * ColumnReference with the same table number as the FromTable with 
-			 * correlationName as its exposed name.
-			 * If correlation name is null, then we simply look for an RC whose name matches
-			 * columnName.
-			 */
-			resultCol = targetCols.getOrderByColumn(columnName, correlationName, sourceTableNumber);
-
-			/* DB2 doesn't allow ordering using generated column name */
-			if ((resultCol == null) || resultCol.isNameGenerated())
-			{
-				String errString = (correlationName == null) ?
-									columnName :
-									correlationName + "." + columnName;
-				throw StandardException.newException(SQLState.LANG_ORDER_BY_COLUMN_NOT_FOUND, errString);
-			}
-			columnPosition = resultCol.getColumnPosition();
-		}
-		else {
-			resultCol = targetCols.getOrderByColumn(columnPosition);
-			if (resultCol == null) {
-				throw StandardException.newException(SQLState.LANG_COLUMN_OUT_OF_RANGE, String.valueOf(columnPosition));
-			}
+			resultCol = col;
+			columnPosition = i;
+		    
 		}
 
 		// Verify that the column is orderable
@@ -257,44 +195,33 @@ public class OrderByColumn extends OrderedColumn {
 	public void pullUpOrderByColumn(ResultSetNode target)
 				throws StandardException 
 	{
-		if (columnName != null) 
-		{
-			/* If correlation name is not null, then we look an RC whose expression is a
-			 * ColumnReference with the same table number as the FromTable with 
-			 * correlationName as its exposed name.
-			 * If correlation name is null, then we simply look for an RC whose name matches
-			 * columnName.
-			 */
-			ResultColumnList	targetCols = target.getResultColumns();
-			resultCol = targetCols.getOrderByColumn(columnName, correlationName);
-			if (resultCol == null) 
-			{// add this order by column to the result set
+		if(expression instanceof ColumnReference){
 
-				TableName tabName = null;
-				if (schemaName != null || correlationName != null)
-				{
-					tabName = (TableName) getNodeFactory().getNode(
-																   C_NodeTypes.TABLE_NAME,
-																   schemaName,
-																   correlationName,
-																   getContextManager());
-				}
+			ColumnReference cr = (ColumnReference) expression;
 
-				ColumnReference cr = (ColumnReference) getNodeFactory().getNode(
-																		   C_NodeTypes.COLUMN_REFERENCE,
-																		   columnName,
-																		   tabName,
-																		   getContextManager());
-				
-				resultCol = (ResultColumn) getNodeFactory().getNode(
-															   C_NodeTypes.RESULT_COLUMN,
-															   columnName,
-															   cr, // column reference
-															   getContextManager());
+			ResultColumnList targetCols = target.getResultColumns();
+			resultCol = targetCols.getOrderByColumn(cr.getColumnName(),
+								cr.tableName != null ? 
+								cr.tableName.getFullTableName():
+								null);
 
+			if(resultCol == null){
+				resultCol = (ResultColumn) getNodeFactory().getNode(C_NodeTypes.RESULT_COLUMN,
+										    cr.getColumnName(),
+										    cr,
+										    getContextManager());
 				targetCols.addResultColumn(resultCol);
 				targetCols.incOrderBySelect();
 			}
+			
+		}else if(!isReferedColByNum(expression)){
+			ResultColumnList	targetCols = target.getResultColumns();
+			resultCol = (ResultColumn) getNodeFactory().getNode(C_NodeTypes.RESULT_COLUMN,
+									    null,
+									    expression,
+									    getContextManager());
+			targetCols.addResultColumn(resultCol);
+			targetCols.incOrderBySelect();
 		}
 	}
 
@@ -345,4 +272,80 @@ public class OrderByColumn extends OrderedColumn {
 		resultCol.setExpression(
 			resultCol.getExpression().remapColumnReferencesToExpressions());
 	}
+
+	private static boolean isReferedColByNum(ValueNode expression) 
+	throws StandardException{
+		
+		if(!expression.isConstantExpression()){
+			return false;
+		}
+		
+		return expression.getConstantValueAsObject() instanceof Integer;
+	}
+
+	
+	private static ResultColumn resolveColumnReference(ResultSetNode target,
+							   ColumnReference cr)
+	throws StandardException{
+		
+		ResultColumn resultCol = null;
+		
+		int					sourceTableNumber = -1;
+		
+		//bug 5716 - for db2 compatibility - no qualified names allowed in order by clause when union/union all operator is used 
+
+		if (target instanceof SetOperatorNode && cr.getTableName() != null){
+			String fullName = cr.getSQLColumnName();
+			throw StandardException.newException(SQLState.LANG_QUALIFIED_COLUMN_NAME_NOT_ALLOWED, fullName);
+		}
+
+		if(cr.getTableNameNode() != null){
+			TableName tableNameNode = cr.getTableNameNode();
+
+			FromTable fromTable = target.getFromTableByName(tableNameNode.getTableName(),
+									(tableNameNode.hasSchema() ?
+									 tableNameNode.getSchemaName():null),
+									true);
+			if(fromTable == null){
+				fromTable = target.getFromTableByName(tableNameNode.getTableName(),
+								      (tableNameNode.hasSchema() ?
+								       tableNameNode.getSchemaName():null),
+								      false);
+				if(fromTable == null){
+					String fullName = cr.getTableNameNode().toString();
+					throw StandardException.newException(SQLState.LANG_EXPOSED_NAME_NOT_FOUND, fullName);
+				}
+			}
+
+			/* HACK - if the target is a UnionNode, then we have to
+			 * have special code to get the sourceTableNumber.  This is
+			 * because of the gyrations we go to with building the RCLs
+			 * for a UnionNode.
+			 */
+			if (target instanceof SetOperatorNode)
+			{
+				sourceTableNumber = ((FromTable) target).getTableNumber();
+			}
+			else
+			{
+				sourceTableNumber = fromTable.getTableNumber();
+			}
+			
+		}
+
+		ResultColumnList	targetCols = target.getResultColumns();
+
+		resultCol = targetCols.getOrderByColumn(cr.getColumnName(),
+							cr.getTableName(),
+							sourceTableNumber);
+							
+		if (resultCol == null || resultCol.isNameGenerated()){
+			String errString = cr.columnName;
+			throw StandardException.newException(SQLState.LANG_ORDER_BY_COLUMN_NOT_FOUND, errString);
+		}
+
+		return resultCol;
+
+	}
+
 }

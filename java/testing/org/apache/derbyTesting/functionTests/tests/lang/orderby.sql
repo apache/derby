@@ -133,7 +133,7 @@ select i from obt order by c;
 -- . order by on column not in select, in table (error)
 select i from obt order by v;
 
--- . order by on expression (not allowed)
+-- . order by on expression (allowed)
 select i from obt order by i+1;
 
 -- . order by on qualified column name, incorrect correlation name (not allowed)
@@ -350,6 +350,66 @@ select a, c from t order by b, c, b, c;
 select a, b, c from t order by b, c;
 select b, c from t order by app.t.a;
 
+
+--Test addtive expression in order clause
+
+create table test_word(value varchar(32));
+insert into test_word(value) values('anaconda');
+insert into test_word(value) values('America');
+insert into test_word(value) values('camel');
+insert into test_word(value) values('Canada');
+
+select * from test_word order by value;
+select * from test_word order by upper(value);
+
+drop table test_word;
+
+create table test_number(value integer);
+insert into test_number(value) values(-1);
+insert into test_number(value) values(0);
+insert into test_number(value) values(1);
+insert into test_number(value) values(2);
+insert into test_number(value) values(3);
+insert into test_number(value) values(100);
+insert into test_number(value) values(1000);
+select * from test_number order by value;
+select * from test_number order by value + 1;
+select * from test_number order by value - 1;
+select * from test_number order by value * 1;
+select * from test_number order by value / 1;
+select * from test_number order by 1 + value;
+select * from test_number order by 1 - value;
+select * from test_number order by 1 * value;
+select * from test_number where value <> 0 order by 6000 / value;
+select * from test_number order by -1 + value;
+select * from test_number order by -1 - value;
+select * from test_number order by - 1 * value;
+select * from test_number where value <> 0 order by - 6000 / value;
+select * from test_number order by abs(value);
+select * from test_number order by value desc;
+select * from test_number order by value + 1 desc;
+select * from test_number order by value - 1 desc;
+select * from test_number order by value * 1 desc;
+select * from test_number order by value / 1 desc;
+select * from test_number order by 1 + value desc;
+select * from test_number order by 1 - value desc;
+select * from test_number order by 1 * value desc;
+select * from test_number where value <> 0 order by 6000 / value desc;
+select * from test_number order by -1 + value desc;
+select * from test_number order by -1 - value desc;
+select * from test_number order by - 1 * value desc;
+select * from test_number where value <> 0 order by - 6000 / value desc;
+select * from test_number order by abs(value) desc;
+drop table test_number;
+create table test_number2(value1 integer,value2 integer);
+insert into test_number2(value1,value2) values(-2,2);
+insert into test_number2(value1,value2) values(-1,2);
+insert into test_number2(value1,value2) values(0,1);
+insert into test_number2(value1,value2) values(0,2);
+insert into test_number2(value1,value2) values(1,1);
+insert into test_number2(value1,value2) values(2,1);
+select * from test_number2 order by abs(value1),mod(value2,2);
+drop table test_number2;
 -- error case
 select * from t order by d;
 select t.* from t order by d;
@@ -371,3 +431,23 @@ select t.a from t order by t.d;
 select s.a from t s order by s.d;
 
 drop table t;
+
+-- test fof using table correlation names 
+select * from (values (2),(1)) as t(x) order by t.x;
+
+create table ta(id int);
+create table tb(id int,c1 int,c2 int);
+insert into ta(id)  values(1);
+insert into ta(id)  values(2);
+insert into ta(id)  values(3);
+insert into ta(id)  values(4);
+insert into ta(id)  values(5);
+insert into tb(id,c1,c2) values(1,5,3);
+insert into tb(id,c1,c2) values(2,4,3);
+insert into tb(id,c1,c2) values(3,4,2);
+insert into tb(id,c1,c2) values(4,4,1);
+insert into tb(id,c1,c2) values(5,4,2);
+select t1.id,t2.c1 from ta as t1 join tb as t2 on t1.id = t2.id order by t2.c1,t2.c2,t1.id;
+
+drop table ta;
+drop table tb;

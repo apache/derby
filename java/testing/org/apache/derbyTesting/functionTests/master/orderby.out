@@ -345,9 +345,15 @@ I
 2          
 1          
 NULL       
-ij> -- . order by on expression (not allowed)
+ij> -- . order by on expression (allowed)
 select i from obt order by i+1;
-ERROR 42X01: Syntax error: Encountered "+" at line 2, column 29.
+I          
+-----------
+1          
+1          
+2          
+3          
+NULL       
 ij> -- . order by on qualified column name, incorrect correlation name (not allowed)
 select i from obt t order by obt.i;
 ERROR 42X04: Column 'OBT.I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OBT.I' is not a column in the target table.
@@ -863,6 +869,352 @@ B          |C
 2          |NULL       
 3          |NULL       
 0          |NULL       
+ij> --Test addtive expression in order clause
+create table test_word(value varchar(32));
+0 rows inserted/updated/deleted
+ij> insert into test_word(value) values('anaconda');
+1 row inserted/updated/deleted
+ij> insert into test_word(value) values('America');
+1 row inserted/updated/deleted
+ij> insert into test_word(value) values('camel');
+1 row inserted/updated/deleted
+ij> insert into test_word(value) values('Canada');
+1 row inserted/updated/deleted
+ij> select * from test_word order by value;
+VALUE                           
+--------------------------------
+America                         
+Canada                          
+anaconda                        
+camel                           
+ij> select * from test_word order by upper(value);
+VALUE                           
+--------------------------------
+America                         
+anaconda                        
+camel                           
+Canada                          
+ij> drop table test_word;
+0 rows inserted/updated/deleted
+ij> create table test_number(value integer);
+0 rows inserted/updated/deleted
+ij> insert into test_number(value) values(-1);
+1 row inserted/updated/deleted
+ij> insert into test_number(value) values(0);
+1 row inserted/updated/deleted
+ij> insert into test_number(value) values(1);
+1 row inserted/updated/deleted
+ij> insert into test_number(value) values(2);
+1 row inserted/updated/deleted
+ij> insert into test_number(value) values(3);
+1 row inserted/updated/deleted
+ij> insert into test_number(value) values(100);
+1 row inserted/updated/deleted
+ij> insert into test_number(value) values(1000);
+1 row inserted/updated/deleted
+ij> select * from test_number order by value;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by value + 1;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by value - 1;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by value * 1;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by value / 1;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by 1 + value;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by 1 - value;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by 1 * value;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number where value <> 0 order by 6000 / value;
+VALUE      
+-----------
+-1         
+1000       
+100        
+3          
+2          
+1          
+ij> select * from test_number order by -1 + value;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by -1 - value;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by - 1 * value;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number where value <> 0 order by - 6000 / value;
+VALUE      
+-----------
+1          
+2          
+3          
+100        
+1000       
+-1         
+ij> select * from test_number order by abs(value);
+VALUE      
+-----------
+0          
+1          
+-1         
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by value desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by value + 1 desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by value - 1 desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by value * 1 desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by value / 1 desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by 1 + value desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by 1 - value desc;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by 1 * value desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number where value <> 0 order by 6000 / value desc;
+VALUE      
+-----------
+1          
+2          
+3          
+100        
+1000       
+-1         
+ij> select * from test_number order by -1 + value desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+0          
+-1         
+ij> select * from test_number order by -1 - value desc;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number order by - 1 * value desc;
+VALUE      
+-----------
+-1         
+0          
+1          
+2          
+3          
+100        
+1000       
+ij> select * from test_number where value <> 0 order by - 6000 / value desc;
+VALUE      
+-----------
+-1         
+1000       
+100        
+3          
+2          
+1          
+ij> select * from test_number order by abs(value) desc;
+VALUE      
+-----------
+1000       
+100        
+3          
+2          
+1          
+-1         
+0          
+ij> drop table test_number;
+0 rows inserted/updated/deleted
+ij> create table test_number2(value1 integer,value2 integer);
+0 rows inserted/updated/deleted
+ij> insert into test_number2(value1,value2) values(-2,2);
+1 row inserted/updated/deleted
+ij> insert into test_number2(value1,value2) values(-1,2);
+1 row inserted/updated/deleted
+ij> insert into test_number2(value1,value2) values(0,1);
+1 row inserted/updated/deleted
+ij> insert into test_number2(value1,value2) values(0,2);
+1 row inserted/updated/deleted
+ij> insert into test_number2(value1,value2) values(1,1);
+1 row inserted/updated/deleted
+ij> insert into test_number2(value1,value2) values(2,1);
+1 row inserted/updated/deleted
+ij> select * from test_number2 order by abs(value1),mod(value2,2);
+VALUE1     |VALUE2     
+-----------------------
+0          |2          
+0          |1          
+-1         |2          
+1          |1          
+-2         |2          
+2          |1          
+ij> drop table test_number2;
+0 rows inserted/updated/deleted
 ij> -- error case
 select * from t order by d;
 ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
@@ -895,5 +1247,47 @@ ERROR 42X04: Column 'T.D' is not in any table in the FROM list or it appears wit
 ij> select s.a from t s order by s.d;
 ERROR 42X04: Column 'S.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.D' is not a column in the target table.
 ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- test fof using table correlation names 
+select * from (values (2),(1)) as t(x) order by t.x;
+X          
+-----------
+1          
+2          
+ij> create table ta(id int);
+0 rows inserted/updated/deleted
+ij> create table tb(id int,c1 int,c2 int);
+0 rows inserted/updated/deleted
+ij> insert into ta(id)  values(1);
+1 row inserted/updated/deleted
+ij> insert into ta(id)  values(2);
+1 row inserted/updated/deleted
+ij> insert into ta(id)  values(3);
+1 row inserted/updated/deleted
+ij> insert into ta(id)  values(4);
+1 row inserted/updated/deleted
+ij> insert into ta(id)  values(5);
+1 row inserted/updated/deleted
+ij> insert into tb(id,c1,c2) values(1,5,3);
+1 row inserted/updated/deleted
+ij> insert into tb(id,c1,c2) values(2,4,3);
+1 row inserted/updated/deleted
+ij> insert into tb(id,c1,c2) values(3,4,2);
+1 row inserted/updated/deleted
+ij> insert into tb(id,c1,c2) values(4,4,1);
+1 row inserted/updated/deleted
+ij> insert into tb(id,c1,c2) values(5,4,2);
+1 row inserted/updated/deleted
+ij> select t1.id,t2.c1 from ta as t1 join tb as t2 on t1.id = t2.id order by t2.c1,t2.c2,t1.id;
+ID         |C1         
+-----------------------
+4          |4          
+3          |4          
+5          |4          
+2          |4          
+1          |5          
+ij> drop table ta;
+0 rows inserted/updated/deleted
+ij> drop table tb;
 0 rows inserted/updated/deleted
 ij> 
