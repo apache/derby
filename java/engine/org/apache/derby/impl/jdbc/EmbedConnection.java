@@ -925,8 +925,10 @@ public abstract class EmbedConnection implements java.sql.Connection
      * @exception SQLException if a database-access error occurs.
      */
     public void close() throws SQLException {
+		// JDK 1.4 javadoc indicates close on a closed connection is a no-op
 		if (isClosed())
-		   	throw newSQLException(SQLState.ALREADY_CLOSED, "Connection");
+		   	return;
+
 
 		if (rootConnection == this)
 		{
