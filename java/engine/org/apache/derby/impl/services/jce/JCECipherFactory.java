@@ -545,12 +545,6 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 					throw StandardException.newException(SQLState.SERVICE_WRONG_BOOT_PASSWORD);
 
 				generatedKey = org.apache.derby.iapi.util.StringUtil.fromHexString(externalKey, 0, externalKey.length());
-				if(create)
-		                   properties.put(Attribute.CRYPTO_KEY_LENGTH,String.valueOf(generatedKey.length));	
-				else
-				  // mismatch in encryptedKey used at creation versus at connecting again
-				  if(generatedKey.length != encodedKeyLength && encodedKeyLength > 0)
-					throw StandardException.newException(SQLState.ENCRYPTION_BAD_EXTERNAL_KEY);
 
 			} else {
 
