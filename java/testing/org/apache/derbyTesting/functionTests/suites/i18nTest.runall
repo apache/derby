@@ -1,0 +1,7 @@
+i18n/JapanCodeConversion.sql
+i18n/UnicodeEscape_JP.sql
+i18n/I18NImportExport.sql
+i18n/urlLocale.sql
+i18n/messageLocale.sql
+i18n/caseI_tr_TR.sql
+i18n/iepnegativetests_ES.sql

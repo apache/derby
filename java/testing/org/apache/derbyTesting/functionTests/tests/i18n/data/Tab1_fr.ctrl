@@ -1,0 +1,12 @@
+#Import/Export Properties
+#Wed Feb 23 15:51:10 GMT+02:00 2000
+ColumnDefinition=True
+DataCodeset=UTF8
+Format=ASCII_DELIMITED
+RecordSeparator=CR-LF
+Null=NULL
+Version=1
+FieldStartDelimiter="
+FieldSeparator=Comma
+DataLocale=fr_FR
+FieldEndDelimiter="

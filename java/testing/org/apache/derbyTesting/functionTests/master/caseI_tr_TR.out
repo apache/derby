@@ -1,0 +1,28 @@
+CONNECTION0* -  EnC:>9< jdbc:derby:trdb
+* = current connection
+ij> create function FMTUNICODE(P1 VARCHAR(100)) RETURNS VARCHAR(300)
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.format'
+NO SQL
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> values FMTUNICODE(UCASE('i'));
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+\u0130                                                                                                                          
+1 row selected
+ij> values FMTUNICODE(UCASE('I'));
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+I                                                                                                                               
+1 row selected
+ij> values FMTUNICODE(LCASE('i'));
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+i                                                                                                                               
+1 row selected
+ij> values FMTUNICODE(LCASE('I'));
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+\u0131                                                                                                                          
+1 row selected
+ij> 

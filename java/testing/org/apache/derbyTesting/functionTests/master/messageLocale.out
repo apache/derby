@@ -1,0 +1,97 @@
+ij> -- THIS TEST WILL NOT WORK WITH THE .jar files
+-- It uses a dummy message_qq_PP_testOnly.properties that exists
+-- only in the codeline
+--
+-- Message locale handling
+--
+--;
+-- load a fake driver that is really a piece of
+-- code that sets the default locale;
+driver 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale';
+ij> --
+-- create a databse in this default locale, should
+-- get english messages, as there are no messages
+-- for rr_TT;
+connect 'jdbc:derby:wombat;create=true';
+ij> -- make sure the database is clean
+drop procedure checkDefaultLoc;
+ERROR 42Y55: 'DROP PROCEDURE' cannot be performed on 'CHECKDEFAULTLOC' because it does not exist.
+ij> create procedure checkDefaultLoc() parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkDefaultLocale';
+0 rows inserted/updated/deleted
+ij> drop procedure checkDatabaseLoc;
+ERROR 42Y55: 'DROP PROCEDURE' cannot be performed on 'CHECKDATABASELOC' because it does not exist.
+ij> create procedure checkDatabaseLoc(in locale char(10)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkDatabaseLocale';
+0 rows inserted/updated/deleted
+ij> drop procedure setDefaultDELoc;
+ERROR 42Y55: 'DROP PROCEDURE' cannot be performed on 'SETDEFAULTDELOC' because it does not exist.
+ij> create procedure setDefaultLoc(in locale char(10), in code char(10)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.setDefaultLocale';
+0 rows inserted/updated/deleted
+ij> drop table t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> drop table t2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> call checkDefaultLoc();
+0 rows inserted/updated/deleted
+ij> call checkDatabaseLoc('rr_TT');
+0 rows inserted/updated/deleted
+ij> -- expect an error
+create table t1 oops (i int primary key);
+ERROR 42X01: Syntax error: Encountered "oops" at line 2, column 17.
+ij> -- setup for
+create table t2 (i int);
+0 rows inserted/updated/deleted
+ij> create index i2_a on t2(i);
+0 rows inserted/updated/deleted
+ij> -- expect a warning
+create index i2_b on t2(i);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I2_A.
+ij> -- another error
+drop table t3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T3' because it does not exist.
+ij> -- set the default locale to German;
+--call java.util.Locale::setDefault(new java.util.Locale('de', 'DE'));
+call setDefaultLoc('de','DE');
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> -- create a database with a locale that has a small
+-- number of messages. Missing ones will default to
+-- the locale of the default locale i.e. German;
+connect 'jdbc:derby:testdb;create=true;territory=qq_PP_testOnly';
+ij> -- error (in qq_PP messages);
+-- create table t1 (i longe);
+create table t1 oops (i int primary key);
+ERROR 42X01: Error of syntax: Encountered "oops" at line 3, column 17.
+ij> -- warning (in qq_PP messages);
+-- create table t2 (i java.lang.Object);
+create table t2 (i int);
+0 rows inserted/updated/deleted
+ij> create index i2_a on t2(i);
+0 rows inserted/updated/deleted
+ij> create index i2_b on t2(i);
+0 rows inserted/updated/deleted
+WARNING 01504: Der neue Index ist ein Duplikat eines vorhandenen Indexes: I2_A.
+ij> -- from default locale (German);
+drop table t3;
+ERROR 42Y55: 'DROP TABLE' kann nicht f EnC:>252< r 'T3' ausgef EnC:>252< hrt werden, da dieses Objekt nicht vorhanden ist.
+ij> -- should be in German;
+disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Das Derby-System wird heruntergefahren.
+ij> -- Now, all Enlish messages;
+connect 'jdbc:derby:enTest;create=true;territory=en_US';
+ij> -- create table t1 (i longe);
+create table t1 oops (i int primary key);
+ERROR 42X01: Syntax error: Encountered "oops" at line 2, column 17.
+ij> -- create table t2 (i java.lang.Object);
+create table t2 (i int);
+0 rows inserted/updated/deleted
+ij> create index i2_a on t2(i);
+0 rows inserted/updated/deleted
+ij> create index i2_b on t2(i);
+0 rows inserted/updated/deleted
+WARNING 01504: The new index is a duplicate of an existing index: I2_A.
+ij> drop table t3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T3' because it does not exist.
+ij> disconnect;
+ij> 

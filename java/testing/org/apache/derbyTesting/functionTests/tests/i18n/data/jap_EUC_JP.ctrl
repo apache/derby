@@ -1,0 +1,7 @@
+#Import/Export Properties
+#Wed Oct 21 13:18:48 PDT 1998
+DataCodeset=EUC_JP
+RecordSeparator=CR-LF
+FieldStartDelimiter="
+FieldSeparator=Comma
+FieldEndDelimiter="

@@ -1,0 +1,138 @@
+IJ Version 10.1
+ij> connect 'jdbc:derby:detest;create=true;' as M EnC:>65533< nchen;
+ij(M EnC:>353< NCHEN)> drop table deta;
+FEHLER 42Y55: 'DROP TABLE' cannot be performed on 'DETA' because it does not exist.
+ij(M EnC:>353< NCHEN)> create table detab ( dc1 decimal(5,3), dc3 date, dc2 char(200) );
+0 Zeilen eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(1.123,date('2000-01-25'),'Zuviele Programme gefunden. Versuchen Sie es erneut.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(2.123,date('2000-02-24'),'Nur Teile der Entwicklungsdatenbank gefunden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(3.123,date('2000-03-23'),'Mehr als eine Instanz der Tabelle %s in Entwicklungsdatenbank gefunden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(4.123,date('2000-04-22'),'Mehr als einen Runner-Datensatz f?r dieses Programm gefunden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(5.123,date('2000-05-21'),'Es kann nur eine BEFORE- oder AFTER INPUT/CONSTRUCT-Klausel in einer ');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(6.123,date('2000-06-20'),'INPUT-/CONSTRUCT-Anweisung erscheinen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(7.123,date('2000-07-19'),'Die Funktion %s kann nur in einer INPUT- oder CONSTRUCT-Anweisung ');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(8.123,date('2000-08-18'),'Fglpc, der Pcode-Kompiler, ist nicht in Ihrem Pfad vorhanden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(9.123,date('2000-09-17'),'Kann Runner %s nicht finden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(10.123,date('2000-10-16'),'I/O-Fehler beim Laufen von fglc: %s.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(11.123,date('2000-11-15'),'I/O-Fehler beim Ausf?hren von fglc.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(12.123,date('2000-12-14'),'Kann Datei %s nicht  EnC:>8221< ffnen, um den Wert einer TEXT-Variable zu lesen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(13.123,date('2000-01-13'),'Der angegebene WORDWRAP RIGHT MARGIN-Wert liegt au EnC:>225< erhalb des Bereichs.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(14.123,date('2000-02-12'),'als oder gleich dem Wert des rechten Reportrands sein.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(15.123,date('2000-03-11'),'4GL unterst?tzt nicht die Ausgabe einer Blob-Variable.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(16.123,date('2000-04-10'),'Die HELP- und ATTRIBUTE-Klauseln k EnC:>8221< nnen jeweils nur einmal definiert werden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(17.123,date('2000-05-09'),'Ein Feld des INTERVAL-Kennzeichners liegt au EnC:>225< erhalb des Bereichs.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(18.123,date('2000-06-08'),'Der Bereich geht von YEAR TO MONTH und von DAY TO FRACTION.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(19.123,date('2000-07-07'),'Das Anlegen von Indizes ist hier nicht erlaubt.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(20.123,date('2000-08-06'),'Hier wird die Eingabe des Spaltennamen erwartet.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(21.123,date('2000-09-05'),'Hier wird die Eingabe des Tabellennamen erwartet.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(22.123,date('2000-10-04'),'Der eigentliche Spaltenname kann hier nicht angegeben werden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(23.123,date('2000-11-03'),'Die maximale Gr EnC:>8221<  EnC:>225< e f?r Varchar mu EnC:>225<  zwischen 1 und 255 liegen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(24.123,date('2000-12-02'),'Kann keine tempor EnC:>8222< re Datei %s anlegen, um eine Blob-Variable aufzunehmen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(25.123,date('2000-11-01'),'Symbol %s mu EnC:>225<  ein SQL-Datenbank-Elementname sein - entweder ein ');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(26.123,date('2000-10-28'),'Datenbankname, ein Tabellenname oder ein Spaltenname.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(27.123,date('2000-09-29'),'DATETIME-Einheiten k EnC:>8221< nnen nur YEAR, MONTH, DAY, HOUR, MINUTE,');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(28.123,date('2000-08-30'),'Eingeklammerte Genauigkeit von FRACTION mu EnC:>225<  zwischen 1 und 5 liegen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(29.123,date('2000-07-31'),'F?r andere Zeiteinheiten kann keine Genauigkeit definiert werden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(30.123,date('2000-06-25'),'Das Startfeld von DATETIME oder INTERVAL-Kennzeichnern mu EnC:>225<  in der ');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(31.123,date('2000-05-25'),'Zeitliste vor dem Endfeld stehen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(32.123,date('2000-04-25'),'Entladen in Datei %s mi EnC:>225< lungen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(33.123,date('2000-03-25'),'Laden aus Datei %s mi EnC:>225< lungen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(34.123,date('2000-02-25'),'Das Programm kann eine DISPLAY ARRAY-Anweisung an dieser Stelle nicht');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(35.123,date('2000-01-25'),'beenden, weil es sich nicht in einer DISPLAY ARRAY-Anweisung befindet.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(36.123,date('2000-02-25'),'Das Programm kann eine INPUT-Anweisung an dieser Stelle nicht beenden,');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(37.123,date('2000-04-25'),'weil es sich nicht in einer INPUT-Anweisung befindet.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(38.123,date('2000-05-25'),'Konnte Datei %s nicht  EnC:>8221< ffnen.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(39.123,date('2000-07-25'),'Name des Eigent?mers %s hat die L EnC:>8222< nge von 8 Zeichen ?berschritten.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(40.123,date('2000-09-25'),'Fehler bei der Speicherzuordnung.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> insert into detab values(41.123,date('2000-05-25'),'Unter dem angegebenen Namen wurde kein lauff EnC:>8222< higes 4GL-Programm gefunden.');
+1 Zeile eingef EnC:>65533< gt/aktualisiert/gel EnC:>8221< scht
+ij(M EnC:>353< NCHEN)> LOCALIZEDDISPLAY ON;
+ij(M EnC:>353< NCHEN)> show connections;
+CONNECTION0 -  EnC:>9< jdbc:derby:wombat
+M EnC:>353< NCHEN* -  EnC:>9< jdbc:derby:detest
+* = aktuelle Verbindung
+ij(M EnC:>353< NCHEN)> select * from detab;
+DC1     |DC3               |DC2                                                                                                                             
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+1,123   |25. Januar 2000   |Zuviele Programme gefunden. Versuchen Sie es erneut.                                                                           &
+2,123   |24. Februar 2000  |Nur Teile der Entwicklungsdatenbank gefunden.                                                                                  &
+3,123   |23. M EnC:>8222< rz 2000     |Mehr als eine Instanz der Tabelle %s in Entwicklungsdatenbank gefunden.                                                        &
+4,123   |22. April 2000    |Mehr als einen Runner-Datensatz f?r dieses Programm gefunden.                                                                  &
+5,123   |21. Mai 2000      |Es kann nur eine BEFORE- oder AFTER INPUT/CONSTRUCT-Klausel in einer                                                           &
+6,123   |20. Juni 2000     |INPUT-/CONSTRUCT-Anweisung erscheinen.                                                                                         &
+7,123   |19. Juli 2000     |Die Funktion %s kann nur in einer INPUT- oder CONSTRUCT-Anweisung                                                              &
+8,123   |18. August 2000   |Fglpc, der Pcode-Kompiler, ist nicht in Ihrem Pfad vorhanden.                                                                  &
+9,123   |17. September 2000|Kann Runner %s nicht finden.                                                                                                   &
+10,123  |16. Oktober 2000  |I/O-Fehler beim Laufen von fglc: %s.                                                                                           &
+11,123  |15. November 2000 |I/O-Fehler beim Ausf?hren von fglc.                                                                                            &
+12,123  |14. Dezember 2000 |Kann Datei %s nicht  EnC:>8221< ffnen, um den Wert einer TEXT-Variable zu lesen.                                                          &
+13,123  |13. Januar 2000   |Der angegebene WORDWRAP RIGHT MARGIN-Wert liegt au EnC:>225< erhalb des Bereichs.                                                        &
+14,123  |12. Februar 2000  |als oder gleich dem Wert des rechten Reportrands sein.                                                                         &
+15,123  |11. M EnC:>8222< rz 2000     |4GL unterst?tzt nicht die Ausgabe einer Blob-Variable.                                                                         &
+16,123  |10. April 2000    |Die HELP- und ATTRIBUTE-Klauseln k EnC:>8221< nnen jeweils nur einmal definiert werden.                                                   &
+17,123  |9. Mai 2000       |Ein Feld des INTERVAL-Kennzeichners liegt au EnC:>225< erhalb des Bereichs.                                                              &
+18,123  |8. Juni 2000      |Der Bereich geht von YEAR TO MONTH und von DAY TO FRACTION.                                                                    &
+19,123  |7. Juli 2000      |Das Anlegen von Indizes ist hier nicht erlaubt.                                                                                &
+20,123  |6. August 2000    |Hier wird die Eingabe des Spaltennamen erwartet.                                                                               &
+21,123  |5. September 2000 |Hier wird die Eingabe des Tabellennamen erwartet.                                                                              &
+22,123  |4. Oktober 2000   |Der eigentliche Spaltenname kann hier nicht angegeben werden.                                                                  &
+23,123  |3. November 2000  |Die maximale Gr EnC:>8221<  EnC:>225< e f?r Varchar mu EnC:>225<  zwischen 1 und 255 liegen.                                                                  &
+24,123  |2. Dezember 2000  |Kann keine tempor EnC:>8222< re Datei %s anlegen, um eine Blob-Variable aufzunehmen.                                                      &
+25,123  |1. November 2000  |Symbol %s mu EnC:>225<  ein SQL-Datenbank-Elementname sein - entweder ein                                                                &
+26,123  |28. Oktober 2000  |Datenbankname, ein Tabellenname oder ein Spaltenname.                                                                          &
+27,123  |29. September 2000|DATETIME-Einheiten k EnC:>8221< nnen nur YEAR, MONTH, DAY, HOUR, MINUTE,                                                                  &
+28,123  |30. August 2000   |Eingeklammerte Genauigkeit von FRACTION mu EnC:>225<  zwischen 1 und 5 liegen.                                                           &
+29,123  |31. Juli 2000     |F?r andere Zeiteinheiten kann keine Genauigkeit definiert werden.                                                              &
+30,123  |25. Juni 2000     |Das Startfeld von DATETIME oder INTERVAL-Kennzeichnern mu EnC:>225<  in der                                                              &
+31,123  |25. Mai 2000      |Zeitliste vor dem Endfeld stehen.                                                                                              &
+32,123  |25. April 2000    |Entladen in Datei %s mi EnC:>225< lungen.                                                                                                &
+33,123  |25. M EnC:>8222< rz 2000     |Laden aus Datei %s mi EnC:>225< lungen.                                                                                                  &
+34,123  |25. Februar 2000  |Das Programm kann eine DISPLAY ARRAY-Anweisung an dieser Stelle nicht                                                          &
+35,123  |25. Januar 2000   |beenden, weil es sich nicht in einer DISPLAY ARRAY-Anweisung befindet.                                                         &
+36,123  |25. Februar 2000  |Das Programm kann eine INPUT-Anweisung an dieser Stelle nicht beenden,                                                         &
+37,123  |25. April 2000    |weil es sich nicht in einer INPUT-Anweisung befindet.                                                                          &
+38,123  |25. Mai 2000      |Konnte Datei %s nicht  EnC:>8221< ffnen.                                                                                                  &
+39,123  |25. Juli 2000     |Name des Eigent?mers %s hat die L EnC:>8222< nge von 8 Zeichen ?berschritten.                                                             &
+40,123  |25. September 2000|Fehler bei der Speicherzuordnung.                                                                                              &
+41,123  |25. Mai 2000      |Unter dem angegebenen Namen wurde kein lauff EnC:>8222< higes 4GL-Programm gefunden.                                                      &
+ij(M EnC:>353< NCHEN)> 

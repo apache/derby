@@ -51,6 +51,7 @@
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/demo"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/derbynet"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/unit"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/i18n"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/master"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.suites.dir}"/> 

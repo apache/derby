@@ -50,11 +50,11 @@ public class Sed
 	}
 	File src = new File(args[0]);
 	File tgt = new File(args[1]);
-	new Sed().exec(src,tgt,null, false);
+	new Sed().exec(src,tgt,null, false, false);
     }
 
     // The arguments should be the names of the input and output files
-    public void exec(File srcFile, File dstFile, InputStream isSed, boolean isJCC)
+    public void exec(File srcFile, File dstFile, InputStream isSed, boolean isJCC, boolean isI18N)
         throws IOException
     {
         // Vector for storing lines to be deleted
@@ -222,7 +222,7 @@ public class Sed
 			subStrings.addElement("-----");
 		}
 		subStrings.addElement("Directory DBLOCATION/wombat already exists");
-		doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed);
+		doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed, isI18N);
 
 	}
 	// This just does JCC changes on the output master file
@@ -266,6 +266,14 @@ public class Sed
 
 	private void doWork(File srcFile, File dstFile, InputStream is, Vector deleteLines, 
 		Vector searchStrings, Vector subStrings, InputStream isSed)
+        throws IOException
+	{
+		doWork(srcFile, dstFile, is, deleteLines, searchStrings, subStrings, isSed, false);
+	}
+		
+
+	private void doWork(File srcFile, File dstFile, InputStream is, Vector deleteLines, 
+		Vector searchStrings, Vector subStrings, InputStream isSed, boolean isI18N)
         throws IOException
 	{
 		
@@ -401,6 +409,47 @@ public class Sed
                     lineDeleted = true;
                 }
             }
+
+            // Now determine if & if so, replace, any non-ascii characters
+            // We do this because non-ascii characters in .sql files will
+            // result in different characters depending on encoding, and
+            // encoding may be different on different os's
+            if (isI18N)
+            {
+                boolean hasNonAscii = false;
+                // check for any characters in the control range
+                for (int si = 0; si < str.length(); si++)
+                {
+                    char c = str.charAt(si);
+                    if (c < (char) 0x20 || c >= (char) 0x7f)
+                    {
+                        hasNonAscii = true;
+                        break;
+                    }
+                }
+
+                if (hasNonAscii)
+                {
+                    StringBuffer sb = new StringBuffer();
+                    for (int si = 0; si < str.length(); si++)
+                    {
+                        char c = str.charAt(si);
+                        if (c < (char) 0x20 || c >= (char) 0x7f)
+                        {
+                            sb.append(' ');
+                            // Encoded Character:> ... <
+                            sb.append("EnC:>");
+                            sb.append((int) str.charAt(si));
+                            sb.append("< ");
+                        }
+			else
+                            sb.append(c);
+                    }
+                    str = sb.toString();
+                }
+            }
+
+
 
             // Determine if this line should be deleted for delete pattern match
             if ( lineDeleted == false )

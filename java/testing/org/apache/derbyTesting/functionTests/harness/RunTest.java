@@ -171,6 +171,8 @@ public class RunTest
     static boolean isSuiteRun = false;
     static boolean lastTestFailed = false;
 
+    static boolean isI18N = false;
+
     static InputStream isSed = null; // For test_sed.properties // Cliff
 
 	public static void main(String[] args)
@@ -310,6 +312,11 @@ public class RunTest
 		
 		String outName = finalOutFile.getPath();
 
+        if (testDirName.startsWith("i18n"))
+        {
+            isI18N=true;
+        }
+
         if (skipsed)
         {
             tmpOutFile.renameTo(finalOutFile);
@@ -320,7 +327,7 @@ public class RunTest
                     {
                         Sed sed = new Sed();
                         sed.exec(tmpOutFile,finalOutFile, isSed, 
-                                        NetServer.isClientConnection(framework));
+                                        NetServer.isClientConnection(framework), isI18N);
 		    }
 		    catch (ClassFormatError cfe)
 		    {
