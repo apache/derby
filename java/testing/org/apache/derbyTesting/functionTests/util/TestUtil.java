@@ -122,6 +122,11 @@ public class TestUtil {
 		return false;
 	}
 
+	public static boolean isEmbeddedFramework()
+	{
+		return (getFramework() == EMBEDDED_FRAMEWORK);
+	}
+
 	/**
 	   Get the framework from the System Property framework
 	   @return  constant for framework being used
@@ -242,7 +247,7 @@ public class TestUtil {
 	 *                will mean ds.setDatabaseName("wombat") will be called
 	 *  @return datasource for current framework
 	 */
-	public static javax.sql.XADataSource getXADatasource(Properties attrs)
+	public static javax.sql.XADataSource getXADataSource(Properties attrs)
 	{
 		
 		String classname = getDataSourcePrefix() + XA_DATASOURCE_STRING + "DataSource";
@@ -260,12 +265,11 @@ public class TestUtil {
 	 */
 	public static javax.sql.ConnectionPoolDataSource getConnectionPoolDataSource(Properties attrs)
 	{
-		
 		String classname = getDataSourcePrefix() + CONNECTION_POOL_DATASOURCE_STRING + "DataSource";
 		return (javax.sql.ConnectionPoolDataSource) getDataSourceWithReflection(classname, attrs);
 	}
 
-	private static String getDataSourcePrefix()
+	public static String getDataSourcePrefix()
 		{
 			framework = getFramework();
 			switch(framework)
@@ -277,13 +281,15 @@ public class TestUtil {
 				case DERBY_NET_CLIENT_FRAMEWORK:
 					return "org.apache.derby.jdbc.Client";
 				case EMBEDDED_FRAMEWORK:
-					return "org.apache.derby.jdbc.Embed";
+					return "org.apache.derby.jdbc.Embedded";
 				default:
 					Exception e = new Exception("FAIL: No DataSource Prefix for framework: " + framework);
 					e.printStackTrace();
 			}
 			return null;
 		}
+
+
 
 	static private Class[] STRING_ARG_TYPE = {String.class};
 	static private Class[] INT_ARG_TYPE = {Integer.TYPE};

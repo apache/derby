@@ -104,7 +104,9 @@ public class DRDAXAProtocol {
 			if (xid == null)
 				connThread.missingCodePoint(CodePoint.XID);
 			
-			if (! readXAFlags)
+			// All but Recover and forget require xaFlags
+			if (syncType != CodePoint.SYNCTYPE_REQ_FORGET && 
+				! readXAFlags)
 				if (SanityManager.DEBUG)
 					connThread.missingCodePoint(CodePoint.XAFLAGS);
 		}
@@ -146,7 +148,10 @@ public class DRDAXAProtocol {
 				break;
 			case CodePoint.SYNCTYPE_INDOUBT:
 				//recover sync type
-				recoverXA();
+				if (readXAFlags)
+					recoverXA(xaflags);
+				else
+					recoverXA();
 				break;
 			default:
 				connThread.invalidCodePoint(codePoint);
@@ -459,19 +464,25 @@ public class DRDAXAProtocol {
 					 xaRetVal, null);		
 	}
 
+	// JCC doesn't send xaflags but always wants TMSTARTRSCAN.  
+	//So default to that if we got no xaflags
+	private void recoverXA() throws DRDAProtocolException
+	{
+		recoverXA(XAResource.TMSTARTRSCAN);
+	}
 
 	/**
 	 * Call recover. Send SYNCCRD response with indoubt list
 	 * 
 	 *  @throws DRDAProtocolException
 	 */
-	private void recoverXA() throws DRDAProtocolException
+	private void recoverXA(int xaflags) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
 		int xaRetVal = xaResource.XA_OK;
 		Xid[] indoubtXids = null;
 		try {
-			indoubtXids = xaResource.recover(XAResource.TMSTARTRSCAN);
+			indoubtXids = xaResource.recover(xaflags);
 		} catch (XAException xe)
 		{
 			xaRetVal = processXAException(xe);

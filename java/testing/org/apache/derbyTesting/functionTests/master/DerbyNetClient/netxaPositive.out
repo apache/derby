@@ -109,6 +109,6 @@ ij(XA)> xa_end xa_success 3;
 ij(XA)> xa_prepare 3;
 ij(XA)> -- should fail with XA_NOTA because we prepared a read only transaction 
 xa_commit xa_1Phase 3;
-IJ ERROR: XAER_PROTO 
+IJ ERROR: XAER_NOTA 
 ij(XA)> disconnect;
 ij> 

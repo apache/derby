@@ -53,6 +53,7 @@ class xaHelper implements xaAbstractHelper
 	private PooledConnection currentPooledConnection;
 
 	private boolean isJCC;
+	private boolean isNetClient;
 	private String framework;
 
   xaHelper()
@@ -62,10 +63,12 @@ class xaHelper implements xaAbstractHelper
 	  
 	public void setFramework(String fm)
 	{
-		framework = fm.toUpperCase();
+		framework = fm.toUpperCase(Locale.ENGLISH);
 		if (framework.endsWith("NET") ||
 			framework.equals("DB2JCC"))
 			isJCC = true;
+		else if (framework.equals("DERBYNETCLIENT"))
+				 isNetClient = true;
 
 	}
 		
@@ -84,16 +87,13 @@ class xaHelper implements xaAbstractHelper
 
 			  databaseName = parser.stringValue(dbname.image);
 			  
-			  if (isJCC)
+			  if (isJCC || isNetClient)
 			  {
 			  xaHelper.setDataSourceProperty(currentXADataSource,
 											 "ServerName", "localhost");
 			  xaHelper.setDataSourceProperty(currentXADataSource,
 											 "portNumber", 1527);
 			  
-			  xaHelper.setDataSourceProperty(currentXADataSource,
-											 "driverType", 4);
-
 			  xaHelper.setDataSourceProperty(currentXADataSource, 
 											 "retrieveMessagesFromServerOnGetMessage", true);
 			  String user;
@@ -107,12 +107,15 @@ class xaHelper implements xaAbstractHelper
 			  //xaHelper.setDataSourceProperty(currentXADataSource,
 			  //"traceFile", "trace.out." + framework);
 			  }
+			  if (isJCC)
+				  xaHelper.setDataSourceProperty(currentXADataSource,
+												 "driverType", 4);
 
 			  xaHelper.setDataSourceProperty(currentXADataSource, "databaseName", databaseName);
 
 			if (shutdown != null && shutdown.toString().toLowerCase(Locale.ENGLISH).equals("shutdown"))
 			{	
-				if (isJCC)
+				if (isJCC || isNetClient)
 					xaHelper.setDataSourceProperty(currentXADataSource,"databaseName", databaseName + ";shutdown=true");
 				else
 					xaHelper.setDataSourceProperty(currentXADataSource, "shutdownDatabase", "shutdown");
@@ -124,7 +127,7 @@ class xaHelper implements xaAbstractHelper
 			}
 			else if (create != null && create.toLowerCase(java.util.Locale.ENGLISH).equals("create"))
 			{
-				if (isJCC)
+				if (isJCC || isNetClient)
 					xaHelper.setDataSourceProperty(currentXADataSource,"databaseName", databaseName + ";create=true");
 				else
 					xaHelper.setDataSourceProperty(currentXADataSource,
@@ -373,13 +376,14 @@ class xaHelper implements xaAbstractHelper
 			case XAException.XAER_RMERR : error = "XAER_RMERR "; break;
 			case XAException.XAER_RMFAIL : error = "XAER_RMFAIL "; break;
 			}
+			//t.printStackTrace(System.out);
 			throw new ijException(error);
 
 		}
 		else // StandardException or run time exception, log it first
 		{
 			String info = LocalizedResource.getMessage("IJ_01SeeClouLog", t.toString(), t.getMessage());
-			t.printStackTrace(System.out);
+			//		t.printStackTrace(System.out);
 			throw new ijException(info);
 		}
 	}
@@ -485,6 +489,9 @@ class xaHelper implements xaAbstractHelper
 			if (isJCC)
 				return (XADataSource) 
 					(Class.forName("com.ibm.db2.jcc.DB2XADataSource").newInstance());
+			else if (isNetClient)
+				return (XADataSource) 
+					(Class.forName("org.apache.derby.jdbc.ClientXADataSource").newInstance());
 			else
 				return (XADataSource)(Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource").newInstance());
 		}
