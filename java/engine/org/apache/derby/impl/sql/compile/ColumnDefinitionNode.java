@@ -510,7 +510,7 @@ public class ColumnDefinitionNode extends TableElementNode
 
 			// Check for 'invalid default' errors (42894)
 			// before checking for 'not storable' errors (42821).
-			if (!defaultTypeIsDB2Valid(columnTypeId, dataTypeServices,
+			if (!defaultTypeIsValid(columnTypeId, dataTypeServices,
 					defaultTypeId, defaultTree, defaultNode.getDefaultText()))
 			{
 					throw StandardException.newException(
@@ -558,15 +558,6 @@ public class ColumnDefinitionNode extends TableElementNode
 
 	/**
 	 * Check the validity of the default for this node
-	 * with respect to restrictions imposed by DB2 that
-	 * Cloudscape doesn't normally disallow (Beetle 5203).
-	 *
-	 * NOTE: that the only checks currently here are those
-	 * which DB2 enforces on DEFAULTS but does NOT enforce
-	 * on normal insertion.  At some point, we may want
-	 * move other checks, currently performed at insertion,
-	 * to here to mimic DB2 behavior (beetle 5585), but
-	 * that is not yet how we do it.
 	 *
 	 * @param columnType TypeId of the target column.
 	 * @param columnDesc Description of the type of the
@@ -580,7 +571,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 */
 
-	public boolean defaultTypeIsDB2Valid(TypeId columnType,
+	public boolean defaultTypeIsValid(TypeId columnType,
 		DataTypeDescriptor columnDesc, TypeId defaultType,
 		ValueNode defaultNode, String defaultText)
 	{
@@ -658,8 +649,7 @@ public class ColumnDefinitionNode extends TableElementNode
 				if (defType == StoredFormatIds.DECIMAL_TYPE_ID) {
 				// only valid if scale and precision are within
 				// those of the column.  Note that scale here should
-				// exclude any trailing 0's after the decimal, per
-				// the DB2 spec.
+				// exclude any trailing 0's after the decimal
 					DataTypeDescriptor defDesc = defaultNode.getTypeServices();
 					int len = defaultText.length();
 					int precision = defDesc.getPrecision();
@@ -696,10 +686,17 @@ public class ColumnDefinitionNode extends TableElementNode
 			// to here instead of waiting until insert time.
 				return (defType == StoredFormatIds.CHAR_TYPE_ID);
 
+			case StoredFormatIds.BIT_TYPE_ID:
+			case StoredFormatIds.VARBIT_TYPE_ID:
+			case StoredFormatIds.LONGVARBIT_TYPE_ID:
+			// only valid if the default type is a BIT string.
+				return (defType == StoredFormatIds.BIT_TYPE_ID);
+
 			case StoredFormatIds.USERDEFINED_TYPE_ID_V3:
 			// default is only valid if it's the same type as the column.
 				return (defType == colType);
 
+			case StoredFormatIds.BLOB_TYPE_ID:
 			case StoredFormatIds.CLOB_TYPE_ID:
 			case StoredFormatIds.SMALLINT_TYPE_ID:
 			case StoredFormatIds.REAL_TYPE_ID:
@@ -714,9 +711,8 @@ public class ColumnDefinitionNode extends TableElementNode
 				return true;
 
 			default:
-			// All other default type checks either 1) involve
-			// types which are not supported in DB2 mode (such as BIT,
-			// TINYINT, NATIONAL_CHAR, etc), or 2) require a DB2 cast-
+			// All other default type checks either 
+			// (TINYINT, NATIONAL_CHAR, etc), or 2) require a DB2 cast-
 			// function (ex. blob(...), which Cloudscape doesn't
 			// support yet--see Beetle 5281), and so they are not
 			// valid for Cloudscape running in DB2 compatibility mode.
