@@ -91,6 +91,8 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 			dataSourcePermissions_net tester = new dataSourcePermissions_net();
 			tester.setProperties();
 			tester.runTest();
+			if (TestUtil.isDerbyNetClientFramework())
+				tester.testClientDataSourceProperties();
 
 		} catch (Exception e) {
 		// if we catch an exception of some sort, we need to make sure to
@@ -141,10 +143,18 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 
 	}
 
+	public javax.sql.DataSource getDS(String database, String user, String 
+									  password)
+	{
+		return getDS(database,user,password,null);
+	}
+
 	public javax.sql.DataSource getDS(String database, String user, String
-									  password)  
-{
-	Properties attrs = new Properties();
+									  password, Properties attrs)  
+	{
+		
+	if (attrs == null)
+		attrs = new Properties();
 	attrs.setProperty("databaseName", database);
 	if (user != null)
 		attrs.setProperty("user", user);
@@ -225,6 +235,99 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		return false;
 	}
 
+	/**
+	 *  Test Client specific dataSource Properties
+	 *
+	 */
+	public void testClientDataSourceProperties() throws SQLException
+	{
+		testRetrieveMessageText();
+	}
+
+	/** 
+	 * Test property retrieveMessageText to retrieve message text
+	 * Property defaults to true for Network Client but can be set to 
+	 * false to disable the procedure call.
+	 */
+	public void testRetrieveMessageText() throws SQLException
+	{
+		Connection conn;
+		String retrieveMessageTextProperty = "retrieveMessageText";
+		Class[] argType = { Boolean.TYPE };
+		String methodName = TestUtil.getSetterName(retrieveMessageTextProperty);
+		Object[] args;
+
+		try {
+			DataSource ds = getDS("wombat", "EDWARD", "noodle");
+			Method sh = ds.getClass().getMethod(methodName, argType);
+			args = new Boolean[] { new Boolean(false) };
+			sh.invoke(ds, args);
+			conn = ds.getConnection();
+			checkMessageText(conn,"false");
+			conn.close();
+			
+			// now try with retrieveMessageText = true
+			ds = getDS("wombat", "EDWARD", "noodle");
+			args = new Boolean[] { new Boolean(true) };
+			sh.invoke(ds, args);
+			conn = ds.getConnection();
+			checkMessageText(conn,"true");
+			conn.close();
+		}
+		catch (Exception e)
+		{
+			System.out.println("FAIL: testRetrieveMessageText() Unexpected Exception " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	public void checkMessageText(Connection conn, String
+								 retrieveMessageTextValue) throws SQLException
+	{
+		System.out.println("** checkMessageText() with retrieveMessageText= " + 
+						   retrieveMessageTextValue);
+
+		try {
+			conn.createStatement().executeQuery("SELECT * FROM APP.NOTTHERE");
+		}
+		catch (SQLException e)
+		{
+			String expectedSQLState = "42X05";
+			String sqlState = e.getSQLState();
+			if (sqlState == null || ! sqlState.equals(expectedSQLState))
+			{
+				System.out.println("Incorrect SQLState.  Got: " + sqlState + 
+								   " should be: " + expectedSQLState); 
+				throw e;
+			}
+			if (retrieveMessageTextValue.equals("true") )
+				{
+					if (e.getMessage().indexOf("does not exist") != -1)
+						System.out.println("PASS: Message Text retrieved properly");
+					else
+					{
+						System.out.println("FAIL: Message text was not retrieved");
+						throw e;
+					}
+				}
+			else
+				// retrieveMessageTextValue is false
+				if (e.getMessage().indexOf("does not exist") == -1)
+				{
+					System.out.println("PASS: Message text not retrieved");
+				}
+				else
+				{
+					System.out.println("FAIL: Message Text should not have been retrieved");
+					throw e;
+				}
+			
+		}
+	}
+
 }
+
+
+
 
 

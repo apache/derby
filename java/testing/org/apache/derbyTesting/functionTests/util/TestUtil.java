@@ -122,6 +122,11 @@ public class TestUtil {
 		return false;
 	}
 
+	public static boolean isDerbyNetClientFramework()
+	{
+		return (getFramework() == DERBY_NET_CLIENT_FRAMEWORK);
+	}
+
 	public static boolean isEmbeddedFramework()
 	{
 		return (getFramework() == EMBEDDED_FRAMEWORK);
@@ -303,7 +308,7 @@ public class TestUtil {
 		Object[] args = null;
 		Object ds = null;
 		Method sh = null;
-
+		String methodName = null;
 		
 		if (specialAttributes == null)
 		{
@@ -311,6 +316,8 @@ public class TestUtil {
 			specialAttributes.put("portNumber",INT_ARG_TYPE);
 			specialAttributes.put("driverType",INT_ARG_TYPE);
 			specialAttributes.put("retrieveMessagesFromServerOnGetMessage",
+								  BOOLEAN_ARG_TYPE);
+			specialAttributes.put("retrieveMessageText",
 								  BOOLEAN_ARG_TYPE);
 		}
 		
@@ -344,7 +351,7 @@ public class TestUtil {
 									" key:" + key + " value:" +value);
 			   
 			}
-			String methodName = getSetterName(key);
+			methodName = getSetterName(key);
 
 			
 			// Need to use reflection to load indirectly
@@ -355,6 +362,7 @@ public class TestUtil {
 
 		} catch (Exception e)
 		{
+			System.out.println("Error accessing method " + methodName);
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
@@ -362,7 +370,7 @@ public class TestUtil {
 	}
 
 	
-	private static String  getSetterName(String attribute)
+	public static String  getSetterName(String attribute)
 	{
 		return "set" + Character.toUpperCase(attribute.charAt(0)) + attribute.substring(1);
 	}

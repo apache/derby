@@ -18,7 +18,7 @@ ij> remove p1;
 ij> autocommit on;
 ij> disconnect all;
 ij> connect 'wombat;shutdown=true;user=system;password=manager';
-ERROR 08006: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
 ij> -- beetle 5468
 disconnect all;
 ij> connect 'wombat;user=system;password=manager';
@@ -91,7 +91,7 @@ ij> remove p3;
 ij> autocommit on;
 ij> disconnect all;
 ij> connect 'myDB;shutdown=true;user=system;password=manager';
-ERROR 08006: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
 ij> -- beetle 5468
 disconnect all;
 ij> connect 'myDB;user=system;password=manager';
@@ -222,11 +222,11 @@ ij> show connections;
 No connections available.
 ij> -- Database shutdown - check user - should succeed
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
-ERROR 08006: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
 ij> -- beetle 5468
 disconnect all;
 ij> connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
-ERROR 08006: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
 ij> -- beetle 5468
 disconnect all;
 ij> -- there should be no connections left here
@@ -237,5 +237,5 @@ connect ';user=jamie;password=LetMeIn;shutdown=true';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij> -- JBMS System shutdown - check user - should succeed
 connect ';user=system;password=manager;shutdown=true';
-ERROR XJ015: XJ015.MDerby system shutdown.((server log XXX)
+ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: XJ015.MDerby system shutdown.((server log XXX)
 ij> 

@@ -35,4 +35,8 @@ ConnectionPoolDataSource with valid default user
 CP connected as EDWARD
 CP connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+** checkMessageText() with retrieveMessageText= false
+PASS: Message text not retrieved
+** checkMessageText() with retrieveMessageText= true
+PASS: Message Text retrieved properly
 Completed dataSourcePermissions_net

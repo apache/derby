@@ -449,7 +449,7 @@ public class util implements java.security.PrivilegedAction {
 		
 		
 		// For JCC make sure we set it to retrieve messages
-		if (isNetFramework())
+		if (isJCCFramework())
 			retrieveMessages = true;
 		
 		if (ijGetMessages != null)
@@ -733,7 +733,7 @@ AppUI.out.println("SIZE="+l);
 	}
 
 	/**
-	 * Used to determine if this is a network testing framework 
+	 * Used to determine if this is a JCC testing framework 
 	 * So that retrieveMessages can be sent.  The plan is to have  
 	 * ij will retrieve messages by default and not look at the testing 
 	 * frameworks. So, ulitmately  this function will look at the driver
@@ -741,11 +741,11 @@ AppUI.out.println("SIZE="+l);
 	 * 
 	 * @return true if the framework contains Net or JCC.
 	 */
-	private static boolean isNetFramework()
+	private static boolean isJCCFramework()
 	{
 		String framework = util.getSystemProperty("framework");
 		return ((framework != null)  &&
-			((framework.toUpperCase(Locale.ENGLISH).indexOf("NET") != -1) ||
+			((framework.toUpperCase(Locale.ENGLISH).equals("DERBYNET")) ||
 			 (framework.toUpperCase(Locale.ENGLISH).indexOf("JCC") != -1)));
 	}
 	

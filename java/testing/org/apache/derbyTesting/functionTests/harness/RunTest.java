@@ -1644,13 +1644,6 @@ clp.list(System.out);
 			    value = NetServer.alterURL(framework,value);
 			    p.put(key, value);
 			}
-			// force messages to show
-			else if ((!key.equals("retrieveMessagesFromServerOnGetMessage")) &&
-				(!key.equals("ij.retrieveMessagesFromServerOnGetMessage")))
-			{
-				p.put("ij.retrieveMessagesFromServerOnGetMessage","true");	
-				p.put("retrieveMessagesFromServerOnGetMessage","true");	
-			}
 			else // for any other properties, just copy them
 			    p.put(key, value);
 			
@@ -1665,6 +1658,13 @@ clp.list(System.out);
 
 		    p.put("ij.user",user);
 		    p.put("ij.password",password);
+		}
+
+		
+		if (NetServer.isJCCConnection(framework))
+		{
+			// force messages to show
+			p.put("ij.retrieveMessagesFromServerOnGetMessage","true");	
 		}
 
 		// If this is not a known protocol for ij we

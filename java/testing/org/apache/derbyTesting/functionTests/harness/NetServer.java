@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.Hashtable;
@@ -376,21 +377,27 @@ public class NetServer
     
     public static  boolean isDB2Connection(String fm)
     {
-	return (fm.equals("DB2app") ||
-		fm.equals("DB2jcc"));
+	return (fm.toUpperCase(Locale.ENGLISH).equals("DB2APP") ||
+		fm.toUpperCase(Locale.ENGLISH).equals("DB2JCC"));
 
     }
 
 	public static boolean isNetworkServerConnection(String fm)
 	{
-		return (fm.startsWith("DerbyNet"));
+		return (fm.toUpperCase(Locale.ENGLISH).startsWith("DERBYNET"));
 	}
 
     public static boolean isClientConnection(String fm)
     {
-	return (fm.startsWith("DerbyNet") ||
-		fm.equals("DB2jcc"));
+	return (fm.toUpperCase(Locale.ENGLISH).startsWith("DERBYNET") ||
+		fm.toUpperCase(Locale.ENGLISH).equals("DB2JCC"));
     }
+
+	public static boolean isJCCConnection(String fm)
+	{
+		return fm.toUpperCase(Locale.ENGLISH).equals("DB2JCC") || 
+			fm.equals("DERBYNET");
+	}
 
     /**
      * @param fm framework name. database url from properties file

@@ -94,8 +94,6 @@ class xaHelper implements xaAbstractHelper
 			  xaHelper.setDataSourceProperty(currentXADataSource,
 											 "portNumber", 1527);
 			  
-			  xaHelper.setDataSourceProperty(currentXADataSource, 
-											 "retrieveMessagesFromServerOnGetMessage", true);
 			  String user;
 			  String password;
 			  user = "APP";
@@ -108,9 +106,13 @@ class xaHelper implements xaAbstractHelper
 			  //"traceFile", "trace.out." + framework);
 			  }
 			  if (isJCC)
+			  {
 				  xaHelper.setDataSourceProperty(currentXADataSource,
 												 "driverType", 4);
 
+				  xaHelper.setDataSourceProperty(currentXADataSource, 
+												 "retrieveMessagesFromServerOnGetMessage", true);
+			  }
 			  xaHelper.setDataSourceProperty(currentXADataSource, "databaseName", databaseName);
 
 			if (shutdown != null && shutdown.toString().toLowerCase(Locale.ENGLISH).equals("shutdown"))

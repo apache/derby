@@ -11,7 +11,7 @@ ij(CONNECTION1)> commit;
 ij(CONNECTION1)> autocommit on;
 ij(CONNECTION1)> disconnect;
 ij> connect 'wombat;shutdown=true;user=francois;password=paceesalute';
-ERROR 08006: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
 ij> connect 'myDB;create=true;user=dan;password=MakeItFaster';
 ij(CONNECTION1)> autocommit off;
 ij(CONNECTION1)> prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
@@ -24,7 +24,7 @@ ij(CONNECTION1)> commit;
 ij(CONNECTION1)> autocommit on;
 ij(CONNECTION1)> disconnect;
 ij> connect 'myDB;shutdown=true;user=dan;password=MakeItFaster';
-ERROR 08006: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
 ij> -- beetle 5468
 disconnect all;
 ij> -- Specifically test JBMS users.
@@ -110,11 +110,11 @@ ij> connect 'wombat;user=francois;password=Corsica';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij> -- Invalid database users
 connect 'myDB;user=howardR;password=IamBetterAtTennis';
-ERROR 04501: 04501.CDatabase connection refused.((server log XXX)
+ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: 04501.CDatabase connection refused.((server log XXX)
 ij> connect 'wombat;user=jerry;password=SacreBleu';
-ERROR 04501: 04501.CDatabase connection refused.((server log XXX)
+ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: 04501.CDatabase connection refused.((server log XXX)
 ij> connect 'wombat;user=jamie;password=MrNamePlates';
-ERROR 04501: 04501.CDatabase connection refused.((server log XXX)
+ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: 04501.CDatabase connection refused.((server log XXX)
 ij> show connections;
 No connections available.
 ij> connect 'wombat;user=francois;password=paceesalute';
@@ -125,7 +125,7 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij(CONNECTION1)> connect 'myDB;user=jamie;password=LetMeIn;shutdown=true';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij(CONNECTION1)> connect 'wombat;user=jerry;password=SacreBleu;shutdown=true';
-ERROR 04501: 04501.CDatabase connection refused.((server log XXX)
+ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: 04501.CDatabase connection refused.((server log XXX)
 ij(CONNECTION1)> show connections;
 CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
 CONNECTION1* - 	jdbc:derby://localhost:1527/myDB;user=jerry;password=SacreBleu
@@ -133,9 +133,9 @@ CONNECTION1* - 	jdbc:derby://localhost:1527/myDB;user=jerry;password=SacreBleu
 ij(CONNECTION1)> -- Database shutdown - check user - should succeed
 ----- beetle 5367
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
-ERROR 08006: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
 ij(CONNECTION1)> connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
-ERROR 08006: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: myDB08006.DDatabase 'myDB' shutdown.((server log XXX)
 ij(CONNECTION1)> show connections;
 CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
 CONNECTION1* - 	jdbc:derby://localhost:1527/myDB;user=jerry;password=SacreBleu
@@ -146,7 +146,7 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij(CONNECTION1)> disconnect all;
 ij> -- JBMS System shutdown - check user - should succeed
 connect ';user=francois;password=paceesalute;shutdown=true';
-ERROR XJ015: XJ015.MDerby system shutdown.((server log XXX)
+ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: XJ015.MDerby system shutdown.((server log XXX)
 ij> -- beetle 5390
 ----- the server does not shut down properly in network server
 ;
