@@ -11389,6 +11389,7 @@ nonReservedKeyword()  :
 	|	tok = <REFERENCING>
         |       tok = <RESET>
 	|	tok = <RESULT>
+	|	tok = <RETAIN>
 	|	tok = <RETURNS>
 	|	tok = <ROW>
 //	|	tok = <ROW_COUNT>
