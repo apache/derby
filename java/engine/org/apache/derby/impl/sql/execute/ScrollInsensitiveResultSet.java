@@ -750,6 +750,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			else
 			{
 				afterLast = true;
+				currentPosition = positionInSource + 1;
 			}
 		}
 
