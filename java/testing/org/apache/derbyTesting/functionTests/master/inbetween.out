@@ -613,7 +613,8 @@ ij> select t from t where t in ('12:30:58', '07:20:20', '07:30:30');
 T       
 --------
 07:30:30
-ij> select p from t;
+ij> -- verify that added predicates getting pushed down
+select p from t;
 P                         
 --------------------------
 NULL                      
@@ -625,8 +626,7 @@ ij> select p from t where p in ('xxxxxxFILTERED-TIMESTAMPxxxxx', 'xxxxxxFILTERED
 P                         
 --------------------------
 xxxxxxFILTERED-TIMESTAMPxxxxx
-ij> -- verify that added predicates getting pushed down
-call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
 ij> maximumdisplaywidth 2000;
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -635,8 +635,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 Statement Name: 
 	null
 Statement Text: 
-	-- verify that added predicates getting pushed down
-call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)
+	call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)
 Parse Time: 0
 Bind Time: 0
 Optimize Time: 0
@@ -648,7 +647,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-null                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+null                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 ij> -- big in lists (test binary search)
 create table big(i int, c char(10));
 0 rows inserted/updated/deleted

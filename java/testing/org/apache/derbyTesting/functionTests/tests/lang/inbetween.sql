@@ -262,10 +262,10 @@ select e from t where e in ('2992-01-02', '3999-08-08', '1992-01-02');
 select t from t;
 select t from t where t in ('12:30:58', '07:20:20', '07:30:30');
 
+-- verify that added predicates getting pushed down
 select p from t;
 select p from t where p in ('1095-09-08 12:30:58.3', '1892-01-01 07:20:20.0', '1892-01-01 07:30:30.0');
 
--- verify that added predicates getting pushed down
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 maximumdisplaywidth 2000;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
