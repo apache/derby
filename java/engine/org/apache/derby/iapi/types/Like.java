@@ -721,7 +721,7 @@ public class Like {
 		// what is there, while stripping escapes
 		//
 
-		if (escape != null)
+		if ((escape != null) && (escape.length() != 0))
 		{
 			char escChar = escape.charAt(0);
 			if (pattern.indexOf(escChar) != -1)
@@ -943,7 +943,7 @@ public class Like {
 			return null;
 		}
 
-		if (escape != null)
+		if ((escape != null) && (escape.length() !=0))
 		{
 			escChar = escape.charAt(0);
 		}

@@ -658,7 +658,6 @@ public interface SQLState {
 	String LANG_INVALID_ESCAPE_CHARACTER                               = "22019";
 	String LANG_INVALID_ESCAPE_SEQUENCE                                = "22025";
 	String LANG_INVALID_TRIM_SET                                       = "22027";
-	String LANG_LIKE_AND_ESCAPE_PARAM                                  = "22500";
 	String LANG_ESCAPE_IS_NULL                                  	   = "22501";
 	String LANG_NULL_INTO_NON_NULL                                     = "23502";
 	String LANG_DUPLICATE_KEY_CONSTRAINT                               = "23505";

@@ -4710,19 +4710,6 @@ remainingNegatablePredicate(ValueNode leftOperand, boolean inSelectClause) throw
                 <LEFT_BRACE> <ESCAPE> escapeValue = additiveExpression(null, 0, inSelectClause) <RIGHT_BRACE>
             ]
 	{
-		//
-		// Error on the too hard to handle corner case of LIKE ? ESCAPE ?.
-		// The problem is at execution when we process the first ? we
-		// call Like.lssThanString/greaterThanString() with escape == null.
-		// There is no way to jam the escape parameter up for use in
-		// ExecAssociatedLikeParameter
-		//
-
-		if (escapeValue != null && escapeValue instanceof ParameterNode
-		    && likePattern instanceof ParameterNode)
-		{
-		    throw StandardException.newException(SQLState.LANG_LIKE_AND_ESCAPE_PARAM);
-		}
 		tree = (ValueNode) nodeFactory.getNode(
 								C_NodeTypes.LIKE_OPERATOR_NODE,
 								leftOperand,
