@@ -52,7 +52,7 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-	 	<pathelement location="${servlet22}"/>
+	 	<pathelement location="${servlet24}"/>
         <pathelement path="${compile.classpath}"/>
       </classpath>
 	  <include name="${derby.dir}/drda/NetServlet.java"/>
@@ -60,7 +60,7 @@
   </target>
 
   <target name="checkservletjar">
-    <available property="servletjar.available" file="${servlet22}"/>
+    <available property="servletjar.available" file="${servlet24}"/>
   </target>
 
 </project>
