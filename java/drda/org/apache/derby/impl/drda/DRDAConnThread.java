@@ -806,7 +806,6 @@ public class DRDAConnThread extends Thread {
 				case CodePoint.EXCSAT:
 					parseEXCSAT();
 					writeEXCSATRD();
-					finalizeChain();
 					break;
 				case CodePoint.ACCSEC:
 					int securityCheckCode = parseACCSEC();
@@ -4039,7 +4038,17 @@ public class DRDAConnThread extends Thread {
 				String paramVal = reader.readStringData(10).trim();  //parameter may be char value
 				if (SanityManager.DEBUG) 
 					trace("ndate parameter value is: \""+paramVal+"\"");
-				ps.setDate(i+1, java.sql.Date.valueOf(paramVal));
+				try {
+					ps.setDate(i+1, java.sql.Date.valueOf(paramVal));
+				} catch (java.lang.IllegalArgumentException e) {
+					// Just use SQLSTATE as message since, if user wants to
+					// retrieve it, the message will be looked up by the
+					// sqlcamessage() proc, which will get the localized
+					// message based on SQLSTATE, and will ignore the
+					// the message we use here...
+					throw new SQLException(SQLState.LANG_DATE_SYNTAX_EXCEPTION,
+						SQLState.LANG_DATE_SYNTAX_EXCEPTION.substring(0,5));
+				}
 				break;
 			}
 			case FdocaConstants.DRDA_TYPE_NTIME:
@@ -4047,20 +4056,37 @@ public class DRDAConnThread extends Thread {
 				String paramVal = reader.readStringData(8).trim();  //parameter may be char value
 				if (SanityManager.DEBUG) 
 					trace("ntime parameter value is: "+paramVal);
-				ps.setTime(i+1, java.sql.Time.valueOf(paramVal));
+				try {
+					ps.setTime(i+1, java.sql.Time.valueOf(paramVal));
+				} catch (java.lang.IllegalArgumentException e) {
+					throw new SQLException(SQLState.LANG_DATE_SYNTAX_EXCEPTION,
+						SQLState.LANG_DATE_SYNTAX_EXCEPTION.substring(0,5));
+				}
 				break;
 			}
 			case FdocaConstants.DRDA_TYPE_NTIMESTAMP:
 			{
-				// DB2 represents ts with 26 chars, and a slightly different format than Java standard
-				// we do the conversion and pad 3 digits for nano seconds.
+				// JCC represents ts in a slightly different format than Java standard, so
+				// we do the conversion to Java standard here.
 				String paramVal = reader.readStringData(26).trim();  //parameter may be char value
 				if (SanityManager.DEBUG)
 					trace("ntimestamp parameter value is: "+paramVal);
-				String tsString = paramVal.substring(0,10)+" "+paramVal.substring(11,19).replace('.', ':')+paramVal.substring(19)+"000";
-				if (SanityManager.DEBUG)
-					trace("tsString is: "+tsString);
-				ps.setTimestamp(i+1, java.sql.Timestamp.valueOf(tsString));
+				try {
+					String tsString = paramVal.substring(0,10) + " " +
+						paramVal.substring(11,19).replace('.', ':') +
+						paramVal.substring(19);
+					if (SanityManager.DEBUG)
+						trace("tsString is: "+tsString);
+					ps.setTimestamp(i+1, java.sql.Timestamp.valueOf(tsString));
+				} catch (java.lang.IllegalArgumentException e1) {
+				// thrown by Timestamp.valueOf(...) for bad syntax...
+					throw new SQLException(SQLState.LANG_DATE_SYNTAX_EXCEPTION,
+						SQLState.LANG_DATE_SYNTAX_EXCEPTION.substring(0,5));
+				} catch (java.lang.StringIndexOutOfBoundsException e2) {
+				// can be thrown by substring(...) if syntax is invalid...
+					throw new SQLException(SQLState.LANG_DATE_SYNTAX_EXCEPTION,
+						SQLState.LANG_DATE_SYNTAX_EXCEPTION.substring(0,5));
+				}
 				break;
 			}
 			case FdocaConstants.DRDA_TYPE_NCHAR:
