@@ -527,7 +527,38 @@ public class checkDataSource
 		conn4.close();
 		xac4.close();
 		
+
+
+		// test jira-derby 95 - a NullPointerException was returned when passing
+		// an incorrect database name (a url in this case) - should now give error XCY00
+		Connection dmc95 = ij.startJBMS();
+		String sqls; 
+		try {
+			testJira95ds( dmc95, "jdbc:derby:mydb" );
+		} catch (SQLException sqle) {
+			sqls = sqle.getSQLState();
+			if (sqls.equals("XCY00"))
+				System.out.println("; ok - expected exception: " + sqls);
+			else 
+				System.out.println("; wrong, unexpected exception: " + sqls + " - " + sqle.toString());
+		} catch (Exception e) {
+				System.out.println("; wrong, unexpected exception: " + e.toString());
+		}
+			
+		try {
+			testJira95xads( dmc95, "jdbc:derby:wombat" );
+		} catch (SQLException sqle) {
+			sqls = sqle.getSQLState();
+			if (sqls.equals("XCY00"))
+				System.out.println("; ok - expected exception: " + sqls + "\n");
+			else 
+				System.out.println("; wrong - unexpected exception: " + sqls + " - " + sqle.toString());
+		} catch (Exception e) {
+				System.out.println("; wrong, unexpected exception: " + e.toString());
+		}
+
 		testDSRequestAuthentication();
+		
 	}
 
 	protected void showXAException(String tag, XAException xae) {
@@ -1268,6 +1299,25 @@ public class checkDataSource
 		conn.close();
 
 	}
+
+	public void testJira95ds(Connection conn, String dbName) throws SQLException
+	{
+		System.out.print("\ntesting jira 95 for DataSource");
+		EmbeddedDataSource ds = new EmbeddedDataSource();
+		ds.setDatabaseName(dbName);
+		Connection conn1 = ds.getConnection();
+		conn1.close();
+	}
+	
+	public void testJira95xads(Connection conn, String dbName) throws SQLException
+	{
+		System.out.print("testing jira 95 for XADataSource");
+		EmbeddedXADataSource dxs = new EmbeddedXADataSource();
+		dxs.setDatabaseName(dbName);
+		Connection conn2 = dxs.getXAConnection().getConnection();
+		conn2.close();
+	}
+
 
 }
 class cdsXid implements Xid, Serializable
