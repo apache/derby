@@ -26,7 +26,6 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,9 +34,10 @@ import java.sql.DatabaseMetaData;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
-
+import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.db.Factory;
 import org.apache.derby.iapi.db.PropertyInfo;
+import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.load.Export;
 import org.apache.derby.impl.load.Import;
 
@@ -138,9 +138,24 @@ public class SystemProcedures  {
 		}
 	}
 	
+	/**
+	 * Get the default or nested connection corresponding to the URL
+	 * jdbc:default:connection. We do not use DriverManager here
+	 * as it is not supported in JSR 169. IN addition we need to perform
+	 * more checks for null drivers or the driver returing null from connect
+	 * as that logic is in DriverManager.
+	 * @return The nested connection
+	 * @throws SQLException Not running in a SQL statement
+	 */
 	private static Connection getDefaultConn()throws SQLException
 	{
-		return DriverManager.getConnection("jdbc:default:connection");
+		InternalDriver id = InternalDriver.activeDriver();
+		if (id != null) { 
+			Connection conn = id.connect("jdbc:default:connection", null);
+			if (conn != null)
+				return conn;
+		}
+		throw Util.noCurrentConnection();
 	}
 
 	/**
