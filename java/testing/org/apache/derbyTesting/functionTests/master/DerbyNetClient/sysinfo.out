@@ -12,6 +12,7 @@ derby.drda.startNetworkServer=false
 derby.drda.host=localhost
 derby.drda.traceAll=false
 ----- Derby Information --------
+JRE - JDBC: J2SE 1.4 - JDBC 3.0
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
@@ -40,6 +41,7 @@ derby.drda.startNetworkServer=false
 derby.drda.host=localhost
 derby.drda.traceAll=false
 ----- Derby Information --------
+JRE - JDBC: J2SE 1.4 - JDBC 3.0
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
