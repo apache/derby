@@ -17,11 +17,11 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="jdbc" depends="compile"/>
+  <target name="jdbc" depends="compile_jdbc"/>
 
 <!-- build targets which need jdbc2.0 libs in the end-->
 <!-- first build all non-special (non jdbc2.0) targets-->
-  <target name="compile">
+  <target name="compile_jsr169">
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -38,7 +38,9 @@
       </classpath>
       <include name="${derby.dir}/jdbc/Driver169.java"/>
     </javac>
+  </target>
 
+  <target name="compile_jdbc" depends="compile_jsr169">
     <javac
       bootclasspath="${empty}"
       nowarn="on"
