@@ -1,0 +1,128 @@
+ij> AUTOCOMMIT OFF;
+ij> -- MODULE DML024
+-- SQL Test Suite, V6.0, Interactive SQL, dml024.sql
+-- 59-byte ID
+-- TEd Version #
+-- AUTHORIZATION HU
+   set schema HU;
+0 rows inserted/updated/deleted
+ij> --O   SELECT USER FROM HU.ECCO;
+  VALUES USER;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+HU                                                                                                                              
+ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+-- date_time print
+-- TEST:0108 Search condition true OR NOT(true)!
+     SELECT EMPNUM,CITY                                                 
+          FROM   STAFF                                                        
+          WHERE  EMPNUM='E1' OR NOT(EMPNUM='E1');
+EM&|CITY           
+-------------------
+E1 |Deale          
+E2 |Vienna         
+E3 |Vienna         
+E4 |Deale          
+E5 |Akron          
+ij> -- PASS:0108 If 5 rows are selected ?
+-- END TEST >>> 0108 <<< END TEST
+-- ****************************************************************
+-- TEST:0109 Search condition true AND NOT(true)!
+     SELECT EMPNUM,CITY                                                  
+          FROM   STAFF                                                       
+          WHERE  EMPNUM='E1' AND NOT(EMPNUM='E1');
+EM&|CITY           
+-------------------
+ij> -- PASS:0109 If 0 rows are selected ?
+-- END TEST >>> 0109 <<< END TEST
+-- **************************************************************
+-- TEST:0110 Search condition unknown OR NOT(unknown)!
+-- setup
+     INSERT INTO WORKS
+            VALUES('E8','P8',NULL);
+1 row inserted/updated/deleted
+ij> -- PASS:0110 If 1 row is inserted?
+     SELECT EMPNUM,PNUM                                                  
+          FROM   WORKS                                                       
+          WHERE HOURS < (SELECT HOURS FROM WORKS                              
+                    WHERE EMPNUM = 'E8')                                     
+          OR NOT(HOURS < (SELECT HOURS FROM WORKS                              
+                    WHERE EMPNUM = 'E8'));
+EM&|PN&
+-------
+ij> -- PASS:0110 If 0 rows are selected ?
+-- restore
+     ROLLBACK WORK;
+ij> -- END TEST >>> 0110 <<< END TEST
+-- *************************************************************
+-- TEST:0111 Search condition unknown AND NOT(unknown)!
+-- setup
+     INSERT INTO WORKS
+            VALUES('E8','P8',NULL);
+1 row inserted/updated/deleted
+ij> -- PASS:0111 If 1 row is inserted?
+     SELECT EMPNUM,PNUM                                                
+          FROM   WORKS                                                       
+          WHERE HOURS < (SELECT HOURS FROM WORKS                            
+                    WHERE EMPNUM = 'E8')                                     
+          AND NOT(HOURS< (SELECT HOURS FROM WORKS                              
+                    WHERE EMPNUM = 'E8'));
+EM&|PN&
+-------
+ij> -- PASS:0111 If 0 rows are selected?
+-- restore
+     ROLLBACK WORK;
+ij> -- END TEST >>> 0111 <<< END TEST
+-- ***************************************************************
+-- TEST:0112 Search condition unknown AND true!
+-- setup
+     INSERT INTO WORKS
+            VALUES('E8','P8',NULL);
+1 row inserted/updated/deleted
+ij> -- PASS:0112 If 1 row is inserted?
+     SELECT EMPNUM,PNUM                                                 
+          FROM   WORKS                                                      
+          WHERE HOURS < (SELECT HOURS FROM WORKS                              
+                    WHERE EMPNUM = 'E8')                                      
+          AND   HOURS IN (SELECT HOURS FROM WORKS);
+EM&|PN&
+-------
+ij> -- PASS:0112 If 0 rows are selected?
+-- restore
+     ROLLBACK WORK;
+ij> -- END TEST >>> 0112 <<< END TEST
+-- *************************************************************
+-- TEST:0113 Search condition unknown OR true!
+-- setup
+     INSERT INTO WORKS
+            VALUES('E8','P8',NULL);
+1 row inserted/updated/deleted
+ij> -- PASS:0113 If 1 row is inserted?
+     SELECT EMPNUM,PNUM                                                 
+          FROM   WORKS                                                        
+          WHERE HOURS < (SELECT HOURS FROM WORKS                              
+                    WHERE EMPNUM = 'E8')                                     
+          OR    HOURS IN (SELECT HOURS FROM WORKS)
+          ORDER BY EMPNUM;
+EM&|PN&
+-------
+E1 |P6 
+E1 |P5 
+E1 |P4 
+E1 |P3 
+E1 |P2 
+E1 |P1 
+E2 |P2 
+E2 |P1 
+E3 |P2 
+E4 |P5 
+E4 |P4 
+E4 |P2 
+ij> -- PASS:0113 If 12 rows are selected?
+-- PASS:0113 If first EMPNUM = 'E1'?
+-- restore
+     ROLLBACK WORK;
+ij> -- END TEST >>> 0113 <<< END TEST
+-- *************************************************////END-OF-MODULE
+;
+ij> 

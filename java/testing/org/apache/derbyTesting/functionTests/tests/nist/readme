@@ -1,0 +1,49 @@
+-- org/apache/derbyTesting/functionTests/tests/nist/readme --
+
+This suite includes files from the SQL Test Suite version 6.0 from the
+National Insitute of Standards and Technology (NIST), an agency of the 
+U.S. Department of Commerce, Gaithersburg MD 20899 available in full 
+from http://www.itl.nist.gov/div897/ctg/sql_form.htm.
+
+Pursuant the Software Acknowledgement and Redistribution agreement at
+http://www.itl.nist.gov/div897/ctg/softagre.htm changes to the original
+NIST suite should be documented.
+
+The following changes were made:
+- no use is made of the NIST testing harness. Instead, suiteable .sql files from
+  the original sql directory have been placed in a separate (this) directory of
+  the Derby functionTests package. The sql scripts are executed by the Derby 
+  functionTests harness using the Derby interactive sql tool 'ij'. 
+  Expected output for Derby is placed in the location suitable for the Derby 
+  functionTests harness. (../../master/*).
+  
+- sections of the tests - i.e. selected test cases - not applicable to Derby 
+  have been commented out, for instance all tests using TRIM.
+
+- VALUES USER statements have been added to relevant test files to check the 
+  correct user is used
+
+- properties files have been added where needed to ensure the tests run with expected 
+  user and database settings as per the Derby database authentication scheme
+
+- AUTOCOMMIT OFF has been added to relevant tests to ensure proper sequencing,
+  transaction management, and improve performance
+ 
+- SET SCHEMA statements have been added to ensure proper behavior with Derby
+
+- Date, time, and timestamp literals have been changed to match the Derby date/time constant syntax.
+
+- The HOUR, MINUTE, SECOND, DAY, MONTH, and YEAR functions have been replaced by the equivalent EXTRACT function.
+
+- CREATE VIEW syntax has been changed to Derby syntax
+
+- JOIN syntax using USING has been modified to use ON keyword.
+
+- CREATE TABLE statements have been changed to have columns participating in a primary or unique
+  index be created NOT NULL.
+
+- CHAR_LENGTH has been changed to LENGTH
+
+
+
+

@@ -1,0 +1,122 @@
+ij> AUTOCOMMIT OFF;
+ij> -- MODULE DML076
+-- SQL Test Suite, V6.0, Interactive SQL, dml076.sql
+-- 59-byte ID
+-- TEd Version #
+-- AUTHORIZATION HU
+   set schema HU;
+0 rows inserted/updated/deleted
+ij> --O   SELECT USER FROM HU.ECCO;
+  VALUES USER;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+HU                                                                                                                              
+ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+-- date_time print
+-- NO_TEST:0435 Host variables in UPDATE WHERE CURRENT!
+-- Testing cursors <update statement:positioned>
+-- *************************************************************
+-- TEST:0436 NULL values for various SQL data types!
+    INSERT INTO BB VALUES(NULL);
+1 row inserted/updated/deleted
+ij> INSERT INTO EE VALUES(NULL);
+1 row inserted/updated/deleted
+ij> INSERT INTO GG VALUES(NULL);
+1 row inserted/updated/deleted
+ij> INSERT INTO HH VALUES(NULL);
+1 row inserted/updated/deleted
+ij> INSERT INTO II VALUES(NULL);
+1 row inserted/updated/deleted
+ij> INSERT INTO JJ VALUES(NULL);
+1 row inserted/updated/deleted
+ij> INSERT INTO MM VALUES(NULL);
+1 row inserted/updated/deleted
+ij> INSERT INTO SS VALUES(NULL);
+1 row inserted/updated/deleted
+ij> SELECT CHARTEST 
+      FROM BB;
+CHA&
+----
+NULL
+ij> -- PASS:0436 If CHARTEST is NULL (Implementor defined print format)?
+    SELECT INTTEST
+      FROM EE;
+INTTEST    
+-----------
+NULL       
+ij> -- PASS:0436 If INTTEST is NULL (Implementor defined print format)?
+    SELECT REALTEST 
+      FROM GG;
+REALTEST     
+-------------
+NULL         
+ij> -- PASS:0436 If REALTEST is NULL (Implementor defined print format)?
+--O    SELECT COUNT(*)
+    SELECT *
+      FROM GG 
+      WHERE REALTEST IS NULL;
+REALTEST     
+-------------
+NULL         
+ij> -- PASS:0436 If count = 1?
+    SELECT SMALLTEST 
+      FROM HH;
+SMALL&
+------
+NULL  
+ij> -- PASS:0436 If SMALLTEST is NULL (Implementor defined print format)?
+    SELECT DOUBLETEST 
+      FROM II;
+DOUBLETEST            
+----------------------
+NULL                  
+ij> -- PASS:0436 If DOUBLETEST is NULL (Implementor defined print format)?
+--O    SELECT COUNT(*) 
+    SELECT * 
+      FROM II 
+      WHERE DOUBLETEST IS NULL;
+DOUBLETEST            
+----------------------
+NULL                  
+ij> -- PASS:0436 If count = 1?
+    SELECT FLOATTEST 
+      FROM JJ;
+FLOATTEST             
+----------------------
+NULL                  
+ij> -- PASS:0436 If FLOATTEST is NULL (Implementor defined print format)?
+--O    SELECT COUNT(*) 
+    SELECT * 
+      FROM JJ 
+      WHERE FLOATTEST IS NULL;
+FLOATTEST             
+----------------------
+NULL                  
+ij> -- PASS:0436 If count = 1?
+    SELECT NUMTEST  
+      FROM MM;
+NUMTE&
+------
+NULL  
+ij> -- PASS:0436 If NUMTEST is NULL (Implementor defined print format)?
+    SELECT NUMTEST 
+      FROM SS;
+NUMTEST         
+----------------
+NULL            
+ij> -- PASS:0436 If NUMTEST is NULL (Implementor defined print format)?
+-- restore
+    ROLLBACK WORK;
+ij> -- END TEST >>> 0436 <<< END TEST
+-- *************************************************************
+-- NO_TEST:0437 NULL values for various host variable types!
+-- Testing Host Variables & Indicator Variables
+-- *************************************************************
+-- NO_TEST:0410 NULL value in OPEN CURSOR!
+-- Testing Cursors & Indicator Variables
+-- *************************************************************
+-- NO_TEST:0441 NULL value for various predicates!
+-- Testing Indicator Variables
+-- *************************************************////END-OF-MODULE
+;
+ij> 

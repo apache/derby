@@ -1,0 +1,45 @@
+ij> AUTOCOMMIT OFF;
+ij> -- MODULE DML039
+-- SQL Test Suite, V6.0, Interactive SQL, dml039.sql
+-- 59-byte ID
+-- TEd Version #
+-- AUTHORIZATION HU
+   set schema HU;
+0 rows inserted/updated/deleted
+ij> --O   SELECT USER FROM HU.ECCO;
+  VALUES USER;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+HU                                                                                                                              
+ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+-- date_time print
+-- TEST:0208 Upper and lower case in LIKE predicate!
+-- setup
+     INSERT INTO STAFF
+            VALUES('E7', 'yanping',26,'China');
+1 row inserted/updated/deleted
+ij> -- PASS:0208 If 1 row is inserted?
+     INSERT INTO STAFF
+            VALUES('E8','YANPING',30,'NIST');
+1 row inserted/updated/deleted
+ij> -- PASS:0208 If 1 row is inserted?
+      SELECT CITY
+           FROM STAFF
+           WHERE EMPNAME LIKE 'yan____%';
+CITY           
+---------------
+China          
+ij> -- PASS:0208 If CITY = 'China'?
+      SELECT CITY
+           FROM STAFF
+           WHERE EMPNAME LIKE 'YAN____%';
+CITY           
+---------------
+NIST           
+ij> -- PASS:0208 If CITY = 'NIST'?
+-- restore
+     ROLLBACK WORK;
+ij> -- END TEST >>> 0208 <<< END TEST
+-- *************************************************////END-OF-MODULE
+;
+ij> 

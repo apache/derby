@@ -1,0 +1,171 @@
+ij> AUTOCOMMIT OFF;
+ij> -- ***************************************************************
+-- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID HU ******
+-- ***************************************************************
+-- MODULE BASETAB
+-- SQL Test Suite, V6.0, Interactive SQL, basetab.sql
+-- 59-byte ID
+-- TEd Version #
+-- AUTHORIZATION HU
+--0   SELECT USER FROM HU.ECCO;
+   VALUES USER;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+HU                                                                                                                              
+ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+-- date_time print
+--   This routine initializes the contents of tables:
+--        STAFF, PROJ, WORKS, STAFF3, VTABLE, and UPUNIQ
+--   This routine may be run at any time to re-initialize tables.
+   DELETE FROM HU.ECCO;
+0 rows inserted/updated/deleted
+ij> INSERT INTO HU.ECCO VALUES ('NL');
+1 row inserted/updated/deleted
+ij> DELETE FROM HU.STAFF;
+0 rows inserted/updated/deleted
+ij> DELETE FROM HU.PROJ;
+0 rows inserted/updated/deleted
+ij> DELETE FROM HU.WORKS;
+0 rows inserted/updated/deleted
+ij> INSERT INTO HU.STAFF VALUES ('E1','Alice',12,'Deale');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.STAFF VALUES ('E2','Betty',10,'Vienna');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.STAFF VALUES ('E3','Carmen',13,'Vienna');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.STAFF VALUES ('E4','Don',12,'Deale');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.STAFF VALUES ('E5','Ed',13,'Akron');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.PROJ VALUES  ('P1','MXSS','Design',10000,'Deale');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.PROJ VALUES  ('P2','CALM','Code',30000,'Vienna');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.PROJ VALUES  ('P3','SDP','Test',30000,'Tampa');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.PROJ VALUES  ('P4','SDP','Design',20000,'Deale');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.PROJ VALUES  ('P5','IRM','Test',10000,'Vienna');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.PROJ VALUES  ('P6','PAYR','Design',50000,'Deale');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E1','P1',40);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E1','P2',20);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E1','P3',80);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E1','P4',20);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E1','P5',12);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E1','P6',12);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E2','P1',40);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E2','P2',80);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E3','P2',20);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E4','P2',20);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E4','P4',40);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.WORKS VALUES  ('E4','P5',80);
+1 row inserted/updated/deleted
+ij> COMMIT WORK;
+ij> --O      SELECT COUNT(*) FROM HU.PROJ;
+      SELECT * FROM HU.PROJ;
+PN&|PNAME               |PTYPE |BUDGET    |CITY           
+----------------------------------------------------------
+P1 |MXSS                |Design|10000     |Deale          
+P2 |CALM                |Code  |30000     |Vienna         
+P3 |SDP                 |Test  |30000     |Tampa          
+P4 |SDP                 |Design|20000     |Deale          
+P5 |IRM                 |Test  |10000     |Vienna         
+P6 |PAYR                |Design|50000     |Deale          
+ij> -- PASS:Setup if count = 6?
+--O      SELECT COUNT(*) FROM HU.STAFF;
+      SELECT * FROM HU.STAFF;
+EM&|EMPNAME             |GRADE|CITY           
+----------------------------------------------
+E1 |Alice               |12   |Deale          
+E2 |Betty               |10   |Vienna         
+E3 |Carmen              |13   |Vienna         
+E4 |Don                 |12   |Deale          
+E5 |Ed                  |13   |Akron          
+ij> -- PASS:Setup if count = 5?
+--O      SELECT COUNT(*) FROM HU.WORKS;
+      SELECT * FROM HU.WORKS;
+EM&|PN&|HOURS 
+--------------
+E1 |P1 |40    
+E1 |P2 |20    
+E1 |P3 |80    
+E1 |P4 |20    
+E1 |P5 |12    
+E1 |P6 |12    
+E2 |P1 |40    
+E2 |P2 |80    
+E3 |P2 |20    
+E4 |P2 |20    
+E4 |P4 |40    
+E4 |P5 |80    
+ij> -- PASS:Setup if count = 12?
+      DELETE FROM HU.STAFF3;
+0 rows inserted/updated/deleted
+ij> DELETE FROM HU.VTABLE;
+0 rows inserted/updated/deleted
+ij> DELETE FROM HU.UPUNIQ;
+0 rows inserted/updated/deleted
+ij> INSERT INTO HU.STAFF3
+              SELECT * 
+              FROM HU.STAFF;
+5 rows inserted/updated/deleted
+ij> INSERT INTO HU.VTABLE VALUES(10,+20,30,40,10.50);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.VTABLE VALUES(0,1,2,3,4.25);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.VTABLE VALUES(100,200,300,400,500.01);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.VTABLE VALUES(1000,-2000,3000,NULL,4000.00);
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.UPUNIQ VALUES(1,'A');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.UPUNIQ VALUES(2,'B');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.UPUNIQ VALUES(3,'C');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.UPUNIQ VALUES(4,'D');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.UPUNIQ VALUES(6,'F');
+1 row inserted/updated/deleted
+ij> INSERT INTO HU.UPUNIQ VALUES(8,'H');
+1 row inserted/updated/deleted
+ij> COMMIT WORK;
+ij> --O      SELECT COUNT(*) FROM HU.STAFF3;
+      SELECT * FROM HU.STAFF3;
+EM&|EMPNAME             |GRADE|CITY           
+----------------------------------------------
+E1 |Alice               |12   |Deale          
+E2 |Betty               |10   |Vienna         
+E3 |Carmen              |13   |Vienna         
+E4 |Don                 |12   |Deale          
+E5 |Ed                  |13   |Akron          
+ij> -- PASS:Setup if count = 5?
+--O      SELECT COUNT(*) FROM HU.VTABLE;
+-- PASS:Setup if count = 4?
+--O      SELECT COUNT(*) FROM HU.UPUNIQ;
+      SELECT * FROM HU.UPUNIQ;
+NUM&|COL2
+---------
+1   |A   
+2   |B   
+3   |C   
+4   |D   
+6   |F   
+8   |H   
+ij> -- PASS:Setup if count = 6?
+-- *************************************************////END-OF-MODULE
+disconnect;
+ij> exit;

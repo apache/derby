@@ -1,0 +1,103 @@
+ij> AUTOCOMMIT OFF;
+ij> -- MODULE  DML158  
+-- SQL Test Suite, V6.0, Interactive SQL, dml158.sql
+-- 59-byte ID
+-- TEd Version #
+-- AUTHORIZATION HU
+   set schema HU;
+0 rows inserted/updated/deleted
+ij> --O   SELECT USER FROM HU.ECCO;
+  VALUES USER;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+HU                                                                                                                              
+ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+   ROLLBACK WORK;
+ij> -- date_time print
+-- TEST:0857 <join condition> set function, outer reference! Error
+   DELETE FROM WORKS
+     WHERE EXISTS 
+     (SELECT * FROM PROJ JOIN STAFF
+      ON PROJ.CITY <> STAFF.CITY
+      AND EMPNUM = WORKS.EMPNUM
+      AND PNUM = WORKS.PNUM);
+ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ij> -- PASS:0857 If ERROR OR SQLSTATE = 42X04
+   SELECT EMPNUM, PNUM FROM WORKS
+       ORDER BY EMPNUM, PNUM;
+EM&|PN&
+-------
+E1 |P1 
+E1 |P2 
+E1 |P3 
+E1 |P4 
+E1 |P5 
+E1 |P6 
+E2 |P1 
+E2 |P2 
+E3 |P2 
+E4 |P2 
+E4 |P4 
+E4 |P5 
+ij> -- PASS:0857 If 12 rows are returned in the following order?
+--                 empnum    pnum
+--                 ======    ====
+-- PASS:0857 If    E1        P1  ?
+-- PASS:0857 If    E1        P2  ?
+-- PASS:0857 If    E1        P3  ?
+-- PASS:0857 If    E1        P4  ?
+-- PASS:0857 If    E1        P5  ?
+-- PASS:0857 If    E1        P6  ?
+-- PASS:0857 If    E2        P1  ?
+-- PASS:0857 If    E2        P2  ?
+-- PASS:0857 If    E3        P2  ?
+-- PASS:0857 If    E4        P2  ?
+-- PASS:0857 If    E4        P4  ?
+-- PASS:0857 If    E4        P5  ?
+   ROLLBACK WORK;
+ij> SELECT EMPNUM, SUM (HOURS) FROM WORKS OWORKS
+       GROUP BY EMPNUM
+       HAVING EMPNUM IN (
+--O       SELECT WORKS.EMPNUM FROM WORKS JOIN STAFF
+--O       ON WORKS.EMPNUM = STAFF.EMPNUM
+       SELECT a.EMPNUM FROM WORKS a, STAFF
+       where a.EMPNUM = STAFF.EMPNUM
+--O       AND HOURS < SUM (OWORKS.HOURS) / 3
+       AND a.HOURS < (select SUM (b.HOURS) / 3 from works b  where a.empnum = b.empnum)
+       AND GRADE > 10)
+       ORDER BY EMPNUM;
+EM&|2          
+---------------
+E1 |184        
+E4 |140        
+ij> -- PASS:0857 If 2 rows are returned in the following order?
+--               empnum    sum(hours)
+--               ======    ==========
+-- PASS:0857 If  E1        184       ?
+-- PASS:0857 If  E4        140       ?
+   SELECT EMPNUM, SUM (HOURS) FROM WORKS OWORKS
+       GROUP BY EMPNUM
+       HAVING EMPNUM IN (
+--O       SELECT WORKS.EMPNUM FROM WORKS JOIN STAFF
+--O       ON WORKS.EMPNUM = STAFF.EMPNUM
+       SELECT a.EMPNUM FROM WORKS a, STAFF
+       where a.EMPNUM = STAFF.EMPNUM
+--O       AND HOURS >= 10 + AVG (OWORKS.HOURS)
+       AND a.HOURS >= (select 10 + AVG (b.HOURS) from works b where a.empnum = b.empnum)
+       AND CITY = 'Deale')
+       ORDER BY EMPNUM;
+EM&|2          
+---------------
+E1 |184        
+E4 |140        
+ij> -- PASS:0857 If 2 rows are returned in the following order?
+--               empnum    sum(hours)
+--               ======    ==========
+-- PASS:0857 If  E1        184       ?
+-- PASS:0857 If  E4        140       ?
+   COMMIT WORK;
+ij> -- END TEST >>> 0857 <<< END TEST
+-- *********************************************
+-- *************************************************////END-OF-MODULE
+;
+ij> 

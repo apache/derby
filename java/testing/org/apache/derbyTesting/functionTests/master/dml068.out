@@ -1,0 +1,198 @@
+ij> AUTOCOMMIT OFF;
+ij> -- MODULE DML068 
+-- SQL Test Suite, V6.0, Interactive SQL, dml068.sql
+-- 59-byte ID
+-- TEd Version #
+-- AUTHORIZATION HU 
+   set schema HU;
+0 rows inserted/updated/deleted
+ij> --O   SELECT USER FROM HU.ECCO;
+  VALUES USER;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+HU                                                                                                                              
+ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+-- date_time print
+-- TEST:0389 95-character graphic subset of ASCII!
+-- NOTE:  OPTIONAL test
+-- NOTE:0389 Collating sequence is implementor defined
+     DELETE FROM AA;
+0 rows inserted/updated/deleted
+ij> -- Making sure the table is empty
+-- setup
+     INSERT INTO AA VALUES('@ at');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('`-qt');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('!exc');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('"dqt');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('#pou');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('$dol');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('%pct');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('&amp');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('''+qt');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('(lpr');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES(')rpr');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('*ast');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('aaaa');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES(':col');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('+plu');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES(';sem');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('[lbk');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('{lbc');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES(',com');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('< lt');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('\bsl');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('|dvt');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('-hyp');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('=equ');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES(']rbk');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('}rbc');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('.per');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('> gt');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('^hat');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('~til');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('/ sl');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('?que');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('_und');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('AAAA');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('0000');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('9999');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('zzzz');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('  sp');
+1 row inserted/updated/deleted
+ij> INSERT INTO AA VALUES('ZZZZ');
+1 row inserted/updated/deleted
+ij> SELECT * FROM AA
+          ORDER BY CHARTEST;
+CHARTEST            
+--------------------
+  sp                
+!exc                
+"dqt                
+#pou                
+$dol                
+%pct                
+&amp                
+'+qt                
+(lpr                
+)rpr                
+*ast                
++plu                
+,com                
+-hyp                
+.per                
+/ sl                
+0000                
+9999                
+:col                
+;sem                
+< lt                
+=equ                
+> gt                
+?que                
+@ at                
+AAAA                
+ZZZZ                
+[lbk                
+\bsl                
+]rbk                
+^hat                
+_und                
+`-qt                
+aaaa                
+zzzz                
+{lbc                
+|dvt                
+}rbc                
+~til                
+ij> -- PASS:0389 If character in 1st position matches                 ?
+-- PASS:0389    description in positions 2-4                      ?
+-- PASS:0389 If ASCII, then ORDER is: space followed by characters?
+-- PASS:0389    !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~            ?
+--O     SELECT COUNT(*)
+     SELECT *
+          FROM AA;
+CHARTEST            
+--------------------
+@ at                
+`-qt                
+!exc                
+"dqt                
+#pou                
+$dol                
+%pct                
+&amp                
+'+qt                
+(lpr                
+)rpr                
+*ast                
+aaaa                
+:col                
++plu                
+;sem                
+[lbk                
+{lbc                
+,com                
+< lt                
+\bsl                
+|dvt                
+-hyp                
+=equ                
+]rbk                
+}rbc                
+.per                
+> gt                
+^hat                
+~til                
+/ sl                
+?que                
+_und                
+AAAA                
+0000                
+9999                
+zzzz                
+  sp                
+ZZZZ                
+ij> -- PASS:0389 If count = 39? 
+-- restore
+     ROLLBACK WORK;
+ij> -- END TEST >>> 0389 <<< END TEST
+-- *************************************************////END-OF-MODULE
+;
+ij> 

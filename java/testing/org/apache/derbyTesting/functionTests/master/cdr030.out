@@ -1,0 +1,102 @@
+ij> AUTOCOMMIT OFF;
+ij> -- MODULE CDR030  
+-- SQL Test Suite, V6.0, Interactive SQL, cdr030.sql
+-- 59-byte ID
+-- TEd Version #
+-- AUTHORIZATION SUN
+   set schema SUN;
+0 rows inserted/updated/deleted
+ij> --O   SELECT USER FROM HU.ECCO;
+  VALUES USER;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+SUN                                                                                                                             
+ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+-- date_time print
+-- NOTE Direct support for SQLCODE or SQLSTATE is not required
+-- NOTE    in Interactive Direct SQL, as defined in FIPS 127-2.
+-- NOTE   ********************* instead ***************************
+-- NOTE If a statement raises an exception condition,
+-- NOTE    then the system shall display a message indicating that
+-- NOTE    the statement failed, giving a textual description
+-- NOTE    of the failure.
+-- NOTE If a statement raises a completion condition that is a
+-- NOTE    "warning" or "no data", then the system shall display
+-- NOTE    a message indicating that the statement completed,
+-- NOTE    giving a textual description of the "warning" or "no data."
+-- TEST:0516 SQLSTATE 23502: integrity constraint violation!
+--O   INSERT INTO EMP 
+--O         VALUES (41,'Tom','China Architecture',
+--O                 20,'Architecture',040553);
+-- PASS:0516 If ERROR, integrity constraint violation, 0 rows inserted?
+-- PASS:0516 OR RI ERROR, parent missing, 0 rows inserted?
+-- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
+--O   DELETE FROM EMP
+--O         WHERE ENO = 21;
+-- PASS:0516 If ERROR, integrity constraint violation, 0 rows deleted?
+-- PASS:0516 OR RI ERROR, children exist, 0 rows deleted?
+-- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
+--O   UPDATE EMP
+--O         SET ENAME = 'Thomas'
+--O         WHERE ENO = 21;
+-- PASS:0516 If ERROR, integrity constraint violation, 0 rows updated?
+-- PASS:0516 OR RI ERROR, chldren exist, 0 rows updated?
+-- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
+-- setup 
+   DELETE FROM STAFF7;
+1 row inserted/updated/deleted
+ij> -- PRIMARY KEY (EMPNUM)
+   INSERT INTO STAFF7 (EMPNUM) 
+         VALUES ('XXX');
+1 row inserted/updated/deleted
+ij> -- PASS:0516 If 1 row inserted?
+   INSERT INTO STAFF7 (EMPNUM) 
+         VALUES ('XXX');
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'STAFF7'.
+ij> -- PASS:0516 If ERROR, integrity constraint violation, 0 rows inserted?
+-- PASS:0516 OR ERROR, unique constraint, 0 rows inserted?
+-- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
+-- setup
+   DELETE FROM PROJ3;
+0 rows inserted/updated/deleted
+ij> -- UNIQUE (PNUM)
+   INSERT INTO PROJ3 (PNUM) VALUES ('787');
+1 row inserted/updated/deleted
+ij> INSERT INTO PROJ3 (PNUM) VALUES ('789');
+1 row inserted/updated/deleted
+ij> -- PASS:0516 If 1 row inserted?
+   UPDATE PROJ3          SET PNUM = '787' 
+                       WHERE PNUM = '789';
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'PROJ3'.
+ij> -- PASS:0516 If ERROR, integrity constraint violation, 0 rows updated?
+-- PASS:0516 OR ERROR, unique constraint, 0 rows updated?
+-- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
+-- setup
+   DELETE FROM STAFF11;
+1 row inserted/updated/deleted
+ij> INSERT INTO STAFF11
+         VALUES('E3','Susan',11,'Hawaii');
+1 row inserted/updated/deleted
+ij> -- PASS:0516 If 1 row inserted?
+-- (CHECK GRADE NOT IN (5,22))
+   UPDATE STAFF11
+         SET GRADE = 5
+         WHERE EMPNUM = 'E3';
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ij> -- PASS:0516 If ERROR, integrity constraint violation, 0 rows updated?
+-- PASS:0516 OR ERROR, check constraint, 0 rows updated?
+-- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
+-- (CHECK NOT EMPNAME LIKE 'T%')
+   UPDATE STAFF11
+         SET EMPNAME = 'Tom'
+         WHERE EMPNUM = 'E3';
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ij> -- PASS:0516 If ERROR, integrity constraint violation, 0 rows updated?
+-- PASS:0516 OR ERROR, check constraint, 0 rows updated?
+-- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
+-- restore
+   ROLLBACK WORK;
+ij> -- END TEST >>> 0516 <<< END TEST
+-- *************************************************////END-OF-MODULE
+;
+ij> 
