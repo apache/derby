@@ -1682,6 +1682,10 @@ public interface StoredFormatIds {
         public static final int LOGOP_REMOVE_FILE =
                 (MIN_ID_2 + 291);
 
+        /* org.apache.derby.impl.store.raw.log.ChecksumOperation */
+        public static final int LOGOP_CHECKSUM =
+                (MIN_ID_2 + 453);
+
 
         /*******************************************************************
         **
@@ -1802,7 +1806,7 @@ public interface StoredFormatIds {
          * Make sure this is updated when a new module is added
          */
         public static final int MAX_ID_2 =
-                (MIN_ID_2 + 452);
+                (MIN_ID_2 + 453);
 
         // DO NOT USE 4 BYTE IDS ANYMORE
         static public final int MAX_ID_4 =

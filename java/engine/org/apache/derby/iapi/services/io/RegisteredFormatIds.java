@@ -512,8 +512,8 @@ String[] TwoByte = {
         /* 450 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
 
  
-        /* 451 */   "org.apache.derby.catalog.types.RoutineAliasInfo"
-
-
+        /* 451 */   "org.apache.derby.catalog.types.RoutineAliasInfo",
+		/* 452 */   null,
+		/* 453 */   "org.apache.derby.impl.store.raw.log.ChecksumOperation"
 };
 }

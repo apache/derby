@@ -39,6 +39,7 @@ import org.apache.derby.impl.store.raw.log.StreamLogScan;
 import org.apache.derby.io.StorageRandomAccessFile;
 
 import java.io.IOException;
+import org.apache.derby.iapi.store.raw.Loggable;
 
 /**
 
@@ -460,9 +461,20 @@ public class Scan implements StreamLogScan {
 			}
 
 			lr = (LogRecord) input.readObject();
-			if (groupmask != 0 || tranId != null)
+
+			// skip the checksum log records, there is no need to look at them 
+			// during backward scans. They are used only in forwardscan during recovery. 
+			if(lr.isChecksum())
 			{
-				if (groupmask != 0 && (groupmask & lr.group()) == 0)
+				candidate = false; 
+			}else if (groupmask != 0 || tranId != null)
+			{
+
+				// skip the checksum log records  
+				if(lr.isChecksum())
+					candidate = false; 
+
+				if (candidate && groupmask != 0 && (groupmask & lr.group()) == 0)
 					candidate = false; // no match, throw this log record out 
 
 				if (candidate && tranId != null)
@@ -950,6 +962,93 @@ public class Scan implements StreamLogScan {
 
 			// the scan is now positioned just past this log record and right
 			// at the beginning of the next log record
+
+
+			/** if the current log record is a checksum log record then
+			 * using the information available in this record validate
+			 * that data in the log file by matching the checksum in 
+			 * checksum log record and by recalculating the checksum for the 
+			 * specified length of the data in the log file. cheksum values
+			 * should match unless the right was incomplete before the crash.
+			 */
+			if(lr.isChecksum())
+			{
+				// checksum log record should not be returned to the logger recovery redo
+				// routines, it is just used to identify the incomplete log writes.
+
+				candidate = false;
+				Loggable op = lr.getLoggable(); 
+				if (SanityManager.DEBUG)
+                {
+                    if (SanityManager.DEBUG_ON(LogToFile.DUMP_LOG_ONLY) ||
+                        SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
+
+						SanityManager.DEBUG(LogToFile.DBG_FLAG, 
+											"scanned " + "Null" + " : " + op + 
+											" instant = " + 
+											LogCounter.toDebugString(currentInstant) + 
+											" logEnd = " +  LogCounter.toDebugString(knownGoodLogEnd));
+				}
+
+				ChecksumOperation clop = (ChecksumOperation) op;
+				int ckDataLength =  clop.getDataLength(); 
+				// resize the buffer to be size of checksum data length if required.
+				if (data.length < ckDataLength)
+				{
+					// make a new array of sufficient size and reset the arrary
+					// in the input stream
+					data = new byte[ckDataLength];
+					input.setData(data);
+					input.setLimit(0, ckDataLength);
+				}
+				
+				boolean validChecksum = false;
+				// check if the expected number of bytes by the checksum log
+				// record actually exist in the file and then verify if checksum
+				// is valid to identify any incomplete out of order writes.
+				if((recordStartPosition + ckDataLength) <= currentLogFileLength)
+				{
+					// read the data into the buffer
+					scan.readFully(data, 0, ckDataLength);
+					// verify the checksum 
+					if(clop.isChecksumValid(data, 0 , ckDataLength))
+						validChecksum = true;
+				}
+
+
+				if(!validChecksum)
+				{
+					// declare that the end of the transaction log is fuzzy, checksum is invalid
+					// only when the writes are incomplete; this can happen
+					// only when writes at the end of the log were partially
+					// written before the crash. 
+
+					if (SanityManager.DEBUG)
+                    {
+                        if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
+                        {
+                            SanityManager.DEBUG(
+                                LogToFile.DBG_FLAG, 
+                                "detected fuzzy log end on log file while doing checksum checks " + 
+								currentLogFileNumber + 
+                                " checksum record start position " + recordStartPosition + 
+                                " file length " + currentLogFileLength + 
+								" checksumDataLength=" + ckDataLength);
+                        }
+						
+					}
+					
+					fuzzyLogEnd = true;
+					scan.close();
+					scan = null;
+					return null;
+				}
+
+				// reset the scan to the start of the next log record
+				scan.seek(recordStartPosition);
+			}
+
+
 		} while (candidate == false) ;
 
 		return lr;

@@ -38,6 +38,7 @@ final class LogAccessFileBuffer
     protected byte[]    buffer;
     protected int       bytes_free;
     protected int       position;
+	protected int       length;
 
     LogAccessFileBuffer next;
     LogAccessFileBuffer prev;
@@ -53,17 +54,18 @@ final class LogAccessFileBuffer
         prev        = null;
         next        = null;
 
-        init();
+        init(0);
     }
 
     /**************************************************************************
      * Private/Protected methods of This class:
      **************************************************************************
      */
-    public void init()
+    public void init(int reserve)
     {
-        bytes_free  = buffer.length;
-        position    = 0;
+		length =  buffer.length - reserve;
+        bytes_free  = length;
+        position    = reserve;
     }
 
     /**************************************************************************

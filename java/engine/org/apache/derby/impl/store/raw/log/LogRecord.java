@@ -145,6 +145,21 @@ public class LogRecord implements Formatable {
 		return tranId.getMaxStoredSize();
 	}
 
+	
+	public static int getStoredSize(int group, TransactionId xactId)
+	{
+		
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(xactId == null, 
+								 "size calculation are based on xactId being  null"); 
+		}
+
+		return 	formatLength + 	CompressedNumber.sizeInt(group) + 
+			FormatIdUtil.getFormatIdByteLength(StoredFormatIds.NULL_FORMAT_ID);
+	}
+
+
 	public TransactionId getTransactionId() 
 		 throws IOException, ClassNotFoundException 
 	{
@@ -292,4 +307,7 @@ public class LogRecord implements Formatable {
 	}
 
 
+	public boolean isChecksum()	{
+		return ((group & Loggable.CHECKSUM) != 0);
+	}
 }

@@ -30,15 +30,14 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.EngineType;
-
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.io.StorageRandomAccessFile;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -65,6 +64,9 @@ import java.util.Properties;
 
     Execute in order
 
+	To Test Bad Log due to partial write that are identified by checking the
+	length in the beginning and end of the log record. 
+
 	java -DTestBadLogSetup=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
 	java -DTestBadLog1=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
 	java -DTestBadLog2=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
@@ -74,12 +76,27 @@ import java.util.Properties;
 	java -DTestBadLog6=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
 	java -DTestBadLog7=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
 	java -DTestBadLog1=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+
+	To Test Bad Log due to an incomplete out of order write that is identified
+	by the checksum logic (simulated by	explicitly corrupting a middle of a 
+	log record at  the  end of log file after it is written).
+	
+	java -DTestBadLogSetup=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog1=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog2=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog3=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog4=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog5=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog6=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog7=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	java -DTestBadLog1=true -DTestBadChecksumLog=true org.apache.derbyTesting.unitTests.harness.UnitTestMain
+	
 	
 */
 
 public class T_RecoverBadLog extends T_Generic {
 
-	private static final String testService = "BadLogTest";
+	private  String testService = "BadLogTest";
 
 	static final String REC_001 = "McLaren";
 	static final String REC_002 = "Ferrari";
@@ -102,8 +119,9 @@ public class T_RecoverBadLog extends T_Generic {
 	private boolean test5;
 	private boolean test6;
 	private boolean test7;
-
-	private static final String infoPath = "extinout/T_RecoverBadLog.info";
+	private boolean checksumTest; 
+	
+	private  String infoPath = "extinout/T_RecoverBadLog.info";
 
 	private static final String TEST_BADLOG_SETUP = "TestBadLogSetup";
 	private static final String TEST_BADLOG1 = "TestBadLog1";
@@ -114,10 +132,14 @@ public class T_RecoverBadLog extends T_Generic {
 	private static final String TEST_BADLOG6 = "TestBadLog6";
 	private static final String TEST_BADLOG7 = "TestBadLog7";
 
+	private static final String TEST_BAD_CHECKSUM_LOG = "TestBadChecksumLog";
+
 	private static final String TEST_BADLOG_INFO = "TestBadLogInfo";
+	private static final String TEST_BADCHECKSUMLOG_INFO = "TestBadChecksumLogInfo";
 
 	RawStoreFactory	factory;
 	LockFactory  lf;
+	LogToFile   logFactory;
 	ContextService contextService;
 	T_Util t_util;
 
@@ -163,6 +185,15 @@ public class T_RecoverBadLog extends T_Generic {
 
 		param = PropertyUtil.getSystemProperty(TEST_BADLOG7);
 		test7 = Boolean.valueOf(param).booleanValue();
+		
+		param = PropertyUtil.getSystemProperty(TEST_BAD_CHECKSUM_LOG);
+		checksumTest = Boolean.valueOf(param).booleanValue();
+		
+		if(checksumTest)
+		{
+			infoPath = "extinout/T_RecoverBadChecksumLog.info";
+			testService = "BadChecksumLogTest";
+		}
 	}
 
 
@@ -183,7 +214,6 @@ public class T_RecoverBadLog extends T_Generic {
 		if (test5) tests++;
 		if (test6) tests++;
 		if (test7) tests++;
-
 		
 		if (tests != 1)
 			throw T_Fail.testFailMsg("One & only one of the bad log recovery test should be run");
@@ -242,21 +272,25 @@ public class T_RecoverBadLog extends T_Generic {
 			else					// not setup, recover it
 			{
 				REPORT("_______________________________________________________");
-				if (test1)
-					REPORT("\n\t\tRunning bad log test 1");
-				if (test2)
-					REPORT("\n\t\tRunning bad log test 2");
-				if (test3)
-					REPORT("\n\t\tRunning bad log test 3");
-				if (test4)
-					REPORT("\n\t\tRunning bad log test 4");
-				if (test5)
-					REPORT("\n\t\tRunning bad log test 5");
-				if (test6)
-					REPORT("\n\t\tRunning bad log test 6");
-				if (test7)
-					REPORT("\n\t\tRunning bad log test 7");
 				
+				String message = "\n\t\tRunning bad log test ";
+				if (checksumTest)
+					message = "\n\t\tRunning bad checksum log test ";
+				if (test1)
+					REPORT(message + " 1");
+				if (test2)
+					REPORT(message + " 2");
+				if (test3)
+					REPORT(message + " 3");
+				if (test4)
+					REPORT(message + " 4");
+				if (test5)
+					REPORT(message + " 5");
+				if (test6)
+					REPORT(message + " 6");
+				if (test7)
+					REPORT(message + " 7");
+
 				REPORT("_______________________________________________________");
 
 				//if external input output files does not exist ,create one
@@ -283,7 +317,8 @@ public class T_RecoverBadLog extends T_Generic {
 					throw T_Fail.testFailMsg("Monitor didn't know how to restart service: " + testService);
 
 				factory = (RawStoreFactory) Monitor.findService(getModuleToTestProtocolName(), testService);
-
+				logFactory =(LogToFile) Monitor.findServiceModule(factory, factory.getLogFactoryModule());
+				
 			}
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -302,6 +337,7 @@ public class T_RecoverBadLog extends T_Generic {
 		t_util = new T_Util(factory, lf, contextService);
 
 		try {
+			
 
 			// these tests can be run in any order
 			RTest1();
@@ -464,15 +500,22 @@ public class T_RecoverBadLog extends T_Generic {
 			///////////////////////////////////////////
 			factory.checkpoint();
 
-
 			//////////////////////////////////////////////////////////
 			// writing approx 1/2 log record to the end of the log - 
 			// NO MORE LOG RECORD SHOULD BE WRITTEN,
 			//////////////////////////////////////////////////////////
-			SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-			System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(numcol*20));
+			if(!checksumTest)
+			{
+				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(numcol*20));
+			}
+			
+			logFactory.flushAll();
 
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+
+			if(checksumTest)
+				simulateLogFileCorruption();
 
 			////////////////////////////////////////////////////////
 
@@ -596,10 +639,17 @@ public class T_RecoverBadLog extends T_Generic {
 			// writing approx 1/2 log record to the end of the log - 
 			// NO MORE LOG RECORD SHOULD BE WRITTEN,
 			//////////////////////////////////////////////////////////
-			SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-			System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES,Integer.toString(numcol*20));
+			if(!checksumTest)
+			{
+				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES,Integer.toString(numcol*20));
+			}
 
+			logFactory.flushAll();
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+			
+			if(checksumTest)
+				simulateLogFileCorruption();
 
 			////////////////////////////////////////////////////////
 
@@ -1002,9 +1052,13 @@ public class T_RecoverBadLog extends T_Generic {
 			// writing 200 bytes of the log record to the end of the log - 
 			// NO MORE LOG RECORD SHOULD BE WRITTEN,
 			//////////////////////////////////////////////////////////
+			if(!checksumTest)
+			{
+				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, "200");
+			}
+			logFactory.flushAll();
 
-			SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-			System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, "200");
 
 			// RESOLVE:
 			// copy and purge actually generates 2 log records, this is
@@ -1014,6 +1068,10 @@ public class T_RecoverBadLog extends T_Generic {
 			badPage1.copyAndPurge(badPage2, 0, i, 0);
 
 			t[3].resetContext();
+
+			if(checksumTest)
+				simulateLogFileCorruption();
+
 			////////////////////////////////////////////////////////
 
 			REPORT("badlog test3: numtrans " + numtrans + " numpages " + numpages);
@@ -1206,10 +1264,17 @@ public class T_RecoverBadLog extends T_Generic {
 			// NO MORE LOG RECORD SHOULD BE WRITTEN,
 			// Length  4 bytes + 7(8) bytes of log record instance
 			//////////////////////////////////////////////////////////
-			SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-			System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(11));
+			if(!checksumTest)
+			{
+				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(11));
+			}
 
+			logFactory.flushAll();
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+
+			if(checksumTest)
+				simulateLogFileCorruption();
 
 			////////////////////////////////////////////////////////
 
@@ -1340,10 +1405,17 @@ public class T_RecoverBadLog extends T_Generic {
 			// NO MORE LOG RECORD SHOULD BE WRITTEN,
 			// Length  3 bytes (4) of log record length
 			//////////////////////////////////////////////////////////
-			SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-			System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(3));
+			if(!checksumTest)
+			{
+				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(3));
+			}
+			logFactory.flushAll();
 
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+
+			if(checksumTest)
+				simulateLogFileCorruption();
 
 			////////////////////////////////////////////////////////
 
@@ -1472,10 +1544,16 @@ public class T_RecoverBadLog extends T_Generic {
 			// writing (1997/2 (data)+ 16(log records ov)) bytes of log record to the end of the log - 
 			// NO MORE LOG RECORD SHOULD BE WRITTEN,
 			//////////////////////////////////////////////////////////
-			SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-			System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString((1997/2) + 16));
-
+			if(!checksumTest)
+			{
+				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString((1997/2) + 16));
+			}
+			logFactory.flushAll();
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+
+			if(checksumTest)
+				simulateLogFileCorruption();
 
 			////////////////////////////////////////////////////////
 
@@ -1605,10 +1683,17 @@ public class T_RecoverBadLog extends T_Generic {
 			//i.e: instead of (1997(data) + 16 (log records overhead)) write (1997 + 15) 
 			// NO MORE LOG RECORD SHOULD BE WRITTEN,
 			//////////////////////////////////////////////////////////
-			SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-			System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(1997+15));
-
+			if(!checksumTest)
+			{
+				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
+				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(1997+15));
+			}
+			logFactory.flushAll();
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+
+			if(checksumTest)
+				simulateLogFileCorruption();
+
 
 			////////////////////////////////////////////////////////
 
@@ -1678,6 +1763,54 @@ public class T_RecoverBadLog extends T_Generic {
 			t.close();
 		}
 	}
+
+
+
+	/*
+	 * simulate log corruption to test the checksuming of log records. 
+	 */
+	private void simulateLogFileCorruption() throws T_Fail, StandardException
+	{
+		long filenum;
+		long filepos;
+		long amountOfLogWritten;
+		LogCounter logInstant = (LogCounter)logFactory.getFirstUnflushedInstant();
+		filenum = logInstant.getLogFileNumber();
+		filepos = logInstant.getLogFilePosition();
+		logFactory.flushAll();
+		logInstant = (LogCounter)logFactory.getFirstUnflushedInstant();
+		filenum = logInstant.getLogFileNumber();
+		amountOfLogWritten = logInstant.getLogFilePosition() - filepos;
+
+		// write some random  garbage into the log file , 
+		// purpose of doing this is to test that recovery works correctly when 
+		// log records in the end of a log file did not get wrtten completely
+		// and in the correct order. 
+
+		try{
+			StorageRandomAccessFile log = logFactory.getLogFileToSimulateCorruption(filenum) ;
+		
+			int noWrites = (int) amountOfLogWritten / 512;
+			//mess up few bytes in every block of a 512 bytes.
+			filepos += 512;
+			java.util.Random r = new java.util.Random();
+			for(int i = 0 ; i < noWrites ; i++)
+			{
+				REPORT("corruptig log file : filenum " + filenum + " fileposition " + filepos);
+				log.seek(filepos);
+				log.writeInt(r.nextInt());
+				filepos +=512;
+
+			}
+			log.sync(false);
+			log.close();
+		}catch(IOException ie)
+		{
+			throw T_Fail.exceptionFail(ie);
+		}
+		
+	}
+
 }
 
 

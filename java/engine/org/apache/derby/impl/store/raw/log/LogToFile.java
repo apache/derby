@@ -282,7 +282,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 	protected LogAccessFile logOut;		// an output stream to the log file
 								// (access of the variable should sync on this)
-
+	private   StorageRandomAccessFile firstLog = null;
 	protected long		     endPosition = -1; // end position of the current log file
 	long					 lastFlush = 0;	// the position in the current log
 											// file that has been flushed to disk
@@ -565,6 +565,12 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 		rawStoreFactory = rsf;
 		dataFactory     = df;
+		
+		// initialize the log writer only after the rawstorefactory is available, 
+		// log writer requires encryption block size info from rawstore factory 
+		// to encrypt checksum log records. 
+		if (firstLog != null) 
+			logOut = new LogAccessFile(this, firstLog, logBufferSize);
 
 		// we don't want to set ReadOnlyDB before recovery has a chance to look
 		// at the latest checkpoint and determine that the database is shutdown
@@ -1003,7 +1009,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 				}
 
 				if (theLog != null)
-					logOut = new LogAccessFile(theLog, logBufferSize);
+					logOut = new LogAccessFile(this, theLog, logBufferSize);
 				
 				if(logSwitchRequired)
 					switchLogFile();
@@ -1850,7 +1856,8 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 					// write out an extra 0 at the end to mark the end of the log
 					// file.
-					logOut.writeInt(0);
+					
+					logOut.writeEndMarker(0);
 
 					endPosition += 4;
 					//set that we are in log switch to prevent flusher 
@@ -1858,6 +1865,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 					inLogSwitch = true; 
 					// flush everything including the int we just wrote
 					flush(logFileNumber, endPosition);
+					
 					
 					// simulate out of log error after the switch over
 					if (SanityManager.DEBUG)
@@ -1883,7 +1891,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 						newLog.seek(endPosition);
 					}
 
-					logOut = new LogAccessFile(newLog, logBufferSize);
+					logOut = new LogAccessFile(this, newLog, logBufferSize);
 					newLog = null;
 
 
@@ -1972,7 +1980,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		@exception IOException Failed to flush to the log
 	*/
 	private void flushBuffer(long fileNumber, long wherePosition)
-		throws IOException
+		throws IOException, StandardException
 	{
 		synchronized (this) {
 			if (fileNumber < logFileNumber)	// history
@@ -2913,29 +2921,28 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 					}
 
 					// don't need to try to delete it, we know it isn't there
-                    StorageRandomAccessFile theLog = privRandomAccessFile(logFile, "rw");
+                    firstLog = privRandomAccessFile(logFile, "rw");
 
-					if (!initLogFile(theLog, logFileNumber, LogCounter.INVALID_LOG_INSTANT))
+					if (!initLogFile(firstLog, logFileNumber, LogCounter.INVALID_LOG_INSTANT))
                     {
 						throw StandardException.newException(
                             SQLState.LOG_SEGMENT_NOT_EXIST, logFile.getPath());
                     }
 
-					endPosition = theLog.getFilePointer();
-					lastFlush = theLog.getFilePointer();
+					endPosition = firstLog.getFilePointer();
+					lastFlush = firstLog.getFilePointer();
 
                     //if write sync is true , prellocate the log file
                     //and reopen the file in rws mode.
                     if(isWriteSynced)
                     {
                         //extend the file by wring zeros to it
-                        preAllocateNewLogFile(theLog);
-                        theLog.close();
-                        theLog=  privRandomAccessFile(logFile, "rws");
+                        preAllocateNewLogFile(firstLog);
+                        firstLog.close();
+                        firstLog=  privRandomAccessFile(logFile, "rws");
                         //postion the log at the current log end postion
-                        theLog.seek(endPosition);
+                        firstLog.seek(endPosition);
                     }
-					logOut = new LogAccessFile(theLog, logBufferSize);
 
 					if (SanityManager.DEBUG)
 					{
@@ -2949,6 +2956,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 					// read only database
 					ReadOnlyDB = true;
 					logOut = null;
+					firstLog = null;
 				}
 
 				recoveryNeeded = false;
@@ -3012,8 +3020,9 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 				try {
 					logOut.flushLogAccessFile();
 					logOut.close();
-				} catch (IOException ioe) {
 				}
+				catch (IOException ioe) {}
+				catch(StandardException se){}
 				logOut = null;
 			}
 		}
@@ -3318,6 +3327,9 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
                                 new Long(LogCounter.MAX_LOGFILE_SIZE));
                     }
 				}
+
+				//reserve the space for the checksum log record
+				endPosition += logOut.reserveSpaceForChecksum(length, logFileNumber,endPosition);
 
 				// don't call currentInstant since we are already in a
 				// synchronzied block 
@@ -3793,6 +3805,22 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		return rawStoreFactory.getEncryptionBlockSize();
 	}
 
+	/**
+	   returns the length that will make the data to be multiple of encryption
+	   block size based on the given length. Block cipher algorithms like DES 
+	   and Blowfish ..etc  require their input to be an exact multiple of the block size.
+	*/
+	public int getEncryptedDataLength(int length)
+	{
+		if ((length % getEncryptionBlockSize()) != 0)
+		{
+			return length + getEncryptionBlockSize() - (length % getEncryptionBlockSize());
+		}
+
+		return length;
+	}
+
+
 
 	/**
 	  Get the instant of the first record which was not
@@ -3939,16 +3967,23 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			Monitor.logMessage("TEST_LOG_INCOMPLETE_LOG_WRITE: writing " + bytesToWrite + 
 				   " bytes out of " + length + " + " + LOG_RECORD_OVERHEAD + " log record");
 
-
-
-
-			long instant = currentInstant();
+			long instant;
 			try
 			{
+								
 				synchronized (this)
 				{
-						//check if the length of the records to be written is 
-						//actually smaller than the number of bytesToWrite 
+					// reserve the space for the checksum log record
+					// NOTE:  bytesToWrite include the log record overhead.
+					endPosition += 
+						logOut.reserveSpaceForChecksum(((length + LOG_RECORD_OVERHEAD) 
+														< bytesToWrite ? length :
+														(bytesToWrite - LOG_RECORD_OVERHEAD)),
+													   logFileNumber,endPosition);
+					instant = currentInstant();
+
+					//check if the length of the records to be written is 
+					//actually smaller than the number of bytesToWrite 
 					if(length + LOG_RECORD_OVERHEAD < bytesToWrite)
 						endPosition += (length + LOG_RECORD_OVERHEAD);
 					else
@@ -4073,6 +4108,25 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		}	
 	}
 
+	/**
+	 * Get the log file to Simulate a log corruption 
+	 * FOR UNIT TESTING USAGE ONLY 
+	*/
+	public StorageRandomAccessFile getLogFileToSimulateCorruption(long filenum) throws IOException, StandardException
+	{
+		if (SanityManager.DEBUG)
+		{
+			//long filenum = LogCounter.getLogFileNumber(logInstant);
+			//			long filepos = LogCounter.getLogFilePosition(logInstant);
+			StorageFile fileName = getLogFileName(filenum);
+			StorageRandomAccessFile log = null;
+			return privRandomAccessFile(fileName, "rw");
+		}
+		
+		return null;
+
+	}
+	
 
 	/*********************************************************************
 	 * Log Testing
@@ -4120,9 +4174,6 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	  simulated to be full.
 	*/
 	public static final String TEST_RECORD_TO_FILL_LOG = SanityManager.DEBUG ? "db2j.unittest.recordToFillLog" : null;
-
-
-
 
 
 	//enable the log archive mode

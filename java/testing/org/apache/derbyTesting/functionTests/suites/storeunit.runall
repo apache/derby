@@ -24,3 +24,11 @@ unit/logSwitchFail.unit
 unit/fullRecoveryFail.unit
 unit/fullRecoveryFail.unit
 unit/fullRecovery.unit
+unit/recoverBadChecksumLogSetup.unit
+unit/recoverBadChecksumLog1.unit
+unit/recoverBadChecksumLog2.unit
+unit/recoverBadChecksumLog3.unit
+unit/recoverBadChecksumLog4.unit
+unit/recoverBadChecksumLog5.unit
+unit/recoverBadChecksumLog6.unit
+unit/recoverBadChecksumLog7.unit
