@@ -1673,11 +1673,6 @@ public interface StoredFormatIds {
         public static final int LOGOP_SET_RESERVED_SPACE = 
                 (MIN_ID_2 + 287);
 
-        /* org.apache.derby.impl.store.raw.log.SaveLWMOperation */
-        public static final int LOGOP_SAVE_LWM =
-                (MIN_ID_2 + 114);
-
-
         /* org.apache.derby.impl.store.raw.data.RemoveFileOperation */
         public static final int LOGOP_REMOVE_FILE =
                 (MIN_ID_2 + 291);

@@ -1512,27 +1512,6 @@ public class Xact extends RawTransaction implements Limit  {
 		return savePoints.size();
 	}
 
-	/**
-		@exception StandardException  Standard cloudscape exception policy
-	*/
-	public void addTruncationLWM(UUID name, LogInstant instant)
-		 throws StandardException
-	{
-		setActiveState();
-
-		logFactory.setTruncationLWM(name, instant);
-	}
-
-	/**
-		@exception StandardException  Standard cloudscape exception policy
-	*/
-	public void removeTruncationLWM(UUID name) throws StandardException
-	{
-		setActiveState();
-
-		logFactory.removeTruncationLWM(name);
-	}
-
 
 	/*
 	**	Implementation specific methods

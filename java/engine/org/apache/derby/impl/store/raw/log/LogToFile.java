@@ -16,8 +16,6 @@ import org.apache.derby.impl.store.raw.log.CheckpointOperation;
 import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.impl.store.raw.log.LogRecord;
 import org.apache.derby.impl.store.raw.log.StreamLogScan;
-import org.apache.derby.impl.store.raw.log.SaveLWMOperation;
-import org.apache.derby.impl.store.raw.log.TruncationPoint;
 
 // need this to print nested exception that corrupts the database
 import org.apache.derby.iapi.services.context.ErrorStringBuilder;
@@ -350,21 +348,10 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	private boolean			 recoveryNeeded = true; // log needs to be recovered
 	private boolean			 inCheckpoint = false; 	// in the middle of a checkpoint
 	private boolean			 inRedo = false;        // in the middle of redo loop
-	private boolean			 movingTruncPt = false;	// in the middle of moving
-													// a truncationLWM
 	private boolean          inLogSwitch = false;
 
 	// make sure we don't do anything after the log factory has been stopped
 	private boolean			 stopped = false;
-
-	Vector 			 		 truncPoints; // a list of truncationLWM
-								// 
-								// MT - This value is set during recovery or
-								// during set/remove TruncationLWM.  In the
-								// former single thread is assumed.  In the
-								// latter must synchronized on this for
-								// access or change.
-
 
 	// if log is to go to another device, this variable is set.  If null, then
 	// log goes to the log subdirectory underneath the data directory
@@ -715,23 +702,6 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
                             LogCounter.getLogFileNumber(undoLWM);
                     }
 
-					TruncationPoint[] tpoints =
-						currentCheckpoint.truncationLWM();
-
-					if (tpoints != null)
-					{
-						LogInstant earliestLWM = restoreTruncationLWMs(tpoints);
-
-						if (earliestLWM != null)
-						{
-							if (((LogCounter)earliestLWM).getLogFileNumber() < 
-                                    firstLogFileNumber)
-                            {
-								firstLogFileNumber = 
-                                    ((LogCounter)earliestLWM).getLogFileNumber();
-                            }
-						}
-					}
 
 					// if the checkpoint record doesn't have a transaction
 					// table, we need to rebuild it by scanning the log from
@@ -1504,35 +1474,9 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			// send the checkpoint record to the log
 			Formatable transactionTable = tf.getTransactionTable();
 
-			// If the truncpoint changes between this time and the time the
-			// checkpoint log record gets written to disk, this is not a
-			// problem.  During recovery, we first get the truncation points
-			// from the checkpoint.  Then during redo, we will encounter any
-			// changes that ever happen to the set of truncation LWMs, so we
-			// will end up picking up everything up to the point of crash.
-			TruncationPoint[] tpoints = null;
-			synchronized(this)
-			{
-				if (truncPoints != null)
-				{
-					// make a snap shot copy of all the truncation LWMs
-					
-					int numTpoints = truncPoints.size();
-
-					tpoints = new TruncationPoint[numTpoints];
-					TruncationPoint t;
-					for (int i = 0; i < numTpoints; i++)
-					{
-						t = (TruncationPoint)truncPoints.elementAt(i);
-						tpoints[i] = 
-                            new TruncationPoint(t.getName(), t.getLogInstant());
-					}
-				}
-			}
-
 			CheckpointOperation nextCheckpoint = 
 				new CheckpointOperation(
-                    redoLWM_long, undoLWM_long, tpoints, transactionTable);
+                    redoLWM_long, undoLWM_long, transactionTable);
 
 			cptran.logAndDo(nextCheckpoint);
 
@@ -2115,50 +2059,12 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		// one truncation at a time
 		synchronized (this)
 		{
-			if (movingTruncPt)	// don't truncate the log while someone is mucking
-				return -1;			// with truncation LWMs
-
 			firstLogNeeded = LogCounter.getLogFileNumber(checkpoint.undoLWM());
 
 			if (SanityManager.DEBUG)
 			{
 				if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
 					SanityManager.DEBUG(DBG_FLAG, "truncatLog: undoLWM firstlog needed " + firstLogNeeded);
-			}
-
-			if (truncPoints != null) // other interesting truncation point in memory
-			{
-				TruncationPoint p;
-				LogCounter logLWM;
-				for (int i = truncPoints.size()-1; i >=0; i--)
-				{
-					p = (TruncationPoint)truncPoints.elementAt(i);
-					logLWM = (LogCounter)(p.getLogInstant());
-					if (firstLogNeeded > logLWM.getLogFileNumber())
-						firstLogNeeded = logLWM.getLogFileNumber();
-				}
-			}
-
-			if (SanityManager.DEBUG)
-			{
-				if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
-					SanityManager.DEBUG(DBG_FLAG, "truncatLog: in memory truncationLWM firstlog needed " + firstLogNeeded);
-			}
-
-			// now go thru the current checkpoint log record.  Somebody may
-			// have change the truncation LWM between the time the
-			// checkpoint record snapshot was taken and now.  And we better
-			// not truncate and violate either set of LWMs
-			TruncationPoint[] tps = checkpoint.truncationLWM();
-			if (tps != null)
-			{
-				LogCounter logLWM;
-				for (int i = tps.length-1; i >= 0; i--)
-				{
-					logLWM = (LogCounter)(tps[i].getLogInstant());
-					if (firstLogNeeded > logLWM.getLogFileNumber())
-						firstLogNeeded = logLWM.getLogFileNumber();
-				}
 			}
 
 			if (SanityManager.DEBUG)
@@ -3801,298 +3707,6 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
         }
     }
 
-	/*
-	 * trunction LWM support
-	 */
-
-	/**
-	    Set or add a truncationLWM with the given name.  If instant is null,
-		set the truncationLWM to the beginning of the log. The truncation point
-		is guaranteed to be durable. 
-
-		<P>MT - MT safe
-
-		@exception StandardException  Standard cloudscape exception policy
-	*/
-	public LogInstant setTruncationLWM(UUID name,
-									   LogInstant instant,
-									   RawStoreFactory rsf,
-									   TransactionFactory tf)
-		 throws StandardException
-	{
-		checkCorrupt();
-
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(name != null, "null UUID name");
-
-
-		synchronized(this)
-		{
-			if (instant == null)
-				instant = new LogCounter(firstLogInstant());
-			else
-			{
-				long firstlog = firstLogInstant();
-				long instant_long = ((LogCounter)instant).getValueAsLong();
-
-				// make sure it is legal
-				if (instant_long < firstlog || instant_long > currentInstant())
-				{
-					throw StandardException.newException(
-                            SQLState.LOG_TRUNC_LWM_ILLEGAL, 
-                            name, instant, 
-                            new LogCounter(firstlog), 
-                            new LogCounter(currentInstant())); 
-				}
-			}
-
-			// Set it now before we log it so that we won't truncate the log in
-			// between. This will stablelize the head of the log if this is
-			// setting the first truncation LWM or setting it backwards.
-			setTruncationLWM(name, instant);
-
-			// If we move the truncation point forward, need to prevent log
-			// truncation from happening until AFTER the log record is written
-			// and log is flushed, otherwise, if the log is truncated before
-			// the SaveLWM operation is sent to the log stream, the previous
-			// LWM will point to a non-existant log record if the system
-			// crashed in the middle.
-			movingTruncPt = true;
-		}
-					
-		RawTransaction itran = null;
-		try
-		{
-
-			// log it to make it durable
-			Loggable lop = new SaveLWMOperation(name, instant, true /* set */);
-
-			// start an internal transaction to log this
-			itran = tf.startInternalTransaction(rsf, ContextService.getFactory().getCurrentContextManager());
-			itran.logAndDo(lop);
-			itran.commit();
-
-			// flush the log
-			synchronized (this) {
-				flush(logFileNumber, endPosition);
-			}
-
-			itran.close();
-			itran = null;
-		}
-		finally
-		{
-			// allow log truncation to proceed
-			synchronized(this)
-			{
-				movingTruncPt = false;
-			}
-
-			if (itran != null)
-			{
-				itran.abort();
-				itran.close();
-			}
-
-		}
-
-		return instant;
-	}
-
-	/**
-		Set or add a truncationLWM with the given name and log instance.
-		This is called underneath the log.
-
-		<P>MT - MT unsafe, caller provide synchronization
-
-		@exception StandardException if the given log instant is older than the
-		first log instance known to this log factory, an exception will be thrown
-	*/
-	public void setTruncationLWM(UUID name, LogInstant instant)
-		 throws StandardException
-	{
-		if (stopped)
-        {
-            throw StandardException.newException(SQLState.LOG_FACTORY_STOPPED);
-        }
-
-		if (inRedo)
-		{
-			// in recovery - if this sets the truncation point further back
-			// from where the current checkpoint sets the first log, it is not
-			// a problem (as long as the log file is still there, which
-			// hopefully it is).
-
-			// This can come about if the checkpoint is taken and
-			// determined that the first useful log is N.  Before log
-			// file N-1 is truncated, a setTruncationLWM with null
-			// instant is called, which sets it to N-1.
-			// Before the next checkpoint is taken, the system crashed.
-			if (firstLogFileNumber < 0 || ((LogCounter)instant).getLogFileNumber() < firstLogFileNumber)
-				firstLogFileNumber = ((LogCounter)instant).getLogFileNumber();
-		}
-
-		TruncationPoint tpoint = null;
-
-		synchronized(this)
-		{
-			if (truncPoints == null)
-				truncPoints = new Vector(1, 1);
-			else
-				tpoint = findTruncPoint(name);
-			
-			// not an existing truncationLWM.  Add it to the list
-			if (tpoint == null)
-			{
-				tpoint = new TruncationPoint(name, instant);
-				truncPoints.addElement(tpoint);
-			}
-			else
-			{
-				// existing truncaionLWM, change it,
-				tpoint.setLogInstant(instant);
-			}
-		}
-	}
-
-
-	/**
-		Find a truncationLWM with the given name.  If that truncationLWM was
-		never set or was removed, return null.
-
-		<P>MT - MT safe.  Whole routine is synchronized on this
-	*/
-	public LogInstant getTruncationLWM(UUID name)
-	{
-		TruncationPoint tpoint;
-		LogInstant instant = null;
-
-		synchronized(this)
-		{
-			if ((tpoint = findTruncPoint(name)) != null)
-			{
-				instant = tpoint.getLogInstant();
-
-				if (SanityManager.DEBUG)
-				{
-					LogCounter first = new LogCounter(firstLogInstant());
-					if (instant.lessThan(first))
-						SanityManager.THROWASSERT(
-							"truncation LWM " + instant +
-							" is < firstlog ( " + first + ") !");
-				}
-			}
-			// don't return from out of a sync block
-		}
-
-		return instant;
-
-	}
-
-	
-	/**
-		Remove a truncationLWM - logged
-
-		<P>MT - MT aware: multiple threads can call removeTruncationLWM if
-		different LWMs are removed, but if multiple threads want to remove the
-		same LWM, an exception will be thrown.
-
-		@exception StandardException if that truncationLWM cannot be found.
-	*/
-	public void removeTruncationLWM(UUID name, 
-									RawStoreFactory rsf,
-									TransactionFactory tf)
-		 throws StandardException
-	{
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(name != null, "null UUID name");
-
-		if (corrupt != null)
-        {
-			throw StandardException.newException(
-                    SQLState.LOG_STORE_CORRUPT, corrupt);
-        }
-
-		if (stopped)
-            throw StandardException.newException(SQLState.LOG_FACTORY_STOPPED);
-
-		synchronized(this)
-		{
-			if (findTruncPoint(name) == null)
-            {
-                throw StandardException.newException(
-                        SQLState.LOG_TRUNC_LWM_NULL);
-            }
-
-			// remove it now, only log it for persistence.  Don't wait till the
-			// log is written out because I can't prevent 2 threads from
-			// removing the same LWM if they both go thru this routine
-			// simultaneously.  Can't keep the log factory in single thread for
-			// so long.
-
-			removeTruncationLWM(name); 
-		}
-
-		Loggable lop = new SaveLWMOperation(name, null, false /* unset */);
-		// start an interanl transaction to log this
-		RawTransaction itran = tf.startInternalTransaction(rsf, ContextService.getFactory().getCurrentContextManager());
-		try
-		{
-			itran.logAndDo(lop);
-		}
-		finally
-		{
-			itran.commit();
-			itran.close();
-		}
-	}
-
-
-	/**
-		Remove a truncationLWM - underneath a log record
-		@exception StandardException  Standard cloudscape exception policy
-	*/
-	public void removeTruncationLWM(UUID name)
-		 throws StandardException
-	{
-
-		if (corrupt != null)
-        {
-			throw StandardException.newException(
-                    SQLState.LOG_STORE_CORRUPT, corrupt);
-        }
-		
-		// During run time, we are called inside a synchronized block.
-		// During recovery redo, no log truncation is going to happen.
-		// So no need to synchronize here.
-		
-		// if it has already been removed, don't bother with it.
-		synchronized(this)
-		{
-			TruncationPoint tpoint = findTruncPoint(name);
-			if (tpoint != null)
-				truncPoints.removeElement(tpoint);
-		}
-	}
-
-	/**
-		Find a truncationLWM.
-
-		<P>MT - MT unsafe.  Caller must provide synchronization
-	*/
-	private TruncationPoint findTruncPoint(UUID name)
-	{
-		if (truncPoints == null)
-			return null;
-
-		for (int i = truncPoints.size()-1; i >= 0; i--)
-		{
-			TruncationPoint tpoint = (TruncationPoint)(truncPoints.elementAt(i));
-			if (tpoint.isEqual(name))
-				return tpoint;
-		}
-		return null;
-	}
 
 	/**
 	  Open a forward scan of the transaction log.
@@ -4188,41 +3802,6 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			SanityManager.ASSERT(logFileNumber > 0 && lastFlush > 0);
 
 		return new LogCounter(logFileNumber,lastFlush);
-	}
-
-	/** restore/replace truncpoints using the passed in arrays 
-	    Called during recovery, no need for synchronization
-	 */
-	private LogInstant restoreTruncationLWMs(TruncationPoint[] tpoints)
-	{
-		if (truncPoints != null)
-			truncPoints.removeAllElements();
-
-		if (tpoints == null || tpoints.length == 0)
-			return null;
-
-		if (truncPoints == null)	
-			truncPoints = new Vector(tpoints.length, 1);
-
-		LogInstant earliestLWM = null;
-
-		for (int i = 0; i < tpoints.length; i++)
-		{
-			TruncationPoint t = tpoints[i];
-
-			if (SanityManager.DEBUG)
-				SanityManager.DEBUG(DBG_FLAG, 
-									"Restoring tpoint " + t.getName() + " " + t.getLogInstant()); 
-
-			// The tpoints come out of the checkpoint log record, OK to just
-			// stuff it into the truncation table because the checkpoint log
-			// record is never going to change it.
-			truncPoints.addElement(t);
-
-			if (earliestLWM == null || t.getLogInstant().lessThan(earliestLWM))
-				earliestLWM = t.getLogInstant();
-		}
-		return earliestLWM;
 	}
 
 

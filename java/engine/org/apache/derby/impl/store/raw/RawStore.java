@@ -824,28 +824,6 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
 	}
 
 
-	/*
-	 * log truncation support
-	 */
-	public LogInstant setTruncationLWM(UUID name, DatabaseInstant instant)
-		 throws StandardException
-	{
-		return logFactory.setTruncationLWM(name, (LogInstant)instant, this, xactFactory);
-	}
-
-	public LogInstant getTruncationLWM(UUID name)
-		 throws StandardException
-	{
-		return logFactory.getTruncationLWM(name);
-	}
-
-	public void removeTruncationLWM(UUID name)
-		 throws StandardException
-	{
-		logFactory.removeTruncationLWM(name, this, xactFactory);
-	}
-
-
 	public ScanHandle openFlushedScan(DatabaseInstant start, int groupsIWant)
 		 throws StandardException
 	{

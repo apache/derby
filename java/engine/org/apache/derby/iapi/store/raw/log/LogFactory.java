@@ -109,68 +109,6 @@ public interface LogFactory extends Corruptable {
 	*/
 	public void flush(LogInstant where) throws StandardException;
 
-	/**
-		@see RawStoreFactory#setTruncationLWM
-
-		@param name - the name of the truncation low water mark. 
-		@param rawStoreFactory - the raw store
-		@param dataFactory - the data factory
-		@param transactionFactory - the transaction factory
-
-		@return The exact instant to which this set the truncation low
-		water mark.
-
-		@exception StandardException StandardCloudscape error policy
-	*/
-
-	public LogInstant setTruncationLWM(UUID name, 
-									   LogInstant instant,
-									   RawStoreFactory rawStoreFactory, 
-									   TransactionFactory transFactory)
-		 throws StandardException;
-
-	/**
-		Internal to RawStore, setting the truncationLWM below the log
-
-		@param name - the name of the truncation low water mark. 
-		@exception StandardException cloudscape standard error policy
-
-	  */
-	public void setTruncationLWM(UUID name, LogInstant instant)
-		 throws StandardException;
-
-
-	/**
-		Get back a truncation LWM
-		@exception StandardException cloudscape standard error policy
-	*/
-	public LogInstant getTruncationLWM(UUID name)
-		 throws StandardException;
-
-	/**
-		Remove a truncation LWM - logged
-
-		@param name - the name of the truncation low water mark. 
-		@param rawStoreFactory - the raw store
-		@param dataFactory - the data factory
-		@param transactionFactory - the transaction factory
-		
-		@exception StandardException cloudscape standard error policy
-	*/
-	void removeTruncationLWM(UUID name,
-							 RawStoreFactory rawStoreFactory, 
-							 TransactionFactory transFactory)
-		 throws StandardException;
-
-	/**
-		Remove a truncation LWM - underneath the log
-
-		@param name - the name of the truncation low water mark. 
-		@exception StandardException cloudscape standard error policy
-	*/
-	void removeTruncationLWM(UUID name)
-		 throws StandardException;
-
 
 	/**
 		Get a LogScan to scan flushed records from the log.

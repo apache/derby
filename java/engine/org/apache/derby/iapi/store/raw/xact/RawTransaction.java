@@ -272,22 +272,6 @@ public abstract class RawTransaction extends Observable implements Transaction {
 
 
 	/**
-		Add a truncation LWM to the log factory
-
-		@exception StandardException Standard Cloudscape error policy
-	*/
-	public abstract void addTruncationLWM(UUID name, LogInstant instant)
-		 throws StandardException;
-
-
-	/**
-		Remove a truncation LWM from the log factory
-		@exception StandardException Standard Cloudscape error policy
-	*/
-	public abstract void removeTruncationLWM(UUID name) throws StandardException;
-
-
-	/**
 		Status that needs to go into the begin transaction log record, if there
 		is one, to help with recovery
 	*/

@@ -41,20 +41,9 @@ extends DiagnosticableGeneric
 		r.append("    lastFlush(offset): "+ltf.lastFlush+"\n");
 		r.append("    logFileNumber: "+ltf.logFileNumber+"\n");
 		r.append("    firstLogFileNumber: "+ltf.firstLogFileNumber+"\n");
-		if (ltf.truncPoints == null)
-		{
-			r.append("    truncPoints: null\n");
-		}
-		else
-		{
-			for(Enumeration e=ltf.truncPoints.elements();
-				e.hasMoreElements();)
-			{
-				Object tp = e.nextElement();
-				r.append("        tp: "+
-						 DiagnosticUtil.toDiagString(tp));
-			}
-		}
 		return r.toString();
 	}
 }
+
+
+

@@ -710,62 +710,6 @@ public interface RawStoreFactory extends Corruptable {
 	*/
 	public void idle() throws StandardException;
 
-	/*
-		Log truncation support - only applies to rawStore that supports logging
-		and log truncation control.
-
-		The RawStore will maintain a set of log instances called truncation low
-		water marks.  These TruncationLWMs are identified by UUID.  Once set,
-		the RawStore will not truncate any log record pass any TruncationLWM.
-		The client must reset these TruncationLWM or delete them from RawStore
-		or else the log will fill up.
-
-		These TruncationLWMs are durable across crashes
-	*/
-
-	/**
-		Set truncation low water mark.  If instant is null, set this named
-		truncation LWM to be the earliest legal log instant currently still
-		available - i.e., the first log instant that has not been truncated.
-		If a truncation low water mark of this name does not exist this creates
-		it.  If a truncation low water mark of this name already exists then
-		this call will move it to a new log instant.
-		<P>
-		When this returns the system will durably remember the new low water
-		mark.
-		
-		@param name The name of the new low water mark. 
-		@return The truncation low water mark log instant.
-
-		@exception StandardException StandardCloudscape error policy
-	*/
-	LogInstant setTruncationLWM(UUID name, DatabaseInstant instant) 
-		 throws StandardException; 
-
-
-	/**
-		Remove a truncation low water mark.  An exception will be thrown if it
-		is not already set. 
-		<P>
-		When this returns the low water mark is removed from the system
-		permanently. 
-
-		@param name The name of the truncation low water mark.
-
-		@exception StandardException StandardCloudscape error policy
-	*/
-	void removeTruncationLWM(UUID name) throws StandardException;
-
-	/**
-		Get a truncatin low water mark.  If it is not set, return null.
-
-		@param name The name of the truncation low water mark.
-
-		@exception StandardException StandardCloudscape error policy
-	*/
-	LogInstant getTruncationLWM(UUID name) throws StandardException;
-
-
 	/**
 	    Get a flushed scan.
 		@param start The instant for the beginning of the scan.

@@ -53,19 +53,12 @@ public class CheckpointOperation implements Loggable
 	// undo LWM
 	protected long	undoLWM;
 
-	// other log trunaction points - after the checkpoint is read from the log
-	// after a recovery, the array is then used to populate the in memory
-	// truncation lwm table.
-	protected TruncationPoint[]	truncationLWM;
-
 	protected Formatable transactionTable;
 
-	public CheckpointOperation(long redoLWM, long undoLWM, 
-							   TruncationPoint[] tpoints, Formatable ttab)
+	public CheckpointOperation(long redoLWM, long undoLWM, Formatable ttab)
 	{
 		this.redoLWM = redoLWM;
 		this.undoLWM = undoLWM;
-		this.truncationLWM = tpoints;
 		this.transactionTable = ttab;
 	}
 
@@ -80,19 +73,8 @@ public class CheckpointOperation implements Loggable
 	{
 		CompressedNumber.writeLong(out, redoLWM);
 		CompressedNumber.writeLong(out, undoLWM);
-		if (truncationLWM == null)
-			CompressedNumber.writeInt(out, 0);	// no other truncation LWM
-		else
-		{
-			CompressedNumber.writeInt(out, truncationLWM.length);
-			for (int i = 0; i < truncationLWM.length; i++)
-			{
-				out.writeObject(truncationLWM[i].getName());
-
-				LogCounter l = (LogCounter)(truncationLWM[i].getLogInstant());
-				CompressedNumber.writeLong(out,l.getValueAsLong());
-			}
-		}
+		// RESOLVE: Following write Not needed, keeping it to avoid upgrade/downgrade issues.
+		CompressedNumber.writeInt(out, 0);	// no other truncation LWM
 
 		if (transactionTable == null)
 			CompressedNumber.writeInt(out, 0);
@@ -108,23 +90,8 @@ public class CheckpointOperation implements Loggable
 		redoLWM = CompressedNumber.readLong(in);
 		undoLWM = CompressedNumber.readLong(in);
 
+		// RESOLVE: Following read Not required, keeping it to avoid upgrade/downgrade issues.
 		int tsize = CompressedNumber.readInt(in); // is there any truncationLWM?
-		if (tsize == 0)
-			truncationLWM = null;
-		else
-		{
-			truncationLWM = new TruncationPoint[tsize];
-			UUID name;
-			LogInstant instant;
-
-			for (int i = 0; i < tsize; i++)
-			{
-				name = (UUID)in.readObject();
-
-				long l = CompressedNumber.readLong(in);
-				truncationLWM[i] = new TruncationPoint(name, new LogCounter(l));
-			}
-		}
 
 		int haveTTab = CompressedNumber.readInt(in);
 		if (haveTTab == 1)
@@ -219,10 +186,6 @@ public class CheckpointOperation implements Loggable
 		return undoLWM;
 	}
 
-	public TruncationPoint[] truncationLWM()
-	{
-		return truncationLWM;
-	}
 
 	public Formatable getTransactionTable()
 	{
@@ -243,17 +206,6 @@ public class CheckpointOperation implements Loggable
 				.append("Checkpoint : \tredoLWM ")
 				.append(redolwm.toString())
 				.append("\n\t\tundoLWM ").append(undolwm.toString());
-
-			if (truncationLWM != null)
-			{
-				LogCounter logLWM;
-				for (int i = truncationLWM.length-1; i >= 0; i--)
-				{
-					logLWM = (LogCounter)(truncationLWM[i].getLogInstant());
-					str.append(" truncation point ").append(i)
-						.append(" ").append(logLWM.toString());
-				}
-			}
 
 			if (transactionTable != null)
 			{
