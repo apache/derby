@@ -49,7 +49,7 @@ select * from outer1 o where exists (select * from idx2 i, idx1 where o.c1 = i.c
 
 -- subqueries that should get flattened
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 2000;
+maximumdisplaywidth 40000;
 
 -- simple IN
 select * from outer1 o where o.c1 in (select c1 from idx1);
@@ -148,7 +148,7 @@ values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 -- beetle 4459 - problems with flattening to exist joins and then flattening to 
 -- normal join
 -- non correlated exists subquery with conditional join
-maximumdisplaywidth 5000;
+maximumdisplaywidth 40000;
 select o.c1 from outer1 o join outer2 o2 on (o.c1 = o2.c1) 
 where exists (select c1 from idx1);
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -214,7 +214,7 @@ insert into colls values ('37', 8);
 insert into docs values '24', '25', '36', '27', '124', '567';
 
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 10000;
+maximumdisplaywidth 40000;
 
 -- NOT IN is flattened
 SELECT COUNT(*) FROM
@@ -361,15 +361,13 @@ select * from t1 where not exists (select * from t2 where t1.c1=t2.c1);
 -- should be flattened
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
+select * from t1 where not exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4));
 -- watch out result, should return 2,3,4,2
-select * from t1 where not exists (select * from t2 where t1.c1=t2.c1 and t2.c1
-not in (select t3.c1 from t3, t4));
 -- can not be flattened, should be materialized
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
+select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4));
 -- should return 1,5,1
-select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not
-in (select t3.c1 from t3, t4));
 -- can not be flattened, should be materialized
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 

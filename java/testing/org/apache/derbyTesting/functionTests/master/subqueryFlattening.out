@@ -79,7 +79,7 @@ C1         |C2         |C3
 ij> -- subqueries that should get flattened
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 2000;
+ij> maximumdisplaywidth 40000;
 ij> -- simple IN
 select * from outer1 o where o.c1 in (select c1 from idx1);
 C1         |C2         |C3         
@@ -150,7 +150,33 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Index Scan ResultSet for IDX1 using index IDX1_1 at ser&
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=2
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
 ij> -- simple EXISTS
 select * from outer1 o where exists (select * from idx1 i where o.c1 = i.c1);
 C1         |C2         |C3         
@@ -221,7 +247,33 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Index Scan ResultSet for IDX1 usi&
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=2
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
 ij> -- simple ANY
 select * from outer1 o where o.c1 = ANY (select c1 from idx1);
 C1         |C2         |C3         
@@ -292,7 +344,33 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Index Scan ResultSet for IDX1 using index IDX1_1 at&
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=2
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
 ij> -- another simple ANY
 select * from outer1 o where o.c2 > ANY (select c1 from idx1 i where o.c1 = i.c1);
 C1         |C2         |C3         
@@ -363,7 +441,37 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Index Scan ResultSet fo&
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=2
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+Column[0][0] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- comparisons with parameters
 prepare p1 as 'select * from outer1 o where exists (select * from idx1 i where i.c1 = ?)';
 ij> execute p1 using 'values 1';
@@ -438,7 +546,31 @@ Source result set:
 	Ordered null semantics on the following columns: 
 			stop position: 
 	> on first 1 column(s).
-	Ordered null semantics on the foll&
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 2
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=2
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
 ij> prepare p2 as 'select * from outer1 o where ? = ANY (select c1 from idx1)';
 ij> execute p2 using 'values 1';
 IJ WARNING: Autocommit may close using result set
@@ -512,7 +644,31 @@ Source result set:
 	Ordered null semantics on the following columns: 
 			stop position: 
 	> on first 1 column(s).
-	Ordered null semantics on the following columns: &
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 2
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=2
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
 ij> -- mix constants with correlation columns
 select * from outer1 o where exists (select * from idx2 i where o.c1 = i.c1 and i.c2 = 2);
 C1         |C2         |C3         
@@ -587,7 +743,35 @@ Source result set:
 			qualifiers:
 Column[0][0] Id: 1
 Operator: =
-Ordered nulls: &
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=2
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- multiple tables in subquery
 select * from outer1 o where exists (select * from idx2 i, idx1 where o.c1 = i.c1 and i.c2 = idx1.c1 and i.c2 = 1);
 C1         |C2         |C3         
@@ -654,7 +838,82 @@ Source result set:
 			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
-				next time (milliseconds) = &
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Right result set:
+			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
 ij> -- comparisons with non-join expressions
 select * from outer1 o where exists (select * from idx1 where idx1.c1 = 1 + 0);
 C1         |C2         |C3         
@@ -727,7 +986,32 @@ Source result set:
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
 			stop position: 
-	> on first 1&
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 2
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=2
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
 ij> select * from outer1 o where exists (select * from idx2 i, idx1 where o.c1 + 0 = i.c1 and i.c2 + 0 = idx1.c1 and i.c2 = 1 + 0);
 C1         |C2         |C3         
 -----------------------------------
@@ -793,7 +1077,90 @@ Source result set:
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
-				close time (mi&
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Right result set:
+			Project-Restrict ResultSet (5):
+			Number of opens = 1
+			Rows seen = 2
+			Rows filtered = 1
+			restriction = true
+			projection = false
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 2
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=3
+					Number of pages visited=1
+					Number of rows qualified=2
+					Number of rows visited=2
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+	Right result set:
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
 ij> -- multilevel subqueries
 -- flatten all
 select * from outer1 o where exists
@@ -867,7 +1234,83 @@ Source result set:
 			Rows filtered = 0
 			Fetch Size = 16
 				constructor time (milliseconds) = 0
-&
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Right result set:
+			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
 ij> -- only flatten bottom
 select * from outer1 o where exists
     (select * from idx2 i where exists
@@ -938,7 +1381,95 @@ Attached subqueries:
 				Hash key is column number 0
 				Rows seen = 1
 				Rows filtered = 0
-					constructor time (milliseconds) = 0&
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0, 1}
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=2
+					Number of rows visited=2
+					Scan type=btree
+					Tree height=1
+					start position: 
+	None
+					stop position: 
+	None
+					scan qualifiers:
+None
+					next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+			Right result set:
+				Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0}
+					Number of columns fetched=1
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+	End Subquery Number 0
+Project-Restrict ResultSet (2):
+Number of opens = 1
+Rows seen = 2
+Rows filtered = 1
+restriction = true
+projection = false
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 2
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of pages visited=1
+		Number of rows qualified=2
+		Number of rows visited=2
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
+None
 ij> -- flatten innermost into exists join, then flatten middle
 -- into outer
 select * from outer1 o where exists
@@ -1011,7 +1542,82 @@ Source result set:
 			Rows seen = 1
 			Rows filtered = 0
 			Fetch Size = 16
-				constructor time (millise&
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Right result set:
+			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={}
+			Number of columns fetched=0
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
 ij> -- flatten a subquery that has a subquery in its select list
 -- verify that subquery gets copied up to outer block
 select * from outer1 o where c1 in
@@ -1086,7 +1692,79 @@ Rows seen = 1
 Rows filtered = 0
 restriction = true
 projection = true
-	construct&
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Nested Loop Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 1
+	Rows seen from the right = 1
+	Rows filtered = 0
+	Rows returned = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Index Scan ResultSet for IDX2 using index IDX2_1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 1}
+			Number of columns fetched=2
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=2
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=2
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- expression subqueries
 -- simple =
 select * from outer1 o where o.c1 = (select c1 from idx1 i where o.c1 = i.c1);
@@ -1159,7 +1837,37 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Index Scan &
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=2
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> select * from outer1 o where o.c1 <= (select c1 from idx1 i where o.c1 = i.c1);
 C1         |C2         |C3         
 -----------------------------------
@@ -1228,7 +1936,37 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Index Scan ResultSet for IDX1 using index IDX1_1 &
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=2
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+Column[0][0] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
 ij> -- multiple tables in subquery
 select * from outer1 o where c1 =  (select i.c1 from idx2 i, idx1 where o.c1 = i.c1 and i.c2 = idx1.c1 and i.c2 = 1);
 C1         |C2         |C3         
@@ -1295,7 +2033,87 @@ Source result set:
 			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
-				next time (milliseconds) &
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0, 1}
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Right result set:
+			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 1
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=3
+				Number of pages visited=1
+				Number of rows qualified=1
+				Number of rows visited=2
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Column[0][1] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=1
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
 ij> -- flattening to an exists join
 -- no index on subquery table
 select * from outer1 where c1 in (select c1 from noidx);
@@ -1368,7 +2186,34 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Hash Scan Resul&
+		Hash Scan ResultSet for NOIDX at serializable isolation level using share table locking: 
+		Number of opens = 2
+		Hash table size = 1
+		Hash key is column number 0
+		Rows seen = 1
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=1
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=2
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			scan qualifiers:
+None
+			next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- no unique index on subquery table
 select * from outer1 where c1 in (select c1 from nonunique_idx1);
 C1         |C2         |C3         
@@ -1439,7 +2284,38 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Hash Scan ResultSet for NONUNIQU&
+		Hash Scan ResultSet for NONUNIQUE_IDX1 using index NONUNIQUE_IDX1_1 at serializable isolation level using share table locking: 
+		Number of opens = 2
+		Hash table size = 1
+		Hash key is column number 0
+		Rows seen = 1
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=2
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			scan qualifiers:
+None
+			next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- columns in subquery are not superset of unique index
 select * from outer1 where c1 in (select c1 from idx2);
 C1         |C2         |C3         
@@ -1510,7 +2386,38 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Hash Scan ResultSet for&
+		Hash Scan ResultSet for IDX2 using index IDX2_1 at serializable isolation level using share table locking: 
+		Number of opens = 2
+		Hash table size = 1
+		Hash key is column number 0
+		Rows seen = 1
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=2
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			scan qualifiers:
+None
+			next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- single table subquery, self join on unique column
 select * from outer1 where exists (select * from idx1 where c1 = c1);
 C1         |C2         |C3         
@@ -1582,7 +2489,44 @@ null			stop position:
 null			qualifiers:
 None
 	Right result set:
-		Proje&
+		Project-Restrict ResultSet (4):
+		Number of opens = 2
+		Rows seen = 2
+		Rows filtered = 0
+		restriction = true
+		projection = false
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share table locking chosen by the optimizer
+			Number of opens = 2
+			Rows seen = 2
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=2
+				Number of rows qualified=2
+				Number of rows visited=2
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
 ij> -- flattening values subqueries
 -- flatten unless contains a subquery
 select * from outer1 where c1 in (values 1);
@@ -1700,11 +2644,90 @@ Materialized subqueries:
 					close time (milliseconds) = 0
 					restriction time (milliseconds) = 0
 					projection time (milliseconds) = 0
-					optimizer estimated c&
+				Source result set:
+					Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 2
+					Rows filtered = 0
+					Fetch Size = 16
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0}
+						Number of columns fetched=1
+						Number of pages visited=1
+						Number of rows qualified=2
+						Number of rows visited=2
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+	End Subquery Number 1
+Project-Restrict ResultSet (14):
+Number of opens = 1
+Rows seen = 1
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Nested Loop Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 1
+	Rows seen from the right = 1
+	Rows filtered = 0
+	Rows returned = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 1
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=3
+			Number of pages visited=1
+			Number of rows qualified=1
+			Number of rows visited=2
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Right result set:
+		Row ResultSet:
+		Number of opens = 1
+		Rows returned = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
 ij> -- beetle 4459 - problems with flattening to exist joins and then flattening to 
 -- normal join
 -- non correlated exists subquery with conditional join
-maximumdisplaywidth 5000;
+maximumdisplaywidth 40000;
 ij> select o.c1 from outer1 o join outer2 o2 on (o.c1 = o2.c1) 
 where exists (select c1 from idx1);
 C1         
@@ -2132,7 +3155,42 @@ Negate comparison result: false
 					Number of columns fetched=1
 					Number of deleted rows visited=0
 					Number of pages visited=2
-					Number of rows q&
+					Number of rows qualified=2
+					Number of rows visited=2
+					Scan type=btree
+					Tree height=1
+					start position: 
+	None
+					stop position: 
+	None
+					qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for OUTER2 at serializable isolation level using share table locking chosen by the optimizer
+		Number of opens = 2
+		Rows seen = 2
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of pages visited=1
+			Number of rows qualified=2
+			Number of rows visited=4
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- original reported bug
 create table business(businesskey int, name varchar(50), changedate int);
 0 rows inserted/updated/deleted
@@ -2309,7 +3367,6 @@ Operator: =
 Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
-			&
 ij> -- clean up
 drop table outer1;
 0 rows inserted/updated/deleted
@@ -2366,7 +3423,7 @@ ij> insert into docs values '24', '25', '36', '27', '124', '567';
 6 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 10000;
+ij> maximumdisplaywidth 40000;
 ij> -- NOT IN is flattened
 SELECT COUNT(*) FROM
 ( SELECT ID FROM DOCS WHERE
@@ -5550,25 +6607,22 @@ Operator: =
 Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
-ij> -- watch out result, should return 2,3,4,2
-select * from t1 where not exists (select * from t2 where t1.c1=t2.c1 and t2.c1
-not in (select t3.c1 from t3, t4));
+ij> select * from t1 where not exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4));
 C1         
 -----------
 2          
 3          
 4          
 2          
-ij> -- can not be flattened, should be materialized
+ij> -- watch out result, should return 2,3,4,2
+-- can not be flattened, should be materialized
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Statement Name: 
 	null
 Statement Text: 
-	-- watch out result, should return 2,3,4,2
-select * from t1 where not exists (select * from t2 where t1.c1=t2.c1 and t2.c1
-not in (select t3.c1 from t3, t4))
+	select * from t1 where not exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4))
 Parse Time: 0
 Bind Time: 0
 Optimize Time: 0
@@ -5779,25 +6833,351 @@ Attached subqueries:
 																					Rows seen from the right = 3
 																					Rows returned = 50
 																						constructor time (milliseconds) = 0
-							&
-ij> -- should return 1,5,1
-select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not
-in (select t3.c1 from t3, t4));
+																						open time (milliseconds) = 0
+																						next time (milliseconds) = 0
+																						close time (milliseconds) = 0
+																					Left result set:
+																						Union ResultSet:
+																						Number of opens = 5
+																						Rows seen from the left = 44
+																						Rows seen from the right = 3
+																						Rows returned = 47
+																							constructor time (milliseconds) = 0
+																							open time (milliseconds) = 0
+																							next time (milliseconds) = 0
+																							close time (milliseconds) = 0
+																						Left result set:
+																							Union ResultSet:
+																							Number of opens = 5
+																							Rows seen from the left = 41
+																							Rows seen from the right = 3
+																							Rows returned = 44
+																								constructor time (milliseconds) = 0
+																								open time (milliseconds) = 0
+																								next time (milliseconds) = 0
+																								close time (milliseconds) = 0
+																							Left result set:
+																								Union ResultSet:
+																								Number of opens = 5
+																								Rows seen from the left = 38
+																								Rows seen from the right = 3
+																								Rows returned = 41
+																									constructor time (milliseconds) = 0
+																									open time (milliseconds) = 0
+																									next time (milliseconds) = 0
+																									close time (milliseconds) = 0
+																								Left result set:
+																									Union ResultSet:
+																									Number of opens = 5
+																									Rows seen from the left = 35
+																									Rows seen from the right = 3
+																									Rows returned = 38
+																										constructor time (milliseconds) = 0
+																										open time (milliseconds) = 0
+																										next time (milliseconds) = 0
+																										close time (milliseconds) = 0
+																									Left result set:
+																										Union ResultSet:
+																										Number of opens = 5
+																										Rows seen from the left = 32
+																										Rows seen from the right = 3
+																										Rows returned = 35
+																											constructor time (milliseconds) = 0
+																											open time (milliseconds) = 0
+																											next time (milliseconds) = 0
+																											close time (milliseconds) = 0
+																										Left result set:
+																											Union ResultSet:
+																											Number of opens = 5
+																											Rows seen from the left = 29
+																											Rows seen from the right = 3
+																											Rows returned = 32
+																												constructor time (milliseconds) = 0
+																												open time (milliseconds) = 0
+																												next time (milliseconds) = 0
+																												close time (milliseconds) = 0
+																											Left result set:
+																												Union ResultSet:
+																												Number of opens = 5
+																												Rows seen from the left = 26
+																												Rows seen from the right = 3
+																												Rows returned = 29
+																													constructor time (milliseconds) = 0
+																													open time (milliseconds) = 0
+																													next time (milliseconds) = 0
+																													close time (milliseconds) = 0
+																												Left result set:
+																													Union ResultSet:
+																													Number of opens = 5
+																													Rows seen from the left = 23
+																													Rows seen from the right = 3
+																													Rows returned = 26
+																														constructor time (milliseconds) = 0
+																														open time (milliseconds) = 0
+																														next time (milliseconds) = 0
+																														close time (milliseconds) = 0
+																													Left result set:
+																														Union ResultSet:
+																														Number of opens = 5
+																														Rows seen from the left = 20
+																														Rows seen from the right = 3
+																														Rows returned = 23
+																															constructor time (milliseconds) = 0
+																															open time (milliseconds) = 0
+																															next time (milliseconds) = 0
+																															close time (milliseconds) = 0
+																														Left result set:
+																															Union ResultSet:
+																															Number of opens = 5
+																															Rows seen from the left = 17
+																															Rows seen from the right = 3
+																															Rows returned = 20
+																																constructor time (milliseconds) = 0
+																																open time (milliseconds) = 0
+																																next time (milliseconds) = 0
+																																close time (milliseconds) = 0
+																															Left result set:
+																																Union ResultSet:
+																																Number of opens = 5
+																																Rows seen from the left = 14
+																																Rows seen from the right = 3
+																																Rows returned = 17
+																																	constructor time (milliseconds) = 0
+																																	open time (milliseconds) = 0
+																																	next time (milliseconds) = 0
+																																	close time (milliseconds) = 0
+																																Left result set:
+																																	Union ResultSet:
+																																	Number of opens = 5
+																																	Rows seen from the left = 11
+																																	Rows seen from the right = 3
+																																	Rows returned = 14
+																																		constructor time (milliseconds) = 0
+																																		open time (milliseconds) = 0
+																																		next time (milliseconds) = 0
+																																		close time (milliseconds) = 0
+																																	Left result set:
+																																		Union ResultSet:
+																																		Number of opens = 5
+																																		Rows seen from the left = 8
+																																		Rows seen from the right = 3
+																																		Rows returned = 11
+																																			constructor time (milliseconds) = 0
+																																			open time (milliseconds) = 0
+																																			next time (milliseconds) = 0
+																																			close time (milliseconds) = 0
+																																		Left result set:
+																																			Union ResultSet:
+																																			Number of opens = 5
+																																			Rows seen from the left = 5
+																																			Rows seen from the right = 3
+																																			Rows returned = 8
+																																				constructor time (milliseconds) = 0
+																																				open time (milliseconds) = 0
+																																				next time (milliseconds) = 0
+																																				close time (milliseconds) = 0
+																																			Left result set:
+																																				Row ResultSet:
+																																				Number of opens = 5
+																																				Rows returned = 5
+																																					constructor time (milliseconds) = 0
+																																					open time (milliseconds) = 0
+																																					next time (milliseconds) = 0
+																																					close time (milliseconds) = 0
+																																			Right result set:
+																																				Row ResultSet:
+																																				Number of opens = 3
+																																				Rows returned = 3
+																																					constructor time (milliseconds) = 0
+																																					open time (milliseconds) = 0
+																																					next time (milliseconds) = 0
+																																					close time (milliseconds) = 0
+																																		Right result set:
+																																			Row ResultSet:
+																																			Number of opens = 3
+																																			Rows returned = 3
+																																				constructor time (milliseconds) = 0
+																																				open time (milliseconds) = 0
+																																				next time (milliseconds) = 0
+																																				close time (milliseconds) = 0
+																																	Right result set:
+																																		Row ResultSet:
+																																		Number of opens = 3
+																																		Rows returned = 3
+																																			constructor time (milliseconds) = 0
+																																			open time (milliseconds) = 0
+																																			next time (milliseconds) = 0
+																																			close time (milliseconds) = 0
+																																Right result set:
+																																	Row ResultSet:
+																																	Number of opens = 3
+																																	Rows returned = 3
+																																		constructor time (milliseconds) = 0
+																																		open time (milliseconds) = 0
+																																		next time (milliseconds) = 0
+																																		close time (milliseconds) = 0
+																															Right result set:
+																																Row ResultSet:
+																																Number of opens = 3
+																																Rows returned = 3
+																																	constructor time (milliseconds) = 0
+																																	open time (milliseconds) = 0
+																																	next time (milliseconds) = 0
+																																	close time (milliseconds) = 0
+																														Right result set:
+																															Row ResultSet:
+																															Number of opens = 3
+																															Rows returned = 3
+																																constructor time (milliseconds) = 0
+																																open time (milliseconds) = 0
+																																next time (milliseconds) = 0
+																																close time (milliseconds) = 0
+																													Right result set:
+																														Row ResultSet:
+																														Number of opens = 3
+																														Rows returned = 3
+																															constructor time (milliseconds) = 0
+																															open time (milliseconds) = 0
+																															next time (milliseconds) = 0
+																															close time (milliseconds) = 0
+																												Right result set:
+																													Row ResultSet:
+																													Number of opens = 3
+																													Rows returned = 3
+																														constructor time (milliseconds) = 0
+																														open time (milliseconds) = 0
+																														next time (milliseconds) = 0
+																														close time (milliseconds) = 0
+																											Right result set:
+																												Row ResultSet:
+																												Number of opens = 3
+																												Rows returned = 3
+																													constructor time (milliseconds) = 0
+																													open time (milliseconds) = 0
+																													next time (milliseconds) = 0
+																													close time (milliseconds) = 0
+																										Right result set:
+																											Row ResultSet:
+																											Number of opens = 3
+																											Rows returned = 3
+																												constructor time (milliseconds) = 0
+																												open time (milliseconds) = 0
+																												next time (milliseconds) = 0
+																												close time (milliseconds) = 0
+																									Right result set:
+																										Row ResultSet:
+																										Number of opens = 3
+																										Rows returned = 3
+																											constructor time (milliseconds) = 0
+																											open time (milliseconds) = 0
+																											next time (milliseconds) = 0
+																											close time (milliseconds) = 0
+																								Right result set:
+																									Row ResultSet:
+																									Number of opens = 3
+																									Rows returned = 3
+																										constructor time (milliseconds) = 0
+																										open time (milliseconds) = 0
+																										next time (milliseconds) = 0
+																										close time (milliseconds) = 0
+																							Right result set:
+																								Row ResultSet:
+																								Number of opens = 3
+																								Rows returned = 3
+																									constructor time (milliseconds) = 0
+																									open time (milliseconds) = 0
+																									next time (milliseconds) = 0
+																									close time (milliseconds) = 0
+																						Right result set:
+																							Row ResultSet:
+																							Number of opens = 3
+																							Rows returned = 3
+																								constructor time (milliseconds) = 0
+																								open time (milliseconds) = 0
+																								next time (milliseconds) = 0
+																								close time (milliseconds) = 0
+																					Right result set:
+																						Row ResultSet:
+																						Number of opens = 3
+																						Rows returned = 3
+																							constructor time (milliseconds) = 0
+																							open time (milliseconds) = 0
+																							next time (milliseconds) = 0
+																							close time (milliseconds) = 0
+																				Right result set:
+																					Row ResultSet:
+																					Number of opens = 3
+																					Rows returned = 3
+																						constructor time (milliseconds) = 0
+																						open time (milliseconds) = 0
+																						next time (milliseconds) = 0
+																						close time (milliseconds) = 0
+																			Right result set:
+																				Row ResultSet:
+																				Number of opens = 3
+																				Rows returned = 3
+																					constructor time (milliseconds) = 0
+																					open time (milliseconds) = 0
+																					next time (milliseconds) = 0
+																					close time (milliseconds) = 0
+																		Right result set:
+																			Row ResultSet:
+																			Number of opens = 3
+																			Rows returned = 3
+																				constructor time (milliseconds) = 0
+																				open time (milliseconds) = 0
+																				next time (milliseconds) = 0
+																				close time (milliseconds) = 0
+																	Right result set:
+																		Row ResultSet:
+																		Number of opens = 3
+																		Rows returned = 3
+																			constructor time (milliseconds) = 0
+																			open time (milliseconds) = 0
+																			next time (milliseconds) = 0
+																			close time (milliseconds) = 0
+																Right result set:
+																	Row ResultSet:
+																	Number of opens = 3
+																	Rows returned = 3
+																		constructor time (milliseconds) = 0
+																		open time (milliseconds) = 0
+																		next time (milliseconds) = 0
+																		close time (milliseconds) = 0
+															Right result set:
+																Row ResultSet:
+																Number of opens = 3
+																Rows returned = 3
+																	constructor time (milliseconds) = 0
+																	open time (milliseconds) = 0
+																	next time (milliseconds) = 0
+																	close time (milliseconds) = 0
+														Right result set:
+															Row ResultSet:
+															Number of opens = 3
+															Rows returned = 3
+																constructor time (milliseconds) = 0
+																open time (milliseconds) = 0
+																next time (milliseconds) = 0
+																close time (milliseconds) = 0
+													Right result set:
+														Row ResultSet:
+								
+ij> select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4));
 C1         
 -----------
 1          
 5          
 1          
-ij> -- can not be flattened, should be materialized
+ij> -- should return 1,5,1
+-- can not be flattened, should be materialized
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Statement Name: 
 	null
 Statement Text: 
-	-- should return 1,5,1
-select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not
-in (select t3.c1 from t3, t4))
+	select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4))
 Parse Time: 0
 Bind Time: 0
 Optimize Time: 0
@@ -6008,7 +7388,336 @@ Attached subqueries:
 																					Rows seen from the right = 3
 																					Rows returned = 50
 																						constructor time (milliseconds) = 0
-																						open time&
+																						open time (milliseconds) = 0
+																						next time (milliseconds) = 0
+																						close time (milliseconds) = 0
+																					Left result set:
+																						Union ResultSet:
+																						Number of opens = 5
+																						Rows seen from the left = 44
+																						Rows seen from the right = 3
+																						Rows returned = 47
+																							constructor time (milliseconds) = 0
+																							open time (milliseconds) = 0
+																							next time (milliseconds) = 0
+																							close time (milliseconds) = 0
+																						Left result set:
+																							Union ResultSet:
+																							Number of opens = 5
+																							Rows seen from the left = 41
+																							Rows seen from the right = 3
+																							Rows returned = 44
+																								constructor time (milliseconds) = 0
+																								open time (milliseconds) = 0
+																								next time (milliseconds) = 0
+																								close time (milliseconds) = 0
+																							Left result set:
+																								Union ResultSet:
+																								Number of opens = 5
+																								Rows seen from the left = 38
+																								Rows seen from the right = 3
+																								Rows returned = 41
+																									constructor time (milliseconds) = 0
+																									open time (milliseconds) = 0
+																									next time (milliseconds) = 0
+																									close time (milliseconds) = 0
+																								Left result set:
+																									Union ResultSet:
+																									Number of opens = 5
+																									Rows seen from the left = 35
+																									Rows seen from the right = 3
+																									Rows returned = 38
+																										constructor time (milliseconds) = 0
+																										open time (milliseconds) = 0
+																										next time (milliseconds) = 0
+																										close time (milliseconds) = 0
+																									Left result set:
+																										Union ResultSet:
+																										Number of opens = 5
+																										Rows seen from the left = 32
+																										Rows seen from the right = 3
+																										Rows returned = 35
+																											constructor time (milliseconds) = 0
+																											open time (milliseconds) = 0
+																											next time (milliseconds) = 0
+																											close time (milliseconds) = 0
+																										Left result set:
+																											Union ResultSet:
+																											Number of opens = 5
+																											Rows seen from the left = 29
+																											Rows seen from the right = 3
+																											Rows returned = 32
+																												constructor time (milliseconds) = 0
+																												open time (milliseconds) = 0
+																												next time (milliseconds) = 0
+																												close time (milliseconds) = 0
+																											Left result set:
+																												Union ResultSet:
+																												Number of opens = 5
+																												Rows seen from the left = 26
+																												Rows seen from the right = 3
+																												Rows returned = 29
+																													constructor time (milliseconds) = 0
+																													open time (milliseconds) = 0
+																													next time (milliseconds) = 0
+																													close time (milliseconds) = 0
+																												Left result set:
+																													Union ResultSet:
+																													Number of opens = 5
+																													Rows seen from the left = 23
+																													Rows seen from the right = 3
+																													Rows returned = 26
+																														constructor time (milliseconds) = 0
+																														open time (milliseconds) = 0
+																														next time (milliseconds) = 0
+																														close time (milliseconds) = 0
+																													Left result set:
+																														Union ResultSet:
+																														Number of opens = 5
+																														Rows seen from the left = 20
+																														Rows seen from the right = 3
+																														Rows returned = 23
+																															constructor time (milliseconds) = 0
+																															open time (milliseconds) = 0
+																															next time (milliseconds) = 0
+																															close time (milliseconds) = 0
+																														Left result set:
+																															Union ResultSet:
+																															Number of opens = 5
+																															Rows seen from the left = 17
+																															Rows seen from the right = 3
+																															Rows returned = 20
+																																constructor time (milliseconds) = 0
+																																open time (milliseconds) = 0
+																																next time (milliseconds) = 0
+																																close time (milliseconds) = 0
+																															Left result set:
+																																Union ResultSet:
+																																Number of opens = 5
+																																Rows seen from the left = 14
+																																Rows seen from the right = 3
+																																Rows returned = 17
+																																	constructor time (milliseconds) = 0
+																																	open time (milliseconds) = 0
+																																	next time (milliseconds) = 0
+																																	close time (milliseconds) = 0
+																																Left result set:
+																																	Union ResultSet:
+																																	Number of opens = 5
+																																	Rows seen from the left = 11
+																																	Rows seen from the right = 3
+																																	Rows returned = 14
+																																		constructor time (milliseconds) = 0
+																																		open time (milliseconds) = 0
+																																		next time (milliseconds) = 0
+																																		close time (milliseconds) = 0
+																																	Left result set:
+																																		Union ResultSet:
+																																		Number of opens = 5
+																																		Rows seen from the left = 8
+																																		Rows seen from the right = 3
+																																		Rows returned = 11
+																																			constructor time (milliseconds) = 0
+																																			open time (milliseconds) = 0
+																																			next time (milliseconds) = 0
+																																			close time (milliseconds) = 0
+																																		Left result set:
+																																			Union ResultSet:
+																																			Number of opens = 5
+																																			Rows seen from the left = 5
+																																			Rows seen from the right = 3
+																																			Rows returned = 8
+																																				constructor time (milliseconds) = 0
+																																				open time (milliseconds) = 0
+																																				next time (milliseconds) = 0
+																																				close time (milliseconds) = 0
+																																			Left result set:
+																																				Row ResultSet:
+																																				Number of opens = 5
+																																				Rows returned = 5
+																																					constructor time (milliseconds) = 0
+																																					open time (milliseconds) = 0
+																																					next time (milliseconds) = 0
+																																					close time (milliseconds) = 0
+																																			Right result set:
+																																				Row ResultSet:
+																																				Number of opens = 3
+																																				Rows returned = 3
+																																					constructor time (milliseconds) = 0
+																																					open time (milliseconds) = 0
+																																					next time (milliseconds) = 0
+																																					close time (milliseconds) = 0
+																																		Right result set:
+																																			Row ResultSet:
+																																			Number of opens = 3
+																																			Rows returned = 3
+																																				constructor time (milliseconds) = 0
+																																				open time (milliseconds) = 0
+																																				next time (milliseconds) = 0
+																																				close time (milliseconds) = 0
+																																	Right result set:
+																																		Row ResultSet:
+																																		Number of opens = 3
+																																		Rows returned = 3
+																																			constructor time (milliseconds) = 0
+																																			open time (milliseconds) = 0
+																																			next time (milliseconds) = 0
+																																			close time (milliseconds) = 0
+																																Right result set:
+																																	Row ResultSet:
+																																	Number of opens = 3
+																																	Rows returned = 3
+																																		constructor time (milliseconds) = 0
+																																		open time (milliseconds) = 0
+																																		next time (milliseconds) = 0
+																																		close time (milliseconds) = 0
+																															Right result set:
+																																Row ResultSet:
+																																Number of opens = 3
+																																Rows returned = 3
+																																	constructor time (milliseconds) = 0
+																																	open time (milliseconds) = 0
+																																	next time (milliseconds) = 0
+																																	close time (milliseconds) = 0
+																														Right result set:
+																															Row ResultSet:
+																															Number of opens = 3
+																															Rows returned = 3
+																																constructor time (milliseconds) = 0
+																																open time (milliseconds) = 0
+																																next time (milliseconds) = 0
+																																close time (milliseconds) = 0
+																													Right result set:
+																														Row ResultSet:
+																														Number of opens = 3
+																														Rows returned = 3
+																															constructor time (milliseconds) = 0
+																															open time (milliseconds) = 0
+																															next time (milliseconds) = 0
+																															close time (milliseconds) = 0
+																												Right result set:
+																													Row ResultSet:
+																													Number of opens = 3
+																													Rows returned = 3
+																														constructor time (milliseconds) = 0
+																														open time (milliseconds) = 0
+																														next time (milliseconds) = 0
+																														close time (milliseconds) = 0
+																											Right result set:
+																												Row ResultSet:
+																												Number of opens = 3
+																												Rows returned = 3
+																													constructor time (milliseconds) = 0
+																													open time (milliseconds) = 0
+																													next time (milliseconds) = 0
+																													close time (milliseconds) = 0
+																										Right result set:
+																											Row ResultSet:
+																											Number of opens = 3
+																											Rows returned = 3
+																												constructor time (milliseconds) = 0
+																												open time (milliseconds) = 0
+																												next time (milliseconds) = 0
+																												close time (milliseconds) = 0
+																									Right result set:
+																										Row ResultSet:
+																										Number of opens = 3
+																										Rows returned = 3
+																											constructor time (milliseconds) = 0
+																											open time (milliseconds) = 0
+																											next time (milliseconds) = 0
+																											close time (milliseconds) = 0
+																								Right result set:
+																									Row ResultSet:
+																									Number of opens = 3
+																									Rows returned = 3
+																										constructor time (milliseconds) = 0
+																										open time (milliseconds) = 0
+																										next time (milliseconds) = 0
+																										close time (milliseconds) = 0
+																							Right result set:
+																								Row ResultSet:
+																								Number of opens = 3
+																								Rows returned = 3
+																									constructor time (milliseconds) = 0
+																									open time (milliseconds) = 0
+																									next time (milliseconds) = 0
+																									close time (milliseconds) = 0
+																						Right result set:
+																							Row ResultSet:
+																							Number of opens = 3
+																							Rows returned = 3
+																								constructor time (milliseconds) = 0
+																								open time (milliseconds) = 0
+																								next time (milliseconds) = 0
+																								close time (milliseconds) = 0
+																					Right result set:
+																						Row ResultSet:
+																						Number of opens = 3
+																						Rows returned = 3
+																							constructor time (milliseconds) = 0
+																							open time (milliseconds) = 0
+																							next time (milliseconds) = 0
+																							close time (milliseconds) = 0
+																				Right result set:
+																					Row ResultSet:
+																					Number of opens = 3
+																					Rows returned = 3
+																						constructor time (milliseconds) = 0
+																						open time (milliseconds) = 0
+																						next time (milliseconds) = 0
+																						close time (milliseconds) = 0
+																			Right result set:
+																				Row ResultSet:
+																				Number of opens = 3
+																				Rows returned = 3
+																					constructor time (milliseconds) = 0
+																					open time (milliseconds) = 0
+																					next time (milliseconds) = 0
+																					close time (milliseconds) = 0
+																		Right result set:
+																			Row ResultSet:
+																			Number of opens = 3
+																			Rows returned = 3
+																				constructor time (milliseconds) = 0
+																				open time (milliseconds) = 0
+																				next time (milliseconds) = 0
+																				close time (milliseconds) = 0
+																	Right result set:
+																		Row ResultSet:
+																		Number of opens = 3
+																		Rows returned = 3
+																			constructor time (milliseconds) = 0
+																			open time (milliseconds) = 0
+																			next time (milliseconds) = 0
+																			close time (milliseconds) = 0
+																Right result set:
+																	Row ResultSet:
+																	Number of opens = 3
+																	Rows returned = 3
+																		constructor time (milliseconds) = 0
+																		open time (milliseconds) = 0
+																		next time (milliseconds) = 0
+																		close time (milliseconds) = 0
+															Right result set:
+																Row ResultSet:
+																Number of opens = 3
+																Rows returned = 3
+																	constructor time (milliseconds) = 0
+																	open time (milliseconds) = 0
+																	next time (milliseconds) = 0
+																	close time (milliseconds) = 0
+														Right result set:
+															Row ResultSet:
+															Number of opens = 3
+															Rows returned = 3
+																constructor time (milliseconds) = 0
+																open time (milliseconds) = 0
+																next time (milliseconds) = 0
+																close time (milliseconds) = 0
+													Right result set:
+														Row ResultSet:
+												
 ij> drop table colls;
 0 rows inserted/updated/deleted
 ij> drop table docs;
