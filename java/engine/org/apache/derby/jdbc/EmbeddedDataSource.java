@@ -240,7 +240,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 
 	// Unlike a DataSource, LocalDriver is shared by all
 	// Cloudscape databases in the same jvm.
-	transient protected Driver169 driver;
+	transient protected InternalDriver driver;
 
 	transient private String jdbcurl;
 
@@ -475,7 +475,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
         return conn;
 	}
    
-	Driver169 findDriver() throws SQLException
+	InternalDriver findDriver() throws SQLException
 	{
 		String url = jdbcurl;
 
@@ -493,7 +493,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 					// If we know the driver, we loaded it.   Otherwise only
 					// work if DriverManager has already loaded it.
 
-					driver = (Driver169) DriverManager.getDriver(url);
+					driver = (InternalDriver) DriverManager.getDriver(url);
 					// DriverManager will throw an exception if it cannot find the driver
 				}
 			}
@@ -522,7 +522,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 			// connection attributes.
 
 			// this space will selected as the database name (and trimmed to an empty string)
-			// See the getDatabaseName() code in Driver169. Since this is a non-null
+			// See the getDatabaseName() code in InternalDriver. Since this is a non-null
 			// value, it will be selected over any databaseName connection attribute.
 			dbName = " ";
 		}

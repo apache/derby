@@ -20,7 +20,7 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.jdbc.Driver169;
+import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.JDBC20Translation;
@@ -126,7 +126,7 @@ public class EmbedConnection implements java.sql.Connection
 	/**	
 		Factory for JDBC objects to be created.
 	*/
-	public Driver169 factory;
+	public InternalDriver factory;
 
 	/**
 		The Connection object the application is using when accessing the
@@ -151,7 +151,7 @@ public class EmbedConnection implements java.sql.Connection
 
 	// create a new Local Connection, using a new context manager
 	//
-	public EmbedConnection(Driver169 driver, String url, Properties info)
+	public EmbedConnection(InternalDriver driver, String url, Properties info)
 		 throws SQLException
 	{
 		// Create a root connection.
@@ -1621,7 +1621,7 @@ public class EmbedConnection implements java.sql.Connection
 		}
 	}
 
-	public final Driver169 getLocalDriver()
+	public final InternalDriver getLocalDriver()
 	{
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(!isClosed(), "connection is closed");

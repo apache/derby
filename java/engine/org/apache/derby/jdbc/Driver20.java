@@ -53,7 +53,7 @@ import java.util.Properties;
 	methods and sql types.
 */
 
-public class Driver20 extends Driver169 implements Driver {
+public class Driver20 extends InternalDriver implements Driver {
 
 	private static final String[] BOOLEAN_CHOICES = {"false", "true"};
 
@@ -191,7 +191,7 @@ public class Driver20 extends Driver169 implements Driver {
 
 		// at this point we have databaseName, 
 
-		String dbname = Driver169.getDatabaseName(url, info);
+		String dbname = InternalDriver.getDatabaseName(url, info);
 
 		// convert the ;name=value attributes in the URL into
 		// properties.

@@ -20,7 +20,7 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.jdbc.Driver169;
+import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -117,7 +117,7 @@ public final class TransactionResourceImpl
 	protected String username;
 
 	private String dbname;
-	private Driver169 driver;
+	private InternalDriver driver;
 	private String url;
 	private String drdaID;
 
@@ -129,13 +129,13 @@ public final class TransactionResourceImpl
 	 * create a brand new connection for a brand new transaction
 	 */
 	TransactionResourceImpl(
-							Driver169 driver, 
+							InternalDriver driver, 
 							String url,
 							Properties info) throws SQLException 
 	{
 		this.driver = driver;
 		csf = driver.getContextServiceFactory();
-		dbname = Driver169.getDatabaseName(url, info);
+		dbname = InternalDriver.getDatabaseName(url, info);
 		this.url = url;
 
 		// the driver manager will push a user name
@@ -193,7 +193,7 @@ public final class TransactionResourceImpl
 	 * should perhaps stop giving out reference to these things but instead use
 	 * the transaction resource itself.
 	 */
-	Driver169 getDriver() {
+	InternalDriver getDriver() {
 		return driver;
 	}
 	ContextService getCsf() {

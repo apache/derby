@@ -25,7 +25,7 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.jdbc.Driver169;
+import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.DB2Limit;
@@ -64,7 +64,7 @@ public class EmbedConnection30 extends EmbedConnection
 	//////////////////////////////////////////////////////////
 
 	public EmbedConnection30(
-			Driver169 driver,
+			InternalDriver driver,
 			String url,
 			Properties info)
 		throws SQLException

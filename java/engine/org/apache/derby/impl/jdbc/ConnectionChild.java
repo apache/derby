@@ -20,7 +20,7 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.jdbc.Driver169;
+import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 
@@ -48,7 +48,7 @@ abstract class ConnectionChild {
 	/**	
 		Factory for JDBC objects to be created.
 	*/
-	protected final Driver169 factory;
+	protected final InternalDriver factory;
 
 	/**
 		Calendar for data operations.

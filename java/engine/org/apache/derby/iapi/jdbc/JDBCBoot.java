@@ -60,13 +60,13 @@ public class JDBCBoot {
 	*/
 	public void boot(String protocol, PrintStream logging) {
 
-		if (org.apache.derby.jdbc.Driver169.activeDriver() == null)
+		if (org.apache.derby.jdbc.InternalDriver.activeDriver() == null)
 		{
 
-			// request that the java.sql.Driver (JDBC) service and the
+			// request that the InternalDriver (JDBC) service and the
 			// authentication service be started.
 			//
-			addProperty("derby.service.jdbc", "org.apache.derby.jdbc.Driver169");
+			addProperty("derby.service.jdbc", "org.apache.derby.jdbc.InternalDriver");
 			addProperty("derby.service.authentication", AuthenticationService.MODULE);
 
 			Monitor.startMonitor(bootProperties, logging);
