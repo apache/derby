@@ -243,11 +243,11 @@
 <!-- =================================================================== -->
   <target name="cleanparsers">
     <delete>
-      <fileset dir="${derby.engine.dir}/impl/sql/compile" includes="SQLParser.java,SQLParserTokenManager.java,SQLParserConstants.java"/>
+      <fileset dir="${derby.engine.dir}/impl/sql/compile" includes="SQLParser.java,SQLParserTokenManager.java,SQLParserConstants.java,TokenMgrError.java"/>
     </delete>
     <delete>
       <fileset dir="${derby.tools.dir}/impl/tools/ij"
-            includes="ij.java ijTokenManager.java ijConstants.java Token.java,mtGrammar.java,mtGrammarConstants.java,mtGrammarTokenManager.java"/>
+            includes="ij.java,ijTokenManager.java,ijConstants.java,Token.java,mtGrammar.java,mtGrammarConstants.java,mtGrammarTokenManager.java,CharStream.java,SimpleCharStream.java,TokenMgrError.java"/>
     </delete>
   </target>
 
