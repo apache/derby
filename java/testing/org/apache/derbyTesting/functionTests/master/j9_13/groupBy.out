@@ -45,7 +45,7 @@ ij> -- group by on long varchar type
 create table unmapped(c1 long varchar);
 0 rows inserted/updated/deleted
 ij> select c1, max(1) from unmapped group by c1;
-ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
 ij> -- clean up
 drop table t1;
 0 rows inserted/updated/deleted
