@@ -65,7 +65,7 @@ import java.sql.SQLException;
  *
  * @author jamie
  */
-final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
+public final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
 {
 	static final BigDecimal ZERO = BigDecimal.valueOf(0L);
 	static final BigDecimal ONE = BigDecimal.valueOf(1L);
