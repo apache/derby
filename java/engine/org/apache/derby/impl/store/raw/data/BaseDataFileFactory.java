@@ -168,6 +168,7 @@ public class BaseDataFileFactory
 
 	// lock against other JBMS opening the same database
 	private StorageRandomAccessFile fileLockOnDB;
+	private StorageFile exFileLock; //file handle to get exclusive lock
 	private HeaderPrintWriter istream;
 	private static final String LINE = 
 	"----------------------------------------------------------------";
@@ -1702,7 +1703,7 @@ public class BaseDataFileFactory
             //about applying exclusive file lock mechanism 
             if(!throwDBlckException)
             {
-                StorageFile exFileLock = storageFactory.newStorageFile( DB_EX_LOCKFILE_NAME);
+                exFileLock = storageFactory.newStorageFile( DB_EX_LOCKFILE_NAME);
                 exLockStatus = exFileLock.getExclusiveFileLock();
             }
 
@@ -1804,10 +1805,15 @@ public class BaseDataFileFactory
 
         if( storageFactory != null)
         {
-            StorageFile fileLock = storageFactory.newStorageFile( DB_LOCKFILE_NAME);
-
-            fileLock.releaseExclusiveFileLock();
+            StorageFile fileLock = storageFactory.newStorageFile(DB_LOCKFILE_NAME);
+            fileLock.delete();
         }
+
+		//release the lock that is acquired using tryLock() to prevent
+		//multiple jvm booting the same database on Unix environments.
+		if(exFileLock != null)
+			exFileLock.releaseExclusiveFileLock();
+
         return;
     } // end of privReleaseJBMSLockOnDB
         
