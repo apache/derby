@@ -52,7 +52,7 @@ insert into four values (3, 1, 2, 1, 1);
 insert into four values (3, 1, 3, 1, 1);
 
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 2000;
+maximumdisplaywidth 20000;
 
 -- queries that cannot eliminate the distinct
 
