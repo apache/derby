@@ -47,7 +47,7 @@ ij> -- PASS:0582 If 1 row is updated?
    SELECT C1, C2, C3 FROM ICAST2;
 C1         |C2                    |C3      
 -------------------------------------------
-2          |2.1                   |9.099   
+2          |2.1                   |9.100   
 ij> -- PASS:0582 If 1 row is selected with C1 = 2 and C3 = 9.100?
    ROLLBACK WORK;
 ij> --O   DROP TABLE ICAST2 CASCADE;

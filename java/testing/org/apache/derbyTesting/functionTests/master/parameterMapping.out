@@ -557,7 +557,7 @@ getXXX on : REAL
   getLong=32 was null false JDBC MATCH(OK)
   getFloat=32.0 was null false JDBC MATCH(OK)
   getDouble=32.0 was null false JDBC MATCH(OK)
-  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
   getBoolean=true was null false JDBC MATCH(OK)
   getString=32.0 was null false JDBC MATCH(OK)
   getBytes=IC JDBC MATCH (INVALID)
@@ -671,8 +671,8 @@ P2=cs.getDouble=41.900001525878906 was null false
 P3=cs.getDouble=88.80000305175781 was null false
 INOUT REAL registerOutParameter(Types.DECIMAL) -- OK
 OUT REAL registerOutParameter(Types.DECIMAL) -- OK
-P2=cs.getBigDecimal=41.90000152587890625 was null false
-P3=cs.getBigDecimal=88.8000030517578125 was null false
+P2=cs.getBigDecimal=41.9 was null false
+P3=cs.getBigDecimal=88.8 was null false
 INOUT REAL registerOutParameter(Types.NUMERIC) -- OK
 OUT REAL registerOutParameter(Types.NUMERIC) -- OK
 INOUT REAL registerOutParameter(Types.BIT) -- OK
@@ -733,7 +733,7 @@ FAIL - mismatch column type 8 expected 6
   getLong=32 was null false JDBC MATCH(OK)
   getFloat=32.0 was null false JDBC MATCH(OK)
   getDouble=32.0 was null false JDBC MATCH(OK)
-  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
   getBoolean=true was null false JDBC MATCH(OK)
   getString=32.0 was null false JDBC MATCH(OK)
   getBytes=IC JDBC MATCH (INVALID)
@@ -847,8 +847,8 @@ P2=cs.getDouble=35.9 was null false
 P3=cs.getDouble=66.8 was null false
 INOUT FLOAT registerOutParameter(Types.DECIMAL) -- OK
 OUT FLOAT registerOutParameter(Types.DECIMAL) -- OK
-P2=cs.getBigDecimal=35.89999999999999857891452847979962825775146484375 was null false
-P3=cs.getBigDecimal=66.7999999999999971578290569595992565155029296875 was null false
+P2=cs.getBigDecimal=35.9 was null false
+P3=cs.getBigDecimal=66.8 was null false
 INOUT FLOAT registerOutParameter(Types.NUMERIC) -- OK
 OUT FLOAT registerOutParameter(Types.NUMERIC) -- OK
 INOUT FLOAT registerOutParameter(Types.BIT) -- OK
@@ -908,7 +908,7 @@ getXXX on : DOUBLE
   getLong=32 was null false JDBC MATCH(OK)
   getFloat=32.0 was null false JDBC MATCH(OK)
   getDouble=32.0 was null false JDBC MATCH(OK)
-  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
   getBoolean=true was null false JDBC MATCH(OK)
   getString=32.0 was null false JDBC MATCH(OK)
   getBytes=IC JDBC MATCH (INVALID)
@@ -1022,8 +1022,8 @@ P2=cs.getDouble=35.9 was null false
 P3=cs.getDouble=66.8 was null false
 INOUT DOUBLE registerOutParameter(Types.DECIMAL) -- OK
 OUT DOUBLE registerOutParameter(Types.DECIMAL) -- OK
-P2=cs.getBigDecimal=35.89999999999999857891452847979962825775146484375 was null false
-P3=cs.getBigDecimal=66.7999999999999971578290569595992565155029296875 was null false
+P2=cs.getBigDecimal=35.9 was null false
+P3=cs.getBigDecimal=66.8 was null false
 INOUT DOUBLE registerOutParameter(Types.NUMERIC) -- OK
 OUT DOUBLE registerOutParameter(Types.NUMERIC) -- OK
 INOUT DOUBLE registerOutParameter(Types.BIT) -- OK

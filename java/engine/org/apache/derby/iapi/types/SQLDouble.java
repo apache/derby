@@ -153,7 +153,7 @@ public final class SQLDouble extends NumberDataType
 	public BigDecimal	getBigDecimal()
 	{
 		if (isNull()) return null;
-		return new BigDecimal(value);
+		return new BigDecimal(Double.toString(value));
 	}
 
     // for lack of a specification: getDouble()==0 gives true

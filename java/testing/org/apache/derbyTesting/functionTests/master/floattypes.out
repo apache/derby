@@ -606,7 +606,7 @@ values (
 ij> values cast(1.7e30 as dec(31));
 1                               
 --------------------------------
-1700000000000000118246355238912 
+1700000000000000000000000000000 
 ij> --try a tiny number 
 -- the following seems to be asking a bit
 -- too much of poor old biginteger, so try

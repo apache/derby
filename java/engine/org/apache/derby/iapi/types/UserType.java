@@ -195,7 +195,7 @@ public class UserType extends DataType
 			if (value instanceof BigDecimal) return ((BigDecimal)value);
 
 			if (value instanceof Number)
-				return new BigDecimal(((Number) value).doubleValue());
+				return new BigDecimal(Double.toString(((Number) value).doubleValue()));
 		}
 		return super.getBigDecimal();
 	}

@@ -371,7 +371,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		}
 		else if (theValue instanceof Number)
 		{
-			value = new BigDecimal(((Number)theValue).doubleValue());
+			value = new BigDecimal(Double.toString(((Number)theValue).doubleValue()));
 		}
 		else
 		{
@@ -720,7 +720,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 
 	private void setCoreValue(double theValue) {
-		value = new BigDecimal(theValue);
+		value = new BigDecimal(Double.toString(theValue));
 		rawData = null;
 	}
 

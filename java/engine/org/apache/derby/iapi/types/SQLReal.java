@@ -161,7 +161,7 @@ public final class SQLReal
 	public BigDecimal	getBigDecimal()
 	{
 		if (isNull()) return null;
-		return new BigDecimal(value);
+		return new BigDecimal(Float.toString(value));
 	}
 
     // for lack of a specification: 0 or null is false,
