@@ -1,6 +1,4 @@
--- THIS TEST WILL NOT WORK WITH THE .jar files
--- It uses a dummy message_qq_PP_testOnly.properties that exists
--- only in the codeline
+-- This test uses dummy messages from org/apache/derby/loc/message_qq_PP_testOnly.properties
 --
 -- Message locale handling
 --
