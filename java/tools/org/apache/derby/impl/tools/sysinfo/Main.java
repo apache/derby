@@ -379,7 +379,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 			int major = Integer.valueOf(p.getProperty ("derby.locale.version.major")).intValue();
 			int minor = Integer.valueOf(p.getProperty ("derby.locale.version.minor")).intValue();
 			int maint = Integer.valueOf(p.getProperty ("derby.locale.version.maint")).intValue();
-			int build = Integer.valueOf(p.getProperty ("derby.locale.build.number")).intValue();
+			String build = p.getProperty ("derby.locale.build.number");
 
 			String lv = ProductVersionHolder.fullVersionString(major, minor, maint, false, build);
 
@@ -862,7 +862,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 			minor.intValue(),
 			0,
 			0,
-			build.intValue(),
+			build.toString(),
 			Boolean.FALSE);
 
 		ZipInfoProperties zip = new ZipInfoProperties(jccVersion);
