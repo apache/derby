@@ -150,32 +150,6 @@ public class EmbedCallableStatement20
     /**
      * JDBC 2.0
      *
-     * Get a BLOB OUT parameter.
-     *
-     * @param i the first parameter is 1, the second is 2, ...
-     * @return an object representing a BLOB
-     * @exception SQLException if a database-access error occurs.
-     */
-    public Blob getBlob (int i) throws SQLException {
-		throw Util.notImplemented();
-	}
-
-    /**
-     * JDBC 2.0
-     *
-     * Get a CLOB OUT parameter.
-     *
-     * @param i the first parameter is 1, the second is 2, ...
-     * @return an object representing a CLOB
-     * @exception SQLException if a database-access error occurs.
-     */
-    public Clob getClob (int i) throws SQLException {
-		throw Util.notImplemented();
-	}
-
-    /**
-     * JDBC 2.0
-     *
      * Get an Array OUT parameter.
      *
      * @param i the first parameter is 1, the second is 2, ...
@@ -186,48 +160,6 @@ public class EmbedCallableStatement20
 		throw Util.notImplemented();
 	}
 
-    /**
-     * Get the value of a SQL DATE parameter as a java.sql.Date object
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @return the parameter value; if the value is SQL NULL, the result is 
-     * null
-     * @exception SQLException if a database-access error occurs.
-     */
-    public java.sql.Date getDate(int parameterIndex, Calendar cal) 
-      throws SQLException 
-	{
-		return getDate(parameterIndex);
-	}
-
-    /**
-     * Get the value of a SQL TIME parameter as a java.sql.Time object.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @return the parameter value; if the value is SQL NULL, the result is 
-	 * null
-     * @exception SQLException if a database-access error occurs.
-     */
-    public java.sql.Time getTime(int parameterIndex, Calendar cal) 
-      throws SQLException 
-	{
-		return getTime(parameterIndex);
-	}
-
-    /**
-     * Get the value of a SQL TIMESTAMP parameter as a java.sql.Timestamp 
-     * object.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @return the parameter value; if the value is SQL NULL, the result is 
-     * null
-     * @exception SQLException if a database-access error occurs.
-     */
-    public java.sql.Timestamp getTimestamp(int parameterIndex, Calendar cal) 
-      throws SQLException 
-	{
-		return getTimestamp(parameterIndex);
-	}
 
  
 	/*
@@ -322,53 +254,6 @@ public class EmbedCallableStatement20
 	*/
 	public void registerOutParameter(String parameterName,
 					int sqlType, int scale)
-    throws SQLException
-	{
-		throw Util.notImplemented();
-	}
-
-	/**
-    * JDBC 3.0
-    *
-    * Retrieve the value of the designated JDBC DATALINK parameter as a java.net.URL object
-    *
-    * @param parameterIndex - the first parameter is 1, the second is 2
-    * @return a java.net.URL object that represents the JDBC DATALINK value used as
-    * the designated parameter
-    * @exception SQLException Feature not implemented for now.
-	*/
-	public URL getURL(int parameterIndex)
-    throws SQLException
-	{
-		throw Util.notImplemented();
-	}
-
-	/**
-    * JDBC 3.0
-    *
-    * Sets the designated parameter to the given java.net.URL object. The driver
-    * converts this to an SQL DATALINK value when it sends it to the database.
-    *
-    * @param parameterName - the name of the parameter
-    * @param val - the parameter value
-    * @exception SQLException Feature not implemented for now.
-	*/
-	public void setURL(String parameterName, URL val)
-    throws SQLException
-	{
-		throw Util.notImplemented();
-	}
-
-	/**
-    * JDBC 3.0
-    *
-    * Retrieves the value of a JDBC DATALINK parameter as a java.net.URL object
-    *
-    * @param parameterName - the name of the parameter
-    * @return the parameter value. If the value is SQL NULL, the result is null.
-    * @exception SQLException Feature not implemented for now.
-	*/
-	public URL getURL(String parameterName)
     throws SQLException
 	{
 		throw Util.notImplemented();

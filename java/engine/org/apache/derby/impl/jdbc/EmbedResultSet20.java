@@ -318,39 +318,7 @@ public class EmbedResultSet20
         //
         /////////////////////////////////////////////////////////////////////////
 
-        /**
-    * JDBC 3.0
-    *
-    * Retrieves the value of the designated column in the current row of this
-    * ResultSet object as a java.net.URL object in the Java programming language.
-    *
-    * @param columnIndex - the first column is 1, the second is 2
-    * @return the column value as a java.net.URL object, if the value is SQL NULL,
-    * the value returned is null in the Java programming language 
-    * @exception SQLException Feature not implemented for now.
-        */
-        public URL getURL(int columnIndex)
-    throws SQLException
-        {
-                throw Util.notImplemented();
-        }
 
-        /**
-    * JDBC 3.0
-    *
-    * Retrieves the value of the designated column in the current row of this
-    * ResultSet object as a java.net.URL object in the Java programming language.
-    *
-    * @param columnName - the SQL name of the column
-    * @return the column value as a java.net.URL object, if the value is SQL NULL,
-    * the value returned is null in the Java programming language 
-    * @exception SQLException Feature not implemented for now.
-        */
-        public URL getURL(String columnName)
-    throws SQLException
-        {
-                throw Util.notImplemented();
-        }
 
         /**
     * JDBC 3.0
