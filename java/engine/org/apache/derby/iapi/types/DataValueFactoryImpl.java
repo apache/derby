@@ -68,9 +68,8 @@ public class DataValueFactoryImpl implements DataValueFactory
           *     Make the constructor public.
           *
           */
-    public      DataValueFactoryImpl(LocaleFinder localeFinder)
+    public      DataValueFactoryImpl()
         {
-                this.localeFinder = localeFinder;
         }
 
         /**

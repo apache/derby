@@ -75,8 +75,6 @@ import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 
-import org.apache.derby.iapi.types.DataValueFactoryImpl;
-
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Property;
@@ -320,18 +318,7 @@ public class GenericLanguageConnectionFactory
 	public void boot(boolean create, Properties startParams) 
 		throws StandardException {
 
-		// Get the Database from the context manager and pass it to the
-		// DataValueFactory. The DVF expects a LocaleFinder, which Database
-		// implements.
-		//
-		// RESOLVE: Unfortunately, the Database is in the process of booting,
-		// so the Monitor can't find it. So, we just pass in null, and let
-		// the DVF get the Database on first access. No amount of shuffling
-		// of boot order can solve this problem, because the Database is
-		// the top-level module for almost everything. So, the Monitor needs
-		// to be fixed so it can find modules that are not done booting yet.
-		dvf = new DataValueFactoryImpl((LocaleFinder) null);
-
+		dvf = (DataValueFactory) Monitor.bootServiceModule(create, this, org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
 		javaFactory = (JavaFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.JavaFactory);
 		uuidFactory = Monitor.getMonitor().getUUIDFactory();
 		classFactory = (ClassFactory) Monitor.getServiceModule(this, org.apache.derby.iapi.reference.Module.ClassFactory);
