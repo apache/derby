@@ -23,12 +23,7 @@ import org.apache.derby.iapi.error.StandardException;
  *
  * @author ames
  */
-public interface CursorResultSet extends ResultSet { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface CursorResultSet extends ResultSet {
 
 	/**
 	 * Returns the row location of the current base table row of the cursor.

@@ -29,10 +29,6 @@ use the ScanController to interact with the scan.
 
 public interface ScanManager extends ScanController, GroupFetchScanController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     /**
      * Close scan as part of terminating a transaction.

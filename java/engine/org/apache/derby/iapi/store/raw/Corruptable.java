@@ -13,10 +13,6 @@ package org.apache.derby.iapi.store.raw;
 import org.apache.derby.iapi.error.StandardException;
 
 public interface Corruptable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Mark the module as corrupt.

@@ -158,10 +158,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 public interface Qualifier
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**	
 	 * The DataValueDescriptor can be 1 of 4 types:<ul>

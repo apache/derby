@@ -71,10 +71,6 @@ import java.text.ParseException;
 public final class SQLDate extends DataType
 						implements DateTimeDataValue
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private int	encodedDate;	//year << 16 + month << 8 + day
 

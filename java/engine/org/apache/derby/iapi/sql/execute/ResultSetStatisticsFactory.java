@@ -28,10 +28,6 @@ import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
 public interface ResultSetStatisticsFactory 
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 		Module name for the monitor's module locating system.
 	 */
 	String MODULE = "org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory";

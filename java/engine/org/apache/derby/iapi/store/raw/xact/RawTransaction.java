@@ -55,10 +55,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 
 public abstract class RawTransaction extends Observable implements Transaction {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	public static final Integer		COMMIT =             new Integer(0);
 	public static final Integer		ABORT =              new Integer(1);

@@ -16,10 +16,6 @@ package org.apache.derby.iapi.store.raw.log;
 
 public interface LogScan {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 		The how and what a logScan returns is left to the specific
 		implementation. 
 		This interface is here so that a LogFactory can return it.

@@ -47,11 +47,6 @@ import java.io.InputStream;
 	useful when processing old transactions in the stage. 
 */
 public interface FileResource {
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	
 	/**
 	  Add a file resource, copying from the input stream.

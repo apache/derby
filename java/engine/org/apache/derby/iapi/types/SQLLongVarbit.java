@@ -51,10 +51,6 @@ import java.sql.SQLException;
  */
 public class SQLLongVarbit extends SQLVarbit
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	public String getTypeName()
 	{

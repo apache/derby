@@ -43,10 +43,6 @@ import java.util.Hashtable;
 
 public interface GroupFetchScanController extends GenericScanController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     /**
      * Fetch the next N rows from the table.
      * <p>

@@ -38,10 +38,6 @@ import org.apache.derby.iapi.services.io.Formatable;
 public interface ExecAggregator extends Formatable
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	    Set's up the aggregate for processing.
 	 */
 	public void setup(String aggregateName);

@@ -29,10 +29,6 @@ import java.io.ObjectOutput;
  */
 public final class JSQLType implements Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	///////////////////////////////////////////////////////////////////////
 	//
 	//	CONSTANTS

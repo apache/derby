@@ -25,10 +25,6 @@ ContainerLock qualifer, and is used for output in lock debugging.
 
 public class D_ContainerLock extends DiagnosticableGeneric
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     // Names of locks for lock trace print out.
 	private static String[] names = { "CIS", "CIX", "CS", "CU", "CX" };
 

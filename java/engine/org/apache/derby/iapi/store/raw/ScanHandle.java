@@ -20,10 +20,6 @@ import java.io.InputStream;
 public interface ScanHandle
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	  Position to the next log record. 
 	  @return true if the log contains a next flushed log record and
 	           false otherwise. If this returns false it is incorrect

@@ -17,12 +17,7 @@ import org.apache.derby.iapi.sql.Activation;
  *
  * @author ames
  */
-public interface CursorActivation extends Activation { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface CursorActivation extends Activation {
 
 	/**
 	 * Returns the target result set for this activation,

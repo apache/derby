@@ -30,10 +30,6 @@ import java.util.Properties;
 
 public interface SortCostController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     /**
      * Close the controller.
      * <p>

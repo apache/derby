@@ -31,10 +31,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 public interface ConglomerateFactory extends MethodFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     static final int    HEAP_FACTORY_ID     = 0x00;
     static final int    BTREE_FACTORY_ID    = 0x01;

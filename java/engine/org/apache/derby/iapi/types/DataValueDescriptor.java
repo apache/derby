@@ -90,11 +90,6 @@ import java.util.Calendar;
 
 public interface DataValueDescriptor extends Storable, Orderable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 	 * Gets the length of the data value.  The meaning of this is

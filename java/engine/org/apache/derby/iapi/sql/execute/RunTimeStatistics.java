@@ -35,10 +35,6 @@ import java.sql.Timestamp;
 public interface RunTimeStatistics
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Get the total compile time for the associated query in milliseconds.
 	 * Compile time can be divided into parse, bind, optimize and generate times.
 	 * <P>

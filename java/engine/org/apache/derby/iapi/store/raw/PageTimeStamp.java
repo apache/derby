@@ -22,9 +22,5 @@ package org.apache.derby.iapi.store.raw;
 
 public interface PageTimeStamp
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/** No method definition.  This is a type definition */
 }

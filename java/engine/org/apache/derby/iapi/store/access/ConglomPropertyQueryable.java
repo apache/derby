@@ -28,10 +28,6 @@ RESOLVE - If language ever wants these interfaces on a ScanController it
 
 public interface ConglomPropertyQueryable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     /**
      * Request the system properties associated with a table. 
      * <p>

@@ -41,10 +41,6 @@ import java.io.Serializable;
 public interface DatabaseInstant
 extends Serializable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	  Return true if this DatabaseInstant is before another

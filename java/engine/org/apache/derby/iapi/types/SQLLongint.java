@@ -65,10 +65,6 @@ import java.sql.SQLException;
 public final class SQLLongint
 	extends NumberDataType
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/*
 	 * DataValueDescriptor interface
 	 * (mostly implemented in DataType)

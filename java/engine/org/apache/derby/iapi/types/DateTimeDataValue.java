@@ -18,10 +18,6 @@ import java.sql.Timestamp;
 
 public interface DateTimeDataValue extends DataValueDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	public static final int YEAR_FIELD = 0;
 	public static final int MONTH_FIELD = 1;
 	public static final int DAY_FIELD = 2;

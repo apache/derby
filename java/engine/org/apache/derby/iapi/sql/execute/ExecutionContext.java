@@ -23,12 +23,7 @@ import org.apache.derby.iapi.sql.ResultSet;
  *
  * @author ames
  */
-public interface ExecutionContext extends Context { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface ExecutionContext extends Context {
 
 	/**
 	 * this is the ID we expect execution contexts

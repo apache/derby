@@ -62,10 +62,6 @@ import java.util.Calendar;
 public class UserType extends DataType
 						implements UserDataValue
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	private Object	value;
 
 	/*

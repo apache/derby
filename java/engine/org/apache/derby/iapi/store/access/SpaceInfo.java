@@ -21,10 +21,6 @@ ConglomerateController.getSpaceInfo().
 
 public interface SpaceInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     /**
      * Get the estimated number of allocated pages
      **/

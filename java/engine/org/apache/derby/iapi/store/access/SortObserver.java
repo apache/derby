@@ -60,10 +60,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface SortObserver
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Called prior to inserting a distinct sort
 	 * key; in other words, the first time that a
 	 * key is inserted into the sorter, this method

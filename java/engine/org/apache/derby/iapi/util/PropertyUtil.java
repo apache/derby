@@ -16,10 +16,6 @@ import java.io.InputStream;
 import java.io.IOException;
 
 public class PropertyUtil {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	
 
 	//////////////////////////////////////////////////////////////////////////////

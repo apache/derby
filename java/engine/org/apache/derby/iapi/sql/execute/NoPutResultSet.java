@@ -28,10 +28,6 @@ import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
  */
 public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// method names for use with SQLState.LANG_RESULT_SET_NOT_OPEN exception
 
 	public	static	final	String	ABSOLUTE		=	"absolute";

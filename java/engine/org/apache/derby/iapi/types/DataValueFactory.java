@@ -31,10 +31,6 @@ import java.util.Locale;
 
 public interface DataValueFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
         /**
          * Get a SQL int with the given value.  A null argument means get
          * a SQL null value.  The second form uses the previous value (if non-null)

@@ -18,12 +18,7 @@ import org.apache.derby.iapi.store.access.DatabaseInstant;
 */
 
 public interface LogInstant
-extends Formatable, DatabaseInstant { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+extends Formatable, DatabaseInstant {
 
 	public static final long INVALID_LOG_INSTANT = 0;
 }

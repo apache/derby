@@ -18,10 +18,6 @@ Global constants provided by the Access Interface.
 
 public interface AccessFactoryGlobals
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     /**************************************************************************
      * Static constants.
      **************************************************************************

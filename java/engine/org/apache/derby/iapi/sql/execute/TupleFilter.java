@@ -22,10 +22,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface TupleFilter
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	  *	Initialize a Filter with a vector of parameters.
 	  *
 	  *	@param	parameters	An ExecRow of parameter values

@@ -23,10 +23,6 @@ import org.apache.derby.iapi.services.locks.Lockable;
 */
 
 public interface RecordHandle extends Lockable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/*****************************************************************
 	 * Special record Identifiers.

@@ -27,10 +27,6 @@ import java.util.Properties;
 
 public interface ScanInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     /**
      * Return all information gathered about the scan.
      * <p>

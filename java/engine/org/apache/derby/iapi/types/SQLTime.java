@@ -76,10 +76,6 @@ import java.text.ParseException;
 public final class SQLTime extends DataType
 						implements DateTimeDataValue
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	private int		encodedTime;
 	private int		encodedTimeFraction; //currently always 0 since we don't

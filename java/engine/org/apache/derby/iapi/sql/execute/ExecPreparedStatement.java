@@ -26,12 +26,7 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  *	@author ames
  */
 public interface ExecPreparedStatement 
-	extends PreparedStatement { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+	extends PreparedStatement {
 
 	/**
 	 * set the statement text

@@ -25,10 +25,6 @@ import java.util.Enumeration;
 */
 
 public final class DoubleProperties extends Properties {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	private final Properties read;
 	private final Properties write;

@@ -30,10 +30,6 @@ calculations need only be done once per scan rather than every iteration.
 
 public final class FetchDescriptor
 {
-    /**
-       IBM Copyright &copy notice.
-    */
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
     /**************************************************************************
      * Fields of the class

@@ -68,10 +68,6 @@ import java.sql.SQLException;
  */
 public final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	public static final BigDecimal ZERO = BigDecimal.valueOf(0L);
 	public static final BigDecimal ONE = BigDecimal.valueOf(1L);
 	public static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);

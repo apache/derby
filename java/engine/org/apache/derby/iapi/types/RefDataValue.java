@@ -15,10 +15,6 @@ import org.apache.derby.iapi.types.RowLocation;
 
 public interface RefDataValue extends DataValueDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 	 * Set the value of this RefDataValue.

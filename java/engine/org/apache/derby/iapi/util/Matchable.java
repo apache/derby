@@ -15,12 +15,7 @@ package org.apache.derby.iapi.util;
 	match a subset of a group of other objects.
 	E.g in a cache.
 */
-public interface Matchable { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public interface Matchable {
 
 	/**
 		Return true if the passed in object matches

@@ -47,10 +47,6 @@ import org.apache.derby.iapi.error.StandardException;
 */
 
 public interface LockingPolicy {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		No locking what so ever, isolation parameter will be ignored by

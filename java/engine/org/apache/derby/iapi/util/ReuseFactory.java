@@ -17,10 +17,6 @@ package org.apache.derby.iapi.util;
 	All the methods in this class are static.
 */
 public class ReuseFactory {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/** Private constructor so no instances can be made */
 	private ReuseFactory() {

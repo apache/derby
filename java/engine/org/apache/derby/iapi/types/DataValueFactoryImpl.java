@@ -53,10 +53,6 @@ import org.apache.derby.iapi.services.context.ContextService;
  */
 public class DataValueFactoryImpl implements DataValueFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
         LocaleFinder localeFinder;
 
         /**

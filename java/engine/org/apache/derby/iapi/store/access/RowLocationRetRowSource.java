@@ -27,10 +27,6 @@ import org.apache.derby.iapi.types.RowLocation;
 */ 
 public interface RowLocationRetRowSource extends RowSource 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		needsRowLocation returns true iff this the row source expects the

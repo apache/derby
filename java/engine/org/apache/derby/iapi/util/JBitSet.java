@@ -30,10 +30,6 @@ import java.util.BitSet;
  */
 public final class JBitSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/* The BitSet that we'd like to extend */
 	private final BitSet	bitSet;
 	/* Cache size() of bitSet, since accessed a lot */

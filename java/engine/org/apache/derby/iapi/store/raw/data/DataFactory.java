@@ -35,10 +35,6 @@ import org.apache.derby.catalog.UUID;
 import java.util.Properties;
 
 public interface DataFactory extends Corruptable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	public static final String MODULE = "org.apache.derby.iapi.store.raw.data.DataFactory";
 

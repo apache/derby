@@ -26,10 +26,6 @@ import org.apache.derby.iapi.util.ByteArray;
 */
 
 public interface RawContainerHandle extends ContainerHandle {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/** A container can be in 4 states:
 		non_existent - this is represented by a null ContainerHandle

@@ -29,12 +29,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	@see Transaction#logAndDo
 */
 
-public interface Loggable extends Formatable { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface Loggable extends Formatable {
 
 	/**
 		Apply the change indicated by this operation and optional data.

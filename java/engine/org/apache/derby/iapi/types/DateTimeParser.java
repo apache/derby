@@ -19,11 +19,6 @@ import org.apache.derby.iapi.error.StandardException;
 class DateTimeParser
 {
 
-    /**
-       IBM Copyright &copy notice.
-    */
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
-
     private String str;
     private String trimmedString;
     private int len;

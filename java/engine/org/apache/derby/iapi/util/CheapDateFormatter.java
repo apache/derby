@@ -16,10 +16,6 @@ package org.apache.derby.iapi.util;
  * expensive.
  */
 public class CheapDateFormatter {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	static final long SECONDS  = 1000L;
 	static final long MINUTES = SECONDS * 60L;
 	static final long HOURS = MINUTES * 60L;

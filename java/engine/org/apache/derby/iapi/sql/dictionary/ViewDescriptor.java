@@ -48,10 +48,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 public class ViewDescriptor extends TupleDescriptor
 	implements UniqueTupleDescriptor, Dependent, Provider
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private int			checkOption;
 	private String		viewName;
 	private String		viewText;

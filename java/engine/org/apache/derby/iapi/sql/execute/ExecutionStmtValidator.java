@@ -29,10 +29,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 public interface ExecutionStmtValidator
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Validate the statement.
 	 *
 	 * @param constantAction The constant action that we are about to execute.  

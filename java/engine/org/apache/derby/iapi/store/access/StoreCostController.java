@@ -46,10 +46,6 @@ query while another query is optimizing.
 
 public interface StoreCostController extends RowCountable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     // The folllowing constants should only be used by StoreCostController
     // implementors.
 

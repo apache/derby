@@ -83,10 +83,6 @@ import java.io.File;
 
 
 public interface RawStoreFactory extends Corruptable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 
 	/**

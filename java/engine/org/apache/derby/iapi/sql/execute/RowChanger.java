@@ -28,10 +28,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 public interface RowChanger
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	  Open this RowChanger.
 
 	  <P>Note to avoid the cost of fixing indexes that do not

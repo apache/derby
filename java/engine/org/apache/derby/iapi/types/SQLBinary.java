@@ -82,10 +82,6 @@ import java.sql.SQLException;
 public abstract class SQLBinary
 	extends DataType implements BitDataValue
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2004;
 
 	static final byte PAD = (byte) 0x20;
 

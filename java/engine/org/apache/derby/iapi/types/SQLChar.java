@@ -84,10 +84,6 @@ import java.util.GregorianCalendar;
 public class SQLChar
 	extends DataType implements StringDataValue, StreamStorable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		Static array that can be used for blank padding.

@@ -26,12 +26,7 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 /**
 */
 
-public interface Transaction { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface Transaction {
 
 	/**
 		Return the context manager this transaction is associated with.

@@ -33,10 +33,6 @@ TransactionController.
 
 public interface TransactionManager extends TransactionController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     /**
      * Constant used for the lock_level argument to openConglomerate() and 

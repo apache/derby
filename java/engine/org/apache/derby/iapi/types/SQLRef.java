@@ -43,10 +43,6 @@ import java.sql.PreparedStatement;
 
 public class SQLRef extends DataType implements RefDataValue
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected RowLocation	value;
 
     private static final int BASE_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( SQLRef.class);

@@ -41,10 +41,6 @@ import java.io.File;
 public interface AccessFactory
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Used to identify this interface when finding it with the Monitor.
      **/
 	public static final String MODULE = 

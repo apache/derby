@@ -28,10 +28,6 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 public interface TemporaryRowHolder
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Insert a row
 	 *
 	 * @param row the row to insert 

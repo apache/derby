@@ -30,10 +30,6 @@ consistent way across both subclasses.
 **/
 
 public abstract class GlobalXact {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     
     /**************************************************************************
      * Protected Fields of the class

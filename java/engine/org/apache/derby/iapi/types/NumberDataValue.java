@@ -15,10 +15,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface NumberDataValue extends DataValueDescriptor
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * The minimum scale when dividing Decimals
 	 */
 	public static final int MIN_DECIMAL_DIVIDE_SCALE = 4;

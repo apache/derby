@@ -27,12 +27,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
   import, to rows coming out of a sort for index creation.
 
 */ 
-public interface RowSource { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public interface RowSource {
 
 	/**
 		Get the next row as an array of column objects. The column objects can

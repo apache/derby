@@ -71,10 +71,6 @@ import java.text.ParseException;
 public final class SQLTimestamp extends DataType
 						implements DateTimeDataValue
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
     static final int MAX_FRACTION_DIGITS = 6; // Only microsecond resolution on conversion to/from strings
     static final int FRACTION_TO_NANO = 1000; // 10**(9 - MAX_FRACTION_DIGITS)

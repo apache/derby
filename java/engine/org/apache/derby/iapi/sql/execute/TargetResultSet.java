@@ -29,10 +29,6 @@ import org.apache.derby.iapi.types.RowLocation;
 public interface TargetResultSet extends ResultSet
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Pass a changed row and the row location for that row
 	 * to the target result set.
 	 *

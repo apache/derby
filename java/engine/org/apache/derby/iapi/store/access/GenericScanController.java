@@ -47,10 +47,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 public interface GenericScanController extends RowCountable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     /**
     Close the scan.  This method always succeeds, and never throws
     any exceptions. Callers must not use the scan controller after

@@ -17,10 +17,6 @@ import java.util.Locale;
 public class StringUtil 
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Used to print out a string for error messages, 
 	 * chops is off at 60 chars for historical reasons.
 	 */

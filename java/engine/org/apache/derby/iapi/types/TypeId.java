@@ -49,10 +49,6 @@ import java.sql.Types;
 
 public final class TypeId implements Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
         /**
          * Various fixed numbers related to datatypes.
          */

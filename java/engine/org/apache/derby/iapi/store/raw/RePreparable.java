@@ -24,10 +24,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 public interface RePreparable 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     /**
      * reclaim locks associated with the changes in this log record.
      * <p>

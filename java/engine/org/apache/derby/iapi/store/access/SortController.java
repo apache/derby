@@ -36,10 +36,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface SortController
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	Close this sort controller.
 	<p>
 	Currently, since only one sort controller is allowed per sort,

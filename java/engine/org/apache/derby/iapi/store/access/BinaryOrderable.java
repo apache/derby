@@ -37,10 +37,6 @@ import java.io.IOException;
 public interface BinaryOrderable extends Orderable
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Compare this Orderable with a given Orderable for the purpose of
 	 * index positioning.  This method treats nulls as ordered values -
 	 * that is, it treats SQL null as equal to null and less than all

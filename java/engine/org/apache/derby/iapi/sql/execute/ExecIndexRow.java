@@ -16,12 +16,7 @@ package org.apache.derby.iapi.sql.execute;
  *
  * @author jeff after ames
  */
-public interface ExecIndexRow extends ExecRow  { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface ExecIndexRow extends ExecRow  {
 
 	/**
 	 * These two methods are a sort of a hack.  The store implements ordered

@@ -18,10 +18,6 @@ package org.apache.derby.iapi.types;
 public interface CloneableObject
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Get a shallow copy of the object and return
 	 * it.  This is used by the sorter to clone
 	 * columns.  It should be cloning the column

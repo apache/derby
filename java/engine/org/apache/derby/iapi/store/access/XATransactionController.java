@@ -44,10 +44,6 @@ synchronization has been provided to provide correct MT behavior from above.
 
 public interface XATransactionController extends TransactionController
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     /**************************************************************************
      * Public Methods of This class:
      **************************************************************************

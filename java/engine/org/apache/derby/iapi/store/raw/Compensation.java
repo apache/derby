@@ -22,10 +22,6 @@ package org.apache.derby.iapi.store.raw;
 	@see Undoable#generateUndo
 */
 public interface Compensation extends Loggable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	  Set up the undoable operation during recovery redo.

@@ -28,10 +28,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 public interface Sort
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	Open a sort controller.
 	<p>
 	The sort may have been dropped already, in which case
