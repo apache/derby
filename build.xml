@@ -350,7 +350,7 @@
       <fileset dir="${directory}" includes="${rmfiles}"/>
     </delete>
     <java classname="javacc"
-          classpath="${jjpath}"
+          classpath="${javacc}"
                 dir="${directory}"
                fork="yes"
         failonerror="true">
