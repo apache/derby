@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.jdbc.EmbedConnection30
 
-   Copyright 2001, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2001, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ import java.util.Vector;
         a new class java.sql.Savepoint, which is referenced by java.sql.Connection.
    </UL>
  *
- * @see org.apache.derby.impl.jdbc.EmbedConnection20
+ * @see org.apache.derby.impl.jdbc.EmbedConnection
  *
  */
-public class EmbedConnection30 extends EmbedConnection20
+public class EmbedConnection30 extends EmbedConnection
 {
 
 	//////////////////////////////////////////////////////////

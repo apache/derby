@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.jdbc.Driver20
 
-   Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1998, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -101,12 +101,7 @@ public class Driver20 extends Driver169 implements Driver {
 	 */
 	public Connection getNewNestedConnection(EmbedConnection conn)
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(conn instanceof EmbedConnection20,
-				"conn expected to be instanceof EmbedConnection20");
-		}
-		return new EmbedConnection20(conn);
+		return new EmbedConnection(conn);
 	}
 
 	/*
@@ -117,7 +112,7 @@ public class Driver20 extends Driver169 implements Driver {
 		 throws SQLException 
 	{
 		// make a new local connection with a new transaction resource
-		return new EmbedConnection20(this, url, info);
+		return new EmbedConnection(this, url, info);
 	}
 
 	/**

@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.jdbc.EmbedPooledConnection
 
-   Copyright 2001, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2001, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 
 /* import impl class */
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.EmbedConnection20;
+import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 
@@ -59,7 +59,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 
 	private Vector eventListener; // who wants to know I am closed or error
 
-	protected EmbedConnection20 realConnection;
+	protected EmbedConnection realConnection;
 	protected int defaultIsolationLevel;
 	private boolean defaultReadOnly;
 	protected BrokeredConnection currentConnectionHandle;
@@ -144,7 +144,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		// first time we establish a connection
 		Connection rc = dataSource.getConnection(username, password, requestPassword);
 
-		this.realConnection = (EmbedConnection20) rc;
+		this.realConnection = (EmbedConnection) rc;
 		defaultIsolationLevel = rc.getTransactionIsolation();
 		defaultReadOnly = rc.isReadOnly();
 		if (currentConnectionHandle != null)

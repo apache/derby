@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.jdbc.EmbedXAConnection
 
-   Copyright 2003, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2003, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.EmbedConnection20;
+import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.TransactionResourceImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
@@ -347,7 +347,7 @@ final class EmbedXAConnection extends EmbedPooledConnection
 			if (tranState.isPrepared)
 				throw new XAException(XAException.XAER_PROTO);
 
-			EmbedConnection20 conn = tranState.conn; 
+			EmbedConnection conn = tranState.conn; 
 
 			try {
 
@@ -451,7 +451,7 @@ final class EmbedXAConnection extends EmbedPooledConnection
 			if (tranState.isPrepared == onePhase)
 				throw new XAException(XAException.XAER_PROTO);
 
-			EmbedConnection20 conn = tranState.conn; 
+			EmbedConnection conn = tranState.conn; 
 
 			try {
 
@@ -902,7 +902,7 @@ final class EmbedXAConnection extends EmbedPooledConnection
 			tranState.associationState = XATransactionState.TC_COMPLETED;
 			tranState.notifyAll();
 
-			EmbedConnection20 conn = tranState.conn;
+			EmbedConnection conn = tranState.conn;
 
 			// already set in its own resource
 			// or can it be returned to its original resource?
@@ -959,7 +959,7 @@ final class EmbedXAConnection extends EmbedPooledConnection
 		Close  an underlying connection object when there is
 		no active XAResource to hand it to.
 	*/
-	private static void closeUnusedConnection(EmbedConnection20 conn) {
+	private static void closeUnusedConnection(EmbedConnection conn) {
 		if (conn != null) {
 			try {
 				conn.close();

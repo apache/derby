@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.jdbc.EmbedConnection
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.store.access.XATransactionController;
 
 /* can't import due to name overlap:
 import java.sql.Connection;
@@ -75,13 +76,17 @@ import java.util.Properties;
  * synchronized across all connections stemming from the
  * same root connection.  The synchronization is upon
  * the a synchronized object return by the rootConnection.
+   <P><B>Supports</B>
+   <UL>
+  <LI> JDBC 2.0
+   </UL>
  * 
  *	@author djd
  *
  * @see TransactionResourceImpl
  *
  */
-public abstract class EmbedConnection implements java.sql.Connection
+public class EmbedConnection implements java.sql.Connection
 {
 
 	private static final StandardException exceptionClose = StandardException.closeException();
@@ -1686,6 +1691,117 @@ public abstract class EmbedConnection implements java.sql.Connection
 		getLanguageConnection().setDrdaID(drdaID);
 	}
 
+	/**
+		Reset the connection before it is returned from a PooledConnection
+		to a new application request (wrapped by a BrokeredConnection).
+		Examples of reset covered here is dropping session temporary tables
+		and reseting IDENTITY_VAL_LOCAL.
+		Most JDBC level reset is handled by calling standard java.sql.Connection
+		methods from EmbedPooledConnection.
+	 */
+	public void resetFromPool() throws SQLException {
+		synchronized (getConnectionSynchronization())
+		{
+			setupContextStack();
+			try {
+				getLanguageConnection().resetFromPool();
+			} catch (StandardException t) {
+				throw handleException(t);
+			}
+			finally
+			{
+				restoreContextStack();
+			}
+		}
+	}
+
+	/*
+	** methods to be overridden by subimplementations wishing to insert
+	** their classes into the mix.
+	** The reason we need to override them is because we want to create a
+	** Local20/LocalStatment object (etc) rather than a Local/LocalStatment
+	** object (etc).
+	*/
+
+
+	/*
+	** XA support
+	*/
+
+	public final int xa_prepare() throws SQLException {
+
+		synchronized (getConnectionSynchronization())
+		{
+            setupContextStack();
+			try
+			{
+				XATransactionController tc = 
+					(XATransactionController) getLanguageConnection().getTransactionExecute();
+
+				int ret = tc.xa_prepare();
+
+				if (ret == XATransactionController.XA_RDONLY)
+				{
+					// On a prepare call, xa allows an optimization that if the
+					// transaction is read only, the RM can just go ahead and
+					// commit it.  So if store returns this read only status -
+					// meaning store has taken the liberty to commit already - we
+					// needs to turn around and call internalCommit (without
+					// committing the store again) to make sure the state is
+					// consistent.  Since the transaction is read only, there is
+					// probably not much that needs to be done.
+
+					getLanguageConnection().internalCommit(false /* don't commitStore again */);
+				}
+				return ret;
+			} catch (StandardException t)
+			{
+				throw handleException(t);
+			}
+			finally
+			{
+				restoreContextStack();
+			}
+		}
+	}
+
+
+	public final void xa_commit(boolean onePhase) throws SQLException {
+
+		synchronized (getConnectionSynchronization())
+		{
+            setupContextStack();
+			try
+			{
+		    	getLanguageConnection().xaCommit(onePhase);
+			} catch (StandardException t)
+			{
+				throw handleException(t);
+			}
+			finally 
+			{
+				restoreContextStack();
+			}
+		}
+	}
+	public final void xa_rollback() throws SQLException {
+
+		synchronized (getConnectionSynchronization())
+		{
+            setupContextStack();
+			try
+			{
+		    	getLanguageConnection().xaRollback();
+			} catch (StandardException t)
+			{
+				throw handleException(t);
+			}
+			finally 
+			{
+				restoreContextStack();
+			}
+		}
+	}
 	/**
 	 * returns false if there is an underlying transaction and that transaction
 	 * has done work.  True if there is no underlying transaction or that

@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.jdbc.XAStatementControl
 
-   Copyright 2003, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2003, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.apache.derby.iapi.jdbc.BrokeredStatementControl;
 import org.apache.derby.iapi.jdbc.BrokeredStatement;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.BrokeredCallableStatement;
-import org.apache.derby.impl.jdbc.EmbedConnection20;
+import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.EmbedStatement;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 
@@ -43,7 +43,7 @@ final class XAStatementControl implements BrokeredStatementControl {
 	private final EmbedXAConnection	xaConnection;
 	private final BrokeredConnection	applicationConnection;
 	BrokeredStatement		applicationStatement;
-	private EmbedConnection20	realConnection;
+	private EmbedConnection	realConnection;
 	private Statement			realStatement;
 	private PreparedStatement	realPreparedStatement;
 	private CallableStatement	realCallableStatement;

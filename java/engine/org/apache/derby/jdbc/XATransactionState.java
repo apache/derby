@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.jdbc.XATransactionState
 
-   Copyright 2003, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2003, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 package org.apache.derby.jdbc;
 
 
-import org.apache.derby.impl.jdbc.EmbedConnection20;
+import org.apache.derby.impl.jdbc.EmbedConnection;
 import javax.transaction.xa.XAResource;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
@@ -45,7 +45,7 @@ public final class XATransactionState extends ContextImpl {
 	// final static int T2_ASSOCIATION_SUSPENDED	= 2;
 	final static int TC_COMPLETED				= 3; // rollback/commit called
 
-	public final EmbedConnection20	conn;
+	public final EmbedConnection	conn;
 	final EmbedXAConnection creatingResource;
 	private EmbedXAConnection  associatedResource;	// owning XAResource
 	final XAXactId			xid;	
@@ -72,7 +72,7 @@ public final class XATransactionState extends ContextImpl {
 	*/
 	boolean isPrepared;
 
-	XATransactionState(ContextManager cm, EmbedConnection20 conn, EmbedXAConnection resource, XAXactId xid) {
+	XATransactionState(ContextManager cm, EmbedConnection conn, EmbedXAConnection resource, XAXactId xid) {
 
 		super(cm, "XATransactionState");
 		this.conn = conn;
