@@ -125,7 +125,7 @@ public class EmbedConnectionContext extends ContextImpl
 	public java.sql.ResultSet getResultSet
 	(
 		ResultSet 				executionResultSet
-	)
+	) throws SQLException
 	{
 		EmbedConnection conn = (EmbedConnection) connRef.get();
 

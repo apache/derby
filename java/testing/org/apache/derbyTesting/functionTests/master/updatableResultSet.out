@@ -1,0 +1,222 @@
+Start testing delete using JDBC2.0 updateable resultset apis
+---Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
+warnings on connection = SQL Warning: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
+requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
+Make sure that we got TYPE_SCROLL_INSENSITIVE? true
+Make sure that we got CONCUR_READ_ONLY? true
+ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+---Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
+requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
+Make sure that we got TYPE_SCROLL_INSENSITIVE? true
+Make sure that we got CONCUR_READ_ONLY? true
+JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+---Negative Test3 - request a read only resultset and attempt deleteRow on it
+Make sure that we got CONCUR_READ_ONLY? true
+Now attempting to send a deleteRow on a read only resultset.
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+---Negative Test4 - request a read only resultset and send a sql with FOR UPDATE clause and attempt deleteRow on it
+Make sure that we got CONCUR_READ_ONLY? true
+Now attempting to send a deleteRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+---Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause
+Make sure that we got CONCUR_READ_ONLY? true
+Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
+Now attempting to send a delete on a sql with no FOR UPDATE clause.
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+---Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
+Make sure that we got CONCUR_READ_ONLY? true
+Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
+Now attempting to send a delete on a sql with FOR READ ONLY clause.
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
+---Negative Test7 - attempt to deleteRow on updatable resultset when the resultset is not positioned on a row
+Make sure that we got CONCUR_UPDATABLE? true
+Now attempt a deleteRow without first doing next on the resultset.
+Got expected exception Invalid cursor state - no current row.
+ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
+Got expected exception Invalid cursor state - no current row.
+---Negative Test8 - attempt deleteRow on updatable resultset after closing the resultset
+Make sure that we got CONCUR_UPDATABLE? true
+Got expected exception ResultSet not open, operation 'deleteRow' not permitted. Verify that autocommit is OFF.
+---Negative Test9 - try updatable resultset on system table
+expected exception FOR UPDATE is not permitted on this type of statement.
+---Negative Test10 - try updatable resultset on a view
+expected exception FOR UPDATE is not permitted on this type of statement.
+---Negative Test11 - attempt to open updatable resultset when there is join in the select query should fail
+expected exception FOR UPDATE is not permitted on this type of statement.
+---Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it
+Opened an updatable resultset. Now trying to drop that table through another Statement
+expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+Since autocommit is on, the drop table exception resulted in a runtime rollback causing updatable resultset object to close
+expected exception ResultSet not open, operation 'deleteRow' not permitted. Verify that autocommit is OFF.
+---Negative Test13 - foreign key constraint failure will cause deleteRow to fail
+expected exception DELETE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
+expected exception ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+---Positive Test1 - request updatable resultset for forward only type resultset
+requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
+got TYPE_FORWARD_ONLY? true
+got CONCUR_UPDATABLE? true
+JDBC 2.0 updatable resultset apis on this ResultSet object will pass because this is an updatable resultset
+column 1 on this row before deleteRow is 1
+column 2 on this row before deleteRow is aa                  
+Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+Got expected exception Invalid cursor state - no current row.
+calling deleteRow again w/o first positioning the ResultSet on the next row will fail
+Got expected exception Invalid cursor state - no current row.
+Position the ResultSet with next()
+Should be able to deletRow() on the current row now
+---Positive Test2 - even if no columns from table specified in the column list, we should be able to get updatable resultset
+total number of rows in T1 
+	 1
+	 -
+	{3}
+column 1 on this row is 1
+total number of rows in T1 after one deleteRow is 
+	 1
+	 -
+	{2}
+---Positive Test3 - use prepared statement with concur updatable status
+requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
+got TYPE_FORWARD_ONLY? true
+got CONCUR_UPDATABLE? true
+column 1 on this row is 1
+Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+Got expected exception Invalid cursor state - no current row.
+calling deleteRow again w/o first positioning the ResultSet on the next row will fail
+Got expected exception Invalid cursor state - no current row.
+Position the ResultSet with next()
+Should be able to deletRow() on the current row now
+---Positive Test4 - use callable statement with concur updatable status
+requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
+got TYPE_FORWARD_ONLY? true
+got CONCUR_UPDATABLE? true
+row not deleted yet. Confirm with rs.rowDeleted()? false
+column 1 on this row is 1
+Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+Got expected exception Invalid cursor state - no current row.
+calling deleteRow again w/o first positioning the ResultSet on the next row will fail
+Got expected exception Invalid cursor state - no current row.
+Position the ResultSet with next()
+Should be able to deletRow() on the current row now
+---Positive Test5 - donot have to select primary key to get an updatable resultset
+column 1 on this row is 1
+now try to delete row when primary key is not selected for that row
+---Positive Test6 - For Forward Only resultsets, DatabaseMetaData will return false for ownDeletesAreVisible and deletesAreDetected
+---This is because, after deleteRow, we position the ResultSet before the next row. We don't make a hole for the deleted row and then stay on that deleted hole
+ownDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? false
+othersDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? true
+deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
+The JDBC program should look at rowDeleted only if deletesAreDetected returns true
+Since Derby returns false for detlesAreDetected for FORWARD_ONLY updatable resultset,the program should not rely on rs.rowDeleted() for FORWARD_ONLY updatable resultsets
+Have this call to rs.rowDeleted() just to make sure the method does always return false? false
+Have this call to rs.rowDeleted() just to make sure the method does always return false? false
+---Positive Test7 - delete using updatable resultset api from a temporary table
+following rows in temp table before deleteRow
+	 C21,C22
+	 --- ---
+	{21,1}
+	{22,1}
+As expected, no rows in temp table after deleteRow
+	 C21,C22
+	 --- ---
+---Positive Test8 - change the name of the resultset and see if deleteRow still works
+change the cursor name(case sensitive name) with setCursorName and then try to deleteRow
+change the cursor name one more time with setCursorName and then try to deleteRow
+---Positive Test9 - using correlation name for the table in the select sql is not a problem
+column 1 on this row is 1
+now try to deleteRow
+---Positive Test10 - 2 updatable resultsets going against the same table, will they conflict?
+delete using first resultset
+attempt to send deleteRow on the same row through a different resultset should throw an exception
+Got expected exception Cursor 'SQLCUR10' is not on a row.
+Move to next row in the 2nd resultset and then delete using the second resultset
+---Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
+Notice the Fetch Size in run time statistics output.
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	SELECT 1, 2 FROM t1 FOR UPDATE of c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (3):
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (2):
+	Number of opens = 1
+	Rows seen = 0
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Table Scan ResultSet for T1 at read committed isolation level using exclusive row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 0
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=0
+			Number of rows qualified=0
+			Number of rows visited=0
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+statement's fetch size is 200
+---Positive Test12 - make sure delete trigger gets fired when deleteRow is issued
+Verify that before delete trigger got fired, row count is 0 in deleteTriggerInsertIntoThisTable
+	 1
+	 -
+	{0}
+column 1 on this row is 1
+now try to delete row and make sure that trigger got fired
+Verify that delete trigger got fired by verifying the row count to be 1 in deleteTriggerInsertIntoThisTable
+	 1
+	 -
+	{1}
+---Positive Test13 - With autocommit off, attempt to drop a table when there is an open updatable resultset on it
+Opened an updatable resultset. Now trying to drop that table through another Statement
+expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+Since autocommit is off, the drop table exception will NOT result in a runtime rollback and hence updatable resultset object is still open
+---Positive Test14 - After deleteRow, resultset is positioned before the next row
+getXXX right after deleteRow will fail because resultset is not positioned on a row, instead it is right before the next row
+expected exception Invalid cursor state - no current row.
+Finished testing updateable resultsets

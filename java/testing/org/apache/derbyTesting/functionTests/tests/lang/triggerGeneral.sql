@@ -28,7 +28,7 @@ create trigger app.t1 NO CASCADE before update of x,y on x for each row mode db2
 -- make sure system tables look as we expect
 select cast(triggername as char(10)), event, firingtime, type, state, referencedcolumns from sys.systriggers;
 
-select cast(triggername as char(10)), text from sys.systriggers t, sys.sysstatements s 
+select cast(triggername as char(10)), CAST (TRIGGERDEFINITION AS VARCHAR(180)), STMTNAME from sys.systriggers t, sys.sysstatements s 
 		where s.stmtid = t.actionstmtid;
 
 select cast(triggername as char(10)), tablename from sys.systriggers t, sys.systables tb
@@ -411,19 +411,17 @@ create table trighistory("cOlUmN1" int, "cOlUmN2  " int, "cOlUmN3""""  " int);
 insert into trigtable values (1, 2, 3);
 create trigger "tt1" after insert on trigtable
 referencing NEW as NEW for each row mode db2sql
-insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values
-(new."cOlUmN1" + 5, "NEW"."cOlUmN2  " * new."cOlUmN3""""  ", 5);
+insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values (new."cOlUmN1" + 5, "NEW"."cOlUmN2  " * new."cOlUmN3""""  ", 5);
 maximumdisplaywidth 2000;
-select cast(triggername as char(10)), text from sys.systriggers t, sys.sysstatements s 
+select cast(triggername as char(10)), CAST (TRIGGERDEFINITION AS VARCHAR(180)), STMTNAME from sys.systriggers t, sys.sysstatements s 
 		where s.stmtid = t.actionstmtid and triggername = 'tt1';
 insert into trigtable values (1, 2, 3);
 select * from trighistory;
 drop trigger "tt1";
 create trigger "tt1" after insert on trigtable
 referencing new as new for each row mode db2sql
-insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values
-(new."cOlUmN1" + new."cOlUmN1", "NEW"."cOlUmN2  " * new."cOlUmN3""""  ", new."cOlUmN2  " * 3);
-select cast(triggername as char(10)), text from sys.systriggers t, sys.sysstatements s 
+insert into trighistory ("cOlUmN1", "cOlUmN2  ", "cOlUmN3""""  ") values (new."cOlUmN1" + new."cOlUmN1", "NEW"."cOlUmN2  " * new."cOlUmN3""""  ", new."cOlUmN2  " * 3);
+select cast(triggername as char(10)), CAST (TRIGGERDEFINITION AS VARCHAR(180)), STMTNAME from sys.systriggers t, sys.sysstatements s 
 		where s.stmtid = t.actionstmtid and triggername = 'tt1';
 insert into trigtable values (1, 2, 3);
 select * from trighistory;

@@ -482,8 +482,8 @@ public abstract class Driver169 implements ModuleControl {
 		return new EmbedDatabaseMetaData(conn,dbname);
 	}
 
-	public abstract EmbedResultSet 
-		newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, EmbedStatement statement, boolean isAtomic) ;
+	public abstract EmbedResultSet
+		newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, EmbedStatement statement, boolean isAtomic) throws SQLException;
 //	{
 //		return new EmbedResultSet(conn, results, forMetaData, statement, isAtomic, false);
 //	}

@@ -157,6 +157,7 @@ public class Driver20 extends Driver169 implements Driver {
   
 	public org.apache.derby.impl.jdbc.EmbedResultSet 
 	newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, org.apache.derby.impl.jdbc.EmbedStatement statement, boolean isAtomic)
+		throws SQLException
 	{
 		return new EmbedResultSet20(conn, results, forMetaData, statement,
 								 isAtomic); 

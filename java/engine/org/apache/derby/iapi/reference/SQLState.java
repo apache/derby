@@ -1379,6 +1379,9 @@ public interface SQLState {
     // (no message in message.properties)
     String BLOB_SETPOSITION_FAILED = "XJ079.S";
 
+    //updatable resultset related
+    String UPDATABLE_RESULTSET_API_DISALLOWED = "XJ083.U";
+
     //following are session severity.
     String DATABASE_NOT_FOUND = "XJ004.C";
     String LOGIN_FAILED = "08004";
@@ -1409,9 +1412,10 @@ public interface SQLState {
     //following are warning severity.
     String DATABASE_EXISTS = "01J01";
     String NO_SCROLL_SENSITIVE_CURSORS = "01J02";
-    String NO_UPDATABLE_CONCURRENCY = "01J03";
+    String UPDATABLE_RESULTSET_FOR_FORWARD_ONLY = "01J03";
 	String LANG_TYPE_NOT_SERIALIZABLE = "01J04";
 	String UPGRADE_SPSRECOMPILEFAILED = "01J05";
+    String QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET = "01J06";
 
 
     //following are database severity

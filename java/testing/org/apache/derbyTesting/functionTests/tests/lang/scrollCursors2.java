@@ -173,11 +173,9 @@ public class scrollCursors2 {
 	{
 		boolean		passed = true;
 		PreparedStatement	ps_f_r = null;
-		PreparedStatement	ps_f_u = null;
 		ResultSet	rs;
 		SQLWarning	warning;
 		Statement	s_f_r = null;
-		Statement	s_f_u = null;
 
 		s_f_r = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 									 ResultSet.CONCUR_READ_ONLY);
@@ -362,34 +360,6 @@ public class scrollCursors2 {
 		rs.close();
 		s_f_r.close();
 
-		s_f_u = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-									 ResultSet.CONCUR_UPDATABLE);
-		// We should have gotten 1 warning and a read only forward only cursor
-		warning = conn.getWarnings();
-		while (warning != null)
-		{
-			System.out.println("warning = " + warning);
-			warning = warning.getNextWarning();
-		}
-		conn.clearWarnings();
-
-		// Verify that result set from statement is 
-		// scroll insensitive and read only
-		rs = s_f_u.executeQuery("select * from t");
-		if (rs.getType() != ResultSet.TYPE_FORWARD_ONLY)
-		{
-			System.out.println("cursor type = " + rs.getType() +
-							   ", not " + ResultSet.TYPE_FORWARD_ONLY);
-		}
-		if (rs.getConcurrency() != ResultSet.CONCUR_READ_ONLY)
-		{
-			System.out.println("concurrency = " + rs.getConcurrency() +
-							   ", not " + ResultSet.CONCUR_READ_ONLY);
-		}
-
-		rs.close();
-
-
 		ps_f_r = conn.prepareStatement(
 									 "select * from t",
 									 ResultSet.TYPE_FORWARD_ONLY,
@@ -432,36 +402,6 @@ public class scrollCursors2 {
 		}
 		rs.close();
 		ps_f_r.close();
-
-		ps_f_u = conn.prepareStatement(
-									 "select * from t",
-									 ResultSet.TYPE_FORWARD_ONLY,
-									 ResultSet.CONCUR_UPDATABLE);
-		// We should have gotten 1 warning and a read only forward only cursor
-		warning = conn.getWarnings();
-		while (warning != null)
-		{
-			System.out.println("warning = " + warning);
-			warning = warning.getNextWarning();
-		}
-		conn.clearWarnings();
-
-		// Verify that result set from statement is 
-		// scroll insensitive and read only
-		rs = ps_f_u.executeQuery();
-		if (rs.getType() != ResultSet.TYPE_FORWARD_ONLY)
-		{
-			System.out.println("cursor type = " + rs.getType() +
-							   ", not " + ResultSet.TYPE_FORWARD_ONLY);
-		}
-		if (rs.getConcurrency() != ResultSet.CONCUR_READ_ONLY)
-		{
-			System.out.println("concurrency = " + rs.getConcurrency() +
-							   ", not " + ResultSet.CONCUR_READ_ONLY);
-		}
-
-		rs.close();
-		ps_f_u.close();
 
 		return passed;
 	}
@@ -1102,7 +1042,6 @@ public class scrollCursors2 {
 		CallableStatement	cs_i_r = null; // insensitive, read only
 		CallableStatement	cs_i_u = null; // insensitive, updatable
 		CallableStatement	cs_f_r = null; // forward only, read only
-		CallableStatement	cs_f_u = null; // forward only, updatable
 
 		cs_s_r = conn.prepareCall(
 								"values cast (? as Integer)",
@@ -1212,28 +1151,6 @@ public class scrollCursors2 {
 		}
 		conn.clearWarnings();
 		cs_f_r.close();	
-
-		cs_f_u = conn.prepareCall(
-								"values cast (? as Integer)",
-								ResultSet.TYPE_FORWARD_ONLY,
-								ResultSet.CONCUR_UPDATABLE);
-
-		// We should have gotten 1 warnings
-		warningCount = 0;
-		warning = conn.getWarnings();
-		while (warning != null)
-		{
-			System.out.println("warning = " + warning);
-			warning = warning.getNextWarning();
-			warningCount++;
-		}
-		if (warningCount != 1)
-		{
-			System.out.println("warningCount expected to be 1, not " + warningCount);
-			passed = false;
-		}
-		conn.clearWarnings();
-		cs_f_u.close();	
 
 		return passed;
 	}

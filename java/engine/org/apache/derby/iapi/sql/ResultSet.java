@@ -312,7 +312,7 @@ public interface ResultSet
 	public NoPutResultSet[] getSubqueryTrackingArray(int numSubqueries);
 
 	/**
-	 * ResultSet for rowss inserted into the table (contains auto-generated keys columns only)
+	 * ResultSet for rows inserted into the table (contains auto-generated keys columns only)
 	 *
 	 * @return NoPutResultSet	NoPutResultSets for rows inserted into the table.
 	 */

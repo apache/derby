@@ -127,6 +127,7 @@ lang/triggerStream.sql
 lang/ungroupedAggregatesNegative.sql
 lang/union.sql
 lang/unlimited.sql
+lang/updatableResultSet.java
 lang/update.sql
 lang/updateCursor.java
 lang/valuesclause.sql

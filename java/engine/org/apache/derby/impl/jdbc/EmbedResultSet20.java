@@ -23,7 +23,10 @@ package org.apache.derby.impl.jdbc;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
+
+import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.Util;
@@ -75,7 +78,7 @@ public class EmbedResultSet20
                                                          boolean forMetaData,
                                                          org.apache.derby.impl.jdbc.EmbedStatement stmt,
                                                          boolean isAtomic)  
-        {
+        throws SQLException {
                 super(conn, resultsToWrap, forMetaData, stmt, isAtomic);
         }
 
@@ -214,7 +217,7 @@ public class EmbedResultSet20
          * @exception SQLException Thrown on error.
      */
     public boolean isAfterLast() throws SQLException 
-        {
+          {
                 return checkRowPosition(ResultSet.ISAFTERLAST, "isAfterLast");
         }
  
@@ -519,15 +522,19 @@ public class EmbedResultSet20
     /**
      * JDBC 2.0
      *
-     * Return the concurrency of this result set.  The concurrency
-     * used is determined by the statement that created the result set.
+     * Return the concurrency of this result set.  The concurrency is determined as follows
+     * If Statement object has CONCUR_READ_ONLY concurrency, then ResultSet object will also have the CONCUR_READ_ONLY concurrency.
+     * But if Statement object has CONCUR_UPDATABLE concurrency, then the concurrency of ResultSet object depends on whether the
+     * underlying language resultset is updatable or not. If the language resultset is updatable, then JDBC ResultSet object will
+     * also have the CONCUR_UPDATABLE concurrency. If lanugage resultset is not updatable, then JDBC ResultSet object concurrency
+     * will be set to CONCUR_READ_ONLY.
      *
      * @return the concurrency type, CONCUR_READ_ONLY, etc.
      * @exception SQLException if a database-access error occurs
      */
     public int getConcurrency() throws SQLException 
         {
-                return JDBC20Translation.CONCUR_READ_ONLY;
+                return concurrencyOfThisResultSet;
         }
 
     //---------------------------------------------------------------------
@@ -579,7 +586,7 @@ public class EmbedResultSet20
      * @see EmbedDatabaseMetaData#deletesAreDetected
      */
     public boolean rowDeleted() throws SQLException {
-                throw Util.notImplemented();
+        return false;
         }
 
     /**
@@ -1336,8 +1343,49 @@ public class EmbedResultSet20
      * called when on the insert row.
      */
     public void deleteRow() throws SQLException {
-                throw Util.notImplemented();
+        synchronized (getConnectionSynchronization()) {
+            checkIfClosed("deleteRow");
+            checkOnRow(); // first make sure there's a current row
+
+            if (getConcurrency() != JDBC20Translation.CONCUR_UPDATABLE)//if not updatable resultset, can't issue deleteRow
+                throw Util.generateCsSQLException(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED, "deleteRow");
+
+            setupContextStack();
+            try {
+                //in case of autocommit on, if there was an exception which caused runtime rollback in this transaction prior to this deleteRow,
+                //the rollback code will mark the language resultset closed (it doesn't mark the JDBC ResultSet closed).
+                //That is why alongwith the earlier checkIfClosed call in this method, there is a check for language resultset close as well.
+                if (theResults.isClosed())
+                    throw Util.generateCsSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, "deleteRow");
+                StringBuffer deleteWhereCurrentOfSQL = new StringBuffer("DELETE FROM ");
+                Activation activation = getEmbedConnection().getLanguageConnection().lookupCursorActivation(getCursorName());
+                deleteWhereCurrentOfSQL.append(getFullBaseTableName(activation.getPreparedStatement().getTargetTable()));//get the underlying (schema.)table name
+                //using quotes around the cursor name to preserve case sensitivity
+                deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF \"" + getCursorName() + "\"");
+
+                LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+                StatementContext statementContext = lcc.pushStatementContext(isAtomic, deleteWhereCurrentOfSQL.toString(), null, false);
+                org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
+                org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true);
+                rs.close();
+                rs.finish();
+                //For forward only resultsets, after a delete, the ResultSet will be positioned right before the next row.
+                rowData = null;
+                lcc.popStatementContext(statementContext, null);
+            } catch (StandardException t) {
+                    throw closeOnTransactionError(t);
+            } finally {
+                restoreContextStack();
+            }
         }
+    }
+
+    private String getFullBaseTableName(ExecCursorTableReference targetTable) {
+		if (targetTable.getSchemaName() != null)
+			return targetTable.getSchemaName() + "." + targetTable.getBaseName();
+		else
+			return targetTable.getBaseName();
+    }
 
     /**
      * JDBC 2.0

@@ -2412,10 +2412,16 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if so 
      * @see Connection
      */
-    public boolean supportsResultSetConcurrency(int type, int concurrency) {
-  		if ((type == JDBC20Translation.TYPE_SCROLL_SENSITIVE) ||
-        (concurrency == JDBC20Translation.CONCUR_UPDATABLE))
-		  return false;
+	public boolean supportsResultSetConcurrency(int type, int concurrency) {
+		//FORWARD_ONLY + CONCUR_UPDATABLE combination is supported (at this point, delete functionality only)
+		if ((type == JDBC20Translation.TYPE_FORWARD_ONLY) &&
+				(concurrency == JDBC20Translation.CONCUR_UPDATABLE))
+			return true;
+
+		//requesting CONCUR_UPDATABLE on any resultset type other than TYPE_FORWARD_ONLY will return false
+		if ((type == JDBC20Translation.TYPE_SCROLL_SENSITIVE) ||
+				(concurrency == JDBC20Translation.CONCUR_UPDATABLE))
+			return false;
 		return true;
 	}
 
@@ -2445,14 +2451,26 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @param result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are visible for the result set type
      */
+    //Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes
+    //made by others and hence following 3 metadata calls will return true for forward only ResultSets.
+    //Scroll insensitive ResultSet by their definition do not see chnages made by others.
+    //Derby does not yet implement scroll sensitive resultsets.
     public boolean othersUpdatesAreVisible(int type) {
-		  return true;
+		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
+			return true;
+		return false;
 	}
+
     public boolean othersDeletesAreVisible(int type)  {
-		  return true;
+		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
+			return true;
+		return false;
 	}
+
     public boolean othersInsertsAreVisible(int type)  {
-		  return true;
+		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
+			return true;
+		return false;
 	}
 
     /**

@@ -84,7 +84,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	// mutable state
 	protected ExecRow currentRow;
-	private DataValueDescriptor[] rowData;
+	//rowData is protected so deleteRow in EmbedResultSet20.java can make it null.
+	//This ensures that after deleteRow, ResultSet is not positioned on the deleted row.
+	protected DataValueDescriptor[] rowData;
 	protected boolean wasNull;
 	protected boolean isClosed;
 	private Object	currentStream;
@@ -131,6 +133,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	protected final boolean isAtomic;
 
+	protected final int concurrencyOfThisResultSet;
 
 	/**
 	 * This class provides the glue between the Cloudscape
@@ -138,7 +141,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public EmbedResultSet(EmbedConnection conn, ResultSet resultsToWrap,
 		boolean forMetaData, EmbedStatement stmt, boolean isAtomic) 
-        {
+        throws SQLException {
 
 		super(conn);
 
@@ -149,6 +152,27 @@ public abstract class EmbedResultSet extends ConnectionChild
 		this.stmt = owningStmt = stmt;
 		this.isAtomic = isAtomic;
 
+		//If the Statement object has CONCUR_READ_ONLY set on it then the concurrency on the ResultSet object will be CONCUR_READ_ONLY also.
+		//But, if the Statement object has CONCUR_UPDATABLE set on it, then the concurrency on the ResultSet object can be
+		//CONCUR_READ_ONLY or CONCUR_UPDATABLE depending on whether the underlying language resultset is updateable or not.
+		//If the underlying language resultset is not updateable, then the concurrency of the ResultSet object will be CONCUR_READ_ONLY
+		//and a warning will be issued on the ResultSet object.
+		if (stmt == null) concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
+		else if (stmt.getResultSetConcurrency() == JDBC20Translation.CONCUR_READ_ONLY)
+			concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
+		else {
+			if (!isForUpdate()) { //language resultset not updatable
+				concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
+				SQLWarning w = StandardException.newWarning(SQLState.QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
+				if (topWarning == null)
+					topWarning = w;
+				else
+					topWarning.setNextWarning(w);
+			} else
+					concurrencyOfThisResultSet = JDBC20Translation.CONCUR_UPDATABLE;
+		}
+
+		// Fill in the column types
 		resultDescription = theResults.getResultDescription();
 
         // assign the max rows and maxfiled size limit for this result set
