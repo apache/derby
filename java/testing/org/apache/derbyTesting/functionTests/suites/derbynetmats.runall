@@ -11,6 +11,7 @@ derbynet/maxthreads.java
 derbynet/prepStmt.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
+derbynet/testProtocol.java
 derbynet/testProperties.java
 derbynet/testconnection.java
 derbynet/testij.java

@@ -973,6 +973,7 @@ public class RunList
 	excludedFromJCC = false;
 	needIBMjvm = null;
 
+
 	// Determine if this is jdk12 or higher (with or without extensions)
         if (iminor >= 2) isJdk12 = true;
 	if ( System.getProperty("java.version").startsWith("1.1.8") ) isJdk118 = true;
@@ -1002,10 +1003,6 @@ public class RunList
 	if (runwithjvm != null && runwithjvm.equals("false"))
 	{
 	    return true;
-	}
-	if (runwithj9 != null && runwithj9.equals("false"))
-	{
-	    return false ;
 	}
 
         if ( (framework != null) && (framework.length()>0) )

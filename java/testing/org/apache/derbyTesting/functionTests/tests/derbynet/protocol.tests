@@ -1,0 +1,2992 @@
+DISPLAY "Test invalid DSS - wrong length"
+startDdm MGRLVLLS
+endDdm
+startDdm MGRLVLLS
+endDdm
+flush
+checkerror SYNTAXRM 8 1 0
+endTest
+//
+DISPLAY "Test invalid DSS - missing D0 "
+writeScalar2Bytes MGRLVLLS 1
+flush
+checkerror SYNTAXRM 8 3 0
+endTest
+//
+DISPLAY "Test invalid DSS - REPLY DSS"
+createDssReply 
+endDss
+flush
+checkerror SYNTAXRM 8 4 0
+endTest
+//
+DISPLAY "First codepoint not EXCSAT"
+createDssRequest
+startDdm MGRLVLLS
+endDdm
+endDss
+flush
+checkerror PRCCNVRM 8 6
+endTest
+//
+DISPLAY "Test EXTNAM too long"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 EXTNAM
+endTest
+//
+DISPLAY "Test non null SPVNAM"
+createDssRequest
+startDdm EXCSAT
+writeScalarString SPVNAM"testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 SPVNAM
+endTest
+//
+DISPLAY "Test too big SRVNAM"
+createDssRequest
+startDdm EXCSAT
+writeScalarString SRVNAM"testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 SRVNAM
+endTest
+//
+DISPLAY "Test too big SRVRLSLV"
+createDssRequest
+startDdm EXCSAT
+writeScalarString SRVRLSLV"testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 SRVRLSLV
+endTest
+//
+DISPLAY "Test too big SRVCLSNM"
+createDssRequest
+startDdm EXCSAT
+writeScalarString SRVCLSNM"testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 SRVCLSNM
+endTest
+//
+DISPLAY "Repeated manager levels with different values"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+startDdm MGRLVLLS
+writeCodePoint4Bytes AGENT 3
+writeCodePoint4Bytes AGENT 7
+endDdm
+endDdm
+endDss
+flush
+checkerror MGRLVLRM 8 AGENT 7
+endTest
+//
+DISPLAY "Missing required SECMEC on ACCSEC"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+checkerror SYNTAXRM 8 14 SECMEC
+endTest
+//
+DISPLAY "ACCSEC doesn't follow EXCSAT"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm MGRLVLLS
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+checkerror PRCCNVRM 8 17
+endTest
+//
+DISPLAY "Test trying security mechanism we don't support"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 1 // DCE
+writeScalarPaddedBytes RDBNAM test 18
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCSECRD // ACCSECRD
+readScalar2Bytes SECMEC 3// SECMEC
+readScalar2Bytes SECMEC 9// SECMEC
+readScalar1Byte SECCHKCD 1// SECMEC
+endTest
+//
+DISPLAY "Test trying too big on SECMEC"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+startDdm SECMEC
+writeInt 2 
+endDdm
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+checkError SYNTAXRM 8 9 SECMEC
+endTest
+//
+DISPLAY "Test trying too small on SECMEC"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+startDdm SECMEC
+writeByte 2 
+endDdm
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+checkError SYNTAXRM 8 11 SECMEC
+endTest
+//
+DISPLAY "Test non null SECMGRNM"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalarString SECMGRNM "Fred"
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+checkError SYNTAXRM 8 11 SECMGRNM
+endTest
+//
+DISPLAY "Test missing RDBNAM on ACCSEC"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 9 // Encrypted userid password
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+checkerror SYNTAXRM 8 14 RDBNAM
+endTest
+//
+DISPLAY "Test specifying encrypted security mechanism without a security token"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 9 // Encrypted userid password
+writeScalarPaddedBytes RDBNAM test 18
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCSECRD // ACCSECRD
+readScalar2Bytes SECMEC 9 // SECMEC encrypted userid password
+readScalar1Byte SECCHKCD MULTIVALSTART 10 SEP 14 MULTIVALEND // can not start decryption manager for all jdks except ibm14
+endTest
+//
+DISPLAY "Test specifying unencrypted security mechanism with a security token"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 3 // Encrypted userid password
+writeScalarPaddedBytes RDBNAM test 18
+startDdm SECTKN
+writeBytes "0x01010101"
+endDdm
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCSECRD // ACCSECRD
+readScalar2Bytes SECMEC 3 // SECMEC encrypted userid password
+readScalar1Byte SECCHKCD 14 // missing security token
+endTest
+//
+DISPLAY "Test SECCHK not following after ACCSEC"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 9 // userid password
+writeScalarPaddedBytes RDBNAM test 18
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+skipDss		// don't care about the ACCSECRD so just skip
+createDssRequest
+startDdm MGRLVLLS
+endDdm
+endDss
+flush
+checkerror PRCCNVRM 8 17
+endTest
+//
+DISPLAY "Test doing two tries for security mechanism"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 1 // DCE
+writeScalarPaddedBytes RDBNAM test 18
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCSECRD // ACCSECRD
+readScalar2Bytes SECMEC 3// SECMEC
+readScalar2Bytes SECMEC 9// SECMEC
+readScalar1Byte SECCHKCD 1// SECMEC
+// ok send one we support
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 3 // userid password
+writeScalarPaddedBytes RDBNAM test 18
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodePoint ACCSECRD // ACCSECRD
+readScalar2Bytes SECMEC 3// SECMEC
+endTest
+//
+DISPLAY "Test missing SECMEC on SECCHK"
+include "excsat_accsecrd1.inc"
+createDssRequest
+startDdm  SECCHK
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 14 SECMEC
+endTest
+//
+DISPLAY "Test different SECMEC on SECCHK than on ACCSEC"
+include "excsat_accsecrd1.inc"
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 4 // userid password
+endDdm
+endDss
+flush
+//not sure what the error should be here (using invalid value for now)
+checkerror SYNTAXRM 8 20 SECMEC
+endTest
+//
+DISPLAY "Test invalid length for RDBNAM"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 3 //  userid password
+writeScalarPaddedBytes RDBNAM "thisNeedsToBeNoMoreThan255CharactersLong" 256
+writeScalarString USRID test
+writeScalarString PASSWORD test
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+checkError SYNTAXRM 8 11 RDBNAM
+endTest
+//
+DISPLAY "Test different RDBNAM on SECCHK than on ACCSEC"
+include "excsat_accsecrd2.inc"
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 3 // userid password
+writeScalarPaddedBytes RDBNAM notthesame 18
+endDdm
+endDss
+flush
+checkerror PRCCNVRM 8 18
+endTest
+//
+DISPLAY "Test security token on SECCHK when not required"
+include "excsat_accsecrd2.inc"
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 3 // userid password
+writeScalarPaddedBytes RDBNAM test 18
+startDdm SECTKN
+writeBytes "0x010101"
+endDdm
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodePoint SECCHKRM
+readScalar2Bytes SVRCOD 8
+readScalar1Byte SECCHKCD 14
+endTest
+//
+DISPLAY "Test missing USERID on SECCHK"
+include "excsat_accsecrd2.inc"
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 3 // userid password
+writeScalarPaddedBytes RDBNAM test 18
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodePoint SECCHKRM
+readScalar2Bytes SVRCOD 8
+readScalar1Byte SECCHKCD 18
+endTest
+//
+DISPLAY "Test missing PASSWORD on SECCHK"
+include "excsat_accsecrd2.inc"
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 3 // userid password
+writeScalarPaddedBytes RDBNAM test 18
+writeScalarString USRID test
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodePoint SECCHKRM
+readScalar2Bytes SVRCOD 8
+readScalar1Byte SECCHKCD 16
+endTest
+//
+DISPLAY "Test ACCRDB not following SECCHK"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm MGRLVLLS
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 14 MGRLVLLS
+endTest
+//
+DISPLAY "Test missing RDBACCCL from ACCRDB"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 14 RDBACCCL
+endTest
+//
+DISPLAY "Test missing CRRTKN"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 14 CRRTKN
+endTest
+//
+DISPLAY "Test too small value for RDBACCCL"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar1Byte RDBACCCL 1
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 11 RDBACCCL
+endTest
+//
+DISPLAY "Test too large value for RDBACCCL"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+startDdm RDBACCCL
+writeInt 1
+writeInt 2
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 RDBACCCL
+endTest
+//
+DISPLAY "Test invalid value for RDBACCCL"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SECMEC
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 20 RDBACCCL
+endTest
+//
+DISPLAY "Test missing PRDID"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 14 PRDID
+endTest
+//
+DISPLAY "Test missing TYPDEFNAM"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 14 TYPDEFNAM
+endTest
+//
+DISPLAY "Test missing TYPDEFOVR"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM  QTDSQLASC
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 14 TYPDEFOVR
+endTest
+//
+DISPLAY "Test bad  TYPDEFNAM" 
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM UNKNOWN
+startDdm TYPDEFOVR
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 20 TYPDEFNAM
+endTest
+//
+DISPLAY "Test codepoint not allowed in TYPDEFOVR"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLASC
+startDdm TYPDEFOVR
+writeScalar2Bytes MGRLVLLS 2
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 29 MGRLVLLS
+endTest
+//
+DISPLAY "Test too small value for CCSIDSBC"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+startDdm CCSIDSBC
+writeByte 1
+endDdm
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 11 CCSIDSBC
+endTest
+//
+DISPLAY "Test too large value for CCSIDSBC"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+startDdm CCSIDSBC
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 CCSIDSBC
+endTest
+//
+DISPLAY "Test too small value for CCSIDMBC"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+startDdm CCSIDMBC
+writeByte 1
+endDdm
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 11 CCSIDMBC
+endTest
+//
+DISPLAY "Test too large value for CCSIDMBC"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+startDdm CCSIDMBC
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 CCSIDMBC
+endTest
+//
+DISPLAY "Test too small value for CCSIDDBC"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+startDdm CCSIDDBC
+writeByte 1
+endDdm
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 11 CCSIDDBC
+endTest
+//
+DISPLAY "Test too large value for CCSIDDBC"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+startDdm CCSIDDBC
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 CCSIDDBC
+endTest
+//
+DISPLAY "Test unsupported single byte code page"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDSBC 5
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError VALNSPRM 8
+endTest
+//
+DISPLAY "Test unsupported  mixed byte code page"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDMBC 5
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCRDBRM
+readScalar2Bytes SVRCOD 4 //check that we get a warning for unsupported CCSID
+skipDdm // don't care about the rest of the Ddm
+endTest
+//
+DISPLAY "Test unsupported double byte code page"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDDBC 5
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCRDBRM
+readScalar2Bytes SVRCOD 4 //check that we get a warning for unsupported CCSID
+skipDdm // don't care about the rest of the Ddm
+endTest
+//
+DISPLAY "Test sending second EXCSAT"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDSBC 1208
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+skipDss // don't care about ACCRDBRM
+createDssRequest
+startDdm EXCSAT
+startDdm MGRLVLLS
+writeCodePoint4Bytes SQLAM 7
+endDdm
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodePoint EXCSATRD // check we get an EXSATRD back
+readLengthAndCodePoint EXTNAM
+skipBytes
+readLengthAndCodePoint MGRLVLLS
+readNetworkShort	SQLAM 
+readNetworkShort	7 	// check we report SQLAM 7 and nothing more
+readLengthAndCodePoint SRVCLSNM
+skipBytes
+readLengthAndCodePoint SRVNAM
+skipBytes
+readLengthAndCodePoint SRVRLSLV
+skipBytes
+endTest
+//
+DISPLAY "Test sending second EXCSAT with same manager but different level"
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+startDdm MGRLVLLS
+writeCodePoint4Bytes SQLAM 6
+endDdm
+endDdm
+endDss
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 3 //  userid password
+writeScalarString RDBNAM "wombat;create=true            " 
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+skipDss		// don't care about the ACCSECRD so just skip
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 3 // userid password
+writeScalarString RDBNAM "wombat;create=true            " 
+writeScalarString USRID test
+writeScalarString PASSWORD test
+endDdm
+endDss
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDSBC 1208
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+skipDss // don't care about ACCRDBRM
+createDssRequest
+startDdm EXCSAT
+startDdm MGRLVLLS
+writeCodePoint4Bytes SQLAM 7
+endDdm
+endDdm
+flush
+checkError MGRLVLRM 8 SQLAM 7
+endTest
+//
+DISPLAY "Test invalid CRRTKN"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDSBC 1208
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 20 CRRTKN
+endTest
+//
+DISPLAY "Test too big PRDID"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000toobig"
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 PRDID
+endTest
+//
+DISPLAY "Test too big TYPDEFNAM"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000toobig"
+writeScalarString TYPDEFNAM "testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 PRDID
+endTest
+//
+DISPLAY "Test invalid TYPDEFNAM"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000toobig"
+writeScalarString TYPDEFNAM "THISISNOTRIGHT"
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 PRDID
+endTest
+//
+DISPLAY "Test too big RDBALWUPD"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+endDdm
+writeScalar2Bytes RDBALWUPD 28
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 RDBALWUPD
+endTest
+//
+DISPLAY "Test invalid RDBALWUPD"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+endDdm
+writeScalar1Byte RDBALWUPD 1
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 20 RDBALWUPD
+endTest
+//
+DISPLAY "Test valid RDBALWUPD"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+endDdm
+writeScalar1Byte RDBALWUPD  -16
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCRDBRM
+endTest
+//
+DISPLAY "Test second valid RDBALWUPD"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+endDdm
+writeScalar1Byte RDBALWUPD  -15
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+readReplyDss
+readLengthAndCodePoint ACCRDBRM
+endTest
+//
+DISPLAY "Test too big PRTDTA"
+include "excsat_secchk.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+endDdm
+writeScalarString PRDDTA "testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+checkError SYNTAXRM 8 9 PRDDTA
+endTest
+//
+DISPLAY "Test for bad length for RDBNAM in PKGNAMCSN"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writeShort 4
+writeString "test" 
+writeShort 18
+writeString "rdbcolid" 18
+writeShort 18
+writePaddedString "pkgid" 18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table abc (a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 RDBNAM
+endTest
+//
+DISPLAY "Test for bad length for PKGID in PKGNAMCSN"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writeShort 18
+writePaddedString "test" 18
+writeShort 8
+writePaddedString "rdbcolid" 8
+writeShort 5
+writePaddedString "pkgid"  5
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table abc (a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 PKGID
+endTest
+//
+DISPLAY "Test for invalid codepoint on EXCSQLIMM"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm MGRLVLLS 
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table abc (a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 29 MGRLVLLS
+endTest
+//
+DISPLAY "Test for invalid TypDefNam in EXCSQLIMM objects"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+writeScalarString TYPDEFNAM "unknown"
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table abc (a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 TYPDEFNAM
+endTest
+//
+DISPLAY "Test for a changed TYPDEF in EXCSQLIMM objects"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+writeScalarString TYPDEFNAM "QTDSQLJVM"
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDMBC 1280		//MacGreek
+endDdm
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table macgreek (a int)" "MacGreek" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+skipDss //RDBUPDRM
+checkSQLCard 0 "     "
+skipDss //ENDUOWRM
+skipDss //SQLCARD for commit
+// use default encoding for drop statement
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "drop table macgreek" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+skipDss // RDBUPDRM
+checkSQLCard 0 "     "
+skipDss // ENDUOWRM
+skipDss //SQLCARD for commit
+endTest
+//
+DISPLAY "Test for missing CCSID in TYPDEFOVR in EXCSQLIMM objects"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+writeScalarString TYPDEFNAM "QTDSQLJVM"
+startDdm TYPDEFOVR
+endDdm
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table macgreek (a int)" "MacGreek" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 14 CCSIDSBC
+endTest
+//
+DISPLAY "Test for invalid value for RDBCMTOK in EXCSQLIMM"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte RDBCMTOK 2
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table a (a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 RDBCMTOK
+endTest
+//
+DISPLAY "Test for valid value for RDBCMTOK in EXCSQLIMM"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte RDBCMTOK "0xf1"
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table rdbcmtoktrue(a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+skipDss // RDBUPDRM
+checkSQLCard 0 "     "
+skipDss // ENDUOWRM
+skipDss // SQLCARD for commit
+endTest
+//
+DISPLAY "Test for valid false value for RDBCMTOK in EXCSQLIMM"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte RDBCMTOK "0xf0"
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table rdbcmtokfalse(a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+skipDss // RDBUPDRM
+checkSQLCard 0 "     "
+skipDss // ENDUOWRM
+skipDss // SQLCARD for commit
+endTest
+//
+DISPLAY "Test that we only send one RDBUPRM per transaction"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table onerdbupdrm(a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodePoint RDBUPDRM
+readScalar2Bytes SVRCOD 0
+skipDdm //RDBNAM
+checkSQLCard 0 "     "
+// drop the table
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "drop table onerdbupdrm" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkSQLCard 0 "     " //SQLCARD for drop
+readReplyDss
+readLengthAndCodePoint ENDUOWRM
+readScalar2Bytes SVRCOD 4
+readScalar1Byte UOWDSP 1
+checkSQLCard 0 "     "	//SQLCARD for commit - no RDBUPDRM
+moreData false
+endTest
+//
+DISPLAY "Test for missing PKGNAMCSN on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 14 PKGNAMCSN
+endTest
+//
+DISPLAY "Test for missing QRYBLKSZ on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 14 QRYBLKSZ
+endTest
+//
+DISPLAY "Test for wrong PKGNAMCSN on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "notthistest" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 PKGNAMCSN
+endTest
+//
+DISPLAY "Test for too small size for QRYBLKSZ on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeByte 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 11 QRYBLKSZ
+endTest
+//
+DISPLAY "Test for too large size for QRYBLKSZ on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 1
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 9 QRYBLKSZ
+endTest
+//
+DISPLAY "Test for too small value for QRYBLKSZ on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 QRYBLKSZ
+endTest
+//
+DISPLAY "Test for too large value for QRYBLKSZ on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 40000
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 QRYBLKSZ
+endTest
+//
+DISPLAY "Test invalid value for QRYBLKCTL on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+writeScalar2Bytes QRYBLKCTL 1
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 29 1
+endTest
+//
+DISPLAY "Test invalid codepoint for OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm PRPSQLSTT // this is wrong
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 29 PRPSQLSTT
+endTest
+//
+DISPLAY "Test too small value for QRYROWSET codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYROWSET
+writeByte 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 QRYROWSET
+endTest
+//
+DISPLAY "Test too large value for QRYROWSET codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYROWSET
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYROWSET
+endTest
+//
+DISPLAY "Test invalid value for QRYROWSET on OPNQRY"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYROWSET 
+writeInt 70000	// this is too big
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 QRYROWSET
+endTest
+//
+DISPLAY "Test too large value for QRYRFRTBL codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYRFRTBL
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYRFRTBL
+endTest
+//
+DISPLAY "Test invalid value for QRYRFRTBL codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYRFRTBL
+writeByte 4
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 QRYRFRTBL
+endTest
+//
+DISPLAY "Test missing PKGNAMCSN on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 14 PKGNAMCSN
+endTest
+//
+DISPLAY "Test missing QRYBLKSZ on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 14 QRYBLKSZ
+endTest
+//
+DISPLAY "Test missing QRYINSID on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 14 QRYINSID
+endTest
+//
+DISPLAY "Test too small value for QRYINSID codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYINSID
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 QRYINSID
+endTest
+//
+DISPLAY "Test too large value for QRYINSID codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYINSID
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYINSID
+endTest
+//
+DISPLAY "Test too small value for QRYROWNBR codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte QRYROWNBR 0
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 QRYROWNBR
+endTest
+//
+DISPLAY "Test too large value for QRYROWNBR codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYROWNBR
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYROWNBR
+endTest
+//
+//
+DISPLAY "Test invalid value for QRYROWSET on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+startDdm QRYROWSET
+writeInt 70000 // too big
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 QRYROWSET
+endTest
+//
+DISPLAY "Test too large value for QRYSCRORN codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYSCRORN
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYSCRORN
+endTest
+//
+DISPLAY "Test invalid value for QRYSCRORN on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+startDdm QRYSCRORN
+writeByte 10 // invalid value
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 QRYSCRORN
+endTest
+//
+DISPLAY "Test invalid codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+startDdm OPNQRY
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 29 OPNQRY
+endTest
+//
+DISPLAY "Test invalid object codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+endDdm
+endDss
+createDssObject
+startDdm PKGNAMCSN //invalid object
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 29 PKGNAMCSN
+endTest
+//
+DISPLAY "Test OUTOVR codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+endDdm
+endDss
+createDssObject
+startDdm OUTOVR 
+writeBytes "0x0676D0"		// length 6, trip type NGDA, SQLDTAGRPLID
+writeBytes "0x300001"		// output type char, length 1
+writeBytes "0x0971E0540001D00001"	//SQLCADTA_RLO
+writeBytes "0x0671F0E00000"	//SQLCADTA_RLO
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodepoint QRYDTA	// just check that we get to QRYDTA for now
+skipBytes
+endTest
+//
+DISPLAY "Test too large value for QRYRELSCR codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYRELSCR
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYRELSCR
+endTest
+//
+DISPLAY "Test invalid value for QRYRELSCR codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte QRYRELSCR 0
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 QRYRELSCR
+endTest
+//
+DISPLAY "Test too large value for QRYROWSNS codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYROWSNS
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYROWSNS
+endTest
+//
+DISPLAY "Test invalid value for QRYROWSNS codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte QRYROWSNS 0
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 QRYROWSNS
+endTest
+//
+DISPLAY "Test too large value for QRYBLKRST codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKRST
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYBLKRST
+endTest
+//
+DISPLAY "Test invalid value for QRYBLKRST codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte QRYBLKRST 0
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 QRYBLKRST
+endTest
+//
+DISPLAY "Test too large value for QRYRTNDTA codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYRTNDTA
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 QRYRTNDTA
+endTest
+//
+DISPLAY "Test invalid value for QRYRTNDTA codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte QRYRTNDTA 0
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 QRYRTNDTA
+endTest
+//
+DISPLAY "Test invalid value for QRYRFRTBL codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte QRYRFRTBL 0
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 QRYRFRTBL
+endTest
+//
+DISPLAY "Test too small value for NBRROW codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm NBRROW
+writeByte 4
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 NBRROW
+endTest
+//
+DISPLAY "Test too large value for NBRROW codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm NBRROW
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 NBRROW
+endTest
+//
+DISPLAY "Test too small value for MAXBLKEXT codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm MAXBLKEXT
+writeByte 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 11 MAXBLKEXT
+endTest
+//
+DISPLAY "Test too large value for MAXBLKEXT codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm MAXBLKEXT
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 MAXBLKEXT
+endTest
+//
+DISPLAY "Test too large value for RTNEXTDTA codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm RTNEXTDTA
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 9 RTNEXTDTA
+endTest
+//
+DISPLAY "Test invalid value for RTNEXTDTA codepoint on CNTQRY"
+include values1.inc
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte RTNEXTDTA 0
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 RTNEXTDTA
+endTest
+//
+DISPLAY "Test missing QRYINSID from CLSQRY"
+include values1.inc
+createDssRequest
+startDdm CLSQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 14 QRYINSID
+endTest
+//
+DISPLAY "Test invalid PKGNAMCSN on CLSQRY"
+include values1.inc
+createDssRequest
+startDdm CLSQRY
+startDdm PKGNAMCSN
+writePaddedString "notthere" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 20 PKGNAMCSN
+endTest
+// Remove this test for now until JCC issue with JCC sending close twice 
+// resolved
+DISPLAY "Test closing an already closed statement"
+include values1.inc
+createDssRequest
+startDdm CLSQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+endDdm
+endDss
+DISPLAY "Removing second close until JCC issue with sending double close is resolve"
+// second close should fail
+//createDssRequest
+//startDdm CLSQRY
+//startDdm PKGNAMCSN
+//writePaddedString "test" 18
+//writePaddedString "rdbcolid" 18
+//writePaddedString "pkgid"  18
+//writeBytes "0x0101010101010101"
+//writeShort 1
+//endDdm
+//startDdm QRYINSID
+//writeInt 0
+//writeInt 1
+//endDdm
+//endDdm
+//endDss
+//flush
+//skipDss // skip SQLCARD from first close
+//readReplyDss
+//readLengthAndCodepoint QRYNOPRM
+endTest
+//
+DISPLAY "Test for too large value for OUTEXP in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm OUTEXP
+writeShort 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 9 OUTEXP
+endTest
+//
+DISPLAY "Test for invalid OUTEXP in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm OUTEXP
+writeByte 10
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 OUTEXP
+endTest
+//
+DISPLAY "Test for too small value for NBRROW in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm NBRROW
+writeByte 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 11 NBRROW
+endTest
+//
+DISPLAY "Test for too large value for NBRROW in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm NBRROW
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 9 NBRROW
+endTest
+//
+DISPLAY "Test for invalid QRYBLKSZ in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm QRYBLKSZ
+writeInt 40000
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 20 QRYBLKSZ
+endTest
+//
+DISPLAY "Test for too small value for MAXRSLCNT in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm MAXRSLCNT
+writeByte 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 11 MAXRSLCNT
+endTest
+//
+DISPLAY "Test for too large value for MAXRSLCNT in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm MAXRSLCNT
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 9 MAXRSLCNT
+endTest
+//
+DISPLAY "Test for too small value for MAXBLKEXT in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm MAXBLKEXT
+writeByte 1
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 11 MAXBLKEXT
+endTest
+//
+DISPLAY "Test for too large value for MAXBLKEXT in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm MAXBLKEXT
+writeInt 1
+writeInt 2
+writeInt 3
+endDdm
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 9 MAXBLKEXT
+endTest
+//
+DISPLAY "Test for invalid value for RDBCMTOK in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte RDBCMTOK 2
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 RDBCMTOK
+endTest
+//
+DISPLAY "Test for too large value for OUTOVROPT in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm OUTOVROPT
+writeInt 4	// valid values are 1 and 2
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 9 OUTOVROPT
+endTest
+//
+DISPLAY "Test for invalid value for OUTOVROPT in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm OUTOVROPT
+writeByte 4	// valid values are 1 and 2
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 OUTOVROPT
+endTest
+//
+DISPLAY "Test for invalid value for QRYROWSET in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYROWSET
+writeInt 40000 // maximum is 32767
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 QRYROWSET
+endTest
+//
+DISPLAY "Test for invalid codepoint in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+startDdm MGRLVLLS
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 29 MGRLVLLS
+endTest
+//
+DISPLAY "Test for missing PKGNAMCSN in EXCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSTT
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 14 PKGNAMCSN
+endTest
+//
+DISPLAY "Test for too large value for RTNSQLDA in PRPSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm RTNSQLDA
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 9 RTNSQLDA
+endTest
+//
+DISPLAY "Test for invalid value for RTNSQLDA in PRPSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm RTNSQLDA
+writeByte 4		// invalid value
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 RTNSQLDA
+endTest
+//
+DISPLAY "Test for too large value for TYPSQLDA in PRPSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm TYPSQLDA
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 9 TYPSQLDA
+endTest
+//
+DISPLAY "Test for invalid value for TYPSQLDA in PRPSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm TYPSQLDA
+writeByte 10		// invalid value
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 TYPSQLDA
+endTest
+//
+DISPLAY "Test for invalid codepoint in PRPSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm MGRLVLLS
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 29 MGRLVLLS
+endTest
+//
+DISPLAY "Test for missing required SQLSTT in PRPSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject
+startDdm TYPDEFNAM
+writeString "QTDSQLASC"
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 14 SQLSTT
+endTest
+//
+DISPLAY "Test for invalid SQLATTR in PRPSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+startDdm SQLATTR
+writeByte 0	// null indicator
+writeEncodedLDString "not an attribute" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 SQLATTR
+endTest
+//
+DISPLAY "Test for missing PKGNAMCSN in DSCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm DSCSQLSTT
+endDdm
+endDss
+flush
+checkerror SYNTAXRM 8 14 PKGNAMCSN
+endTest
+//
+DISPLAY "Test for too large value for TYPSQLDA in DSCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm DSCSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm TYPSQLDA
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 9 TYPSQLDA
+endTest
+//
+DISPLAY "Test for invalid value for TYPSQLDA in DSCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm DSCSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm TYPSQLDA
+writeByte 10		// invalid value
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 TYPSQLDA
+endTest
+//
+DISPLAY "Test for invalid codepoint in DSCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm DSCSQLSTT
+startDdm MGRLVLLS
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 29 MGRLVLLS
+endTest
+//
+DISPLAY "Test for non-existant prepared statement in DSCSQLSTT"
+include connect.inc
+createDssRequest
+startDdm DSCSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 20 PKGNAMCSN
+endTest
+//

@@ -281,6 +281,17 @@ language implementation in derby. <br>
     <li>variety of tests, including some from derbylang suite</li>
     <li>tested on a variety of hardware takes from 15 to 30 minutes</li>
   </ul>
+  <li>derbynetautostart</li>
+  <ul>
+    <li>tests networkserver functionality without requiring
+networkserver framework<br>
+    </li>
+  </ul>
+  <li>propertyinfo</li>
+  <ul>
+    <li>runs test to get property information<br>
+    </li>
+  </ul>
   <li>storeall</li>
   <ul>
     <li>tests for storage area</li>
@@ -300,6 +311,18 @@ do not each need to create a new database</li>
     <li>tests the xa implementation. There is both a storage and
 language element to these tests</li>
     <li>tested on a variety of hardware takes from 2 to 4 minutes<br>
+    </li>
+  </ul>
+  <li>storeunit</li>
+  <ul>
+    <li>tests store-related unit tests. Runs from 8 to 15 minutes<br>
+    </li>
+  </ul>
+  <li>unit <br>
+  </li>
+  <ul>
+    <li>tests 4 general functionality unit tests. runs from 5 to 10
+minutes<br>
     </li>
   </ul>
   <li>jdbcapi</li>
@@ -338,12 +361,53 @@ tests. Hence it needed its own suite.properties file.</li>
     <li>takes 5 to 10 minutes<br>
     </li>
   </ul>
-  <li>encryption</li>
+  <li>encryptionAll <br>
+  </li>
   <ul>
-    <li>runs the storemats suite in encryption scheme DESede<br>
+    <li>takes 30 to 55 minutes</li>
+    <li>runs a few encryption tests plus the following encryption tests
+suites<br>
     </li>
-    <li>takes 25 to 40 minutes<br>
-    </li>
+  </ul>
+  <ul>
+    <ul>
+      <li>encryption</li>
+    </ul>
+    <ul>
+      <ul>
+        <li>runs the storemats, sysinfo and multi suites in encryption
+scheme DESede<br>
+        </li>
+      </ul>
+      <ul>
+        <li>takes 25 to 40 minutes</li>
+      </ul>
+    </ul>
+    <ul>
+      <li>encryptionAES - tests AES encryption scheme<br>
+      </li>
+    </ul>
+    <ul>
+      <li>encryptionBlowfish - tests Blowfish encryption scheme<br>
+      </li>
+    </ul>
+    <ul>
+      <li>encryptionCFB - tests CFB encryption scheme<br>
+      </li>
+    </ul>
+    <ul>
+      <li>encryptionDES - tests DES encryption scheme<br>
+      </li>
+    </ul>
+    <ul>
+      <li>encryptionECB - tests ECB encryption scheme<br>
+      </li>
+    </ul>
+    <ul>
+      <li>encryptionOFB - tests OFB encryption scheme</li>
+    </ul>
+  </ul>
+  <ul>
   </ul>
   <li>multi</li>
   <ul>
@@ -364,7 +428,7 @@ tests. Hence it needed its own suite.properties file.</li>
     </li>
   </ul>
   <ul>
-    <li>tested on a variety of hardware takes from 2.30 - 5.00 hours </li>
+    <li>tested on a variety of hardware takes from 3.00 - 6.00 hours </li>
   </ul>
   <li><a href="#Note1:"><small>See Note1</small></a><br>
   </li>
@@ -690,13 +754,22 @@ extensions:<br>
   <li>&nbsp;.java&nbsp;&nbsp;&nbsp; tests that run in a separate jvm.</li>
   <li>&nbsp;.sql &nbsp;&nbsp;&nbsp; tests that run using ij</li>
   <li>&nbsp;.sql2 &nbsp;&nbsp;&nbsp; related to .sql</li>
-  <li>&nbsp;.multi &nbsp;&nbsp;&nbsp; multi threaded tests. There are
-no
-multi threaded tests in the first contribution to apache, and the
-sections pertaining to such tests have been commented out</li>
-  <li>&nbsp;.unit &nbsp;&nbsp;&nbsp; unit tests. Currently there are no
-hooks for unit tests in the harness and no unit tests are contributed
-initially.</li>
+  <li>&nbsp;.multi &nbsp;&nbsp;&nbsp; multi threaded tests. There is
+currently only 1 test being run. The multi test functions a little
+differently from .java and .sql* tests in that RunTest starts a
+separate harness class called MultiTest to control the details of the
+run. Also, the actual test files live under
+org/apache/derbyTesting/functionTests/multiTests, rather than
+org/apache/derbyTesting/functionTests/tests. <br>
+  </li>
+  <li>&nbsp;.unit &nbsp;&nbsp;&nbsp; unit tests. The unit tests
+actually refer to &lt;testname&gt;_derby.properties files under
+org/apache/derbyTesting/functionTests/tests/unit that activate the
+actual unit test harness and tests under
+org/apache/derbyTesting/unitTests. These tests test more underlying
+functionality than the (rest of the) functionTests, which are more
+geared toward how end-users might use functionality.<br>
+  </li>
 </ul>
 <br>
 <h3><a class="mozTocH3" name="mozTocId809770"></a>4.2 <a name="ov2"></a>Supporting

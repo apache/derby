@@ -1,3 +1,4 @@
+DerbyNetNewServer_app.properties
 NSinSameJVM_app.properties
 badConnection_sed.properties
 dblook_test_net_app.properties
@@ -14,3 +15,10 @@ testij.sql
 testclientij.sql
 testij_app.properties
 testij_sed.properties
+testProtocol_app.properties
+protocol.tests
+excsat_accsecrd1.inc
+excsat_accsecrd2.inc
+excsat_secchk.inc
+connect.inc
+values1.inc
