@@ -451,7 +451,6 @@ public class updatableResultSet {
       System.out.println("got TYPE_FORWARD_ONLY? " +  (callStmt.getResultSetType() == ResultSet.TYPE_FORWARD_ONLY));
       System.out.println("got CONCUR_UPDATABLE? " +  (callStmt.getResultSetConcurrency() == ResultSet.CONCUR_UPDATABLE));
 			rs.next();
-      System.out.println("row not deleted yet. Confirm with rs.rowDeleted()? " + rs.rowDeleted());
       System.out.println("column 1 on this row is " + rs.getInt(1));
 			rs.deleteRow();
       System.out.println("Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail");
