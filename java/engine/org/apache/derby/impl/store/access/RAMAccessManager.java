@@ -651,14 +651,9 @@ public abstract class RAMAccessManager
     public MethodFactory findMethodFactoryByImpl(String impltype)
         throws StandardException
     {
-        MethodFactory factory;
-        
         // See if there's an access method that supports the desired
         // implementation type as its primary implementation type.
-		Object value = implhash.get(impltype);
-
-
-        factory = (MethodFactory) implhash.get(impltype);
+        MethodFactory factory = (MethodFactory) implhash.get(impltype);
         if (factory != null)
 				return factory;
 
