@@ -1,0 +1,586 @@
+
+                     Building Derby
+================================================================
+
+Contents
+
+1     About this document
+1.1   Who should read this document
+1.2   Notes
+
+2     Downloads
+2.1   Download source code
+2.2   Download required software
+2.2.1 Download and install Apache Ant 1.6.x
+2.2.2 Download and install Java Development Kit release 1.4.x
+2.2.3 Download and install Java Development Kit release 1.3.x
+2.2.4 Download extensions for Java Development Kit release 1.3.x
+2.2.5 Download Java Compiler Compiler (JavaCC) version 3.1
+2.2.6 Download jakarta-servlet API 4 (Servlet 2.4)
+2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
+2.2.8 Download Jikes 1.14 (Optional)
+
+3     Build instructions
+3.1   Set required environmental variables
+3.2   Create property file
+3.3   Run Derby build
+3.4   Verify Derby build
+
+4     Derby build miscellaneous information
+4.1   Derby build targets
+4.2   Derby source code upgrade
+4.3   Derby build flow
+
+
+---------------------------------------------------------------
+1     About this document
+
+This document contains the instructions to build a binary
+distribution version of the derby database from a source 
+distribution. 
+
+
+
+1.1   Who should read this document
+
+This document is intended for any one interested in 
+downloading and building a binary distribution of
+derby source distribution. 
+
+
+
+1.2   Notes
+
+The following conventions are followed in the document:
+
+(1) The directories are referred in unix convention.
+    For Windows, / should be replaced with \.
+
+(2) All examples or commands are given in unix conventions.
+    For Windows, modify the examples or commands as per
+    windows conventions.
+ 
+(3) This document contains urls to download required
+    software for derby builds. Urls may change anytime.
+    If there is any problem with any url, notify it
+    via derby mailing list.
+
+
+
+---------------------------------------------------------------
+2     Downloads
+
+Prior to building derby source code, download derby source
+code and required software as following:
+
+
+
+2.1   Download source code
+
+Create a new directory and download derby source code in 
+this directory. This directory will be referred to as the 
+${derby.source} directory in the rest of this document. 
+
+After downloading source code to directory ${derby.source},
+there should be the following files and directories:
+
+${derby.source}/build.xml 
+${debry.source}/java 
+${derby.source}/tools 
+
+
+
+2.2   Download required software
+
+This section lists all the required software for Derby
+build environment.
+
+Notes:
+----- 
+(1) Derby build environment requires you to install two levels of 
+    Java Development Kit (JDK) - 1.3.x and 1.4.x as Derby is designed 
+    to work in JDK1.3.x (JDBC 2.0) and JDK 1.4.x (JDBC 3.0) 
+    environments. The Derby build is set up such that that most of 
+    the code is compiled against JDK 1.3.x libraries so that no 
+    dependencies on JDK 1.4.x classes exist, except for the code 
+    that only runs in JDK1.4.x. In addition Derby's JDBC 2.0 
+    implementation must compile against JDBC 2.0 class definitions 
+    and the JDBC 3.0 implementation against JDBC 3.0 class 
+    definitions.
+
+(2) The Derby build environment is tested with JDK 131 (Sun), 
+    JDK 141(Sun), and Ant 161. The Derby build environment should
+    work with other versions and other sources of JDK 13 (1.3.x) 
+    and JDK 14 (1.4.x), and other versions of Ant 1.6 (1.6.x).
+
+
+
+2.2.1 Download and install Apache Ant 1.6.x
+
+(1) Download a binary distribution of Ant 1.6.x from:
+         http://ant.apache.org/bindownload.cgi
+
+(2) Install Ant 1.6.x in any directory. This 
+    directory will be referred to as ${ant.dir} 
+    directory in the rest of this document. 
+
+
+
+2.2.2 Download and install Java Development Kit (JDK) release 1.4.x
+
+Skip steps 1-2 of this section if you already have JDK 1.4.x 
+installed on your system.  
+
+(1) Download JDK 1.4.x. 
+    The reference implementation is available at:
+       http://java.sun.com/j2se
+
+(2) Install JDK 1.4.x according to the instructions included 
+    with the release in any directory. 
+
+(3) The directory where you have installed JDK 1.4.x will be 
+    referred to as ${jdk14.dir} in the rest of this document.
+
+
+
+2.2.3 Download and install Java Development Kit (JDK) release 1.3.x
+
+Skip steps 1-2 of this section if you already have JDK 1.3.x 
+installed on your system.  
+
+(1) Download JDK 1.3.x. 
+    The reference implementation is available at:
+       http://java.sun.com/j2se
+
+(2) Install JDK 1.3.x according to the instructions included 
+    with the release in any directory. 
+
+(3) The directory where you have installed JDK 1.3.x will be 
+    referred to as ${jdk13.dir} in the rest of this document.
+
+
+
+2.2.4 Download extensions for Java Development Kit release 1.3.x
+
+(1) JDBC 2.0
+
+    Download JDBC 2.0 (jdbc2_0-stdext.jar) from:
+      http://java.sun.com/products/jdbc/download.html
+    by selecting "JDBC 2.0 Optional Package Binary".
+
+    Save jdbc2_0-stdext.jar file in directory
+      ${derby.source}/tools/java 
+
+
+(2) Java Transaction API (JTA) 1.0.1B
+
+    Download JTA 1.0.1B (jta-1_0_1B-classes.zip) from:
+      http://java.sun.com/products/jta/ 
+    by selecting "Class files".
+
+    Save jta-1_0_1B-classes.zip file in directory
+      ${derby.source}/tools/java 
+
+
+(3) Java Cryptography Extension (JCE) version 1.2.2
+
+    Download JCE 1.2.2 (jce-1_2_2.zip) from:
+      http://java.sun.com/products/jce/index-122.html
+
+    Note: You will need to register to download JCE 1.2.2.
+
+    The downloaded file (jce-1_2_2.zip)  for JCE contains 
+    documentation files and multiple jar files. After 
+    downloading the zip file, unzip the file and copy only 
+    jce1.2.2/lib/jce1_2_2.jar file to directory 
+      ${derby.source}/tools/java
+
+
+
+2.2.5 Download Java Compiler Compiler (JavaCC) version 3.1
+
+JavaCC 3.1 (javacc-3.1.zip or javacc-3.1.tar.gz) can be 
+downloaded from:
+    https://javacc.dev.java.net/
+
+Note: The latest available version of JavaCC is 3.2.
+However, JavaCC 3.1 is the requirement for Derby build
+environment.
+
+The downloaded file (javacc-3.1.zip or javacc-3.1.tar.gz) 
+contains documentation and other files. After downloading 
+the zip or tar file, unzip or untar the file and copy only 
+javacc-3.1/bin/lib/javacc.jar file to directory 
+   ${derby.source}/tools/java 
+
+
+
+2.2.6 Download jakarta-servlet API 4 (Servlet 2.4)
+
+jakarta-servlet API 4 (jakarta-servletapi-4-yyyymmdd.zip or
+jakarta-servletapi-4-yyyymmdd.tar.gz) can be downloaded from:
+   http://cvs.apache.org/builds/jakarta-servletapi-4/nightly/
+
+Note: There is zip and tar file for nightly build for every day.
+Download the zip or tar file for latest day.
+ 
+The downloaded file (jakarta-servletapi-4-yyyymmdd.zip or
+jakarta-servletapi-4-yyyymmdd.tar.gz) contains documentation and 
+other files. After downloading the zip or tar file, unzip or 
+untar the file and copy only jakarta-servletapi-4/lib/servlet.jar 
+file to directory 
+   ${derby.source}/tools/java 
+
+
+
+2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
+
+This is an optional section.
+The reason is that osgi.jar is required to only build the 
+class org.apache.derby.osgi.EmbeddedActivator. This class 
+and jar file manifest entries created in derby.jar allow 
+that jar file to be an OSGi bundle. If osgi.jar is not 
+present EmbeddedActivator will not be build and derby.jar 
+will not contain the manifest entries to be an OSGi bundle.
+
+OSGi Service Platform release 3 (osgi.jar) can be downloaded from: 
+   http://osgi.org
+
+Note: You will need to register to download OSGi Service Platform 
+      release 3.
+
+The downloaded file should be copied to directory
+   ${derby.source}/tools/java 
+
+
+
+Note: After following the steps in sections 2.2.4-2.2.7 of this
+document, you should have the following:
+
+${derby.source}/tools/java/javacc.jar
+${derby.source}/tools/java/jce1_2_2.jar 
+${derby.source}/tools/java/jdbc2_0-stdext.jar
+${derby.source}/tools/java/jta-1_0_1B-classes.zip 
+${derby.source}/tools/java/servlet.jar
+${derby.source}/tools/java/osgi.jar
+
+
+
+2.2.8 Download and Install Jikes 1.14 (Optional)
+
+This is an optional section.
+
+Jikes is an open source java compiler that improves compile 
+speed over standard java compiler. If you would like to have 
+improved compile speed, you can proceed to install Jikes. 
+Jikes 1.14 is the required version for derby builds.
+
+Jikes 1.14 can be downloaded from:
+    http://www.ibm.com/developerworks/oss/jikes/
+     
+Install Jikes 1.14 in any directory. This directory will be 
+referred to as the ${jikes.dir} directory in the rest of this 
+document. 
+
+
+
+---------------------------------------------------------------
+3     Build instructions
+
+
+3.1   Set Required Environmental Variables
+
+(1) Create environment variable ANT_HOME  to point to the 
+    directory where you have installed Ant. For example:
+
+     setenv ANT_HOME ${ant.dir} -- On unix(csh)
+     export ANT_HOME=${ant.dir} -- On unix(ksh)
+     set ANT_HOME=${ant.dir}    -- On Windows
+
+(2) Modify the PATH environment variable to include the 
+    directory ${ant.dir}/bin in its list. This makes the "ant" 
+    command line script available, which will be used to 
+    actually perform the build. Also, if you opted to install
+    jikes in section 2.2.8 of this document, add ${jikes.dir} 
+    to the PATH as well. For example:
+
+     setenv PATH ${ant.dir}/bin:${jikes.dir}:$PATH -- On unix(csh)
+     export PATH=${ant.dir}/bin:${jikes.dir}:$PATH -- On unix(ksh)
+     set PATH=${ant.dir}\bin;${jikes.dir};%PATH%   -- On Windows
+
+(3) Create environment variable JAVA_HOME  to point to the 
+    directory where you have installed JDK 1.4.x. For example:
+
+     setenv JAVA_HOME ${jdk14.dir} -- On unix(csh).
+     export JAVA_HOME=${jdk14.dir} -- On unix(ksh)
+     set JAVA_HOME=${jdk14.dir}    -- On Windows
+
+
+
+3.2   Create property file
+
+You will need to create a property file to specify
+your environment and some of your options. Do the following
+to specify your environment and options:
+
+(1) Find out user home directory on your system. You can find  
+    user home directory by doing echo on variable %HOME% 
+    on windows and $home or $HOME on unix.
+
+(2) Create a file called "ant.properties" in user home 
+    directory and define the following variables in 
+    "ant.properties":
+   
+    - j14lib
+
+      This is a required variable which defines the location of
+      JDK 1.4.x. Define the variable as following:
+
+          j14lib=${jdk14.dir}/jre/lib
+      
+      where ${jdk14.dir} is the directory name where you have 
+      installed JDK 1.4.x. Check out section 2.2.2 of this document. 
+
+    - j13lib
+
+      This is a required variable which defines the location of
+      JDK 1.4.x. Define the variable as following:
+
+          j13lib=${jdk13.dir}/jre/lib
+
+      where ${jdk13.dir} is the directory name where you have 
+      installed JDK 1.3.x. Check out section 2.2.3 of this document.
+      
+    - build.compiler
+
+      This variable defines if standard java compiler or jikes is 
+      used for build. The default value of this variable is set to 
+      use standard java compiler for build. If you opted to install
+      jikes in section 2.2.8 of this document, you can give your 
+      option to use jikes for build by overwriting default value of 
+      this variable by setting it as following: 
+   
+          build.compiler=jikes
+
+    - proceed
+
+      This variable directs Ant to proceed past any build errors and  
+      complete rest of the build (when set to true) or stop build any 
+      time an error is found (when set to false). The default value 
+      for this variable is false. You can overwrite default value 
+      by setting it to true by defining the variable as following: 
+
+           proceed=true
+
+    - sane
+
+      By default this variable is set to true and builds
+      extra asserts and debugging information in the class
+      files. When set to false no extra asserts or debugging 
+      information is included in the class files, making Derby
+      run faster as it generates smaller class files.
+      You can overwrite default value by setting it to false by
+      defining the variable as following: 
+
+          sane=false
+
+      Typically applications embedding Derby would use jar files 
+      built with sane=false.
+
+3.3   Run Derby build
+
+(1) Go to directory ${derby.source}.
+
+(2) Run the following command to start build:
+     
+    >ant
+
+    The above command will build all classes into
+    ${derby.source}/classes. If you add this directory
+    in your classpath, you will have full functionality
+    of engine, tools, and network server. 
+
+(3) Run the following command to build all jars:
+    
+    >ant buildjars
+
+    The above command will build the following jar files:
+    - derby.jar (database engine), 
+    - derbytools.jar (utilities: sysinfo, dblook, ij) 
+    - derbynet.jar (network server).
+
+    You can run the ant command to build an individual jar
+    file as following:
+    - command "ant derbyjar" to build derby.jar
+    - command "ant derbytoolsjar" to build derbytools.jar
+    - command "ant derbynetjar" to build derbynet.jar
+
+Notes: 
+(1) The estimated total time for build completion is ~5-10 minutes.
+
+(2) Derby build environment is NOT dependency based build environment.
+    Make sure to check out explaination of "clobber" target in
+    section 4.1 of this document.
+
+
+
+3.4   Verify Derby build
+
+To verify if the Derby build was successful, do the
+following:
+
+(1) Run "ant" command again and nothing should happen. No 
+    files should get compiled, copied or generated. 
+
+(2) Check if the following directories were created:
+      - ${derby.source}/classes
+      - ${derby.source}/jars if you have built the 
+        jars in step 3 of section 3.3
+
+(3) Execute the following command:
+    
+    >java -cp ${derby.source}/classes org.apache.derby.tools.sysinfo
+
+    You can also execute one of the following commands if you 
+    have built the jars in step 3 of section 3.3:
+
+    For builds with sane=true
+    >java -cp ${derby.source}/jars/sane/derby.jar:${derby.source}/jars/sane/derbytools.jar org.apache.derby.tools.sysinfo
+
+    For builds with sane=false
+    >java -cp ${derby.source}/jars/insane/derby.jar:${derby.source}/jars/insane/derbytools.jar org.apache.derby.tools.sysinfo
+
+    The above commands should report the system info and output 
+    should look like the following:
+
+    ------------------ Java Information ------------------
+    Java Version:    1.4.1_07
+    Java Vendor:     Sun Microsystems Inc.
+    Java home:       C:\Program Files\Java\j2re1.4.1_07
+    Java classpath:  c:\derby\classes
+    OS name:         Windows 2000
+    OS architecture: x86
+    OS version:      5.0
+    Java user name:  derbyuser
+    Java user home:  C:\Documents and Settings\Administrator
+    Java user dir:   C:\derby
+    --------- Derby Information --------
+    [C:\derby\classes] 10.0.2.0 - (1)
+    ------------------------------------------------------
+    ----------------- Locale Information -----------------
+    ------------------------------------------------------
+
+
+(4) Execute the following command:
+    
+    >java -cp ${derby.source}/classes org.apache.derby.tools.ij 
+
+    You can also execute one of the following commands if you 
+    have built the jars in step 3 of section 3.3:
+
+    For builds with sane=true
+    >java -cp ${derby.source}/jars/sane/derby.jar:${derby.source}/jars/sane/derbytools.jar org.apache.derby.tools.ij 
+
+    For builds with sane=false
+    >java -cp ${derby.source}/jars/insane/derby.jar:${derby.source}/jars/insane/derbytools.jar org.apache.derby.tools.ij 
+                
+   
+(5) Execute the following statement: 
+
+    connect 'jdbc:derby:test;create=true'; 
+
+    The above statement should create and connect to a 
+    database with no errors.
+
+
+
+---------------------------------------------------------------
+4     Derby build miscellaneous information
+
+This section provides miscellaneous information about
+Derby builds. 
+
+
+
+4.1   Derby build targets
+
+Some of the main targets that can be called as
+"ant targetname" are as the  following:
+
+  source: to build source code. This is default target.
+
+  javadoc: to create javadoc for all source code.
+
+  publishedapi: to create javadoc for application api classes.
+
+  buildjars: to create jar files
+
+  clobber: remove all built objects except jars. You should run
+           this target if you have source code upgrade or
+           you changed the source code and you are getting
+           some errors.
+
+  clean: remove output directory (${derby.source}/classes)
+
+  cleanjars: remove jars directory (${derby.source}/jars)
+
+  cleandocs: remove javadoc directory (${derby.source}/javadoc)
+
+
+
+4.2   Derby source code upgrade
+
+After upgrading derby source code, do the following before 
+building the code as per instructions given in section 3.3:
+
+(1) Go to directory ${derby.source}.
+
+(2) Run the following command to clean up:
+
+    >ant clobber
+
+
+
+4.3   Derby Build flow
+
+This section provides the information on Derby build flow.
+This section can be skipped unless you are really interested
+in learning about Derby build flow.
+    
+Initially, Ant generates state.properties. This file contains 
+a single property, sanity, with a boolean value that determines 
+the sanity state of the build. 'Sanity' was a concept introduced 
+early in Cloudscape as a way of having assert functionality 
+in the code before Java actually supported such functionality 
+syntactically. It was a way to keep development 'sane,' 
+thus the name. Assertions are contained in an if-block based 
+on the static final boolean values SanityState.DEBUG or 
+SanityState.ASSERT, which are true in a sane (debug) build, 
+and false in an insane (non-debug/optimized) build. 
+Therefore, in an insane build, a smart compiler will not 
+write the code in the if-block into the classfile, since 
+it would never be run. 
+
+The source file containing the static final boolean values of the
+sanity state, org.apache.derby.iapi.services.sanity.SanityState 
+is then generated from a template. The sanity state defaults to 
+true. This also directs the compiler to turn on all debugging 
+options on the compiler. The sanity state can be set to insane 
+by running 'ant insane' or passing in the value -Dsane=false or 
+-Dsanity=false. Note that this file will be removed after 
+'ant clobber,' so if you are rebuilding from scratch and want 
+the build to be a non-debug build, run 'ant insane' before 
+building.
+
+Once the sanity state has been generated, Ant prints out for 
+reference the current properties that affect the build, 
+including base directory, output directory, compiler, 
+sanity state, and the value of the java property 'proceed.' 
+ 
+Next, the parser files are generated with JavaCC. Once the parser 
+files have been generated, the compilation of the source files 
+begins. The source is compiled in a specific order, that order 
+being: reference, internal API, public API, implementation. 
+At the end of the build, the properties files containing the 
+message files are copied into the output directory and the 
+version information properties files are generated.

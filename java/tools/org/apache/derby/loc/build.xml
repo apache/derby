@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<project default="locales" basedir="../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Product names and release info -->
+  <property file="${properties.dir}/release.properties"/>
+
+<!-- Targets -->
+  <target name="locales" depends="copyfiles"/>
+
+  <target name="copyfiles">
+    <copy todir="${loc.dir}" flatten="true">
+      <fileset dir="${derby.tools.locales.dir}">
+        <include name="sysinfoMessages.properties"/>
+        <include name="toolsmessages.properties"/>
+      </fileset>
+    </copy>
+  </target>
+
+</project>
+

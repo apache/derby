@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<project default="iapi" basedir="../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+<!-- Targets -->
+  <target name="iapi" depends="compile"/>
+
+  <target name="compile">
+    <ant dir="${derby.engine.dir}/impl/services"/>
+    <ant dir="${derby.engine.dir}/impl/io"/>
+    <ant dir="${derby.engine.dir}/impl/store"/>
+    <ant dir="${derby.engine.dir}/impl/sql"/>
+    <ant dir="${derby.engine.dir}/impl/db"/>
+    <ant dir="${derby.engine.dir}/impl/jdbc"/>
+    <ant dir="${derby.engine.dir}/impl/load"/>
+  </target>
+
+</project>
+

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<!-- ==================================================================== -->
+<!--                       Cloudscape build file                          -->
+<!-- ==================================================================== -->
+
+<project default="drda" basedir="../..">
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <property name="properties.dir" value="tools/ant/properties"/>
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <property file="${properties.dir}/parser.properties"/>
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="drda" >
+    <ant dir="${derby.drda.dir}/impl/drda"/>
+    <ant dir="${derby.drda.dir}/drda"/>
+    <ant dir="${derby.drda.dir}/loc/drda"/>
+  </target>
+
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
+</project>
+

@@ -1,0 +1,184 @@
+/*
+
+   Licensed Materials - Property of IBM
+   Cloudscape - Package org.apache.derby.impl.sql.compile
+   (C) Copyright IBM Corp. 1998, 2004. All Rights Reserved.
+   US Government Users Restricted Rights - Use, duplication or
+   disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+
+ */
+
+package	org.apache.derby.impl.sql.compile;
+
+import org.apache.derby.iapi.error.StandardException;
+
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+
+import org.apache.derby.iapi.types.TypeId;
+
+import org.apache.derby.iapi.reference.SQLState;
+
+import org.apache.derby.iapi.services.sanity.SanityManager;
+
+import java.util.Vector;
+
+/**
+ * A GroupByColumn is a column in the GROUP BY clause.
+ *
+ * @author jerry
+ */
+public class GroupByColumn extends OrderedColumn 
+{
+	/**
+		IBM Copyright &copy notice.
+	*/
+	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+	private ColumnReference	colRef;
+
+	/**
+	 * Initializer.
+	 *
+	 * @param colRef	The ColumnReference for the grouping column
+	 */
+	public void init(Object colRef) 
+	{
+		this.colRef = (ColumnReference) colRef;
+	}
+
+	/**
+	 * Convert this object to a String.  See comments in QueryTreeNode.java
+	 * for how this should be done for tree printing.
+	 *
+	 * @return	This object as a String
+	 */
+	public String toString() 
+	{
+		if (SanityManager.DEBUG)
+		{
+			return "Column Reference: "+colRef+super.toString();
+		}
+		else
+		{
+			return "";
+		}
+	}
+
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 *
+	 * @return	Nothing
+	 */
+
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			if (colRef != null)
+			{
+				printLabel(depth, "colRef: ");
+				colRef.treePrint(depth + 1);
+			}
+		}
+	}
+
+	/**
+	 * Get the name of this column
+	 *
+	 * @return	The name of this column
+	 */
+	public String getColumnName() 
+	{
+		return colRef.getColumnName();
+	}
+
+	/**
+	 * Get the ColumnReference from this GroupByColumn.
+	 *
+	 * @return ColumnReference	The ColumnReference from this node.
+	 */
+	public ColumnReference getColumnReference()
+	{
+		return colRef;
+	}
+
+	/**
+	 * Set the ColumnReference for this GroupByColumn.
+	 *
+	 * @param colRef	The new ColumnReference for this node.
+	 *
+	 * @return Nothing.
+	 */
+	public void setColumnReference(ColumnReference colRef)
+	{
+		this.colRef = colRef;
+	}
+
+	/**
+	 * Get the table number for this GroupByColumn.
+	 *
+	 * @return	int The table number for this GroupByColumn
+	 */
+
+	public int getTableNumber()
+	{
+		return colRef.getTableNumber();
+	}
+
+	/**
+	 * Get the source this GroupByColumn
+	 *
+	 * @return	The source of this GroupByColumn
+	 */
+
+	public ResultColumn getSource()
+	{
+		return colRef.getSource();
+	}
+
+	/**
+	 * Bind this grouping column.
+	 *
+	 * @param fromList			The FROM list to use for binding
+	 * @param subqueryList		The SubqueryList we are building as we hit
+	 *							SubqueryNodes.
+	 * @param aggregateVector	The aggregate vector we build as we hit 
+	 *							AggregateNodes.
+	 *
+	 * @return	Nothing
+	 *
+	 * @exception StandardException	Thrown on error
+	 */
+
+	public void bindExpression(
+			FromList fromList, 
+			SubqueryList subqueryList,
+			Vector	aggregateVector) 
+				throws StandardException
+	{
+		/* Bind the ColumnReference to the FromList */
+		colRef = (ColumnReference) colRef.bindExpression(fromList,
+							  subqueryList,
+							  aggregateVector);
+
+		// Verify that we can group on the column
+
+		/*
+		 * Do not check to see if we can map user types
+		 * to built-in types.  The ability to do so does
+		 * not mean that ordering will work.  In fact,
+		 * as of version 2.0, ordering does not work on
+		 * user types.
+		 */
+		TypeId ctid = colRef.getTypeId();
+		if (! ctid.orderable(getClassFactory()))
+		{
+			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_ORDERABLE_DURING_EXECUTION, 
+							ctid.getSQLTypeName());
+		}
+	}
+}

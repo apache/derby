@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+
+<project default="locales" basedir="../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Product names and release info -->
+  <property file="${properties.dir}/release.properties"/>
+
+<!-- Targets -->
+  <target name="locales" depends="split"/>
+
+  <target name="split" depends="verifysplit">
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_en"/>
+    </antcall>
+  </target>
+
+  <target name="doSplit" depends="splitprops,verifysplit,noSplit,chksplit" unless="split.done">
+<!-- SplitMessages doesn't play well with jdk13 (resource-bundle stuff??) -->
+    <mkdir dir="${loc.dir}"/>
+    <java classname="org.apache.derbyBuild.splitmessages"
+          classpath="${out.dir}"
+          dir="${derby.locales.dir}"
+          fork="yes"
+          failonerror="true">
+      <arg line="${loc.dir} ${split.properties}"/>
+    </java>
+    <touch file="${split.donefile}"/>
+  </target>
+
+  <target name="splitprops">
+    <property name="split.properties" value="${msgdir}/${msgfile}.properties"/>
+    <property name="split.donefile" value="${loc.dir}/${msgfile}.done"/>
+  </target>
+
+  <target name="chksplit">
+    <uptodate property="split.done"
+              targetfile="${split.donefile}" >
+      <srcfiles dir="${derby.locales.dir}" includes="${msgfile}.properties" />
+    </uptodate>
+  </target>
+
+  <target name="verifysplit">
+    <available classname="org.apache.derbyBuild.splitmessages"
+               property="splitmsgs.available">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+      </classpath>
+    </available>
+  </target>
+
+  <target name="noSplit" unless="splitmsgs.available">
+    <echo message=""/>
+    <echo message="***** SplitMessages not available *****"/>
+    <echo message=" ***** Run &quot;all&quot; target first *****"/>
+    <echo message=""/>
+    <fail message="  Exiting ant build..."/>
+  </target>
+</project>
+

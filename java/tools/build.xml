@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<!-- ==================================================================== -->
+<!--                       Cloudscape build file                          -->
+<!-- ==================================================================== -->
+
+<project default="tools" basedir="../..">
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <property name="properties.dir" value="tools/ant/properties"/>
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <property file="${properties.dir}/parser.properties"/>
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="tools" depends="tools_base"
+          description="Build Derby tools">
+
+  </target>
+
+  <target name="tools_base">
+    <ant dir="${derby.tools.dir}/iapi/tools"/>
+    <ant dir="${derby.tools.dir}/impl/tools"/>
+    <ant dir="${derby.tools.dir}/tools"/>
+    <ant dir="${derby.tools.dir}/loc"/>
+  </target>
+
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
+</project>
+

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<project default="compile" basedir="../../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+<property file="${properties.dir}/defaultcompiler.properties"/> 
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+<!-- Targets -->
+
+  <target name="compile" depends="compile_iapi_store_jdk13"/>
+
+  <target name="compile_iapi_store_jsr169">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/store/**"/>
+      <exclude name="${derby.dir}/iapi/store/access/xa/*.java"/>
+    </javac>
+  </target>
+
+  <target name="compile_iapi_store_jdk13" depends="compile_iapi_store_jsr169">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+		<pathelement location="${jta1_2}"/>
+        <pathelement path="${java13compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/store/access/xa/*.java"/>
+    </javac>
+  </target>
+
+</project>
+

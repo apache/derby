@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+
+<project default="drda" basedir="../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+<!-- Targets -->
+  <target name="drda" depends="compile,servlet"/>
+
+  <target name="compile">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.drda.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/drda/*.java"/>
+      <exclude name="${derby.dir}/drda/NetServlet.java"/>
+    </javac>
+  </target>
+
+  <target name="servlet" depends="checkservletjar" if="servletjar.available">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.drda.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+	 	<pathelement location="${servlet22}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+	  <include name="${derby.dir}/drda/NetServlet.java"/>
+    </javac>
+  </target>
+
+  <target name="checkservletjar">
+    <available property="servletjar.available" file="${servlet22}"/>
+  </target>
+
+</project>
+

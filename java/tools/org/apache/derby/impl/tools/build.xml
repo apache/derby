@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+
+<project default="compile" basedir="../../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+<property file="${properties.dir}/defaultcompiler.properties"/> 
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+<!-- Targets -->
+  <target name="compile" depends="compile_tools_impl_jdk14"/>
+
+  <target name="parser">
+    <ant antfile="${src.dir}/build.xml" target="genParser">
+      <property name="msg" value="Generating ij parser..."/>
+      <property name="directory" value="${derby.tools.dir}/impl/tools/ij"/>
+      <property name="rmfiles" value="ijimplparser_rm.files"/>
+      <property name="jjfile" value="ij.jj"/>
+      <property name="chkfile" value="ij.java"/>
+    </ant>
+    <ant antfile="${src.dir}/build.xml" target="genParser">
+      <property name="msg" value="Generating mtGrammar parser..."/>
+      <property name="directory" value="${derby.tools.dir}/impl/tools/ij"/>
+      <property name="rmfiles" value="mtparser_rm.files"/>
+      <property name="jjfile" value="mtGrammar.jj"/>
+      <property name="chkfile" value="mtGrammar.java"/>
+    </ant>
+  </target>
+
+  <target name="compile_tools_impl">
+
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.tools.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/impl/tools/**"/>
+      <exclude name="${derby.dir}/impl/tools/ij/xaHelper.java"/>
+      <exclude name="${derby.dir}/impl/tools/ij/Main14.java"/>
+      <exclude name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
+    </javac>
+   </target>
+  <target name="compile_tools_impl_jdk14" depends="compile_tools_impl">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${ostoolsrc.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/impl/tools/ij/xaHelper.java"/>
+      <include name="${derby.dir}/impl/tools/ij/Main14.java"/>
+      <include name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
+    </javac>
+	
+   </target>
+
+</project>
+

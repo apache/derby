@@ -1,0 +1,123 @@
+/*
+
+   Licensed Materials - Property of IBM
+   Cloudscape - Package org.apache.derby.catalog.types
+   (C) Copyright IBM Corp. 1998, 2004. All Rights Reserved.
+   US Government Users Restricted Rights - Use, duplication or
+   disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+
+ */
+
+package org.apache.derby.catalog.types;
+
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+
+import java.sql.Types;
+import java.io.ObjectOutput;
+import java.io.ObjectInput;
+import java.io.IOException;
+
+public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
+{
+	/**
+		IBM Copyright &copy notice.
+	*/
+	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+	/********************************************************
+	**
+	**	This class implements Formatable. That means that it
+	**	can write itself to and from a formatted stream. If
+	**	you add more fields to this class, make sure that you
+	**	also write/read them with the writeExternal()/readExternal()
+	**	methods.
+	**
+	**	If, inbetween releases, you add more fields to this class,
+	**	then you should bump the version number emitted by the getTypeFormatId()
+	**	method.
+	**
+	********************************************************/
+
+	protected String className;
+
+	/**
+	 * Public niladic constructor. Needed for Formatable interface to work.
+	 *
+	 */
+	public	UserDefinedTypeIdImpl() { super(); }
+
+	/**
+	 * Constructor for a UserDefinedTypeIdImpl. The SQLTypeName of a UserDefinedType
+	 * is assumed to be its className.
+	 *
+	 * @param className	The SQL name of the type
+	 */
+
+	public UserDefinedTypeIdImpl(String className)
+	{
+		super(className);
+		this.className = className;
+		JDBCTypeId = java.sql.Types.JAVA_OBJECT;
+	}
+
+
+	/** Return the java class name for this type */
+	public String	getClassName()
+	{
+		return className;
+	}
+
+	/** Does this type id represent a system built-in type? */
+	public boolean systemBuiltIn()
+	{
+		return false;
+	}
+
+	/** Does this type id represent a user type? */
+	public boolean userType()
+	{
+		return true;
+	}
+	// Formatable interface.
+
+	/**
+	 * Read this object from a stream of stored objects.
+	 *
+	 * @param in read this.
+	 *
+	 * @exception IOException					thrown on error
+	 * @exception ClassNotFoundException		thrown on error
+	 */
+	public void readExternal( ObjectInput in )
+		 throws IOException, ClassNotFoundException
+	{
+		super.readExternal( in );
+		className = in.readUTF();
+		JDBCTypeId = java.sql.Types.JAVA_OBJECT;
+	}
+
+	/**
+	 * Write this object to a stream of stored objects.
+	 *
+	 * @param out write bytes here.
+	 *
+	 * @exception IOException		thrown on error
+	 */
+	public void writeExternal( ObjectOutput out )
+		 throws IOException
+	{
+		super.writeExternal( out );
+		out.writeUTF( className );
+	}
+	/**
+	 * Get the formatID which corresponds to this class.
+	 *
+	 *	@return	the formatID of this class
+	 */
+	public	int	getTypeFormatId()	{ return StoredFormatIds.USERDEFINED_TYPE_ID_IMPL_V3; }
+
+	/**
+	 * Get the format id for the wrapper type id that corresponds to
+	 * this type id.
+	 */
+	public int wrapperTypeFormatId() { return StoredFormatIds.USERDEFINED_TYPE_ID_V3; }
+}

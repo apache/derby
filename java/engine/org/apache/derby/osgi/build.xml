@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+
+<project default="osgi" basedir="../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+<property file="${properties.dir}/defaultcompiler.properties"/> 
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+<!-- Targets -->
+  <target name="osgi" depends="compile_osgi"/>
+
+  <target name="compile_osgi" depends="checkosgijar" if="osgijar.available">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+		<pathelement location="${osgi}"/>
+        <pathelement path="${java13compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/osgi/*.java"/>
+    </javac>
+  </target>
+
+  <target name="checkosgijar">
+    <available property="osgijar.available" file="${osgi}"/>
+  </target>
+
+</project>
+

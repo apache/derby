@@ -1,0 +1,64 @@
+/*
+
+   Licensed Materials - Property of IBM
+   Cloudscape - Package org.apache.derby.impl.tools.ij
+   (C) Copyright IBM Corp. 1998, 2004. All Rights Reserved.
+   US Government Users Restricted Rights - Use, duplication or
+   disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+
+ */
+
+package org.apache.derby.impl.tools.ij;
+
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.util.Vector;
+
+/**
+ * This is an empty impl for reuse of code.
+ *
+ * @author ames
+ */
+abstract class ijResultImpl implements ijResult {
+	/**
+		IBM Copyright &copy notice.
+	*/
+	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+	public boolean isConnection() { return false; }
+	public boolean isStatement() { return false; }
+	public boolean isResultSet() throws SQLException { return false; }
+	public boolean isUpdateCount() throws SQLException { return false; }
+	public boolean isNextRowOfResultSet() { return false; }
+	public boolean isVector() { return false; }
+	public boolean isMulti() { return false; }
+	public boolean isException() { return false; }
+	public boolean hasWarnings() throws SQLException { return getSQLWarnings()!=null; }
+
+	public Connection getConnection() { return null; }
+	public Statement getStatement() { return null; }
+	public int getUpdateCount() throws SQLException { return -1; }
+	public ResultSet getResultSet() throws SQLException { return null; }
+	public ResultSet getNextRowOfResultSet() { return null; }
+	public Vector getVector() { return null; }
+	public SQLException getException() { return null; }
+
+	public void closeStatement() throws SQLException { }
+
+	public abstract SQLWarning getSQLWarnings() throws SQLException;
+	public abstract void clearSQLWarnings() throws SQLException;
+
+
+	public String toString() {
+		if (isConnection()) return LocalizedResource.getMessage("IJ_Con0",getConnection().toString());
+		if (isStatement()) return LocalizedResource.getMessage("IJ_Stm0",getStatement().toString());
+		if (isNextRowOfResultSet()) return LocalizedResource.getMessage("IJ_Row0",getNextRowOfResultSet().toString());
+		if (isVector()) return LocalizedResource.getMessage("IJ_Vec0",getVector().toString());
+		if (isMulti()) return LocalizedResource.getMessage("IJ_Mul0",getVector().toString());
+		if (isException()) return LocalizedResource.getMessage("IJ_Exc0",getException().toString());
+		return LocalizedResource.getMessage("IJ_Unkn0",this.getClass().getName());
+	}
+}

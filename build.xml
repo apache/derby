@@ -1,0 +1,770 @@
+<?xml version="1.0"?>
+
+<project default="buildsource" basedir=".">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/sane${sanity}.properties"/>
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+  <!-- Release and version info -->
+  <property file="${properties.dir}/release.properties"/>
+
+<!-- Targets -->
+
+  <target name="buildsource" depends="init,engine,tools,drda,build,versioninfo"/>
+
+<!-- ==================================================================== -->
+<!--                       Initialize targets                             -->
+<!-- ==================================================================== -->
+
+  <target name="init" unless="init.done">
+    <tstamp/>
+    <mkdir dir="${out.dir}"/>
+    <!-- generate sanity state.properties if one does not exist -->
+    <available property="state.available" file="${state.file}"/>
+    <antcall target="ensuresanitystate"/>
+    <property file="${state.file}"/>
+    <property file="${properties.dir}/sane${sanity}.properties"/>
+    <antcall target="setissane"/>
+    <property name="init.done" value="true"/>
+  </target>
+
+  <target name="setissane">
+    <condition property="is.sane">
+      <equals arg1="${sanity}" arg2="true"/>
+    </condition>
+  </target>
+
+  <target name="ensuresanitystate" unless="state.available">
+    <antcall target="sane"/>
+  </target>
+
+  <target name="showenv" depends="init" unless="showenv.done">
+    <echo message=""/>
+    <echo message="Ant environment:"/>
+    <echo message="  Base Directory: ${basedir}"/>
+    <echo message="  Build output: ${out.dir}"/>
+    <echo message="  Compiler: ${build.compiler}"/>
+    <echo message="  Sane = ${sane}"/>
+    <echo message="  Proceed = ${proceed}"/>
+    <echo message=""/>
+    <property name="showenv.done" value="true"/>
+  </target>
+
+<!-- ==================================================================== -->
+<!--                     Build version info files                         -->
+<!-- ==================================================================== -->
+
+  <target name="versioninfo" depends="ckversioninfo,writeversioninfo"/>
+
+  <target name="ckversioninfo">
+    <condition property="versioninfo.available">
+      <and>
+        <available file="${out.dir}/org/apache/derby/info/DBMS.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/tools.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/net.properties"/>
+      </and>
+    </condition>
+  </target>
+
+  <target name="writeversioninfo" unless="versioninfo.available">
+    <mkdir dir="${out.dir}/org/apache/derby/info/"/>
+
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.iname" value="Apache Derby Embedded Engine"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="codeline"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/DBMS.properties"/>
+    </antcall>
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.iname" value="Apache Derby Tools"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="codeline"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/tools.properties"/>
+    </antcall>
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.iname" value="Apache Derby Network Server"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="codeline"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/net.properties"/>
+    </antcall>
+  </target>
+
+  <target name="cleanversion">
+    <delete file="${out.dir}/org/apache/derby/info/DBMS.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/tools.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/net.properties"/>
+  </target>
+<!-- ==================================================================== -->
+<!--                         Info writer build target                     -->
+<!-- ==================================================================== -->
+
+  <target name="infowriter">
+    <propertyfile file="${info.file}" comment="${copyright.comment}">
+      <entry key="derby.version.major" value="${major}"/>
+      <entry key="derby.version.minor" value="${minor}"/>
+      <entry key="derby.version.maint" value="${maint}"/>
+      <entry key="derby.version.drdamaint" value="${drdamaint}"/>
+      <entry key="derby.build.number" value="${info.buildnumber}"/>
+      <entry key="derby.product.technology.name" value="${info.iname}"/>
+      <entry key="derby.product.external.name" value="${info.ename}"/>
+      <entry key="derby.product.external.version" value="${eversion}"/>
+      <entry key="derby.version.beta" value="${beta}"/>
+      <entry key="derby.product.vendor" value="${vendor}"/>
+      <entry key="derby.product.file" value="${info.productfile}"/>
+    </propertyfile>
+  </target>  
+
+
+<!-- ==================================================================== -->
+<!--                   Derby Engine build target                     -->
+<!-- ==================================================================== -->
+
+  <target name="engine" depends="state,parsers">
+    <ant dir="${derby.engine.src.dir}"/>
+    <antcall target="build"/>
+    <ant dir="${derby.engine.dir}/loc"/>
+    <antcall target="class_size_catalog"/>
+  </target>
+
+  <target name="tools" depends="engine">
+    <ant dir="${derby.tools.src.dir}"/>
+  </target>
+
+  <target name="drda" depends="engine">
+    <ant dir="${derby.drda.src.dir}"/>
+  </target>
+
+  <target name="build" >
+    <ant dir="${derby.build.src.dir}"/>
+  </target>
+
+<!-- ==================================================================== -->
+<!--                     Build SanityState.java                           -->
+<!-- ==================================================================== -->
+
+  <target name="getstate">
+    <condition property="needstate">
+      <or>
+        <not>
+          <equals arg1="${sane}" arg2="${sanity}"/>
+        </not>
+        <not>
+          <available file="${sanity.dir}/SanityState.java"/>
+        </not>
+      </or>
+    </condition>
+  </target>
+
+  <property name="state.file" value="${derby.engine.src.dir}/state.properties"/>
+  <property file="${state.file}"/>
+  <target name="state" if="needstate"
+          depends="showenv,getstate"
+          description="Build SanityState.java">
+    <echo message="  Generating SanityState.java..."/>
+    <property name="sane" value="true"/>
+    <filter token="SANE" value="${sane}"/>
+    <copy file="${sanity.dir}/SanityState.tmpl"
+          tofile="${sanity.dir}/SanityState.java"
+          overwrite="yes" filtering="on"/>
+    <property name="header" value="Generated file - do not modify!"/>
+    <propertyfile file="${state.file}" comment="${header}">
+      <entry key="sanity" value="${sane}" type="string"/>
+    </propertyfile>
+    <delete dir="${sanity.out.dir}"/>
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Remove SanityState.java file                    -->
+<!-- =================================================================== -->
+  <target name="cleanstate">
+    <delete file="${derby.engine.src.dir}/state.properties"/>
+    <delete file="${sanity.dir}/SanityState.java"/>
+    <delete dir="${sanity.out.dir}"/>
+  </target>
+
+<!-- =================================================================== -->
+<!--                 Remove all built objects (except jars)              -->
+<!-- =================================================================== -->
+  <target name="clobber" depends="showenv,clean,cleanstate,cleanparsers,cleancatalog"/>
+
+<!-- =================================================================== -->
+<!--                       Remove output tree                            -->
+<!-- =================================================================== -->
+  <target name="clean">
+    <delete dir="${out.dir}"/>
+  </target>
+
+<!-- ==================================================================== -->
+<!--                         Build parsers                                -->
+<!-- ==================================================================== -->
+  <target name="parsers"
+          description="Build the parsers">
+    <ant dir="${derby.tools.dir}/impl/tools"  target="parser"/>
+    <ant dir="${derby.engine.dir}/impl/sql"  target="parser"/>
+  </target>
+
+  <target name="genParser" depends="chkparser" unless="parser.done">
+    <echo message="  ${msg}"/>
+    <delete>
+      <fileset dir="${directory}" includes="${rmfiles}"/>
+    </delete>
+    <java classname="javacc"
+          classpath="${jjpath}"
+                dir="${directory}"
+               fork="yes"
+        failonerror="true">
+      <arg value="${jjfile}"/>
+    </java>
+  </target>
+
+  <target name="chkparser">
+    <uptodate property="parser.done"
+              targetfile="${directory}/${chkfile}" >
+      <srcfiles dir="${directory}" includes="${jjfile}" />
+    </uptodate>
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Remove parser-generated files                   -->
+<!-- =================================================================== -->
+  <target name="cleanparsers">
+    <delete>
+      <fileset dir="${derby.engine.dir}/impl/sql/compile" includes="SQLParser.java,SQLParserTokenManager.java,SQLParserConstants.java"/>
+    </delete>
+    <delete>
+      <fileset dir="${derby.tools.dir}/impl/tools/ij"
+            includes="ij.java ijTokenManager.java ijConstants.java Token.java,mtGrammar.java,mtGrammarConstants.java,mtGrammarTokenManager.java"/>
+    </delete>
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Class Size Catalog build                        -->
+<!-- =================================================================== -->
+
+  <!-- Note that checking the up-to-date status of the files scanned by  -->
+  <!-- ClassSizeCrawler will not always result in the ClassSizeCatalog   -->
+  <!-- being updated properly. We would have to be able to scan the full -->
+  <!-- dependency tree. This does prevent recompilation in most cases,   -->
+  <!-- and requires it in the most obvious. If there is concern that     -->
+  <!-- the ClassSizeCatalog may have changed significantly since the     -->
+  <!-- last build, run cleancatalog and rebuild to regenerate it.        -->
+
+  <target name="class_size_catalog" depends="cscuptodate" unless="csc.uptodate"
+          description="create the class size catalog -- a java file">
+    <java classname="org.apache.derbyBuild.ClassSizeCrawler"
+          fork="yes"
+          failonerror="yes">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <jvmarg value="-DWS=${workspace}"/>
+      <jvmarg value="-DclassDir=${out.dir}"/>
+      <jvmarg value="-Dout=${derby.engine.src.dir}/${derby.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
+      <jvmarg value="-Dprefix.1=org.apache.derby.iapi.types"/>            
+      <jvmarg value="-Dprefix.2=org.apache.derby.impl"/>
+      <arg value="org.apache.derby.iapi.types.DataValueDescriptor"/>
+      <arg value="org.apache.derby.impl.services.cache.CachedItem"/>
+      <arg value="org.apache.derby.impl.store.raw.data.RecordId"/>
+      <arg value="org.apache.derby.iapi.store.raw.ContainerKey"/>
+      <arg value="org.apache.derby.iapi.services.cache.SizedCacheable"/>
+      <arg value="java.lang.ref.WeakReference"/>
+      <arg value="java.math.BigDecimal"/>
+      <arg value="java.util.ArrayList"/>
+      <arg value="java.util.GregorianCalendar"/>
+    </java>
+
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
+    </javac>
+
+  </target>
+
+  <target name="cscuptodate">
+    <condition property="csc.uptodate">
+      <and>
+        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/iapi/types/DataValueDescriptor.java"
+                  targetfile="${out.dir}/org/apache/derby/iapi/types/DataValueDescriptor.class"/>
+        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/impl/services/cache/CachedItem.java"
+                  targetfile="${out.dir}/org/apache/derby/impl/services/cache/CachedItem.class"/>
+        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/impl/store/raw/data/RecordId.java"
+                  targetfile="${out.dir}/org/apache/derby/impl/store/raw/data/RecordId.class"/>
+        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/iapi/store/raw/ContainerKey.java"
+                  targetfile="${out.dir}/org/apache/derby/iapi/store/raw/ContainerKey.class"/>
+        <uptodate srcfile="${osengsrc.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.java"
+                  targetfile="${out.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.class"/>
+        <available file="${osengsrc.dir}/org/apache/derby/iapi/services/cache/ClassSizeCatalog.java"/>
+      </and>
+    </condition>
+  </target>
+
+  <target name="cleancatalog"
+          description="Remove the generated catalog java file.">
+    <delete file="${derby.engine.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Generate sanity.properties                      -->
+<!-- =================================================================== -->
+
+  <target name="sane">
+    <propertyfile file="${state.file}" comment="${header}">
+      <entry key="sanity" value="true" type="string"/>
+    </propertyfile>
+  </target>
+  <target name="insane">
+    <propertyfile file="${state.file}" comment="${header}">
+      <entry key="sanity" value="false" type="string"/>
+    </propertyfile>
+  </target>
+
+
+<!-- =================================================================== -->
+<!--                           Javadoc targets                           -->
+<!-- =================================================================== -->
+
+  <target name="javadoc" depends="publishedapi,derbydocs,toolsdocs,grammardocs"/>
+
+  <target name="publishedapi">
+
+    <delete dir="${basedir}/javadoc/publishedapi"/>
+    <delete dir="${basedir}/javadoc/sourcedir"/>
+    <mkdir dir="${basedir}/javadoc/publishedapi"/>
+    <mkdir dir="${basedir}/javadoc/sourcedir"/>
+
+    <!-- drda files -->
+    <mkdir dir="${basedir}/javadoc/sourcedir"/>
+    <copy todir="${basedir}/javadoc/sourcedir"> 
+      <fileset dir="${derby.drda.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+    </copy>
+	
+    <!-- engine files -->
+    <copy todir="${basedir}/javadoc/sourcedir">
+      <fileset dir="${derby.engine.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+    </copy>
+
+    <!-- tools files -->
+    <copy todir="${basedir}/javadoc/sourcedir">
+      <fileset dir="${derby.tools.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+    </copy>
+
+    <javadoc sourcepath="${basedir}/javadoc/sourcedir/"
+             classpath="${compile.classpath};${osgi};${servlet22};${out.dir}"
+             breakiterator="true"
+             destdir="${basedir}/javadoc/publishedapi"
+             packagenames="org.apache.derby.authentication,org.apache.derby.drda,org.apache.derby.jdbc.io,org.apache.derby.jdbc,org.apache.derby.tools"
+             Windowtitle="Apache Derby ${major}.${minor} API Documentation"
+             Doctitle="Apache Derby ${major}.${minor} API Documentation"
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; IBM Corp. 1997,2004 All Rights Reserved.&lt;/i&gt;"/>
+
+    <delete dir="${basedir}/javadoc/sourcedir"/>
+
+  </target>
+
+  <target name="derbydocs">
+
+    <delete dir="${basedir}/javadoc/engine"/>
+    <mkdir dir="${basedir}/javadoc/engine"/>
+
+    <antcall target="javadocsubpackages">
+      <param name="javadoc.sourcepath" value="${derby.engine.src.dir};${derby.drda.src.dir};${derby.tools.src.dir}"/>
+      <param name="javadoc.classpath" value="${basedir}/classes;${java14compile.classpath};${jars.extras};${osgi}"/>
+      <param name="javadoc.destdir" value="${basedir}/javadoc/engine"/>
+      <param name="javadoc.subpackages" value="org.apache.derby"/>
+      <param name="javadoc.doctitle" value="Apache Derby V${major}.${minor} Engine Documentation"/>
+      <param name="javadoc.windowtitle" value="Apache Derby V${major}.${minor} Engine Documentation"/>
+      <param name="javadoc.bottom" value="Apache Derby V${major}.${minor} Engine Documentation  -  &lt;i&gt;Copyright &amp;copy; IBM Corp. 1997,2004 All Rights Reserved.&lt;/i&gt;"/>
+    </antcall>
+  </target>
+
+  <target name="toolsdocs">
+
+    <delete dir="${basedir}/javadoc/tools"/>
+    <mkdir dir="${basedir}/javadoc/tools"/>
+
+    <antcall target="dojjdocs">
+      <param name="jjtodoc" value="${derby.tools.dir}/impl/tools/ij/ij.jj"/>
+      <param name="jjdoctarget" value="${basedir}/javadoc/tools/ij.html"/>
+    </antcall>
+
+  </target>
+
+  <target name="grammardocs">
+
+    <delete dir="${basedir}/javadoc/language"/>
+    <mkdir dir="${basedir}/javadoc/language"/>	
+
+    <antcall target="dojjdocs">
+      <param name="jjtodoc" value="${derby.engine.dir}/impl/sql/compile/sqlgrammar.jj"/>
+      <param name="jjdoctarget" value="${basedir}/javadoc/language/sqlgrammar.html"/>
+    </antcall>
+
+  </target>
+
+  <target name="dojjdocs">
+
+    <java classname="jjdoc" fork="yes">
+      <classpath path="${javatools.dir}/javacc.jar;${compile.classpath}"/>
+      <arg value="-NOONE_TABLE"/>
+      <arg value="-output_file=${jjdoctarget}"/>
+      <arg value="${jjtodoc}"/>
+    </java>
+
+  </target>
+
+  <target name="javadocsubpackages">
+    <java classname="com.sun.tools.javadoc.Main" fork="yes">
+      <classpath path="${java.home}/../lib/tools.jar;${out.dir}"/>
+      <jvmarg value="-mx320M"/>
+      <arg value="-subpackages"/>
+      <arg value="org"/>
+      <arg value="-private"/>
+      <arg value="-breakiterator"/>
+      <arg value="-sourcepath"/>
+      <arg value="${javadoc.sourcepath}"/>
+      <arg value="-classpath"/>
+      <arg value="${javadoc.classpath}"/>
+      <arg value="-d"/>
+      <arg value="${javadoc.destdir}"/>
+      <arg value="-windowtitle"/>
+      <arg value="${javadoc.windowtitle}"/>
+      <arg value="-doctitle"/>
+      <arg value="${javadoc.doctitle}"/>
+      <arg value="-bottom"/>
+      <arg value="${javadoc.bottom}"/>
+      <arg value="-taglet"/>
+      <arg value="org.apache.derbyBuild.javadoc.FormatIdTaglet"/>
+      <arg value="-taglet"/>
+      <arg value="org.apache.derbyBuild.javadoc.PurposeTaglet"/>
+      <arg value="-taglet"/>
+      <arg value="org.apache.derbyBuild.javadoc.UpgradeTaglet"/>
+      <arg value="-taglet"/>
+      <arg value="org.apache.derbyBuild.javadoc.DiskLayoutTaglet"/>
+      <arg value="-taglet"/>
+      <arg value="org.apache.derbyBuild.javadoc.EndFormatTaglet"/>
+    </java>
+  </target>
+
+  <target name="cleandocs">
+
+    <delete dir="${basedir}/javadoc"/>
+
+  </target>
+
+<!-- =================================================================== -->
+<!--                               Jar targets                           -->
+<!-- =================================================================== -->
+
+  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar"/>
+  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar"/>
+
+  <target name="initjars" depends="setsanityname">
+    <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
+    <property name="derby.jar.topdir" value="${basedir}/jars"/>
+    <mkdir dir="${derby.jar.dir}"/>
+    <mkdir dir="${derby.jar.dir}/lists"/>
+    <condition property="changenumber" value="1">
+      <not>
+        <isset property="changenumber"/>
+      </not>
+    </condition>
+  </target>
+
+
+<!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
+
+  <target name="derbyjar" depends="initjars">
+
+    <echo message="Beginning derby.jar ${sanity.name} build"/>
+
+    <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
+      <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
+    </concat>
+
+    <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
+    <java classname="org.apache.derbyBuild.propertyconfig">
+      <arg value="${out.dir}/org/apache/derby/modules.properties"/>
+      <arg value="derby"/>
+      <arg value="${derby.jar.dir}/lists/org/apache/derby/modules.properties"/>
+      <classpath>
+        <pathelement path="${out.dir}"/>
+      </classpath>
+    </java>
+
+    <!-- filter out EmbeddedActivator if osgi.jar is not available -->
+    <antcall target="filteractivator"/>
+
+    <echo message=" creating derby.jar class list "/>
+    <java classname="org.apache.derbyBuild.classlister" fork="yes">
+      <jvmarg value="-DcloudscapeOnly=true"/>
+      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derby.list"/>
+      <arg value="${derby.jar.dir}/lists/otherDerbyClasses.properties"/> 
+      <arg value="${derby.jar.dir}/lists/org/apache/derby/modules.properties"/>
+      <classpath>
+        <pathelement path="${out.dir}"/> 
+      </classpath>
+    </java>
+
+    <!-- This next antcall generates a new properties file for the build.  -->
+    <!-- If a changenumber is passed into the build via a property file or -->
+    <!-- on the command line, the build number will be inserted into the   -->
+    <!-- build at this point.                                              -->
+ 
+    <echo message=" creating new DBMS.properties file"/>
+    <antcall target="infowriter">
+      <param name="info.iname" value="Apache Derby Embedded Engine"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.buildnumber" value="${changenumber}"/>
+      <param name="info.productfile" value="derby.jar"/>
+      <param name="info.file" value="${out.dir}//org/apache/derby/info/DBMS.properties"/>
+    </antcall>
+    <echo file="${derby.jar.dir}/lists/derby.list"
+          append="true"
+          message="org/apache/derby/info/DBMS.properties"/>
+
+    <!-- the next two targets are orthogonal. Only one will be executed, -->
+    <!-- depending on whether or not osgi.jar is available.              -->
+    <antcall target="derbyjarwithosgi"/>
+    <antcall target="derbyjarwithoutosgi"/>
+
+    <!-- add non-class files to jar -->
+
+    <jar destfile="${derby.jar.dir}/derby.jar" 
+         update="true"
+         compress="true">
+      <fileset dir="${out.dir}"
+               includes="org/apache/derby/loc/m?_en.properties,
+                         org/apache/derby/loc/m??_en.properties,
+                         org/apache/derby/loc/sysinfoMessages.properties,
+                         org/apache/derby/loc/toolsmessages.properties,
+                         org/apache/derby/impl/jdbc/metadata.properties,
+                         org/apache/derby/impl/sql/catalog/metadata_net.properties,
+                         org/apache/derby/info/DBMS.properties"/>
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="org/apache/derby/modules.properties"/>
+    </jar>
+
+  </target>
+
+  <target name="filteractivator" depends="checkosgijar" if="osgijar.unavailable">
+
+    <replaceregexp file="${derby.jar.dir}/lists/otherDerbyClasses.properties"
+                   match="derby.module.osgi.activator=org.apache.derby.osgi.EmbeddedActivator"
+                   replace=""/>
+
+  </target>
+
+  <target name="derbyjarwithoutosgi" depends="checkosgijar" if="osgijar.unavailable">
+
+    <manifest file="${derby.jar.dir}/lists/smf.mf">
+      <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
+      <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
+      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}"/>
+    </manifest> 
+
+    <jar destfile="${derby.jar.dir}/derby.jar"
+         basedir="${out.dir}"
+	 includesfile="${derby.jar.dir}/lists/derby.list"
+         compress="true"
+         filesonly="true"
+         manifest="${derby.jar.dir}/lists/smf.mf"/>
+
+  </target>
+
+  <target name="derbyjarwithosgi" depends="checkosgijar" if="osgijar.available">
+
+    <manifest file="${derby.jar.dir}/lists/smf.mf">
+      <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
+      <attribute name="Bundle-Activator" value="org.apache.derby.osgi.EmbeddedActivator"/>
+      <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
+      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}"/>
+      <attribute name="Import-Package" value="java.sql"/>
+      <attribute name="DynamicImport-Package" value="*"/>
+      <attribute name="Export-Package" value="org.apache.derby.authentication,org.apache.derby.database,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti"/> 
+    </manifest> 
+
+    <jar destfile="${derby.jar.dir}/derby.jar"
+         basedir="${out.dir}"
+	 includesfile="${derby.jar.dir}/lists/derby.list"
+         compress="true"
+         filesonly="true"
+         manifest="${derby.jar.dir}/lists/smf.mf"/>
+
+  </target>
+
+<!-- - - - - - - - - - - - -  derbytools.jar target - - - - - - - - - - -->
+
+  <target name="derbytoolsjar" depends="setsanityname">
+
+    <echo message="Beginning derbytools.jar ${sanity.name} build"/>
+
+    <echo message=" creating tools.list "/>
+    <java classname="org.apache.derbyBuild.classlister" fork="yes">
+      <jvmarg value="-Ddb2jtools=true"/>
+      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derbytools.list"/>
+      <arg value="${basedir}/tools/jar/tools.properties"/>
+      <classpath>
+        <pathelement path="${out.dir}"/>
+      </classpath>
+    </java>
+    <replace file="${derby.jar.dir}/lists/derbytools.list" token="$$$$" value="$$"/>
+
+    <echo message=" creating new tools.properties file "/>
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="${changenumber}"/>
+      <param name="info.iname" value="Apache Derby Tools"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="derbytools.jar"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/tools.properties"/>
+    </antcall>
+
+    <delete file="${derby.jar.dir}/derbytools.jar"/>
+    <jar destfile="${derby.jar.dir}/derbytools.jar"
+         basedir="${out.dir}"
+         includesfile="${derby.jar.dir}/lists/derbytools.list"
+         compress="true"
+         filesonly="true"/>
+    <jar destfile="${derby.jar.dir}/derbytools.jar"
+         compress="true"
+         filesonly="true"
+         update="true">
+      <fileset dir="${out.dir}"
+               includes="org/apache/derby/loc/sysinfoMessages.properties,
+                         org/apache/derby/loc/toolsmessages.properties,
+                         org/apache/derby/info/tools.properties"/>
+    </jar>
+
+  </target>
+
+<!-- - - - - - - - - - - - - - derbynet.jar target - - - - - - - - - - - -->
+
+  <target name="derbynetjar" depends="setsanityname">
+
+    <echo message="Beginning derbynet.jar ${sanity.name} build"/>
+
+    <echo message=" creating net.list"/> 
+    <java classname="org.apache.derbyBuild.classlister" fork="yes">
+      <jvmarg value="-Ddb2jdrda=true"/>
+      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derbynet.list"/>
+      <arg value="${basedir}/tools/jar/net.properties"/>
+      <classpath>
+        <pathelement path="${out.dir}"/>
+      </classpath>
+    </java>
+
+    <echo message=" creating new net.properties file "/>
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="${changenumber}"/>
+      <param name="info.iname" value="Apache Derby Network Server"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="derbynet.jar"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/net.properties"/>
+    </antcall>
+
+    <delete file="${derby.jar.dir}/derbynet.jar"/>
+    <jar destfile="${derby.jar.dir}/derbynet.jar"
+         basedir="${out.dir}"
+         includesfile="${derby.jar.dir}/lists/derbynet.list"
+         compress="true"
+         filesonly="true"/>
+    <jar destfile="${derby.jar.dir}/derbynet.jar"
+         compress="true"
+         filesonly="true"
+         update="true">
+      <fileset dir="${out.dir}"
+               includes="org/apache/derby/loc/drda/**,
+                         org/apache/derby/info/net.properties"/>
+    </jar>
+
+  </target>
+
+<!-- - - - - - - - - - - -  jar build helper targets  - - - - - - - - - -->
+
+  <target name="setsanityname" depends="init,setissane,sanitynamesane,sanitynameinsane"/>
+
+  <target name="sanitynamesane" if="is.sane">
+    <property name="sanity.name" value="sane"/>
+  </target>
+
+  <target name="sanitynameinsane" unless="is.sane">
+    <property name="sanity.name" value="insane"/>
+  </target>
+
+  <target name="checkosgijar" depends="setosgiavailable,setosgiunavailable"/>
+  <target name="setosgiavailable">
+    <condition property="osgijar.available">
+      <available file="${osgi}"/>
+    </condition>
+  </target>
+  <target name="setosgiunavailable">
+    <condition property="osgijar.unavailable">
+      <not>
+        <available file="${osgi}"/>
+      </not>
+    </condition>
+  </target>
+
+
+  <target name="cleanjars" depends="setsanityname">
+    <delete dir="${basedir}/jars/${sanity.name}"/>
+  </target>
+
+<!-- =================================================================== -->
+<!--                         Nightly build targets                       -->
+<!-- =================================================================== -->
+
+  <target name="buildworld">
+
+    <property name="proceed" value="true"/>
+
+    <!-- Build insane product jars -->
+    <antcall target="clobber"/>
+    <antcall target="insane"/>
+    <antcall target="buildsource"/>
+    <antcall target="buildsource"/>
+    <antcall target="jars"/>
+
+
+    <!-- Build sane product jars -->
+    <antcall target="clobber"/>
+    <antcall target="sane"/>
+    <antcall target="buildsource"/>
+    <antcall target="buildsource"/>
+    <antcall target="jars"/>
+
+    <!-- Build everything else -->
+    <antcall target="javadoc"/>
+
+  </target>
+
+</project>

@@ -1,0 +1,390 @@
+
+options {
+	STATIC = false;
+	DEBUG_PARSER = false;
+	DEBUG_TOKEN_MANAGER = false;
+	ERROR_REPORTING = true;
+	USER_TOKEN_MANAGER = false;
+	USER_CHAR_STREAM = false;
+	JAVA_UNICODE_ESCAPE = false;
+	UNICODE_INPUT = true;
+	IGNORE_CASE = true;
+	CACHE_TOKENS = true;
+	LOOKAHEAD = 1;
+}
+
+PARSER_BEGIN(mtGrammar)
+
+package org.apache.derby.impl.tools.ij;
+
+import java.util.Hashtable;
+import java.util.Vector;
+import java.io.IOException;
+import org.apache.derby.iapi.tools.i18n.*;
+
+public class mtGrammar 
+{
+	private LocalizedOutput currOut;
+	private LocalizedInput currIn;
+
+
+	mtGrammar() { }
+}
+
+PARSER_END(mtGrammar)
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r\n"
+| "\n"
+| "\r"
+| "\f"
+}
+
+SPECIAL_TOKEN : /* COMMENTS */
+{
+  <SINGLE_LINE_SQLCOMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+	| <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+	| <SINGLE_LINE_COMMENT2: "#" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+}
+
+TOKEN [IGNORE_CASE] :
+{
+	<CASE: "case:">
+|	<FILE: "file:">	
+|	<LAST: "last:">	
+|	<INIT: "init:">	
+|	<WEIGHT: "weight:">	
+|	<DESCRIPTION: "description:">	
+|	<IGNOREERRORS: "ignoreErrors:">	
+|	<PROPERTIES: "properties:">	
+|	<THREADS: "threads:">	
+|	<RUNTIME: "runtime:">	
+|	<INT: (["0"-"9"])+> 
+|	<WORD: (["a"-"z", "A"-"Z", "_", "/", ".","$", "0"-"9"])+> 
+|	<STRING: ["\""] (~["\n", "\r", "\""])+ ["\""] > 
+}
+
+TOKEN :
+{	/* Operators and punctuation */
+	<COMMA: ","> 
+|	<COLON: ":"> 
+}
+
+
+//
+// start of BNF rules
+//
+
+mtTestSuite
+grammarStatement() :
+{
+	Vector cases = null;
+	Vector init = null;
+	Vector last = null;
+	int	threads = 0;
+	mtTime time; 
+}
+{
+	threads=numThreads() 
+	time=runTime() 
+	[ init=init() ]
+	cases=cases()
+	[ last=last() ]
+	<EOF>
+	{
+		return new mtTestSuite(threads, time, init, cases, last);
+	
+	}	
+}
+int
+numThreads() :
+{
+	Token	t;
+}
+{
+	<THREADS> t=<INT>
+	{
+		int val = Integer.decode(t.image).intValue();
+		return val;
+	}
+}
+
+mtTime
+runTime() :
+{
+	mtTime time;
+}
+{
+	<RUNTIME> time=time()
+	{
+		return time;
+	}
+}
+
+Vector
+cases() :
+{
+	Vector testCases = new Vector(5);	// start with 5
+}
+{
+	(testCase(testCases))+
+	{
+		return testCases;
+	}
+}
+
+
+
+void
+testCase(Vector testCases) :
+{
+	Token	t;
+	mtTestCase testCase = new mtTestCase();
+}
+{
+	<CASE> t=<WORD> caseInfo(testCase)
+	{
+		testCase.setName(t.image);
+		testCases.addElement(testCase);
+	}
+}
+
+
+Vector
+init() :
+{
+	Vector testCases = new Vector(5);	// start with 5
+}
+{
+	(initCase(testCases))+ 
+	{
+		return testCases;
+	}
+}
+
+
+
+void
+initCase(Vector testCases) :
+{
+	Token	t;
+	mtTestCase testCase = new mtTestCase();
+}
+{
+	<INIT> t=<WORD> caseInfo(testCase)
+	{
+		testCase.setName(t.image);
+		testCases.addElement(testCase);
+	}
+}
+
+Vector
+last() :
+{
+	Vector testCases = new Vector(1);	// start with 1
+}
+{
+	(lastCase(testCases))+ 
+	{
+		return testCases;
+	}
+}
+
+
+
+void
+lastCase(Vector testCases) :
+{
+	Token	t;
+	mtTestCase testCase = new mtTestCase();
+}
+{
+	<LAST> t=<WORD> caseInfo(testCase)
+	{
+		testCase.setName(t.image);
+		testCases.addElement(testCase);
+	}
+}
+
+void
+caseInfo(mtTestCase testCase) :
+{
+	String	file;
+	String	prop = null;
+	int	weight = 50;
+	Hashtable errorList = null;
+	String	description = null;
+}
+{
+	file=scriptFile() 
+	{
+		testCase.setFile(file);
+	}
+
+	[ prop=propFile() ]
+	{
+		testCase.setPropFile(prop);
+	}
+
+	[ weight=weight() ]
+	{
+		testCase.setWeight(weight);
+	} 
+
+	[ errorList=ignoreErrors() ] 
+	{
+		if (errorList == null)
+			errorList = new Hashtable();
+
+		testCase.setIgnoreErrors(errorList);
+	}
+
+	[ description=description() ]
+	{
+		testCase.setDescription(description);
+	}
+}
+
+
+String
+scriptFile() :
+{
+	Token	t;
+}
+{
+	<FILE> t=<WORD>
+	{
+		return t.image;
+	}
+}
+
+
+String
+propFile() :
+{
+	Token 	t;
+}
+{
+	<PROPERTIES> t=<WORD>
+	{
+		return t.image;
+	}
+}
+
+int
+weight() :
+{
+	Token	t;
+}
+{
+	<WEIGHT> t=<INT>
+	{
+		int val = Integer.decode(t.image).intValue();
+		if (val > 100 || val < 1)
+		{
+			System.out.println("LINE "+t.beginLine +": Weight '"+t.image
+							+"' is invalid, must be between 1..100"
+							+" -- defaulting to 50.");
+			val = 50;
+		}
+		return val;	
+	}
+}
+
+String 
+description() :
+{
+	Token	t;
+}
+{
+	<DESCRIPTION> t=<STRING>
+	{
+		return t.image;
+	}	
+}
+
+Hashtable
+ignoreErrors() :
+{
+	// note: we need a non-null errorlist even
+	// if there is nothing in it
+	Hashtable errorList = new Hashtable();
+}
+{
+	<IGNOREERRORS> getError(errorList) (<COMMA> getError(errorList))*
+	{
+		return errorList;
+	}
+}
+
+void
+getError(Hashtable errorList) :
+{
+	String	s;
+}
+{
+	s=word_or_int()
+	{
+		if (errorList == null)
+		{
+		}
+		errorList.put(s, new Integer(0));
+	}
+}
+
+String
+word_or_int() :
+{
+	Token	t;
+}
+{
+	t=<WORD>
+	{
+		return t.image;
+	}
+|	t=<INT>
+	{
+		return t.image;
+	}
+}
+
+/*
+** Possible formats:
+**
+** 	HH:MM:SS
+** 	   MM:SS
+** 	      SS
+*/
+mtTime
+time() :
+{
+	Token h, m, s;
+}
+{
+	LOOKAHEAD(4) h=<INT> <COLON> m=<INT> <COLON> s=<INT>
+	{
+		return new mtTime(
+				Integer.decode(h.image).intValue(),
+				Integer.decode(m.image).intValue(),
+				Integer.decode(s.image).intValue());
+	}
+|	LOOKAHEAD(2) m=<INT> <COLON> s=<INT> 
+	{
+		return new mtTime(
+				0,
+				Integer.decode(m.image).intValue(),
+				Integer.decode(s.image).intValue());
+	}
+|	s=<INT>
+	{
+		return new mtTime(
+				0,
+				0,
+				Integer.decode(s.image).intValue());
+	}
+}	

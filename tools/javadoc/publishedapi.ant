@@ -1,0 +1,36 @@
+# This file contains a list of the files that constitute the public API
+# 
+# IMPORTANT: all names should be like package names, but with slashes
+#            instead of dots.
+#
+# Add new files to the appropriate package section; add new sections
+# for new packages.
+#
+# IMPORTANT: if you are adding a new package, be sure to add it to
+#            the list of packages in the publishedapi target in
+#            the toplevel build.xml file.
+#
+# Please do not add whitespace in front of class names.
+# Blank lines and comments are allowed.
+
+# package: org.apache.derby.authentication
+
+org/apache/derby/authentication/UserAuthenticator.java
+
+# package: org.apache.derby.drda
+
+org/apache/derby/drda/NetServlet.java
+org/apache/derby/drda/NetworkServerControl.java
+
+# package: org.apache.derby.jdbc
+
+org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java
+org/apache/derby/jdbc/EmbeddedDataSource.java
+org/apache/derby/jdbc/EmbeddedDriver.java
+org/apache/derby/jdbc/EmbeddedXADataSource.java
+
+# package: org.apache.derby.tools
+
+org/apache/derby/tools/ij.java
+org/apache/derby/tools/sysinfo.java
+org/apache/derby/tools/cslook.java

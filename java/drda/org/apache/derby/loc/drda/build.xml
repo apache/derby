@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<project default="locales" basedir="../../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <property file="${properties.dir}/drdadirs.properties"/>
+
+<!-- Targets -->
+  <target name="locales" depends="copyfiles"/>
+
+  <target name="copyfiles">
+    <copy todir="${drdaloc.dir}" flatten="true">
+      <fileset dir="${derby.drda.locales.dir}">
+        <include name="messages*.properties"/>
+        <include name="servlet*.properties"/>
+
+      </fileset>
+
+    </copy>
+
+  </target>
+
+</project>
+

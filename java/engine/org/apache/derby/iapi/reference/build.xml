@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<project default="compile_reference" basedir="../../../../../../..">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+<!-- Targets -->
+  <target name="reference" depends="compile_reference"/>
+
+  <target name="compile_reference">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/reference/**"/>
+      <exclude name="${derby.dir}/iapi/reference/JDBC20Translation.java"/>
+      <exclude name="${derby.dir}/iapi/reference/JDBC30Translation.java"/>
+    </javac>
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/reference/JDBC20Translation.java"/>
+      <include name="${derby.dir}/iapi/reference/JDBC30Translation.java"/>
+    </javac>
+  </target>
+
+</project>
+
