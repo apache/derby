@@ -501,8 +501,12 @@ class DRDAStatement
 			return ps;
 		}
 		parsePkgidToFindHoldability();
-		ps = prepareStatementJDBC3(sqlStmt, scrollType, concurType, 
-								   withHoldCursor);
+		Connection conn = database.getConnection();
+		if (conn instanceof BrokeredConnection)
+			ps = conn.prepareStatement(sqlStmt, scrollType, concurType);
+		else
+			ps = prepareStatementJDBC3(sqlStmt, scrollType, concurType, 
+									   withHoldCursor);
 		// beetle 3849  -  Need to change the cursor name to what
 		// JCC thinks it will be, since there is no way in the 
 		// protocol to communicate the actual cursor name.  JCC keeps 
@@ -1615,6 +1619,7 @@ class DRDAStatement
 			}
 			else
 			{
+				t.printStackTrace();
 				throw Util.javaException(t);
 			}
 		}
