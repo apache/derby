@@ -1,0 +1,20 @@
+ij> -- Use a valid attribute, but do not display message.
+connect 'jdbc:derby:wombat;dataEncryption=true';
+ij(CONNECTION1)> -- Find an unknown attribute.
+connect 'jdbc:derby:wombat;unknown=x';
+URL Attribute [unknown=x]
+   Attribute is unknown to Derby.
+ij(CONNECTION2)> -- Check for duplicate.
+connect 'jdbc:derby:wombat;dataEncryption=true;dataEncryption=false';
+URL Attribute [dataEncryption=true]
+   Attribute is a duplicate.
+URL Attribute [dataEncryption=false]
+   Attribute is a duplicate.
+ij(CONNECTION3)> -- Perform case check.
+connect 'jdbc:derby:wombat;dataencryption=true';
+URL Attribute [dataencryption=true]
+   Attribute is unknown to Derby.
+ij(CONNECTION4)> -- Check for true/false.
+connect 'jdbc:derby:wombat;dataEncryption=x';
+ERROR XJ05B: JDBC attribute 'dataEncryption' has an invalid value 'x', valid values are '{true|false}'.
+ij(CONNECTION4)> 

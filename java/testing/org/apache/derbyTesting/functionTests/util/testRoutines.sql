@@ -1,0 +1,3 @@
+CREATE PROCEDURE TESTROUTINE.INSTALL_ROUTINES() MODIFIES SQL DATA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.installRoutines' language java parameter style java;  
+CALL TESTROUTINE.INSTALL_ROUTINES();
+DROP PROCEDURE TESTROUTINE.INSTALL_ROUTINES;

@@ -1,0 +1,230 @@
+ij> --
+-- Specifically test SECURE users with ldap 
+-- Configure the ldap databases, plus some for reference
+--
+-- 'derbySchemeDB'	- BUILTIN authentication
+--						  & some db authorization restriction.
+-- 'ldapSchemeDB'		- LDAP authentication
+--						  (or NT thru LDAP)
+-- 'ldapSchemeDBJN'	- LDAP setting url through java.naming.*
+--						  some db authorization restriction.
+--
+-- let's create all the dbs and configure them.
+-- we will authenticate using a default system user that we
+-- have configured.
+-- A typical bad guy who cannot access any database but guest
+-- is Jamie.
+--
+--
+-- 'derbySchemeDB' database authentication/authorization config
+--
+connect 'derbySchemeDB;create=true;user=system;password=manager';
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij(CONNECTION1)> execute p2 using 'values(''derby.authentication.provider'', ''BUILTIN'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> -- let's define users in this database (other than the ones
+-- known at the system level. This is for the test
+-- These 3 users will only be known in this database
+execute p2 using 'values(''derby.user.martin'', ''obfuscateIt'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> execute p2 using 'values(''derby.user.dan'', ''makeItFaster'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> execute p2 using 'values(''derby.user.mamta'', ''ieScape'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> execute p2 using 'values(''derby.database.propertiesOnly'', ''true'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> commit;
+ij(CONNECTION1)> autocommit on;
+ij(CONNECTION1)> --
+-- 'ldapSchemeDB' database authentication/authorization config
+--
+connect 'ldapSchemeDB;create=true;user=system;password=manager';
+ij(CONNECTION2)> autocommit off;
+ij(CONNECTION2)> prepare p3 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij(CONNECTION2)> execute p3 using 'values(''derby.authentication.provider'', ''LDAP'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION2)> execute p3 using 'values(''derby.authentication.server'', ''thehost.opensource.apache.com:389'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION2)> execute p3 using 'values(''derby.authentication.ldap.searchBase'', ''o=opensource.apache.com'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION2)> -- this is the default search filter
+execute p3 using 'values(''derby.authentication.ldap.searchFilter'', ''(&(objectClass=inetOrgPerson)(uid=%USERNAME%))'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION2)> commit;
+ij(CONNECTION2)> autocommit on;
+ij(CONNECTION2)> connect 'ldapSchemeDBJN;create=true;user=system;password=manager';
+ij(CONNECTION3)> autocommit off;
+ij(CONNECTION3)> prepare p3 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij(CONNECTION3)> execute p3 using 'values(''derby.authentication.provider'', ''LDAP'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION3)> execute p3 using 'values(''java.naming.provider.url'', ''ldap://thehost.opensource.apache.com:389'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION3)> execute p3 using 'values(''derby.authentication.ldap.searchBase'', ''o=opensource.apache.com'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION3)> -- this is the default search filter
+execute p3 using 'values(''derby.authentication.ldap.searchFilter'', ''(&(objectClass=inetOrgPerson)(uid=%USERNAME%))'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION3)> commit;
+ij(CONNECTION3)> autocommit on;
+ij(CONNECTION3)> disconnect;
+ij> --
+-- Shutdown the system for database properties to take effect
+--
+disconnect all;
+ij> connect 'derbySchemeDB;user=system;password=manager;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'ldapSchemeDB;user=system;password=manager;shutdown=true';
+ERROR 08006: Database 'ldapSchemeDB' shutdown.
+ij> connect 'ldapSchemeDBJN;user=system;password=manager;shutdown=true';
+ERROR 08006: Database 'ldapSchemeDBJN' shutdown.
+ij> disconnect all;
+ij> -- shuting down the system causes IJ to loose the protocol, therefore
+-- we'd be doomed :(
+#connect ';shutdown=true;user=system;password=manager';
+IJ ERROR: Unable to establish connection
+ij> -- 1) Valid authentication & authorization requests/ops
+connect 'derbySchemeDB;user=mamta;password=ieScape';
+ij> connect 'derbySchemeDB;user=dan;password=makeItFaster';
+ij(CONNECTION1)> connect 'derbySchemeDB;user=martin;password=obfuscateIt';
+ij(CONNECTION2)> -- Invalid ones:
+connect 'derbySchemeDB;user=Jamie;password=theHooligan';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION2)> connect 'derbySchemeDB;user=francois;password=paceesalute';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION2)> show connections;
+CONNECTION0 - 	jdbc:derby:derbySchemeDB
+CONNECTION1 - 	jdbc:derby:derbySchemeDB
+CONNECTION2* - 	jdbc:derby:derbySchemeDB
+* = current connection
+ij(CONNECTION2)> --
+-- 1rst test phase for LDAP
+-- We look-up the user DN and authenticate to LDAP with passed-in
+-- credentials
+connect 'ldapSchemeDB;user=mamta;password=yeeHaLdap';
+ij(CONNECTION3)> connect 'ldapSchemeDB;user=francois;password=corsica';
+ij(CONNECTION4)> -- Invalid ones:
+connect 'ldapSchemeDB;user=Jamie;password=theHooligan';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION4)> connect 'ldapSchemeDB;user=dan;password=makeItFaster';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION4)> -- wrong ldap password
+connect 'ldapSchemeDB;user=francois;password=paceesalute';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION4)> show connections;
+CONNECTION0 - 	jdbc:derby:derbySchemeDB
+CONNECTION1 - 	jdbc:derby:derbySchemeDB
+CONNECTION2 - 	jdbc:derby:derbySchemeDB
+CONNECTION3 - 	jdbc:derby:ldapSchemeDB
+CONNECTION4* - 	jdbc:derby:ldapSchemeDB
+* = current connection
+ij(CONNECTION4)> --
+-- 2nd test phases for LDAP - Cache the User DN locally
+-- to avoid the initial look-up
+--
+connect 'ldapSchemeDB;user=francois;password=corsica';
+ij(CONNECTION5)> autocommit off;
+ij(CONNECTION5)> prepare p5 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij(CONNECTION5)> execute p5 using 'values(''derby.authentication.ldap.searchFilter'', ''derby.user'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION5)> -- set the users DN locally now
+execute p5 using 'values(''derby.user.mamta'', ''uid=mamta,ou=People,o=opensource.apache.com'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION5)> execute p5 using 'values(''derby.user.francois'', ''uid=francois,ou=People,o=opensource.apache.com'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION5)> show connections;
+CONNECTION0 - 	jdbc:derby:derbySchemeDB
+CONNECTION1 - 	jdbc:derby:derbySchemeDB
+CONNECTION2 - 	jdbc:derby:derbySchemeDB
+CONNECTION3 - 	jdbc:derby:ldapSchemeDB
+CONNECTION4 - 	jdbc:derby:ldapSchemeDB
+CONNECTION5* - 	jdbc:derby:ldapSchemeDB
+* = current connection
+ij(CONNECTION5)> commit;
+ij(CONNECTION5)> autocommit on;
+ij(CONNECTION5)> -- restart ldapSchemeDB for properties to take effect & reconnect to test
+connect 'ldapSchemeDB;user=francois;password=corsica;shutdown=true';
+ERROR 08006: Database 'ldapSchemeDB' shutdown.
+ij(CONNECTION5)> -- re-test
+connect 'ldapSchemeDB;user=mamta;password=yeeHaLdap';
+ij(CONNECTION6)> connect 'ldapSchemeDB;user=francois;password=corsica';
+ij(CONNECTION7)> -- 2a) Some users with no local DN: rachael, kathy
+--     as no local DN cached, look-up will be performed with
+--     default search filter.
+--
+connect 'ldapSchemeDB;user=kathy;password=kathyS';
+ij(CONNECTION8)> connect 'ldapSchemeDB;user=rachael;password=rachaelF';
+ij(CONNECTION9)> show connections;
+CONNECTION0 - 	jdbc:derby:derbySchemeDB
+CONNECTION1 - 	jdbc:derby:derbySchemeDB
+CONNECTION2 - 	jdbc:derby:derbySchemeDB
+CONNECTION6 - 	jdbc:derby:ldapSchemeDB
+CONNECTION7 - 	jdbc:derby:ldapSchemeDB
+CONNECTION8 - 	jdbc:derby:ldapSchemeDB
+CONNECTION9* - 	jdbc:derby:ldapSchemeDB
+* = current connection
+ij(CONNECTION9)> -- Invalid ones:
+connect 'ldapSchemeDB;user=Jamie;password=theHooligan';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION9)> connect 'ldapSchemeDB;user=dan;password=makeItFaster';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION9)> -- wrong ldap password
+connect 'ldapSchemeDB;user=francois;password=paceesalute';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION9)> show connections;
+CONNECTION0 - 	jdbc:derby:derbySchemeDB
+CONNECTION1 - 	jdbc:derby:derbySchemeDB
+CONNECTION2 - 	jdbc:derby:derbySchemeDB
+CONNECTION6 - 	jdbc:derby:ldapSchemeDB
+CONNECTION7 - 	jdbc:derby:ldapSchemeDB
+CONNECTION8 - 	jdbc:derby:ldapSchemeDB
+CONNECTION9* - 	jdbc:derby:ldapSchemeDB
+* = current connection
+ij(CONNECTION9)> -- Database shutdown - check user - should fail
+connect 'derbySchemeDB;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION9)> connect 'ldapSchemeDB;user=jamie;password=LetMeIn;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION9)> show connections;
+CONNECTION0 - 	jdbc:derby:derbySchemeDB
+CONNECTION1 - 	jdbc:derby:derbySchemeDB
+CONNECTION2 - 	jdbc:derby:derbySchemeDB
+CONNECTION6 - 	jdbc:derby:ldapSchemeDB
+CONNECTION7 - 	jdbc:derby:ldapSchemeDB
+CONNECTION8 - 	jdbc:derby:ldapSchemeDB
+CONNECTION9* - 	jdbc:derby:ldapSchemeDB
+* = current connection
+ij(CONNECTION9)> -- Database shutdown - check user - should succeed
+connect 'derbySchemeDB;user=mamta;password=ieScape;shutdown=true';
+ERROR 08006: Database 'derbySchemeDB' shutdown.
+ij(CONNECTION9)> connect 'ldapSchemeDB;user=mamta;password=yeeHaLdap;shutdown=true';
+ERROR 08006: Database 'ldapSchemeDB' shutdown.
+ij(CONNECTION9)> show connections;
+No current connection
+ij> -- Derby system shutdown - check user - should fail
+connect ';user=jamie;password=LetMeIn;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> disconnect all;
+ij> --
+-- 1rst test phase for LDAP
+-- We look-up the user DN and authenticate to LDAP with passed-in
+-- credentials
+connect 'ldapSchemeDBJN;user=mamta;password=yeeHaLdap';
+ij> connect 'ldapSchemeDBJN;user=francois;password=corsica';
+ij(CONNECTION1)> -- Invalid ones:
+connect 'ldapSchemeDBJN;user=Jamie;password=theHooligan';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION1)> connect 'ldapSchemeDBJN;user=dan;password=makeItFaster';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION1)> -- wrong ldap password
+connect 'ldapSchemeDBJN;user=francois;password=paceesalute';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION1)> show connections;
+CONNECTION0 - 	jdbc:derby:ldapSchemeDBJN
+CONNECTION1* - 	jdbc:derby:ldapSchemeDBJN
+* = current connection
+ij(CONNECTION1)> disconnect all;
+ij> -- Derby system shutdown - check user - should succeed
+connect ';user=system;password=manager;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> 

@@ -181,7 +181,7 @@ T4                                                                              
 ij> rollback;
 ij> create function countopens() returns varchar(128)
 language java parameter style java
-external name 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.countOpens';
+external name 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.countOpens';
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- do consistency check on scans, etc.
@@ -631,7 +631,7 @@ ij> create table t0_1 (c1 int, c2 int not null constraint p2 primary key);
 ij> execute p1;
 0 rows inserted/updated/deleted
 ij> -- do consistency check on scans, etc.
--- values (org.apache.derbyTesting.functionTests.util.ConsistencyChecker::countOpens());
+-- values (org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker::countOpens());
 -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
 from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';

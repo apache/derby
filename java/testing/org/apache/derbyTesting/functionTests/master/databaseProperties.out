@@ -1,0 +1,177 @@
+ij> run resource '/org/apache/derbyTesting/functionTests/util/testRoutines.sql';
+ij> CREATE PROCEDURE TESTROUTINE.INSTALL_ROUTINES() MODIFIES SQL DATA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.installRoutines' language java parameter style java;
+0 rows inserted/updated/deleted
+ij> CALL TESTROUTINE.INSTALL_ROUTINES();
+0 rows inserted/updated/deleted
+ij> DROP PROCEDURE TESTROUTINE.INSTALL_ROUTINES;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION GET_TABLE_PROPERTY (SCHEMA_NAME VARCHAR(128), TABLE_NAME VARCHAR(128), PROP_KEY VARCHAR(1000)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getTableProperty' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> -- Get a property that hasn't been set yet - should return null
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('key1');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- Set a couple of properties
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('key1', 'one, two, three');
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('key2', 'eins, zwei, drei');
+0 rows inserted/updated/deleted
+ij> -- and fetch them
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('key1');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+one, two, three                                                                                                                 
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('key2');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+eins, zwei, drei                                                                                                                
+ij> -- and delete one of theme
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('key2', null);
+0 rows inserted/updated/deleted
+ij> -- and fetch them
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('key1');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+one, two, three                                                                                                                 
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('key2');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- Now check some explicit properties
+-- ************ derby.storage.pageSize
+-- See what the default is first
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+4096                                                                                                                            
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- set the per-database value
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '16384');
+0 rows inserted/updated/deleted
+ij> -- this create table should pick up the per-database
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+16384                                                                                                                           
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- ************ derby.storage.minimumRecordSize
+-- See what the default is first
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.minimumRecordSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+12                                                                                                                              
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- set the per-database value
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.minimumRecordSize', '42');
+0 rows inserted/updated/deleted
+ij> -- this create table should pick up the per-database
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.minimumRecordSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+42                                                                                                                              
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- ************ derby.storage.pageReservedSpace
+-- See what the default is first
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageReservedSpace');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+20                                                                                                                              
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- set the per-database value
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageReservedSpace', '17');
+0 rows inserted/updated/deleted
+ij> -- this create table should pick up the per-database
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageReservedSpace');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+17                                                                                                                              
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- ************ derby.database.noAutoBoot
+-- should be set in service.properties, not the conglomerate, but that's transparent here ... 
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.noAutoBoot');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.noAutoBoot', 'true');
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.noAutoBoot');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+true                                                                                                                            
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.noAutoBoot', 'false');
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.noAutoBoot');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+false                                                                                                                           
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.noAutoBoot', null);
+0 rows inserted/updated/deleted
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.noAutoBoot');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- Now check some explicit properties
+-- Now check with derby.storage.pageSize if derby.database.propertiesOnly
+-- ensures that system wide properties are ignored
+-- See is currently set, should be 16384
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+16384                                                                                                                           
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- set system value
+CALL TESTROUTINE.SET_SYSTEM_PROPERTY('derby.storage.pageSize', '8192');
+0 rows inserted/updated/deleted
+ij> -- this create table should pick up the system value - 8192
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+8192                                                                                                                            
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- 
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.propertiesOnly', 'true');
+0 rows inserted/updated/deleted
+ij> -- this create table should pick up the database value - 16384
+create table T (i int);
+0 rows inserted/updated/deleted
+ij> values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+16384                                                                                                                           
+ij> drop table T;
+0 rows inserted/updated/deleted
+ij> -- verify that creation time only properties may not be set.
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.engineType', '9');
+ERROR XCY02: The requested property change is not supported 'derby.engineType'='9'.
+ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.engineType');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> drop function GET_TABLE_PROPERTY;
+0 rows inserted/updated/deleted
+ij> 

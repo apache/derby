@@ -1,0 +1,14 @@
+Test nullSQLText starting
+Test prepareStatement with null argument
+FAIL -- expected exception
+Null SQL String Exception
+Test execute with null argument
+FAIL -- expected exception
+Null SQL String Exception
+Test executeQuery with null argument
+FAIL -- expected exception
+Null SQL String Exception
+Test executeUpdate with null argument
+FAIL -- expected exception
+Null SQL String Exception
+Test nullSQLText finished

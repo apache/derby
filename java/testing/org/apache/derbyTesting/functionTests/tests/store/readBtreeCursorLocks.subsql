@@ -1,0 +1,547 @@
+-- Very basic single user testing of read locks on cursors on indexes.
+-- This ".subsql" test is
+-- meant to be run from another test such that it gets run under multiple
+-- isolation levels.  This is important as they behave
+-- differently, depending on isolation levels.
+--
+-- assume's caller has already done: run 'LockTableQuery.subsql'; to get 
+-- easy access to the lock VTI.
+
+-- TEST  0: btree cursor scan, group fetch = 1
+-- TEST  1: btree cursor scan, group fetch = 2
+-- TEST  2: btree cursor scan, group fetch = 1 stop scan in middle of set
+-- TEST  3: btree cursor scan, group fetch = 4 stop scan in middle of set
+-- TEST  4: btree cursor scan, group fetch = 1 (scan with some deleted rows)
+-- TEST  5: btree cursor scan, group fetch = 2(scan with committed deleted rows)
+-- TEST  6: btree cursor scan, group fetch = 1 (scan with "<" qualifier)
+-- TEST  7: btree cursor scan, group fetch = 2 (scan with "<" qualifier)
+-- TEST  8: btree cursor scan, group fetch = 1 (scan with equals qualifier)
+-- TEST  9: btree cursor scan, group fetch = 2 (scan with equals qualifier)
+-- TEST 10: btree cursor scan, group fetch = 1 ("=" qualifier, no rows return)
+
+autocommit off;
+
+--------------------------------------------------------------------------------
+-- Assumes that calling routine has set up the following simple dataset, 
+-- a heap, and index with following initial values:
+--     create table a (a int, b int, c somesortofchar, [index_pad]);
+--     create index a_idx on a (a) or a_idx on a (a, index_pad);
+--
+-- 1, 10, 'one'
+-- 2, 20, 'two'
+-- 3, 30, 'three'
+-- 4, 40, 'four'
+-- 5, 50, 'five'
+-- 6, 60, 'six'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 0: btree cursor scan, group fetch = 1
+-- Test full cursor scan which does no updates.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+-------------------------------------------------------------------------------
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 1: btree cursor scan, group fetch = 2
+-- Test full cursor scan which does no updates.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--------------------------------------------------------------------------------
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','2');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 2: btree cursor scan, group fetch = 1, stop scan in middle of set
+-- Test full cursor scan which does no updates.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--------------------------------------------------------------------------------
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 3: btree cursor scan, group fetch = 4, stop scan in middle of set
+-- Test full cursor scan which does no updates.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--------------------------------------------------------------------------------
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','4');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 4: btree cursor scan, group fetch = 1 (scan table with some deleted rows)
+-- Test full cursor scan on a data set with some deleted rows (the "even" ones).
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--
+-- After the delete the base table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+delete from a where a = 2 or a = 4 or a = 6;
+commit;
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 5: btree cursor scan, group fetch = 2 (scan with committed deleted rows)
+-- Test full cursor scan on a data set with some deleted rows (the "even" ones).
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--
+-- At this point the base table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','2');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a';
+
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 6: btree cursor scan, group fetch = 1 (scan with "<" qualifier)
+-- Test "less than" qualified cursor scan on a data set.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--
+-- At this point the base table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a where a < 3';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 7: btree cursor scan, group fetch = 2 (scan with "<" qualifier)
+-- Test "less than" qualified cursor scan on a data set.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--
+-- At this point the base table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','2');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a where a < 3';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 8: btree cursor scan, group fetch = 1 (scan with equals qualifier)
+-- Test "equals" qualified cursor scan on a data set.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--
+-- At this point the base table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a where a = 5';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 9: btree cursor scan, group fetch = 2 (scan with equals qualifier)
+-- Test "equals" qualified cursor scan on a data set.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--
+-- At this point the base table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','2');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a where a = 5 or a = 7';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+
+--------------------------------------------------------------------------------
+-- TEST 10: btree cursor scan, group fetch = 1 (equals qualifier, no rows return)
+-- Test "equals" qualified cursor scan on a data set, no rows returned.
+--    ALL MODES        - TABLE IS, "scan page lockname of form (pageno, 1) 
+--    SERIALIZABLE     - row S locks as it visits each row, held until end xact
+--    REPEATABLE READ  - row S locks as it visits each row, held until end xact
+--    READ COMMITTED   - row S lock on current row, released on move to next row
+--    READ UNCOMMITTED - no row locks.
+--
+-- At this point the base table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+-- no rows expected to qualify
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+
+-- RESOLVE: missing row locks
+-- WORKAROUND: creating an index and dropping it 
+-- to force the statement to be recompiled
+create index ix1 on a(a);
+drop index ix1;
+commit;
+
+get cursor scan_cursor as
+    'select a from a where a = 42';
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+
+drop table a;

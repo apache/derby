@@ -1,5 +1,6 @@
 store/cisco.sql
 store/connectDisconnect.sql
+store/databaseProperties.sql
 store/longRow.sql
 store/logDevice.sql
 store/Rllmodule1.sql
@@ -16,8 +17,13 @@ store/testsqldecimal.sql
 store/heapscan.sql
 store/removeStubs.sql
 store/lockTableVti.sql
+store/rollForwardBackup.sql
 store/rollForwardRecovery.sql
+store/readlocks.sql
 store/backupRestore.sql
+store/backupRestore1.java
+store/bootLock.java
 store/bug3498.sql
+store/Beetle6038.java
 store/holdCursorJDBC30.sql
 store/holdCursorExternalSortJDBC30.sql

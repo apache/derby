@@ -1,0 +1,20 @@
+Test checkpoint starting
+CHECKPOINT WAS DONE
+Checking logs and Checkpoint at Insert:0
+Checking logs and Checkpoint at Insert:400
+Checking logs and Checkpoint at Insert:800
+Checking logs and Checkpoint at Insert:1200
+CHECKPOINT WAS DONE
+Checking logs and Checkpoint at Insert:1600
+Checking logs and Checkpoint at Insert:2000
+CHECKPOINT WAS DONE
+Checking logs and Checkpoint at Insert:2400
+Modifying the checkpoint/log intervals
+checkPointInterval:150001
+logSwitchInterval:150001
+Checking logs and Checkpoint at Insert:2800
+CHECKPOINT WAS DONE
+Checking logs and Checkpoint at Insert:3200
+CHECKPOINT WAS DONE
+database shutdown properly
+Test checkpoint finished

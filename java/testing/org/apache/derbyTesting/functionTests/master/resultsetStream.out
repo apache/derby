@@ -1,0 +1,16 @@
+Test resultsetStream starting
+getColumnCount(): 1
+Checksum of first 200 bytes 3061553656
+Size of file = 3470
+getColumnCount(): 2
+Checksum of first 200 bytes 3061553656
+second columns is 3470
+FAILS DUE TO BUG 5710
+getColumnCount(): 1
+len=56
+number of reads=56
+EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
+EXPECTED SQLSTATE(XJ001): Java exception: 'Input stream held less data than requested length.: java.io.IOException'.
+EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
+EXPECTED SQLSTATE(XJ001): Java exception: 'Input stream held less data than requested length.: java.io.IOException'.
+Test resultsetStream finished

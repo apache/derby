@@ -120,7 +120,7 @@ from sys.systables where tabletype = 'T';
 
 create function countopens() returns varchar(128)
 language java parameter style java
-external name 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.countOpens';
+external name 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.countOpens';
 commit;
 
 -- do consistency check on scans, etc.
@@ -409,7 +409,7 @@ create table t0_1 (c1 int, c2 int not null constraint p2 primary key);
 execute p1;
 
 -- do consistency check on scans, etc.
--- values (org.apache.derbyTesting.functionTests.util.ConsistencyChecker::countOpens());
+-- values (org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker::countOpens());
 
 -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)

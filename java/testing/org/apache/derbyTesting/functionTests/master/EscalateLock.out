@@ -1,0 +1,1042 @@
+ij> -- test lock escalation.  derby.locks.escalationThreshold=100 property 
+-- has been set to force lock escalation
+-- to occur at the minimum level of 100  locks.
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> run resource 'LockTableQuery.subsql';
+ij> create view lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
+0 rows inserted/updated/deleted
+ij> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
+-- order by
+--     tabname, type desc, mode, cnt, lockname
+-- lock table with system catalog locks included.
+create view full_lock_table as
+select 
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state,
+    status
+from 
+    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+on l.xid = t.xid where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- lock table with no join.
+create view lock_table2 as
+select 
+    cast(l.xid as char(8)) as xid,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    cast(lockname as char(10)) as lockname,
+    state
+from 
+    new org.apache.derby.diag.LockTable() l  
+where l.tableType <> 'S' ;
+0 rows inserted/updated/deleted
+ij> -- transaction table with no join.
+create view tran_table as
+select 
+    *
+from 
+    new org.apache.derby.diag.TransactionTable() t ;
+0 rows inserted/updated/deleted
+ij> autocommit off;
+ij> -- TEST 1 - make sure IX row locks are escalated to a persistent X table lock.
+create table foo (a int);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> -- first insert 90 rows
+insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> -- check to make sure we have IX table and X row locks.
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |9   |IX  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,10)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,11)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,12)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,13)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,14)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,15)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,16)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,17)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,18)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,19)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,20)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,21)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,22)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,23)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,24)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,25)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,26)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,27)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,28)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,29)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,30)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,31)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,32)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,33)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,34)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,35)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,36)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,37)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,38)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,39)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,40)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,41)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,42)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,43)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,44)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,45)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,46)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,47)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,48)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,49)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,50)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,51)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,52)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,53)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,54)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,55)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,56)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,57)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,58)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,59)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,60)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,61)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,62)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,63)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,64)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,65)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,66)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,67)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,68)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,69)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,70)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,71)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,72)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,73)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,74)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,75)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,76)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,77)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,78)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,79)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,80)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,81)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,82)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,83)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,84)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,85)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,86)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,87)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,88)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,89)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,9)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,90)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,91)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,92)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,93)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,94)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,95)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,96)    |GRANT|ACTIVE  
+ij> -- now insert 10 more rows, pushing the lock over the escalation limit.
+insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> -- check to make sure we now just have a X table lock.
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |11  |IX  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |FOO         |Tablelock |GRANT|ACTIVE  
+ij> -- insert 10 more rows to make sure we don't get rows locks from now on.
+insert into foo values (0), (1), (2), (3), (4), (5), (6), (7), (8), (9);
+10 rows inserted/updated/deleted
+ij> -- check to make sure we now just have a X table lock.
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |12  |IX  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |X   |FOO         |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> -- TEST 2 - make sure IS row locks are escalated to a persistent X table lock.
+create index foox on foo (a);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> set isolation serializable;
+0 rows inserted/updated/deleted
+ij> -- get IS row locks on just under 100 of the rows;
+select a from foo where a < 5;
+A          
+-----------
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+2          
+2          
+2          
+2          
+2          
+2          
+2          
+2          
+2          
+2          
+2          
+3          
+3          
+3          
+3          
+3          
+3          
+3          
+3          
+3          
+3          
+3          
+4          
+4          
+4          
+4          
+4          
+4          
+4          
+4          
+4          
+4          
+4          
+ij> -- check to make sure we have IS table and S row locks.
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IS  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,10)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,100)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,101)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,107)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,108)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,109)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,11)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,110)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,111)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,17)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,18)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,19)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,20)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,21)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,27)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,28)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,29)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,30)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,31)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,37)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,38)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,39)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,40)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,41)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,47)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,48)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,49)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,50)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,51)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,57)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,58)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,59)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,60)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,61)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,67)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,68)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,69)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,70)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,71)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,77)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,78)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,79)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,80)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,81)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,87)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,88)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,89)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,9)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,90)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,91)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,97)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,98)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |S   |FOO         |(1,99)    |GRANT|ACTIVE  
+ij> -- now get enough IS row locks to push over the lock escalation limit
+select a from foo where a >= 5;
+A          
+-----------
+5          
+5          
+5          
+5          
+5          
+5          
+5          
+5          
+5          
+5          
+5          
+6          
+6          
+6          
+6          
+6          
+6          
+6          
+6          
+6          
+6          
+6          
+7          
+7          
+7          
+7          
+7          
+7          
+7          
+7          
+7          
+7          
+7          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+9          
+9          
+9          
+9          
+9          
+9          
+9          
+9          
+9          
+9          
+9          
+ij> -- check to make sure we now just have a S table lock.
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |3   |IS  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |S   |FOO         |Tablelock |GRANT|ACTIVE  
+ij> -- make sure subsequent IS locks are recognized as covered by the S table lock.
+select a from foo where a = 8;
+A          
+-----------
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+8          
+ij> -- check to make sure we now just have a S table lock.
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |4   |IS  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |S   |FOO         |Tablelock |GRANT|ACTIVE  
+ij> commit;
+ij> -- TEST 3 - reproduce abort failure similar to bug 4328
+create table aborttest (keycol int, data varchar(1000));
+0 rows inserted/updated/deleted
+ij> -- first insert 110 rows
+insert into aborttest values (0, PADSTRING('0',1000)), (0, PADSTRING('1',1000)), (0, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('3',1000)), (0, PADSTRING('4',1000)), (0, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('6',1000)), (0, PADSTRING('7',1000)), (0, PADSTRING('8',1000)), (0, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values  (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> insert into aborttest values (0, PADSTRING('0',1000)), (1, PADSTRING('1',1000)), (2, PADSTRING('2',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values (3, PADSTRING('3',1000)), (4, PADSTRING('4',1000)), (5, PADSTRING('5',1000));
+3 rows inserted/updated/deleted
+ij> insert into aborttest values  (6, PADSTRING('6',1000)), (7, PADSTRING('7',1000)), (8, PADSTRING('8',1000)), (9, PADSTRING('9',1000));
+4 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> create index idx on aborttest (keycol, data);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> delete from aborttest where keycol < 3;
+40 rows inserted/updated/deleted
+ij> -- check to make sure we have a X row locks and IX table lock;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |ABORTTEST   |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |ABORTTEST   |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,9)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(14,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(14,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(15,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(17,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(18,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(18,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(24,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(24,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(25,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(27,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(28,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(28,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(34,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(34,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(35,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(5,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(7,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(8,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(8,7)     |GRANT|ACTIVE  
+ij> delete from aborttest where keycol >= 3 ;
+70 rows inserted/updated/deleted
+ij> -- check to make sure we escalated;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |ABORTTEST   |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |3   |X   |ABORTTEST   |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |ABORTTEST   |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,9)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(14,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(14,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(15,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(17,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(18,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(18,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(24,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(24,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(25,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(27,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(28,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(28,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(34,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(34,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(35,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(5,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(7,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(8,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(8,7)     |GRANT|ACTIVE  
+ij> -- now cause space reclamation on the leftmost leaf
+insert into aborttest values (-1, '-1'), (-1, '-1');
+2 rows inserted/updated/deleted
+ij> -- check to make sure we escalated;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |4   |IX  |ABORTTEST   |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |3   |X   |ABORTTEST   |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |ABORTTEST   |(1,3)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(1,9)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(11,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(14,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(14,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(15,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(17,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(18,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(18,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(2,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(21,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(24,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(24,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(25,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(27,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(28,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(28,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(3,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(31,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(34,7)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(34,8)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(35,6)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(4,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(5,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(7,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(8,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |ABORTTEST   |(8,7)     |GRANT|ACTIVE  
+ij> -- Before fix to bug 4328/4330 the following rollback would cause a recovery
+-- error which would shut down the server, and cause recovery to always fail.
+-- The problem was that the lock escalation bug would remove locks on 
+-- uncommitted deleted rows, and then the above insert would try and succeed
+-- at purging rows that it should not have been able.  When undo comes along to
+-- undo the delete it can't find the row because it has been purged by a
+-- committed nested internal transaction.
+rollback;
+ij> select count(*) from aborttest;
+1          
+-----------
+110        
+ij> select keycol from aborttest;
+KEYCOL     
+-----------
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+ij> commit;
+ij> -- TEST 4 - (beetle 4764) make sure no lock timeout if escalate is blocked by 
+-- another user.
+-- 
+connect 'wombat' as block_escalate_connection;
+ij(BLOCK_ESCALATE_CONNECTION)> set connection block_escalate_connection;
+ij(BLOCK_ESCALATE_CONNECTION)> autocommit off;
+ij(BLOCK_ESCALATE_CONNECTION)> drop table foo;
+0 rows inserted/updated/deleted
+ij(BLOCK_ESCALATE_CONNECTION)> create table foo (a int, data char(10));
+0 rows inserted/updated/deleted
+ij(BLOCK_ESCALATE_CONNECTION)> commit;
+ij(BLOCK_ESCALATE_CONNECTION)> insert into foo values (1, 'blocker');
+1 row inserted/updated/deleted
+ij(BLOCK_ESCALATE_CONNECTION)> connect 'wombat' as escalate_connection;
+ij(ESCALATE_CONNECTION)> set connection escalate_connection;
+ij(ESCALATE_CONNECTION)> autocommit off;
+ij(ESCALATE_CONNECTION)> commit;
+ij(ESCALATE_CONNECTION)> -- insert 100 rows which should try to escalate the lock but then fail, because
+-- it is blocked by the block_escalate_connection
+insert into foo values (0, '0'), (0, '1'), (0, '2'), (0, '3'), (0, '4'), (0, '5'), (0, '6'), (0, '7'), (0, '8'), (0, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (10, '0'), (11, '1'), (12, '2'), (13, '3'), (14, '4'), (15, '5'), (16, '6'), (17, '7'), (18, '8'), (19, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (20, '0'), (21, '1'), (22, '2'), (23, '3'), (24, '4'), (25, '5'), (26, '6'), (27, '7'), (28, '8'), (29, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (30, '0'), (31, '1'), (32, '2'), (33, '3'), (34, '4'), (35, '5'), (36, '6'), (37, '7'), (38, '8'), (39, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (40, '0'), (41, '1'), (42, '2'), (43, '3'), (44, '4'), (45, '5'), (46, '6'), (47, '7'), (48, '8'), (49, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (50, '0'), (51, '1'), (52, '2'), (53, '3'), (54, '4'), (55, '5'), (56, '6'), (57, '7'), (58, '8'), (59, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (60, '0'), (61, '1'), (62, '2'), (63, '3'), (64, '4'), (65, '5'), (66, '6'), (67, '7'), (68, '8'), (69, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (70, '0'), (71, '1'), (72, '2'), (73, '3'), (74, '4'), (75, '5'), (76, '6'), (77, '7'), (78, '8'), (79, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (80, '0'), (81, '1'), (82, '2'), (83, '3'), (84, '4'), (85, '5'), (86, '6'), (87, '7'), (88, '8'), (89, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (90, '0'), (91, '1'), (92, '2'), (93, '3'), (94, '4'), (95, '5'), (96, '6'), (97, '7'), (98, '8'), (99, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> insert into foo values (100, '0'), (101, '1'), (102, '2'), (103, '3'), (104, '4'), (105, '5'), (106, '6'), (107, '7'), (108, '8'), (109, '9');
+10 rows inserted/updated/deleted
+ij(ESCALATE_CONNECTION)> -- check to make sure we have not escalated;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+---------------------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |11  |IX  |FOO         |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,10)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,100)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,101)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,102)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,103)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,104)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,105)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,106)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,107)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,108)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,109)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,11)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,110)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,111)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,112)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,113)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,114)   |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,12)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,13)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,14)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,15)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,16)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,17)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,18)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,19)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,20)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,21)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,22)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,23)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,24)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,25)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,26)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,27)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,28)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,29)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,30)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,31)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,32)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,33)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,34)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,35)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,36)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,37)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,38)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,39)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,40)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,41)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,42)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,43)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,44)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,45)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,46)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,47)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,48)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,49)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,50)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,51)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,52)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,53)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,54)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,55)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,56)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,57)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,58)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,59)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,60)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,61)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,62)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,63)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,64)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,65)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,66)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,67)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,68)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,69)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,70)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,71)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,72)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,73)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,74)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,75)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,76)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,77)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,78)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,79)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,8)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,80)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,81)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,82)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,83)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,84)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,85)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,86)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,87)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,88)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,89)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,9)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,90)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,91)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,92)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,93)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,94)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,95)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,96)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,97)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,98)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(1,99)    |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(2,6)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(2,7)     |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |FOO         |(2,8)     |GRANT|ACTIVE  
+ij(ESCALATE_CONNECTION)> commit;
+ij(ESCALATE_CONNECTION)> set connection block_escalate_connection;
+ij(BLOCK_ESCALATE_CONNECTION)> commit;
+ij(BLOCK_ESCALATE_CONNECTION)> -- see if all the data made it.
+select a, data from foo;
+A          |DATA      
+----------------------
+1          |blocker   
+0          |0         
+0          |1         
+0          |2         
+0          |3         
+0          |4         
+0          |5         
+0          |6         
+0          |7         
+0          |8         
+0          |9         
+10         |0         
+11         |1         
+12         |2         
+13         |3         
+14         |4         
+15         |5         
+16         |6         
+17         |7         
+18         |8         
+19         |9         
+20         |0         
+21         |1         
+22         |2         
+23         |3         
+24         |4         
+25         |5         
+26         |6         
+27         |7         
+28         |8         
+29         |9         
+30         |0         
+31         |1         
+32         |2         
+33         |3         
+34         |4         
+35         |5         
+36         |6         
+37         |7         
+38         |8         
+39         |9         
+40         |0         
+41         |1         
+42         |2         
+43         |3         
+44         |4         
+45         |5         
+46         |6         
+47         |7         
+48         |8         
+49         |9         
+50         |0         
+51         |1         
+52         |2         
+53         |3         
+54         |4         
+55         |5         
+56         |6         
+57         |7         
+58         |8         
+59         |9         
+60         |0         
+61         |1         
+62         |2         
+63         |3         
+64         |4         
+65         |5         
+66         |6         
+67         |7         
+68         |8         
+69         |9         
+70         |0         
+71         |1         
+72         |2         
+73         |3         
+74         |4         
+75         |5         
+76         |6         
+77         |7         
+78         |8         
+79         |9         
+80         |0         
+81         |1         
+82         |2         
+83         |3         
+84         |4         
+85         |5         
+86         |6         
+87         |7         
+88         |8         
+89         |9         
+90         |0         
+91         |1         
+92         |2         
+93         |3         
+94         |4         
+95         |5         
+96         |6         
+97         |7         
+98         |8         
+99         |9         
+100        |0         
+101        |1         
+102        |2         
+103        |3         
+104        |4         
+105        |5         
+106        |6         
+107        |7         
+108        |8         
+109        |9         
+ij(BLOCK_ESCALATE_CONNECTION)> 

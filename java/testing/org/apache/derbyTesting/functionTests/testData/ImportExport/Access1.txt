@@ -1,0 +1,10 @@
+1,7,3,"Exercise Bike","Deluxe","KK200","1234ABCDDDD1234",1993-02-06,0:00:00,"Clock Tower Sporting Goods",200.00,100.00,1,
+2,3,1,"Gray three-cushion sofa","70"" sleeper",,,1975-04-01,0:00:00,"The Sofa Gallery",600.00,,1,
+3,7,6,"Mountain Bike",,,,1993-08-12,0:00:00,"Crawford & Sons Custom Bicycles",1239.00,1000.00,1,
+4,6,4,"Computer","375","1089","00001",,,"ByteComp, Inc.",3000.00,2500.00,0,
+5,5,6,"Cordless drill","Deluxe","PK200","XXX8373220",1993-08-18,0:00:00,"Costoso, Ltd.",2000.00,1250.00,1,
+6,3,5,"Ebony inlaid table",,,,1990-04-1,0:00:00,,250.00,,1,"Handed down from Grandma. Belonged to her mother."
+7,5,6,"Table saw",,"BKV100","BKV9832355",,,,,110.00,0,"Belonged to Dad."
+8,2,4,"Baseball card collection",,,,,,,,500.00,0,"Most were trades. Most valuable card in collection."
+9,4,3,"Pearl neclace",,,,1990-05-01,0:00:00,,,250.00,1,"Gift from Lee and Martha."
+10,6,1,"Audio-Visual Receiver",,"AV-520","AVZZZ98333257",1994-10-10,0:00:00,"Southridge Video Shop",800.00,,1,

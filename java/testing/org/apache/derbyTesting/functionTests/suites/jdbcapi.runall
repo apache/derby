@@ -1,0 +1,13 @@
+jdbcapi/bestrowidentifier.sql
+jdbcapi/characterStreams.java
+jdbcapi/nullSQLText.java
+jdbcapi/prepStmtMetaData.java
+jdbcapi/resultset.java
+jdbcapi/resultsetStream.java
+jdbcapi/users.sql
+jdbcapi/users2.sql
+jdbcapi/secureUsers.sql
+jdbcapi/secureUsers1.sql
+jdbcapi/maxfieldsize.java
+jdbcapi/LOBTest.java
+jdbcapi/blobclob4BLOB.java

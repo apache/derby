@@ -8,7 +8,7 @@
 set isolation to rr;
 
 CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
-EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.runConsistencyChecker'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 autocommit off;
 

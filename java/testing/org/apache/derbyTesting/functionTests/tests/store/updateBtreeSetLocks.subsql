@@ -1,0 +1,246 @@
+-- Very basic single user testing of update locks.  This ".subsql" test is
+-- meant to be run from another test such that it gets run under multiple
+-- isolation levels.  This is important for update locks as they behave
+-- differently, depending on isolation levels.
+--
+-- This test concentrates on updates which use a primary index for the cursor,
+-- and then update a non-key field, or delete a row.
+--
+-- assume's caller has already done: run 'LockTableQuery.subsql'; to get 
+-- easy access to the lock VTI.
+
+autocommit off;
+
+--------------------------------------------------------------------------------
+-- Assumes that calling routine has set up the following simple dataset, 
+-- a heap, no indexes with following initial values:
+--     create table (a int, b int, c somesortofchar, d somesortofpad);
+--     create index a_idx on (a, somesortofpad) 
+-- 1, 10, 'one'
+-- 2, 20, 'two'
+-- 3, 30, 'three'
+-- 4, 40, 'four'
+-- 5, 50, 'five'
+-- 6, 60, 'six'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which does no updates.
+--------------------------------------------------------------------------------
+select a, b, c from a;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which deletes exact match on a.
+--------------------------------------------------------------------------------
+delete from a where a = 4;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select a from a;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which deletes "even" rows.
+--------------------------------------------------------------------------------
+delete from a where a = 2 or a = 4 or a = 6;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select a from a;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which does no updates, now there are committed
+-- deleted rows in the heap.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+delete from a where (a = 2 or a = 4 or a = 6) and (b < 8);
+
+commit;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test updates an exact match on a.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+update a  set b = 300 where a = 3;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test updates an exact match on a with base row qualification necessary.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 300, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+update a  set b = 30 where a = 3 and b = 300;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which updates the middle 2 rows, now there are 
+-- committed deleted rows in the heap.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+update a  set b = -b where a >= 3 and a < 6;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test exact match which does no updates. 
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, -30, 'three'
+-- 5, -50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+delete from a  where a = 2;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+update a  set b = -b where a = 2;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which does no updates. 
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, -30, 'three'
+-- 5, -50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+delete from a  where a > 0 and b < -1000;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which deletes the positive rows.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, -30, '-three'
+-- 5, -50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+delete from a  where a = 1 or a = 7;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which updates a row.
+-- 
+-- At this point the table should look like:
+-- 3, -30, '-three'
+-- 5, -50, 'five'
+--------------------------------------------------------------------------------
+
+update a  set b = 30 where a > 2 and a < 5;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which updates a row and deletes a row.
+-- 
+-- At this point the table should look like:
+-- 3, 30, 'three'
+-- 5, -50, 'five'
+--------------------------------------------------------------------------------
+
+update a  set b = 3030 where a > 2 and a < 5;
+delete from a where a = 5;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+-------------------------------------------------------------------------------
+-- At this point the table should look like:
+-- 3, 3030, 'threethree'
+--------------------------------------------------------------------------------
+select * from a;
+commit;
+
+drop table a;

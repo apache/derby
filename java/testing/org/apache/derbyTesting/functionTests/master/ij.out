@@ -1,0 +1,90 @@
+ij> -- this test shows the ij commands in use,
+-- and what happens when invalid stuff is entered.
+-- no driver loaded yet, detected off of the url
+-- this one is a bad url:
+connect 'cloudscape:wombat';
+ERROR 08001: No suitable driver
+ij> -- this one will work.
+connect 'jdbc:derby:wombat';
+ERROR XJ004: Database 'wombat' not found.
+ij> -- no connection yet, this will fail
+create table t (i int);
+IJ ERROR: Unable to establish connection
+ij> -- no table yet, this will fail
+select i from t;
+IJ ERROR: Unable to establish connection
+ij> -- invalid syntax ... incomplete statements
+driver;
+IJ ERROR: Unable to establish connection
+ij> connect;
+IJ ERROR: Unable to establish connection
+ij> prepare;
+IJ ERROR: Unable to establish connection
+ij> execute;
+IJ ERROR: Unable to establish connection
+ij> run;
+IJ ERROR: Unable to establish connection
+ij> remove;
+IJ ERROR: Unable to establish connection
+ij> -- should fail because procedure is an illegal statement name
+prepare procedure as 'select * from bar';
+IJ ERROR: procedure is an illegal name for a statement
+ij> -- should fail because text is passed on to derby, which
+-- barfs on the unknown statement name. execute procedure is
+-- a foundation 2000 concept
+execute procedure sqlj.install_jar( 'file:c:/p4c/systest/out/DigIt.jar', 'SourceWUs', 1 );
+IJ ERROR: Unable to establish connection
+ij> -- and, the help output:
+help;
+ Supported commands include:
+  PROTOCOL 'JDBC protocol' [ AS ident ];
+                               -- sets a default or named protocol
+  DRIVER 'class for driver';   -- loads the named class
+  CONNECT 'url for database' [ PROTOCOL namedProtocol ] [ AS connectionName ];
+                               -- connects to database URL
+                               -- and may assign identifier
+  SET CONNECTION connectionName; -- switches to the specified connection
+  SHOW CONNECTIONS;            -- lists all connections
+  AUTOCOMMIT [ ON | OFF ];     -- sets autocommit mode for the connection
+  DISCONNECT [ CURRENT | connectionName | ALL ];
+                               -- drop current, named, or all connections;
+                               -- the default is CURRENT
+  COMMIT;                      -- commits the current transaction
+  ROLLBACK;                    -- rolls back the current transaction
+  PREPARE name AS 'SQL-J text'; -- prepares the SQL-J text
+  EXECUTE { name | 'SQL-J text' } [ USING { name | 'SQL-J text' } ] ;
+                               -- executes the statement with parameter
+                               -- values from the USING result set row
+  REMOVE name;                 -- removes the named previously prepared statement
+  RUN 'filename';              -- run commands from the named file
+  ELAPSEDTIME [ ON | OFF ];    -- sets elapsed time mode for ij
+  MAXIMUMDISPLAYWIDTH integerValue;
+                               -- sets the maximum display width for
+                               -- each column to integerValue
+  ASYNC name 'SQL-J text';     -- run the command in another thread
+  WAIT FOR name;               -- wait for result of ASYNC'd command
+  GET [SCROLL INSENSITIVE] CURSOR name AS 'SQL-J query';
+                               -- gets a cursor (JDBC result set) on the query
+                               -- SCROLL cursors are only available 
+                               -- in JDBC 2.0 and higher. 
+                               -- (Cursor scroll type is ignored in JDBC 1.X.) 
+  NEXT name;                   -- gets the next row from the named cursor
+  FIRST name;                  -- gets the first row from the named scroll cursor
+  LAST name;                   -- gets the last row from the named scroll cursor
+  PREVIOUS name;               -- gets the previous row from the named scroll cursor
+  ABSOLUTE integer name;       -- positions the named scroll cursor at the absolute row number
+                               -- (A negative number denotes position from the last row.) 
+  RELATIVE integer name;       -- positions the named scroll cursor relative to the current row
+                               -- (integer is number of rows)
+  AFTER LAST name;             -- positions the named scroll cursor after the last row
+  BEFORE FIRST name;           -- positions the named scroll cursor before the first row
+  GETCURRENTROWNUMBER name;    -- returns the row number for the current position of the named scroll cursor
+                               -- (0 is returned when the cursor is not positioned on a row.) 
+  CLOSE name;                  -- closes the named cursor
+  UNICODEESCAPE [ ON | OFF ]; -- sets unicode escape mode for the input stream
+  LOCALIZEDDISPLAY [ ON | OFF ];
+                               -- controls locale sensitive data representation
+  EXIT;                        -- exits ij
+  HELP;                        -- shows this message
+ Any unrecognized commands are treated as potential SQL-J commands and executed directly.
+ij> 

@@ -82,6 +82,7 @@ forupdate.sql
 functions.sql
 groupBy.sql
 holdCursorJavaReflection_app.properties
+holdCursorJava_app.properties
 holdCursorIJ.sql
 holdCursorIJ_app.properties
 identifier.sql
@@ -152,6 +153,8 @@ reopenScan.sql
 repeat_app.properties
 repeat_derby.properties
 schemas.sql
+scrollCursors1.sql
+scrollCursors3.sql
 select.sql
 selectivity.sql
 selectivity_app.properties

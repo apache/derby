@@ -1,0 +1,214 @@
+-- Very basic single user testing of heap set query update locks.  This ".subsql" test is
+-- meant to be run from another test such that it gets run under multiple
+-- isolation levels.  This is important for update locks as they behave
+-- differently, depending on isolation levels.
+--
+-- assume's caller has already done: run 'LockTableQuery.subsql'; to get 
+-- easy access to the lock VTI.
+
+autocommit off;
+
+--------------------------------------------------------------------------------
+-- Assumes that calling routine has set up the following simple dataset, 
+-- a heap, no indexes with following initial values:
+--     create table (a int, b int, c somesortofchar);
+-- 1, 10, 'one'
+-- 2, 20, 'two'
+-- 3, 30, 'three'
+-- 4, 40, 'four'
+-- 5, 50, 'five'
+-- 6, 60, 'six'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full heap scan which does a delete which does not qualify.
+--------------------------------------------------------------------------------
+delete from a where a = -42;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full heap scan which does an update which does not qualify.  This can
+-- be done with a single call to store pushing the qualifier down.
+--------------------------------------------------------------------------------
+update a set b = -b where a = -42;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full heap scan which does an update which does not qualify.  This has to
+-- be deferred as the update may change the values in the qualifer.
+--------------------------------------------------------------------------------
+update a set a = -a, b = -b where a = -42;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full scan which deletes "even" rows.
+--------------------------------------------------------------------------------
+delete from a where a = 2 or a = 4 or a = 6;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full heap scan which does a delete which does not qualify.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+delete from a where a = -42;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full heap scan which does an update which does not qualify.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+update a set b = -b where a = -42;
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which updates the middle 2 rows, now there are 
+-- committed deleted rows in the heap.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+update a set b = -b where a = 3 or a = 5;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which does no updates. 
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, -30, 'three'
+-- 5, -50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+update a set b = 4000 where a < 0;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which deletes the positive rows.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, -30, 'three'
+-- 5, -50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+delete from a where b > 0;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which updates a row.
+-- 
+-- At this point the table should look like:
+-- 3, -30, 'three'
+-- 5, -50, 'five'
+--------------------------------------------------------------------------------
+
+update a set b = -b, c = 'three' where a > 2 and a < 5;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which updates a row and deletes a row.
+--
+-- can't be done is one set statement, do 2 statements.
+-- 
+-- At this point the table should look like:
+-- 3, 30, 'three'
+-- 5, -50, 'five'
+--------------------------------------------------------------------------------
+
+update a set a=33,b=3030,c='threethree' where a = 3;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+delete from a where a = 5;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+select * from a;
+commit;
+
+-------------------------------------------------------------------------------
+-- At this point the table should look like:
+-- 33, 3030, 'threethree'
+--------------------------------------------------------------------------------
+
+drop table a;

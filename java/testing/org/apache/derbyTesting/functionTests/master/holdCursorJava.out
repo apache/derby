@@ -1,0 +1,12 @@
+Creating table...
+done creating table and inserting data.
+Start multi table query with holdability true test
+value of t2.c22 is 1
+value of t2.c22 is 2
+Multi table query with holdability true test over
+Start isolation level change test
+Switch isolation while there are open cursors
+Should see exceptions
+ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
+PASS: Can't change isolation if they are open cursor
+Isolation level change test over

@@ -4,7 +4,7 @@
 run resource 'createTestProcedures.subsql';
 maximumdisplaywidth 512;
 CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
-EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ConsistencyChecker.runConsistencyChecker'
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.runConsistencyChecker'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 
 

@@ -21,7 +21,7 @@
   <property name="this.dir" value="${derby.testing.functest.dir}/util"/>
 
 <!-- Targets -->
-  <target name="util" depends="FTpolicy,compile"/>
+  <target name="util" depends="FTpolicy,compile,copyfiles"/>
   
   <target name="FTpolicy" depends="copyfiles,compile"/>
 
@@ -65,8 +65,9 @@
 
 
   <target name="copyfiles">
-    <copy file="${derby.testing.src.dir}/${derby.testing.functest.dir}/util/nwsvr.policy"
-      todir="${out.dir}/${derby.testing.functest.dir}/util"> 
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/util">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/util/copyfiles.ant"/>  
     </copy>
   </target>
 

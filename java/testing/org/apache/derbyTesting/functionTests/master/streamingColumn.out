@@ -1,0 +1,101 @@
+Test streamingColumn starting
+===> testing extin/short.data length = 56
+No truncation and hence no error
+===> testing extin/shortbanner length = 8282
+No truncation and hence no error
+===> testing extin/derby.banner length = 414000
+expected exception for data > 32700 in length
+===> testing extin/empty.data length = 0
+No truncation and hence no error
+===> verified length 56
+===> verified length 8282
+===> verified length 0
+===> verified length 56
+===> verified length 8282
+===> verified length 0
+===> verified length 56
+===> verified length 8282
+===> verified length 0
+===> verified length 56
+===> verified length 8282
+===> verified length 0
+expect to get null string back
+a = -1 got null string back
+a = -1 got null string back
+===> testing extin/short.data length = 56
+===> testing extin/shortbanner length = 8282
+===> testing extin/derby.banner length = 414000
+===> testing extin/empty.data length = 0
+streamTest7
+Starting streamTest8(conn, 10, 2500)
+Finishing streamTest8(conn, 10, 2500)
+Starting streamTest9(conn, 10, 2500)
+Finishing streamTest9(conn, 10, 2500)
+Starting streamTest8(conn, 2500, 10)
+Finishing streamTest8(conn, 2500, 10)
+Starting streamTest9(conn, 2500, 10)
+Finishing streamTest9(conn, 2500, 10)
+Testing 10 starts from here
+===> testing extin/short.data length = 56
+No truncation and hence no error
+===> testing extin/shortbanner length = 8282
+No truncation and hence no error
+===> testing extin/derby.banner length = 414000
+expected exception for data > 32700 in length
+===> testing extin/empty.data length = 0
+No truncation and hence no error
+Testing 10 ends in here
+Test 11 - Can't pass negative length as the stream length for various setXXXStream methods
+===> testing using setAsciiStream with -2 as length
+PASS -- expected exception:SQL Exception: Input stream cannot have negative length.
+===> testing using setCharacterStream with -1 as length
+PASS -- expected exception:SQL Exception: Input stream cannot have negative length.
+===> testing using setBinaryStream with -1 as length
+PASS -- expected exception:SQL Exception: Input stream cannot have negative length.
+Test 11 - negative stream length tests end in here
+Test 12 - varchar truncation tests start from here
+===> testing(using setAsciiStream) extin/char32675trailingblanks.data length = 32675
+No truncation and hence no error
+===> testing(using setCharacterStream) extin/char32675trailingblanks.data length = 32675
+No truncation and hence no error
+===> testing trailing blanks(using setString) length = 32675
+No truncation and hence no error
+===> testing trailing blanks(using setObject) length = 32675
+No truncation and hence no error
+===> testing trailing blanks using concatenation
+No truncation and hence no error.
+===> testing(using setAsciiStream) extin/char32675.data length = 32675
+expected exception for data > 32672 in length
+===> testing(using setCharacterStream) extin/char32675.data length = 32675
+expected exception for data > 32672 in length
+===> testing trailing non-blanks(using setString) length = 32675
+expected exception for data > 32672 in length
+===> testing trailing non-blanks(using setObject) length = 32675
+expected exception for data > 32672 in length
+===> testing trailing non-blank characters using concatenation
+expected exception for data > 32672 in length
+===> verified length 32672
+===> verified length 32672
+===> verified length 32672
+===> verified length 32672
+===> verified length 32672
+Test 12 - varchar truncation tests end in here
+Test 13 - long varchar truncation tests start from here
+===> testing(using setAsciiStream) extin/char32703trailingblanks.data length = 32703
+expected exception for data > 32700 in length
+===> testing(using setCharacterStream) extin/char32703trailingblanks.data length = 32703
+expected exception for data > 32700 in length
+===> testing trailing blanks(using setString) length = 32703
+expected exception for data > 32700 in length
+===> testing trailing blanks(using setObject) length = 32703
+expected exception for data > 32700 in length
+===> testing(using setAsciiStream) extin/char32703.data length = 32703
+expected exception for data > 32700 in length
+===> testing(using setCharacterStream) extin/char32703.data length = 32703
+expected exception for data > 32700 in length
+===> testing trailing non-blanks(using setString) length = 32703
+expected exception for data > 32700 in length
+===> testing trailing non-blanks(using setObject) length = 32703
+expected exception for data > 32700 in length
+Test 13 - long varchar truncation tests end in here
+Test streamingColumn finished

@@ -68,6 +68,7 @@
       <include name="${this.dir}/*.java"/>
       <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
       <exclude name="${this.dir}/holdCursorJavaReflection.java"/>
+      <exclude name="${this.dir}/holdCursorJava.java"/>
       <exclude name="${this.dir}/streams.java"/>
       <exclude name="${this.dir}/procedureJdbc30.java"/>
     </javac>
@@ -89,6 +90,7 @@
       </classpath>
       <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
       <include name="${this.dir}/holdCursorJavaReflection.java"/>
+      <include name="${this.dir}/holdCursorJava.java"/>
       <include name="${this.dir}/streams.java"/>
       <include name="${this.dir}/procedureJdbc30.java"/>
     </javac>

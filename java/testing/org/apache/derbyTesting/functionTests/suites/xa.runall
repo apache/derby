@@ -1,3 +1,4 @@
+jdbcapi/checkDataSource.java
 jdbcapi/dataSourcePermissions.java
 jdbcapi/xaAnotherTest.sql
 jdbcapi/xaSimplePositive.sql

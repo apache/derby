@@ -1,0 +1,221 @@
+ij> ------------------------------------------------------------------------------
+-- TEST CASES SPECIFIC TO STORE IMPLEMENTATION OF READ UNCOMMITTED:
+-- overview:
+--    TEST 0: Test a scan positioned on a row which is deleted from it.
+--    TEST 1: Test a scan positioned on a row which is purged from it.
+------------------------------------------------------------------------------
+--
+------------------------------------------------------------------------------
+run resource 'createTestProcedures.subsql';
+ij> CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'com.ibm.db2j.testing.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'com.ibm.db2j.testing.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij> connect 'wombat' as scanner;
+ij(SCANNER)> autocommit off;
+ij(SCANNER)> connect 'wombat' as deleter;
+ij(DELETER)> autocommit off;
+ij(DELETER)> ------------------------------------------------------------------------------
+-- TEST 0: Test a scan positioned on a row which is deleted from it.
+------------------------------------------------------------------------------
+set connection scanner;
+ij(SCANNER)> set current isolation to UR;
+0 rows inserted/updated/deleted
+ij(SCANNER)> drop table data;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'DATA' because it does not exist.
+ij(SCANNER)> -- create a table with 2 rows per index page.
+create table data (keycol int, data varchar(1600)) ;
+0 rows inserted/updated/deleted
+ij(SCANNER)> insert into data values (0, PADSTRING('0',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (10, PADSTRING('100',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (20, PADSTRING('200',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (30, PADSTRING('300',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (40, PADSTRING('400',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (50, PADSTRING('100',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (60, PADSTRING('200',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (70, PADSTRING('300',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (80, PADSTRING('400',1600));
+1 row inserted/updated/deleted
+ij(SCANNER)> create index idx on data (keycol, data) ;
+0 rows inserted/updated/deleted
+ij(SCANNER)> commit;
+ij(SCANNER)> set connection deleter;
+ij(DELETER)> SET ISOLATION READ COMMITTED;
+0 rows inserted/updated/deleted
+ij(DELETER)> commit;
+ij(DELETER)> -- position scanner with no bulk fetch on 40,400
+set connection scanner;
+ij(SCANNER)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(SCANNER)> get cursor scan_cursor as
+    'select keycol from data';
+ij(SCANNER)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+0          
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+10         
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+20         
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+30         
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+40         
+ij(SCANNER)> -- now delete all the rows except for 70 and 80
+set connection deleter;
+ij(DELETER)> delete from data where keycol < 70;
+7 rows inserted/updated/deleted
+ij(DELETER)> -- scanner should automatically jump to 70
+set connection scanner;
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+70         
+ij(SCANNER)> -- cleanup
+close scan_cursor;
+ij(SCANNER)> commit;
+ij(SCANNER)> set connection deleter;
+ij(DELETER)> commit;
+ij(DELETER)> ------------------------------------------------------------------------------
+-- TEST 1: Test a scan positioned on a row which is purged.
+------------------------------------------------------------------------------
+set connection scanner;
+ij(SCANNER)> set isolation read uncommitted;
+0 rows inserted/updated/deleted
+ij(SCANNER)> drop table data;
+0 rows inserted/updated/deleted
+ij(SCANNER)> -- create a table with 3 rows per index page.
+create table data (keycol int, data varchar(1200));
+0 rows inserted/updated/deleted
+ij(SCANNER)> insert into data values (0, PADSTRING('0',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (10, PADSTRING('100',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (20, PADSTRING('200',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (30, PADSTRING('300',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (40, PADSTRING('400',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (50, PADSTRING('100',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (60, PADSTRING('200',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (70, PADSTRING('300',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> insert into data values (80, PADSTRING('400',1200));
+1 row inserted/updated/deleted
+ij(SCANNER)> create index idx on data (keycol, data) ;
+0 rows inserted/updated/deleted
+ij(SCANNER)> commit;
+ij(SCANNER)> -- position scanner with no bulk fetch on 0,0 (first row in btree)
+set connection scanner;
+ij(SCANNER)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
+0 rows inserted/updated/deleted
+ij(SCANNER)> get cursor scan_cursor as
+    'select keycol from data';
+ij(SCANNER)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '16');
+0 rows inserted/updated/deleted
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+0          
+ij(SCANNER)> -- delete all the rows in the table except for the last few pages, and the 1st;
+set connection deleter;
+ij(DELETER)> delete from data where keycol < 50 and keycol > 0;
+4 rows inserted/updated/deleted
+ij(DELETER)> -- insert enough rows after the first to force a split by the scanner on the 1st
+-- page, it will now be positioned by key on the (0, 0) key.   Then delete the
+-- rows that we just inserted.
+set connection scanner;
+ij(SCANNER)> insert into data values (9, '3'), (9, '2'), (9, '1');
+3 rows inserted/updated/deleted
+ij(SCANNER)> delete from data where keycol = 9;
+3 rows inserted/updated/deleted
+ij(SCANNER)> -- delete the key that the scan is positioned on.  
+set connection deleter;
+ij(DELETER)> delete from data where keycol = 0;
+1 row inserted/updated/deleted
+ij(DELETER)> commit;
+ij(DELETER)> set connection scanner;
+ij(SCANNER)> -- this should now cause another split on the first page in the btree, this
+-- time it should reclaim row 0.
+insert into data values (8, '3'), (8, '2'), (8, '1');
+3 rows inserted/updated/deleted
+ij(SCANNER)> -- scanner should automatically jump to 8, handling the fact that row (0,0)
+-- no longer exists in the table.
+set connection scanner;
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+50         
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+60         
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+70         
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+80         
+ij(SCANNER)> -- delete all the rows that remain except the last;
+set connection deleter;
+ij(DELETER)> delete from data where keycol > 10 and keycol < 80;
+3 rows inserted/updated/deleted
+ij(DELETER)> commit;
+ij(DELETER)> -- position scan on last row of scan.
+set connection scanner;
+ij(SCANNER)> next scan_cursor;
+KEYCOL     
+-----------
+8          
+ij(SCANNER)> -- now repeat process from above to make the current scan position disappear to
+-- test code path executed when closing a scan where the last scan position has
+-- disappeared.
+set connection scanner;
+ij(SCANNER)> insert into data values (82, '3'), (82, '2'), (82, '1');
+3 rows inserted/updated/deleted
+ij(SCANNER)> delete from data where keycol = 81;
+0 rows inserted/updated/deleted
+ij(SCANNER)> set connection deleter;
+ij(DELETER)> delete from data where keycol = 80;
+1 row inserted/updated/deleted
+ij(DELETER)> commit;
+ij(DELETER)> set connection scanner;
+ij(SCANNER)> -- this statement will purge (80, 800) from the table.
+insert into data values (81, '3'), (81, '2'), (81, '1');
+3 rows inserted/updated/deleted
+ij(SCANNER)> delete from data where keycol = 81;
+3 rows inserted/updated/deleted
+ij(SCANNER)> -- this statement will execute code which will look for last key positioned on
+-- while closing the statement.
+close scan_cursor;
+ij(SCANNER)> -- cleanup
+set connection scanner;
+ij(SCANNER)> commit;
+ij(SCANNER)> set connection deleter;
+ij(DELETER)> commit;
+ij(DELETER)> 

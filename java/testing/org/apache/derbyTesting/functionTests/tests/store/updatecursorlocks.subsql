@@ -1,0 +1,332 @@
+-- Very basic single user testing of update locks on cursors on heap tables.  
+-- This ".subsql" test is
+-- meant to be run from another test such that it gets run under multiple
+-- isolation levels.  This is important for update locks as they behave
+-- differently, depending on isolation levels.
+--
+-- assume's caller has already done: run 'LockTableQuery.subsql'; to get 
+-- easy access to the lock VTI.
+
+autocommit off;
+
+--------------------------------------------------------------------------------
+-- Assumes that calling routine has set up the following simple dataset, 
+-- a heap, no indexes with following initial values:
+--     create table (a int, b int, c somesortofchar);
+-- 1, 10, 'one'
+-- 2, 20, 'two'
+-- 3, 30, 'three'
+-- 4, 40, 'four'
+-- 5, 50, 'five'
+-- 6, 60, 'six'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which does no updates.
+--    Should claim a "U" lock as it visits each row.  In serializable it
+--    will convert the lock to S when it moves off the row, having done no
+--    update.  In read committed it will release each U lock as it moves off
+--    the row.
+--
+--    Note that the current implementation claims a IX table lock when doing
+--    update locking, which it will not release even if no actual update is
+--    performed.
+--------------------------------------------------------------------------------
+get cursor scan_cursor as
+    'select a, b, c from a for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which deletes "even" rows.
+--     Will claim an U lock as it visits each row.  Will claim an X lock on any
+--     row it actually deletes.
+--------------------------------------------------------------------------------
+get cursor scan_cursor as
+    'select a, b, c from a for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+delete from a where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+delete from a where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+delete from a where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which does no updates, now there are committed
+-- deleted rows in the heap, make sure there are no locks on the committed
+-- deleted rows.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+get cursor scan_cursor as
+    'select a, b, c from a for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test full cursor scan which updates the middle 2 rows, now there are 
+-- committed deleted rows in the heap.  Will get X locks only on the rows
+-- which are updated.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- 3, 30, 'three'
+-- 5, 50, 'five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+get cursor scan_cursor as
+    'select a, b, c from a for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+update a set a=-3,b=-30,c='-three' where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+update a set a=-5,b=-50,c='-five' where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which does no updates. 
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- -3, -30, '-three'
+-- -5, -50, '-five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+get cursor scan_cursor as
+    'select a, b, c from a where a < 0 for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which deletes the positive rows.
+-- 
+-- At this point the table should look like:
+-- 1, 10, 'one'
+-- -3, -30, '-three'
+-- -5, -50, '-five'
+-- 7, 70, 'seven'
+--------------------------------------------------------------------------------
+get cursor scan_cursor as
+    'select a, b, c from a where a > 0 for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+delete from a where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+delete from a where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which updates a row.
+-- 
+-- At this point the table should look like:
+-- -3, -30, '-three'
+-- -5, -50, '-five'
+--------------------------------------------------------------------------------
+
+get cursor scan_cursor as
+    'select a, b, c from a where a >= -5 for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+update a set a=3,b=30,c='three' where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+select * from a;
+commit;
+
+--------------------------------------------------------------------------------
+-- Test qualified full cursor scan which updates a row and deletes a row.
+-- 
+-- At this point the table should look like:
+-- 3, 30, 'three'
+-- -5, -50, '-five'
+--------------------------------------------------------------------------------
+
+get cursor scan_cursor as
+    'select a, b, c from a where a >= -5 for update';
+
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+update a set a=33,b=3030,c='threethree' where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+next scan_cursor;
+delete from a where current of scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+close scan_cursor;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+
+commit;
+select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+commit;
+
+-------------------------------------------------------------------------------
+-- At this point the table should look like:
+-- 33, 3030, 'threethree'
+--------------------------------------------------------------------------------
+select * from a;
+commit;
+
+drop table a;

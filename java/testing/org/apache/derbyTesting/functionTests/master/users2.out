@@ -1,0 +1,241 @@
+ij> --
+-- Specifically test Derby users using DERBY scheme
+-- and by only looking at database properties for authentication
+-- The only user at the system level is system/manager
+--
+-- check allowed users in wombat db.
+-- initial connection in sysprop was:
+-- connect 'wombat;create=true;user=system;password=manager';
+--
+-- Default to: derby.authentication.provider=BUILTIN
+--
+autocommit off;
+ij> prepare p1 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p1 using 'values(''derby.connection.requireAuthentication'', ''true'')';
+0 rows inserted/updated/deleted
+ij> commit;
+ij> remove p1;
+ij> autocommit on;
+ij> disconnect all;
+ij> connect 'wombat;shutdown=true;user=system;password=manager';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- beetle 5468
+disconnect all;
+ij> connect 'wombat;user=system;password=manager';
+ij> --
+-- set authentication config for 'wombat' database
+--
+autocommit off;
+ij> prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p2 using 'values(''derby.user.kreg'', ''visualWhat?'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.user.jeff'', ''HomeRun61'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.user.ames'', ''AnyVolunteer?'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.user.jamie'', ''MrNamePlates'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.user.howardR'', ''IamBetterAtTennis'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.user.francois'', ''paceesalute'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.database.fullAccessUsers'', ''jeff,howardR,ames,francois,kreg'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.database.readOnlyAccessUsers'', ''jamie'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.database.defaultConnectionMode'', ''noAccess'')';
+0 rows inserted/updated/deleted
+ij> execute p2 using 'values(''derby.database.propertiesOnly'', ''true'')';
+0 rows inserted/updated/deleted
+ij> commit;
+ij> autocommit on;
+ij> -- Check that the passwords are encrypted
+-- values getDatabaseProperty('derby.user.francois');
+-- values getDatabaseProperty('derby.user.ames');
+-- values getDatabaseProperty('derby.user.kreg');
+-- values getDatabaseProperty('derby.user.jeff');
+-- values getDatabaseProperty('derby.user.howardR');
+-- values getDatabaseProperty('derby.user.jamie');
+connect 'wombat;user=kreg;password=visualWhat?';
+ij(CONNECTION1)> connect 'wombat;user=jeff;password=HomeRun61';
+ij(CONNECTION2)> connect 'wombat;user=ames;password=AnyVolunteer?';
+ij(CONNECTION3)> connect 'wombat;user=howardR;password=IamBetterAtTennis';
+ij(CONNECTION4)> -- should succeed
+create table APP.t1(c1 char(30));
+0 rows inserted/updated/deleted
+ij(CONNECTION4)> insert into APP.t1 values CURRENT_USER;
+1 row inserted/updated/deleted
+ij(CONNECTION4)> connect 'wombat;user=jamie;password=MrNamePlates';
+ij(CONNECTION5)> -- should fail as readOnly user
+insert into APP.t1 values CURRENT_USER;
+ERROR 25502: An SQL data change is not permitted for a read-only connection, user or database.
+ij(CONNECTION5)> create table APP.t2(c1 char(30));
+ERROR 25503: DDL is not permitted for a read-only connection, user or database.
+ij(CONNECTION5)> show connections;
+CONNECTION0 - 	jdbc:derby:wombat
+CONNECTION1 - 	jdbc:derby:wombat
+CONNECTION2 - 	jdbc:derby:wombat
+CONNECTION3 - 	jdbc:derby:wombat
+CONNECTION4 - 	jdbc:derby:wombat
+CONNECTION5* - 	jdbc:derby:wombat
+* = current connection
+ij(CONNECTION5)> disconnect all;
+ij> -- check allowed users in myDB db.
+--
+connect 'myDB;create=true;user=system;password=manager';
+ij> autocommit off;
+ij> prepare p3 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p3 using 'values(''derby.connection.requireAuthentication'', ''true'')';
+0 rows inserted/updated/deleted
+ij> remove p3;
+ij> autocommit on;
+ij> disconnect all;
+ij> connect 'myDB;shutdown=true;user=system;password=manager';
+ERROR 08006: Database 'myDB' shutdown.
+ij> -- beetle 5468
+disconnect all;
+ij> connect 'myDB;user=system;password=manager';
+ij> --
+-- set authentication config for 'myDB' database
+--
+autocommit off;
+ij> prepare p4 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p4 using 'values(''derby.user.kreg'', ''visualWhat?'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.user.dan'', ''MakeItFaster'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.user.ames'', ''AnyVolunteer?'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.user.jerry'', ''SacreBleu'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.user.jamie'', ''MrNamePlates'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.user.francois'', ''paceesalute'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.database.fullAccessUsers'', ''jerry,dan,kreg,ames,francois,jamie'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.database.defaultConnectionMode'', ''noAccess'')';
+0 rows inserted/updated/deleted
+ij> execute p4 using 'values(''derby.database.propertiesOnly'', ''true'')';
+0 rows inserted/updated/deleted
+ij> commit;
+ij> autocommit on;
+ij> -- Check that the passwords are encrypted
+-- values getDatabaseProperty('derby.user.francois');
+-- values getDatabaseProperty('derby.user.ames');
+-- values getDatabaseProperty('derby.user.kreg');
+-- values getDatabaseProperty('derby.user.dan');
+-- values getDatabaseProperty('derby.user.jerry');
+-- values getDatabaseProperty('derby.user.jamie');
+--
+-- also check USER flavors
+--
+connect 'myDB;user=jerry;password=SacreBleu';
+ij(CONNECTION1)> create table APP.t1(c1 char(30) check (UPPER(c1) <> 'JAMIE'));
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> insert into APP.t1 values CURRENT_USER;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> connect 'myDB;user=kreg;password=visualWhat?';
+ij(CONNECTION2)> insert into APP.t1 values USER;
+1 row inserted/updated/deleted
+ij(CONNECTION2)> connect 'myDB;user=ames;password=AnyVolunteer?';
+ij(CONNECTION3)> insert into APP.t1 values SESSION_USER;
+1 row inserted/updated/deleted
+ij(CONNECTION3)> connect 'myDB;user=dan;password=MakeItFaster';
+ij(CONNECTION4)> select * from APP.t1;
+C1                            
+------------------------------
+JERRY                         
+KREG                          
+AMES                          
+ij(CONNECTION4)> update APP.t1 set c1 = USER;
+3 rows inserted/updated/deleted
+ij(CONNECTION4)> select * from APP.t1;
+C1                            
+------------------------------
+DAN                           
+DAN                           
+DAN                           
+ij(CONNECTION4)> connect 'myDB;user=francois;password=paceesalute';
+ij(CONNECTION5)> update APP.t1 set c1 = USER;
+3 rows inserted/updated/deleted
+ij(CONNECTION5)> connect 'myDB;user=jamie;password=MrNamePlates';
+ij(CONNECTION6)> select * from APP.t1;
+C1                            
+------------------------------
+FRANCOIS                      
+FRANCOIS                      
+FRANCOIS                      
+ij(CONNECTION6)> update APP.t1 set c1 = USER;
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ij(CONNECTION6)> show connections;
+CONNECTION0 - 	jdbc:derby:myDB
+CONNECTION1 - 	jdbc:derby:myDB
+CONNECTION2 - 	jdbc:derby:myDB
+CONNECTION3 - 	jdbc:derby:myDB
+CONNECTION4 - 	jdbc:derby:myDB
+CONNECTION5 - 	jdbc:derby:myDB
+CONNECTION6* - 	jdbc:derby:myDB
+* = current connection
+ij(CONNECTION6)> disconnect all;
+ij> --
+-- some negative cases
+--
+-- Invalid login's
+connect 'wombat';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'wombat;user=badUser1;password=YeeHa!';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'wombat;user=badUser2;password=YeeHa!';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'myDB;user=dan;password=MakeItSlower';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'myDB;user=jamie;password=LetMeIn';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'wombat;user=francois;password=Corsica';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> -- Invalid database users
+connect 'myDB;user=howardR;password=IamBetterAtTennis';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'wombat;user=jerry;password=SacreBleu';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'wombat;user=jamie;password=MrNamePlates';
+ij> show connections;
+CONNECTION0* - 	jdbc:derby:wombat
+* = current connection
+ij> connect 'wombat;user=francois;password=paceesalute';
+ij(CONNECTION1)> connect 'myDB;user=jerry;password=SacreBleu';
+ij(CONNECTION2)> -- Database shutdown - check user - should fail
+connect 'myDB;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION2)> connect 'myDB;user=jamie;password=LetMeIn;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION2)> connect 'wombat;user=jerry;password=SacreBleu;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij(CONNECTION2)> show connections;
+CONNECTION0 - 	jdbc:derby:wombat
+CONNECTION1 - 	jdbc:derby:wombat
+CONNECTION2* - 	jdbc:derby:myDB
+* = current connection
+ij(CONNECTION2)> disconnect all;
+ij> show connections;
+No connections available.
+ij> -- Database shutdown - check user - should succeed
+connect 'wombat;user=francois;password=paceesalute;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- beetle 5468
+disconnect all;
+ij> connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+ERROR 08006: Database 'myDB' shutdown.
+ij> -- beetle 5468
+disconnect all;
+ij> -- there should be no connections left here
+show connections;
+No connections available.
+ij> -- JBMS System shutdown - check user - should fail
+connect ';user=jamie;password=LetMeIn;shutdown=true';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> -- JBMS System shutdown - check user - should succeed
+connect ';user=system;password=manager;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> 

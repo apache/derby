@@ -1,0 +1,44 @@
+Test batchUpdate starting
+Positive Statement: clear the batch and run the empty batch
+Positive Statement: testing 1 statement batch
+Positive Statement: testing 2 inserts and 1 update batch
+Positive Statement: 1000 statements batch
+Positive Statement: statement testing batch with autocommit true
+Positive Statement: add 3 statements, clear batch and execute batch
+Positive Statement: add 3 statements, clear batch, add 3 and execute batch
+Positive Statement: testing associated parameters
+Negative Statement: statement testing select as first stat in the batch
+Negative Statement: statement testing select as nth stat in the batch
+Negative Statement: statement testing select as last stat in the batch
+Negative Statement: statement testing execute in the middle of batch
+Negative Statement: statement testing executeQuery in the middle of batch
+Negative Statement: statement testing executeUpdate in the middle of batch
+Negative Statement: statement testing overflow error as first stat in the batch
+Negative Statement: statement testing overflow error as nth stat in the batch
+Negative Statement: statement testing overflow error as last stat in the batch
+Negative Statement: statement testing time out while getting the lock in the batch
+Positive Callable Statement: statement testing callable statement batch
+Negative Callable Statement: callable statement with output parameters in the batch
+Positive Prepared Stat: set no parameter values and run the batch
+Positive Prepared Stat: no settable parameters
+Positive Prepared Stat: set one set of parameter values and run the batch
+Positive Prepared Stat: set 3 set of parameter values and run the batch
+Positive Prepared Stat: set one set of parameter values to null and run the batch
+Positive Prepared Stat: 1000 parameter set batch
+Positive Prepared Stat: batch, rollback, batch and commit combinations
+Positive Prepared Stat: batch and commit combinations
+Positive Prepared Stat: batch, batch and rollback combinations
+Positive Prepared Stat: batch, batch and commit combinations
+Positive Prepared Stat: testing batch with autocommit true
+Positive Prepared Stat: add 3 statements, clear batch and execute batch
+Positive Prepared Stat: add 3 statements, clear batch, add 3 and execute batch
+Negative Prepared Stat: testing select in the batch
+Negative Prepared Stat: testing execute in the middle of batch
+Negative Prepared Stat: testing executeQuery in the middle of batch
+Negative Prepared Stat: testing executeUpdate in the middle of batch
+Negative Prepared Stat: testing overflow as first set of values
+Negative Prepared Stat: testing overflow as nth set of values
+Negative Prepared Stat: testing overflow as last set of values
+Negative Prepared Stat: testing transaction error, time out while getting the lock
+PASS
+Test batchUpdate finished

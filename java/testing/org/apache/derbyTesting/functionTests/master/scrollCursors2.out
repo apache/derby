@@ -1,0 +1,15 @@
+Test scrollCurors2 starting
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+warning = SQL Warning: Scroll sensitive cursors are not currently implemented.
+warning = SQL Warning: Scroll sensitive cursors are not currently implemented.
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+warning = SQL Warning: Scroll sensitive cursors are not currently implemented.
+warning = SQL Warning: Scroll sensitive cursors are not currently implemented.
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+warning = SQL Warning: Updatable ResultSets are not currently implemented.
+PASS
+Test scrollCursors2 finished

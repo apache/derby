@@ -1,0 +1,137 @@
+ij> -- this test shows some ij abilities against an active database
+create table t (i int);
+0 rows inserted/updated/deleted
+ij> insert into t values (3), (4);
+2 rows inserted/updated/deleted
+ij> prepare s as 'select * from t';
+ij> execute s;
+I          
+-----------
+3          
+4          
+ij> remove s;
+ij> -- now it won't find s
+execute s;
+IJ ERROR: Unable to establish prepared statement S
+ij> prepare s as 'select * from t where i=?';
+ij> -- fails, needs parameter
+execute s;
+ERROR 07000: At least one parameter to the current statement is uninitialized.
+ij> -- works, finds value
+execute s using 'values 3';
+IJ WARNING: Autocommit may close using result set
+I          
+-----------
+3          
+ij> prepare t as 'values 3';
+ij> -- same as last execute
+execute s using t;
+IJ WARNING: Autocommit may close using result set
+I          
+-----------
+3          
+ij> -- same as last execute
+execute 'select * from t where i=?' using 'values 3';
+IJ WARNING: Autocommit may close using result set
+I          
+-----------
+3          
+ij> -- same as last execute
+execute 'select * from t where i=?' using t;
+IJ WARNING: Autocommit may close using result set
+I          
+-----------
+3          
+ij> -- param that is not needed gets out of range message
+execute 'select * from t where i=?' using 'values (3,4)';
+IJ WARNING: Autocommit may close using result set
+ERROR XCL13: The parameter position '2' is out of range.  The number of parameters for this prepared  statement is '1'.
+ij> -- ignores rows that are not needed
+execute 'select * from t where i=?' using 'values 3,4';
+IJ WARNING: Autocommit may close using result set
+I          
+-----------
+3          
+ij> -- with autocommit off, extra rows are processed and no warning results
+autocommit off;
+ij> execute 'select * from t where i=?' using 'values 3,4';
+I          
+-----------
+3          
+I          
+-----------
+4          
+ij> execute 'select * from t where i=?' using 'values 3';
+I          
+-----------
+3          
+ij> autocommit on;
+ij> -- will say params not set when no rows in using values
+execute 'select * from t where i=?' using 'select * from t where i=9';
+IJ ERROR: Using clause had no results
+ij> -- will say params not set when using values is not a query
+execute 'select * from t where i=?' using 'create table s (i int)';
+IJ ERROR: Using clause had no results
+ij> -- note that the using part was, however, executed...
+drop table s;
+0 rows inserted/updated/deleted
+ij> -- bug 5926 - make sure the using clause result set got closed
+drop table t;
+0 rows inserted/updated/deleted
+ij> create table t(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t values(1);
+1 row inserted/updated/deleted
+ij> execute 'select * from t where c1=?' using 'select * from t where c1=1';
+IJ WARNING: Autocommit may close using result set
+C1         
+-----------
+1          
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> create table t(c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t values(1);
+1 row inserted/updated/deleted
+ij> insert into t values(2);
+1 row inserted/updated/deleted
+ij> execute 'select * from t where c1=?' using 'select * from t where c1>=1';
+IJ WARNING: Autocommit may close using result set
+C1         
+-----------
+1          
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- show that long fields now don't take forever...
+create table t ( c char(50));
+0 rows inserted/updated/deleted
+ij> insert into t values('hello');
+1 row inserted/updated/deleted
+ij> select cast(c as varchar(20)) from t;
+1                   
+--------------------
+hello               
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> -- show multiconnect ability; db name is wombat, reuse it...
+-- assumes ij.protocol is appropriately set...
+connect 'wombat' as wombat;
+ij(WOMBAT)> show connections;
+CONNECTION0 - 	jdbc:derby:wombat
+WOMBAT* - 	jdbc:derby:wombat
+* = current connection
+ij(WOMBAT)> set connection connection0;
+ij(CONNECTION0)> show connections;
+CONNECTION0* - 	jdbc:derby:wombat
+WOMBAT - 	jdbc:derby:wombat
+* = current connection
+ij(CONNECTION0)> set connection wombat;
+ij(WOMBAT)> disconnect;
+ij> show connections;
+CONNECTION0 - 	jdbc:derby:wombat
+No current connection
+ij> set connection connection0;
+ij> show connections;
+CONNECTION0* - 	jdbc:derby:wombat
+* = current connection
+ij> 

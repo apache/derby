@@ -40,18 +40,16 @@ Expected Exception is Syntax error: MISSING ON ROLLBACK RETAIN CURSORS.
 Expected Exception is Multiple or conflicting keywords involving the 'ON ROLLBACK RETAIN CURSORS' clause are present.
 Expected Exception is Multiple or conflicting keywords involving the 'ON ROLLBACK RETAIN LOCKS' clause are present.
 Expected Exception is Multiple or conflicting keywords involving the 'UNIQUE' clause are present.
-Test 17 No nested savepoints allowed when using SQL to set savepoints. This is to match DB2 LUW behavior
+Test 17 No nested savepoints allowed when using SQL to set savepoints.
 Test 17a Test with UNIQUE clause.
 Expected Exception is The maximum number of savepoints has been reached. 
 Test 17b Test without UNIQUE clause.
 Since no nesting is allowed, skipping UNIQUE still gives error for trying to define another savepoint
 Expected Exception is The maximum number of savepoints has been reached. 
 Test 18 No nested SQL savepoints allowed inside JDBC savepoint.
-This is to match DB2 LUW behavior
 Following SQL savepoint will fail because we are trying to nest it inside JDBC savepoint
 Expected Exception is The maximum number of savepoints has been reached. 
 Test 19 No nested SQL savepoints allowed inside SQL savepoint.
-This is to match DB2 LUW behavior
 Following SQL savepoint will fail because we are trying to nest it inside SQL savepoint
 Expected Exception is The maximum number of savepoints has been reached. 
 Test 20 Rollback of SQL savepoint works same as rollback of JDBC savepoint.

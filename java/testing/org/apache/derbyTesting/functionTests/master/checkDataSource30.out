@@ -1,0 +1,737 @@
+Running connection checks on Nested
+  isolation level 2
+  auto commit     false
+  read only       false
+Running JDBC 3.0 connection checks on DriverManager 
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on DriverManager 
+  isolation level 2
+  auto commit     true
+  read only       false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+DriverManager  <closedconn>.close() no error
+DriverManager  <closedconn>.createStatement() 08003 - No current connection.
+DriverManager  <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+EmbeddedDataSource <closedconn>.close() no error
+EmbeddedDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedConnectionPoolDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(1):connectionClosed
+method calls on a closed connection
+EmbeddedConnectionPoolDataSource <closedconn>.close() no error
+EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedConnectionPoolDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(1):connectionClosed
+method calls on a closed connection
+EmbeddedConnectionPoolDataSource <closedconn>.close() no error
+EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Changes rolled back OK in auto closed pooled connection
+EVENT(1):connectionClosed
+expected SQL Exception: No current connection.
+expected SQL Exception: No current connection.
+Running JDBC 3.0 connection checks on EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedXADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(3):connectionClosed
+method calls on a closed connection
+EmbeddedXADataSource <closedconn>.close() no error
+EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Changes rolled back OK in auto closed local XAConnection
+EVENT(3):connectionClosed
+ERROR XJ015: Derby system shutdown.
+Running connection checks on Nested
+  isolation level 2
+  auto commit     false
+  read only       false
+Running JDBC 3.0 connection checks on DriverManager 
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on DriverManager 
+  isolation level 2
+  auto commit     true
+  read only       false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+DriverManager  <closedconn>.close() no error
+DriverManager  <closedconn>.createStatement() 08003 - No current connection.
+DriverManager  <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+EmbeddedDataSource <closedconn>.close() no error
+EmbeddedDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedConnectionPoolDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(2):connectionClosed
+method calls on a closed connection
+EmbeddedConnectionPoolDataSource <closedconn>.close() no error
+EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedConnectionPoolDataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(2):connectionClosed
+method calls on a closed connection
+EmbeddedConnectionPoolDataSource <closedconn>.close() no error
+EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedXADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(4):connectionClosed
+method calls on a closed connection
+EmbeddedXADataSource <closedconn>.close() no error
+EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on EmbeddedXADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(4):connectionClosed
+method calls on a closed connection
+EmbeddedXADataSource <closedconn>.close() no error
+EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+EVENT(5):connectionClosed
+Running JDBC 3.0 connection checks on Global EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+Running connection checks on Global EmbeddedXADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(5):connectionClosed
+method calls on a closed connection
+Global EmbeddedXADataSource <closedconn>.close() no error
+Global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+Global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on Global EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+Running connection checks on Global EmbeddedXADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(5):connectionClosed
+method calls on a closed connection
+Global EmbeddedXADataSource <closedconn>.close() no error
+Global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+Global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on Switch to local EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on Switch to local EmbeddedXADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to local EmbeddedXADataSource <closedconn>.close() no error
+Switch to local EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to local EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on Switch to local EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot issue savepoint when autoCommit is on.
+Running connection checks on Switch to local EmbeddedXADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to local EmbeddedXADataSource <closedconn>.close() no error
+Switch to local EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to local EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on Switch to global EmbeddedXADataSource
+  holdability     false
+JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+Running connection checks on Switch to global EmbeddedXADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to global EmbeddedXADataSource <closedconn>.close() no error
+Switch to global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running JDBC 3.0 connection checks on Switch to global EmbeddedXADataSource
+  holdability     true
+JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+Running connection checks on Switch to global EmbeddedXADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to global EmbeddedXADataSource <closedconn>.close() no error
+Switch to global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+initial local
+  holdability     true
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+initial  X1
+  holdability     false
+  isolation level READ_COMMITTED
+  auto commit     false
+  read only       false
+modified X1
+  holdability     false
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+modified local
+  holdability     false
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       true
+reset local
+  holdability     false
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+re-join X1
+  holdability     false
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+back to local (same as reset)
+  holdability     false
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+EVENT(6):connectionClosed
+new handle - local 
+  holdability     true
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+EVENT(6):connectionClosed
+re-join with new handle X1
+  holdability     true
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+EVENT(6):connectionClosed
+pre-X1 commit - local
+  holdability     true
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+pre-X1 commit - X1
+  holdability     true
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+post-X1 end - local
+  holdability     true
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+post-X1 commit - local
+  holdability     true
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+EVENT(6):connectionClosed
+TESTING RE_USE OF STATEMENT OBJECTS
+THE STATEMENT OBJECTS CAN NOT BE REUSED ACROSS LOCAL/GLOBAL CONNECTIONS BECAUSE, LOCAL CONNECTION CREATES THEM
+WITH HOLDABILITY TRUE WHEREAS GLOBAL CONNECTION CAN ONLY WORK WITH STATEMENTS WITH HOLDABILITY FALSE
+LOCK TABLE
+END LOCK TABLE
+Statement State @ Create 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+Statement State @ PS Create 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 1
+    1 type 4
+Statement State @ CS Create 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 2
+    1 type 12
+    2 type 12
+Params-local-1: ru(params) contents {3}
+sru1-local-1: ru(SN1) contents {1} {2} {3}
+Expecting exception because global transaction sru1-global-2 is trying to use a statement with holdability true
+sru1-global-2: SQL Exception: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+sru2-global-3: ru(OAK2) contents {1} {2} {3}
+Expecting exception because global transaction sru1-global-4 is trying to use a statement with holdability true
+sru1-global-4: SQL Exception: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Statement State @ GLOBAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+Statement State @ PS GLOBAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 1
+    1 type 4
+Statement State @ CS GLOBAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 2
+    1 type 12
+    2 type 12
+PASS: got exception because holdability is true on prepared statement and that is not allowed in global transactions
+Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+sru1-local-5: ru(SN1) contents {1} {2} {3}
+sru2-local-6: ru(OAK2) contents {1} {2} {3}
+sru3-local-7: ru(SF3) contents {1} {2} {3}
+Statement State @ LOCAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+Statement State @ PS LOCAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 1
+    1 type 4
+Statement State @ CS LOCAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 2
+    1 type 12
+    2 type 12
+Params-local-2: ru(params) contents {3}
+LOCK TABLE
+  xid row 0 lock count 4
+  xid row 1 lock count 14
+END LOCK TABLE
+sru1-local-8: ru(SN1) contents {1} {2} {3}
+sru2-local-9: ru(OAK2) contents {1} {2} {3}
+sru3-local-10: ru(SF3) contents {1} {2} {3}
+Statement State @ LOCAL 2 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+Statement State @ PS LOCAL 2 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 1
+    1 type 4
+Statement State @ CS LOCAL 2
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  Parameter Count 2
+    1 type 12
+    2 type 12
+LOCK TABLE
+  xid row 0 lock count 4
+  xid row 1 lock count 12
+END LOCK TABLE
+sruBatch update counts : 1  1  2  1 :
+sruBatch: ru(null) contents {1} {2} {3} {4} {5} {6} {7} {8}
+XAConnection.getXAResource : No current connection.
+XAConnection.getConnection : No current connection.
+XAResource.start : XAException - No current connection.
+ERROR 08003: No current connection.
+XAResource.end : XAException - No current connection.
+ERROR 08003: No current connection.
+XAResource.commit : XAException - No current connection.
+ERROR 08003: No current connection.
+XAResource.prepare : XAException - No current connection.
+ERROR 08003: No current connection.
+XAResource.recover : XAException - No current connection.
+ERROR 08003: No current connection.
+XAResource.prepare : XAException - No current connection.
+ERROR 08003: No current connection.
+XAResource.isSameRM : XAException - No current connection.
+ERROR 08003: No current connection.
+Patricio update count 1
+conn4 autcommit true
+acxs 1
+acxs 2
+autocommitxastart expected No current connection.
+acxs 1
+acxs 2
+autocommitxastart expected  : XAException - null
+acxs 3
+DataSource - EMPTY
+  getConnection() - XJ004:Database '' not found.
+  getConnection(null, null) - XJ004:Database '' not found.
+  getConnection(fred, null) - XJ004:Database '' not found.
+  getConnection(fred, wilma) - XJ004:Database '' not found.
+  getConnection(null, wilma) - XJ004:Database '' not found.
+  getConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+DataSource - connectionAttributes=databaseName=wombat
+  getConnection() - XJ004:Database '' not found.
+  getConnection(null, null) - XJ004:Database '' not found.
+  getConnection(fred, null) - XJ004:Database '' not found.
+  getConnection(fred, wilma) - XJ004:Database '' not found.
+  getConnection(null, wilma) - XJ004:Database '' not found.
+  getConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+DataSource - attributesAsPassword=true
+  getConnection() - XJ004:Database '' not found.
+  getConnection(null, null) - XJ004:Database '' not found.
+  getConnection(fred, null) - XJ004:Database '' not found.
+  getConnection(fred, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getConnection(null, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+DataSource - attributesAsPassword=true, connectionAttributes=databaseName=kangaroo
+  getConnection() - XJ004:Database '' not found.
+  getConnection(null, null) - XJ004:Database '' not found.
+  getConnection(fred, null) - XJ004:Database '' not found.
+  getConnection(fred, wilma) - XJ028:The URL 'jdbc:derby: ;databaseName=kangaroo;wilma' is not properly formed.
+  getConnection(null, wilma) - XJ028:The URL 'jdbc:derby: ;databaseName=kangaroo;wilma' is not properly formed.
+  getConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+Enable Authentication
+08006:Database 'wombat' shutdown.
+AUTHENTICATION NOW ENABLED
+DataSource - attributesAsPassword=true
+  getConnection() - XJ004:Database '' not found.
+  getConnection(null, null) - XJ004:Database '' not found.
+  getConnection(fred, null) - XJ004:Database '' not found.
+  getConnection(fred, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getConnection(null, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+DataSource - attributesAsPassword=true, user=fred, password=databaseName=wombat;password=wilma
+  getConnection() - XJ004:Database '' not found.
+  getConnection(null, null) - XJ004:Database '' not found.
+  getConnection(fred, null) - XJ004:Database '' not found.
+  getConnection(fred, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getConnection(null, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+ConnectionPoolDataSource - EMPTY
+  getPooledConnection() - XJ004:Database '' not found.
+  getPooledConnection(null, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, wilma) - XJ004:Database '' not found.
+  getPooledConnection(null, wilma) - XJ004:Database '' not found.
+  getPooledConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+ConnectionPoolDataSource - connectionAttributes=databaseName=wombat
+  getPooledConnection() - XJ004:Database '' not found.
+  getPooledConnection(null, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, wilma) - XJ004:Database '' not found.
+  getPooledConnection(null, wilma) - XJ004:Database '' not found.
+  getPooledConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+ConnectionPoolDataSource - attributesAsPassword=true
+  getPooledConnection() - XJ004:Database '' not found.
+  getPooledConnection(null, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getPooledConnection(null, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getPooledConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+ConnectionPoolDataSource - attributesAsPassword=true, user=fred, password=databaseName=wombat;password=wilma
+  getPooledConnection() - XJ004:Database '' not found.
+  getPooledConnection(null, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, null) - XJ004:Database '' not found.
+  getPooledConnection(fred, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getPooledConnection(null, wilma) - XJ028:The URL 'jdbc:derby: ;wilma' is not properly formed.
+  getPooledConnection(null, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - XJ004:Database '' not found.
+  getPooledConnection(fred, databaseName=wombat;password=betty) - XJ004:Database '' not found.
+XADataSource - EMPTY
+  getXAConnection() - 08006:Database not available
+  getXAConnection(null, null) - 08006:Database not available
+  getXAConnection(fred, null) - 08006:Database not available
+  getXAConnection(fred, wilma) - 08006:Database not available
+  getXAConnection(null, wilma) - 08006:Database not available
+  getXAConnection(null, databaseName=wombat) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat;password=wilma) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08006:Database not available
+XADataSource - databaseName=wombat
+  getXAConnection() - 08004:Connection refused : Invalid authentication.
+  getXAConnection(null, null) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, null) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, wilma) - OK
+  getXAConnection(null, wilma) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(null, databaseName=wombat) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, databaseName=wombat) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, databaseName=wombat;password=wilma) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08004:Connection refused : Invalid authentication.
+XADataSource - connectionAttributes=databaseName=wombat
+  getXAConnection() - 08006:Database not available
+  getXAConnection(null, null) - 08006:Database not available
+  getXAConnection(fred, null) - 08006:Database not available
+  getXAConnection(fred, wilma) - 08006:Database not available
+  getXAConnection(null, wilma) - 08006:Database not available
+  getXAConnection(null, databaseName=wombat) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat;password=wilma) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08006:Database not available
+XADataSource - attributesAsPassword=true
+  getXAConnection() - 08006:Database not available
+  getXAConnection(null, null) - 08006:Database not available
+  getXAConnection(fred, null) - 08006:Database not available
+  getXAConnection(fred, wilma) - 08006:Database not available
+  getXAConnection(null, wilma) - 08006:Database not available
+  getXAConnection(null, databaseName=wombat) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat;password=wilma) - 08006:Database not available
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08006:Database not available
+XADataSource - databaseName=wombat, attributesAsPassword=true
+  getXAConnection() - 08004:Connection refused : Invalid authentication.
+  getXAConnection(null, null) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, null) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, wilma) - XJ028:The URL 'jdbc:derby:wombat;wilma' is not properly formed.
+  getXAConnection(null, wilma) - XJ028:The URL 'jdbc:derby:wombat;wilma' is not properly formed.
+  getXAConnection(null, databaseName=wombat) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, databaseName=wombat) - 08004:Connection refused : Invalid authentication.
+  getXAConnection(fred, databaseName=wombat;password=wilma) - OK
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08004:Connection refused : Invalid authentication.
+START XA HOLDABILITY TEST
+By default, autocommit is true for a connection
+Default holdability for a connection is HOLD_CURSORS_OVER_COMMIT
+CONNECTION(not in xa transaction yet) HOLDABILITY true
+Notice that autocommit now is false for connection because it is part of the global transaction
+Notice that connection's holdability at this point is CLOSE_CURSORS_AT_COMMIT because it is part of the global transaction
+CONNECTION(in xa transaction) HOLDABILITY false
+This is a bug. Connection's holdability should have been CLOSE_CURSORS_AT_COMMIT since it is in the global transaction
+Have reported this on Derby dev-list
+CONNECTION(in xa transaction) HOLDABILITY true
+Autocommit on Connection inside global transaction has been set correctly to false
+CONNECTION(non-xa) HOLDABILITY false
+STATEMENT HOLDABILITY false
+STATEMENT HOLDABILITY false
+STATEMENT HOLDABILITY true
+PREPARED STATEMENT HOLDABILITY true
+CALLABLE STATEMENT HOLDABILITY true
+H@1 id 1
+H@2 id 2
+H@3 id 3
+CONNECTION(xa) HOLDABILITY false
+STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
+STATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
+PREPAREDSTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
+CALLABLESTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
+X@1 id 1
+X@2 id 2
+Expected SQLException No current connection.
+Expected SQLException No current connection.
+resume XA transaction and keep using rs
+Check holdability of various jdbc objects after resuming XA transaction
+CONNECTION(xa) HOLDABILITY false
+STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
+STATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
+PREPAREDSTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
+CALLABLESTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
+STATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
+PREPAREDSTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
+CALLABLESTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
+X@3 id 3
+Expected SQLException ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Expected SQLException ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Set connection to hold 
+CONNECTION(held) HOLDABILITY true
+CONNECTION(xa) HOLDABILITY false
+Expected SQLException(setHoldability) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expected SQLException (Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expected SQLException (PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expected SQLException (CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+STATEMENT HOLDABILITY true
+Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+PREPARED STATEMENT HOLDABILITY true
+Expected SQLException (local PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expected SQLException (local PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+CALLABLE STATEMENT HOLDABILITY true
+Expected SQLException (local CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expected SQLException (local CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+CONNECTION(held) HOLDABILITY true
+PASS XA HOLDABILITY TEST
+Completed checkDataSource30

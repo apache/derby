@@ -1,0 +1,52 @@
+ij> disconnect;
+ij> connect 'wombat;user=U1' AS C1;
+ij> connect 'wombat;user=U2' AS C2;
+ij(C2)> set connection C1;
+ij(C1)> create table t1(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij(C1)> insert into t1 values (1, 2), (3, 4), (5, 6), (7, 8), (9, 10);
+5 rows inserted/updated/deleted
+ij(C1)> get scroll insensitive cursor c1 as 'select * from t1';
+ij(C1)> set connection C2;
+ij(C2)> -- see what happens to other user when we close our cursor
+-- before they are done.
+get scroll insensitive cursor c1 as 'select * from U1.t1';
+ij(C2)> set connection C1;
+ij(C1)> next c1;
+C1         |C2         
+-----------------------
+1          |2          
+ij(C1)> set connection C2;
+ij(C2)> next c1;
+C1         |C2         
+-----------------------
+1          |2          
+ij(C2)> set connection C1;
+ij(C1)> last c1;
+C1         |C2         
+-----------------------
+9          |10         
+ij(C1)> set connection C2;
+ij(C2)> last c1;
+C1         |C2         
+-----------------------
+9          |10         
+ij(C2)> set connection C1;
+ij(C1)> previous c1;
+C1         |C2         
+-----------------------
+7          |8          
+ij(C1)> set connection C2;
+ij(C2)> close c1;
+ij(C2)> set connection C1;
+ij(C1)> first c1;
+C1         |C2         
+-----------------------
+1          |2          
+ij(C1)> close c1;
+ij(C1)> drop table t1;
+0 rows inserted/updated/deleted
+ij(C1)> disconnect;
+ij> set connection C2;
+ij> disconnect;
+ij> 

@@ -1,5 +1,5 @@
 //Recommended set of permissions to start & use the network server, 
-//assuming the '${cloudscape.codebase}${/}-' directory has been secured. 
+//assuming the '${derby.codebase}${/}-' directory has been secured. 
 //Fine tune based on your environment settings
 grant codeBase "file:${csinfo.codebase}/-" {
 permission java.io.FilePermission "${derby.system.home}",

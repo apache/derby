@@ -27,6 +27,10 @@
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v2"
         includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/v2/copyfiles.ant"/>
     </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/ImportExport">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ImportExport"
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ImportExport/copyfiles.ant"/>
+    </copy>
   </target>
 
 </project>

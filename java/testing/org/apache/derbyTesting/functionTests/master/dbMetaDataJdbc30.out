@@ -1,0 +1,31 @@
+Test dbMetaDataJdbc30 starting
+JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.0.0 alpha)
+The URL is: jdbc:derby:wombat
+supportsSavepoints() : true
+supportsNamedParameters() : false
+supportsMultipleOpenResults() : true
+supportsGetGeneratedKeys() : true
+supportsResultSetHoldability(HOLD_CURSORS_OVER_COMMIT) : true
+supportsResultSetHoldability(CLOSE_CURSORS_AT_COMMIT) : true
+getJDBCMajorVersion() : 3
+getJDBCMinorVersion() : 0
+getSQLStateType() : 2
+getResultSetHoldability() : 1
+getDatabaseMajorVersion() : 10
+getDatabaseMinorVersion() : 1
+supportsStatementPooling() : false
+getMaxColumnNameLength() = 30
+getMaxCursorNameLength() = 18
+getMaxSchemaNameLength() = 30
+getMaxProcedureNameLength() = 128
+getMaxTableNameLength() = 128
+getMaxUserNameLength() = 30
+getSuperTypes() with null :
+EXPECTED: Not Implemented Exception or empty  ResultSet
+getSuperTables() with null :
+EXPECTED: Not Implemented Exception or empty  ResultSet
+getAttributes() with null :
+EXPECTED: Not Implemented Exception or empty  ResultSet
+locatorsUpdateCopy(): 
+Expected : Feature not implemented: no details.
+Test dbMetaDataJdbc30 finished

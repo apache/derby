@@ -67,7 +67,7 @@ public class savepointJdbc30 {
 			setUpTest(s);
 
 			//JCC translates the JDBC savepoint calls into equivalent SQL statements.
-			//In addition, (in order to stay DB2 LUW compatible), we do not allow nested savepoints when
+			//In addition, we do not allow nested savepoints when
 			//coming through SQL statements. Because of this restriction, we can't run most of the
 			//JDBC savepoint tests under DRDA framework. The JDBC tests have nested JDBC savepoint
 			//calls and they fail when run under JCC(because they get translated into nested SQL savepoints).
@@ -96,7 +96,7 @@ public class savepointJdbc30 {
 
 	//The following tests have nested savepoints through JDBC calls. When coming through JCC,
 	//these nested JDBC savepoint calls are translated into equivalent SQL savepoint statements.
-	//But for DB2 LUW compatibility, we do not allow nested savepoints coming through SQL statments
+	//But we do not allow nested savepoints coming through SQL statments
 	//and hence these tests can't be run under DRDA framework.
 	static void nonDRDATests(Connection con, Statement s)
 					throws SQLException {
@@ -277,7 +277,6 @@ public class savepointJdbc30 {
 
 		// Test 48
 		System.out.println("Test 48 No nested SQL savepoints allowed.");
-		System.out.println("This is to match DB2 LUW behavior");
 		savepoint1 = con.setSavepoint();
 		savepoint2 = con.setSavepoint();
 		System.out.println("Following SQL savepoint will fail because we are trying to nest it inside JDBC savepoint");
@@ -694,7 +693,7 @@ public class savepointJdbc30 {
 		con.rollback();
 
 		// Test 17
-		System.out.println("Test 17 No nested savepoints allowed when using SQL to set savepoints. This is to match DB2 LUW behavior");
+		System.out.println("Test 17 No nested savepoints allowed when using SQL to set savepoints.");
 		System.out.println("Test 17a Test with UNIQUE clause.");
 		s.executeUpdate("SAVEPOINT s1 UNIQUE ON ROLLBACK RETAIN LOCKS ON ROLLBACK RETAIN CURSORS");
 		try {
@@ -720,7 +719,6 @@ public class savepointJdbc30 {
 
 		// Test 18
 		System.out.println("Test 18 No nested SQL savepoints allowed inside JDBC savepoint.");
-		System.out.println("This is to match DB2 LUW behavior");
 		savepoint1 = con.setSavepoint();
 		System.out.println("Following SQL savepoint will fail because we are trying to nest it inside JDBC savepoint");
 		try {
@@ -736,7 +734,6 @@ public class savepointJdbc30 {
 
 		// Test 19
 		System.out.println("Test 19 No nested SQL savepoints allowed inside SQL savepoint.");
-		System.out.println("This is to match DB2 LUW behavior");
 		s.executeUpdate("SAVEPOINT s1 ON ROLLBACK RETAIN LOCKS ON ROLLBACK RETAIN CURSORS");
 		System.out.println("Following SQL savepoint will fail because we are trying to nest it inside SQL savepoint");
 		try {
