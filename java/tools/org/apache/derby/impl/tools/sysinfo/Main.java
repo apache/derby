@@ -562,6 +562,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	}
 	private static void tryClientClasspath(StringBuffer successes, StringBuffer failures) {
 		tryMyClasspath("com.ibm.db2.jcc.DB2Driver", Main.getTextMessage("SIF08.L", "db2jcc.jar"), successes, failures);
+		tryMyClasspath("org.apache.derby.jdbc.ClientDriver", Main.getTextMessage("SIF08.L", "derbyclient.jar"), successes, failures);
 	}
 
 	private static void tryUtilsClasspath(StringBuffer successes, StringBuffer failures) {
@@ -685,6 +686,10 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
                                     "org/apache/derby/info/" +
                                     org.apache.derby.iapi.services.info.ProductGenusNames.NET +
+                                    ".properties",
+
+                                   "org/apache/derby/info/" +
+                                    org.apache.derby.iapi.services.info.ProductGenusNames.DNC +
                                     ".properties"
                                 };
 

@@ -55,5 +55,11 @@ public interface ProductGenusNames
 	/**Genus name for net products.*/
 	public static String NET = "net";
 	public static String NET_INFO = "/org/apache/derby/info/net.properties";
-        }
+
+	/**Genus name for network client */
+	public static String DNC = "dnc";
+	public static String DNC_INFO = "/org/apache/derby/info/dnc.properties";
+
+}
+
 

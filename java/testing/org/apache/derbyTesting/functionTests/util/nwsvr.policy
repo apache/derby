@@ -50,6 +50,7 @@ permission java.net.SocketPermission "${csinfo.serverhost}",
 grant codeBase "file:${csinfo.codebase}/-"  {
  permission java.io.FilePermission "${csinfo.codebase}/derby.jar", "read";
  permission java.io.FilePermission "${csinfo.codebase}/derbynet.jar", "read";
+ permission java.io.FilePermission "${csinfo.codebase}/derbyclient.jar", "read";
  permission java.io.FilePermission "${csinfo.codebase}/db2jcc.jar", "read";
  permission java.io.FilePermission "${csinfo.codebase}/db2jcc_license_c.jar", "read";
  permission java.io.FilePermission "${csinfo.codebase}/derbyLocale_de_DE.jar", "read";

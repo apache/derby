@@ -60,7 +60,7 @@ class Session {
 		try
 		{
 			isJCC = conn.getMetaData().getDriverName().startsWith("IBM DB2 JDBC Universal Driver");
-			isDNC = conn.getMetaData().getDriverName().startsWith("DERBY Network Client JDBC Driver");
+			isDNC = conn.getMetaData().getDriverName().startsWith("Apache Derby Network Client");
 
 		}
 		catch (SQLException se)
