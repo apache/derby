@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.iapi.types.DataValueFactoryImpl
 
-   Copyright 1999, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1999, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@
  */
 
 package org.apache.derby.iapi.types;
-
-import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.BooleanDataValue;
@@ -39,36 +37,28 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
-import org.apache.derby.iapi.types.*;
-
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Locale;
+
 
 import org.apache.derby.iapi.db.DatabaseContext;
 import org.apache.derby.iapi.services.context.ContextService;
 
 /**
- * This class implements DataValueFactory.
+ * Core implementation of DataValueFactory. Does not implement
+ * methods required to generate DataValueDescriptor implementations
+ * for the DECIMAL datatype. J2ME and J2SE require different implementations.
  *
  * @see DataValueFactory
  */
-public class DataValueFactoryImpl implements DataValueFactory
+abstract class DataValueFactoryImpl implements DataValueFactory
 {
         LocaleFinder localeFinder;
 
-        /**
-          *     Make the constructor public.
-          *
-          */
-    public      DataValueFactoryImpl()
+        DataValueFactoryImpl()
         {
         }
 
@@ -285,7 +275,7 @@ public class DataValueFactoryImpl implements DataValueFactory
                 previous.setValue(value);
                 return previous;
         }
-        public NumberDataValue getDecimalDataValue(Number value)
+        public final NumberDataValue getDecimalDataValue(Number value)
 			throws StandardException
         {
 			NumberDataValue ndv = getNullDecimal((NumberDataValue) null);
@@ -293,7 +283,7 @@ public class DataValueFactoryImpl implements DataValueFactory
 			return ndv;
         }
 
-        public NumberDataValue getDecimalDataValue(Number value, NumberDataValue previous)
+        public final NumberDataValue getDecimalDataValue(Number value, NumberDataValue previous)
                         throws StandardException
         {
                 if (previous == null)
@@ -302,24 +292,8 @@ public class DataValueFactoryImpl implements DataValueFactory
                 previous.setValue(value);
                 return previous;
         }
-        public NumberDataValue getDecimalDataValue(Long value, NumberDataValue previous)
-                        throws StandardException
-        {
-                if (previous == null)
-                        previous = new SQLDecimal();
 
-                previous.setValue(value);
-                return previous;
-        }
-        public NumberDataValue getDecimalDataValue(String value) throws StandardException
-        {
-                if (value != null)
-                        return new SQLDecimal(value);
-                else
-                        return new SQLDecimal();
-        }
-
-        public NumberDataValue getDecimalDataValue(String value,
+        public final NumberDataValue getDecimalDataValue(String value,
                                                                                                 NumberDataValue previous)
                         throws StandardException
         {
@@ -699,19 +673,6 @@ public class DataValueFactoryImpl implements DataValueFactory
                 if (dataValue == null)
                 {
                         return new SQLDouble();
-                }
-                else
-                {
-                        dataValue.setToNull();
-                        return dataValue;
-                }
-        }
-
-        public NumberDataValue getNullDecimal(NumberDataValue dataValue)
-        {
-                if (dataValue == null)
-                {
-                        return new SQLDecimal();
                 }
                 else
                 {

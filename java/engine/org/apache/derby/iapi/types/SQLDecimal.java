@@ -44,7 +44,6 @@ import java.io.ObjectInput;
 import java.io.IOException;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -283,7 +282,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		return value;
 	}
 
-	public BigDecimal	getBigDecimal()
+	private BigDecimal	getBigDecimal()
 	{
 		if ((value == null) && (rawData != null)) 
 		{
@@ -386,7 +385,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
-		setCoreValue(theValue.getBigDecimal());
+		setCoreValue(SQLDecimal.getBigDecimal(theValue));
 	}
 
 	public int	getLength()
@@ -523,7 +522,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	/** @exception StandardException		Thrown on error */
 	protected int typeCompare(DataValueDescriptor arg) throws StandardException
 	{
-		BigDecimal otherValue = arg.getBigDecimal();
+		BigDecimal otherValue = SQLDecimal.getBigDecimal(arg);
 
 		return getBigDecimal().compareTo(otherValue);
 	}
@@ -751,7 +750,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		int desiredScale = desiredType.getScale();
 		int desiredPrecision = desiredType.getPrecision();
 
-		setCoreValue(source.getBigDecimal());
+		setCoreValue(SQLDecimal.getBigDecimal(source));
 		setWidth(desiredPrecision, desiredScale, true);
 	}
 
@@ -790,7 +789,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		result.setBigDecimal(addend1.getBigDecimal().add(addend2.getBigDecimal()));
+		result.setBigDecimal(SQLDecimal.getBigDecimal(addend1).add(SQLDecimal.getBigDecimal(addend2)));
 		return result;
 	}
 
@@ -823,7 +822,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		result.setBigDecimal(left.getBigDecimal().subtract(right.getBigDecimal()));
+		result.setBigDecimal(SQLDecimal.getBigDecimal(left).subtract(SQLDecimal.getBigDecimal(right)));
 		return result;
 	}
 
@@ -856,7 +855,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		result.setBigDecimal(left.getBigDecimal().multiply(right.getBigDecimal()));
+		result.setBigDecimal(SQLDecimal.getBigDecimal(left).multiply(SQLDecimal.getBigDecimal(right)));
 		return result;
 	}
 
@@ -913,13 +912,13 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return result;
 		}
 
-		BigDecimal divisorBigDecimal = divisor.getBigDecimal();
+		BigDecimal divisorBigDecimal = SQLDecimal.getBigDecimal(divisor);
 
 		if (divisorBigDecimal.compareTo(ZERO) == 0)
 		{
 			throw  StandardException.newException(SQLState.LANG_DIVIDE_BY_ZERO);
 		}
-		BigDecimal dividendBigDecimal = dividend.getBigDecimal();
+		BigDecimal dividendBigDecimal = SQLDecimal.getBigDecimal(dividend);
 
 		/*
 		** Set the result scale to be either the passed in scale, whcih was

@@ -20,25 +20,20 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.types.Orderable;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.util.StringUtil;
@@ -46,8 +41,6 @@ import org.apache.derby.iapi.util.StringUtil;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
-
-import java.math.BigDecimal;
 
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -146,14 +139,6 @@ public final class SQLBoolean
 		return (double) makeInt(value);
 	}
 
-	/** 
-	 * @see DataValueDescriptor#getBigDecimal 
-	 */
-	public BigDecimal	getBigDecimal()
-	{
-		if (isNull()) return null;
-		return BigDecimal.valueOf(makeInt(value));
-	}
 	/**
 	 * Implementation for BOOLEAN type. Convert to a BigDecimal using long
 	 */

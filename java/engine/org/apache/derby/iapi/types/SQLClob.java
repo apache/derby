@@ -20,14 +20,10 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -35,8 +31,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.math.BigDecimal;
-
 import java.util.Calendar;
 
 
@@ -175,10 +169,6 @@ public class SQLClob
 	public double	getDouble() throws StandardException
 	{
 		throw dataTypeConversion("double");
-	}
-	public BigDecimal	getBigDecimal() throws StandardException
-	{
-		throw dataTypeConversion("java.math.BigDecimal");
 	}
 	public int typeToBigDecimal() throws StandardException
 	{

@@ -26,33 +26,23 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.UserDataValue;
-
-import org.apache.derby.iapi.types.Orderable;
-import org.apache.derby.iapi.types.*;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
-import java.math.BigDecimal;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -184,20 +174,6 @@ public class UserType extends DataType
 			// REMIND: check for overflow
 			if (value instanceof Number) return ((Number)value).doubleValue();
 		return super.getDouble();
-	}
-
-	/**
-	 * @exception StandardException thrown on failure to convert
-	 */
-	public BigDecimal getBigDecimal() throws StandardException
-	{
-		if (! isNull()) {
-			if (value instanceof BigDecimal) return ((BigDecimal)value);
-
-			if (value instanceof Number)
-				return new BigDecimal(Double.toString(((Number) value).doubleValue()));
-		}
-		return super.getBigDecimal();
 	}
 
 	/**

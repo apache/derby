@@ -21,16 +21,13 @@
 package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.Orderable;
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.services.io.Storable;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -198,16 +195,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @exception StandardException   Thrown on error
 	 */
 	double	getDouble() throws StandardException;
-
-	/**
-	 * Gets the value in the data value descriptor as a BigDecimal.
-	 * Throws an exception if the data value is not a BigDecimal.
-	 *
-	 * @return	The data value as a java.math.BigDecimal.
-	 *
-	 * @exception StandardException   Thrown on error
-	 */
-	BigDecimal	getBigDecimal() throws StandardException;
 	
 	/**
 	 * How should this value be obtained so that it can

@@ -20,30 +20,23 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.CloneableObject;
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.Orderable;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -167,18 +160,6 @@ public abstract class DataType
 		throw dataTypeConversion("double");
 	}
 
-	/**
-	 * Gets the value in the data value descriptor as a BigDecimal.
-	 * Throws an exception if the data value is not receivable as a BigDecimal.
-	 *
-	 * @return	The data value as a java.lang.BigDecimal.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public BigDecimal	getBigDecimal() throws StandardException
-	{
-		throw dataTypeConversion("java.math.BigDecimal");
-	}
 	public int typeToBigDecimal() throws StandardException
 	{
 		throw dataTypeConversion("java.math.BigDecimal");

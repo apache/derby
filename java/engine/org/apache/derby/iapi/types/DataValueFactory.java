@@ -20,20 +20,14 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import java.util.Locale;
 
 /**
  * This interface is how we get constant data values of different types.

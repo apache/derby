@@ -34,6 +34,25 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/types/*.java"/>
+      <exclude name="${derby.dir}/iapi/types/SQLDecimal.java"/>
+      <exclude name="${derby.dir}/iapi/types/J2SEDataValueFactory.java"/>
+    </javac>
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java13compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/types/SQLDecimal.java"/>
+      <include name="${derby.dir}/iapi/types/J2SEDataValueFactory.java"/>
     </javac>
   </target>
 

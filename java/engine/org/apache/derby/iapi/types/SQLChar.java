@@ -24,28 +24,22 @@ import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
-
-import org.apache.derby.iapi.db.Database;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.ConcatableDataValue;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.error.StandardException;
 
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.util.StringUtil;
@@ -64,7 +58,6 @@ import java.io.ObjectInput;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.io.EOFException;
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -75,10 +68,8 @@ import java.text.CollationElementIterator;
 import java.text.RuleBasedCollator;
 import java.text.CollationKey;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Locale;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * SQLChar satisfies the DataValueDescriptor
@@ -224,19 +215,6 @@ public class SQLChar
 		}
 	}
 
-	/**
-	 * @see DataValueDescriptor#getBigDecimal
-	 * @exception StandardException thrown on failure to convert
-	 */
-	public BigDecimal	getBigDecimal() throws StandardException
-	{
-		if (isNull()) return null;
-		try {
-		    return new BigDecimal(getString().trim());
-		} catch (NumberFormatException nfe) {
-			throw StandardException.newException(SQLState.LANG_FORMAT_EXCEPTION, "java.math.BigDecimal");
-		}
-	}
 	/**
 	 * CHAR/VARCHAR/LONG VARCHAR implementation. Convert to a BigDecimal using getString.
 	 */

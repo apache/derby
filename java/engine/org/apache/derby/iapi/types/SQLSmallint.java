@@ -24,15 +24,11 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.BooleanDataValue;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Storable;
 
@@ -43,8 +39,6 @@ import org.apache.derby.iapi.services.cache.ClassSize;
 
 import org.apache.derby.iapi.types.NumberDataType;
 import org.apache.derby.iapi.types.SQLBoolean;
-
-import java.math.BigDecimal;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -134,15 +128,6 @@ public final class SQLSmallint
 	public double	getDouble()
 	{
 		return (double) value;
-	}
-
-	/** 
-	 * @see DataValueDescriptor#getBigDecimal 
-	 */
-	public BigDecimal	getBigDecimal()
-	{
-		if (isNull()) return null;
-		return BigDecimal.valueOf(value);
 	}
 
     // for lack of a specification: 0 or null is false,
