@@ -829,11 +829,13 @@ public class metadata {
 			return;
 		}
 		
-		// Display column headings
+		// Display column headings, and include column types
+		// as part of those headings.
 		for (int i=1; i<=numCols; i++) {
 			if (i > 1) System.out.print(",");
 			headers[i-1] = rsmd.getColumnLabel(i);
 			System.out.print(headers[i-1]);
+			System.out.print("[" + rsmd.getColumnTypeName(i) + "]");
 
 		}
 		System.out.println();
