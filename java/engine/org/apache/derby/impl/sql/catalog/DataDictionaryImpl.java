@@ -557,7 +557,7 @@ public	class	DataDictionaryImpl
 				//create procedures for network server metadata
 				create_SYSIBM_procedures(bootingTC);
 				//create metadata sps statement required for network server
-				createNetworkServerMetadataSps(bootingTC);
+				createSystemSps(bootingTC);
                 // create the SYSCS_UTIL system procedures)
                 create_SYSCS_procedures(bootingTC);
 				// log the current dictionary version
@@ -7995,26 +7995,40 @@ public	class	DataDictionaryImpl
 		return dictionaryVersion.checkVersion(requiredMajorVersion, feature);
 	}
 		
-	/*
-	** Create system built-in metadata stored prepared statements.  This is now only for network server.
+	/**
+	** Create system built-in metadata stored prepared statements.
 	*/
-	public void createNetworkServerMetadataSps(TransactionController tc)
+	void createSystemSps(TransactionController tc)
 		throws StandardException
 	{
-		Properties p = getQueryDescriptions();
+		// DatabaseMetadata stored plans
+		createSPSSet(tc, false, getSystemSchemaDescriptor().getUUID());
+
+		// network server stored plans
+		createSPSSet(tc, true, getSysIBMSchemaDescriptor().getUUID());
+	}
+
+	/**
+		Create a set of stored prepared statements from a properties file.
+		Key is the statement name, value is the SQL statement.
+	*/
+	private void createSPSSet(TransactionController tc, boolean net, UUID schemaID)
+		throws StandardException
+	{
+		Properties p = getQueryDescriptions(net);
 		Enumeration enum = p.keys();
 		//statement will get compiled on first execution
 		//Note: Don't change this to FALSE LCC is not available for compiling
 		boolean nocompile = true;
-		UUID sysIBMUUID = getSysIBMSchemaDescriptor().getUUID();
+		
 		while (enum.hasMoreElements())
 		{
 			String spsName = (String)enum.nextElement();
 			String spsText =  p.getProperty(spsName);
 			SPSDescriptor spsd = new SPSDescriptor(this, spsName,
 												   getUUIDFactory().createUUID(),
-												   sysIBMUUID,
-												   sysIBMUUID,
+												   schemaID,
+												   schemaID,
 												   SPSDescriptor.SPS_TYPE_REGULAR,
 												   !nocompile,		// it is valid, unless nocompile
 												   spsText, //sps text
@@ -9224,26 +9238,23 @@ public	class	DataDictionaryImpl
 	** Priv block code to load net work server meta data queries.
 	*/
 
-	private final Properties getQueryDescriptions() {
+	private String spsSet;
+	private final synchronized Properties getQueryDescriptions(boolean net) {
+		spsSet = net ? "metadata_net.properties" : "/org/apache/derby/impl/jdbc/metadata.properties";
 		return (Properties) java.security.AccessController.doPrivileged(this);
-	}
-
-	
-	private Properties PrivGetQueryDescriptions() {
-		Properties p = new Properties();
-		try {
-
-			// SECURITY PERMISSION - IP3
-			InputStream is = DataDictionaryImpl.class.getResourceAsStream("metadata_net.properties");
-			p.load(is);
-			is.close();
-		} catch (IOException ioe) {}
-		return p;
 	}
 
 	public final Object run() {
 		// SECURITY PERMISSION - IP3
-		return PrivGetQueryDescriptions();
+		Properties p = new Properties();
+		try {
+
+			// SECURITY PERMISSION - IP3
+			InputStream is = getClass().getResourceAsStream(spsSet);
+			p.load(is);
+			is.close();
+		} catch (IOException ioe) {}
+		return p;
 	}
 
 

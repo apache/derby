@@ -137,7 +137,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		try {
 
 			// SECURITY PERMISSION - IP3
-			InputStream is = EmbedDatabaseMetaData.class.getResourceAsStream("metadata.properties");
+			InputStream is = getClass().getResourceAsStream("metadata.properties");
 			
 			p.load(is);
 			is.close();
@@ -2847,29 +2847,6 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	// MISC 
 	//
 	//////////////////////////////////////////////////////////////
-
-
-	/**
-	 * Creates  all SPSes for metadata queries. 
-	 *
-	 *
-	 * @exception StandardException standard cloudscape error
-	 *
-	 */
-	final void initializeNewDatabase(Properties dummy) throws StandardException
-	{
-		Properties p = getQueryDescriptions();
-		Enumeration enum = p.keys();
-		LanguageConnectionContext lcc = getLanguageConnectionContext();				
-		
-		while (enum.hasMoreElements())
-		{
-			String key = (String)enum.nextElement();
-			createNewSPS(key, p.getProperty(key));
-		}
-
-		lcc.internalCommit( true );
-	}
 	
 	/*
 	 * utility helper routines:
@@ -2901,13 +2878,6 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 				
                 ps = prepareSPS(nameKey, queryText);
-
-				if (ps == null)
-				{
-					// executed if for whatever reason we couldn't get a 
-                    // prepared statement from an SPS
-					ps = getEmbedConnection().prepareMetaDataStatement(queryText);
-				}
 			}
 
 			catch (Throwable t) 
@@ -2942,7 +2912,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		 */
 		lcc.beginNestedTransaction(true);
 
-		DataDictionary dd = getDataDictionary();
+		DataDictionary dd = getLanguageConnectionContext().getDataDictionary();
 		SPSDescriptor spsd = dd.getSPSDescriptor(
 										spsName, 
 										dd.getSystemSchemaDescriptor());
@@ -2950,7 +2920,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 		if (spsd == null)
 		{
-			createNewSPS(spsName, spsText);
+			throw Util.notImplemented(spsName);
 		}
 
 		/* manish:
@@ -2968,48 +2938,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 	}
 
-
-	/*
-	** Create a new stored prepared statement.  Uses
-	** the CreateSPSConstantAction to do its dirty work.
-	**
-	*/
-	private void createNewSPS(String 		spsName,
-								String 		spsText)
-		throws StandardException
-	{
-		try
-		{
-			SchemaDescriptor sd = getDataDictionary().getSystemSchemaDescriptor();
-
-			ConstantAction action = getGenericConstantActionFactory().getCreateSPSConstantAction(
-										sd.getSchemaName(),
-										spsName,		// name
-										spsText,		// text
-										(String)null,	// using text
-										true,			// ok to create in SYS
-										false,			// compile it
-										sd.getUUID());	// compilation schema
-
-			action.executeConstantAction(null);
-		} catch (StandardException e)
-		{
-			// I think the right thing to do here is to not
-			// throw an exception if the sps already exists.
-			if (e.getMessageId().equals(SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT))
-				return;
-			throw e;
-		}
-		return;
-	}
-
 	static final protected String swapNull(String s) {
 		return (s == null ? "%" : s);
-	}
-
-	private DataDictionary getDataDictionary()
-	{
-		return getLanguageConnectionContext().getDataDictionary();
 	}
 
 	/**

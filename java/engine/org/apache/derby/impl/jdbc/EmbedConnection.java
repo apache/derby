@@ -143,9 +143,6 @@ public abstract class EmbedConnection implements java.sql.Connection
 	public EmbedConnection(Driver169 driver, String url, Properties info)
 		 throws SQLException
 	{
-		boolean createdNewDatabase = false; // indicates whether we created
-											// a new db or not
-
 		// Create a root connection.
 		applicationConnection = rootConnection = this;
 		factory = driver;
@@ -199,8 +196,6 @@ public abstract class EmbedConnection implements java.sql.Connection
 					addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.DATABASE_EXISTS, getDBName()));
 				} else {
 
-					boolean[] didCreate = { false };
-
 					// check for user's credential and authenticate the user
 					// with system level authentication service.
 					// FIXME: We should also check for CREATE DATABASE operation
@@ -211,9 +206,8 @@ public abstract class EmbedConnection implements java.sql.Connection
 					checkUserCredentials(null, info);
 					
 					// Process with database creation
-					database = createDatabase(tr.getDBName(), info, didCreate);
+					database = createDatabase(tr.getDBName(), info);
 					tr.setDatabase(database);
-					createdNewDatabase = didCreate[0];
 				}
 			}
 
@@ -239,20 +233,6 @@ public abstract class EmbedConnection implements java.sql.Connection
 			// now we have the database connection, we can shut down
 			if (shutdown) {
 				throw tr.shutdownDatabaseException();
-			}
-
-			/*
-			** We may be required to do some work creating
-			** stored prepared statements for use by 
-			** DatabaseMetaData.  Be careful to only instantiate
-			** a DatabaseMetaData if absolutely necessary because
-			** of the overhead.
-			*/
-			boolean creatingMetaData = false;
-			if (createdNewDatabase)
-			{
-                creatingMetaData = true;
-                ((EmbedDatabaseMetaData) getMetaData()).initializeNewDatabase(info);
 			}
 
 		} catch (Throwable t) {
@@ -1470,16 +1450,13 @@ public abstract class EmbedConnection implements java.sql.Connection
 		Create a new database.
 		@param dbname the database name
 		@param info the properties
-		@param didCreate a boolean array that serves as a return
-			parameter that indicates whether the database was
-			actually created or not
 
 		@return	Database The newly created database or null.
 
 	 	@exception SQLException if fails to create database
 	*/
 
-	private Database createDatabase(String dbname, Properties info, boolean[] didCreate)
+	private Database createDatabase(String dbname, Properties info)
 		throws SQLException {
 
 		info = filterProperties(info);
@@ -1489,10 +1466,6 @@ public abstract class EmbedConnection implements java.sql.Connection
 			{
 				// service already exists, create a warning
 				addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.DATABASE_EXISTS, dbname));
-			}
-			else if (didCreate != null)
-			{
-				didCreate[0] = true;
 			}
 		} catch (StandardException mse) {
 

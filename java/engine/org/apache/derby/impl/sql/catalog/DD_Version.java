@@ -282,7 +282,7 @@ public	class DD_Version implements	Formatable
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSDUMMY1_CATALOG_NUM);
 			bootingDictionary.populateSYSDUMMY1(tc);
 			bootingDictionary.create_SYSIBM_procedures(tc);
-			bootingDictionary.createNetworkServerMetadataSps(tc);
+			bootingDictionary.createSystemSps(tc);
 		}
 	}
 
