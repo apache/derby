@@ -50,7 +50,7 @@ public class BrokeredPreparedStatement extends BrokeredStatement
      */
 	public final ResultSet executeQuery() throws SQLException
     {
-		control.checkHoldCursors(resultSetHoldability);
+		controlCheck().checkHoldCursors(resultSetHoldability);
         return wrapResultSet(getPreparedStatement().executeQuery());
     } 
 
@@ -418,7 +418,7 @@ public class BrokeredPreparedStatement extends BrokeredStatement
      */
     public final boolean execute() throws SQLException
     {
-		control.checkHoldCursors(resultSetHoldability);
+		controlCheck().checkHoldCursors(resultSetHoldability);
         return getPreparedStatement().execute();
     }
 

@@ -35,7 +35,9 @@ public class BrokeredStatement implements Statement
     private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	/**
-		My control.
+		My control. Use the controlCheck() method to obtain the control
+		when calling a check method. This will result in the correct exception
+		being thrown if the statement is already closed.
 	*/
 	protected final BrokeredStatementControl control;
 
@@ -91,13 +93,13 @@ public class BrokeredStatement implements Statement
 
     public final boolean execute(String sql) throws SQLException
 	{
-		control.checkHoldCursors(resultSetHoldability);
+		controlCheck().checkHoldCursors(resultSetHoldability);
 		return getStatement().execute(sql);
     } 
 
     public final ResultSet executeQuery(String sql) throws SQLException
 	{
-		control.checkHoldCursors(resultSetHoldability);
+		controlCheck().checkHoldCursors(resultSetHoldability);
 		return wrapResultSet(getStatement().executeQuery(sql));
     }
 
@@ -508,5 +510,17 @@ public class BrokeredStatement implements Statement
 	}
 	protected final ResultSet wrapResultSet(ResultSet rs) {
 		return control.wrapResultSet(rs);
+	}
+
+	/**
+		Get the BrokeredStatementControl in order to perform a check.
+		Obtained indirectly to ensure that the correct exception is
+		thrown if the Statement has been closed.
+	*/
+	protected final BrokeredStatementControl controlCheck() throws SQLException
+	{
+		// simplest method that will throw an exception if the Statement is closed
+		getStatement().getConnection();
+		return control;
 	}
 }
