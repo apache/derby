@@ -208,6 +208,16 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @exception StandardException   Thrown on error
 	 */
 	BigDecimal	getBigDecimal() throws StandardException;
+	
+	/**
+	 * How should this value be obtained so that it can
+	 * be converted to a BigDecimal representation.
+	 * @return Types.CHAR for String conversion through getString
+	 * Types.DECIMAL for BigDecimal through getObject or Types.BIGINT
+	 * for long conversion through getLong
+	 * @exception StandardException Conversion is not possible
+	 */
+	int typeToBigDecimal() throws StandardException;
 
 	/**
 	 * Gets the value in the data value descriptor as a byte array.

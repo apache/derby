@@ -632,87 +632,7 @@ public final class SQLSmallint
 	}
 
 
-	/**
-	 * This method implements the + operator for "smallint + smallint".
-	 *
-	 * @param addend1	One of the addends
-	 * @param addend2	The other addend
-	 * @param result	The result of a previous call to this method, null
-	 *					if not called yet
-	 *
-	 * @return	A SQLSmallint containing the result of the addition
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
 
-	public NumberDataValue plus(NumberDataValue addend1,
-							NumberDataValue addend2,
-							NumberDataValue result)
-				throws StandardException
-	{
-		if (result == null)
-		{
-			result = new SQLSmallint();
-		}
-
-		if (addend1.isNull() || addend2.isNull())
-		{
-			result.setToNull();
-			return result;
-		}
-
-		/*
-		** Java does not check for overflow with integral types. We have to
-		** check the result ourselves.
-		**
-			The setValue(int) will perform the overflow check.
-		*/
-		int sum = addend1.getShort() + addend2.getShort();
-
-		result.setValue(sum);
-		return result;
-	}
-
-	/**
-	 * This method implements the - operator for "smallint - smallint".
-	 *
-	 * @param left	The value to be subtracted from
-	 * @param right	The value to be subtracted
-	 * @param result	The result of a previous call to this method, null
-	 *					if not called yet
-	 *
-	 * @return	A SQLSmallint containing the result of the subtraction
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-
-	public NumberDataValue minus(NumberDataValue left,
-							NumberDataValue right,
-							NumberDataValue result)
-				throws StandardException
-	{
-		if (result == null)
-		{
-			result = new SQLSmallint();
-		}
-
-		if (left.isNull() || right.isNull())
-		{
-			result.setToNull();
-			return result;
-		}
-
-		/*
-		** Java does not check for overflow with integral types. We have to
-		** check the result ourselves.
-		**
-			The setValue(int) will perform the overflow check.
-		*/
-		int difference = left.getShort() - right.getShort();
-
-		result.setValue(difference);
-		return result;
-	}
 
 	/**
 	 * This method implements the * operator for "smallint * smallint".
@@ -754,47 +674,7 @@ public final class SQLSmallint
 		return result;
 	}
 
-	/**
-	 * This method implements the / operator for "smallint / smallint".
-	 *
-	 * @param dividend	The numerator
-	 * @param divisor	The denominator
-	 * @param result	The result of a previous call to this method, null
-	 *					if not called yet
-	 *
-	 * @return	A SQLSmallint containing the result of the division
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
 
-	public NumberDataValue divide(NumberDataValue dividend,
-							 NumberDataValue divisor,
-							 NumberDataValue result)
-				throws StandardException
-	{
-		short	shortDivisor;
-
-		if (result == null)
-		{
-			result = new SQLSmallint();
-		}
-
-		if (dividend.isNull() || divisor.isNull())
-		{
-			result.setToNull();
-			return result;
-		}
-
-		/* Catch divide by 0 */
-		shortDivisor = divisor.getShort();
-		if (shortDivisor == 0)
-		{
-			throw StandardException.newException(SQLState.LANG_DIVIDE_BY_ZERO);
-		}
-
-		result.setValue((short) (dividend.getShort() / shortDivisor));
-		return result;
-	}
 	/**
 		mod(smallint, smallint)
 	*/

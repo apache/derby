@@ -180,6 +180,10 @@ public class SQLClob
 	{
 		throw dataTypeConversion("java.math.BigDecimal");
 	}
+	public int typeToBigDecimal() throws StandardException
+	{
+		throw dataTypeConversion("java.math.BigDecimal");
+	}
 	public byte[]	getBytes() throws StandardException
 	{
 		throw dataTypeConversion("byte[]");

@@ -113,8 +113,8 @@ public class EmbedResultSet20
 
 				if (wasNull = dvd.isNull())
 					return null;
-
-				return dvd.getBigDecimal();
+				
+				return org.apache.derby.iapi.types.SQLDecimal.getBigDecimal(dvd);
 
 			} catch (StandardException t) {
 				throw noStateChangeException(t);
@@ -183,7 +183,7 @@ public class EmbedResultSet20
      *
          * @exception SQLException Feature not implemented for now.
      */
-    public BigDecimal getBigDecimal(String columnName) throws SQLException {
+    public final BigDecimal getBigDecimal(String columnName) throws SQLException {
                         return getBigDecimal(findColumnName(columnName));
         }
 

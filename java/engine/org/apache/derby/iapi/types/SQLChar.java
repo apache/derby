@@ -237,7 +237,13 @@ public class SQLChar
 			throw StandardException.newException(SQLState.LANG_FORMAT_EXCEPTION, "java.math.BigDecimal");
 		}
 	}
-
+	/**
+	 * CHAR/VARCHAR/LONG VARCHAR implementation. Convert to a BigDecimal using getString.
+	 */
+	public int typeToBigDecimal()  throws StandardException
+	{
+		return java.sql.Types.CHAR;
+	}
 	/**
 	 * @see DataValueDescriptor#getDate
 	 * @exception StandardException thrown on failure to convert

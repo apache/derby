@@ -637,89 +637,8 @@ public final class SQLTinyint
 	}
 
 
-	/**
-	 * This method implements the + operator for "byte + byte".
-	 *
-	 * @param addend1	One of the addends
-	 * @param addend2	The other addend
-	 * @param result	The result of a previous call to this method, null
-	 *					if not called yet
-	 *
-	 * @return	A SQLTinyint containing the result of the addition
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
 
-	public NumberDataValue plus(NumberDataValue addend1,
-							NumberDataValue addend2,
-							NumberDataValue result)
-				throws StandardException
-	{
-		if (result == null)
-		{
-			result = new SQLTinyint();
-		}
 
-		if (addend1.isNull() || addend2.isNull())
-		{
-			result.setToNull();
-			return result;
-		}
-
-		/*
-		** Java does not check for overflow with integral types. We have to
-		** check the result ourselves.
-		**
-		** The sum of 2 bytes is an int, so we check to see if the sum
-		** is in the range of values for a bytes.
-		*/
-		int sum = addend1.getByte() + addend2.getByte();
-
-		result.setValue(sum);
-		return result;
-	}
-
-	/**
-	 * This method implements the - operator for "tinyint - tinyint".
-	 *
-	 * @param left	The value to be subtracted from
-	 * @param right	The value to be subtracted
-	 * @param result	The result of a previous call to this method, null
-	 *					if not called yet
-	 *
-	 * @return	A SQLTinyint containing the result of the subtraction
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-
-	public NumberDataValue minus(NumberDataValue left,
-							NumberDataValue right,
-							NumberDataValue result)
-				throws StandardException
-	{
-		if (result == null)
-		{
-			result = new SQLTinyint();
-		}
-
-		if (left.isNull() || right.isNull())
-		{
-			result.setToNull();
-			return result;
-		}
-
-		/*
-		** Java does not check for overflow with integral types. We have to
-		** check the result ourselves.
-		**
-		** The difference of 2 bytes is an int, so we check to see if the
-		** difference is in the range of values for a byte.
-		*/
-		int difference = left.getByte() - right.getByte();
-
-		result.setValue(difference);
-		return result;
-	}
 
 	/**
 	 * This method implements the * operator for "tinyint * tinyint".
@@ -762,47 +681,7 @@ public final class SQLTinyint
 		return result;
 	}
 
-	/**
-	 * This method implements the / operator for "tinyint / tinyint".
-	 *
-	 * @param dividend	The numerator
-	 * @param divisor	The denominator
-	 * @param result	The result of a previous call to this method, null
-	 *					if not called yet
-	 *
-	 * @return	A SQLTinyint containing the result of the division
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
 
-	public NumberDataValue divide(NumberDataValue dividend,
-							 NumberDataValue divisor,
-							 NumberDataValue result)
-				throws StandardException
-	{
-		byte	byteDivisor;
-
-		if (result == null)
-		{
-			result = new SQLTinyint();
-		}
-
-		if (dividend.isNull() || divisor.isNull())
-		{
-			result.setToNull();
-			return result;
-		}
-
-		/* Catch divide by 0 */
-		byteDivisor = divisor.getByte();
-		if (byteDivisor == 0)
-		{
-			throw StandardException.newException(SQLState.LANG_DIVIDE_BY_ZERO);
-		}
-
-		result.setValue((byte) (dividend.getByte() / byteDivisor));
-		return result;
-	}
 	/**
 		mod(tinyint, tinyint)
 	*/

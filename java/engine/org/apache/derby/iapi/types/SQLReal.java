@@ -163,7 +163,13 @@ public final class SQLReal
 		if (isNull()) return null;
 		return new BigDecimal(Float.toString(value));
 	}
-
+	/**
+	 * DOUBLE implementation. Convert to a BigDecimal using getString.
+	 */
+	public int typeToBigDecimal()
+	{
+		return java.sql.Types.CHAR;
+	}
     // for lack of a specification: 0 or null is false,
     // all else is true
 	/** 

@@ -31,7 +31,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.DB2Limit;
 
 import org.apache.derby.iapi.types.*;
-import java.math.BigDecimal;
 
 /**
  * NumberDataType is the superclass for all exact and approximate 
@@ -105,10 +104,164 @@ public abstract class NumberDataType extends DataType
         result.setValue( Math.sqrt(doubleValue) );
         return result;
     }
+    
+	/**
+	 * This method implements the + operator for TINYINT,SMALLINT,INT.
+	 *
+	 * @param addend1	One of the addends
+	 * @param addend2	The other addend
+	 * @param result	The result of a previous call to this method, null
+	 *					if not called yet
+	 *
+	 * @return	A NumberDataValue containing the result of the addition
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+
+	public NumberDataValue plus(NumberDataValue addend1,
+							NumberDataValue addend2,
+							NumberDataValue result)
+				throws StandardException
+	{
+		if (result == null)
+		{
+			result = (NumberDataValue) getNewNull();
+		}
+
+		if (addend1.isNull() || addend2.isNull())
+		{
+			result.setToNull();
+			return result;
+		}
+		int addend1Int = addend1.getInt();
+		int addend2Int = addend2.getInt();
+
+		int resultValue = addend1Int + addend2Int;
+
+		/*
+		** Java does not check for overflow with integral types. We have to
+		** check the result ourselves.
+		**
+		** Overflow is possible only if the two addends have the same sign.
+		** Do they?  (This method of checking is approved by "The Java
+		** Programming Language" by Arnold and Gosling.)
+		*/
+		if ((addend1Int < 0) == (addend2Int < 0))
+		{
+			/*
+			** Addends have the same sign.  The result should have the same
+			** sign as the addends.  If not, an overflow has occurred.
+			*/
+			if ((addend1Int < 0) != (resultValue < 0))
+			{
+				throw outOfRange();
+			}
+		}
+
+		result.setValue(resultValue);
+
+		return result;
+	}
+	/**
+	 * This method implements the - operator for TINYINT, SMALLINT and INTEGER.
+	 *
+	 * @param left	The value to be subtracted from
+	 * @param right	The value to be subtracted
+	 * @param result	The result of a previous call to this method, null
+	 *					if not called yet
+	 *
+	 * @return	A SQLInteger containing the result of the subtraction
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+
+	public NumberDataValue minus(NumberDataValue left,
+							NumberDataValue right,
+							NumberDataValue result)
+				throws StandardException
+	{
+		if (result == null)
+		{
+			result = (NumberDataValue) getNewNull();
+		}
+
+		if (left.isNull() || right.isNull())
+		{
+			result.setToNull();
+			return result;
+		}
+
+		int diff = left.getInt() - right.getInt();
+
+		/*
+		** Java does not check for overflow with integral types. We have to
+		** check the result ourselves.
+		**
+		** Overflow is possible only if the left and the right side have opposite signs.
+		** Do they?  (This method of checking is approved by "The Java
+		** Programming Language" by Arnold and Gosling.)
+		*/
+		if ((left.getInt() < 0) != (right.getInt() < 0))
+		{
+			/*
+			** Left and right have opposite signs.  The result should have the same
+			** sign as the left (this).  If not, an overflow has occurred.
+			*/
+			if ((left.getInt() < 0) != (diff < 0))
+			{
+				throw outOfRange();
+			}
+		}
+
+		result.setValue(diff);
+
+		return result;
+	}
+	
+	/**
+	 * This method implements the / operator for TINYINT, SMALLINT and INTEGER.
+	 * Specialized methods are not required for TINYINT and SMALLINT as the Java
+	 * virtual machine always executes byte and int division as integer.
+	 *
+	 * @param dividend	The numerator
+	 * @param divisor	The denominator
+	 * @param result	The result of a previous call to this method, null
+	 *					if not called yet
+	 *
+	 * @return	A SQLInteger containing the result of the division
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+
+	public NumberDataValue divide(NumberDataValue dividend,
+							 NumberDataValue divisor,
+							 NumberDataValue result)
+				throws StandardException
+	{
+		if (result == null)
+		{
+			result = (NumberDataValue) getNewNull();
+		}
+
+		if (dividend.isNull() || divisor.isNull())
+		{
+			result.setToNull();
+			return result;
+		}
+
+		/* Catch divide by 0 */
+		int intDivisor = divisor.getInt();
+		if (intDivisor == 0)
+		{
+			throw StandardException.newException(SQLState.LANG_DIVIDE_BY_ZERO);
+		}
+
+		result.setValue(dividend.getInt() / intDivisor);
+		return result;
+	}
 
 	/**
-	 * This is dummy parent divide method.  Put it here for all the children
-	 * that don't need this.  @see NumberDataValue#divide
+	 	Suitable for integral types that ignore scale.
 	 */
 	public NumberDataValue divide(NumberDataValue dividend,
 								  NumberDataValue divisor,
@@ -116,9 +269,7 @@ public abstract class NumberDataType extends DataType
 								  int scale)
 				throws StandardException
 	{
-		if (SanityManager.DEBUG)
-			SanityManager.NOTREACHED();
-		return null;
+		return divide(dividend, divisor, result);
 	}
 
 	public NumberDataValue mod(NumberDataValue dividend,
@@ -129,7 +280,6 @@ public abstract class NumberDataType extends DataType
 			SanityManager.NOTREACHED();
 		return null;
 	}
-
 
 	/** @exception StandardException		Thrown on error */
 	public final int compare(DataValueDescriptor arg) throws StandardException
@@ -244,7 +394,15 @@ public abstract class NumberDataType extends DataType
 
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, getTypeName());
 		}
-	}	
+	}
+	
+	/**
+	 * Implementation for integral types. Convert to a BigDecimal using long
+	 */
+	public int typeToBigDecimal()
+	{
+		return java.sql.Types.BIGINT;
+	}
 	/**
 		Return the precision of this specific DECIMAL value.
 		If the value does not represent a SQL DECIMAL then

@@ -45,6 +45,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedConnection;
@@ -97,9 +98,12 @@ public class EmbedCallableStatement20
 	{
 		checkStatus();
 		try {
-			BigDecimal v =  getParms().getParameterForGet(parameterIndex-1).getBigDecimal();
-			wasNull = (v == null);
-			return v;
+			DataValueDescriptor dvd = getParms().getParameterForGet(parameterIndex-1);
+			if (wasNull = dvd.isNull())
+				return null;
+			
+			return org.apache.derby.iapi.types.SQLDecimal.getBigDecimal(dvd);
+			
 		} catch (StandardException e)
 		{
 			throw EmbedResultSet.noStateChangeException(e);
@@ -1161,18 +1165,12 @@ public class EmbedCallableStatement20
 	 * @see CallableStatement#getBigDecimal
      * @exception SQLException NoOutputParameters thrown.
      */
-    public BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException
+    public final BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException
 	{
-		checkStatus();
-		try {
-			BigDecimal v =  getParms().getParameterForGet(parameterIndex-1).getBigDecimal();
-			wasNull = (v == null);
-			return v;
-		} catch (StandardException e)
-		{
-			throw EmbedResultSet.noStateChangeException(e);
-		}
-
+    	BigDecimal v = getBigDecimal(parameterIndex);
+    	if (v != null)
+    		v = v.setScale(scale, BigDecimal.ROUND_HALF_DOWN);
+    	return v;
 	}
 	/**
 		Allow explict setObject conversions by sub-classes for classes

@@ -70,7 +70,7 @@ public final class AvgAggregator extends SumAggregator
 				scale = TypeId.DECIMAL_SCALE;
 			} else {
 				// DECIMAL
-				scale = addend.getBigDecimal().scale();
+				scale = ((NumberDataValue) addend).getDecimalValueScale();
 				if (scale < NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE)
 					scale = NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE;
 			}
@@ -104,17 +104,23 @@ public final class AvgAggregator extends SumAggregator
 		// this code creates data type objects directly, it is anticipating
 		// the time they move into the defined api of the type system. (djd).
 		String typeName = value.getTypeName();
+		
+		DataValueDescriptor newValue;
 
 		if (typeName.equals(TypeId.INTEGER_NAME)) {
-			value = new org.apache.derby.iapi.types.SQLLongint(value.getLong());
+			newValue = new org.apache.derby.iapi.types.SQLLongint();
 		} else if (typeName.equals(TypeId.TINYINT_NAME) || 
 				   typeName.equals(TypeId.SMALLINT_NAME)) {
-			value = new org.apache.derby.iapi.types.SQLInteger(value.getInt());
+			newValue = new org.apache.derby.iapi.types.SQLInteger();
 		} else if (typeName.equals(TypeId.REAL_NAME)) {
-			value = new org.apache.derby.iapi.types.SQLDouble(value.getDouble());
+			newValue = new org.apache.derby.iapi.types.SQLDouble();
 		} else {
-			value = new org.apache.derby.iapi.types.SQLDecimal(value.getBigDecimal());
+			newValue = new org.apache.derby.iapi.types.SQLDecimal();
 		}
+		
+		newValue.setValue(value);
+		value = newValue;
+		
 		accumulate(addend);
 	}
 
@@ -157,23 +163,39 @@ public final class AvgAggregator extends SumAggregator
 	 *
 	 * @return null or the average as Double
 	 */
-	public Object getResult()
+	public DataValueDescriptor getResult() throws StandardException
 	{
 		if (count == 0)
 		{
 			return null;
 		}
 
-		// note we cannot use the Datatype's divide method as it only supports
-		// dividing by the same type, where we need the divisor to be a long
-		// regardless of the sum type.
+		NumberDataValue sum = (NumberDataValue) value;
+		NumberDataValue avg = (NumberDataValue) value.getNewNull();
 
-		BigDecimal avg = null;
-		try {
-			 avg = value.getBigDecimal().divide(BigDecimal.valueOf(count), scale, BigDecimal.ROUND_DOWN);
-		} catch (StandardException se) {
-			// get BigDecimal for a numeric type cannot throw an exception.
+		
+		if (count > (long) Integer.MAX_VALUE)
+		{
+			// TINYINT, SMALLINT, INTEGER implement arithmetic using integers
+			// If the sum is still represented as a TINYINT, SMALLINT or INTEGER
+			// we cannot let their int based arithmetic handle it, since they
+			// will perform a getInt() on the long value which will truncate the long value.
+			// One solution would be to promote the sum to a SQLLongint, but its value
+			// will be less than or equal to Integer.MAX_VALUE, so the average will be 0.
+			String typeName = sum.getTypeName();
+
+			if (typeName.equals(TypeId.INTEGER_NAME) ||
+					typeName.equals(TypeId.TINYINT_NAME) || 
+					   typeName.equals(TypeId.SMALLINT_NAME))
+			{
+				avg.setValue(0);
+				return avg;
+			}
 		}
+
+		NumberDataValue countv = new org.apache.derby.iapi.types.SQLLongint(count);
+		sum.divide(sum, countv, avg, scale);
+				
 		return avg;
 	}
 

@@ -47,6 +47,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * SQLDecimal satisfies the DataValueDescriptor
@@ -162,8 +163,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 */
 	public int	getInt() throws StandardException
 	{
-		BigDecimal localValue = getBigDecimal();
-		if (localValue == null)
+		if (isNull())
 			return 0;
 
 		try {
@@ -183,9 +183,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 */
 	public byte	getByte() throws StandardException
 	{
-		BigDecimal localValue = getBigDecimal();
-
-		if (localValue == null)
+		if (isNull())
 			return (byte)0;
 
 		try {
@@ -205,8 +203,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 */
 	public short	getShort() throws StandardException
 	{
-		BigDecimal localValue = getBigDecimal();
-		if (localValue == null)
+		if (isNull())
 			return (short)0;
 
 		try {
@@ -294,6 +291,15 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		}
 
 		return value;
+	}
+	
+	/**
+	 * DECIMAL implementation. Convert to a BigDecimal using getObject
+	 * which will return a BigDecimal
+	 */
+	public int typeToBigDecimal()
+	{
+		return java.sql.Types.DECIMAL;
 	}
 
     // 0 or null is false, all else is true
@@ -552,9 +558,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 									  boolean isNullable)
 		throws SQLException
 	{
-			ResultSetMetaData rsmd = resultSet.getMetaData();
-			value = resultSet.getBigDecimal(colNumber,
-											rsmd.getScale(colNumber));
+			value = resultSet.getBigDecimal(colNumber);
 			rawData = null;
 	}
 	/**
@@ -1087,6 +1091,39 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	{
 		BigDecimal localValue = getBigDecimal();
 		return (localValue == null) ? 0 : localValue.scale();
+	}
+	
+	/**
+	 * Get a BigDecimal representing the value of a DataValueDescriptor
+	 * @param value Non-null value to be converted
+	 * @return BigDecimal value
+	 * @throws StandardException Invalid conversion or out of range.
+	 */
+	public static BigDecimal getBigDecimal(DataValueDescriptor value) throws StandardException
+	{
+		if (SanityManager.DEBUG)
+		{
+			if (value.isNull())
+				SanityManager.THROWASSERT("NULL value passed to SQLDecimal.getBigDecimal");
+		}
+		
+		switch (value.typeToBigDecimal())
+		{
+		case Types.DECIMAL:
+			return (BigDecimal) value.getObject();
+		case Types.CHAR:
+			try {
+				return new BigDecimal(value.getString().trim());
+			} catch (NumberFormatException nfe) {
+				throw StandardException.newException(SQLState.LANG_FORMAT_EXCEPTION, "java.math.BigDecimal");
+			}
+		case Types.BIGINT:
+			return BigDecimal.valueOf(value.getLong());
+		default:
+			if (SanityManager.DEBUG)
+				SanityManager.THROWASSERT("invalid return from " + value.getClass() + ".typeToBigDecimal() " + value.typeToBigDecimal());
+			return null;
+		}
 	}
 
 	private int getWholeDigits()

@@ -72,7 +72,7 @@ abstract class OrderableAggregator extends SystemAggregator
 	 *
 	 * @return the result as a DataValueDescriptor 
 	 */
-	public Object getResult()
+	public DataValueDescriptor getResult() throws StandardException
 	{
 		return value;
 	}

@@ -294,35 +294,21 @@ class GenericAggregator
 			ua = getAggregatorInstance();
 		}	
 
-		Object result = ua.getResult();
-
 		/*
-		** Handle setting the result.  If null, call setToNull.
 		**
-		** If we got a DataValueDescriptor then we are going to copy
+		** We are going to copy
 		** then entire DataValueDescriptor into the result column.
 		** We could call setValue(result.setObject()), but we
 		** might loose state (e.g. SQLBit.getObject() returns a
 		** byte[] which looses the precision of the bit.  
 		**
-		** On an object, just call setValue().
 		*/
+		
+		DataValueDescriptor result = ua.getResult();
 		if (result == null)
-		{
 			outputColumn.setToNull();
-		}
-		/*
-		** See above as to why we cannot do: 
-		**		outputColumn.setValue(result.getObject());	
-		*/
-		else if (result instanceof DataValueDescriptor)
-		{
-			row.setColumn(resultColumnId + 1, (DataValueDescriptor)result);
-		}
 		else
-		{
 			outputColumn.setValue(result);
-		}
 
 		return ua.didEliminateNulls();
 	}

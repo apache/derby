@@ -154,7 +154,13 @@ public final class SQLBoolean
 		if (isNull()) return null;
 		return BigDecimal.valueOf(makeInt(value));
 	}
-
+	/**
+	 * Implementation for BOOLEAN type. Convert to a BigDecimal using long
+	 */
+	public int typeToBigDecimal()
+	{
+		return java.sql.Types.BIGINT;
+	}
 	public String	getString()
 	{
 		if (isNull())

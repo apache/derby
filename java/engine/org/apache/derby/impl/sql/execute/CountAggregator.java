@@ -71,9 +71,9 @@ public final class CountAggregator
 	 *
 	 * @return the value as a Long 
 	 */
-	public Object getResult()
+	public DataValueDescriptor getResult()
 	{
-		return new Long(value);
+		return new org.apache.derby.iapi.types.SQLLongint(value);
 	}
 
 

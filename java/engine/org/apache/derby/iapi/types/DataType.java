@@ -179,7 +179,10 @@ public abstract class DataType
 	{
 		throw dataTypeConversion("java.math.BigDecimal");
 	}
-
+	public int typeToBigDecimal() throws StandardException
+	{
+		throw dataTypeConversion("java.math.BigDecimal");
+	}
 	/**
 	 * Gets the value in the data value descriptor as a byte[].
 	 * Throws an exception if the data value is not receivable as a Binary or Varbinary.

@@ -100,8 +100,9 @@ public interface ExecAggregator extends Formatable
 	 * Produces the result to be returned by the query.
 	 * The last processing of the aggregate.
 	 *
-	 */
-	public Object getResult();
+	 * @exception StandardException on error
+ 	 */
+	public DataValueDescriptor getResult() throws StandardException;
 
 	/**
  	   Return a new initialized copy of this aggregator, any state

@@ -155,7 +155,13 @@ public final class SQLDouble extends NumberDataType
 		if (isNull()) return null;
 		return new BigDecimal(Double.toString(value));
 	}
-
+	/**
+	 * DOUBLE implementation. Convert to a BigDecimal using getString.
+	 */
+	public int typeToBigDecimal()
+	{
+		return java.sql.Types.CHAR;
+	}
     // for lack of a specification: getDouble()==0 gives true
     // independent of the NULL flag
 	public boolean	getBoolean()
