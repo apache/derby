@@ -36,10 +36,12 @@ import java.sql.SQLException;
 class Session
 {
 
-	// session states
+	// session states	   
 	protected static final int INIT = 1;	// before exchange of server attributes
-	protected static final int ATTEXC = 2;	// after exchange of server attributes
-	protected static final int CLOSED = 3;	// session has ended
+	protected static final int ATTEXC = 2;	// after first exchange of server attributes
+	protected static final int SECACC = 3;	// after ACCSEC (Security Manager Accessed)
+	protected static final int CHKSEC = 4;	// after SECCHK  (Checked Security)
+	protected static final int CLOSED = 5;	// session has ended
 
 	// session types
 	protected static final int DRDA_SESSION = 1;
@@ -196,7 +198,50 @@ class Session
 		return (Database)dbtable.get(dbName);
 	}
 
+	/**
+	 * Get requried security checkpoint.
+	 * Used to verify EXCSAT/ACCSEC/SECCHK order.
+	 *
+	 *  @return next required Security checkpoint or -1 if 
+	 *          neither ACCSEC or SECCHK are required at this time.
+	 *
+	 */
+	protected int getRequiredSecurityCodepoint()
+	{
+		switch (state)
+		{
+			case ATTEXC:
+				// On initial exchange of attributes we require ACCSEC 
+				// to access security manager
+				return CodePoint.ACCSEC;
+			case SECACC:
+				// After security manager has been accessed successfully we
+				// require SECCHK to check security
+				return CodePoint.SECCHK;
+			default:
+				return -1;
+		}	 
+	}
 
+	/**
+	 * Check if a security codepoint is required
+	 *
+	 * @return true if ACCSEC or SECCHK are required at this time.
+	 */
+	protected boolean requiresSecurityCodepoint()
+	{
+		return (getRequiredSecurityCodepoint() != -1);
+	}
+
+	/**
+	 * Set Session state
+	 * 
+	 */
+	protected void setState(int s)
+	{
+		state = s;
+	}
+	
 	/**
 	 * Get session into initial state
 	 *

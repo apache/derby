@@ -217,7 +217,7 @@ public class BrokeredCallableStatement extends BrokeredPreparedStatement
 	protected final CallableStatement getCallableStatement() throws SQLException {
 		return control.getRealCallableStatement();
 	}
-	protected final PreparedStatement getPreparedStatement() throws SQLException {
+	public final PreparedStatement getPreparedStatement() throws SQLException {
 		return getCallableStatement();
 	}
 	/**

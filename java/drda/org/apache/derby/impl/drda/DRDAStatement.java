@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import  org.apache.derby.iapi.jdbc.BrokeredConnection;
+import  org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -276,7 +277,7 @@ class DRDAStatement
 		try {
 			Method sh =
 				rsstmt.getClass().getMethod("getResultSetHoldability", getResultSetHoldabilityParam);
-			holdValue =  ((Integer) sh.invoke(ps,null)).intValue();
+			holdValue =  ((Integer) sh.invoke(rsstmt,null)).intValue();
 		}
 		catch (Exception e) {
 			handleReflectionException(e);
@@ -518,9 +519,13 @@ class DRDAStatement
 	 *
 	 * @return prepared statement
 	 */
-	protected PreparedStatement getPreparedStatement() 
+	protected PreparedStatement getPreparedStatement() throws SQLException
 	{
-		return ps;
+		if (ps instanceof BrokeredPreparedStatement)
+			return (PreparedStatement)(
+						   ((BrokeredPreparedStatement) ps).getStatement());
+		else
+			return ps;
 	}
 
 

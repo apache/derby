@@ -560,12 +560,10 @@ public class DRDAConnThread extends Thread {
 		else
 		{
 			// exchange attributes with application requester
-			if (exchangeServerAttributes())
-				session.state = Session.ATTEXC;
-			else
-				closeSession();
+			exchangeServerAttributes();
 		}
 	}
+
 	/**
 	 * Process DRDA commands we can receive once server attributes have been
 	 * exchanged.
@@ -577,11 +575,16 @@ public class DRDAConnThread extends Thread {
 		DRDAStatement stmt = null;
 		int updateCount = 0;
 		boolean PRPSQLSTTfailed = false;
+		boolean checkSecurityCodepoint = session.requiresSecurityCodepoint();
 		do
 		{
 			correlationID = reader.readDssHeader();
 			int codePoint = reader.readLengthAndCodePoint();
 			int writerMark = writer.markDSSClearPoint();
+			
+			if (checkSecurityCodepoint)
+				verifyInOrderACCSEC_SECCHK(codePoint,session.getRequiredSecurityCodepoint());
+
 			switch(codePoint)
 			{
 				case CodePoint.CNTQRY:
@@ -801,7 +804,19 @@ public class DRDAConnThread extends Thread {
 					}
 					break;
 				case CodePoint.EXCSAT:
-					parseDRDAConnection();
+					parseEXCSAT();
+					writeEXCSATRD();
+					finalizeChain();
+					break;
+				case CodePoint.ACCSEC:
+					int securityCheckCode = parseACCSEC();
+					writeACCSECRD(securityCheckCode); 
+					checkSecurityCodepoint = true;
+					break;
+				case CodePoint.SECCHK:
+					if(parseDRDAConnection())
+						// security all checked and connection ok
+						checkSecurityCodepoint = false;
 					break;
 				/* since we don't support sqlj, we won't get bind commands from jcc, we
 				 * might get it from ccc; just skip them.
@@ -916,11 +931,10 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Exchange server attributes with application requester
 	 *
- 	 * @return true if the session was started successfully; false otherwise
-	 * @exception DRDAProtocolException, SQLException
+	 * @exception DRDAProtocolException
 	 */
-	private boolean exchangeServerAttributes()
-		throws  DRDAProtocolException, SQLException
+	private void exchangeServerAttributes()
+		throws  DRDAProtocolException
 	{
 		int codePoint;
 		correlationID = reader.readDssHeader();
@@ -944,10 +958,10 @@ public class DRDAConnThread extends Thread {
 										  CodePoint.PRCCNVCD_EXCSAT_FIRST_AFTER_CONN);
 		}
 
-		// set up a new Application Requester to store information about the
-		// application requester for this session
-		
-		return parseDRDAConnection();
+		parseEXCSAT();
+		writeEXCSATRD();
+		finalizeChain();
+		session.setState(session.ATTEXC);
 	}
 	
 
@@ -956,49 +970,8 @@ public class DRDAConnThread extends Thread {
 		int codePoint;
 		boolean sessionOK = true;
 
-		appRequester = new AppRequester();
-		parseEXCSAT();
-		writeEXCSATRD();
-		finalizeChain();
 
-		//we may have to do the access security more than once if we don't
-		//provide the requested security mechanism or we run into errors
-		//if we don't know the requested security mechanism
-		//we'll send our known security mechanisms and the requester will pick
-		//if he picks one that requires a security token then another ACCSEC 
-		//will flow
-		int securityCheckCode = 0;
-		boolean notdone = true;
-		while (notdone)
-		{
-			correlationID = reader.readDssHeader();
-			codePoint = reader.readLengthAndCodePoint();
-			verifyInOrderACCSEC_SECCHK(codePoint,CodePoint.ACCSEC);
-			securityCheckCode = parseACCSEC();
-			// need security token
-			if (securityCheckCode == 0  && 
-				database.securityMechanism == CodePoint.SECMEC_EUSRIDPWD &&
-				database.publicKeyIn == null)
-					securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING;
-
-			// shouldn't have security token
-			if (securityCheckCode == 0 &&
-				database.securityMechanism == CodePoint.SECMEC_USRIDPWD &&
-				database.publicKeyIn != null)
-					securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING;
-			if (SanityManager.DEBUG)
-				trace("** ACCSECRD securityCheckCode is: "+securityCheckCode);
-			writeACCSECRD(securityCheckCode);
-			// everything is O.K., we're done
-			if (securityCheckCode == 0) 
-			{
-				notdone = false;
-			}
-		}
-		correlationID = reader.readDssHeader();
-		codePoint = reader.readLengthAndCodePoint();
-		verifyInOrderACCSEC_SECCHK(codePoint,CodePoint.SECCHK);
-		securityCheckCode = parseSECCHK();
+		int securityCheckCode = parseSECCHK();
 		if (SanityManager.DEBUG)
 			trace("*** SECCHKRM securityCheckCode is: "+securityCheckCode);
 		writeSECCHKRM(securityCheckCode);
@@ -1231,6 +1204,31 @@ public class DRDAConnThread extends Thread {
 		int codePoint;
 		String strVal;
 
+		// There are three kinds of EXCSAT's we might get.
+		// 1) Initial Exchange attributes.
+		//    For this we need to initialize the apprequester.
+		//    Session state is set to ATTEXC and then the AR must 
+		//    follow up with ACCSEC and SECCHK to get the connection.
+		//  2) Send of EXCSAT as ping or mangager level adjustment. 
+		//     (see parseEXCSAT2())
+		//     For this we just ignore the EXCSAT objects that
+		//     are already set.
+		//  3) Send of EXCSAT for connection reset. (see parseEXCSAT2())
+		//     This is treated just like ping and will be followed up 
+		//     by an ACCSEC request if in fact it is a connection reset.
+
+		// If we have already exchanged attributes once just 
+		// process any new manager levels and return (case 2 and 3 above)
+		if (appRequester != null)
+		{
+			parseEXCSAT2();
+			return;
+		}
+
+		// set up a new Application Requester to store information about the
+		// application requester for this session
+
+		appRequester = new AppRequester();
 
 		reader.markCollection();
 
@@ -1611,9 +1609,32 @@ public class DRDAConnThread extends Thread {
 		database.securityMechanism = securityMechanism;
 		database.publicKeyIn = publicKeyIn;
 
+		// need security token
+		if (securityCheckCode == 0  && 
+			database.securityMechanism == CodePoint.SECMEC_EUSRIDPWD &&
+			database.publicKeyIn == null)
+			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING;
+
+		// shouldn't have security token
+		if (securityCheckCode == 0 &&
+			database.securityMechanism == CodePoint.SECMEC_USRIDPWD &&
+			database.publicKeyIn != null)
+			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING;
+		if (SanityManager.DEBUG)
+			trace("** ACCSECRD securityCheckCode is: "+securityCheckCode);
+		
+		// If the security check was successful set the session state to
+		// security accesseed.  Otherwise go back to attributes exchanged so we
+		// require another ACCSEC
+		if (securityCheckCode == 0)
+			session.setState(session.SECACC);
+		else
+			session.setState(session.ATTEXC);
+
 		return securityCheckCode;
 
 	}
+
 	/**
 	 * Parse OPNQRY
 	 * Instance Variables
@@ -2612,6 +2633,11 @@ public class DRDAConnThread extends Thread {
 		{
 			securityCheckCode = verifyUserIdPassword();
 		}
+
+		// Security all checked 
+		if (securityCheckCode == 0)
+			session.setState(session.CHKSEC);
+		
 		return securityCheckCode;
 
 	}

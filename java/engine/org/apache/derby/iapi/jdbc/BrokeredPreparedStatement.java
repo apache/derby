@@ -491,14 +491,14 @@ public class BrokeredPreparedStatement extends BrokeredStatement
 	** Control methods.
 	*/
 
-	protected PreparedStatement getPreparedStatement() throws SQLException {
+	public PreparedStatement getPreparedStatement() throws SQLException {
 		return control.getRealPreparedStatement();
 	}
 
 	/**
 		Override the BrokeredStatement's getStatement() to always return a PreparedStatement.
 	*/
-	protected final Statement getStatement() throws SQLException {
+	public final Statement getStatement() throws SQLException {
 		return getPreparedStatement();
 	}
 
