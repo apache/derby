@@ -186,8 +186,8 @@ public class GenerateReport {
 		NumFail = CountLines (failFileName);
 		NumRun = NumPass+NumFail;
 		NumSkip = CountLines (skipFileName);
-		PercentPass = (int)Math.round(100* ((double)NumPass/(double)NumRun));
-		PercentFail = (int)Math.round(100* ((double)NumFail/(double)NumRun));
+		PercentPass = (int)Math.ceil(100* ((double)NumPass/(double)NumRun));
+		PercentFail = (int)Math.floor(100* ((double)NumFail/(double)NumRun));
 	}
 
 	static int CountLines(String fileName) {

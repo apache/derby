@@ -362,7 +362,7 @@ to specify your environment and options:
     - j13lib
 
       This is a required variable which defines the location of
-      JDK 1.4.x. Define the variable as following:
+      JDK 1.3.x. Define the variable as following:
 
           j13lib=${jdk13.dir}/jre/lib
 

@@ -1034,13 +1034,13 @@
     <antcall target="clobber"/>
     <antcall target="insane"/>
     <antcall target="all"/>
-    <antcall target="jars"/>
+    <antcall target="buildjars"/>
 
     <!-- Build sane product jars -->
     <antcall target="clobber"/>
     <antcall target="sane"/>
     <antcall target="all"/>
-    <antcall target="jars"/>
+    <antcall target="buildjars"/>
 
     <!-- Build everything else -->
     <antcall target="javadoc"/>
