@@ -292,7 +292,7 @@ language implementation in derby. <br>
       <li>storetests: set of store tests grouped together because they
 do not each need to create a new database</li>
     </ul>
-    <li>tested on a variety of hardware takes from 10 to 25 minutes<br>
+    <li>tested on a variety of hardware takes from 25 to 50 minutes<br>
     </li>
   </ul>
   <li>xa</li>
@@ -302,9 +302,31 @@ language element to these tests</li>
     <li>tested on a variety of hardware takes from 2 to 4 minutes<br>
     </li>
   </ul>
-  <li>derbytools</li>
+  <li>jdbcapi</li>
   <ul>
-    <li>currently only test included is for the dblook utility. <br>
+    <li>tests implementation of jdbc api such as Connection class
+implementation, Metadata etc.</li>
+    <li>takes from 20 to 40 minutes<br>
+    </li>
+  </ul>
+  <li>jdbc20<br>
+  </li>
+  <ul>
+    <li>tests implementation of features from the jdbc 20 specification</li>
+    <li>takes 2 to 5 minutes<br>
+    </li>
+  </ul>
+  <li>jdk14</li>
+  <ul>
+    <li>tests implementation of features from the jdk14 specification</li>
+    <li>takes 2 to 5 minutes<br>
+    </li>
+  </ul>
+  <li>derbytools<br>
+  </li>
+  <ul>
+    <li>tests for dblook, ij, and import/export utilities</li>
+    <li>takes 5 to 10 minutes<br>
     </li>
   </ul>
   <li>derbyall</li>
@@ -313,7 +335,7 @@ language element to these tests</li>
     </li>
   </ul>
   <ul>
-    <li>tested on a variety of hardware takes from 1.50 - 4.00 hours </li>
+    <li>tested on a variety of hardware takes from 2 - 4.30 hours </li>
   </ul>
   <li><a href="#Note1:"><small>See Note1</small></a><br>
   </li>
