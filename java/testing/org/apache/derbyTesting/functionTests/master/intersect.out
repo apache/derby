@@ -1,0 +1,331 @@
+ij> create table t1( id integer not null primary key, i1 integer, i2 integer, c10 char(10), c30 char(30), tm time);
+0 rows inserted/updated/deleted
+ij> create table t2( id integer not null primary key, i1 integer, i2 integer, vc20 varchar(20), d double, dt date);
+0 rows inserted/updated/deleted
+ij> insert into t1(id,i1,i2,c10,c30) values
+  (1,1,1,'a','123456789012345678901234567890'),
+  (2,1,2,'a','bb'),
+  (3,1,3,'b','bb'),
+  (4,1,3,'zz','5'),
+  (5,null,null,null,'1.0'),
+  (6,null,null,null,'a');
+6 rows inserted/updated/deleted
+ij> insert into t2(id,i1,i2,vc20,d) values
+  (1,1,1,'a',1.0),
+  (2,1,2,'a',1.1),
+  (5,null,null,'12345678901234567890',3),
+  (100,1,3,'zz',3),
+  (101,1,2,'bb',null),
+  (102,5,5,'',null),
+  (103,1,3,' a',null),
+  (104,1,3,'null',7.4);
+8 rows inserted/updated/deleted
+ij> -- no duplicates
+select id,i1,i2 from t1 intersect select id,i1,i2 from t2 order by id DESC,i1,i2;
+ID         |I1         |I2         
+-----------------------------------
+5          |NULL       |NULL       
+2          |1          |2          
+1          |1          |1          
+ij> select id,i1,i2 from t1 intersect all select id,i1,i2 from t2 order by 1,2,3;
+ID         |I1         |I2         
+-----------------------------------
+1          |1          |1          
+2          |1          |2          
+5          |NULL       |NULL       
+ij> -- Only specify order by on some columns
+select id,i1,i2 from t1 intersect select id,i1,i2 from t2 order by i2, id DESC;
+ID         |I1         |I2         
+-----------------------------------
+1          |1          |1          
+2          |1          |2          
+5          |NULL       |NULL       
+ij> select id,i1,i2 from t1 intersect all select id,i1,i2 from t2 order by 3 DESC, 1;
+ID         |I1         |I2         
+-----------------------------------
+5          |NULL       |NULL       
+2          |1          |2          
+1          |1          |1          
+ij> -- duplicates
+select i1,i2 from t1 intersect select i1,i2 from t2 order by 1,2;
+I1         |I2         
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+NULL       |NULL       
+ij> select i1,i2 from t1 intersect all select i1,i2 from t2 order by 1,2;
+I1         |I2         
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+1          |3          
+NULL       |NULL       
+ij> -- right side is empty
+select i1,i2 from t1 intersect select i1,i2 from t2 where id = -1;
+I1         |I2         
+-----------------------
+ij> select i1,i2 from t1 intersect all select i1,i2 from t2 where id = -1;
+I1         |I2         
+-----------------------
+ij> -- left side is empty
+select i1,i2 from t1 where id = -1 intersect all select i1,i2 from t2;
+I1         |I2         
+-----------------------
+ij> -- check precedence
+select i1,i2 from t1 intersect all select i1,i2 from t2 intersect values(5,5),(1,3) order by 1,2;
+1          |2          
+-----------------------
+1          |3          
+ij> (select i1,i2 from t1 intersect all select i1,i2 from t2) intersect values(5,5),(1,3) order by 1,2;
+1          |2          
+-----------------------
+1          |3          
+ij> values(-1,-1,-1) union select id,i1,i2 from t1 intersect select id,i1,i2 from t2 order by 1,2,3;
+1          |2          |3          
+-----------------------------------
+-1         |-1         |-1         
+1          |1          |1          
+2          |1          |2          
+5          |NULL       |NULL       
+ij> select id,i1,i2 from t1 intersect select id,i1,i2 from t2 union values(-1,-1,-1) order by 1,2,3;
+1          |2          |3          
+-----------------------------------
+-1         |-1         |-1         
+1          |1          |1          
+2          |1          |2          
+5          |NULL       |NULL       
+ij> -- check conversions
+select c10 from t1 intersect select vc20 from t2 order by 1;
+1                   
+--------------------
+a                   
+zz                  
+ij> select c30 from t1 intersect select vc20 from t2;
+1                             
+------------------------------
+a                             
+bb                            
+ij> select c30 from t1 intersect all select vc20 from t2;
+1                             
+------------------------------
+a                             
+bb                            
+ij> -- check insert intersect into table and intersect without order by
+create table r( i1 integer, i2 integer);
+0 rows inserted/updated/deleted
+ij> insert into r select i1,i2 from t1 intersect select i1,i2 from t2;
+4 rows inserted/updated/deleted
+ij> select i1,i2 from r order by 1,2;
+I1         |I2         
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+NULL       |NULL       
+ij> delete from r;
+4 rows inserted/updated/deleted
+ij> insert into r select i1,i2 from t1 intersect all select i1,i2 from t2;
+5 rows inserted/updated/deleted
+ij> select i1,i2 from r order by 1,2;
+I1         |I2         
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+1          |3          
+NULL       |NULL       
+ij> delete from r;
+5 rows inserted/updated/deleted
+ij> -- test LOB
+create table t3( i1 integer, cl clob(64), bl blob(1M));
+0 rows inserted/updated/deleted
+ij> insert into t3 values
+  (1, cast( 'aa' as clob(64)), cast(X'01' as blob(1M)));
+1 row inserted/updated/deleted
+ij> create table t4( i1 integer, cl clob(64), bl blob(1M));
+0 rows inserted/updated/deleted
+ij> insert into t4 values
+  (1, cast( 'aa' as clob(64)), cast(X'01' as blob(1M)));
+1 row inserted/updated/deleted
+ij> select cl from t3 intersect select cl from t4 order by 1;
+ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ij> select bl from t3 intersect select bl from t4 order by 1;
+ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ij> -- invalid conversion
+select tm from t1 intersect select dt from t2;
+ERROR 42X61: Types 'TIME' and 'DATE' are not INTERSECT compatible.
+ij> select c30 from t1 intersect select d from t2;
+ERROR 42X61: Types 'CHAR' and 'DOUBLE' are not INTERSECT compatible.
+ij> -- different number of columns
+select i1 from t1 intersect select i1,i2 from t2;
+ERROR 42X58: The number of columns on the left and right sides of the INTERSECT must be the same.
+ij> -- ? in select list of intersect
+select ? from t1 intersect select i1 from t2;
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> select i1 from t1 intersect select ? from t2;
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> -- except tests
+select id,i1,i2 from t1 except select id,i1,i2 from t2 order by id,i1,i2;
+ID         |I1         |I2         
+-----------------------------------
+3          |1          |3          
+4          |1          |3          
+6          |NULL       |NULL       
+ij> select id,i1,i2 from t1 except all select id,i1,i2 from t2 order by 1 DESC,2,3;
+ID         |I1         |I2         
+-----------------------------------
+6          |NULL       |NULL       
+4          |1          |3          
+3          |1          |3          
+ij> select id,i1,i2 from t2 except select id,i1,i2 from t1 order by 1,2,3;
+ID         |I1         |I2         
+-----------------------------------
+100        |1          |3          
+101        |1          |2          
+102        |5          |5          
+103        |1          |3          
+104        |1          |3          
+ij> select id,i1,i2 from t2 except all select id,i1,i2 from t1 order by 1,2,3;
+ID         |I1         |I2         
+-----------------------------------
+100        |1          |3          
+101        |1          |2          
+102        |5          |5          
+103        |1          |3          
+104        |1          |3          
+ij> select i1,i2 from t1 except select i1,i2 from t2 order by 1,2;
+I1         |I2         
+-----------------------
+ij> select i1,i2 from t1 except all select i1,i2 from t2 order by 1,2;
+I1         |I2         
+-----------------------
+NULL       |NULL       
+ij> select i1,i2 from t2 except select i1,i2 from t1 order by 1,2;
+I1         |I2         
+-----------------------
+5          |5          
+ij> select i1,i2 from t2 except all select i1,i2 from t1 order by 1,2;
+I1         |I2         
+-----------------------
+1          |2          
+1          |3          
+5          |5          
+ij> -- right side is empty
+select i1,i2 from t1 except select i1,i2 from t2 where id = -1 order by 1,2;
+I1         |I2         
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+NULL       |NULL       
+ij> select i1,i2 from t1 except all select i1,i2 from t2 where id = -1  order by 1,2;
+I1         |I2         
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+1          |3          
+NULL       |NULL       
+NULL       |NULL       
+ij> -- left side is empty
+select i1,i2 from t1 where id = -1 except select i1,i2 from t2 order by 1,2;
+I1         |I2         
+-----------------------
+ij> select i1,i2 from t1 where id = -1 except all select i1,i2 from t2 order by 1,2;
+I1         |I2         
+-----------------------
+ij> -- Check precedence. Union and except have the same precedence. Intersect has higher precedence.
+select i1,i2 from t1 except select i1,i2 from t2 intersect values(-1,-1) order by 1,2;
+1          |2          
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+NULL       |NULL       
+ij> select i1,i2 from t1 except (select i1,i2 from t2 intersect values(-1,-1)) order by 1,2;
+1          |2          
+-----------------------
+1          |1          
+1          |2          
+1          |3          
+NULL       |NULL       
+ij> select i1,i2 from t2 except select i1,i2 from t1 union values(5,5) order by 1,2;
+1          |2          
+-----------------------
+5          |5          
+ij> (select i1,i2 from t2 except select i1,i2 from t1) union values(5,5) order by 1,2;
+1          |2          
+-----------------------
+5          |5          
+ij> select i1,i2 from t2 except all select i1,i2 from t1 except select i1,i2 from t1 where id = 3 order by 1,2;
+I1         |I2         
+-----------------------
+1          |2          
+5          |5          
+ij> (select i1,i2 from t2 except all select i1,i2 from t1) except select i1,i2 from t1 where id = 3 order by 1,2;
+I1         |I2         
+-----------------------
+1          |2          
+5          |5          
+ij> -- check conversions
+select c10 from t1 except select vc20 from t2 order by 1;
+1                   
+--------------------
+b                   
+NULL                
+ij> select c30 from t1 except select vc20 from t2 order by 1;
+1                             
+------------------------------
+1.0                           
+123456789012345678901234567890
+5                             
+ij> select c30 from t1 except all select vc20 from t2;
+1                             
+------------------------------
+1.0                           
+123456789012345678901234567890
+5                             
+bb                            
+ij> -- check insert except into table and except without order by
+insert into r select i1,i2 from t2 except select i1,i2 from t1;
+1 row inserted/updated/deleted
+ij> select i1,i2 from r order by 1,2;
+I1         |I2         
+-----------------------
+5          |5          
+ij> delete from r;
+1 row inserted/updated/deleted
+ij> insert into r select i1,i2 from t2 except all select i1,i2 from t1;
+3 rows inserted/updated/deleted
+ij> select i1,i2 from r order by 1,2;
+I1         |I2         
+-----------------------
+1          |2          
+1          |3          
+5          |5          
+ij> delete from r;
+3 rows inserted/updated/deleted
+ij> -- test LOB
+select cl from t3 except select cl from t4 order by 1;
+ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ij> select bl from t3 except select bl from t4 order by 1;
+ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ij> -- invalid conversion
+select tm from t1 except select dt from t2;
+ERROR 42X61: Types 'TIME' and 'DATE' are not EXCEPT compatible.
+ij> select c30 from t1 except select d from t2;
+ERROR 42X61: Types 'CHAR' and 'DOUBLE' are not EXCEPT compatible.
+ij> -- different number of columns
+select i1 from t1 except select i1,i2 from t2;
+ERROR 42X58: The number of columns on the left and right sides of the EXCEPT must be the same.
+ij> -- ? in select list of except
+select ? from t1 except select i1 from t2;
+ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
+ij> -- Invalid order by
+select id,i1,i2 from t1 intersect select id,i1,i2 from t2 order by t1.i1;
+ERROR 42877: A qualified column name 'T1.I1' is not allowed in the ORDER BY clause.
+ij> select id,i1,i2 from t1 except select id,i1,i2 from t2 order by t1.i1;
+ERROR 42877: A qualified column name 'T1.I1' is not allowed in the ORDER BY clause.
+ij> 
