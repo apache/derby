@@ -1534,7 +1534,7 @@ class DRDAStatement
 		Class[] getParameterMetaDataParam = {};
 		try {
 			Method sh =
-				getPreparedStatement().getClass().getMethod("getParameterMetaData", getParameterMetaDataParam);
+				getPreparedStatement().getClass().getMethod("getEmbedParameterSetMetaData", getParameterMetaDataParam);
 			pmeta = (EmbedParameterSetMetaData)
 				sh.invoke(getPreparedStatement(),null);
 			stmtPmeta = pmeta;
@@ -1565,6 +1565,7 @@ class DRDAStatement
 		}
 		catch (Exception e)
 		{
+			
 			handleReflectionException(e);
 		}
 		return retVal;
@@ -1608,7 +1609,9 @@ class DRDAStatement
 				throw (SQLException) t;
 			}
 			else
+			{
 				throw Util.javaException(t);
+			}
 		}
 		else
 			// invoke can throw IllegalAccessException or 
