@@ -949,8 +949,6 @@ public class RunList
 	boolean result = false;
 
 	// figure out if suite should be skipped ... adhoc rules
-	boolean isRmiJdbc = false;
-	boolean isIBridge = false;
 	boolean isJdk12 = false; // really now 'isJdk12orHigher'
 	boolean isJdk14 = false;
 	boolean isJdk15 = false;
@@ -982,19 +980,39 @@ public class RunList
         if ( System.getProperty("java.version").startsWith("1.4.") ) isJdk14 = true;
         if ( System.getProperty("java.version").startsWith("1.5.") ) isJdk15 = true;
 
+	// if a test needs an ibm jvm, skip if runwithibmjvm is true.
+	// if a test needs to not run in an ibm jvm, skip if runwithibmjvm is false.
+	// if null, continue in all cases.
+	if (runwithibmjvm != null) 
+	{ 
+	    if (runwithibmjvm.equals("")) { needIBMjvm = null; }
+	    else { needIBMjvm = new Boolean(runwithibmjvm); }
+	}
+	if (runwithibmjvm == null) { needIBMjvm = null; }
+	if (needIBMjvm != null)
+	{
+	    boolean needsibm = needIBMjvm.booleanValue();
+	    boolean ibmjvm = false;
+	    String vendor = System.getProperty("java.vendor");
+	    if (vendor.startsWith("IBM")) { ibmjvm = true; }
+	    if (!needsibm && ibmjvm) { return true; }
+	    if (needsibm && !ibmjvm) { return true; }
+	}
+
+	if (runwithjvm != null && runwithjvm.equals("false"))
+	{
+	    return true;
+	}
+	if (runwithj9 != null && runwithj9.equals("false"))
+	{
+	    return false ;
+	}
+
         if ( (framework != null) && (framework.length()>0) )
 	{
-            if (framework.equals("RmiJdbc"))
-	    { 
-		try {
-			Class.forName("org.objectweb.rmijdbc.Driver");
-		} catch (ClassNotFoundException cnfe) {
-			driverNotFound = true;
-			result = true;
-		}
-            }
-            else if (framework.equals("DerbyNet"))
+            if (framework.equals("DerbyNet"))
 	    {
+		// skip if the derbynet.jar is not in the Classpath
 		try {
 			Class.forName("org.apache.derby.drda.NetworkServerControl");
 		} catch (ClassNotFoundException cnfe) {
@@ -1002,14 +1020,18 @@ public class RunList
 			result = true;
 		}
 
+		// skip if the IBM Universal JDBC Driver is not in the Classpath
+		// note that that driver loads some javax.naming.* classes which may not
+		// be present at runtime, and thus we need to catch a possible error too 
 		try {
 			Class.forName("com.ibm.db2.jcc.DB2Driver");
 		} catch (ClassNotFoundException cnfe) {
 			driverNotFound = true;
 			result = true;
+		} catch (NoClassDefFoundError err) {
+			driverNotFound = true;
+			result = true;
 		}
-
-
 	    }
 	}
 
@@ -1073,34 +1095,6 @@ public class RunList
             }
             if (result) return true;
         }
-
-	// if a test needs an ibm jvm, skip if runwithibmjvm is true.
-	// if a test needs to not run in an ibm jvm, skip if runwithibmjvm is false.
-	// if null, continue in all cases.
-	if (runwithibmjvm != null) 
-	{ 
-	    if (runwithibmjvm.equals("")) { needIBMjvm = null; }
-	    else { needIBMjvm = new Boolean(runwithibmjvm); }
-	}
-	if (runwithibmjvm == null) { needIBMjvm = null; }
-	if (needIBMjvm != null)
-	{
-	    boolean needsibm = needIBMjvm.booleanValue();
-	    boolean ibmjvm = false;
-	    String vendor = System.getProperty("java.vendor");
-	    if (vendor.startsWith("IBM")) { ibmjvm = true; }
-	    if (!needsibm && ibmjvm) { return true; }
-	    if (needsibm && !ibmjvm) { return true; }
-	}
-
-	if (runwithjvm != null && runwithjvm.equals("false"))
-	{
-	    return true;
-	}
-	if (runwithj9 != null && runwithj9.equals("false"))
-	{
-	    return false ;
-	}
 
 	if (excludeJCC != null)
 	{

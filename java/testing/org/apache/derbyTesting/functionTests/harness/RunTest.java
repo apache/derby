@@ -861,7 +861,7 @@ public class RunTest
 			javavmVersion = javaVersion;
 
 
-		JavaVersionHolder jvh = new JavaVersionHolder(javaVersion);
+		JavaVersionHolder jvh = new JavaVersionHolder(javavmVersion);
 		majorVersion = jvh.getMajorVersion();
 		minorVersion = jvh.getMinorVersion();
         iminor = jvh.getMinorNumber();
