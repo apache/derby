@@ -239,7 +239,13 @@ ERROR 42X05: Table 'N' does not exist.
 ij> select * from b where b like cast('0102%' as blob(10));
 ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
 ij> select * from c where c like cast('12%' as clob(10));
-ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+C    
+-----
+1234 
+12345
+1234 
+12345
+1234&
 ij> select * from n where n like cast('12%' as nclob(10));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- cleanup

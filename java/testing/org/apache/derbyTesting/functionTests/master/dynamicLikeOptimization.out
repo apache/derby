@@ -86,7 +86,7 @@ select 1 from t1  where '_foobar' like '__foobar' escape '_';
 1          
 ij> -- match
 select 1 from t1  where 'asdf' like 'a%' escape cast(null as char);
-ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ERROR 22501: An ESCAPE clause of NULL returns undefined results and is not allowed.
 ij> -- error NULL escape
 prepare ll2 as 'select 1 from t1 where ''%foobar'' like ? escape ?';
 ij> execute ll2 using 'values (''Z%foobar'', ''Z'') ';
