@@ -38,9 +38,8 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedConnection;
+import  org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
-import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
-import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
@@ -78,12 +77,13 @@ class DRDAStatement
 	protected int withHoldCursor = -1;	 // hold cursor after commit attribute.
 	protected int isolationLevel;         //JCC isolation level for Statement
 	protected String cursorName;
-	protected int scrollType;			// Sensitive or Insensitive scroll attribute
-	protected int concurType;			// Concurency type
+	protected int scrollType = ResultSet.TYPE_FORWARD_ONLY;			// Sensitive or Insensitive scroll attribute
+	protected int concurType = ResultSet.CONCUR_READ_ONLY;;			// Concurency type
 	protected long rowCount;			// Number of rows we have processed
 	protected byte [] rslsetflg;		// Result Set Flags
 	protected int maxrslcnt;			// Maximum Result set count
 	protected PreparedStatement ps;     // Prepared statement
+	protected EmbedParameterSetMetaData stmtPmeta; // param metadata
 	protected boolean isCall;
 	protected String procName;			// callable statement's method name
 	private   int[] outputTypes;		// jdbc type for output parameter or NOT_OUTPUT_PARAM
@@ -252,6 +252,37 @@ class DRDAStatement
 		currentDrdaRs.clearExtDtaObjects();
 	}
 
+	/**
+	 *
+	 *  get resultSetHoldability with reflection. 
+	 *  We need to use reflection so we can use hold cursors with 1.3.1. 
+	 *  And also since our statement might be a BrokeredStatement.
+	 * 
+	 * @return the resultSet holdability for the prepared statement
+	 *
+	 */
+	protected int getResultSetHoldability() throws SQLException
+	{
+		Statement rsstmt = null;
+		ResultSet rs = getResultSet();
+		int holdValue = -1;
+
+		if (rs  != null)
+			rsstmt = rs.getStatement();
+		else
+			rsstmt = getPreparedStatement();
+				
+		Class[] getResultSetHoldabilityParam  = {};
+		try {
+			Method sh =
+				rsstmt.getClass().getMethod("getResultSetHoldability", getResultSetHoldabilityParam);
+			holdValue =  ((Integer) sh.invoke(ps,null)).intValue();
+		}
+		catch (Exception e) {
+			handleReflectionException(e);
+		}
+		return holdValue;
+	}
 
 	/*
 	 * Is lob object nullable
@@ -380,6 +411,14 @@ class DRDAStatement
 		return currentDrdaRs.scrollType;
 	}
 
+	/** 
+	 * is this a scrollable cursor?
+	 * return true if this is not a forward only cursor
+	 */
+	protected boolean isScrollable()
+	{
+		return (getScrollType() != ResultSet.TYPE_FORWARD_ONLY);
+	}
 
 	protected void setConcurType(int scrollType)
 	{
@@ -461,41 +500,8 @@ class DRDAStatement
 			return ps;
 		}
 		parsePkgidToFindHoldability();
-		if (withHoldCursor == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT) {
-			if (JVMInfo.JDK_ID == 2) {//need to use reflection for holdability for jdk 1.3
-				//prepareStatement takes 4 parameters
-				Class[] PREP_STMT_PARAM = { String.class, Integer.TYPE, Integer.TYPE, Integer.TYPE };
-				Object[] PREP_STMT_ARG = { sqlStmt, new Integer(scrollType),
-				new Integer(concurType), new Integer(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)};
-				try {
-					//create a prepared statement with close cursor at commit using reflection.
-					Method sh = database.getConnection().getClass().getMethod("prepareStatement", PREP_STMT_PARAM);
-					ps = (PreparedStatement) (sh.invoke(database.getConnection(), PREP_STMT_ARG));
-				} catch (InvocationTargetException itex) {
-					Throwable e = itex.getTargetException();
-					//prepareStatement can only throw SQLExcepton
-					if (e instanceof SQLException)
-					{
-						throw (SQLException) e;
-					}
-					else
-						throw Util.javaException(e);
-				}
-				catch (Exception e) {
-					// invoke can throw IllegalAccessException or 
-					// IllegalArgumentException, but these should not 
-					// occur from this code. Just in case we will throw it
-					throw Util.javaException(e);
-				}
-			} else if (JVMInfo.JDK_ID >= 4) 
-				ps = ((EmbedConnection)(database.getConnection())).prepareStatement(sqlStmt, scrollType, concurType, withHoldCursor);
-			else //no holdability change support for jdk 12 and less
-				ps = database.getConnection().prepareStatement(sqlStmt);
-		} else if (scrollType != 0)
-			ps = database.getConnection().prepareStatement(sqlStmt, scrollType, concurType);
-		else
-			ps = database.getConnection().prepareStatement(sqlStmt);
-      
+		ps = prepareStatementJDBC3(sqlStmt, scrollType, concurType, 
+								   withHoldCursor);
 		// beetle 3849  -  Need to change the cursor name to what
 		// JCC thinks it will be, since there is no way in the 
 		// protocol to communicate the actual cursor name.  JCC keeps 
@@ -552,7 +558,7 @@ class DRDAStatement
 			}
 			// For normal selects we are done, but procedures might
 			// have more resultSets
-		}while (isCallable && ((EmbedPreparedStatement) ps).getMoreResults(JDBC30Translation.KEEP_CURRENT_RESULT));
+		}while (isCallable && getMoreResults(JDBC30Translation.KEEP_CURRENT_RESULT));
 
 		return hasResultSet;
 
@@ -928,7 +934,8 @@ class DRDAStatement
 		return currentDrdaRs.wasExplicitlyClosed();
 	}
 
-	/** Clean up statements and resultSet
+	/** 
+	 * Clean up statements and resultSet
 	 * 
 	 */
 	protected void close()  throws SQLException
@@ -943,9 +950,10 @@ class DRDAStatement
 		resultSetKeyList = null;
 		numResultSets = 0;
 		ps = null;
+		stmtPmeta = null;
 		stmt = null;
-		scrollType = 0;
-		concurType = 0;
+		scrollType = ResultSet.TYPE_FORWARD_ONLY;	
+		concurType = ResultSet.CONCUR_READ_ONLY;;
 		withHoldCursor = -1;
 		rowCount = 0;
 		rslsetflg = null;
@@ -1081,8 +1089,8 @@ class DRDAStatement
 	{
 		if (ps != null && ps instanceof CallableStatement)
 		{
-			EmbedParameterSetMetaData pmeta = 	((EmbedCallableStatement)
-											 ps).getEmbedParameterSetMetaData();
+			EmbedParameterSetMetaData pmeta = 	getParameterMetaData();
+
 			return Math.min(pmeta.getPrecision(index),
 							FdocaConstants.NUMERIC_MAX_PRECISION);
 
@@ -1102,8 +1110,7 @@ class DRDAStatement
 	{
 		if (ps != null && ps instanceof CallableStatement)
 		{
-			EmbedParameterSetMetaData pmeta = 	((EmbedCallableStatement)
-											 ps).getEmbedParameterSetMetaData();
+			EmbedParameterSetMetaData pmeta = 	getParameterMetaData();
 			return Math.min(pmeta.getScale(index),FdocaConstants.NUMERIC_MAX_PRECISION);
 		}
 		else 
@@ -1215,7 +1222,7 @@ class DRDAStatement
 		else
 		{
 			s += indent + pkgid + sectionNumber ;
-			s += "\t" + ((EmbedPreparedStatement) ps).getSQLText();
+			s += "\t" + getSQLText();
 		}
 		return s;
 	}
@@ -1270,7 +1277,7 @@ class DRDAStatement
 
 	private void setupCallableStatementParams(CallableStatement cs) throws SQLException
 	{
-		EmbedParameterSetMetaData pmeta = 	((EmbedCallableStatement) cs).getEmbedParameterSetMetaData();
+		EmbedParameterSetMetaData pmeta = 	getParameterMetaData();
 		int numElems = pmeta.getParameterCount();
 
 		for ( int i = 0; i < numElems; i ++)
@@ -1466,6 +1473,149 @@ class DRDAStatement
 			withHoldCursor = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
 		
 		}
+	}
+
+
+	/**
+	 *  prepare a statement using reflection so that server can run on jdk131
+	 *  and still pass holdability.  
+	 *  parameters are passed on to either the EmbedConnection or 
+	 *  BrokeredConnection prepareStatement() method.
+	 *  @param sqlStmt - SQL statement text
+	 *  @param scrollType - scroll type
+	 *  @param concurtype - concurrency type
+	 *  @param withHoldCursor - holdability
+	 * 
+	 *  @throws SQLException
+	 *  @return Prepared Statement
+	 *  @see java.sql.Connection#prepareStatement
+	 */
+	private PreparedStatement prepareStatementJDBC3(String sqlStmt, int
+													scrollType, int concurType,
+													int withHoldCursor) throws SQLException
+	{
+		PreparedStatement lps = null;
+
+		// If holdability is still uninitialized, default is HOLD_CURSORS_OVER_COMMIT
+		int resultSetHoldability = (withHoldCursor == -1) ? 
+			resultSetHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT :
+			withHoldCursor;
+
+		//prepareStatement takes 4 parameters
+		Class[] PREP_STMT_PARAM = { String.class, Integer.TYPE, Integer.TYPE, Integer.TYPE };
+		Object[] PREP_STMT_ARG = { sqlStmt, new Integer(scrollType),
+								   new Integer(concurType), new Integer(resultSetHoldability)};
+		try {
+			//create a prepared statement with hold cursor over commit using reflection.
+			Method sh = database.getConnection().getClass().getMethod("prepareStatement", PREP_STMT_PARAM);
+			lps = (PreparedStatement) (sh.invoke(database.getConnection(), PREP_STMT_ARG));
+		} catch (Exception e) {
+			handleReflectionException(e);
+		} 
+
+		return lps;
+	}
+
+	
+	/** 
+	 * Get parameter metadata from EmbedPreparedStatement or 
+	 * BrokeredPreparedStatement. We use reflection because we don't know which
+	 * we have.
+	 * 
+	 * @return EmbedParameterSetMetaData for the prepared statement. 
+	 * Note: there is no separate BrokeredParameterSetMetaData.
+	 */
+	protected EmbedParameterSetMetaData getParameterMetaData() throws SQLException
+	{
+		if (stmtPmeta != null)
+			return stmtPmeta;
+
+		EmbedParameterSetMetaData pmeta = null;
+		Class[] getParameterMetaDataParam = {};
+		try {
+			Method sh =
+				getPreparedStatement().getClass().getMethod("getParameterMetaData", getParameterMetaDataParam);
+			pmeta = (EmbedParameterSetMetaData)
+				sh.invoke(getPreparedStatement(),null);
+			stmtPmeta = pmeta;
+		}
+		catch (Exception e) {
+			handleReflectionException(e);
+		}
+		return stmtPmeta;
+	}
+	
+	/**
+	 * get more results using reflection.
+	 * @param current - flag to pass to Statement.getMoreResults(current)
+	 * @return true if there are more results.
+	 * @throws SQLException
+	 * @see java.sql.Statemen#getMoreResults
+	 *
+	 */
+	protected boolean getMoreResults(int current) throws SQLException
+	{
+		boolean retVal = false;
+		Class[] intPARAM = {Integer.TYPE};
+		Object[] args = {new Integer(current)};
+		try {
+			Method sh = getPreparedStatement().getClass().getMethod("getMoreResults",intPARAM);
+			Boolean retObj = (Boolean) sh.invoke(getPreparedStatement(),args);
+			retVal = retObj.booleanValue();
+		}
+		catch (Exception e)
+		{
+			handleReflectionException(e);
+		}
+		return retVal;
+	}
+
+	/**
+	 * Use reflection to retrieve SQL Text for EmbedPreparedStatement  
+	 * or BrokeredPreparedStatement.
+	 * @return SQL text
+	 */
+	private String getSQLText() 
+	{
+	   String retVal = null;
+		Class[] emptyPARAM = {};
+		Object[] args = null;
+		try {
+			Method sh = getPreparedStatement().getClass().getMethod("getSQLText",emptyPARAM);
+			retVal = (String) sh.invoke(getPreparedStatement(),args);
+		}
+		catch (Exception e)
+		{
+			//  do nothing we will just return a null string
+		}
+		return retVal;
+
+	}
+
+	/** helper method to handle exceptions generated by methods invoked 
+	 * through  reflection.
+	 * @param e - exception thrown
+	 * @throws SQLException - actual exception that occurred
+	 */
+	private void handleReflectionException(Exception e) throws SQLException
+	{
+		if  (e instanceof InvocationTargetException) 
+		{
+			Throwable t = ((InvocationTargetException) e).getTargetException();
+			
+			if (t  instanceof SQLException)
+			{
+				throw (SQLException) t;
+			}
+			else
+				throw Util.javaException(t);
+		}
+		else
+			// invoke can throw IllegalAccessException or 
+			// IllegalArgumentException, but these should not 
+			// occur from this code. Just in case we will throw it
+			throw Util.javaException(e);
+		
 	}
 }
 

@@ -416,5 +416,42 @@ public class BrokeredConnection implements Connection
 		return new BrokeredCallableStatement(statementControl, getJDBCLevel(), sql);
 	}
 
+	/**
+	 *  set the DrdaId for this connection. The drdaID prints with the 
+	 *  statement text to the errror log
+	 *  @param drdaID  drdaID to be used for this connection
+	 *
+	 */
+	public void setDrdaID(String drdaID)
+	{
+		control.setDrdaID(drdaID);
+	}
+
+	/**
+	 *  Set the internal isolation level to use for preparing statements.
+	 *  Subsequent prepares will use this isoalation level
+	 * @param level - internal isolation level 
+	 * @throws SQLException
+	 * @see EmbedConnection#setPrepareIsolation
+	 * 
+	 */
+	public void setPrepareIsolation(int level) throws SQLException
+	{
+		control.setPrepareIsolation(level);
+	}
+
+	/**
+	 * get the isolation level that is currently being used to prepare 
+	 * statements (used for network server)
+	 * 
+	 * @throws SQLException
+	 * @return current prepare isolation level 
+	 * @see EmbedConnection#getPrepareIsolation
+	 */
+	public int getPrepareIsolation() throws SQLException
+	{
+		return control.getPrepareIsolation();
+	}
+
 	protected int getJDBCLevel() { return 2;}
 }

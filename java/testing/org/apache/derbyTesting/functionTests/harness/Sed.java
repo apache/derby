@@ -234,20 +234,12 @@ public class Sed
 
         // Vectors for substitutions
         Vector searchStrings = new Vector();
-		searchStrings.addElement("^true[ ]*\\|");
-		searchStrings.addElement("^false[ ]*\\|");
-		searchStrings.addElement("\\|true[ ]*\\|");
-		searchStrings.addElement("\\|false[ ]*\\|");
 		searchStrings.addElement("[ ]*\\|");
 		searchStrings.addElement("^--*");
 
         Vector subStrings = new Vector();
 		// true and false show up as 1 and 0 in JCC. 
 		//because they have no boolean support
-		subStrings.addElement("1 |");
-		subStrings.addElement("0 |");
-		subStrings.addElement("|1 |");
-		subStrings.addElement("|0 |");
 		subStrings.addElement(" |");
 		subStrings.addElement("-----");
 

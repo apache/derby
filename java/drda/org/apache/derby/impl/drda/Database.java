@@ -21,14 +21,16 @@
 package org.apache.derby.impl.drda;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Properties;
+import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 /**
@@ -39,6 +41,8 @@ class Database
 {
 
 	protected String dbName;			// database name 
+	protected String shortDbName;       // database name without attributes
+	String attrString="";               // attribute string
 	protected int securityMechanism;	// Security mechanism
 	protected String userId;			// User Id
 	protected String password;			// password
@@ -64,11 +68,12 @@ class Database
 	protected boolean sendTRGDFTRT = false; // Send package target default value
 
 	private Connection conn;			// Connection to the database
-	private DRDAStatement defaultStatement; // default statement used 
+	DRDAStatement defaultStatement;    // default statement used 
 													   // for execute imm
 	private DRDAStatement currentStatement; // current statement we are working on
-	private Hashtable stmtTable;		// Hash table for storing statements
+	Hashtable stmtTable;		// Hash table for storing statements
 
+	boolean forXA = false;
 
 	// constructor
 	/**
@@ -78,10 +83,29 @@ class Database
 	 */
 	protected Database (String dbName)
 	{
+		if (dbName != null)
+		{
+			int attrOffset = dbName.indexOf(';');
+			if (attrOffset != -1)
+			{
+				this.attrString = dbName.substring(attrOffset,dbName.length());
+				this.shortDbName = dbName.substring(0,attrOffset);
+			}
+			else
+				this.shortDbName = dbName;
+		}
+
 		this.dbName = dbName;
 		this.stmtTable = new Hashtable();
+		initializeDefaultStatement();
+	}
+
+
+	private void initializeDefaultStatement()
+	{
 		this.defaultStatement = new DRDAStatement(this);
 	}
+
 	/**
 	 * Set connection and create the SQL statement for the default statement
 	 *
@@ -209,6 +233,39 @@ class Database
 	}
 
 	/**
+	 * Make a new connection using the database name and set 
+	 * the connection in the database
+	 * @param p Properties for connection attributes to pass to connect
+	 * @return new local connection
+	 */
+	protected Connection makeConnection(Properties p) throws SQLException
+	{
+		p.put(Attribute.USERNAME_ATTR, userId);
+		p.put(Attribute.PASSWORD_ATTR, password);
+		Connection conn = DB2jServerImpl.getDriver().connect(Attribute.PROTOCOL
+							 + dbName + attrString, p);
+		conn.setAutoCommit(false);
+		setConnection(conn);
+		return conn;
+	}
+
+	// Create string to pass to DataSource.setConnectionAttributes
+	String appendAttrString(Properties p)
+	{
+		if (p == null)
+			return null;
+		
+		Enumeration pKeys = p.propertyNames();
+		while (pKeys.hasMoreElements()) 
+		{
+			String key = (String) pKeys.nextElement();
+			attrString +=";" + key  +"=" + p.getProperty(key);
+		}
+
+		return attrString;
+	}
+
+	/**
 	 * Get result set
 	 *
 	 * @param pkgnamcsn - key to access prepared statement
@@ -287,8 +344,11 @@ class Database
 				defaultStatement.close();
 			if ((conn != null) && !conn.isClosed())
 			{
-				conn.rollback();
-				conn.close();
+				if (! forXA)
+				{
+					conn.rollback();
+				}
+				conn.close();					
 			}
 		}
 		finally {
@@ -297,6 +357,12 @@ class Database
 			defaultStatement = null;
 			stmtTable=null;
 		}
+	}
+
+	protected void setDrdaID(String drdaID)
+	{
+		if (conn != null)
+			((EmbedConnection)conn).setDrdaID(drdaID);
 	}
 
 	/**

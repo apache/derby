@@ -64,7 +64,7 @@ class DRDAResultSet
 	protected int [] outovr_drdaType;	// Output override DRDA type and length
 
 	protected int withHoldCursor;			// hold cursor after commit attribute
-	protected int scrollType;			// Sensitive or Insensitive scroll attribute
+	protected int scrollType = ResultSet.TYPE_FORWARD_ONLY;			// Sensitive or Insensitive scroll attribute
 	protected int concurType;			// Concurency type
 	protected long rowCount;			// Number of rows we have processed
 	private ResultSet rs;              // Current ResultSet
@@ -354,7 +354,7 @@ class DRDAResultSet
 		rs = null;
 		gotPrctyp = false;
 		outovr_drdaType = null;
-		scrollType = 0;
+		scrollType = ResultSet.TYPE_FORWARD_ONLY;	
 		concurType = 0;
 		rowCount = 0;
 		rsLens = null;

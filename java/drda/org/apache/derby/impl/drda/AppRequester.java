@@ -49,7 +49,7 @@ class AppRequester
 											6, // SQLAM
 											1, // SUPERVISOR	
 											5, // SYNCPTMGR
-											7  // XAMGR
+											0  // XAMGR
 											};
 	// Application requester information
 	protected String	extnam;			// External Name - EXCSAT
@@ -247,6 +247,18 @@ class AppRequester
 
 		return clientType;
 
+	}
+
+	/**
+	 * Is this an AppRequester that supports XA 
+	 *
+	 * return true if XAMGR >= 7, false otherwise
+	 **/
+
+	protected  boolean isXARequester()
+	{
+		return (getManagerLevel(CodePoint.XAMGR) >= 7);
+		
 	}
 
 }

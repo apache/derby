@@ -187,13 +187,13 @@ public class DB2jServerImpl {
 												 7, // SQLAM
 												 0, // SUPERVISOR
 												 0, // SYNCPTMGR
-												 0  // XAMGR
+												 7  // XAMGR
 												};
 											
 	
 	protected PrintWriter logWriter;                        // console
 	protected PrintWriter cloudscapeLogWriter;              // derby.log
-	protected Driver cloudscapeDriver;
+	private static Driver cloudscapeDriver;
 
 	// error types
 	private final static int ERRTYPE_SEVERE = 1;
@@ -382,6 +382,13 @@ public class DB2jServerImpl {
 		else
 			return null;
     }
+
+	protected static Driver getDriver()
+	{
+		return cloudscapeDriver;
+	}
+	
+
 	/********************************************************************************
 	 * Implementation of NetworkServerControl API
 	 * The server commands throw exceptions for errors, so that users can handle

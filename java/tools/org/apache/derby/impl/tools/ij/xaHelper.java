@@ -52,18 +52,23 @@ class xaHelper implements xaAbstractHelper
 	private ConnectionPoolDataSource currentCPDataSource;
 	private PooledConnection currentPooledConnection;
 
-  private String framework_property;
+	private boolean isJCC;
+	private String framework;
 
   xaHelper()
   {
   }
 	  
 	  
-   public void setFramework(String framework)
-  {
-    this.framework_property = framework_property;
-  }
-	
+	public void setFramework(String fm)
+	{
+		framework = fm.toUpperCase();
+		if (framework.endsWith("NET") ||
+			framework.equals("DB2JCC"))
+			isJCC = true;
+
+	}
+		
 	private Xid makeXid(int xid)
 	{
 		return new ijXid(xid, databaseName.getBytes());
@@ -78,31 +83,58 @@ class xaHelper implements xaAbstractHelper
 			  currentXADataSource = (XADataSource) getXADataSource();
 
 			  databaseName = parser.stringValue(dbname.image);
+			  
+			  if (isJCC)
+			  {
+			  xaHelper.setDataSourceProperty(currentXADataSource,
+											 "ServerName", "localhost");
+			  xaHelper.setDataSourceProperty(currentXADataSource,
+											 "portNumber", 1527);
+			  
+			  xaHelper.setDataSourceProperty(currentXADataSource,
+											 "driverType", 4);
+
+			  xaHelper.setDataSourceProperty(currentXADataSource, 
+											 "retrieveMessagesFromServerOnGetMessage", true);
+			  String user;
+			  String password;
+			  user = "APP";
+			  password = "APP";
+			  xaHelper.setDataSourceProperty(currentXADataSource,
+											 "user", user);
+			  xaHelper.setDataSourceProperty(currentXADataSource,
+											 "password", password);
+			  //xaHelper.setDataSourceProperty(currentXADataSource,
+			  //"traceFile", "trace.out." + framework);
+			  }
+
 			  xaHelper.setDataSourceProperty(currentXADataSource, "databaseName", databaseName);
-			  xaHelper.setDataSourceProperty(currentXADataSource, "dataSourceName", databaseName);
 
 			if (shutdown != null && shutdown.toString().toLowerCase(Locale.ENGLISH).equals("shutdown"))
-			{
-			  xaHelper.setDataSourceProperty(currentXADataSource, "shutdownDatabase", "shutdown");
+			{	
+				if (isJCC)
+					xaHelper.setDataSourceProperty(currentXADataSource,"databaseName", databaseName + ";shutdown=true");
+				else
+					xaHelper.setDataSourceProperty(currentXADataSource, "shutdownDatabase", "shutdown");
 
 				// do a getXAConnection to shut it down */
 				currentXADataSource.getXAConnection().getConnection();
-
 				currentXADataSource = null;
 				currentXAConnection = null;
 			}
-			else if (create != null)
+			else if (create != null && create.toLowerCase(java.util.Locale.ENGLISH).equals("create"))
 			{
-				if (create.toLowerCase(java.util.Locale.ENGLISH).equals("create"))
-				{
-					xaHelper.setDataSourceProperty(currentXADataSource, "createDatabase", "create");
+				if (isJCC)
+					xaHelper.setDataSourceProperty(currentXADataSource,"databaseName", databaseName + ";create=true");
+				else
+					xaHelper.setDataSourceProperty(currentXADataSource,
+												   "createDatabase", "create");
 
-					/* do a getXAConnection to create it */
-					XAConnection conn = currentXADataSource.getXAConnection();
-					conn.close();
-
-					xaHelper.setDataSourceProperty(currentXADataSource, "createDatabase", null);
-				}
+				/* do a getXAConnection to create it */
+				XAConnection conn = currentXADataSource.getXAConnection();
+				conn.close();
+				
+				xaHelper.setDataSourceProperty(currentXADataSource, "createDatabase", null);
 			}
 		}
 		catch (Throwable t)
@@ -366,7 +398,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		databaseName = parser.stringValue(dbname.image);
 		xaHelper.setDataSourceProperty(currentDataSource, "databaseName", databaseName);
-
+		xaHelper.setDataSourceProperty(currentXADataSource, "dataSourceName", databaseName);
 		// make a connection
 		Connection c = null;
 		String username = null;
@@ -450,7 +482,11 @@ class xaHelper implements xaAbstractHelper
 		// if we new it directly, then it will the tools.jar file to bloat.
 		try
 		{
-			return (XADataSource)(Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource").newInstance());
+			if (isJCC)
+				return (XADataSource) 
+					(Class.forName("com.ibm.db2.jcc.DB2XADataSource").newInstance());
+			else
+				return (XADataSource)(Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource").newInstance());
 		}
 		catch(ClassNotFoundException cnfe) {
 			throw new ijException(LocalizedResource.getMessage("IJ_XAClass"));
@@ -462,7 +498,24 @@ class xaHelper implements xaAbstractHelper
 	}
 	private static final Class[] STRING_P = { "".getClass() };
 	private static final Class[] INT_P = { Integer.TYPE };
+	private static final Class[] BOOLEAN_P = {Boolean.TYPE };
 
+	private static void setDataSourceProperty(Object ds, String property, int 
+											  value) throws SQLException
+	{
+		String methodName =
+			"set" + Character.toUpperCase(property.charAt(0)) + property.substring(1);
+		try {
+			java.lang.reflect.Method m = ds.getClass().getMethod(methodName, INT_P);
+			m.invoke(ds, new Object[] {new Integer(value)});
+		}
+		catch (Exception e)
+		{
+			throw new SQLException(property + " ???" + e.getMessage());
+		}		
+		
+	}
+	
 	private static void setDataSourceProperty(Object ds, String property, String value) throws SQLException {
 
 		String methodName =
@@ -478,7 +531,23 @@ class xaHelper implements xaAbstractHelper
 			//m.invoke(ds, new Object[] {Integer.valueOf(value)});
 		}
 	}
+
+private static void setDataSourceProperty(Object ds, String property, boolean value) throws SQLException {
+
+		String methodName =
+			"set" + Character.toUpperCase(property.charAt(0)) + property.substring(1);
+
+		try {
+			java.lang.reflect.Method m = ds.getClass().getMethod(methodName, BOOLEAN_P);
+			m.invoke(ds, new Object[] {new Boolean(value)});
+			return;
+		} catch (Exception nsme) {
+			throw new SQLException(property + " ???");
+		}
+	}
 }
+
+
 
 class ijXid implements Xid, java.io.Serializable
 {

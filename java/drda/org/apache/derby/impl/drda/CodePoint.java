@@ -754,6 +754,86 @@ class CodePoint
 	static final int OUTOVRFRS = 1; 	// Output Override allowed on first CNTQRY
 	static final int OUTOVRANY = 2; 	// Output Override allowed on any CNTQRY
 
+
+
+	//--------------------------XA code points---------------------------
+	
+	
+	// Release conversation
+	public static final int RLSCONV = 0x119F;
+
+	// SYNC Point Control Reply
+	public static final int SYNCCRD = 0x1248;
+	
+	// XA Return Value
+	public static final int XARETVAL = 0x1904;
+	
+	// XA Timeout Value;
+	public static final int TIMEOUT = 0x1907;
+
+	// new unit of work for XA
+	public static final int SYNCTYPE_NEW_UOW = 0x09;
+	
+	// End unit of work (Sync type).
+	public static final int SYNCTYPE_END_UOW = 0x0B;
+	
+	// Prepare to commit (Sync type).
+	public static final int SYNCTYPE_PREPARE = 0x01;
+	
+	// migrate to resync server sync type
+	public static final int SYNCTYPE_MIGRATE = 0x02;
+	
+	// commit sync type
+	public static final int SYNCTYPE_COMMITTED = 0x03;
+	
+	// request to commit sync type
+	public static final int SYNCTYPE_REQ_COMMIT = 0x05;
+
+	// request to forget sync type
+	public static final int SYNCTYPE_REQ_FORGET = 0x06;
+	
+	//rollback sync type
+	public static final int SYNCTYPE_ROLLBACK = 0x04;
+	
+	// Request Sync log information (Sync type).
+	static final int SYNCTYPE_REQ_LOG = 0x08;
+
+	// migrated unit of work sync type
+	public static final int SYNCTYPE_MIGRATED = 0x0A;
+	
+	//recover sync type
+	public static final int SYNCTYPE_INDOUBT = 0x0C;
+
+	
+	// Forget unit of work.
+	public static final int FORGET = 0x1186;
+	
+	// SYNC Type Codepoint
+	public static final int SYNCTYPE = 0x1187;
+	
+	// XId Codepoint
+	public static final int XID = 0x1801;
+	
+	// XA Flag Codepoint
+	public static final int XAFLAGS = 0x1903;
+	
+	// Resync Type
+	public static final int RSYNCTYP = 0x11EA;
+	
+	// Sync Resync Reply
+	public static final int SYNCRRD = 0x126D;
+	
+	// XA Flags
+	public static final int TMNOFLAGS = 0x00000000;
+	
+
+	// Prepared and hueristic complete list
+	static final int PRPHRCLST = 0x1905;
+	
+	// XID count
+	static final int XIDCNT = 0x1906;
+	
+	
 	//-----------------------Manager code points --------------------------
 
 	protected static int [] MGR_CODEPOINTS = {

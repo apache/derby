@@ -1,5 +1,5 @@
 /*
-   Derby - Class org.apache.derby.impl.drda.DRDAConnThread
+    Derby - Class org.apache.derby.impl.drda.DRDAConnThread
 
    Copyright 2001, 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -15,8 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
- */
-
+*/
 /**
  * This class translates DRDA protocol from an application requester to JDBC
  * for Cloudscape and then translates the results from Cloudscape to DRDA
@@ -56,7 +55,6 @@ import java.math.BigDecimal;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.DB2Limit;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
@@ -64,10 +62,8 @@ import org.apache.derby.impl.jdbc.EmbedSQLWarning;
 import org.apache.derby.impl.jdbc.EmbedStatement;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedConnection;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
-
 import org.apache.derby.iapi.services.info.JVMInfo;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -108,11 +104,14 @@ public class DRDAConnThread extends Thread {
 	private OutputStream sockos;
 	private DDMReader reader;
 	private DDMWriter writer;
+	private DRDAXAProtocol xaProto;
+
 	private static int [] ACCRDB_REQUIRED = {CodePoint.RDBACCCL, 
 											 CodePoint.CRRTKN,
 											 CodePoint.PRDID,
 											 CodePoint.TYPDEFNAM,
 											 CodePoint.TYPDEFOVR};
+
 	private static int MAX_REQUIRED_LEN = 5;
 
 	private int currentRequiredLength = 0;
@@ -270,6 +269,24 @@ public class DRDAConnThread extends Thread {
 	protected OutputStream getOutputStream()
 	{
 		return sockos;
+	}
+
+	/**
+	 *  get DDMReader
+	 * @return DDMReader for this thread
+	 */
+	protected DDMReader getReader()
+	{
+		return reader;
+	}
+	
+	/** 
+	 * get  DDMWriter 
+	 * @return DDMWriter for this thread
+	 */
+	protected DDMWriter getWriter()
+	{
+		return writer;
 	}
 
 	/**
@@ -784,8 +801,7 @@ public class DRDAConnThread extends Thread {
 					}
 					break;
 				case CodePoint.EXCSAT:
-					parseEXCSAT2();
-					writeEXCSATRD();
+					parseDRDAConnection();
 					break;
 				/* since we don't support sqlj, we won't get bind commands from jcc, we
 				 * might get it from ccc; just skip them.
@@ -854,6 +870,11 @@ public class DRDAConnThread extends Thread {
 						errorInChain(e);
 					}
 					break;
+				case CodePoint.SYNCCTL:
+					if (xaProto == null)
+						xaProto = new DRDAXAProtocol(this);
+					xaProto.parseSYNCCTL();
+					break;
 				default:
 					codePointNotSupported(codePoint);
 			}
@@ -902,7 +923,6 @@ public class DRDAConnThread extends Thread {
 		throws  DRDAProtocolException, SQLException
 	{
 		int codePoint;
-		boolean sessionOK = true;
 		correlationID = reader.readDssHeader();
 		if (SanityManager.DEBUG) {
 		  if (correlationID == 0)
@@ -926,6 +946,16 @@ public class DRDAConnThread extends Thread {
 
 		// set up a new Application Requester to store information about the
 		// application requester for this session
+		
+		return parseDRDAConnection();
+	}
+	
+
+	private boolean parseDRDAConnection() throws DRDAProtocolException
+	{
+		int codePoint;
+		boolean sessionOK = true;
+
 		appRequester = new AppRequester();
 		parseEXCSAT();
 		writeEXCSATRD();
@@ -1041,6 +1071,7 @@ public class DRDAConnThread extends Thread {
 		session.appRequester = server.getAppRequester(appRequester);
 		return sessionOK;
 	}
+
 	/**
 	 * Write RDB Failure
 	 *
@@ -1105,7 +1136,6 @@ public class DRDAConnThread extends Thread {
 		if (endOfName != -1)
 			realName = realName.substring(0, endOfName);
 		retSecChkCode = getConnFromDatabaseName();
-
 		return retSecChkCode;
 	}
 
@@ -1122,17 +1152,12 @@ public class DRDAConnThread extends Thread {
 	{
 		Properties p = new Properties();
 		databaseAccessException = null;
-		p.put(Attribute.USERNAME_ATTR, database.userId);
-		p.put(Attribute.PASSWORD_ATTR, database.password);
 		//if we haven't got the correlation token yet, use session number for drdaID
 		if (session.drdaID == null)
 			session.drdaID = leftBrace + session.connNum + rightBrace;
 		p.put(Attribute.DRDAID_ATTR, session.drdaID);
 	 	try {
-			Connection conn =
-				server.cloudscapeDriver.connect(Attribute.PROTOCOL  + database.dbName, p);
-	  		conn.setAutoCommit(false);
-			database.setConnection(conn);
+			database.makeConnection(p);
 	  	} catch (SQLException se) {
 			String sqlState = se.getSQLState();
 			// need to set the security check code based on the reason the connection     
@@ -1264,6 +1289,7 @@ public class DRDAConnThread extends Thread {
 			codePoint = reader.getCodePoint();
 		}
 	}
+
 	/**
 	 * Parses EXCSAT2 (Exchange Server Attributes)
 	 * Instance variables
@@ -1372,7 +1398,7 @@ public class DRDAConnThread extends Thread {
 			else
 				unknownManagers.addElement(new Integer(manager));
 			if (SanityManager.DEBUG)
-				trace("Manager = " + java.lang.Integer.toHexString(manager) + 
+			   trace("Manager = " + java.lang.Integer.toHexString(manager) + 
 					  " ManagerLevel " + managerLevel);
 		}
 		sqlamLevel = appRequester.getManagerLevel(CodePoint.SQLAM);
@@ -2124,7 +2150,7 @@ public class DRDAConnThread extends Thread {
 		// check for required variables
 		if (pkgnamcsn == null)
 			missingCodePoint(CodePoint.PKGNAMCSN);
-		if (!gotQryblksz)
+ 		if (!gotQryblksz)
 			missingCodePoint(CodePoint.QRYBLKSZ);
 		if (sqlamLevel >= MGRLVL_7 && !gotQryinsid)
 			missingCodePoint(CodePoint.QRYINSID);
@@ -2315,7 +2341,7 @@ public class DRDAConnThread extends Thread {
 			//This is a unique sequence number per session
 			writer.writeInt(session.qryinsid++);
 			//Write the scroll attributes if they are set
-			if (stmt.getScrollType() != 0)
+			if (stmt.isScrollable())
 			{
 				writer.writeScalar1Byte(CodePoint.QRYATTSCR, CodePoint.TRUE);
 				//Cloudscape only supports insensitive scroll cursors
@@ -2698,9 +2724,8 @@ public class DRDAConnThread extends Thread {
 									time + leftBrace + session.connNum + rightBrace;
 					if (SanityManager.DEBUG) 
 						trace("******************************************drdaID is: " + session.drdaID);
-					EmbedConnection conn = (EmbedConnection)(database.getConnection());
-					if (conn != null)
-						conn.setDrdaID(session.drdaID);
+					database.setDrdaID(session.drdaID);
+	
 					break;
 				//required
 				case CodePoint.RDBNAM:
@@ -3830,9 +3855,10 @@ public class DRDAConnThread extends Thread {
 							rtnParam = true;
 						}
 						ps = cs;
+						stmt.ps = ps;
 					}
 
-					pmeta = ((EmbedPreparedStatement) ps).getEmbedParameterSetMetaData();
+					pmeta = stmt.getParameterMetaData();
 
 					reader.readBytes(6);	// descriptor footer
 					break;
@@ -4822,7 +4848,16 @@ public class DRDAConnThread extends Thread {
 
 		// If it is a real SQL Error write a SQLERRRM first
 		severity = getExceptionSeverity(e);
-		if (sendSQLERRRM || (severity > CodePoint.SVRCOD_ERROR))
+		if (severity > CodePoint.SVRCOD_ERROR)
+		{
+			// For a session ending error > CodePoint.SRVCOD_ERROR you cannot
+			// send a SQLERRRM. A CMDCHKRM is required.  In XA if there is a
+			// lock timeout it ends the whole session. I am not sure this 
+			// is the correct behaviour but if it occurs we have to send 
+			// a CMDCHKRM instead of SQLERRM
+			writeCMDCHKRM(severity);
+		}
+		else if (sendSQLERRRM)
 		{
 			writeSQLERRRM(severity);
 		}
@@ -4896,6 +4931,26 @@ public class DRDAConnThread extends Thread {
 		writer.endDdmAndDss ();
 
 	}
+
+	/**
+	 * Write CMDCHKRM
+	 *
+	 * Instance Variables
+	 * 	SVRCOD - Severity Code - required 
+ 	 *
+	 * @param	severity	severity of error
+	 *
+	 * @exception DRDAProtocolException
+	 */
+	private void writeCMDCHKRM(int severity) throws DRDAProtocolException
+	{
+		writer.createDssReply();
+		writer.startDdm(CodePoint.CMDCHKRM);
+		writer.writeScalar2Bytes(CodePoint.SVRCOD, severity);
+		writer.endDdmAndDss ();
+
+	}
+
 	/**
 	 * Translate from Cloudscape exception severity to SVRCOD
 	 *
@@ -5385,7 +5440,7 @@ public class DRDAConnThread extends Thread {
 	{
 		PreparedStatement ps = stmt.getPreparedStatement();
 		ResultSetMetaData rsmeta = ps.getMetaData();
-		EmbedParameterSetMetaData pmeta = ((EmbedPreparedStatement) ps).getEmbedParameterSetMetaData();
+		EmbedParameterSetMetaData pmeta = stmt.getParameterMetaData();
 		int numElems = 0;
 		if (e == null || e instanceof SQLWarning)
 		{
@@ -5440,7 +5495,7 @@ public class DRDAConnThread extends Thread {
 		if (!stmt.needsToSendParamData)
 			rs = stmt.getResultSet();
 		if (rs == null)		// this is a CallableStatement, use parameter meta data
-			pmeta = ((EmbedPreparedStatement) stmt.ps).getEmbedParameterSetMetaData();
+			pmeta = stmt.getParameterMetaData();
 		else
 			rsmeta = rs.getMetaData();
 
@@ -5616,10 +5671,6 @@ public class DRDAConnThread extends Thread {
 		if (!stmt.needsToSendParamData)
 			rs = stmt.getResultSet();
 		
-		if (rs != null)
-			rsstmt = (EmbedStatement) rs.getStatement();
-		else
-			rsstmt = (EmbedStatement) stmt.getPreparedStatement();
 
 		if (JVMInfo.JDK_ID < 2) //write null indicator for SQLDHROW because there is no holdability support prior to jdk1.3
 		{
@@ -5630,7 +5681,7 @@ public class DRDAConnThread extends Thread {
 		writer.writeByte(0);		// SQLDHROW INDICATOR
 
 		//SQLDHOLD
-		writer.writeShort(rsstmt.getResultSetHoldability());
+		writer.writeShort(stmt.getResultSetHoldability());
 		
 		//SQLDRETURN
 		writer.writeShort(0);
@@ -5694,6 +5745,7 @@ public class DRDAConnThread extends Thread {
 				if ((stmt.getBlksize() - endOffset ) < rowsize)
 					getMoreData = false;
 
+				startOffset = endOffset;
 			}
 
 		}
@@ -5729,7 +5781,7 @@ public class DRDAConnThread extends Thread {
 		if (rs != null)
 		{
 			numCols = stmt.getNumRsCols();					
-			if (stmt.getScrollType() != 0)
+			if (stmt.isScrollable())
 				hasdata = positionCursor(stmt, rs);
 			else
 				hasdata = rs.next();
@@ -5895,14 +5947,14 @@ public class DRDAConnThread extends Thread {
 			}
 			/*(1) scrollable we return at most a row set; OR (2) no retrieve data
 			 */
-			else if (stmt.getScrollType() != 0 || noRetrieveRS)
+			else if (stmt.isScrollable() || noRetrieveRS)
 				moreData=false;
 
 		} while (hasdata && rowCount < stmt.getQryrowset());
 
 		// add rowCount to statement row count
 		// for non scrollable cursors
-		if (stmt.getScrollType() == 0)
+		if (!stmt.isScrollable())
 			stmt.rowCount += rowCount;
 
 		if (!hasdata)
@@ -5911,7 +5963,7 @@ public class DRDAConnThread extends Thread {
 			moreData=false;
 		}
 
-		if (stmt.getScrollType() == 0)
+		if (!stmt.isScrollable())
 			stmt.setHasdata(hasdata);
 		return moreData;
 	}
@@ -5977,7 +6029,7 @@ public class DRDAConnThread extends Thread {
 		int blksize = stmt.getBlksize() > 0 ? stmt.getBlksize() : CodePoint.QRYBLKSZ_MAX;
 		if (rs != null)
 		{
-			if (stmt.getScrollType() != 0)
+			if (stmt.isScrollable())
 			{
 				// for scrollable cursors - calculate the row count
 				// since we may not have gone through each row
@@ -6591,7 +6643,7 @@ public class DRDAConnThread extends Thread {
 	 *
 	 * @exception DRDAProtocolException
 	 */
-	private void invalidCodePoint(int codePoint) throws DRDAProtocolException
+	protected void invalidCodePoint(int codePoint) throws DRDAProtocolException
 	{
 		throwSyntaxrm(CodePoint.SYNERRCD_INVALID_CP_FOR_CMD, codePoint);
 	}
@@ -6601,7 +6653,7 @@ public class DRDAConnThread extends Thread {
 	 * @param codePoint  code point value
 	 * @exception DRDAProtocolException
 	 */
-	private void codePointNotSupported(int codePoint) throws DRDAProtocolException
+	protected void codePointNotSupported(int codePoint) throws DRDAProtocolException
 	{
 		throw new
 			DRDAProtocolException(DRDAProtocolException.DRDA_Proto_CMDNSPRM,
@@ -6928,7 +6980,13 @@ public class DRDAConnThread extends Thread {
 	 */
 	private void addDatabase(String dbname)
 	{
-		Database db = new Database(dbname);
+		Database db;
+		if (appRequester.isXARequester())
+		{
+			db = new XADatabase(dbname);
+		}
+		else
+			db = new Database(dbname);
 		session.addDatabase(db);
 		session.database = db;
 		database = db;
@@ -7151,6 +7209,7 @@ public class DRDAConnThread extends Thread {
 		return s;
 	}
 
+
 	/**
 	 * Finalize the current DSS chain and send it if
 	 * needed.
@@ -7163,5 +7222,3 @@ public class DRDAConnThread extends Thread {
 	}
 
 }
-
-

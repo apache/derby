@@ -88,4 +88,23 @@ public interface BrokeredConnectionControl
 		Optionally wrap a CallableStatement with an CallableStatement.
 	*/
 	public CallableStatement wrapStatement(CallableStatement realStatement, String sql) throws SQLException;
+
+	/** Set drdaID of underlying connection 
+	 * @param drdaID - drdaId of connection
+	 */
+	public void setDrdaID(String drdaID);	
+
+	/**
+	 *  Set the internal isolation level to use for preparing statements.
+	 *  used for Network Server
+	 *  @param level - isolation level for prepared statements 
+	 */
+	public void setPrepareIsolation(int level) throws SQLException;
+
+	/**
+	 *  Get the internal isolation level to use for preparing statements.
+	 *  @return prepare isolation level
+	 */
+	public int getPrepareIsolation() throws SQLException;
+
 }

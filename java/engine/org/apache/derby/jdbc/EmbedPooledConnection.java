@@ -392,4 +392,40 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	public CallableStatement wrapStatement(CallableStatement cs, String sql) throws SQLException {
 		return cs;
 	}
+
+	/**
+	 * set DrdaId for this connection. 
+	 * Used by network server to identify connection.
+	 * @param  drdaID drda connection identifier
+	 */
+	public   void setDrdaID(String drdaID)
+	{
+		realConnection.setDrdaID(drdaID);
+	}
+
+	/**
+	 *  Set the internal isolation level to use for preparing statements.
+	 *  Subsequent prepares will use this isoalation level
+	 * @param level internal isolation level 
+	 *
+	 * @throws SQLException
+	 * @see BrokeredConnection#setPrepareIsolation
+	 * 
+	 */
+	public  void setPrepareIsolation(int level) throws SQLException
+	{
+		realConnection.setPrepareIsolation(level);
+	}
+	
+	/** 
+	 * Get prepare isolation level.
+	 * For network server this will be the isolation level at which statements
+	 * will be prepared.
+	 * @return isolation level
+	 */
+	public  int getPrepareIsolation() throws SQLException
+	{
+		return realConnection.getPrepareIsolation();
+	}
+
 }
