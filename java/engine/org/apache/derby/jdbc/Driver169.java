@@ -183,12 +183,6 @@ public abstract class Driver169 implements ModuleControl {
 		}
 	}
 
-	private LanguageConnectionContext getCurrentLanguageContext() {
-		ContextManager cm = getCurrentContextManager();
-		if (cm == null) { return null; }
-		return (LanguageConnectionContext)cm.getContext(LanguageConnectionContext.CONTEXT_ID);
-	}
-
 	public int getMajorVersion() {
 		return Monitor.getMonitor().getEngineVersion().getMajorVersion();
 	}
