@@ -678,7 +678,14 @@ public interface Property {
 	public final static String DRDA_PROP_PORTNUMBER = "derby.drda.portNumber";
 	public final static String DRDA_PROP_HOSTNAME = "derby.drda.host";
 
-
+	/**
+	 * derby.drda.keepAlive
+	 *
+	 *<BR>
+	 * client socket setKeepAlive value
+	 */
+	public final static String DRDA_PROP_KEEPALIVE = "derby.drda.keepAlive";
+	
 	/*
 	** Internal properties, mainly used by Monitor.
 	*/

@@ -59,9 +59,10 @@ class ClientThread extends Thread {
 								return serverSocket.accept();
 							}
 						}
-					);
-					//set time out
-					
+					 );
+							clientSocket.setKeepAlive(parent.getKeepAlive());
+					//set time out					
+					//this looks highly suspect.  Why does timeSlice setSoTimeout?		
 					if (timeSlice != 0)
 						clientSocket.setSoTimeout(timeSlice);
 				} catch (PrivilegedActionException e) {

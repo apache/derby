@@ -239,6 +239,7 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 	private Object timeSliceSync = new Object();// object to use for syncing reading
 										// and changing timeSlice
 
+	private boolean keepAlive = true;   // keepAlive value for client socket 
 	private int minPoolSize;			//minimum pool size for pooled connections
 	private int maxPoolSize;			//maximum pool size for pooled connections
 	private Object poolSync = new Object();	// object to use for syning reading
@@ -2513,6 +2514,12 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 			portNumber = getIntPropVal(Property.DRDA_PROP_PORTNUMBER, propval);
 
 		propval = PropertyUtil.getSystemProperty( 
+			Property.DRDA_PROP_KEEPALIVE);
+		if (propval != null && 
+			StringUtil.SQLEqualsIgnoreCase(propval,"false"))
+			keepAlive = false;
+		
+		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_HOSTNAME);
 		if (propval != null)
 			hostArg = propval;
@@ -2568,6 +2575,7 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 		}
 		return val;
 	}
+
 	/**
 	 * Handle console error message
 	 * 	- display on console and if it is a user error, display usage
@@ -2944,6 +2952,15 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 			timeSlice = value;
 		}
 	}
+	
+	/** 
+	 * Get the current value of keepAlive to configure how long the server
+	 * should keep the socket alive for a disconnected client
+	 */
+	protected boolean getKeepAlive()
+	{
+		return keepAlive;
+	}
 
 	/**
 	 * Get the current value of minimum number of threads to create at start
@@ -3006,6 +3023,7 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 			return minPoolSize;
 		}
 	}
+
 	/**
 	 * Set the current value of minimum number of pooled connections to create at start
 	 *
@@ -3017,6 +3035,7 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 			minPoolSize = value;
 		}
 	}
+	
 	/**
 	 * Get the current value of maximum number of pooled connections to create 
 	 *
@@ -3245,6 +3264,8 @@ public class DB2jServerImpl { private static final String copyrightNotice = org.
 		Properties retval = new Properties();
 		retval.put(Property.DRDA_PROP_PORTNUMBER, new Integer(portNumber).toString());
 		retval.put(Property.DRDA_PROP_HOSTNAME, hostArg);
+		retval.put(Property.DRDA_PROP_KEEPALIVE, new Boolean(keepAlive).toString());
+
 		String tracedir = getTraceDirectory();
 		if (tracedir != null)
 			retval.put(Property.DRDA_PROP_TRACEDIRECTORY, tracedir);
