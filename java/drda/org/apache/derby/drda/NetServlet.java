@@ -81,7 +81,7 @@ public class NetServlet extends HttpServlet {
 		throws ServletException
 	{
 
-		LocalizedResource langUtil = new LocalizedResource();
+		LocalizedResource langUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
 				
 		String port = config.getInitParameter("portNumber");
 		if (port != null) {
@@ -896,7 +896,6 @@ public class NetServlet extends HttpServlet {
 		locale = null;
 		if (acceptLanguage == null)
 		{
-        	localUtil.init();
 			return localUtil;
 		}
 		// Use a tokenizer ot separate acceptable languages
@@ -917,7 +916,6 @@ public class NetServlet extends HttpServlet {
 			}
 		}
 		// nothing worked use defaults
-        localUtil.init();
 		return localUtil;
 		
 	}
