@@ -21,10 +21,6 @@ import java.net.*;
 	A set of public static methods for dealing with File objects.
 */
 public abstract class FileUtil {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     private static final int BUFFER_SIZE = 4096*4;
 	/**

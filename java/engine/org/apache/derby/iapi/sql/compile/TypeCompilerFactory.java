@@ -20,10 +20,6 @@ import org.apache.derby.iapi.types.TypeId;
 
 public interface TypeCompilerFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	public static final String MODULE = "org.apache.derby.iapi.sql.compile.TypeCompilerFactory";
 
 	/**

@@ -61,10 +61,6 @@ import java.io.Serializable;
 public class FormatIdOutputStream
 extends DataOutputStream implements ObjectOutput, ErrorInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	  Constructor for a FormatIdOutputStream

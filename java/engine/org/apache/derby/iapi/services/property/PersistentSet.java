@@ -18,10 +18,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 public interface PersistentSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
     /**
      * Gets a value for a stored property. The returned value will be:
 	 *

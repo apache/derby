@@ -17,12 +17,7 @@ import org.apache.derby.iapi.services.context.Context;
 	Generated classes must implement this interface.
 
 */
-public interface GeneratedByteCode { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public interface GeneratedByteCode {
 
 	/**
 		Initialize the generated class from a context.

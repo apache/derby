@@ -16,10 +16,6 @@ import java.io.IOException;
 
 /** Float Constant - page 96 */
 final class CONSTANT_Float_info extends ConstantPoolEntry {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private final float value;
 
 	CONSTANT_Float_info(float value) {

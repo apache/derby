@@ -87,10 +87,6 @@ import java.util.Iterator;
 public class TableDescriptor extends TupleDescriptor
 	implements UniqueSQLObjectDescriptor, Provider
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public static final int BASE_TABLE_TYPE = 0;
 	public static final int SYSTEM_TABLE_TYPE = 1;
 	public static final int VIEW_TYPE = 2;

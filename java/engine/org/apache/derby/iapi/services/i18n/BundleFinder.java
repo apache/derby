@@ -14,12 +14,7 @@ import java.util.ResourceBundle;
 
 /**
  */
-public interface BundleFinder { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public interface BundleFinder {
 
 	/**
 		Return the bundle to be used. The msgIdf is passed

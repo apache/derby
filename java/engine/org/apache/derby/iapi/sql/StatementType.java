@@ -17,10 +17,6 @@ package org.apache.derby.iapi.sql;
  */
 public interface StatementType
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	public static final int UNKNOWN	= 0;
 	public static final int INSERT	= 1;
 	public static final int BULK_INSERT_REPLACE = 2;

@@ -41,13 +41,7 @@ import java.util.Enumeration;
  * <p>
  * @see org.apache.derby.iapi.services.sanity.AssertFailure
  */
-public class SanityManager { 
-
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public class SanityManager {
 	/**
 	 * The build tool may be configured to alter
 	 * this source file to reset the static final variables

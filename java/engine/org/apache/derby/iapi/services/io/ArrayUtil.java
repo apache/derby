@@ -25,10 +25,6 @@ import java.lang.reflect.Array;
  */
 public abstract class ArrayUtil
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	///////////////////////////////////////////////////////////////////
 	//
 	// Methods for Arrays of OBJECTS.  Cannot be used for an

@@ -22,10 +22,6 @@ import java.sql.Timestamp;
  */
 public class StatisticsDescriptor extends TupleDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	private UUID statID; 		// my UUID 
 	private UUID statRefID;  	// UUID of object for which I'm a statistic 
 	private UUID statTableID;  	// UUID of table for which I'm a stat 

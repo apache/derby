@@ -20,10 +20,6 @@ package org.apache.derby.iapi.error;
  */
 public interface ExceptionSeverity
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/*
 	 * Use NO_APPLICABLE_SEVERITY for internal errors and unit
 	 * tests that don't need to report or worry about severities.

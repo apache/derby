@@ -23,10 +23,6 @@ import org.apache.derby.iapi.util.JBitSet;
  */
 public interface RequiredRowOrdering
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	static final int SORT_REQUIRED = 1;
 	static final int ELIMINATE_DUPS = 2;
 	static final int NOTHING_REQUIRED = 3;

@@ -17,12 +17,7 @@ import org.apache.derby.iapi.error.StandardException;
 	ModuleControl is <B>optionally</B> implemented by a module's factory class.
 */
 
-public interface ModuleControl { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface ModuleControl {
 
 	/**
 		Boot this module with the given properties. Creates a module instance

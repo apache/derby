@@ -31,10 +31,6 @@ import org.apache.derby.iapi.reference.DB2Limit;
 public interface TypeCompiler
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Various fixed numbers related to datatypes.
 	 */
 	// Need to leave space for '-'

@@ -45,10 +45,6 @@ import java.sql.SQLWarning;
 
 public interface ResultSet
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/* Get time only spent in this ResultSet */
 	public static final int CURRENT_RESULTSET_ONLY = 0;
 	/* Get time spent in this ResultSet and below */

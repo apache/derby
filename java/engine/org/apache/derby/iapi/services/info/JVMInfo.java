@@ -17,10 +17,6 @@ package org.apache.derby.iapi.services.info;
 public abstract class JVMInfo
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 		The JVM's runtime environment.
 		<UL>
 		<LI> 1 - JDK 1.1

@@ -68,11 +68,6 @@ import java.util.Hashtable;
 */
 
 public interface Lockable {
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
     
 	/**
 		Note the fact the object is locked. Performs required actions

@@ -19,10 +19,6 @@ import java.io.IOException;
 */
 public class LimitReader extends Reader implements Limit 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	protected int remainingBytes;
 	protected boolean limitInPlace;
 	private	Reader	reader;

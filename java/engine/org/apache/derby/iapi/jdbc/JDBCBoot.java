@@ -29,12 +29,7 @@ import java.io.PrintStream;
 	Should be used indirectly through JDBCDriver or JDBCServletBoot
 	or any other useful booting mechanism that comes along.
 */
-public class JDBCBoot { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public class JDBCBoot {
 
 	private Properties bootProperties;
 

@@ -33,10 +33,6 @@ import	org.apache.derby.impl.sql.compile.QueryTreeNode;
 public abstract class NodeFactory
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 		Module name for the monitor's module locating system.
 	 */
 	public static final String MODULE = "org.apache.derby.iapi.sql.compile.NodeFactory";

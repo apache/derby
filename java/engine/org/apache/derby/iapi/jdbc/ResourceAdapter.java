@@ -350,10 +350,6 @@ import org.apache.derby.iapi.error.StandardException;
 
  */
 public interface ResourceAdapter {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		If a run time global transaction exists, the resource adapter will find

@@ -22,12 +22,7 @@ import org.apache.derby.catalog.UUID;
 	It needs to be notified if the schema object changes, so that
 	it can recompile against the new information.
  */
-public interface Dependency { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface Dependency {
 
 	/**
 		return the provider's key for this dependency.

@@ -28,10 +28,6 @@ import org.apache.derby.catalog.Dependable;
 public class SchemaDescriptor extends TupleDescriptor 
 	implements UniqueTupleDescriptor, Provider
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	
 	/*
 	** When we boot, we put the system tables in

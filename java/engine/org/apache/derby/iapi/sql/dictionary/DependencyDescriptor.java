@@ -34,10 +34,6 @@ import org.apache.derby.iapi.sql.depend.Provider;
 public class DependencyDescriptor extends TupleDescriptor 
 	implements UniqueTupleDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/** public interface for this class is:
 		<ol>
 		<li>public DependableFinder getDependentFinder();</li>

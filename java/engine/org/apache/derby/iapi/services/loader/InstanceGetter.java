@@ -12,12 +12,7 @@ package org.apache.derby.iapi.services.loader;
 
 import java.lang.reflect.InvocationTargetException;
 
-public interface InstanceGetter { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public interface InstanceGetter {
 
 	/**
 		Create an instance of a class.

@@ -59,11 +59,6 @@ import java.math.BigDecimal;
 public interface LanguageConnectionContext extends Context {
 
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-
-	/**
 	 * this is the ID we expect these contexts
 	 * to be stored into a context manager under.
 	 */

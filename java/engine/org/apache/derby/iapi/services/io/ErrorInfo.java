@@ -15,10 +15,6 @@ package org.apache.derby.iapi.services.io;
  */
 interface ErrorInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	String getErrorInfo();
 
     Exception getNestedException();

@@ -24,12 +24,7 @@ import java.util.Enumeration;
 
 
 */
-public interface LockFactory extends PropertySetCallback { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface LockFactory extends PropertySetCallback {
 
 	/**
 		Lock an object within a compatability space

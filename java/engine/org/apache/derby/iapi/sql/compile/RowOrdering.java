@@ -18,10 +18,6 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public interface RowOrdering
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	static final int	ASCENDING = 1;
 	static final int	DESCENDING = 2;
 	static final int	DONTCARE = 3;

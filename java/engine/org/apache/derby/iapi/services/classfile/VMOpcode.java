@@ -17,12 +17,7 @@ package org.apache.derby.iapi.services.classfile;
  * REMIND: might want a debugging version of this,
  * that stored the stack depth and operand expectations.
  */
-public interface VMOpcode { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public interface VMOpcode {
     short BAD = -999; // used in mapping arrays to say "don't do that"
     short NOP = 0;
     short ACONST_NULL = 1;

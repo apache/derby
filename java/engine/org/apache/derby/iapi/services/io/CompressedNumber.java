@@ -25,10 +25,6 @@ import java.io.*;
 */
 
 public abstract class CompressedNumber {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	// the maximum number of bytes written out for an int
 	public static final int MAX_INT_STORED_SIZE = 4;

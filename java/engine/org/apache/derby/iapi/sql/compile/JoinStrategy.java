@@ -29,10 +29,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 public interface JoinStrategy {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Is this join strategy feasible under the circumstances?
 	 *
 	 * @param innerTable	The inner table of the join

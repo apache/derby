@@ -34,10 +34,6 @@ import org.apache.derby.iapi.services.context.ContextService;
 public final class FormatIdInputStream extends DataInputStream
 	 implements ErrorObjectInput, Resetable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	protected ClassFactory cf;
 	private ErrorInfo errorInfo;
     private Exception myNestedException;

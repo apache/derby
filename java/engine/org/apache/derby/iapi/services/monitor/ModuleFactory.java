@@ -28,10 +28,6 @@ and manages loading, starting, and finding them.
 
 public interface ModuleFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
     /**
      * Find the module in the system with the given module protocol,

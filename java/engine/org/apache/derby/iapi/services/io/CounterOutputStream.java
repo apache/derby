@@ -20,10 +20,6 @@ import java.io.EOFException;
 */
 
 public class CounterOutputStream extends OutputStream implements Limit {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	protected OutputStream out;
 	private int count;

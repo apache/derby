@@ -63,10 +63,6 @@ import java.sql.SQLException;
  */
 public class ConsistencyChecker
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/** no requirement for a constructor */
 	private ConsistencyChecker() {

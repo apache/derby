@@ -16,12 +16,7 @@ import java.io.IOException;
 	Methods that allow limits to be placed on an input or output stream to
 	avoid clients reading or writing too much information.
 */
-public interface Limit { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public interface Limit {
 
 	/**
 		Set the limit of the data that can be read or written. After this

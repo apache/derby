@@ -25,10 +25,6 @@ package org.apache.derby.iapi.services.io;
 public interface TypedFormat
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	  Get a universally unique identifier for the type of
 	  this object. 
 

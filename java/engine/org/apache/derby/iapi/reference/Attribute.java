@@ -31,12 +31,7 @@ package org.apache.derby.iapi.reference;
 	are public, static and final since they are declared in an interface.
 */
 
-public interface Attribute { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public interface Attribute {
 
 	/**
 		Not an attribute but the root for the JDBC URL that Cloudscape supports.

@@ -46,10 +46,6 @@ import org.apache.derby.iapi.error.StandardException;
 	@see Class#newInstance
 */
 public interface Cacheable  {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Set the identity of the object to represent an item that already exists,

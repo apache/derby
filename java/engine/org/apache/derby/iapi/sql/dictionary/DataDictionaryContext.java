@@ -22,10 +22,6 @@ import org.apache.derby.iapi.services.context.Context;
 
 public interface DataDictionaryContext extends Context
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// this is the ID we expect data dictionary contexts
 	// to be stored into a context manager under.
 	public static final String CONTEXT_ID = "DataDictionaryContext";

@@ -24,10 +24,6 @@ import java.io.InputStream;
 class ApplicationObjectInputStream extends ObjectInputStream
     implements ErrorObjectInput
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	protected ClassFactory cf;
 	protected ObjectStreamClass        initialClass;

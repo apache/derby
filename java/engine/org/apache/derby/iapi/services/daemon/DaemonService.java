@@ -30,10 +30,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public interface DaemonService 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public static int TIMER_DELAY = 10000; // wake up once per TIMER_DELAY milli-second
 
 

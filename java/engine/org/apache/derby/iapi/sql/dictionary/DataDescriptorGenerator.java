@@ -45,10 +45,6 @@ import java.io.InputStream;
 
 public class DataDescriptorGenerator 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	private 	UUIDFactory uuidf;
 
     protected	final DataDictionary	dataDictionary; // the data dictionary that this generator operates on

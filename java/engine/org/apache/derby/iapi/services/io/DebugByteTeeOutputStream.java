@@ -14,11 +14,6 @@ import org.apache.derby.iapi.services.io.AccessibleByteArrayOutputStream;
 
 
 class DebugByteTeeOutputStream extends FilterOutputStream {
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 	private AccessibleByteArrayOutputStream tee = new AccessibleByteArrayOutputStream(256);
 
 	DebugByteTeeOutputStream(OutputStream out) {

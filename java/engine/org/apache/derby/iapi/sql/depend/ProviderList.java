@@ -23,10 +23,6 @@ import java.util.Hashtable;
 public class ProviderList extends Hashtable
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
-	/**
 	 * Add a Provider to the list.
 	 *
 	 * @param prov	The Provider to add to the list.

@@ -29,12 +29,7 @@ import java.text.MessageFormat;
  *
  * @author ames
  */
-public final class MessageService { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public final class MessageService {
 
 	private static final Locale EN = new Locale("en", "US");
 

@@ -11,10 +11,6 @@
 package org.apache.derby.iapi.services.classfile;
 
 public interface VMDescriptor {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
     char C_VOID = 'V';
     String VOID = "V";
     char C_BOOLEAN = 'Z';

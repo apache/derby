@@ -23,10 +23,6 @@ import java.util.ArrayList;
 
 public class ConglomerateDescriptorList extends ArrayList
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
 
 	/**
 	 * Get a conglomerate descriptor by its number

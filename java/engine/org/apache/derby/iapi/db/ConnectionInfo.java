@@ -33,10 +33,6 @@ import java.sql.SQLException;
  
 public abstract class ConnectionInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	/** no requirement for a constructor */
 	private ConnectionInfo() {}

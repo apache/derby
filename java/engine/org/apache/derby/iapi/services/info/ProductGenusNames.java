@@ -33,10 +33,6 @@ package org.apache.derby.iapi.services.info;
   */
 public interface ProductGenusNames
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**Genus name for dbms products.*/
 	public static String DBMS = "DBMS";

@@ -43,10 +43,6 @@ public abstract class ConstraintDescriptor
 	extends TupleDescriptor
 	implements UniqueTupleDescriptor, Provider, Dependent
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// used to indicate what type of constraints we 
 	// are interested in
 	public static final int ENABLED		= 1;

@@ -25,10 +25,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public abstract class KeyConstraintDescriptor extends ConstraintDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	/** interface to this class:
 		<ol>
 		<li>public UUID getIndexId();</li>

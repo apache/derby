@@ -20,10 +20,6 @@ import java.io.IOException;
  */
 
 class ClassInput extends DataInputStream {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	ClassInput(InputStream in) {
 		super(in);

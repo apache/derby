@@ -20,10 +20,6 @@ import java.lang.reflect.Modifier;
 
 public class ClassSize
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
     public static final int refSize;
     private static final int objectOverhead = 2; // references, not bytes!
     private static final int booleanSize = 4;

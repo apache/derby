@@ -14,10 +14,6 @@ package org.apache.derby.iapi.services.locks;
 	Constants for the LockFactory
 */
 public interface C_LockFactory {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		Timeout value that indicates wait for the lock or latch forever.

@@ -21,10 +21,6 @@ import org.apache.derby.iapi.error.StandardException;
   */
 public interface Authorizer
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/** SQL write (insert,update,delete) operation */
 	public static final int SQL_WRITE_OP = 0;
 	/** SQL SELECT  operation */

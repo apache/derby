@@ -45,10 +45,6 @@ import org.apache.derby.catalog.UUID;
 
 public class ColumnDescriptor extends TupleDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	// implementation
 	DefaultInfo			columnDefaultInfo;

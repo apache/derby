@@ -34,10 +34,6 @@ import org.apache.derby.iapi.services.info.JVMInfo;
 */
 
 public interface RegisteredFormatIds {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 /* one byte  format identifiers never used
 String[] OneByte = {

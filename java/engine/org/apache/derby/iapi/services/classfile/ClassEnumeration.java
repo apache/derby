@@ -25,10 +25,6 @@ import org.apache.derby.iapi.services.classfile.VMDescriptor;
 
 
 class ClassEnumeration implements Enumeration {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	ClassHolder	cpt;
 	Enumeration			inner;
 	CONSTANT_Index_info	position;

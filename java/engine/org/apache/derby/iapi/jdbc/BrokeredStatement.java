@@ -28,11 +28,6 @@ import java.lang.reflect.*;
  */
 public class BrokeredStatement implements Statement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	/**
 		My control. Use the controlCheck() method to obtain the control

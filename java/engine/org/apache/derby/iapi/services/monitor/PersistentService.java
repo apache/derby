@@ -49,11 +49,6 @@ import java.io.IOException;
 public interface PersistentService {
 
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-
-	/**
 		Service stored in a directory.
 	*/
 	public static final String DIRECTORY = "directory";

@@ -26,10 +26,6 @@ import org.apache.derby.iapi.util.JBitSet;
 public interface OptimizablePredicateList 
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 *  Return the number of OptimizablePredicates in the list.
 	 *
 	 *  @return integer		The number of OptimizablePredicates in the list.

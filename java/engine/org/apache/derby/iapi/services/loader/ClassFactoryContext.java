@@ -18,10 +18,6 @@ import org.apache.derby.iapi.error.StandardException;
 */
 
 public abstract class ClassFactoryContext extends ContextImpl {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	public static final String CONTEXT_ID = "ClassFactoryContext";
 

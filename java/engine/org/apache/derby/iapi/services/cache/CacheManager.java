@@ -16,12 +16,7 @@ import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.util.Matchable;
 import org.apache.derby.iapi.util.Operator;
 
-public interface CacheManager { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface CacheManager {
 
     /**
      * @return the current maximum size of the cache.

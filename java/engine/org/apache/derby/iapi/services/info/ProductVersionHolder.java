@@ -101,10 +101,6 @@ import java.util.Properties;
   */
 public final class ProductVersionHolder implements java.security.PrivilegedAction
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	//
 	//Used as an invalid value for numbers. This works because all

@@ -15,10 +15,6 @@ import java.util.Vector;
 import java.io.IOException;
 
 class Attributes extends Vector {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private int classFileSize;
 
 	Attributes(int count) {

@@ -29,11 +29,6 @@ import java.io.UTFDataFormatException;
 */
 public final class ArrayInputStream extends InputStream implements LimitObjectInput {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-
 	private byte[] pageData;
 
 	private int		start;

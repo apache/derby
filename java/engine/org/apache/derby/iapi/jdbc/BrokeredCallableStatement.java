@@ -23,11 +23,6 @@ import java.util.Map;
 public class BrokeredCallableStatement extends BrokeredPreparedStatement
           implements CallableStatement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	public BrokeredCallableStatement(BrokeredStatementControl control, int jdbcLevel, String sql) throws SQLException {
 		super(control, jdbcLevel, sql);

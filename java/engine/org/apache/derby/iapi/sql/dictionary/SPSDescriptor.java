@@ -85,10 +85,6 @@ public class SPSDescriptor extends TupleDescriptor
 	implements UniqueSQLObjectDescriptor, Dependent, Provider
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Statement types.  
 	 * <UL>
 	 * <LI> SPS_TYPE_TRIGGER	- trigger (<B>NOT IMPLEMENTED</B>) </LI>

@@ -43,10 +43,6 @@ import org.apache.derby.catalog.UUID;
 public interface UUIDFactory 
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	  Create a new UUID.  The resulting object is guaranteed
 	  to be unique "across space and time".
 	  @return		The UUID.

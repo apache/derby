@@ -233,11 +233,6 @@ import java.io.PrintStream;
 */
 public class Monitor {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-
 	public static final String SERVICE_TYPE_DIRECTORY = "serviceDirectory";
 
 	public static final Object syncMe = new Object();

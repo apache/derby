@@ -21,10 +21,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface Visitor
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * This is the default visit operation on a 
 	 * QueryTreeNode.  It just returns the node.  This
 	 * will typically suffice as the default visit 

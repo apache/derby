@@ -22,10 +22,6 @@ package org.apache.derby.iapi.services.locks;
  */
 
 public interface VirtualLockTable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	// flags for Lockable.lockAttributes
 	public static final int LATCH = 1;

@@ -27,10 +27,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 public class  FileInfoDescriptor extends TupleDescriptor 
 	implements Provider, UniqueSQLObjectDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/** A type tho indicate the file is a jar file **/
 	public static final int JAR_FILE_TYPE = 0;
 

@@ -18,12 +18,6 @@ import java.sql.*;
 public interface BrokeredStatementControl
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-
-	String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
-
-	/**
 		Can cursors be held across commits.
 	*/
 	public void checkHoldCursors(int holdability) throws SQLException;

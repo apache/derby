@@ -22,10 +22,6 @@ import java.io.PrintWriter;
 public interface HeaderPrintWriter
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Puts out some setup info for
 	 * the current write and the write(s) that will be put out next.
 	 * It ends with a \n\r.

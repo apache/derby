@@ -19,10 +19,6 @@ import java.io.IOException;
 /** Constant Pool class - pages 92-99 */
 public abstract class ConstantPoolEntry /*implements PoolEntry*/
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	
 	protected int tag; // u1 (page 83)
 	protected boolean doubleSlot; // Some entries take up two slots! (see footnote page 98) 

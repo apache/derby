@@ -21,10 +21,6 @@ import org.apache.derby.iapi.sql.StatementType;
  */
 public class CheckConstraintDescriptor extends ConstraintDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	ReferencedColumns	referencedColumns;
 	String						constraintText;
 

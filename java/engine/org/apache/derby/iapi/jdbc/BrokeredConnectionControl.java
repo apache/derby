@@ -22,12 +22,6 @@ import java.sql.CallableStatement;
 public interface BrokeredConnectionControl
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-
-	String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
-
-	/**
 		Return the real JDBC connection for the brokered connection.
 	*/
 	public Connection	getRealConnection() throws SQLException;

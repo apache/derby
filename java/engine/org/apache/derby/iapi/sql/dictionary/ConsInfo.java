@@ -25,10 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface ConsInfo	extends	Formatable
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
-	/**
 	  *	This ConsInfo describes columns in a referenced table. What is
 	  *	the schema that the referenced table lives in?
 	  *

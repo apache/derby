@@ -14,10 +14,6 @@ package org.apache.derby.iapi.services.locks;
 	A Latch represents a latch held in the lock manager.
 */
 public interface Latch {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**	
 		Get the compatability space the latch is held in.

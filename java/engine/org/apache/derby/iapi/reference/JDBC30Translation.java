@@ -31,11 +31,6 @@ import java.sql.Types;
 */
 
 public interface JDBC30Translation {
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
         /*
         ** public statics from 3.0 version of java.sql.DatabaseMetaData
         */

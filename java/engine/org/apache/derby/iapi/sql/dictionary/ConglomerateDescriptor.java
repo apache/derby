@@ -40,10 +40,6 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 public class ConglomerateDescriptor extends TupleDescriptor
 	implements UniqueTupleDescriptor, Provider
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// Implementation
 	long	conglomerateNumber;
 	String	name;

@@ -26,10 +26,6 @@ import org.apache.derby.catalog.UUID;
 public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	   public interface to this descriptor:
 	   <ol>
 	   <li>public boolean hasSelfReferencingFK(ConstraintDescriptorList cdl, int type) 

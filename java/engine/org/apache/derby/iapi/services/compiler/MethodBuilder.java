@@ -28,10 +28,6 @@ package org.apache.derby.iapi.services.compiler;
 	invoke methods or create objects described by the callers.
  */
 public interface MethodBuilder {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	 * Declare the method throws an exception.

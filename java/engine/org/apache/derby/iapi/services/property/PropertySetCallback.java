@@ -15,12 +15,7 @@ import org.apache.derby.iapi.services.daemon.Serviceable;
 import java.io.Serializable;
 import java.util.Dictionary;
 
-public interface PropertySetCallback { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public interface PropertySetCallback {
 
 	/**
 		Initialize the properties for this callback.

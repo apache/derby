@@ -23,12 +23,7 @@ package org.apache.derby.iapi.reference;
 	M* - Message service
 */
 
-public interface MessageId { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
+public interface MessageId {
 
 	/*
 	** Raw Store log

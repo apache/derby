@@ -253,10 +253,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
  */
 
 public interface DependencyManager {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/* NOTE - every value in this group (actions) must have a matching
 	 * String in the implementation of getActionString().

@@ -39,10 +39,6 @@ import java.sql.SQLWarning;
 
 public class StandardException extends Exception 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	public static final int REPORT_DEFAULT = 0;
 	public static final int REPORT_NEVER = 1;
 	public static final int REPORT_ALWAYS = 2;

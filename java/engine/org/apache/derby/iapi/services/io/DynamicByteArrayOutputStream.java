@@ -23,10 +23,6 @@ import java.io.OutputStream;
 	and can get a direct reference of the array.
 */
 public class DynamicByteArrayOutputStream extends OutputStream {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	private static int INITIAL_SIZE = 4096;
 

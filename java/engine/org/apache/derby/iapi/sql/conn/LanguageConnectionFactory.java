@@ -65,10 +65,6 @@ import java.util.Locale;
  */
 public interface LanguageConnectionFactory {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 		Used to locate this factory by the Monitor basic service.
 		There needs to be a language factory per database.
 	 */

@@ -30,10 +30,6 @@ import java.sql.SQLWarning;
 public interface PreparedStatement
 	extends Dependent, Provider
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	 * Checks whether this PreparedStatement is up to date.

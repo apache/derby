@@ -30,12 +30,7 @@ import org.apache.derby.iapi.error.StandardException;
   can deal with them.
 */
 
-public interface Serviceable { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface Serviceable {
 
 	/**
 		Do whatever it is that you want the daemon to do for you. There may be

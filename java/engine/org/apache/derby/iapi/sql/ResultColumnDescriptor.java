@@ -21,10 +21,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 public interface ResultColumnDescriptor
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Returns a DataTypeDescriptor for the column. This DataTypeDescriptor
 	 * will not represent an actual value, it will only represent the type
 	 * that all values in the column will have.

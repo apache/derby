@@ -25,10 +25,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
  */
 public interface Dependent  extends Dependable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 		Check that all of the dependent's dependencies are valid.

@@ -46,10 +46,6 @@ import java.sql.SQLException;
   */
 public final class PropertyInfo
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /**
      * Get the Properties associated with a given table.

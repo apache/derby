@@ -17,10 +17,6 @@ import java.io.IOException;
 
 /** Utf8- page 100 - Section 4.4.7 */
 final class CONSTANT_Utf8_info extends ConstantPoolEntry {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private final String value;
 	private int asString;
 	private int asCode;

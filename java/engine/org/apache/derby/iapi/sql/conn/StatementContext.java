@@ -32,11 +32,6 @@ import org.apache.derby.iapi.sql.LanguageFactory;
 public interface StatementContext extends Context {
 
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-
-	/**
 	 * Mark this context as being in use.
 	 *
 	 *	@param	parentInTrigger	true if the parent started in the context of a trigger

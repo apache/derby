@@ -16,9 +16,5 @@ package org.apache.derby.iapi.sql.compile;
  */
 public interface CodeGeneration
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	String GENERATED_PACKAGE_PREFIX = "org.apache.derby.exe.";
 }

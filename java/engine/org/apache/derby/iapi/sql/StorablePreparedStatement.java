@@ -22,10 +22,6 @@ import org.apache.derby.iapi.services.loader.GeneratedClass;
  */
 public interface StorablePreparedStatement extends ExecPreparedStatement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 	 * Load up the class from the saved bytes.

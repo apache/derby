@@ -26,10 +26,6 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 public class OptimizerTrace
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
-	/**
 	 * Control whether or not optimizer trace is on.
 	 *
 	 * @param onOrOff    Whether to turn optimizer trace on (true) or off (false).

@@ -14,10 +14,6 @@ package org.apache.derby.iapi.services.compiler;
 	A field within the generated class.
  */
 public interface LocalField {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**
 		Return an expression that's the value of this field

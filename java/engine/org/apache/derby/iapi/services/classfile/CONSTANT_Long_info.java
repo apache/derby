@@ -15,10 +15,6 @@ import java.io.IOException;
 
 /** Long Constant - page 97 - Section 4.4.5 */
 final class CONSTANT_Long_info extends ConstantPoolEntry {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private final long value;
 
 	CONSTANT_Long_info(long value) {

@@ -81,12 +81,7 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
  *
  * @author ames
  */
-public interface JavaFactory { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface JavaFactory {
 
 	public	final	static	String	JAVA_FACTORY_PROPERTY = "derby.module.JavaCompiler";
 

@@ -18,10 +18,6 @@ import java.io.*;
 	a DataInputStream just to get this functionality.
 */
 public final class InputStreamUtil {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**
 		Read an unsigned byte from an InputStream, throwing an EOFException

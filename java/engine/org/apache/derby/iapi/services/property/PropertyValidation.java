@@ -28,10 +28,6 @@ import java.util.Vector;
 
 public class PropertyValidation implements PropertyFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private Vector  notifyOnSet;
 
     /* Constructors for This class: */

@@ -22,11 +22,6 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
  */
 public class BrokeredConnection30 extends BrokeredConnection
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-	private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 	
 	// default for Cloudscape
 	private int stateHoldability = java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;

@@ -28,10 +28,6 @@ import org.apache.derby.iapi.util.JBitSet;
 
 public interface Optimizer {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 		Module name for the monitor's module locating system.
 	 */
 	String MODULE = "org.apache.derby.iapi.sql.compile.Optimizer";

@@ -38,10 +38,6 @@ import org.apache.derby.io.StorageFactory;
 
 public interface CipherFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
     /** Minimum bootPassword length */
     public static final int MIN_BOOTPASS_LENGTH = 8;

@@ -44,10 +44,6 @@ package org.apache.derby.iapi.services.cache;
 	@see Class#newInstance
 */
 public interface CacheableFactory  {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	public Cacheable newCacheable(CacheManager cm);
 }

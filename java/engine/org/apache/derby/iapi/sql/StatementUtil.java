@@ -21,10 +21,6 @@ import org.apache.derby.iapi.reference.SQLState;
  */
 public class StatementUtil
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	private StatementUtil(){};	// Do not instantiate
 
 	public static String typeName(int typeNumber)

@@ -16,10 +16,6 @@ package org.apache.derby.iapi.sql;
  */
 public interface LanguageProperties
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/*
 	** BulkFetch
 	**

@@ -20,10 +20,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 */
 final class SystemContext extends ContextImpl
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	SystemContext(ContextManager cm) {
 		super(cm, "SystemContext");
 	}

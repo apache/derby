@@ -33,11 +33,6 @@ package org.apache.derby.iapi.reference;
 public interface Property { 
 
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyright = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-
-	/**
 		Name of the file that contains system wide properties.
 		Has to be located in ${derby.system.home} if set, otherwise ${user.dir}
 	*/

@@ -27,10 +27,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public class SubCheckConstraintDescriptor extends SubConstraintDescriptor
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	/** public interface to this class:
 		<ol>
 		<li>public String getConstraintText();</li>

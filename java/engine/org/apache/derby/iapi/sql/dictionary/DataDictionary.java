@@ -52,10 +52,6 @@ import java.util.Vector;
 
 public interface DataDictionary
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	String MODULE = "org.apache.derby.iapi.sql.dictionary.DataDictionary";
 
 	/** Special version indicating the database must be upgraded to or created at the current engine level */

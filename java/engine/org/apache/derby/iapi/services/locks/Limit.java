@@ -21,12 +21,7 @@ import java.util.Enumeration;
 
 	@see LockFactory#setLimit
 */
-public interface Limit { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public interface Limit {
 
 	/**
 		Called by the lock factory when a limit has been reached.

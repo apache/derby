@@ -17,10 +17,6 @@ import org.apache.derby.iapi.services.context.Context;
   A context for a database.
   */
 public interface DatabaseContext extends Context {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	public static final String CONTEXT_ID = "Database";
 	public Database getDatabase();
 }

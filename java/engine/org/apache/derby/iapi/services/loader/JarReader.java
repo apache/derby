@@ -17,10 +17,6 @@ import org.apache.derby.iapi.error.StandardException;
 */
 
 public interface JarReader {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	/**
 		Load the contents of a Jarfile. The return is either

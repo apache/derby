@@ -28,10 +28,6 @@ import java.util.Iterator;
 public class ColumnDescriptorList extends ArrayList
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
-	/**
 	 * Add the column.  Currently, the table id is ignored.
 	 *
 	 * @param tableId the table id (ignored)

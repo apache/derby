@@ -25,10 +25,6 @@ import java.sql.SQLException;
  */
 public interface AuthenticationService 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	public static final String MODULE =
 								"org.apache.derby.iapi.jdbc.AuthenticationService";

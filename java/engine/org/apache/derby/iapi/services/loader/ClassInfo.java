@@ -14,10 +14,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class ClassInfo implements InstanceGetter {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	private static final Class[] noParameters = new Class[0];
 	private static final Object[] noArguments = new Object[0];

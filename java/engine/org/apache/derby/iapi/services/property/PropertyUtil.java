@@ -51,10 +51,6 @@ import java.util.Dictionary;
 
 */
 public class PropertyUtil {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	// List of properties that are stored in the service.properties file
 	public static final String[] servicePropertyList = {

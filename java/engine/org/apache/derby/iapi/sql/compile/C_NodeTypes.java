@@ -19,10 +19,6 @@ package org.apache.derby.iapi.sql.compile;
  */
 public interface C_NodeTypes
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	/** Node types, for use with getNode methods */
 	static final int TEST_CONSTRAINT_NODE = 1;
 	static final int CURRENT_ROW_LOCATION_NODE = 2;

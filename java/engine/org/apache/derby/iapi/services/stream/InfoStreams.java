@@ -23,12 +23,7 @@ package org.apache.derby.iapi.services.stream;
  * @see HeaderPrintWriter
  * @author ames
  */
-public interface InfoStreams { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface InfoStreams {
 
 	/**
 	 Return the default stream. If the default stream could not be set up as requested then

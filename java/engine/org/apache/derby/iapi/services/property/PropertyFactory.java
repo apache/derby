@@ -41,10 +41,6 @@ import java.util.Dictionary;
 
 public interface PropertyFactory
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
     /**************************************************************************
      * methods that are Property related.
      **************************************************************************

@@ -12,11 +12,6 @@ package org.apache.derby.iapi.reference;
 
 public interface Module {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2001_2004;
-
 	String CacheFactory = "org.apache.derby.iapi.services.cache.CacheFactory";
 	String CipherFactory = "org.apache.derby.iapi.services.crypto.CipherFactory";
 	String ClassFactory = "org.apache.derby.iapi.services.loader.ClassFactory";

@@ -11,10 +11,6 @@
 package org.apache.derby.iapi.error;
 
 public final class PassThroughException extends RuntimeException {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	private final Exception nested;
 

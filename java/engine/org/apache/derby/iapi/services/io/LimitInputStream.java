@@ -19,10 +19,6 @@ import java.io.IOException;
 	can be read from the stream.
 */
 public class LimitInputStream extends FilterInputStream implements Limit {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	protected int remainingBytes;
 	protected boolean limitInPlace;

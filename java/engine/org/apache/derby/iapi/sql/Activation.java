@@ -63,10 +63,6 @@ import java.util.Hashtable;
 public interface Activation
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Resets the activation to the "pre-execution" state -
 	 * that is, the state where it can be used to begin a new execution.
 	 * Frees local buffers, stops scans, resets counters to zero, sets

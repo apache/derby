@@ -24,10 +24,6 @@ import java.sql.SQLException;
  */
 public interface ConnectionContext 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 	public static final String CONTEXT_ID = "JDBC_ConnectionContext";
 
 	/**

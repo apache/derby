@@ -11,10 +11,6 @@
 package org.apache.derby.iapi.reference;
 
 public interface ContextId {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2002_2004;
 
 
 	String LANG_CONNECTION = "LanguageConnectionContext";

@@ -17,10 +17,6 @@ import java.io.IOException;
 
 
 public class ClassMember {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 	protected ClassHolder cpt;
 	protected int access_flags;
 	protected int name_index;

@@ -23,10 +23,6 @@ import org.apache.derby.iapi.util.JBitSet;
 public interface OptimizablePredicate
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Get the map of referenced tables for this OptimizablePredicate.
 	 *
 	 * @return JBitSet	Referenced table map.

@@ -20,10 +20,6 @@ package org.apache.derby.iapi.sql;
 public interface ResultDescription
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Returns an identifier that tells what type of statement has been
 	 * executed. This can be used to determine what other methods to call
 	 * to get the results back from a statement. For example, a SELECT

@@ -46,10 +46,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface DaemonFactory 
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 		Create a new DaemonService with the default daemon timer delay.
 
 		@exception StandardException Standard cloudscape error policy

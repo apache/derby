@@ -19,10 +19,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 import java.sql.SQLException;
 
 public class ConnectionUtil {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	/**
 		Get the current LanguageConnectionContext.

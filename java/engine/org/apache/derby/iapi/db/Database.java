@@ -41,10 +41,6 @@ import java.util.Locale;
 
 public interface Database extends org.apache.derby.database.Database, LocaleFinder
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	// this interface gets used on a module, so we name it:
 	// Note that doers not point to this class name, but instead to
 	// the public API for this class. This ensures that the name

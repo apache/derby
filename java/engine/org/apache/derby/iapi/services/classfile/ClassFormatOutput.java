@@ -30,10 +30,6 @@ import java.io.OutputStream;
  */
 
 public final class ClassFormatOutput extends DataOutputStream {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	public ClassFormatOutput() {
 		this(512);

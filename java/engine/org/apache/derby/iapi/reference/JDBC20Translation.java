@@ -30,12 +30,7 @@ import java.sql.Types;
         are public, static and final since they are declared in an interface.
 */
 
-public interface JDBC20Translation { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+public interface JDBC20Translation {
         /*
         ** public statics from 2.0 version of java.sql.ResultSet
         */

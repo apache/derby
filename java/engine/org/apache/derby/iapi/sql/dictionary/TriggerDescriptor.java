@@ -80,10 +80,6 @@ import java.io.IOException;
 public class TriggerDescriptor extends TupleDescriptor
 	implements UniqueSQLObjectDescriptor, Provider, Dependent, Formatable 
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 	// field that we want users to be able to know about
 	public static final int SYSTRIGGERS_STATE_FIELD = 8;
 

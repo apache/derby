@@ -11,10 +11,6 @@
 package org.apache.derby.iapi.services.diag;
 
 public abstract class Performance {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
 
 	// If you want to do some performance measurement, check out this
 	// file and change the value of this to `true', then compile

@@ -21,11 +21,6 @@ import java.io.IOException;
 public interface Storable
 extends Formatable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
- 
-    public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	  Return whether the value is null or not.

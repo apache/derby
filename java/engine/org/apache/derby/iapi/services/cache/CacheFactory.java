@@ -14,10 +14,6 @@ package org.apache.derby.iapi.services.cache;
 	A factory for handing out caches.
 */
 public interface CacheFactory {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 	
 	/**
 		Create a cache that uses the class represented by holderClass as

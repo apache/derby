@@ -34,10 +34,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
  */
 public interface Statement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	 * Generates an execution plan without executing it.

@@ -25,10 +25,6 @@ import java.io.ByteArrayOutputStream;
    
  */
 public class AccessibleByteArrayOutputStream extends ByteArrayOutputStream {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	public AccessibleByteArrayOutputStream() {
 		super();

@@ -33,10 +33,6 @@ import	org.apache.derby.impl.sql.compile.QueryTreeNode;
 
 public interface Parser
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	 * Parses the given statement and returns a query tree. The query tree

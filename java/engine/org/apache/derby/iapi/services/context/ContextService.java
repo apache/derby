@@ -25,10 +25,6 @@ import java.util.Iterator;
 */
 public final class ContextService //OLD extends Hashtable
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	private static ContextService factory;
 	private HeaderPrintWriter errorStream;

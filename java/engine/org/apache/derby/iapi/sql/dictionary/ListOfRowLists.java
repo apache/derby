@@ -25,10 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 public interface ListOfRowLists
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
 
 	/**
 	 * Add another system table's RowList to this list of lists.

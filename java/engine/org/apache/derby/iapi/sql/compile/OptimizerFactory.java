@@ -24,12 +24,7 @@ import org.apache.derby.iapi.error.StandardException;
 	There is expected to be only one of these configured per database.
  */
 
-public interface OptimizerFactory { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface OptimizerFactory {
 	/**
 		Module name for the monitor's module locating system.
 	 */

@@ -19,9 +19,5 @@ import org.apache.derby.iapi.services.io.Limit;
  */
 public interface LimitObjectInput
 	extends ErrorObjectInput, Limit
-{ 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1999_2004;
+{
 }

@@ -18,12 +18,7 @@ import org.apache.derby.iapi.services.context.Context;
 	(Similar to java.lang.Class).
 */
 
-public interface GeneratedClass { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1998_2004;
+public interface GeneratedClass {
 
 	/**
 		Return the name of the generated class.

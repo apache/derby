@@ -18,11 +18,6 @@ import java.net.URL;
 */
 public class BrokeredPreparedStatement30 extends BrokeredPreparedStatement {
 
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
-
 	private final Object generatedKeys;
 	public BrokeredPreparedStatement30(BrokeredStatementControl control, int jdbcLevel, String sql, Object generatedKeys) throws SQLException {
 		super(control, jdbcLevel, sql);

@@ -31,10 +31,6 @@ import java.util.Properties;
 public interface TabInfo
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * ROWNOTDUPLICATE is out of range for a row
 	 * number.  If a return code does not equal 
 	 * this value, then it refers to the row

@@ -25,10 +25,6 @@ import java.util.Properties;
  */
 
 public interface Optimizable {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
 
 	/**
 	 * Choose the next access path to evaluate for this Optimizable.

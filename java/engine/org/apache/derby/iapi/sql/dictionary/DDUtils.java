@@ -28,10 +28,6 @@ import java.util.Enumeration;
 
 public	class	DDUtils
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2000_2004;
 
 	/*
 	** For a foreign key, this is used to locate the referenced

@@ -52,12 +52,7 @@ package org.apache.derby.iapi.services.io;
   file. If you remove support for a one please document that the
   format id is deprecated. Never remove or re-use a format id.
  */
-public interface StoredFormatIds { 
-
-	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
+public interface StoredFormatIds {
 
         /** Byte length of a two byt format id. */
         int  TWO_BYTE_FORMAT_ID_BYTE_LENGTH = 2;

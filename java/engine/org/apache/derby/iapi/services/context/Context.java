@@ -46,10 +46,6 @@ import org.apache.derby.iapi.error.StandardException;
 public interface Context
 {
 	/**
-		IBM Copyright &copy notice.
-	*/
-	public static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_1997_2004;
-	/**
 	 * Returns the context manager that has stored this
 	 * context in its stack.
 	 */

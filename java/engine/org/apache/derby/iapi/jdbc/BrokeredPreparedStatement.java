@@ -24,11 +24,6 @@ import java.net.URL;
 public class BrokeredPreparedStatement extends BrokeredStatement
 	implements PreparedStatement
 {
-	/**
-		IBM Copyright &copy notice.
-	*/
-
-    private static final String copyrightNotice = org.apache.derby.iapi.reference.Copyright.SHORT_2003_2004;
 
 	/**
 		SQL used to create me.
