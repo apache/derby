@@ -35,6 +35,7 @@ class AppRequester
 	protected static final int UNKNOWN_CLIENT = 0;
 	protected static final int JCC_CLIENT = 1;
 	protected static final int CCC_CLIENT = 2;		// not yet supported.
+	protected static final int DNC_CLIENT = 3;		// derby net client 
 
 	private static final int [] MIN_MGR_LEVELS = {
 											3, // AGENT - JCC comes in at 3
@@ -107,6 +108,8 @@ class AppRequester
 			clientType = UNKNOWN_CLIENT;
 		else if (srvrlslv.indexOf("JCC") != -1)
 			clientType = JCC_CLIENT;
+		else if (srvrlslv.indexOf("DNC") != -1)
+			clientType = DNC_CLIENT;
 		else
 			clientType = UNKNOWN_CLIENT;
 	}
@@ -228,6 +231,7 @@ class AppRequester
 		switch (clientType) {
 
 			case JCC_CLIENT:
+			case DNC_CLIENT:
 				return DB2Limit.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH;
 			default:
 			// Default is the max for C clients, since that is more

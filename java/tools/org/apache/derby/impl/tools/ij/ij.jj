@@ -298,10 +298,11 @@ class ij {
 			haveConnection();
 			aStatement = theConnection.createStatement();
 
-			// for JCC - remove comments at the beginning of the statement
+			// for JCC or DNC - remove comments at the beginning of the statement
 			// and trim
 			if ((currentConnEnv != null) &&
-			    currentConnEnv.getSession().getIsJCC())
+			    ((currentConnEnv.getSession().getIsJCC()) ||
+			     currentConnEnv.getSession().getIsDNC()))
 			{
 				int nextline;
 				while(stmt.startsWith("--"))

@@ -33,6 +33,6 @@ ij(CONNECTION4)> connect 'jdbc:derby://localhost:1527/my-db-name;upgrade=true:us
 ij(CONNECTION5)> connect 'jdbc:derby://localhost:1527/my-db-name;shutdown=true:user=usr;password=pwd;'
 ----- Quoted db and attributes
 connect 'jdbc:derby://localhost:1527/"./my-dbname;create=true":user=usr;password=pwd;';
-ERROR 08006: DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: my-db-name08006.DDatabase 'my-db-name' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: my-db-name08006.DDatabase 'my-db-name' shutdown.((server log XXX)
 ij(CONNECTION5)> connect 'jdbc:derby://localhost:1527/"./my-dbname;create=true":user=usr;password=pwd;retrieveMessagesFromServerOnGetMessage=true;';
 ij(CONNECTION6)> 

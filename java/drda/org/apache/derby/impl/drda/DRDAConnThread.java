@@ -2784,8 +2784,9 @@ public class DRDAConnThread extends Thread {
 						tooBig(CodePoint.PRDID);
 
 					/* If JCC version is 1.5 or later, send SQLWarning on CNTQRY */
-					if ((appRequester.getClientType() == appRequester.JCC_CLIENT) &&
-						(appRequester.greaterThanOrEqualTo(1, 5, 0)))
+					if (((appRequester.getClientType() == appRequester.JCC_CLIENT) &&
+						(appRequester.greaterThanOrEqualTo(1, 5, 0))) ||
+					   (appRequester.getClientType() == appRequester.DNC_CLIENT))
 					{
 						sendWarningsOnCNTQRY = true;
 					}
