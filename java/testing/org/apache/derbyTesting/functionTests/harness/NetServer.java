@@ -396,7 +396,7 @@ public class NetServer
 	public static boolean isJCCConnection(String fm)
 	{
 		return fm.toUpperCase(Locale.ENGLISH).equals("DB2JCC") || 
-			fm.equals("DERBYNET");
+			fm.toUpperCase(Locale.ENGLISH).equals("DERBYNET");
 	}
 
     /**
