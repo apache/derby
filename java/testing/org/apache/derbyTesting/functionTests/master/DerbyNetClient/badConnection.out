@@ -3,7 +3,7 @@ passed SQLException all the way to client, then thrown by client...
 SQLState is: null
 vendorCode is: -99999
 nextException is: null
-reason is: null userid not supported
+reason is: null password not supported
 Database not Found  (RDBNFNRM)
 passed SQLException all the way to client, then thrown by client...
 SQLState is: 08004

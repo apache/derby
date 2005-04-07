@@ -1655,18 +1655,25 @@ clp.list(System.out);
 			    p.put(key, value);
 			
 		}
-		// Temporary until jcc supports null userid
-		if (NetServer.isClientConnection(framework))
+
+		
+		// jcc default requires userid
+		// derby client will default to "APP" so doesn't need harness
+		// to set a user.
+		if (NetServer.isJCCConnection(framework))
 		{
 			String user = System.getProperty("ij.user");
-			String password = System.getProperty("ij.password");
 			if (user == null) user = "APP";
-			if (password == null) password = "APP";
-
 		    p.put("ij.user",user);
-		    p.put("ij.password",password);
 		}
 
+		// both jcc and client require password for the moment
+		if (NetServer.isClientConnection(framework))
+		{	
+			String password = System.getProperty("ij.password");
+			if (password == null) password = "APP";
+		    p.put("ij.password",password);
+		}
 		
 		if (NetServer.isJCCConnection(framework))
 		{

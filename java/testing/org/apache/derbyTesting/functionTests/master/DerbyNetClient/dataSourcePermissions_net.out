@@ -1,6 +1,6 @@
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
 Checking authentication with DriverManager
-EXPECTED CONNFAIL null userid not supported
+EXPECTED CONNFAIL null password not supported
 EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
 DS connected as EDWARD
 DS connected as FRANCES
