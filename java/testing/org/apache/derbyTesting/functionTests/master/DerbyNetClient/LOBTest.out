@@ -1,7 +1,7 @@
 create table bit_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol char (8 ) for bit data )
 insert into bit_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS char (8 ) for bit data) )
 insert into bit_table ( col_0 ) values ( 'true' )
-	org.apache.derby.client.am.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
 insert into bit_table ( col_1 ) values ( 'true' )
 insert into bit_table ( col_2 ) values ( 'true' )
 insert into bit_table ( col_3 ) values ( 'true' )
@@ -380,13 +380,13 @@ select typecol from bit_table
 	OUT = Object : byte[]
 -----< columns CAST TO type: METADATA TESTS
 select cast( col_0 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
 select cast( col_1 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
 select cast( col_2 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'VARCHAR' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'VARCHAR' to 'CHAR () FOR BIT DATA'.
 select cast( col_3 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'LONG VARCHAR' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'CHAR () FOR BIT DATA'.
 select cast( col_4 as char (8) for bit data ) from bit_table
 	---- 1
 	Column    : 1
@@ -434,7 +434,7 @@ select cast( col_5 as char (8) for bit data ) from bit_table
 	OUT = NULL
 	OUT = NULL
 select cast( col_6 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
 select cast( typecol as char (8) for bit data ) from bit_table
 	---- 1
 	Column    : 1
@@ -460,13 +460,13 @@ select cast( typecol as char (8) for bit data ) from bit_table
 	OUT = Object : byte[]
 -----< type CAST TO types: METADATA TESTS
 select cast( typecol as int ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'INTEGER'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'INTEGER'.
 select cast( typecol as char(10) ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
 select cast( typecol as varchar(80) ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
 select cast( typecol as long varchar ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
 select cast( typecol as char(10) for bit data ) from bit_table
 	---- 1
 	Column    : 1
@@ -563,7 +563,7 @@ drop table bit_table
 create table bit_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol char (8 ) for bit data )
 insert into bit_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS char (8 ) for bit data) )
 insert into bit_table ( col_0 ) values ( 'true' )
-	org.apache.derby.client.am.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
 insert into bit_table ( col_1 ) values ( 'true' )
 insert into bit_table ( col_2 ) values ( 'true' )
 insert into bit_table ( col_3 ) values ( 'true' )
@@ -942,13 +942,13 @@ select typecol from bit_table
 	OUT = Object : byte[]
 -----< columns CAST TO type: METADATA TESTS
 select cast( col_0 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
 select cast( col_1 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
 select cast( col_2 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'VARCHAR' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'VARCHAR' to 'CHAR () FOR BIT DATA'.
 select cast( col_3 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'LONG VARCHAR' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'CHAR () FOR BIT DATA'.
 select cast( col_4 as char (8) for bit data ) from bit_table
 	---- 1
 	Column    : 1
@@ -996,7 +996,7 @@ select cast( col_5 as char (8) for bit data ) from bit_table
 	OUT = NULL
 	OUT = NULL
 select cast( col_6 as char (8) for bit data ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
 select cast( typecol as char (8) for bit data ) from bit_table
 	---- 1
 	Column    : 1
@@ -1022,13 +1022,13 @@ select cast( typecol as char (8) for bit data ) from bit_table
 	OUT = Object : byte[]
 -----< type CAST TO types: METADATA TESTS
 select cast( typecol as int ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'INTEGER'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'INTEGER'.
 select cast( typecol as char(10) ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
 select cast( typecol as varchar(80) ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
 select cast( typecol as long varchar ) from bit_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
 select cast( typecol as char(10) for bit data ) from bit_table
 	---- 1
 	Column    : 1
@@ -1125,7 +1125,7 @@ drop table bit_table
 create table blob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol blob (2 M) )
 insert into blob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS blob (2 M)) )
 insert into blob_table ( col_0 ) values ( 'true' )
-	org.apache.derby.client.am.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
 insert into blob_table ( col_1 ) values ( 'true' )
 insert into blob_table ( col_2 ) values ( 'true' )
 insert into blob_table ( col_3 ) values ( 'true' )
@@ -1504,13 +1504,13 @@ select typecol from blob_table
 	OUT = Object : java.sql.Blob
 -----< columns CAST TO type: METADATA TESTS
 select cast( col_0 as blob(2 M) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'INTEGER' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'INTEGER' to 'BLOB'.
 select cast( col_1 as blob(2 M) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
 select cast( col_2 as blob(2 M) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'VARCHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'VARCHAR' to 'BLOB'.
 select cast( col_3 as blob(2 M) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
 select cast( col_4 as blob(2 M) ) from blob_table
 	---- 1
 	Column    : 1
@@ -1605,17 +1605,17 @@ select cast( typecol as blob(2 M) ) from blob_table
 	OUT = Object : java.sql.Blob
 -----< type CAST TO types: METADATA TESTS
 select cast( typecol as int ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'INTEGER'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'INTEGER'.
 select cast( typecol as char(10) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR'.
 select cast( typecol as varchar(80) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'VARCHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'VARCHAR'.
 select cast( typecol as long varchar ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
 select cast( typecol as char(10) for bit data ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
 select cast( typecol as long varchar for bit data ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
 select cast( typecol as blob(80) ) from blob_table
 	---- 1
 	Column    : 1
@@ -1666,7 +1666,7 @@ drop table blob_table
 create table blob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol blob (2 K) )
 insert into blob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS blob (2 K)) )
 insert into blob_table ( col_0 ) values ( 'true' )
-	org.apache.derby.client.am.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
 insert into blob_table ( col_1 ) values ( 'true' )
 insert into blob_table ( col_2 ) values ( 'true' )
 insert into blob_table ( col_3 ) values ( 'true' )
@@ -2045,13 +2045,13 @@ select typecol from blob_table
 	OUT = Object : java.sql.Blob
 -----< columns CAST TO type: METADATA TESTS
 select cast( col_0 as blob(2 K) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'INTEGER' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'INTEGER' to 'BLOB'.
 select cast( col_1 as blob(2 K) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
 select cast( col_2 as blob(2 K) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'VARCHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'VARCHAR' to 'BLOB'.
 select cast( col_3 as blob(2 K) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
 select cast( col_4 as blob(2 K) ) from blob_table
 	---- 1
 	Column    : 1
@@ -2146,17 +2146,17 @@ select cast( typecol as blob(2 K) ) from blob_table
 	OUT = Object : java.sql.Blob
 -----< type CAST TO types: METADATA TESTS
 select cast( typecol as int ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'INTEGER'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'INTEGER'.
 select cast( typecol as char(10) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR'.
 select cast( typecol as varchar(80) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'VARCHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'VARCHAR'.
 select cast( typecol as long varchar ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
 select cast( typecol as char(10) for bit data ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
 select cast( typecol as long varchar for bit data ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
 select cast( typecol as blob(80) ) from blob_table
 	---- 1
 	Column    : 1
@@ -2207,7 +2207,7 @@ drop table blob_table
 create table blob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol blob (64  ) )
 insert into blob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS blob (64  )) )
 insert into blob_table ( col_0 ) values ( 'true' )
-	org.apache.derby.client.am.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
 insert into blob_table ( col_1 ) values ( 'true' )
 insert into blob_table ( col_2 ) values ( 'true' )
 insert into blob_table ( col_3 ) values ( 'true' )
@@ -2586,13 +2586,13 @@ select typecol from blob_table
 	OUT = Object : java.sql.Blob
 -----< columns CAST TO type: METADATA TESTS
 select cast( col_0 as blob(64  ) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'INTEGER' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'INTEGER' to 'BLOB'.
 select cast( col_1 as blob(64  ) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
 select cast( col_2 as blob(64  ) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'VARCHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'VARCHAR' to 'BLOB'.
 select cast( col_3 as blob(64  ) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'LONG VARCHAR' to 'BLOB'.
 select cast( col_4 as blob(64  ) ) from blob_table
 	---- 1
 	Column    : 1
@@ -2687,17 +2687,17 @@ select cast( typecol as blob(64  ) ) from blob_table
 	OUT = Object : java.sql.Blob
 -----< type CAST TO types: METADATA TESTS
 select cast( typecol as int ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'INTEGER'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'INTEGER'.
 select cast( typecol as char(10) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR'.
 select cast( typecol as varchar(80) ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'VARCHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'VARCHAR'.
 select cast( typecol as long varchar ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'LONG VARCHAR'.
 select cast( typecol as char(10) for bit data ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CHAR () FOR BIT DATA'.
 select cast( typecol as long varchar for bit data ) from blob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'LONG VARCHAR FOR BIT DATA'.
 select cast( typecol as blob(80) ) from blob_table
 	---- 1
 	Column    : 1
@@ -2747,9 +2747,9 @@ select cast( typecol as blob (64  ) ) from blob_table
 drop table blob_table
 create table clob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol clob (2 K) )
 insert into clob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS clob (2 K)) )
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
 insert into clob_table ( col_0 ) values ( 'true' )
-	org.apache.derby.client.am.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
 insert into clob_table ( col_1 ) values ( 'true' )
 insert into clob_table ( col_2 ) values ( 'true' )
 insert into clob_table ( col_3 ) values ( 'true' )
@@ -2757,7 +2757,7 @@ insert into clob_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) 
 insert into clob_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
 insert into clob_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
 insert into clob_table ( typecol ) values cast ( X'0074007200750065'  AS clob (2 K))
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
 === Columntype int
 select col_0 from clob_table
 	0 getObject            ->		EXCEPTION (null)
@@ -3113,7 +3113,7 @@ select typecol from clob_table
 	OUT = NULL
 -----< columns CAST TO type: METADATA TESTS
 select cast( col_0 as clob(2 K) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'INTEGER' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'INTEGER' to 'CLOB'.
 select cast( col_1 as clob(2 K) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3178,11 +3178,11 @@ select cast( col_3 as clob(2 K) ) from clob_table
 	OUT = NULL
 	OUT = NULL
 select cast( col_4 as clob(2 K) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
 select cast( col_5 as clob(2 K) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'CLOB'.
 select cast( col_6 as clob(2 K) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CLOB'.
 select cast( typecol as clob(2 K) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3206,7 +3206,7 @@ select cast( typecol as clob(2 K) ) from clob_table
 	OUT = NULL
 -----< type CAST TO types: METADATA TESTS
 select cast( typecol as int ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'INTEGER'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'INTEGER'.
 select cast( typecol as char(10) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3271,11 +3271,11 @@ select cast( typecol as long varchar ) from clob_table
 	OUT = NULL
 	OUT = NULL
 select cast( typecol as char(10) for bit data ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'CHAR () FOR BIT DATA'.
 select cast( typecol as long varchar for bit data ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'LONG VARCHAR FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'LONG VARCHAR FOR BIT DATA'.
 select cast( typecol as blob(80) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'BLOB'.
 select cast( typecol as clob (2 K) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3300,9 +3300,9 @@ select cast( typecol as clob (2 K) ) from clob_table
 drop table clob_table
 create table clob_table ( dummy int , col_0 int, col_1 char(10), col_2 varchar(80), col_3 long varchar, col_4 char(10) for bit data, col_5 long varchar for bit data, col_6 blob(80), typecol clob (64  ) )
 insert into clob_table values ( 45 ,100,'101','102','103',X'003100300034',X'003100300035',CAST (X'003100300036' AS blob(80)),CAST (X'003100300037' AS clob (64  )) )
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
 insert into clob_table ( col_0 ) values ( 'true' )
-	org.apache.derby.client.am.SqlException: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
 insert into clob_table ( col_1 ) values ( 'true' )
 insert into clob_table ( col_2 ) values ( 'true' )
 insert into clob_table ( col_3 ) values ( 'true' )
@@ -3310,7 +3310,7 @@ insert into clob_table ( col_4 ) values cast ( X'0074007200750065'  AS char(10) 
 insert into clob_table ( col_5 ) values cast ( X'0074007200750065'  AS long varchar for bit data)
 insert into clob_table ( col_6 ) values cast ( X'0074007200750065'  AS blob(80))
 insert into clob_table ( typecol ) values cast ( X'0074007200750065'  AS clob (64  ))
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
 === Columntype int
 select col_0 from clob_table
 	0 getObject            ->		EXCEPTION (null)
@@ -3666,7 +3666,7 @@ select typecol from clob_table
 	OUT = NULL
 -----< columns CAST TO type: METADATA TESTS
 select cast( col_0 as clob(64  ) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'INTEGER' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'INTEGER' to 'CLOB'.
 select cast( col_1 as clob(64  ) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3731,11 +3731,11 @@ select cast( col_3 as clob(64  ) ) from clob_table
 	OUT = NULL
 	OUT = NULL
 select cast( col_4 as clob(64  ) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CLOB'.
 select cast( col_5 as clob(64  ) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'CLOB'.
 select cast( col_6 as clob(64  ) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'BLOB' to 'CLOB'.
+	ERROR 42846: Cannot convert types 'BLOB' to 'CLOB'.
 select cast( typecol as clob(64  ) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3759,7 +3759,7 @@ select cast( typecol as clob(64  ) ) from clob_table
 	OUT = NULL
 -----< type CAST TO types: METADATA TESTS
 select cast( typecol as int ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'INTEGER'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'INTEGER'.
 select cast( typecol as char(10) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3824,11 +3824,11 @@ select cast( typecol as long varchar ) from clob_table
 	OUT = NULL
 	OUT = NULL
 select cast( typecol as char(10) for bit data ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'CHAR () FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'CHAR () FOR BIT DATA'.
 select cast( typecol as long varchar for bit data ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'LONG VARCHAR FOR BIT DATA'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'LONG VARCHAR FOR BIT DATA'.
 select cast( typecol as blob(80) ) from clob_table
-	org.apache.derby.client.am.SqlException: Cannot convert types 'CLOB' to 'BLOB'.
+	ERROR 42846: Cannot convert types 'CLOB' to 'BLOB'.
 select cast( typecol as clob (64  ) ) from clob_table
 	---- 1
 	Column    : 1
@@ -3854,20 +3854,20 @@ drop table clob_table
 -----< BLOB Insertion Tests
 create table blobCheck (bl blob(80)) 
 insert into blobCheck (bl ) values ('string' )
-	org.apache.derby.client.am.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'CHAR'. 
 insert into blobCheck (bl ) values (cast (X'0073007400720069006e0067' as blob(80)) )
 insert into blobCheck (bl ) values (X'48' )
-	org.apache.derby.client.am.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+	ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
 insert into blobCheck (bl ) values (cast (X'C8' as blob(80)) )
 insert into blobCheck (bl ) values ( X'a78a' )
-	org.apache.derby.client.am.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+	ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
 insert into blobCheck (bl ) values (cast (X'a78a' as blob(80)) )
 insert into blobCheck (bl ) values ('string' )
-	org.apache.derby.client.am.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR'. 
+	ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'CHAR'. 
 insert into blobCheck (bl ) values (cast (X'0073007400720069006e0067' as blob(80)) )
 insert into blobCheck (bl ) values (X'48' )
-	org.apache.derby.client.am.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+	ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
 insert into blobCheck (bl ) values (cast (X'C8' as blob(80)) )
 insert into blobCheck (bl ) values ( X'a78a' )
-	org.apache.derby.client.am.SqlException: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+	ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
 insert into blobCheck (bl ) values (cast (X'a78a' as blob(80)) )

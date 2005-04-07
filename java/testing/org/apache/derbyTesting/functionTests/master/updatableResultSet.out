@@ -1,6 +1,6 @@
 Start testing delete and update using JDBC2.0 updateable resultset apis
 Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
-warnings on connection = SQL Warning: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
+WARNING 01J03: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
 requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
 Make sure that we got CONCUR_READ_ONLY? true

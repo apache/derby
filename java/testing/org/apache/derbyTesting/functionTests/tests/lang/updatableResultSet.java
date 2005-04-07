@@ -213,7 +213,7 @@ public class updatableResultSet {
 			warnings = conn.getWarnings();
 			while (warnings != null)
 			{
-				System.out.println("warnings on connection = " + warnings);
+				JDBCDisplayUtil.ShowWarnings(System.out, warnings);
 				warnings = warnings.getNextWarning();
 			}
 			conn.clearWarnings();

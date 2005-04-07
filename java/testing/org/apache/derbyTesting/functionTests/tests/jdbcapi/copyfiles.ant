@@ -18,6 +18,7 @@ metadata_sed.properties
 metadataJdbc20_app.properties
 metadataJdbc20_derby.properties
 metadataJdbc20_sed.properties
+odbc_metadata_sed.properties
 resultsetJdbc30_app.properties
 resultsetJdbc30_sed.properties
 resultsetStream.gif

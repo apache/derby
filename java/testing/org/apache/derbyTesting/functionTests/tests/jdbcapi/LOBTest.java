@@ -40,6 +40,7 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derby.tools.JDBCDisplayUtil;
 
 /**
  * @author Jonas S Karlsson
@@ -66,8 +67,8 @@ public class LOBTest {
 	}
     public static void printSQLError(SQLException e) {
         while (e != null) {
-			System.out.print("\t");
-            System.out.println(e.toString());
+            System.out.print("\t");
+            JDBCDisplayUtil.ShowSQLException(System.out, e);
             e = e.getNextException();
         }
     }
@@ -468,11 +469,14 @@ class LOBTester {
         {
             for(int i=0; i<columns; i++) {
                 String insert = "insert into "+table+" ( "+colNames[i];
+
 				if (isBitColumn(i))
 				// have to cast for blob columns.
+	{
 					insert += " ) values cast ( " +
 						TestUtil.stringToHexLiteral("true") +
 						"  AS " + colTypes[i] + ")";
+	}
 				else
                     insert += " ) values ( 'true' )";
                 Xprint(insert);

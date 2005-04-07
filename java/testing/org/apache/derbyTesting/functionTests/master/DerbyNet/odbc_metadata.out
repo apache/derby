@@ -39,7 +39,7 @@ result row: 11.10 11.10 14.4 -6.699999999999999 6.699999999999999
 Column result scale after division is: 23
 dc / 2 = 5.55000000000000000000000
 dc / 2 = 5.55500000000000000000000
-JDBC Driver 'IBM DB2 JDBC Universal Driver Architecture', version 2.4 (2.4.17)
+JDBC Driver 'IBM DB2 JDBC Universal Driver Architecture', version (EXPECTED VERSION)
 The URL is: jdbc:derby:net://localhost:1527/wombat;create=true
 allTablesAreSelectable(): true
 maxColumnNameLength(): 30
@@ -79,7 +79,7 @@ nullsAreSortedAtStart(): false
 nullsAreSortedAtEnd(): false
 getDatabaseProductName(): Apache Derby
 getDatabaseProductVersion(): 10.1.0.0 alpha
-getDriverVersion(): 2.4.17
+getDriverVersion(): EXPECTED VERSION
 usesLocalFiles(): true
 usesLocalFilePerTable(): true
 supportsMixedCaseIdentifiers(): false
