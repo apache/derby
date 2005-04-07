@@ -59,7 +59,8 @@ public abstract class GClass implements ClassBuilder {
 		return cf.loadGeneratedClass(qualifiedName, getClassBytecode());
 	}
 
-	protected void writeClassFile(String dir, boolean logMessage, Throwable t) {
+	protected void writeClassFile(String dir, boolean logMessage, Throwable t)
+		throws StandardException {
 
 		if (SanityManager.DEBUG) {
 

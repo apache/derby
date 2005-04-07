@@ -84,7 +84,7 @@ public interface ClassBuilder {
 	 * generated, if there are no constructors then
 	 * the default no-arg constructor will be defined.
 	 */
-	ByteArray getClassBytecode();
+	ByteArray getClassBytecode() throws StandardException;
 
 	/**
 	 * the class's unqualified name

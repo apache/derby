@@ -31,7 +31,9 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
@@ -105,32 +107,33 @@ class BCClass extends GClass {
 	 * generated, if there are no constructors then
 	 * the default no-arg constructor will be defined.
 	 */
-	public ByteArray getClassBytecode() {
+	public ByteArray getClassBytecode() throws StandardException {
 
 		// return if already done
 		if (bytecode != null) return bytecode;
+		
+		try {
 
-		if (SanityManager.DEBUG) {
-		  if (SanityManager.DEBUG_ON("ClassLineNumbers")) {
+			if (SanityManager.DEBUG) {
+				if (SanityManager.DEBUG_ON("ClassLineNumbers")) {
 
-			try {
+					ClassFormatOutput sout = new ClassFormatOutput(2);
 
-				ClassFormatOutput sout = new ClassFormatOutput(2);
+					int cpiUTF = classHold.addUtf8("GC.java");
 
-				int cpiUTF = classHold.addUtf8("GC.java");
+					sout.putU2(cpiUTF);
 
-				sout.putU2(cpiUTF);
-
-				classHold.addAttribute("SourceFile", sout);
-			} catch (IOException ioe) {
-				SanityManager.THROWASSERT("i/o exception generating class file " + ioe.toString());
+					classHold.addAttribute("SourceFile", sout);
+				}
 			}
-		  }
+
+			// the class is now complete, get its bytecode.
+			bytecode = classHold.getFileFormat();
+			
+		} catch (IOException ioe) {
+			throw StandardException.newException(
+					SQLState.GENERATED_CLASS_LINKAGE_ERROR, ioe, getFullName());
 		}
-
-
-		// the class is now complete, get its bytecode.
-		bytecode = classHold.getFileFormat();
 
 		// release resources, we have the code now.
 		// name is not released, it may still be accessed.

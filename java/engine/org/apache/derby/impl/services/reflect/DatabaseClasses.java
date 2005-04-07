@@ -263,7 +263,8 @@ public abstract class DatabaseClasses
 		return -1;
 	}
 
-	public ByteArray buildSpecificFactory(String className, String factoryName) {
+	public ByteArray buildSpecificFactory(String className, String factoryName)
+		throws StandardException {
 
 		ClassBuilder cb = javaFactory.newClassBuilder(this, CodeGeneration.GENERATED_PACKAGE_PREFIX,
 			Modifier.PUBLIC | Modifier.FINAL, factoryName, "org.apache.derby.impl.services.reflect.GCInstanceFactory");

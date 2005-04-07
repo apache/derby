@@ -113,14 +113,19 @@ public class ClassHolder {
 		method_info = new MemberTable(0);
 	}
 
-	public void put(ClassFormatOutput out) throws IOException {
+	private void put(ClassFormatOutput out) throws IOException {
 
 		/* Write out the header */
 		out.putU4(VMDescriptor.JAVA_CLASS_FORMAT_MAGIC);
 		out.putU2(VMDescriptor.JAVA_CLASS_FORMAT_MINOR_VERSION);
 		out.putU2(VMDescriptor.JAVA_CLASS_FORMAT_MAJOR_VERSION);
 
-		out.putU2(cptEntries.size());
+		// special case checking that the number of constant
+		// pool entries does not exceed the limit of 65535
+		// (as it is stored as a U2).
+		// Special case to allow somewhat easier debugging
+		// of the resulting failure.
+		out.putU2("constant_pool", cptEntries.size());
 		cptPut(out);
 
 		out.putU2(access_flags);
@@ -165,8 +170,12 @@ public class ClassHolder {
 	**	Public methods from ClassHolder.
 	*/
 
-
-	public ByteArray getFileFormat() {
+	/**
+	 * Convert the object representation of the class into
+	 * its class file format.
+	 * @exception IOException error writing the class
+	 */
+	public ByteArray getFileFormat() throws IOException {
 
 		int classFileSize = 4 + (10 * 2);
 		classFileSize += cptEstimatedSize;
@@ -183,16 +192,12 @@ public class ClassHolder {
 		if (attribute_info != null)
 			classFileSize += attribute_info.classFileSize();
 
-		try {
-			ClassFormatOutput cfo = new ClassFormatOutput(classFileSize + 200);
+	
+		ClassFormatOutput cfo = new ClassFormatOutput(classFileSize + 200);
 
-			put(cfo);
+		put(cfo);
 
-			return new ByteArray(cfo.getData(), 0, cfo.size());
-
-		} catch (IOException e) {
-			return null;
-		}
+		return new ByteArray(cfo.getData(), 0, cfo.size());
 
 	}
 
