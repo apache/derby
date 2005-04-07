@@ -148,23 +148,22 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		*/
 
 		/*
-		** Save the evaluation of the left operand in a field.
-		** Generated code is:
-		**		(<fieldx> = <leftOperand>)
-		*/
-		LocalField leftOperandSaver = acb.newFieldDeclaration(Modifier.PRIVATE,
-												ClassName.BooleanDataValue);
-
-		/*
 		** See whether the left operand equals the short-circuit value.
 		** Generated code is:
 		**		.equals(shortCircuitValue)
 		*/
 
 		leftOperand.generateExpression(acb, mb);
-		mb.putField(leftOperandSaver);
+		// stack - left
+
+		// put an extra left of the stack for potential
+		// use in the else clause.
+		mb.dup();
+		// stack - left, left
 		mb.push(shortCircuitValue);
+		// stack - left, left, shortcircuit
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "equals", "boolean", 1);
+		// stack left, result
 
 		/*
 		** Generate the if expression.  This is what accomplishes
@@ -177,7 +176,9 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		*/
 
 		mb.conditionalIf();
-
+		
+		// stack: left
+		
 		/*
 		** Generate the return value if the left operand equals the short-
 		** circuit value.  Generated code calls a static method in the
@@ -187,8 +188,11 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		LocalField reusableBoolean = acb.newFieldDeclaration(Modifier.PRIVATE,
 												ClassName.BooleanDataValue);
 
+
 		mb.push(shortCircuitValue);
+		// stack: left, shortcircuit
 		acb.generateDataValue(mb, getTypeCompiler(), reusableBoolean);
+		// stack: left, dvf
 
 
 		mb.startElseCode();
@@ -202,14 +206,34 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		**	<fieldx>.<methodName>(<rightOperand>)
 		*/
 
-		mb.getField(leftOperandSaver);
+		// stack: left
+		
+		// we duplicate left here rather than just pop'ing left
+		// in the 'then' clause. pop'ing in the then clause
+		// breaks the current conditional implementation
+		// which is modeling a simple ? : operator.
+		// note that this will leave through either path
+		// an extra left on the stack after the conditional
+		mb.dup();
+		// stack left, left
 
 		rightOperand.generateExpression(acb, mb);
+		// stack: left, left, right
 		mb.upCast(ClassName.BooleanDataValue);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, ClassName.BooleanDataValue, 1);
+		// stack: left, result(left op right)
 
 		mb.completeConditional();
+		//	 stack: left, result
+		
+		// remove the extra left on the stack, see the
+		// comments in the else clause.
+		mb.swap();
+		// stack: result, left
+		mb.pop();
+		
+		// stack: result
 	}
 
 	DataTypeDescriptor resolveLogicalBinaryOperator(

@@ -338,7 +338,6 @@ public class BinaryOperatorNode extends ValueNode
 		throws StandardException
 	{
 		String		resultTypeName;
-		LocalField	receiverField;
 		String		receiverType;
 
 /*
@@ -353,9 +352,6 @@ public class BinaryOperatorNode extends ValueNode
 		** The receiver is the operand with the higher type precedence.
 		** Like always makes the left the receiver.
 		**
-		** Allocate an object for re-use to hold the receiver.  This is because
-		** the receiver is passed to the method as one of the parameters,
-		** and we don't want to evaluate it twice.
 		*/
 		if (leftOperand.getTypeId().typePrecedence() >
 			rightOperand.getTypeId().typePrecedence())
@@ -371,20 +367,22 @@ public class BinaryOperatorNode extends ValueNode
 		    receiverType = getReceiverInterfaceName();
 
 			/*
-			** Generate (field = <left expression>).  This assignment is
-			** used as the receiver of the method call for this operator,
-			** and the field is used as the left operand:
+			** Generate (with <left expression> only being evaluated once)
 			**
-			**	(field = <left expression>).method(field, <right expression>...)
+			**	<left expression>.method(<left expression>, <right expression>...)
 			*/
-			receiverField =
-				acb.newFieldDeclaration(Modifier.PRIVATE, receiverType);
 
 			leftOperand.generateExpression(acb, mb);
-			mb.putField(receiverField); // method instance
 			mb.cast(receiverType); // cast the method instance
-			mb.getField(receiverField); mb.cast(leftInterfaceType); // first arg with cast
-			rightOperand.generateExpression(acb, mb); mb.cast(rightInterfaceType); // second arg with cast
+			// stack: left
+			
+			mb.dup();
+			mb.cast(leftInterfaceType);
+			// stack: left, left
+			
+			rightOperand.generateExpression(acb, mb);
+			mb.cast(rightInterfaceType); // second arg with cast
+			// stack: left, left, right
 		}
 		else
 		{
@@ -399,20 +397,25 @@ public class BinaryOperatorNode extends ValueNode
 		    receiverType = getReceiverInterfaceName();
 
 			/*
-			** Generate (field = <right expression>).  This assignment is
-			** used as the receiver of the method call for this operator,
-			** and the field is used as the right operand:
+			** Generate (with <right expression> only being evaluated once)
 			**
-			**	(field = <right expression>).method(<left expression>, field...)
+			**	<right expression>.method(<left expression>, <right expression>)
 			*/
-			receiverField =
-				acb.newFieldDeclaration(Modifier.PRIVATE, rightInterfaceType);
 
-			rightOperand.generateExpression(acb, mb);
-			mb.putField(receiverField); // method instance
+			rightOperand.generateExpression(acb, mb);			
 			mb.cast(receiverType); // cast the method instance
-			leftOperand.generateExpression(acb, mb); mb.cast(leftInterfaceType); // second arg with cast
-			mb.getField(receiverField); mb.cast(rightInterfaceType); // first arg with cast
+			// stack: right
+			
+			mb.dup();
+			mb.cast(rightInterfaceType);
+			// stack: right,right
+			
+			leftOperand.generateExpression(acb, mb);
+			mb.cast(leftInterfaceType); // second arg with cast
+			// stack: right,right,left
+			
+			mb.swap();
+			// stack: right,left,right			
 		}
 
 		/* Figure out the result type name */
