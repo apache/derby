@@ -2273,7 +2273,7 @@ clp.list(System.out);
         else if (testType.equals("java"))
         {
             sysProp.put("user.dir", outDir.getCanonicalPath());
-            javaPath = "org.apache.derbyTesting." + testDirName;
+            javaPath = "org.apache.derbyTesting.functionTests.tests." + testDirName;
             String[] args = new String[2];
             args[0] = "-p";
             args[1] = propString;
