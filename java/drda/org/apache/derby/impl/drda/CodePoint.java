@@ -709,7 +709,7 @@ class CodePoint
 	//---------------------Security Check Codes ---------------------------
 	static final int SECCHKCD_OK = 0;		// Security info correct and acceptable
 	static final int SECCHKCD_NOTSUPPORTED = 0x01;	// SECMEC value not supported
-	static final int SECCHKCD_SECTKNMISSING = 0x0E;	// SECTKN missing or invalid 
+	static final int SECCHKCD_SECTKNMISSING_OR_INVALID = 0x0E;	// SECTKN missing or invalid 
 	static final int SECCHKCD_PASSWORDMISSING = 0x10;	// Password missing  
 	static final int SECCHKCD_USERIDMISSING = 0x12;	// User Id missing  
 	static final int SECCHKCD_USERIDINVALID = 0x13;	// Userid invalid

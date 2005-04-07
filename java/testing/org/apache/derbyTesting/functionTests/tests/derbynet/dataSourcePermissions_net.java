@@ -123,7 +123,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	public void setProperties() {
 
 		// Set required server properties.
-		System.setProperty("database", 
+		System.setProperty("database",
 						   TestUtil.getJdbcUrlPrefix("localhost",
 													 NETWORKSERVER_PORT) +
 						   "wombat;create=true");
@@ -134,7 +134,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 
 	public String getJDBCUrl(String db, String attrs) {
 
-		String s = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT) 
+		String s = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT)
 			+ db;
 		if (attrs != null)
 			if (TestUtil.isJCCFramework())
@@ -146,16 +146,16 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 
 	}
 
-	public javax.sql.DataSource getDS(String database, String user, String 
+	public javax.sql.DataSource getDS(String database, String user, String
 									  password)
 	{
 		return getDS(database,user,password,null);
 	}
 
 	public javax.sql.DataSource getDS(String database, String user, String
-									  password, Properties attrs)  
+									  password, Properties attrs)
 	{
-		
+
 	if (attrs == null)
 		attrs = new Properties();
 	attrs.setProperty("databaseName", database);
@@ -166,7 +166,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	attrs = addRequiredAttributes(attrs);
 	return TestUtil.getDataSource(attrs);
 	}
-	
+
 
 
 	public javax.sql.ConnectionPoolDataSource getCPDS(String database, String user, String password) {
@@ -221,7 +221,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		}
 
 	}
-	private static boolean isServerStarted(NetworkServerControl server, int ntries)
+	protected static boolean isServerStarted(NetworkServerControl server, int ntries)
 	{
 		for (int i = 1; i <= ntries; i ++)
 		{
@@ -247,9 +247,9 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		testRetrieveMessageText();
 	}
 
-	/** 
+	/**
 	 * Test property retrieveMessageText to retrieve message text
-	 * Property defaults to true for Network Client but can be set to 
+	 * Property defaults to true for Network Client but can be set to
 	 * false to disable the procedure call.
 	 */
 	public void testRetrieveMessageText() throws SQLException
@@ -268,7 +268,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 			conn = ds.getConnection();
 			checkMessageText(conn,"false");
 			conn.close();
-			
+
 			// now try with retrieveMessageText = true
 			ds = getDS("wombat", "EDWARD", "noodle");
 			args = new Boolean[] { new Boolean(true) };
@@ -287,7 +287,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	public void checkMessageText(Connection conn, String
 								 retrieveMessageTextValue) throws SQLException
 	{
-		System.out.println("** checkMessageText() with retrieveMessageText= " + 
+		System.out.println("** checkMessageText() with retrieveMessageText= " +
 						   retrieveMessageTextValue);
 
 		try {
@@ -299,8 +299,8 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 			String sqlState = e.getSQLState();
 			if (sqlState == null || ! sqlState.equals(expectedSQLState))
 			{
-				System.out.println("Incorrect SQLState.  Got: " + sqlState + 
-								   " should be: " + expectedSQLState); 
+				System.out.println("Incorrect SQLState.  Got: " + sqlState +
+								   " should be: " + expectedSQLState);
 				throw e;
 			}
 			if (retrieveMessageTextValue.equals("true") )
@@ -324,7 +324,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 					System.out.println("FAIL: Message Text should not have been retrieved");
 					throw e;
 				}
-			
+
 		}
 	}
 

@@ -1,0 +1,9 @@
+Checking security mechanism authentication with DriverManager
+T1: jdbc:derby:net://localhost:20000/wombat;create=true - EXCEPTION null userid not supported
+T2: jdbc:derby:net://localhost:20000/wombat;create=true:user=max; - EXCEPTION null password not supported
+T3: jdbc:derby:net://localhost:20000/wombat;create=true:user=neelima;password=lee;
+T4: jdbc:derby:net://localhost:20000/wombat;create=true:user=neelima;password=lee;securityMechanism=3;
+T6: jdbc:derby:net://localhost:20000/wombat;create=true:user=neelima;securityMechanism=4;
+T8: jdbc:derby:net://localhost:20000/wombat;create=true:user=neelima;password=lee;securityMechanism=4;
+SECMEC_USRIDPWD: OK
+Completed testSecMec

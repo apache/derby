@@ -40,4 +40,6 @@ connect 'jdbc:derby:net://localhost:1527/"./my-dbname;create=true":user=usr;pass
 connect 'jdbc:derby:net://localhost:1527/"./my-dbname;create=true":user=usr;password=pwd;retrieveMessagesFromServerOnGetMessage=true;';
 
 
+-- with no user
+connect 'jdbc:derby:net://localhost:1527/wombat;create=true:retrieveMessagesFromServerOnGetMessage=true;';
 

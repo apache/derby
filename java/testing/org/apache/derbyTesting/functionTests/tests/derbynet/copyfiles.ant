@@ -17,6 +17,7 @@ testclientij.sql
 testij_app.properties
 testij_sed.properties
 testProtocol_app.properties
+testSecMec_app.properties
 protocol.tests
 excsat_accsecrd1.inc
 excsat_accsecrd2.inc

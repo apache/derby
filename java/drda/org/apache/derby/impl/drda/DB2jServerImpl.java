@@ -171,7 +171,6 @@ public class DB2jServerImpl {
 	protected final static int DEFAULT_CCSID = 1208;
 	protected final static byte SPACE_CHAR = 32;
 														
-	protected final static int DEFAULT_SECURITY_MECHANISM =  CodePoint.SECMEC_USRIDPWD;
 
 	// Application Server manager levels - this needs to be in sync
 	// with CodePoint.MGR_CODEPOINTS

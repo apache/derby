@@ -1556,10 +1556,13 @@ public class DRDAConnThread extends Thread {
 					securityMechanism = reader.readNetworkShort();
 					if (SanityManager.DEBUG)
 						trace("Security mechanism = " + securityMechanism);
-					if (securityMechanism != server.DEFAULT_SECURITY_MECHANISM)
+					// for plain text userid,password USRIDPWD, and USRIDONL
+				        // no need of decryptionManager
+					if (securityMechanism != CodePoint.SECMEC_USRIDPWD &&
+					    securityMechanism != CodePoint.SECMEC_USRIDONL)
 					{
 						//this is the only other one we understand
-						if (securityMechanism != CodePoint.SECMEC_EUSRIDPWD)
+						if (securityMechanism != CodePoint.SECMEC_EUSRIDPWD) 
 							securityCheckCode = CodePoint.SECCHKCD_NOTSUPPORTED;
 						else
 						{
@@ -1612,13 +1615,14 @@ public class DRDAConnThread extends Thread {
 		if (securityCheckCode == 0  && 
 			database.securityMechanism == CodePoint.SECMEC_EUSRIDPWD &&
 			database.publicKeyIn == null)
-			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING;
+			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING_OR_INVALID;
 
 		// shouldn't have security token
 		if (securityCheckCode == 0 &&
-			database.securityMechanism == CodePoint.SECMEC_USRIDPWD &&
+			(database.securityMechanism == CodePoint.SECMEC_USRIDPWD ||
+			database.securityMechanism == CodePoint.SECMEC_USRIDONL)  &&
 			database.publicKeyIn != null)
-			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING;
+			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING_OR_INVALID;
 		if (SanityManager.DEBUG)
 			trace("** ACCSECRD securityCheckCode is: "+securityCheckCode);
 		
@@ -2468,6 +2472,7 @@ public class DRDAConnThread extends Thread {
 			// these are the ones we know about
 			writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDPWD);
 			writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_EUSRIDPWD);
+			writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDONL);
 		}
 		if (securityCheckCode != 0)
 		{
@@ -2535,7 +2540,7 @@ public class DRDAConnThread extends Thread {
 				case CodePoint.SECTKN:
 					if (database.securityMechanism != CodePoint.SECMEC_EUSRIDPWD)
 					{
-						securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING;
+						securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING_OR_INVALID;
 						reader.skipBytes();
 					}
 					else if (database.decryptedUserId == null) {
@@ -2612,12 +2617,16 @@ public class DRDAConnThread extends Thread {
 
 		//check if we have a userid and password when we need it
 		if (securityCheckCode == 0 && 
-				database.securityMechanism == CodePoint.SECMEC_USRIDPWD)
+		   (database.securityMechanism == CodePoint.SECMEC_USRIDPWD||
+		    database.securityMechanism == CodePoint.SECMEC_USRIDONL ))
 		{
 			if (database.userId == null)
 				securityCheckCode = CodePoint.SECCHKCD_USERIDMISSING;
-			else if (database.password == null)
+			else if ( database.securityMechanism == CodePoint.SECMEC_USRIDPWD)
+			{
+			    if (database.password == null)
 				securityCheckCode = CodePoint.SECCHKCD_PASSWORDMISSING;
+			}
 			//Note, we'll ignore encryptedUserId and encryptedPassword if they
 			//are also set
 		}

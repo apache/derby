@@ -241,7 +241,10 @@ class Database
 	protected Connection makeConnection(Properties p) throws SQLException
 	{
 		p.put(Attribute.USERNAME_ATTR, userId);
-		p.put(Attribute.PASSWORD_ATTR, password);
+                
+                // take care of case of SECMEC_USRIDONL
+                if(password != null) 
+		    p.put(Attribute.PASSWORD_ATTR, password);
 		Connection conn = DB2jServerImpl.getDriver().connect(Attribute.PROTOCOL
 							 + dbName + attrString, p);
 		conn.setAutoCommit(false);

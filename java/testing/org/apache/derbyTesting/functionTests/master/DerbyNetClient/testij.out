@@ -53,4 +53,9 @@ ij(CONNECTION13)> connect 'jdbc:derby://localhost:1527/my-db-name;create=true;us
 ij(CONNECTION14)> -- Should see message text
 select * from APP.notthere;
 ERROR 42X05: Table 'APP.NOTTHERE' does not exist.
+ij(CONNECTION14)> -- just user security mechanism
+connect 'jdbc:derby://localhost:1527/my-db-name;create=true;user=usr;retrieveMessageText=true';
+ERROR (no SQLState): null password not supported
+ij(CONNECTION14)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP';
+ERROR (no SQLState): null password not supported
 ij(CONNECTION14)> 

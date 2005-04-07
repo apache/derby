@@ -65,4 +65,7 @@ connect 'jdbc:derby://localhost:1527/my-db-name;create=true;user=usr;password=pw
 -- Should see message text
 select * from APP.notthere;
 
+-- just user security mechanism
+connect 'jdbc:derby://localhost:1527/my-db-name;create=true;user=usr;retrieveMessageText=true';
 
+connect 'jdbc:derby://localhost:1527/wombat' USER 'APP';
