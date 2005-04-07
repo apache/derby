@@ -303,7 +303,16 @@ public interface MethodBuilder {
 		</PRE>.
 	*/
 	public void isInstanceOf(String className);
-
+	
+	/**
+	 * Pop the top value off the stack
+		<PRE>
+		Stack ..., value =>
+		      ...
+		</PRE>.
+	*/
+	public void pop();
+		
 	/**
 		End a statement.
 		Pops the top-word of the stack, if any.

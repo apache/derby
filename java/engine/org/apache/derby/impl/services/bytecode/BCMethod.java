@@ -77,7 +77,7 @@ public class BCMethod implements MethodBuilder {
 
 	private int currentVarNum;
 	private int statementNum;
-
+	
 	BCMethod(ClassBuilder cb,
 			String returnType,
 			String methodName,
@@ -87,7 +87,6 @@ public class BCMethod implements MethodBuilder {
 
 		this.cb = (BCClass) cb;
 		modClass = this.cb.modify();
-		//this.modifiers = modifiers;
 
 		if (SanityManager.DEBUG) {
    			this.cb.validateType(returnType);
@@ -834,13 +833,21 @@ public class BCMethod implements MethodBuilder {
 	public void completeConditional() {
 		condition = condition.end(myCode, stackTypeOffset);
 	}
+	
+	public void pop() {
+		if (SanityManager.DEBUG) {
+			if (stackDepth == 0)
+				SanityManager.THROWASSERT("pop when stack is empty!");
+		}
+		Type toPop = popStack();
+
+		myCode.addInstr(toPop.width() == 2  ? VMOpcode.POP2 : VMOpcode.POP);
+
+	}	
 
 	public void endStatement() {
 		if (stackDepth != 0) {
-			Type toPop = popStack();
-
-			myCode.addInstr(toPop.width() == 2  ? VMOpcode.POP2 : VMOpcode.POP);
-
+			pop();
 		}
 
 		//if (SanityManager.DEBUG) {
@@ -973,5 +980,6 @@ public class BCMethod implements MethodBuilder {
 			return false;
 		}
 	}
+	
 }
 
