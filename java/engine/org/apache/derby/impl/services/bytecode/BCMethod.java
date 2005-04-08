@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.services.bytecode.BCMethod
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2005 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 
 package org.apache.derby.impl.services.bytecode;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.compiler.ClassBuilder;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.classfile.ClassFormatOutput;
@@ -68,16 +67,35 @@ public class BCMethod implements MethodBuilder {
 
 	final BCClass		cb;
 	protected final ClassHolder modClass; // the class it is in (modifiable fmt)
+	private final String myReturnType;
+	
+	/**
+	 * The original name of the method, this
+	 * represents how any user would call this method.
+	 */
+	private final String myName;
 
 	protected BCLocalField[] parameters; 
 	protected Vector thrownExceptions; // expected to be names of Classes under Throwable
 
-	final CodeChunk myCode;
+	CodeChunk myCode;
 	protected ClassMember myEntry;
 
 	private int currentVarNum;
 	private int statementNum;
 	
+	/**
+	 * True if we are currently switching control
+	 * over to a sub method to avoid hitting the code generation
+	 * limit of 65535 bytes per method.
+	 */
+	private boolean handlingOverflow;
+	
+	/**
+	 * How many sub-methods we have overflowed to.
+	 */
+	private int subMethodCount;
+
 	BCMethod(ClassBuilder cb,
 			String returnType,
 			String methodName,
@@ -87,6 +105,8 @@ public class BCMethod implements MethodBuilder {
 
 		this.cb = (BCClass) cb;
 		modClass = this.cb.modify();
+		myReturnType = returnType;
+		myName = methodName;
 
 		if (SanityManager.DEBUG) {
    			this.cb.validateType(returnType);
@@ -127,8 +147,13 @@ public class BCMethod implements MethodBuilder {
 	// MethodBuilder interface
 	//
 
+	/**
+	 * Return the logical name of the method. The current
+	 * myEntry refers to the sub method we are currently
+	 * overflowing to. Those sub-methods are hidden from any caller.
+	 */
 	public String getName() {
-		return myEntry.getName();
+		return myName;
 	}
 
 	public void getParameter(int id) {
@@ -148,6 +173,17 @@ public class BCMethod implements MethodBuilder {
 	 * the list of thrownExceptions.
 	 */
 	public void addThrownException(String exceptionClass) {
+		
+		// cannot add exceptions after code generation has started.
+		// Allowing this would cause the method overflow/split to
+		// break as the top-level method would not have the exception
+		// added in the sub method.
+		if (SanityManager.DEBUG)
+		{
+			if (myCode.getRelativePC() != 0)
+				SanityManager.THROWASSERT("Adding exception after code generation " + exceptionClass
+						+ " to method " + getName());
+		}
 
 		if (thrownExceptions == null)
 			thrownExceptions = new Vector();
@@ -478,7 +514,11 @@ public class BCMethod implements MethodBuilder {
 		int rw = rt.width();
 		if (rw != 0)
 			growStack(rw, rt);
-
+		else
+		{
+			if (stackDepth == 0)
+				overflowMethodCheck();
+		}
 		return cpi;
 	}
 
@@ -535,7 +575,11 @@ public class BCMethod implements MethodBuilder {
 		int rw = rt.width();
 		if (rw != 0)
 			growStack(rw, rt);
-
+		else
+		{
+			if (stackDepth == 0)
+				overflowMethodCheck();
+		}
 		// Check the declared type of the method
 		if (SanityManager.DEBUG) {
 
@@ -842,7 +886,9 @@ public class BCMethod implements MethodBuilder {
 		Type toPop = popStack();
 
 		myCode.addInstr(toPop.width() == 2  ? VMOpcode.POP2 : VMOpcode.POP);
-
+		
+		if (stackDepth == 0)
+			overflowMethodCheck();
 	}	
 
 	public void endStatement() {
@@ -981,5 +1027,127 @@ public class BCMethod implements MethodBuilder {
 		}
 	}
 	
+	/**
+	 * Check to see if the current method byte code is nearing the
+	 * limit of 65535. If it is start overflowing to a new method.
+	 * <P>
+	 * Overflow is handled for a method named e23 as:
+	 * <CODE>
+	 public Object e23()
+	 {
+	   ... existing code
+	   // split point
+	   return e23_0();
+	 }
+	 private Object e23_0()
+	 {
+	    ... first set overflowed code
+	    // split point
+	    return e23_1(); 
+	 }
+	 private Object e23_1()
+	 {
+	    ... second set overflowed code
+	    // method complete
+	    return result; 
+	 }
+	 	 </CODE>
+	 <P>
+	 
+	 These overflow methods are hidden from the code using this MethodBuilder,
+	 it continues to think that it is building a single method with the
+	 original name.
+
+
+	 * <BR> Restrictions:
+	 * <UL>
+	 * <LI> Only handles methods with no arguments
+	 * <LI> Stack depth must be zero
+	 * </UL>
+	 * 
+	 *
+	 */
+	private void overflowMethodCheck()
+	{
+		if (handlingOverflow)
+			return;
+		
+		// don't sub method in the middle of a conditional
+		if (condition != null)
+			return;
+		
+		int currentCodeSize = myCode.getRelativePC();
+		
+		// Overflow at >= 55,000 bytes which is someway
+		// below the limit of 65,535. Ideally overflow
+		// would occur at 65535 minus the few bytes needed
+		// to call the sub-method, but the issue is at this level
+		// we don't know frequently we are called given the restriction
+		// of only being called when the stack depth is zero.
+		// Thus split earlier to try ensure most cases are caught.
+		// Only downside is that we may split into N methods when N-1 would suffice.
+		if (currentCodeSize < 55000)
+			return;
+		
+		// only handle no-arg methods at the moment.
+		if (parameters != null)
+		{
+			if (parameters.length != 0)
+				return;
+		}
+		
+		int modifiers = myEntry.getModifier();	
+		//System.out.println("NEED TO SPLIT " + myEntry.getName() + "  " + currentCodeSize + " stack " + stackDepth);
+
+		// the sub-method can be private to ensure that no-one
+		// can call it accidentally from outside the class.
+		modifiers &= ~(Modifier.PROTECTED | Modifier.PUBLIC);
+		modifiers |= Modifier.PRIVATE;
+		
+		String subMethodName = myName + "_s" + Integer.toString(subMethodCount++);
+		BCMethod subMethod = (BCMethod) cb.newMethodBuilder(
+				modifiers,
+				myReturnType, subMethodName);
+		subMethod.thrownExceptions = this.thrownExceptions;
+				
+		// stop any recursion
+		handlingOverflow = true;
+		
+		// in this method make a call to the sub method we will
+		// be transferring control to.
+		short op;
+		if ((modifiers & Modifier.STATIC) == 0)
+		{
+			op = VMOpcode.INVOKEVIRTUAL;
+			this.pushThis();
+		} else {
+			op = VMOpcode.INVOKESTATIC;
+		}
+		
+		this.callMethod(op, (String) null, subMethodName, myReturnType, 0);
+	
+		// and return its value, works just as well for a void method!
+		this.methodReturn();
+		this.complete();
+		
+		handlingOverflow = false;
+		
+		// now the tricky bit, make this object take over the
+		// code etc. from the sub method. This is done so
+		// that any code that has a reference to this MethodBuilder
+		// will continue to work. They will be writing code into the
+		// new sub method.
+		
+		this.myEntry = subMethod.myEntry;
+		this.myCode = subMethod.myCode;
+		this.currentVarNum = subMethod.currentVarNum;
+		this.statementNum = subMethod.statementNum;
+		
+		// copy stack info
+		this.stackTypes = subMethod.stackTypes;
+		this.stackTypeOffset = subMethod.stackTypeOffset;
+		this.maxStack = subMethod.maxStack;
+		this.stackDepth = subMethod.stackDepth;
+	}
 }
 
