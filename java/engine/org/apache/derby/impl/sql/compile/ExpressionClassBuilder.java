@@ -853,12 +853,16 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 
 	/**
 	 * generated the next field name available.
-	 * these are of the form 'f#', where # is
+	 * these are of the form 'e#', where # is
 	 * incremented each time.
+	 * This shares the name space with the expression methods
+	 * as Java allows names and fields to have the same name.
+	 * This reduces the number of constant pool entries created
+	 * for a generated class file.
 	 */
 	private String newFieldName()
 	{
-		return "f".concat(Integer.toString(nextFieldNum++));
+		return "e".concat(Integer.toString(nextFieldNum++));
 	}
 
 
