@@ -1,6 +1,6 @@
 Checking security mechanism authentication with DriverManager
-T1: jdbc:derby://localhost:20000/wombat;create=true - EXCEPTION null password not supported
-T2: jdbc:derby://localhost:20000/wombat;create=true;user=max - EXCEPTION null password not supported
+T1: jdbc:derby://localhost:20000/wombat;create=true
+T2: jdbc:derby://localhost:20000/wombat;create=true;user=max
 T3: jdbc:derby://localhost:20000/wombat;create=true;user=neelima;password=lee
 T4: jdbc:derby://localhost:20000/wombat;create=true;user=neelima;password=lee;securityMechanism=3
 T6: jdbc:derby://localhost:20000/wombat;create=true;user=neelima;securityMechanism=4

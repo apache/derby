@@ -24,7 +24,7 @@ ij> -- examples from the docs
 connect 'jdbc:derby://localhost:1527/wombat;create=true;user=judy;password=judy';
 ij(CONNECTION1)> connect 'jdbc:derby://localhost:1527/./wombat;user=judy;password=judy';
 ij(CONNECTION2)> connect 'jdbc:derby://localhost:1527/toursDB';
-ERROR (no SQLState): null password not supported
+ERROR 08004: The application server rejected establishment of the connection.  An attempt was made to access a database, toursDB, which was not found.
 ij(CONNECTION2)> connect 'jdbc:derby://localhost:1527/toursDB' USER 'dbadmin' PASSWORD 'dbadbmin';
 ERROR 08004: The application server rejected establishment of the connection.  An attempt was made to access a database, toursDB, which was not found.
 ij(CONNECTION2)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP' PASSWORD 'APP';
@@ -55,7 +55,5 @@ select * from APP.notthere;
 ERROR 42X05: Table 'APP.NOTTHERE' does not exist.
 ij(CONNECTION14)> -- just user security mechanism
 connect 'jdbc:derby://localhost:1527/my-db-name;create=true;user=usr;retrieveMessageText=true';
-ERROR (no SQLState): null password not supported
-ij(CONNECTION14)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP';
-ERROR (no SQLState): null password not supported
-ij(CONNECTION14)> 
+ij(CONNECTION15)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP';
+ij(CONNECTION16)> 

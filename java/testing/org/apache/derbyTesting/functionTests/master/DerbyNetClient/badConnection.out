@@ -1,9 +1,9 @@
 No user/password  (Client error)
 passed SQLException all the way to client, then thrown by client...
-SQLState is: null
-vendorCode is: -99999
+SQLState is: 08004
+vendorCode is: -4499
 nextException is: null
-reason is: null password not supported
+reason is: The application server rejected establishment of the connection.  An attempt was made to access a database, testbase, which was not found.
 Database not Found  (RDBNFNRM)
 passed SQLException all the way to client, then thrown by client...
 SQLState is: 08004
