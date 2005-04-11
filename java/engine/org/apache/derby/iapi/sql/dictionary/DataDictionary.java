@@ -74,15 +74,34 @@ public interface DataDictionary
 	public static final int DD_VERSION_CS_5_2			= 100;
 	/** Cloudscape 8.1 (Pre-Gandalf) System Catalog version */
 	public static final int DD_VERSION_CS_8_1			= 110;
-	/** Cloudscape 10.0 (Gandalf) System Catalog version */
+	/** Cloudscape/Derby 10.0 (Gandalf) System Catalog version */
 	public static final int DD_VERSION_CS_10_0			= 120;
+
+	/** Derby 10.1 System Catalog version */
+	public static final int DD_VERSION_DERBY_10_1		= 130;
 
 	// general info
 	public	static	final	String	DATABASE_ID = "derby.databaseID";
 
 	// version ids
+	/**
+	 * DataDictionaryVersion property indicates the updgrade level of the system catalogs.
+	 * Stored as a database property. Set to an instance of DD_Version with
+	 * the major number one of the DataDictionary.DD_* values.
+	 */
 	public	static	final	String	CORE_DATA_DICTIONARY_VERSION = "DataDictionaryVersion";
+	/**
+	 * CreateDataDictionaryVersion property indicates the level of the system catalogs,
+	 * at the time of database creation.
+	 * Stored as a database property. Set to an instance of DD_Version.
+	 */
 	public	static	final	String	CREATE_DATA_DICTIONARY_VERSION = "CreateDataDictionaryVersion";
+	/**
+	 * derby.softDataDictionaryVersion property indicates the soft upgrade level of the system catalogs.
+	 * Soft upgrade will sometime make minor changes to the system catalogs that can be safely consumed by
+	 * earlier versions, such as correcting values.
+	 * Stored as a database property. Set to an instance of DD_Version.
+	 */
 	public  static  final   String  SOFT_DATA_DICTIONARY_VERSION = "derby.softDataDictionaryVersion";
     public  static  final   String  PROPERTY_CONGLOMERATE_VERSION = "PropertyConglomerateVersion";
 
@@ -1493,8 +1512,27 @@ public interface DataDictionary
 	/**
 		Check to see if a database has been upgraded to the required
 		level in order to use a langauge feature that is.
+		<P>
+		This is used to ensure new functionality that would lead on disk
+		information not understood by a previous release is not executed
+		while in soft upgrade mode. Ideally this is called at compile time
+		and the parser has a utility method to enable easy use at parse time.
+		<P>
+		To use this method, a feature implemented in a certain release (DataDictionary version)
+		would call it with the constant matching the release. E.g. for a new feature added
+		in 10.1, a call such as 
+		<PRE>
+		// check and throw an exception if the database is not at 10.1
+		dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "NEW FEATURE NAME");
+		
+		</PRE>
+		This call would occur during the compile time, usually indirectly through
+		the parser utility method, but direct calls can be made during QueryNode initialization,
+		or even at bind time.
+		<BR>
+		It is not expected that this method would be called at execution time.
 
-		@param majorVersion Data Dictionary major version
+		@param majorVersion Data Dictionary major version (DataDictionary.DD_ constant)
 		@param feature Non-null to throw an error, null to return the state of the version match.
 
 		@return True if the database has been upgraded to the required level, false otherwise.

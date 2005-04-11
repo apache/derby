@@ -281,6 +281,19 @@ public class SQLParser
 										LanguageConnectionContext.CONTEXT_ID);
 	}
 
+	/**
+		Utility method for checking that the underlying database has been
+		upgraded to the required level to use this functionality. Used to
+		disallow SQL statements that would leave on-disk formats that would
+		not be understood by a engine that matches the current upgrade level
+		of the database. Throws an exception if the database is not a the required level.
+		<P>
+		Typically used for CREATE statements at the parser level. Called usually just
+		before the node is created, or can be called in just a partial syntax fragment
+		
+		@param majorVersion Data Dictionary major version (DataDictionary.DD_ constant)
+		@param feature SQL Feature name, for error text.
+	*/
 	private void checkVersion(int version, String feature) throws StandardException
 	{
 		getLanguageConnectionContext().getDataDictionary().checkVersion(
