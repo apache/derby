@@ -410,8 +410,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		/* Assign the initializer to the DataValueDescriptor[] field */
 		MethodBuilder cb = acb.getConstructor();
 		cb.pushNewArray(ClassName.DataValueDescriptor, listSize);
-		cb.putField(arrayField);
-		cb.endStatement();
+		cb.setField(arrayField);
 
 		/* Set the array elements that are constant */
 		int numConstants = 0;

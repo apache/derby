@@ -698,8 +698,7 @@ public class StaticMethodCallNode extends MethodCallNode
 		// reset the parameters are null indicator.
 		if (returnsNullOnNullState != null) {
 			mb.push(false);
-			mb.putField(returnsNullOnNullState);
-			mb.endStatement();
+			mb.setField(returnsNullOnNullState);
 
 			// for the call to the generated method below.
 			mb.pushThis();
@@ -772,8 +771,7 @@ public class StaticMethodCallNode extends MethodCallNode
 				functionEntrySQLAllowed = acb.newFieldDeclaration(Modifier.PRIVATE, "short");
 				mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
 									"getSQLAllowed", "short", 0);
-				mb.putField(functionEntrySQLAllowed);
-				mb.endStatement();
+				mb.setField(functionEntrySQLAllowed);
 
 			}
 			
@@ -819,8 +817,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 					// create the holder of all the ResultSet arrays, new java.sql.ResultSet[][compiledResultSets]
 					cons.pushNewArray("java.sql.ResultSet[]", compiledResultSets);
-					cons.putField(procedureResultSetsHolder);
-					cons.endStatement();
+					cons.setField(procedureResultSetsHolder);
 
 
 					// arguments for the dynamic result sets

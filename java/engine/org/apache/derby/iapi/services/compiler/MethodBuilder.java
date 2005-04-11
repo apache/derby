@@ -182,6 +182,18 @@ public interface MethodBuilder {
 	public void getStaticField(String declaringClass, String fieldName, String fieldType);
 
 	/**
+	Pop the top stack value and store it in the local field. 
+	This call pushes the this instance required to access the field itself.
+	This call does not leave any value on the stack.
+
+	<PRE>
+	Stack ...,value  =>
+	      ...
+	</PRE>
+	*/
+	public void setField(LocalField field);
+
+	/**
 		Pop the top stack value and store it in the local field. 
 		This call pushes the this instance required to access the field itself.
 		Like the Java language 'field = value', this leaves the value on the stack.

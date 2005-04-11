@@ -913,9 +913,7 @@ public class CastNode extends ValueNode
 		*/
 
 		acb.generateNull(acbConstructor, getTypeCompiler(destCTI));
-		acbConstructor.putField(field);
-		acbConstructor.endStatement();
-
+		acbConstructor.setField(field);
 
 
 		/*

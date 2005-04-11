@@ -578,8 +578,7 @@ public class DeleteNode extends DMLModStatementNode
 			LocalField arrayField =
 				acb.newFieldDeclaration(Modifier.PRIVATE, resultSetArrayType);
 			mb.pushNewArray(ClassName.ResultSet, dependentNodes.length);  // new ResultSet[size]
-			mb.putField(arrayField);
-			mb.endStatement();
+			mb.setField(arrayField);
 
 			argCount = 4;
 			for(int index=0 ; index <  dependentNodes.length ; index++)

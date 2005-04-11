@@ -845,8 +845,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 
 		constructor.pushNewStart(ClassName.CurrentDatetime);
 		constructor.pushNewComplete(0);
-		constructor.putField(cdtField);
-		constructor.endStatement();
+		constructor.setField(cdtField);
 
 		return cdtField;
 	}

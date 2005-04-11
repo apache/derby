@@ -1395,8 +1395,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		cb.push(numCols);
 		cb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 							rowAllocatorMethod, rowAllocatorType, 1);
-		cb.putField(field);
-		cb.endStatement();
+		cb.setField(field);
 		/* Increase the statement counter in constructor.  Code size in
 		 * constructor can become too big (more than 64K) for Java compiler
 		 * to handle (beetle 4293).  We set constant columns in other

@@ -2756,8 +2756,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			/* Assign the initializer to the Qualifier[] field */
 			consMB.pushNewArray(
                 ClassName.Qualifier + "[]", (int) num_of_or_conjunctions + 1);
-			consMB.putField(qualField);
-			consMB.endStatement();
+			consMB.setField(qualField);
 
             // Allocate qualifiers[0] which is an entry for each of the leading
             // AND clauses.
@@ -3150,8 +3149,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		LocalField field =
 			acb.newFieldDeclaration(Modifier.PRIVATE, ClassName.ExecIndexRow);
 		
-		mb.putField(field);
-		mb.endStatement();
+		mb.setField(field);
 
 		return field;
 	}

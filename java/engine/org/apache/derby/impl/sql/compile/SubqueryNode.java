@@ -1843,18 +1843,15 @@ public class SubqueryNode extends ValueNode
 				mb.getField(subRS);
 				mb.completeConditional();
 		
-				mb.putField(subRS);
-				mb.endStatement();
+				mb.setField(subRS);
 
                 executeMB.pushNull( ClassName.NoPutResultSet);
-                executeMB.putField(subRS);
-                executeMB.endStatement();
+                executeMB.setField(subRS);
 			}
 
             executeMB.pushNull( ClassName.NoPutResultSet);
-            executeMB.putField(rsFieldLF);
-            executeMB.endStatement();
-
+            executeMB.setField(rsFieldLF);
+ 
 			// now we fill in the body of the conditional
 			mb.getField(rsFieldLF);
 			mb.conditionalIfNull();
@@ -1990,8 +1987,7 @@ public class SubqueryNode extends ValueNode
 			mb.completeConditional();
 		}
 		
-		mb.putField(rsFieldLF);
-		mb.endStatement();
+		mb.setField(rsFieldLF);
 
 		/* rs.openCore() */
 		mb.getField(rsFieldLF);
@@ -2089,8 +2085,7 @@ public class SubqueryNode extends ValueNode
 		mb.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, mbsq.getName(), type, 0);
 
 		// generate: field = value (value is on stack)
-		mb.putField(field);
-		mb.endStatement();
+		mb.setField(field);
 
 		return field;
 	}

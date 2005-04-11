@@ -451,8 +451,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 		  mb.getField(returnsNullOnNullState);
 		mb.completeConditional();
 		
-		mb.putField(returnsNullOnNullState);
-		mb.endStatement();
+		mb.setField(returnsNullOnNullState);
 	}
 
 

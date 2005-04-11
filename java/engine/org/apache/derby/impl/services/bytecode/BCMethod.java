@@ -202,7 +202,7 @@ public class BCMethod implements MethodBuilder {
 	public void complete() {
 		// write exceptions attribute info
 		writeExceptions();
-
+		
 		// get the code attribute to put itself into the class
 		// provide the final header information needed
 		myCode.complete(modClass, myEntry, maxStack, currentVarNum);
@@ -729,6 +729,20 @@ public class BCMethod implements MethodBuilder {
 
 		growStack(ft);
 	}
+	
+	/**
+	 * Set the field but don't duplicate its value so
+	 * nothing is left on the stack after this call.
+	 */
+	public void setField(LocalField field) {
+		BCLocalField lf = (BCLocalField) field;
+		Type lt = lf.type;
+
+		putField(lf.type, lf.cpi, false);
+
+		if (stackDepth == 0)
+			overflowMethodCheck();
+	}
 
 	/**
 		Upon entry the top word(s) on the stack is
@@ -753,7 +767,7 @@ public class BCMethod implements MethodBuilder {
 		BCLocalField lf = (BCLocalField) field;
 		Type lt = lf.type;
 
-		putField(lf.type, lf.cpi);
+		putField(lf.type, lf.cpi, true);
 	}
 
 	/**
@@ -764,50 +778,38 @@ public class BCMethod implements MethodBuilder {
 		Type ft = cb.factory.type(fieldType);
 		int cpi = modClass.addFieldReference(cb.classType.vmNameSimple, fieldName, ft.vmName());
 
-		putField(ft, cpi);
+		putField(ft, cpi, true);
 	}
 
-	private void putField(Type fieldType, int cpi) {
+	private void putField(Type fieldType, int cpi, boolean dup) {
 
 		// now have ...,value
-		myCode.addInstr(fieldType.width() == 2  ? VMOpcode.DUP2 : VMOpcode.DUP);
-		growStack(fieldType);
-
-		// now have ...,value,value
-		pushThis();
-		// now have ...,value,value,this
-		swap();
-		/*
-		if (fieldType.width() == 1) {
-			myCode.addInstr(VMOpcode.SWAP);
-			Type t1 = popStack();
-			Type t2 = popStack();
-			growStack(t1);
-			growStack(t2);
-
-			// now have ...,word,this,word
-
-		} else {
-
-			// now have wA,wB,wA,wB,this
-			myCode.addInstr(VMOpcode.DUP_X2);
-
-			Type t1 = popStack();
-			Type t2 = popStack();
-			growStack(t1);
-			growStack(t2);
-			growStack(t1);
-
-			// now have wA,wB,this,wA,wB,this
-			myCode.addInstr(VMOpcode.POP);
-			popStack();
-
-			// now have wA,wB,this,wA,wB
+		if (dup)
+		{
+			myCode.addInstr(fieldType.width() == 2  ? VMOpcode.DUP2 : VMOpcode.DUP);
+			growStack(fieldType);
 		}
-*/
+		// now have
+		// dup true:  ...,value,value
+		// dup false: ...,value,
+
+		pushThis();
+		// now have
+		// dup true:  ...,value,value,this
+		// dup false: ...,value,this
+
+		swap();
+		// now have
+		// dup true:  ...,value,this,value
+		// dup false: ...,this,value
+
 		myCode.addInstrU2(VMOpcode.PUTFIELD, cpi);
 		popStack(); // the value
 		popStack(); // this
+
+		// now have
+		// dup true:  ...,value
+		// dup false: ...
 	}
 	/**
 		Pop the top stack value and store it in the field.
