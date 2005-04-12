@@ -333,7 +333,7 @@ public class updatableResultSet {
 			}
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
-
+
 			System.out.println("Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			rs = stmt.executeQuery("select * from t1");//notice that we forgot to give mandatory FOR UPDATE clause for updatable resultset
@@ -359,7 +359,7 @@ public class updatableResultSet {
 			}
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
-      System.out.println("Now attempting to send a updateRow on a sql with no FOR UPDATE clause.");
+      System.out.println("Now attempting to send a updateRow on a sql with no FOR UPDATE clause.");
 			try {
 				rs.updateRow();
 				System.out.println("FAIL!!! updateRow should have failed on sql with no FOR UPDATE clause");
