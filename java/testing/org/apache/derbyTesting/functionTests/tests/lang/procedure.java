@@ -343,14 +343,16 @@ public class procedure
 		ir1.close();
 		ir2.close();
 
-		conn.commit();
+		if (!conn.getAutoCommit())
+			conn.commit();
 
 
 
 		ResultSet rs = s.executeQuery("select * from t1");
 		org.apache.derby.tools.JDBCDisplayUtil.DisplayResults(System.out, rs, conn);
 
-		conn.commit();
+		if (!conn.getAutoCommit())
+			conn.commit();
 
 		callExceptionExpected(conn, "CALL IR2(2, 'no way')");
 		callExceptionExpected(conn, "CALL IR2(?, 'no way')");
@@ -1278,7 +1280,9 @@ public class procedure
 		showMatchingProcedures(conn, "SQLCONTROL2_%");
 		showMatchingProcedures(conn, "SQLCONTROL3_%");
 		showMatchingProcedures(conn, "SQLCONTROL4_%");
-		conn.commit();
+
+		if (!conn.getAutoCommit())
+			conn.commit();
 
 		for (int i = 0; i < control.length; i++) {
 			String type = control[i];

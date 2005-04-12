@@ -687,7 +687,6 @@ public class callable
 		  System.out.println("cstmt.getBigDecimal(3): " + retVal3);
 		  cstmt.close();
 		  ps.close();
-		  conn.commit();
 		  
 		  }catch (SQLException e) { 
 			  System.out.println(e.getMessage());

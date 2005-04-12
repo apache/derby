@@ -365,7 +365,6 @@ class prepStmt
 			System.out.println("SQLState: " + e.getSQLState() + " message: " + e.getMessage());
 		}
 
-		conn.rollback();
 	}
 
 
