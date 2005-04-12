@@ -149,10 +149,13 @@ public class DerbyEclipsePlugin{
 		version=prop.getProperty(PropertyNames.PRODUCT_MAJOR_VERSION)+"."+prop.getProperty(PropertyNames.PRODUCT_MINOR_VERSION)+"."+maint/MAINT_DIV;
 		tmpProp.put(PLUGIN_VERSION,version);
 
-		//initially thought of using
-		//version+="."+maint%MAINT_DIV+"_v"+prop.getProperty(PropertyNames.PRODUCT_BUILD_NUMBER);
-		version+="."+maint%MAINT_DIV+" ("+prop.getProperty(PropertyNames.PRODUCT_BUILD_NUMBER)+")";
-		tmpProp.put(PLUGIN_VERSION_BUILD_NUMBER,version);
+		//With Eclipse 3.1M5a release, adding '(PRODUCT_BUILD_NUMBER)' to the 'version' info in
+		//the plugin.xml creates some issues while loading. It has been removed and only the
+		//MAJOR.Minor.interim.point has been added to the plugin.xml.
+		//The actual Derby build version can be obtained using the 'sysinfo' tool.
+		
+		version+="."+maint%MAINT_DIV;
+		tmpProp.put(PLUGIN_VERSION_BUILD_NUMBER,version+" ("+prop.getProperty(PropertyNames.PRODUCT_BUILD_NUMBER)+")");
 
 		//add info to plugin.xml strings
 		part_1+=version+"\"";
