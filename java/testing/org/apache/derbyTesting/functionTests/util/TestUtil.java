@@ -376,6 +376,11 @@ public class TestUtil {
 	}
 
 	
+	public static String  getGetterName(String attribute)
+	{
+		return "get" + Character.toUpperCase(attribute.charAt(0)) + attribute.substring(1);
+	}
+
 	// Some methods for test output.
 	public static void dumpSQLExceptions(SQLException sqle) {
 		TestUtil.dumpSQLExceptions(sqle, false);

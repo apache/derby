@@ -245,6 +245,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	public void testClientDataSourceProperties() throws SQLException
 	{
 		testRetrieveMessageText();
+		testDescription();
 	}
 
 	/**
@@ -280,6 +281,39 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		catch (Exception e)
 		{
 			System.out.println("FAIL: testRetrieveMessageText() Unexpected Exception " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Test description property
+	 */
+	public void testDescription() throws SQLException
+	{
+		String descriptionProperty = "description";
+		Class[] argType = { String.class};
+		String setterMethodName = TestUtil.getSetterName(descriptionProperty);
+		String getterMethodName = TestUtil.getGetterName(descriptionProperty);
+
+		Object[] args;
+
+		try {
+			String setDescription = "Everything you ever wanted to know about this datasource";
+			DataSource ds = getDS("wombat", "EDWARD", "noodle");
+			// Set the description
+			Method sh = ds.getClass().getMethod(setterMethodName, argType);
+			args = new Object[] { new String(setDescription) };
+			sh.invoke(ds, args);
+			// Now check it
+			sh = ds.getClass().getMethod(getterMethodName, null);
+			String getDescription = (String) sh.invoke(ds, null);
+			if (!setDescription.equals(getDescription))
+				throw new Exception("getDescription() " + getDescription + 
+									" does not match setDescription() ");
+		}
+		catch (Exception e)
+		{
+			System.out.println("FAIL: testDescription() Unexpected Exception " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
