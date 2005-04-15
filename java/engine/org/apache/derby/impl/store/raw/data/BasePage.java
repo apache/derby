@@ -412,10 +412,10 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	*/
 
 	public RecordHandle fetch(
-    RecordHandle            handle, 
-    Object[]   row, 
-    FormatableBitSet                 validColumns, 
-    boolean                 forUpdate)
+    RecordHandle        handle, 
+    Object[]            row, 
+    FormatableBitSet    validColumns, 
+    boolean             forUpdate)
 	throws StandardException {
 
 		if (SanityManager.DEBUG) {
@@ -450,7 +450,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	public RecordHandle fetchFromSlot(
     RecordHandle            rh, 
     int                     slot, 
-    Object[]   row,
+    Object[]                row,
     FetchDescriptor         fetchDesc,
     boolean                 ignoreDelete)
 		 throws StandardException
@@ -1395,10 +1395,9 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 		// page does not copy over the remaining pieces, i.e.,the new head page
 		// still points to those pieces.
 
-		owner.getActionSet().actionPurge (t, this, src_slot, num_rows,
-										  recordIds, true);
+		owner.getActionSet().actionPurge(
+            t, this, src_slot, num_rows, recordIds, true);
 	}
-
 
 
 	/**
@@ -2488,7 +2487,6 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	*/
 	public abstract boolean spaceForCopy(int num_rows, int[] spaceNeeded)
 		 throws StandardException;
-
 
 	/**
 		Return the total number of bytes used, reserved, or wasted by the

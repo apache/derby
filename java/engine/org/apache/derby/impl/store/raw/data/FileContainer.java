@@ -1281,6 +1281,124 @@ public abstract class FileContainer
 
 	}
 
+	/**
+	  Compress free space from container.
+
+	  <BR> MT - thread aware - It is assumed that our caller (our super class)
+	  has already arranged a logical lock on page allocation to only allow a
+	  single thread through here.
+
+      Compressing free space is done in allocation page units, working
+      it's way from the end of the container to the beginning.  Each
+      loop operates on the last allocation page in the container.
+
+      Freeing space in the container page involves 2 transactions, an
+      update to an allocation page, N data pages, and possibly the delete
+      of the allocation page.
+	  The User Transaction (UT) initiated the compress call.
+	  The Nested Top Transaction (NTT) is the transaction started by RawStore
+	  inside the compress call.  This NTT is committed before compress returns.
+	  The NTT is used to access high traffic data structures such as the 
+      AllocPage.
+
+	  This is outline of the algorithm used in compressing the container.
+
+      Until a non free page is found loop, in each loop return to the OS
+         all space at the end of the container occupied by free pages, including
+         the allocation page itself if all of it's pages are free.  
+      
+	  1) Find last 2 allocation pages in container (last if there is only one).
+	  2) invalidate the allocation information cached by the container.
+		 Without the cache no page can be gotten from the container.  Pages
+		 already in the page cache are not affected.  Thus by latching the 
+		 allocPage and invalidating the allocation cache, this NTT blocks out 
+		 all page gets from this container until it commits.
+	  3) the allocPage determines which pages can be released to the OS, 
+         mark that in its data structure (the alloc extent).  Mark the 
+         contiguous block of nallocated/free pages at the end of the file
+         as unallocated.  This change is associated with the NTT.
+      4) The NTT calls the OS to deallocate the space from the file.  Note
+         that the system can handle being booted and asked to get an allocated
+         page which is past end of file, it just extends the file automatically.
+	  5) If freeing all space on the alloc page, and there is more than one
+         alloc page, then free the alloc page - this requires an update to the 
+         previous alloc page which the loop has kept latched also.
+      6) if the last alloc page was deleted, restart loop at #1
+
+      All NTT latches are released before this routine returns.
+	  If we use an NTT, the caller has to commit the NTT to release the
+	  allocPage latch.  If we don't use an NTT, the allocPage latch is released
+	  as this routine returns.
+
+	  @param ntt - the nested top transaction for the purpose of freeing space.
+						If ntt is null, use the user transaction for allocation.
+	  #param allocHandle - the container handle opened by the ntt, 
+						use this to latch the alloc page
+
+	  @exception StandardException Standard Cloudscape error policy 
+	*/
+	protected void compressContainer(
+    RawTransaction      ntt,
+    BaseContainerHandle allocHandle)
+		 throws StandardException 
+	{
+		AllocPage alloc_page      = null;
+		AllocPage prev_alloc_page = null;
+
+		if (firstAllocPageNumber == ContainerHandle.INVALID_PAGE_NUMBER)
+        {
+            // no allocation pages in container, no work to do!
+			return;
+        }
+
+		try
+		{
+            synchronized(allocCache)
+            {
+                // loop until last 2 alloc pages are reached.
+                alloc_page = (AllocPage) 
+                    allocHandle.getAllocPage(firstAllocPageNumber);
+
+                while (!alloc_page.isLast())
+                {
+                    if (prev_alloc_page != null)
+                    {
+                        // there are more than 2 alloc pages, unlatch the 
+                        // earliest one.
+                        prev_alloc_page.unlatch();
+                    }
+                    prev_alloc_page = alloc_page;
+                    alloc_page      = null;
+
+                    long nextAllocPageNumber = 
+                        prev_alloc_page.getNextAllocPageNumber();
+                    long nextAllocPageOffset = 
+                        prev_alloc_page.getNextAllocPageOffset();
+
+                    alloc_page = (AllocPage) 
+                        allocHandle.getAllocPage(nextAllocPageNumber);
+                }
+
+                alloc_page.compress(this);
+
+				allocCache.invalidate(); 
+            }
+		}
+		catch (StandardException se)
+		{
+
+			if (alloc_page != null)
+            {
+				alloc_page.unlatch();
+                alloc_page = null;
+            }
+			if (prev_alloc_page != null)
+            {
+				prev_alloc_page.unlatch();
+				prev_alloc_page = null;
+            }
+        }
+	}
 
 	/**
 	  Create a new page in the container.
@@ -2487,6 +2605,15 @@ public abstract class FileContainer
         */
 		return p;
 	}
+
+	protected BasePage getPageForCompress(
+    BaseContainerHandle handle,
+    int                 flag,
+    long                pageno)
+		 throws StandardException
+	{
+        return(getPageForInsert(handle, flag));
+    }
 
 	/**
 		Get a potentially suitable page for insert and latch it.

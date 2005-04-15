@@ -728,6 +728,24 @@ public class SystemProcedures  {
         return(ret_val ? 1 : 0);
     }
 
+    public static void SYSCS_INPLACE_COMPRESS_TABLE(
+    String  schema,
+    String  tablename,
+    int     purgeRows,
+    int     defragementRows,
+    int     truncateEnd)
+		throws SQLException
+    {
+        org.apache.derby.iapi.db.OnlineCompress.compressTable(
+            schema, 
+            tablename, 
+            (purgeRows == 1),
+            (defragementRows == 1),
+            (truncateEnd == 1));
+
+        return;
+    }
+
     public static String SYSCS_GET_RUNTIMESTATISTICS()
 		throws SQLException
     {
@@ -1044,14 +1062,3 @@ public class SystemProcedures  {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -1437,6 +1437,134 @@ public class RAMTransaction
 	}
 
 
+
+    /**
+     * Purge all committed deleted rows from the conglomerate.
+     * <p>
+     * This call will purge committed deleted rows from the conglomerate,
+     * that space will be available for future inserts into the conglomerate.
+     * <p>
+     *
+     * @param conglomId Id of the conglomerate to purge.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public void purgeConglomerate(
+    long    conglomId)
+        throws StandardException
+    {
+        findExistingConglomerate(conglomId).purgeConglomerate(
+            this, 
+            rawtran);
+
+		return;
+    }
+
+    /**
+     * Return free space from the conglomerate back to the OS.
+     * <p>
+     * Returns free space from the conglomerate back to the OS.  Currently
+     * only the sequential free pages at the "end" of the conglomerate can
+     * be returned to the OS.
+     * <p>
+     *
+     * @param conglomId Id of the conglomerate to purge.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public void compressConglomerate(
+    long    conglomId)
+        throws StandardException
+    {
+        findExistingConglomerate(conglomId).compressConglomerate(
+            this, 
+            rawtran); 
+
+		return;
+    }
+
+    /**
+     * Compress table in place
+     * <p>
+     * Returns a GroupFetchScanController which can be used to move rows
+     * around in a table, creating a block of free pages at the end of the
+     * table.  The process will move rows from the end of the table toward
+     * the beginning.  The GroupFetchScanController will return the 
+     * old row location, the new row location, and the actual data of any
+     * row moved.  Note that this scan only returns moved rows, not an
+     * entire set of rows, the scan is designed specifically to be
+     * used by either explicit user call of the SYSCS_ONLINE_COMPRESS_TABLE()
+     * procedure, or internal background calls to compress the table.
+     *
+     * The old and new row locations are returned so that the caller can
+     * update any indexes necessary.
+     *
+     * This scan always returns all collumns of the row.
+     * 
+     * All inputs work exactly as in openScan().  The return is 
+     * a GroupFetchScanController, which only allows fetches of groups
+     * of rows from the conglomerate.
+     * <p>
+     *
+	 * @return The GroupFetchScanController to be used to fetch the rows.
+     *
+	 * @param conglomId             see openScan()
+     * @param hold                  see openScan()
+     * @param open_mode             see openScan()
+     * @param lock_level            see openScan()
+     * @param isolation_level       see openScan()
+     *
+	 * @exception  StandardException  Standard exception policy.
+     *
+     * @see ScanController
+     * @see GroupFetchScanController
+     **/
+	public GroupFetchScanController defragmentConglomerate(
+    long                            conglomId,
+    boolean                         online,
+    boolean                         hold,
+    int                             open_mode,
+    int                             lock_level,
+    int                             isolation_level)
+        throws StandardException
+	{
+        if (SanityManager.DEBUG)
+        {
+			if ((open_mode & 
+                ~(TransactionController.OPENMODE_FORUPDATE | 
+                  TransactionController.OPENMODE_FOR_LOCK_ONLY |
+                  TransactionController.OPENMODE_SECONDARY_LOCKED)) != 0)
+				SanityManager.THROWASSERT(
+					"Bad open mode to openScan:" + 
+                    Integer.toHexString(open_mode));
+
+			if (!(lock_level == MODE_RECORD |
+                 lock_level == MODE_TABLE))
+				SanityManager.THROWASSERT(
+                "Bad lock level to openScan:" + lock_level);
+        }
+
+		// Find the conglomerate.
+		Conglomerate conglom = findExistingConglomerate(conglomId);
+
+		// Get a scan controller.
+		ScanManager sm = 
+            conglom.defragmentConglomerate(
+                this, 
+                rawtran, 
+                hold, 
+                open_mode, 
+                determine_lock_level(lock_level),
+                determine_locking_policy(lock_level, isolation_level),
+                isolation_level);
+
+		// Keep track of it so we can release on close.
+		scanControllers.addElement(sm);
+
+		return(sm);
+	}
+
+
 	public ScanController openScan(
     long                            conglomId,
     boolean                         hold,
@@ -1467,9 +1595,6 @@ public class RAMTransaction
                 (StaticCompiledOpenConglomInfo) null,
                 (DynamicCompiledOpenConglomInfo) null));
     }
-
-
-
 
 	public ScanController openCompiledScan(
     boolean                         hold,

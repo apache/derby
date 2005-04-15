@@ -62,6 +62,7 @@ import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
+import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -650,7 +651,7 @@ public final class Heap
     int                             lock_level,
     LockingPolicy                   locking_policy,
     int                             isolation_level,
-	FormatableBitSet				            scanColumnList,
+	FormatableBitSet				scanColumnList,
     DataValueDescriptor[]	        startKeyValue,
     int                             startSearchOperator,
     Qualifier                       qualifier[][],
@@ -700,6 +701,220 @@ public final class Heap
             stopSearchOperator);
 
 		return(heapscan);
+	}
+
+	public void purgeConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran)
+        throws StandardException
+    {
+        OpenConglomerate        open_for_ddl_lock   = null;
+        HeapController          heapcontroller      = null;
+        TransactionManager      nested_xact         = null;
+
+        try
+        {
+            open_for_ddl_lock = new OpenHeap();
+
+            // Open table in intended exclusive mode in the top level 
+            // transaction, this will stop any ddl from happening until 
+            // purge of whole table is finished.
+
+            if (open_for_ddl_lock.init(
+                    (ContainerHandle) null,
+                    this,
+                    this.format_ids,
+                    xact_manager,
+                    rawtran,
+                    false,
+                    TransactionController.OPENMODE_FORUPDATE,
+                    TransactionController.MODE_RECORD,
+                    null,
+                    null) == null)
+            {
+                throw StandardException.newException(
+                        SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                        new Long(id.getContainerId()));
+            }
+
+            // perform all the "real" work in a non-readonly nested user 
+            // transaction, so that as work is completed on each page resources
+            // can be released.  Must be careful as all locks obtained in nested
+            // transaction will conflict with parent transaction - so this call
+            // must be made only if parent transaction can have no conflicting
+            // locks on the table, otherwise the purge will fail with a self
+            // deadlock.
+            nested_xact = (TransactionManager) 
+                xact_manager.startNestedUserTransaction(false);
+
+            // now open the table in a nested user transaction so that each
+            // page worth of work can be committed after it is done.
+
+            OpenConglomerate open_conglom = new OpenHeap();
+
+            if (open_conglom.init(
+                (ContainerHandle) null,
+                this,
+                this.format_ids,
+                nested_xact,
+                rawtran,
+                true,
+                TransactionController.OPENMODE_FORUPDATE,
+                TransactionController.MODE_RECORD,
+                null,
+                null) == null)
+            {
+                throw StandardException.newException(
+                        SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                        new Long(id.getContainerId()).toString());
+            }
+
+            heapcontroller = new HeapController();
+
+            heapcontroller.init(open_conglom);
+
+            Page page   = open_conglom.getContainer().getFirstPage();
+
+            boolean purgingDone = false;
+
+            while (page != null)
+            {
+                long pageno = page.getPageNumber();
+                purgingDone = heapcontroller.purgeCommittedDeletes(page);
+
+                if (purgingDone)
+                {
+                    page = null;
+
+                    // commit xact to free resouurces ASAP, commit will
+                    // unlatch the page if it has not already been unlatched
+                    // by a remove.
+                    open_conglom.getXactMgr().commitNoSync(
+                                TransactionController.RELEASE_LOCKS);
+                    open_conglom.reopen();
+                }
+                else
+                {
+                    page.unlatch();
+                    page = null;
+                }
+
+                page = open_conglom.getContainer().getNextPage(pageno);
+            }
+        }
+        finally
+        {
+            if (open_for_ddl_lock != null)
+                open_for_ddl_lock.close();
+            if (heapcontroller != null)
+                heapcontroller.close();
+            if (nested_xact != null)
+            {
+                nested_xact.commitNoSync(TransactionController.RELEASE_LOCKS);
+                nested_xact.destroy();
+            }
+        }
+
+        return;
+    }
+
+	public void compressConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran)
+        throws StandardException
+    {
+        OpenConglomerate        open_conglom    = null;
+        HeapController          heapcontroller  = null;
+
+        try
+        {
+            open_conglom = new OpenHeap();
+
+            // Open table in intended exclusive mode in the top level 
+            // transaction, this will stop any ddl from happening until 
+            // purge of whole table is finished.
+
+            if (open_conglom.init(
+                    (ContainerHandle) null,
+                    this,
+                    this.format_ids,
+                    xact_manager,
+                    rawtran,
+                    false,
+                    TransactionController.OPENMODE_FORUPDATE,
+                    TransactionController.MODE_RECORD,
+                    null,
+                    null) == null)
+            {
+                throw StandardException.newException(
+                        SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                        new Long(id.getContainerId()));
+            }
+
+            heapcontroller = new HeapController();
+
+            heapcontroller.init(open_conglom);
+
+            open_conglom.getContainer().compressContainer();
+        }
+        finally
+        {
+            if (open_conglom != null)
+                open_conglom.close();
+        }
+
+        return;
+    }
+
+    /**
+     * Open a heap compress scan.
+     * <p>
+     *
+     * @see Conglomerate#openCompressScan
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	public ScanManager defragmentConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran,
+    boolean                         hold,
+    int                             open_mode,
+    int                             lock_level,
+    LockingPolicy                   locking_policy,
+    int                             isolation_level)
+		throws StandardException
+	{
+        OpenConglomerate open_conglom = new OpenHeap();
+
+        if (open_conglom.init(
+                (ContainerHandle) null,
+                this,
+                this.format_ids,
+                xact_manager,
+                rawtran,
+                hold,
+                open_mode,
+                lock_level,
+                null,
+                null) == null)
+        {
+            throw StandardException.newException(
+                    SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                    new Long(id.getContainerId()));
+        }
+
+		HeapCompressScan heap_compress_scan = new HeapCompressScan();
+
+        heap_compress_scan.init(
+            open_conglom,
+            null,
+            null,
+            0,
+            null,
+            null,
+            0);
+
+		return(heap_compress_scan);
 	}
 
 

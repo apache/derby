@@ -423,6 +423,34 @@ public class AllocExtent implements Externalizable
 		setExtentFreePageStatus(true);
 	}
 
+    protected long compressPages()
+    {
+        int compress_bitnum = -1;
+
+        for (int i = extentLength - 1; i >= 0; i--)
+        {
+            if (freePages.isSet(i))
+            {
+                freePages.clear(i);
+                compress_bitnum = i;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (compress_bitnum >= 0)
+        {
+            extentLength = compress_bitnum;
+            return(extentStart + extentLength - 1);
+        }
+        else
+        {
+            return(-1);
+        }
+
+    }
 
 	protected long getExtentEnd()
 	{
@@ -764,14 +792,20 @@ public class AllocExtent implements Externalizable
 				for (int j = 0; j < 8; j++)
 				{
 					if (((1 << j) & free[i]) != 0)
+                    {
 						allocatedPageCount--;
+                    }
 				}
 			}
 		}
 
 		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(allocatedPageCount >= 0,
-								 "number of allocated page < 0");
+        {
+			SanityManager.ASSERT(
+                allocatedPageCount >= 0,
+                "number of allocated page < 0, val =" + allocatedPageCount +
+                "\nextent = " + toDebugString());
+        }
 
 		return allocatedPageCount;
 	}

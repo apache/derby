@@ -98,6 +98,17 @@ public abstract class Scan implements ScanManager, ScanInfo
                 SQLState.SORT_IMPROPER_SCAN_METHOD);
     }
 
+    public int fetchNextGroup(
+    DataValueDescriptor[][]     row_array,
+    RowLocation[]               old_rowloc_array,
+    RowLocation[]               new_rowloc_array)
+        throws StandardException
+    {
+        throw StandardException.newException(
+                SQLState.SORT_IMPROPER_SCAN_METHOD);
+    }
+
+
     /**
      * Insert all rows that qualify for the current scan into the input
      * Hash table.  

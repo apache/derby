@@ -147,6 +147,28 @@ class HeapScan
         }
     }
 
+    protected void setRowLocationArray(
+    RowLocation[]   rowloc_array,
+    int             index,
+    RecordHandle    rh)
+        throws StandardException
+    {
+        if (rowloc_array[index] == null)
+        {
+            rowloc_array[index] = new HeapRowLocation(rh);
+        }
+        else
+        {
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.ASSERT(
+                    rowloc_array[index] instanceof HeapRowLocation);
+            }
+
+            ((HeapRowLocation)rowloc_array[index]).setFrom(rh);
+        }
+    }
+
     /**
     Fetch the row at the next position of the Scan.
 
@@ -252,6 +274,16 @@ class HeapScan
                 (BackingStoreHashtable) null,
                 row_array.length,
                 (int[]) null));
+    }
+
+    public int fetchNextGroup(
+    DataValueDescriptor[][] row_array,
+    RowLocation[]           old_rowloc_array,
+    RowLocation[]           new_rowloc_array)
+        throws StandardException
+	{
+        throw(StandardException.newException(
+                SQLState.HEAP_UNIMPLEMENTED_FEATURE));
     }
 
 

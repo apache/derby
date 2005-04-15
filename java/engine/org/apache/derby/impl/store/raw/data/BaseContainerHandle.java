@@ -181,6 +181,22 @@ public class BaseContainerHandle extends Observable
 	}
 
 	/**
+		Release free space to the OS.
+		<P>
+        As is possible release any free space to the operating system.  This
+        will usually mean releasing any free pages located at the end of the
+        file using the java truncate() interface.
+
+		@exception StandardException	Standard Cloudscape error policy
+	*/
+	public void compressContainer() throws StandardException 
+    {
+		checkUpdateOpen();
+
+		container.compressContainer(this);
+	}
+
+	/**
 		Add a page to the container, if flag == ContainerHandle.ADD_PAGE_BULK,
 		tell the container about it.
 
@@ -336,6 +352,14 @@ public class BaseContainerHandle extends Observable
 		checkUpdateOpen();
 
 		return container.getPageForInsert(this, flag);
+	}
+
+	public Page getPageForCompress(int flag, long pageno) 
+		 throws StandardException
+	{
+		checkUpdateOpen();
+
+		return container.getPageForCompress(this, flag, pageno);
 	}
 
 	/**

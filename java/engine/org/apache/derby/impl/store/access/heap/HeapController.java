@@ -70,7 +70,7 @@ public class HeapController
 
     /**************************************************************************
      * Protected concrete impl of abstract methods of 
-     *     GenericCongloemrateController class:
+     *     GenericConglomerateController class:
      **************************************************************************
      */
     protected final void getRowPositionFromRowLocation(
@@ -105,6 +105,93 @@ public class HeapController
      * Private/Protected methods of This class:
      **************************************************************************
      */
+
+    /**
+     * Check and purge committed deleted rows on a page.
+     * <p>
+     * 
+	 * @return true, if no purging has been done on page, and thus latch
+     *         can be released before end transaction.  Otherwise the latch
+     *         on the page can not be released before commit.
+     *
+     * @param page   A non-null, latched page must be passed in.  If all
+     *               rows on page are purged, then page will be removed and
+     *               latch released.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    protected final boolean purgeCommittedDeletes(
+    Page                page)
+        throws StandardException
+    {
+        boolean purgingDone = false;
+
+        // The number records that can be reclaimed is:
+        // total recs - recs_not_deleted
+        int num_possible_commit_delete = 
+            page.recordCount() - page.nonDeletedRecordCount();
+
+        if (num_possible_commit_delete > 0)
+        {
+            // loop backward so that purges which affect the slot table 
+            // don't affect the loop (ie. they only move records we 
+            // have already looked at).
+            for (int slot_no = page.recordCount() - 1; 
+                 slot_no >= 0; 
+                 slot_no--) 
+            {
+                boolean row_is_committed_delete = 
+                    page.isDeletedAtSlot(slot_no);
+
+                if (row_is_committed_delete)
+                {
+                    // At this point we only know that the row is
+                    // deleted, not whether it is committed.
+
+                    // see if we can purge the row, by getting an
+                    // exclusive lock on the row.  If it is marked
+                    // deleted and we can get this lock, then it
+                    // must be a committed delete and we can purge 
+                    // it.
+
+                    RecordHandle rh =
+                        page.fetchFromSlot(
+                            (RecordHandle) null,
+                            slot_no,
+                            RowUtil.EMPTY_ROW,
+                            RowUtil.EMPTY_ROW_FETCH_DESCRIPTOR,
+                            true);
+
+                    row_is_committed_delete =
+                        this.lockRowAtSlotNoWaitExclusive(rh);
+
+                    if (row_is_committed_delete)
+                    {
+                        purgingDone = true;
+
+                        page.purgeAtSlot(slot_no, 1, false);
+                    }
+                }
+            }
+        }
+        if (page.recordCount() == 0)
+        {
+
+            // Deallocate the current page with 0 rows on it.
+            this.removePage(page);
+
+            // removePage guarantees to unlatch the page even if an
+            // exception is thrown. The page is protected against reuse
+            // because removePage locks it with a dealloc lock, so it
+            // is OK to release the latch even after a purgeAtSlot is
+            // called.
+            // @see ContainerHandle#removePage
+
+            purgingDone = true;
+        }
+
+        return(purgingDone);
+    }
 
     /**
      * Insert a new row into the heap.

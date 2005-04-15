@@ -137,6 +137,12 @@ public interface GroupFetchScanController extends GenericScanController
     RowLocation[]           rowloc_array)
         throws StandardException;
 
+    public int fetchNextGroup(
+    DataValueDescriptor[][] row_array,
+    RowLocation[]           oldrowloc_array,
+    RowLocation[]           newrowloc_array)
+        throws StandardException;
+
     /**
     Move to the next position in the scan.  If this is the first
     call to next(), the position is set to the first row.

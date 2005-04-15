@@ -194,6 +194,18 @@ public interface ContainerHandle
 	public Page addPage() throws StandardException;
 
 
+	/**
+		Release free space to the OS.
+		<P>
+        As is possible release any free space to the operating system.  This
+        will usually mean releasing any free pages located at the end of the
+        file using the java truncate() interface.
+
+		@exception StandardException	Standard Cloudscape error policy
+	*/
+	public void compressContainer() throws StandardException;
+
+
 	/**	
 		Add an empty page to the container and obtain exclusive access to it.
 		<P>
@@ -416,6 +428,11 @@ public interface ContainerHandle
 	public Page getPageForInsert(int flag) 
 		 throws StandardException;
 
+	public Page getPageForCompress(
+    int     flag,
+    long    pageno) 
+		 throws StandardException;
+
 	// Try to get a page that is unfilled, 'unfill-ness' is defined by the
 	// page.  Since unfill-ness is defined by the page, the only thing RawStore
 	// guarentees about the page is that it has space for a a minimum sized
@@ -427,7 +444,6 @@ public interface ContainerHandle
 	// If for whatever reasons RawStore is unable to come up with such a page,
 	// null will be returned.
 	public static final int GET_PAGE_UNFILLED = 0x1;
-
 
 
     /**

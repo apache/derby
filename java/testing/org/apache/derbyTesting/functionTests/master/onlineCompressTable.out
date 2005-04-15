@@ -1,0 +1,88 @@
+ij> autocommit off;
+ij> -- start with simple test, does the call work?
+create table test1 (a int);
+0 rows inserted/updated/deleted
+ij> -- call SYSCS_UTIL.SYSCS_ONLINE_COMPRESS_TABLE('APP', 'TEST1');
+-- expect failures schema/table does not exist
+-- call SYSCS_UTIL.SYSCS_ONLINE_COMPRESS_TABLE(null, 'test2');
+-- call SYSCS_UTIL.SYSCS_ONLINE_COMPRESS_TABLE('APP', 'test2');
+-- non existent schema
+-- call SYSCS_UTIL.SYSCS_ONLINE_COMPRESS_TABLE('doesnotexist', 'a');
+-- cleanup
+drop table test1;
+0 rows inserted/updated/deleted
+ij> -- load up a table, delete most of it's rows and then see what compress does.
+create table test1 (keycol int, a char(250), b char(250), c char(250), d char(250));
+0 rows inserted/updated/deleted
+ij> insert into test1 values (1, 'a', 'b', 'c', 'd');
+1 row inserted/updated/deleted
+ij> insert into test1 (select keycol + 1, a, b, c, d from test1);
+1 row inserted/updated/deleted
+ij> insert into test1 (select keycol + 2, a, b, c, d from test1);
+2 rows inserted/updated/deleted
+ij> insert into test1 (select keycol + 4, a, b, c, d from test1);
+4 rows inserted/updated/deleted
+ij> insert into test1 (select keycol + 8, a, b, c, d from test1);
+8 rows inserted/updated/deleted
+ij> insert into test1 (select keycol + 16, a, b, c, d from test1);
+16 rows inserted/updated/deleted
+ij> insert into test1 (select keycol + 32, a, b, c, d from test1);
+32 rows inserted/updated/deleted
+ij> insert into test1 (select keycol + 64, a, b, c, d from test1);
+64 rows inserted/updated/deleted
+ij> insert into test1 (select keycol + 128, a, b, c, d from test1);
+128 rows inserted/updated/deleted
+ij> insert into test1 (select keycol + 256, a, b, c, d from test1);
+256 rows inserted/updated/deleted
+ij> create index test1_idx on test1(keycol);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> select 
+    conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, 
+    estimspacesaving
+        from new org.apache.derby.diag.SpaceTable('TEST1') t
+                order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TEST1                                                                                                                           |0     |171                 |0                   |4096       |0                   
+TEST1_IDX                                                                                                                       |1     |4                   |0                   |4096       |0                   
+ij> delete from test1 where keycol > 300;
+212 rows inserted/updated/deleted
+ij> commit;
+ij> delete from test1 where keycol < 100;
+99 rows inserted/updated/deleted
+ij> commit;
+ij> call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP', 'TEST1', 1, 0, 0);
+0 rows inserted/updated/deleted
+ij> select 
+    conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, 
+    estimspacesaving
+        from new org.apache.derby.diag.SpaceTable('TEST1') t
+                order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TEST1                                                                                                                           |0     |68                  |103                 |4096       |421888              
+TEST1_IDX                                                                                                                       |1     |4                   |0                   |4096       |0                   
+ij> commit;
+ij> -- call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP', 'TEST1', 0, 1, 0);
+select 
+    conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, 
+    estimspacesaving
+        from new org.apache.derby.diag.SpaceTable('TEST1') t
+                order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TEST1                                                                                                                           |0     |68                  |103                 |4096       |421888              
+TEST1_IDX                                                                                                                       |1     |4                   |0                   |4096       |0                   
+ij> call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP', 'TEST1', 0, 0, 1);
+0 rows inserted/updated/deleted
+ij> select 
+    conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, 
+    estimspacesaving
+        from new org.apache.derby.diag.SpaceTable('TEST1') t
+                order by conglomeratename;
+CONGLOMERATENAME                                                                                                                |ISIND&|NUMALLOCATEDPAGES   |NUMFREEPAGES        |PAGESIZE   |ESTIMSPACESAVING    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TEST1                                                                                                                           |0     |68                  |32                  |4096       |131072              
+TEST1_IDX                                                                                                                       |1     |4                   |0                   |4096       |0                   
+ij> 

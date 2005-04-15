@@ -537,6 +537,54 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 		return n;
 	}
 
+    /**
+     * Short one line description of routine.
+     * <p>
+     * Longer descrption of routine.
+     * <p>
+     *
+	 * @return The identifier to be used to open the conglomerate later.
+     *
+     * @param param1 param1 does this.
+     * @param param2 param2 does this.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	protected void truncatePages(
+    long lastValidPagenum)
+	{  
+		// int n = doTruncatePages(lastValidPagenum); 
+
+        synchronized(this)
+        {
+            boolean inwrite = false;
+            try
+            {
+                dataFactory.writeInProgress();
+                inwrite = true;
+
+                fileData.setLength((lastValidPagenum + 1) * pageSize);
+            }
+            catch (IOException ioe)
+            {
+                // The disk may have run out of space. 
+                // Don't error out in un-allocation since application can
+                // still function even if allocation fails.
+            }
+            catch (StandardException se)
+            {
+                // some problem calling writeInProgress
+            }
+            finally
+            {
+                if (inwrite)
+                    dataFactory.writeFinished();
+            }
+        }
+
+		return;
+	}
+
 
 	/*
 		Write the header of a random access file and sync it

@@ -22,6 +22,7 @@ package org.apache.derby.impl.store.access.conglomerate;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
@@ -42,6 +43,7 @@ public class RowPosition
     public RecordHandle    current_rh;
     public int             current_slot;
     public boolean         current_rh_qualified;
+    public long            current_pageno;
 
     /**************************************************************************
      * Constructors for This class:
@@ -67,11 +69,18 @@ public class RowPosition
         current_rh              = null;
         current_slot            = Page.INVALID_SLOT_NUMBER;
         current_rh_qualified    = false;
+        current_pageno          = ContainerHandle.INVALID_PAGE_NUMBER;
     }
 
     public final void positionAtNextSlot()
     {
         current_slot++;
+        current_rh   = null;
+    }
+
+    public final void positionAtPrevSlot()
+    {
+        current_slot--;
         current_rh   = null;
     }
 
@@ -94,7 +103,12 @@ public class RowPosition
             ret_string = 
                 ";current_slot=" + current_slot +
                 ";current_rh=" + current_rh +
-                ";current_page=" + current_page;
+                ";current_pageno=" + current_pageno +
+                ";current_page=" + 
+                    (current_page == null ? 
+                         "null" : String.valueOf(current_page.getPageNumber()));
+
+                // ";current_page=" + current_page;
         }
 
         return(ret_string);

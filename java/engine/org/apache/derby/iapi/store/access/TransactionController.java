@@ -1191,6 +1191,80 @@ public interface TransactionController
 		int                             stopSearchOperator)
 			throws StandardException;
 
+    /**
+     * Compress table in place
+     * <p>
+     * Returns a GroupFetchScanController which can be used to move rows
+     * around in a table, creating a block of free pages at the end of the
+     * table.  The process will move rows from the end of the table toward
+     * the beginning.  The GroupFetchScanController will return the 
+     * old row location, the new row location, and the actual data of any
+     * row moved.  Note that this scan only returns moved rows, not an
+     * entire set of rows, the scan is designed specifically to be
+     * used by either explicit user call of the SYSCS_ONLINE_COMPRESS_TABLE()
+     * procedure, or internal background calls to compress the table.
+     *
+     * The old and new row locations are returned so that the caller can
+     * update any indexes necessary.
+     *
+     * This scan always returns all collumns of the row.
+     * 
+     * All inputs work exactly as in openScan().  The return is 
+     * a GroupFetchScanController, which only allows fetches of groups
+     * of rows from the conglomerate.
+     * <p>
+     *
+	 * @return The GroupFetchScanController to be used to fetch the rows.
+     *
+	 * @param conglomId             see openScan()
+     * @param hold                  see openScan()
+     * @param open_mode             see openScan()
+     * @param lock_level            see openScan()
+     * @param isolation_level       see openScan()
+     *
+	 * @exception  StandardException  Standard exception policy.
+     *
+     * @see ScanController
+     * @see GroupFetchScanController
+     **/
+	GroupFetchScanController defragmentConglomerate(
+		long                            conglomId,
+        boolean                         online,
+		boolean                         hold,
+		int                             open_mode,
+        int                             lock_level,
+        int                             isolation_level)
+			throws StandardException;
+
+    /**
+     * Purge all committed deleted rows from the conglomerate.
+     * <p>
+     * This call will purge committed deleted rows from the conglomerate,
+     * that space will be available for future inserts into the conglomerate.
+     * <p>
+     *
+     * @param conglomId Id of the conglomerate to purge.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	void purgeConglomerate(long conglomId)
+			throws StandardException;
+
+    /**
+     * Return free space from the conglomerate back to the OS.
+     * <p>
+     * Returns free space from the conglomerate back to the OS.  Currently
+     * only the sequential free pages at the "end" of the conglomerate can
+     * be returned to the OS.
+     * <p>
+     *
+     * @param conglomId Id of the conglomerate to purge.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	void compressConglomerate(long conglomId)
+			throws StandardException;
+
 
     /**
      * Retrieve the maximum value row in an ordered conglomerate.

@@ -141,7 +141,6 @@ public abstract class OpenConglomerate
      *     unlockPositionAfterRead(RowPosition)
      **************************************************************************
      */
-
     /**
      * Latch the page containing the current RowPosition, and reposition scan.
      * <p>
@@ -166,7 +165,7 @@ public abstract class OpenConglomerate
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    protected boolean latchPageAndRepositionScan(RowPosition pos)
+    public boolean latchPageAndRepositionScan(RowPosition pos)
 		throws StandardException
     {
         boolean scan_repositioned = false;
@@ -176,8 +175,11 @@ public abstract class OpenConglomerate
 
         try
         {
-            pos.current_page = 
-                container.getPage(pos.current_rh.getPageNumber());
+            if (pos.current_rh != null)
+            {
+                pos.current_page = 
+                    container.getPage(pos.current_rh.getPageNumber());
+            }
 
         }
         catch (Throwable t)
@@ -243,10 +245,28 @@ public abstract class OpenConglomerate
         if (pos.current_page == null)
         {
             // position on the next page.
-            pos.current_page = 
-                container.getNextPage(pos.current_rh.getPageNumber());
+            long current_pageno;
 
-            pos.current_slot = Page.FIRST_SLOT_NUMBER - 1;
+            if (pos.current_rh != null)
+            {
+                current_pageno = pos.current_rh.getPageNumber();
+            }
+            else if (pos.current_pageno != ContainerHandle.INVALID_PAGE_NUMBER)
+            {
+                current_pageno = pos.current_pageno;
+            }
+            else
+            {
+                // no valid position, return a null page
+                return(false);
+            }
+
+            pos.current_page = container.getNextPage(current_pageno);
+
+            pos.current_slot   = Page.FIRST_SLOT_NUMBER - 1;
+
+            // now position is tracked by active page
+            pos.current_pageno = ContainerHandle.INVALID_PAGE_NUMBER;
 
             scan_repositioned = true;
         }

@@ -312,7 +312,7 @@ public interface Conglomerate extends Storable, DataValueDescriptor
     int                             lock_level,
     LockingPolicy                   locking_policy,
     int                             isolation_level,
-	FormatableBitSet				            scanColumnList,
+	FormatableBitSet				scanColumnList,
     DataValueDescriptor[]	        startKeyValue,
     int                             startSearchOperator,
     Qualifier                       qualifier[][],
@@ -320,6 +320,61 @@ public interface Conglomerate extends Storable, DataValueDescriptor
     int                             stopSearchOperator,
     StaticCompiledOpenConglomInfo   static_info,
     DynamicCompiledOpenConglomInfo  dynamic_info)
+        throws StandardException;
+
+    /**
+     * Online compress table.
+     *
+     * Returns a ScanManager which can be used to move rows
+     * around in a table, creating a block of free pages at the end of the
+     * table.  The process of executing the scan will move rows from the end 
+     * of the table toward the beginning.  The GroupFetchScanController will
+     * return the old row location, the new row location, and the actual data 
+     * of any row moved.  Note that this scan only returns moved rows, not an
+     * entire set of rows, the scan is designed specifically to be
+     * used by either explicit user call of the SYSCS_ONLINE_COMPRESS_TABLE()
+     * procedure, or internal background calls to compress the table.
+     *
+     * The old and new row locations are returned so that the caller can
+     * update any indexes necessary.
+     *
+     * This scan always returns all collumns of the row.
+     * 
+     * All inputs work exactly as in openScan().  The return is 
+     * a GroupFetchScanController, which only allows fetches of groups
+     * of rows from the conglomerate.
+     * <p>
+     * Note that all Conglomerates may not implement openCompressScan(), 
+     * currently only the Heap conglomerate implements this scan.
+     *
+	 * @return The GroupFetchScanController to be used to fetch the rows.
+     *
+	 * @param conglomId             see openScan()
+     * @param hold                  see openScan()
+     * @param open_mode             see openScan()
+     * @param lock_level            see openScan()
+     * @param isolation_level       see openScan()
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	ScanManager defragmentConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran,
+    boolean                         hold,
+    int                             open_mode,
+    int                             lock_level,
+    LockingPolicy                   locking_policy,
+    int                             isolation_level)
+        throws StandardException;
+
+	void purgeConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran)
+        throws StandardException;
+
+	void compressConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran)
         throws StandardException;
 
     /**

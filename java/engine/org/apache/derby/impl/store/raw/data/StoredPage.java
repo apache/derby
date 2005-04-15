@@ -1374,6 +1374,17 @@ public class StoredPage extends CachedPage
 		return((freeSpace - bytesNeeded) >= 0);
 	}
 
+	protected boolean spaceForCopy(int spaceNeeded)
+	{
+        // add up the space needed by the rows, add in minimumRecordSize
+        // if length of actual row is less than minimumRecordSize.
+        int bytesNeeded = slotEntrySize + 
+            (spaceNeeded >= minimumRecordSize ? 
+                 spaceNeeded : minimumRecordSize);
+
+		return((freeSpace - bytesNeeded) >= 0);
+	}
+
     /**
      * Read the record at the given slot into the given row.
      * <P>
@@ -6807,6 +6818,149 @@ public class StoredPage extends CachedPage
 		overflowPage.unlatch();
 		return count;
 	}
+
+    /**
+     * Move record to a page toward the beginning of the file.
+     * <p>
+     * As part of compressing the table records need to be moved from the
+     * end of the file toward the beginning of the file.  Only the 
+     * contiguous set of free pages at the very end of the file can
+     * be given back to the OS.  This call is used to purge the row from
+     * the current page, insert it into a previous page, and return the
+     * new row location 
+     * Mark the record identified by position as deleted. The record may be 
+     * undeleted sometime later using undelete() by any transaction that sees 
+     * the record.
+     * <p>
+     * The interface is optimized to work on a number of rows at a time, 
+     * optimally processing all rows on the page at once.  The call will 
+     * process either all rows on the page, or the number of slots in the
+     * input arrays - whichever is smaller.
+     * <B>Locking Policy</B>
+     * <P>
+     * MUST be called with table locked, not locks are requested.  Because
+     * it is called with table locks the call will go ahead and purge any
+     * row which is marked deleted.  It will also use purge rather than
+     * delete to remove the old row after it moves it to a new page.  This
+     * is ok since the table lock insures that no other transaction will
+     * use space on the table before this transaction commits.
+     *
+     * <BR>
+     * A page latch on the new page will be requested and released.
+     *
+     * @param old_handle     An array to be filled in by the call with the 
+     *                       old handles of all rows moved.
+     * @param new_handle     An array to be filled in by the call with the 
+     *                       new handles of all rows moved.
+     * @param new_pageno     An array to be filled in by the call with the 
+     *                       new page number of all rows moved.
+     *
+     * @return the number of rows processed.
+     *
+     * @exception StandardException	Standard Cloudscape error policy
+     *
+     * @see LockingPolicy
+     **/
+	public int moveRecordForCompressAtSlot(
+    int             slot,
+    Object[]        row,
+    RecordHandle[]  old_handle,
+    RecordHandle[]  new_handle)
+		throws StandardException
+    {
+        long src_pageno = getPageNumber();
+
+        try
+        {
+            fetchFromSlot(
+                null,
+                slot,
+                row,
+                (FetchDescriptor) null, // all columns retrieved
+                false);
+
+            int row_size = getRecordPortionLength(slot);
+
+            // first see if row will fit on current page being used to insert
+            StoredPage dest_page = 
+                (StoredPage) owner.getPageForCompress(0, src_pageno);
+
+            if (dest_page != null)
+            {
+                SanityManager.DEBUG_PRINT("moveRecordForCompressAtSlot", 
+                        "last = " + dest_page.getPageNumber()); 
+
+                if ((dest_page.getPageNumber() >= getPageNumber()) ||
+                    (!dest_page.spaceForCopy(row_size)))
+                {
+                    // page won't work
+                    dest_page.unlatch();
+                    dest_page = null;
+                }
+            }
+
+            if (dest_page == null)
+            {
+                // last page did not work, try unfilled page
+                dest_page = (StoredPage)  
+                    owner.getPageForCompress(
+                        ContainerHandle.GET_PAGE_UNFILLED, src_pageno);
+
+                if (dest_page != null)
+                {
+                    SanityManager.DEBUG_PRINT("moveRecordForCompressAtSlot", 
+                            "unfill = " + dest_page.getPageNumber()); 
+
+                    if ((dest_page.getPageNumber() >= getPageNumber()) ||
+                        (!dest_page.spaceForCopy(row_size)))
+                    {
+                        // page won't work
+                        dest_page.unlatch();
+                        dest_page = null;
+                    }
+                }
+            }
+
+            if (dest_page == null)
+            {
+                // last and unfilled page did not work, try getting a free page
+                dest_page = (StoredPage) owner.addPage();
+
+                SanityManager.DEBUG_PRINT("moveRecordForCompressAtSlot", 
+                        "addPage = " + dest_page.getPageNumber()); 
+
+                if (dest_page.getPageNumber() >= getPageNumber())
+                {
+                    owner.removePage(dest_page);
+                    dest_page = null;
+                }
+            }
+
+            if (dest_page != null)
+            {
+                int dest_slot = dest_page.recordCount();
+
+                old_handle[0] = getRecordHandleAtSlot(slot);
+
+                copyAndPurge(dest_page, slot, 1, dest_slot);
+
+                new_handle[0] = dest_page.getRecordHandleAtSlot(dest_slot);
+
+                dest_page.unlatch();
+
+                return(1);
+            }
+            else
+            {
+                return(0);
+            }
+        }
+        catch (IOException ioe)
+        {
+            throw StandardException.newException(
+                SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
+        }
+    }
 
 	/*
 	 * methods that is called underneath a page action

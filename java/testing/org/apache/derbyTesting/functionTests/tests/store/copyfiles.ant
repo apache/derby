@@ -123,3 +123,5 @@ xaOffline1_derby.properties
 xaOffline1_sed.properties
 xab2354.sql
 xab2354_sed.properties
+OnlineCompressTest_app.properties
+OnlineCompressTest_derby.properties

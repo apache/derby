@@ -8430,7 +8430,7 @@ public	class	DataDictionaryImpl
                 tc);
         }
 
-        // SMALLINT SYSCS_UTIL.SYSCS_CHECK_TABLE(varchar(128))
+        // SMALLINT SYSCS_UTIL.SYSCS_CHECK_TABLE(varchar(128), varchar(128))
         {
             // procedure argument names
             String[] arg_names = {"SCHEMANAME", "TABLENAME"};
@@ -8476,6 +8476,48 @@ public	class	DataDictionaryImpl
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.CLOB, DB2Limit.DB2_LOB_MAXWIDTH),
                 */
+                tc);
+        }
+
+        // void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
+        //     IN SCHEMANAME        VARCHAR(128), 
+        //     IN TABLENAME         VARCHAR(128),
+        //     IN PURGE_ROWS        SMALLINT,
+        //     IN DEFRAGMENT_ROWS   SMALLINT,
+        //     IN TRUNCATE_END      SMALLINT
+        //     )
+        {
+            // procedure argument names
+            String[] arg_names = {
+                "SCHEMANAME", 
+                "TABLENAME", 
+                "PURGE_ROWS", 
+                "DEFRAGMENT_ROWS", 
+                "TRUNCATE_END"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT)
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_INPLACE_COMPRESS_TABLE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                (TypeDescriptor) null,
                 tc);
         }
 

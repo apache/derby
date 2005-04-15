@@ -165,6 +165,68 @@ public abstract class BaseContainer implements Lockable {
 
 
 	/**
+		Release free space to the OS.
+		<P>
+        As is possible release any free space to the operating system.  This
+        will usually mean releasing any free pages located at the end of the
+        file using the java truncate() interface.
+
+		@exception StandardException	Standard Cloudscape error policy
+	*/
+	public void compressContainer(BaseContainerHandle handle)
+        throws StandardException
+    {
+		RawTransaction ntt = handle.getTransaction().startNestedTopTransaction();
+
+		int mode = handle.getMode(); 
+
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT((mode & ContainerHandle.MODE_FORUPDATE) ==
+								 ContainerHandle.MODE_FORUPDATE, 
+								 "addPage handle not for update");
+		}
+
+		// if we are not in the same transaction as the one which created the
+		// container and the container may have logged some operation already, 
+		// then we need to log allocation regardless of whether user changes
+		// are logged.  Otherwise, the database will be corrupted if it
+		// crashed. 
+		if ((mode & ContainerHandle.MODE_CREATE_UNLOGGED) == 0 &&
+			(mode & ContainerHandle.MODE_UNLOGGED) ==
+						ContainerHandle.MODE_UNLOGGED) 
+			mode &= ~ContainerHandle.MODE_UNLOGGED;
+
+		// make a handle which is tied to the ntt, not to the user transaction 
+        // this handle is tied to.  The container is already locked by the 
+        // user transaction, open it nolock
+		BaseContainerHandle allocHandle = (BaseContainerHandle)
+            ntt.openContainer(identity, (LockingPolicy)null, mode);
+
+		if (allocHandle == null)
+        {
+			throw StandardException.newException(
+                    SQLState.DATA_ALLOC_NTT_CANT_OPEN, 
+                    new Long(getSegmentId()), 
+                    new Long(getContainerId()));
+        }
+
+		// Latch this container, the commit will release the latch
+		ntt.getLockFactory().lockObject(
+                ntt, ntt, this, null, C_LockFactory.WAIT_FOREVER);
+
+		try
+		{
+            compressContainer(ntt, allocHandle);
+		}
+		finally
+		{
+            ntt.commitNoSync(Transaction.RELEASE_LOCKS);
+			ntt.close();
+		}
+    }
+
+	/**
 		Add a page to this container.
 
 		<BR> MT - thread aware - 
@@ -650,6 +712,14 @@ public abstract class BaseContainer implements Lockable {
 												 int flag)
 		 throws StandardException;
 
+	protected abstract BasePage getPageForCompress(
+    BaseContainerHandle handle,
+    int                 flag,
+    long                pageno)
+		 throws StandardException;
+
+	protected abstract void truncatePages(long lastValidPagenum);
+
 
 	/**
 		Create a new page in the container.
@@ -660,6 +730,11 @@ public abstract class BaseContainer implements Lockable {
 										RawTransaction t,
 										BaseContainerHandle allocHandle,
 										boolean isOverflow) throws StandardException;
+
+	protected abstract void compressContainer(
+    RawTransaction      t,
+    BaseContainerHandle allocHandle)
+        throws StandardException;
 
 
 	/**

@@ -958,7 +958,36 @@ public class AllocPage extends StoredPage
 
 	}
 
+	/**
+		compress
 
+		@param myContainer the container object
+	*/
+	protected boolean compress(
+    FileContainer myContainer)
+        throws StandardException
+	{
+        boolean all_pages_compressed = false;
+
+		if (SanityManager.DEBUG)
+			SanityManager.ASSERT(isLatched(), "page is not latched");
+
+        long last_valid_page = extent.compressPages();
+        if (last_valid_page >= 0)
+        {
+            // a non-negative return means that pages can be returned to
+            // the operating system.
+            myContainer.truncatePages(last_valid_page);
+
+            if (last_valid_page == this.getPageNumber())
+            {
+                // all pages of the extent have been returned to OS.
+                all_pages_compressed = true;
+            }
+        }
+
+        return(all_pages_compressed);
+	}
 
 	/*********************************************************************
 	 * Extent Testing
@@ -968,6 +997,4 @@ public class AllocPage extends StoredPage
 	 *
 	 *********************************************************************/
 	public static final String TEST_MULTIPLE_ALLOC_PAGE = SanityManager.DEBUG ? "TEST_MULTI_ALLOC_PAGE" : null;
-
 }
-

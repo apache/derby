@@ -227,10 +227,10 @@ public interface Page
      * @see LockingPolicy
      **/
 	RecordHandle fetch(
-    RecordHandle            handle, 
-    Object[]   row, 
-    FormatableBitSet                 validColumns, 
-    boolean                 forUpdate)
+    RecordHandle        handle, 
+    Object[]            row, 
+    FormatableBitSet    validColumns, 
+    boolean             forUpdate)
 		throws StandardException;
 
     /**
@@ -283,9 +283,9 @@ public interface Page
 	 * @exception  StandardException  Standard exception policy.
      **/
 	boolean spaceForInsert(
-    Object[]   row, 
-    FormatableBitSet                 validColumns, 
-    int                     overflowThreshold) 
+    Object[]            row, 
+    FormatableBitSet    validColumns, 
+    int                 overflowThreshold) 
         throws StandardException;
 
     /**
@@ -311,10 +311,10 @@ public interface Page
      * @exception StandardException Row cannot fit on the page or row is null.
      **/
 	RecordHandle insert(
-    Object[]   row, 
-    FormatableBitSet                 validColumns,
-    byte                    insertFlag, 
-    int                     overflowThreshold)
+    Object[]            row, 
+    FormatableBitSet    validColumns,
+    byte                insertFlag, 
+    int                 overflowThreshold)
 		throws StandardException;
 
 	/**
@@ -350,8 +350,8 @@ public interface Page
 	 * @exception  StandardException  Standard exception policy.
      **/
 	boolean update(
-    RecordHandle            handle, 
-    Object[]   row, 
+    RecordHandle        handle, 
+    Object[]            row, 
     FormatableBitSet                 validColumns)
 		throws StandardException;
 
@@ -390,6 +390,55 @@ public interface Page
 	public boolean delete(
     RecordHandle    handle, 
     LogicalUndo     undo)
+		throws StandardException;
+
+    /**
+     * Move record to a page toward the beginning of the file.
+     * <p>
+     * As part of compressing the table records need to be moved from the
+     * end of the file toward the beginning of the file.  Only the 
+     * contiguous set of free pages at the very end of the file can
+     * be given back to the OS.  This call is used to purge the row from
+     * the current page, insert it into a previous page, and return the
+     * new row location 
+     * Mark the record identified by position as deleted. The record may be 
+     * undeleted sometime later using undelete() by any transaction that sees 
+     * the record.
+     * <p>
+     * The interface is optimized to work on a number of rows at a time, 
+     * optimally processing all rows on the page at once.  The call will 
+     * process either all rows on the page, or the number of slots in the
+     * input arrays - whichever is smaller.
+     * <B>Locking Policy</B>
+     * <P>
+     * MUST be called with table locked, not locks are requested.  Because
+     * it is called with table locks the call will go ahead and purge any
+     * row which is marked deleted.  It will also use purge rather than
+     * delete to remove the old row after it moves it to a new page.  This
+     * is ok since the table lock insures that no other transaction will
+     * use space on the table before this transaction commits.
+     *
+     * <BR>
+     * A page latch on the new page will be requested and released.
+     *
+     * @param old_handle     An array to be filled in by the call with the 
+     *                       old handles of all rows moved.
+     * @param new_handle     An array to be filled in by the call with the 
+     *                       new handles of all rows moved.
+     * @param new_pageno     An array to be filled in by the call with the 
+     *                       new page number of all rows moved.
+     *
+     * @return the number of rows processed.
+     *
+     * @exception StandardException	Standard Cloudscape error policy
+     *
+     * @see LockingPolicy
+     **/
+	public int moveRecordForCompressAtSlot(
+    int             slot,
+    Object[]        row,
+    RecordHandle[]  old_handle,
+    RecordHandle[]  new_handle)
 		throws StandardException;
 
     /**

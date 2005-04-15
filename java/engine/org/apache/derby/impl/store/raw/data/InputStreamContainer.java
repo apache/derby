@@ -132,6 +132,13 @@ public class InputStreamContainer extends FileContainer  {
 		return 0;
 	}
 
+	protected void truncatePages(long lastValidPagenum)
+    {
+		// Nothing to do since we are inherently read-only.
+		return;
+    }
+    
+
 	/*
 	** Container creation, opening, and closing
 	*/

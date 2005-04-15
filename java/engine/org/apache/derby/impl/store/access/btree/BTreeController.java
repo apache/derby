@@ -1018,11 +1018,18 @@ public class BTreeController extends OpenBTree implements ConglomerateController
          throws StandardException
     {
 
-		if (this.container == null)       
-		{
-            throw StandardException.newException(
-                        SQLState.BTREE_IS_CLOSED,
-                        new Long(err_containerid));
+		if (isClosed())
+        {
+            if (getHold())
+            {
+                reopen();
+            }
+            else
+            {
+                throw StandardException.newException(
+                            SQLState.BTREE_IS_CLOSED,
+                            new Long(err_containerid));
+            } 
         }
 
         if (SanityManager.DEBUG)

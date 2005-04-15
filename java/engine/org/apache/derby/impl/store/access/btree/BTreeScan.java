@@ -1838,6 +1838,19 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 (int[]) null));
     }
 
+    public int fetchNextGroup(
+    DataValueDescriptor[][] row_array,
+    RowLocation[]           old_rowloc_array,
+    RowLocation[]           new_rowloc_array)
+        throws StandardException
+	{
+        // This interface is currently only used to move rows around in
+        // a heap table, unused in btree's -- so not implemented.
+
+        throw StandardException.newException(
+                SQLState.BTREE_UNIMPLEMENTED_FEATURE);
+    }
+
     /**
      * Insert all rows that qualify for the current scan into the input
      * Hash table.  

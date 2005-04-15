@@ -1,4 +1,5 @@
 storetests/st_schema.sql
+storetests/onlineCompressTable.sql
 storetests/st_1.sql
 storetests/st_b5772.sql
 storetests/derby94.sql

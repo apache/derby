@@ -755,6 +755,48 @@ public class B2I extends BTree
 	}
 
     /**
+     * Open a b-tree compress scan.
+     * <p>
+     * B2I does not support a compress scan.
+     * <p>
+	 * @see Conglomerate#openCompressScan
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	public ScanManager defragmentConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran,
+    boolean                         hold,
+    int                             open_mode,
+    int                             lock_level,
+    LockingPolicy                   locking_policy,
+    int                             isolation_level)
+			throws StandardException
+	{
+        throw StandardException.newException(
+            SQLState.BTREE_UNIMPLEMENTED_FEATURE);
+	}
+
+	public void purgeConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran)
+        throws StandardException
+    {
+        // currently on work to do in btree's for purge rows, purging
+        // happens best when split is about to happen.
+        return;
+    }
+
+	public void compressConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran)
+        throws StandardException
+    {
+        // TODO - need to implement for btree
+        return;
+    }
+
+    /**
      * Return an open StoreCostController for the conglomerate.
      * <p>
      * Return an open StoreCostController which can be used to ask about 
