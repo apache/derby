@@ -1,0 +1,1197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Types and Scope of Locks in Derby Systems</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Types and Scope of Locks in Derby Systems</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Types+and+Scope+of+Locks+in+Derby+Systems">Types and Scope of Locks in Derby Systems</a>
+</li>
+<li>
+<a href="#Exclusive+Locks">Exclusive Locks</a>
+</li>
+<li>
+<a href="#Shared+Locks">Shared Locks</a>
+</li>
+<li>
+<a href="#Update+Locks">Update Locks</a>
+</li>
+<li>
+<a href="#Lock+Compatibility">Lock Compatibility</a>
+</li>
+<li>
+<a href="#Scope+of+Locks">Scope of Locks</a>
+</li>
+<li>
+<a href="#Notes+on+Locking">Notes on Locking</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Types+and+Scope+of+Locks+in+Derby+Systems"></a>
+<h3>Types and Scope of Locks in Derby Systems</h3>
+<div style="margin-left: 0 ; border: 2px"></div>
+<a name="N10043"></a><a name="Exclusive+Locks"></a>
+<h3>Exclusive Locks</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX696"></a>  When a statement modifies data, its transaction holds an <em>exclusive</em> lock on data that prevents other transactions from accessing the data. This lock remains in place until the transaction holding the lock issues a commit or rollback. Table-level locking lowers concurrency in a multi-user system.</p>
+</div>
+<a name="N1004E"></a><a name="Shared+Locks"></a>
+<h3>Shared Locks</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When a statement reads data without making any modifications, its transaction obtains a <em>shared lock</em> on the data. Another transaction that tries to read the same data is permitted to read, but a transaction that tries to update the data will be prevented from doing so until the shared lock is released. How long this shared lock is held depends on the isolation level of the transaction holding the lock. Transactions using the TRANSACTION_READ_COMMITTED isolation level release the lock when the transaction steps through to the next row. Transactions using the TRANSACTION_SERIALIZABLE or TRANSACTION_REPEATABLE_READ isolation level hold the lock until the transaction is committed, so even a SELECT can prevent updates if a commit is never issued. Transactions using the TRANSACTION_READ_UNCOMMITTED isolation level do not request any locks.</p>
+</div>
+<a name="N10058"></a><a name="Update+Locks"></a>
+<h3>Update Locks</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX698"></a> When a user-defined update cursor (created with the FOR UPDATE clause) reads data, its transaction obtains an <em>update</em> lock on the data. If the user-defined update cursor updates the data, the update lock is converted to an exclusive lock. If the cursor does not update the row, when the transaction steps through to the next row, transactions using the TRANSACTION_READ_COMMITTED isolation level release the lock, and transactions using the TRANSACTION_SERIALIZABLE or TRANSACTION_REPEATABLE_READ isolation level downgrade it to a shared lock until the transaction is committed. (For update locks, the TRANSACTION_READ_UNCOMMITTED isolation level acts the same way as TRANSACTION_READ_COMMITTED.)</p>
+<p>Update locks help minimize deadlocks.</p>
+</div>
+<a name="N10065"></a><a name="Lock+Compatibility"></a>
+<h3>Lock Compatibility</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a href="#TBLSII-CONCEPTS-LOCK_MTRX">Table 6</a> lists compatibility between lock types. <cite>+</cite> means compatible, <cite>-</cite> means incompatible.<br>
+</p>
+<p>
+<strong>Table 6. Lock Compatibility Matrix</strong>
+<br>
+</p>
+<table class="ForrestTable" cellspacing="1" cellpadding="4">
+<tr>
+<td width="29%">
+<br>
+</td><td width="24%">Shared</td><td width="24%">Update</td><td width="24%">Exclusive</td>
+</tr>
+<tr>
+<td width="29%">Shared</td><td width="24%">
+<p>+<br>
+</p>
+</td><td width="24%">
+<p>-<br>
+</p>
+</td><td width="24%">
+<p>-<br>
+</p>
+</td>
+</tr>
+<tr>
+<td width="29%">Update</td><td width="24%">
+<p>+<br>
+</p>
+</td><td width="24%">
+<p>-<br>
+</p>
+</td><td width="24%">
+<p>-<br>
+</p>
+</td>
+</tr>
+<tr>
+<td width="29%">Exclusive</td><td width="24%">
+<p>-<br>
+</p>
+</td><td width="24%">
+<p>-<br>
+</p>
+</td><td width="24%">
+<p>-<br>
+</p>
+</td>
+</tr>
+</table>
+</div>
+<a name="N100C1"></a><a name="Scope+of+Locks"></a>
+<h3>Scope of Locks</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The amount of data locked by a statement can vary.</p>
+<ul>
+<li>
+<em>table locks</em> 
+<p>A statement can lock the <em>entire table</em>.</p>
+<p>Table-level locking systems always lock entire tables.</p>
+<p>Row-level locking systems can lock entire tables if the WHERE clause of a statement cannot use an index. For example, UPDATES that cannot use an index lock the entire table.</p>
+<p>Row-level locking systems can lock entire tables if a high number of single-row locks would be less efficient than a single table-level lock. Choosing table-level locking instead of row-level locking for performance reasons is called <em>lock escalation</em>. (For more information about this topic, see "About the System's Selection of Lock Granularity" and "Transaction-Based Lock Escalation" in <cite>Tuning Derby</cite>.)</p>
+</li>
+<li>
+<em>single-row locks</em> 
+<p>A statement can lock only <em>a single row</em> at a time.</p>
+<p>This section applies only to row-level locking systems.</p>
+<p>For TRANSACTION_READ_COMMITTED or TRANSACTION_REPEATABLE_READ isolation, Derby treats rows as cursors for SELECT statements. It locks rows only as the application steps through the rows in the result. The current row is locked. The row lock is released when the application goes to the next row. (For TRANSACTION_SERIALIZABLE isolation, however, Derby locks the whole set before the application begins stepping through.) For TRANSACTION_READ_UNCOMMITTED, no row locks are requested.</p>
+<p>Derby locks single rows for INSERT statements, holding each row until the transaction is committed. (If there is an index associated with the table, the previous key is also locked.)</p>
+</li>
+<li>
+<em>range locks</em> 
+<p>A statement can lock <em>a range of rows</em> (range lock).</p>
+<p>This section applies only to row-level locking systems.</p>
+<p>For <em>any</em> isolation level, Derby locks <em>all the rows in the result</em> plus an entire range of rows for updates or deletes.</p>
+<p>For the TRANSACTION_SERIALIZABLE isolation level, Derby locks all the rows in the result plus an entire range of rows in the table for SELECTs to prevent nonrepeatable reads and phantoms.</p>
+<p>For example, if a SELECT statement specifies rows in the <em>Employee</em> table where the <em>salary</em> is BETWEEN two values, the system can lock more than just the actual rows it returns in the result. It also must lock the entire <em>range</em> of rows between those two values to prevent another transaction from inserting, deleting, or updating a row within that range.</p>
+<p>An index must be available for a range lock. If one is not available, Derby locks the entire table.<br>
+</p>
+<p>
+<strong>Table 7. Possible Types and Scopes of Locking</strong>
+<br>
+</p>
+<table class="ForrestTable" cellspacing="1" cellpadding="4">
+<tr>
+<th><a name="WQ28"></a>Transaction Isolation Level</th><th><a name="WQ29"></a>Table-Level Locking</th><th><a name="WQ30"></a>Row-Level Locking</th>
+</tr>
+<tr>
+<td headers="WQ28" width="30%">Connection. TRANSACTION_ READ_UNCOMMITED (SQL: UR)</td><td headers="WQ29" width="25%">For SELECT statements, table-level locking is never requested using this isolation level. For other statements, same as for TRANSACTION_ READ_ COMMITTED.</td><td headers="WQ30" width="45%">SELECT statements get no locks. For other statements, same as for TRANSACTION_ READ_COMMITTED.</td>
+</tr>
+<tr>
+<td headers="WQ28" width="30%">Connection. TRANSACTION_ READ_COMMITTED (SQL: CS)</td><td headers="WQ29" width="25%">SELECT statements get a shared lock on the entire table. The locks are released when the user closes the <em>ResultSet</em>. Other statements get exclusive locks on the entire table, which are released when the transaction commits.</td><td headers="WQ30" width="45%">SELECTs lock and release single rows as the user steps through the <em>ResultSet</em>. UPDATEs and DELETEs get exclusive locks on a range of rows. INSERT statements get exclusive locks on single rows (and sometimes on the preceding rows).</td>
+</tr>
+<tr>
+<td headers="WQ28" width="30%">Connection. TRANSACTION_ REPEATABLE_READ (SQL: RS)</td><td headers="WQ29" width="25%">Same as for TRANSACTION_ SERIALIZABLE</td><td headers="WQ30" width="45%">SELECT statements get shared locks on the rows that satisfy the WHERE clause (but do not prevent inserts into this range). UPDATEs and DELETEs get exclusive locks on a range of rows. INSERT statements get exclusive locks on single rows (and sometimes on the preceding rows).</td>
+</tr>
+<tr>
+<td headers="WQ28" width="30%">Connection. TRANSACTION_ SERIALIZABLE (SQL: RR)</td><td headers="WQ29" width="25%">SELECT statements get a shared lock on the entire table. Other statements get exclusive locks on the entire table, which are released when the transaction commits.</td><td headers="WQ30" width="45%">SELECT statements get shared locks on a range of rows. UPDATE and DELETE statements get exclusive locks on a range of rows. INSERT statements get exclusive locks on single rows (and sometimes on the preceding rows).</td>
+</tr>
+</table>
+</li>
+</ul>
+</div>
+<a name="N1015C"></a><a name="Notes+on+Locking"></a>
+<h3>Notes on Locking</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>In addition to the locks already described, foreign key lookups require briefly held shared locks on the referenced table (row or table, depending on the configuration).</p>
+<p>The table and examples in this section do not take performance-based lock escalation into account. Remember that the system can choose table-level locking for performance reasons.</p>
+<hr>
+<a href="develop73.html">Previous Page</a>
+<br>
+<a href="develop75.html">Next Page</a>
+<br>
+<a href="develop02.html#ToC">Table of Contents</a>
+<br>
+<a href="develop157.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

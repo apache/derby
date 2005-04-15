@@ -1,0 +1,1798 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CREATE Statements</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>CREATE Statements</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#CREATE+FUNCTION+Statement">CREATE FUNCTION Statement</a>
+</li>
+<li>
+<a href="#function-Name">function-Name</a>
+</li>
+<li>
+<a href="#FunctionParameter">FunctionParameter</a>
+</li>
+<li>
+<a href="#FunctionElement">FunctionElement</a>
+</li>
+<li>
+<a href="#CREATE+INDEX+statement">CREATE INDEX statement</a>
+</li>
+<li>
+<a href="#CREATE+PROCEDURE+Statement">CREATE PROCEDURE Statement</a>
+</li>
+<li>
+<a href="#procedure-Name">procedure-Name</a>
+</li>
+<li>
+<a href="#ProcedureParameter">ProcedureParameter</a>
+</li>
+<li>
+<a href="#ProcedureElement">ProcedureElement</a>
+</li>
+<li>
+<a href="#CREATE+SCHEMA+statement">CREATE SCHEMA statement</a>
+</li>
+<li>
+<a href="#CREATE+TABLE+statement">CREATE TABLE statement</a>
+</li>
+<li>
+<a href="#CREATE+TRIGGER+statement">CREATE TRIGGER statement</a>
+</li>
+<li>
+<a href="#CREATE+VIEW+statement">CREATE VIEW statement</a>
+</li>
+</ul>
+<a name="N10043"></a><a name="CREATE+FUNCTION+Statement"></a>
+<h3>CREATE FUNCTION Statement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The CREATE FUNCTION statement allows you to create Java functions, which you can then use in an expression.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>
+<strong>CREATE FUNCTION function-Name ( [ FunctionParameter [, FunctionParameter] ] * )
+RETURNS DataType [ FunctionElement ] *</strong>
+
+</pre>
+</div>
+<a name="N10050"></a><a name="function-Name"></a>
+<h3>function-Name</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>[ schema-Name. ] SQL92Identifier</strong>
+
+</pre>
+<p>If schema-Name is not provided, the current schema is the default schema. If a qualified procedure name is specified, the schema name cannot begin with SYS.</p>
+</div>
+<a name="N1005A"></a><a name="FunctionParameter"></a>
+<h3>FunctionParameter</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>[ parameter-Name ] DataType</strong>
+
+</pre>
+<p>PararameterName must be unique within a function.</p>
+<p>The syntax of <em>DataType</em> is described in <a href="sqlj122.html#HDRSII-SQLJ-31068">Data Types</a>.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Long data-types such as LONG VARCHAR, LONG VARCHAR FOR BIT DATA, CLOB, and BLOB are not allowed as parameters in a CREATE FUNCTION statement.</dd>
+</dl>
+</div>
+<a name="N10074"></a><a name="FunctionElement"></a>
+<h3>FunctionElement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>{ 
+SPECIFIC</strong> [ <em>schema-Name.</em> ] <em>SQL92Identifier</em>
+| LANGUAGE { JAVA }
+| EXTERNAL NAME <em>string</em>
+| PARAMETER STYLE JAVA
+| { NO SQL | CONTAINS SQL | READS SQL DATA }
+| { RETURNS NULL ON NULL INPUT | CALLED ON NULL INPUT }
+ }
+</pre>
+<p>
+<strong>LANGUAGE</strong>
+</p>
+<p>
+<strong>JAVA</strong>- the database manager will call the function as a public static method in a Java class.</p>
+<p>
+<strong>EXTERNAL NAME string</strong>
+</p>
+<p>
+<em>String</em> describes the Java method to be called when the function is executed, and takes the following form:</p>
+<pre>class_name.method_name
+</pre>
+<p>The External Name cannot have any extraneous spaces.</p>
+<p>
+<strong>PARAMETER STYLE</strong>
+</p>
+<p>
+<strong>JAVA</strong> - The function will use a parameter-passing convention that conforms to the Java language and SQL Routines specification. INOUT and OUT parameters will be passed as single entry arrays to facilitate returning values. Result sets are returned through additional parameters to the Java method of type java.sql.ResultSet[] that are passed single entry arrays.</p>
+<p>Derby does not support long column types (for example Long Varchar, BLOB, and so on). An error will occur if you try to use one of these long column types.</p>
+<p>
+<strong>NO SQL, CONTAINS SQL, READS SQL DATA</strong>
+</p>
+<p>Indicates whether the function issues any SQL statements and, if so, what type.</p>
+<dl>
+<dt>
+<strong>CONTAINS SQL</strong>
+</dt>
+<dd>Indicates that SQL statements that neither read nor modify SQL data can be executed by the function. Statements that are not supported in any function return a different error.</dd>
+<dt>
+<strong>NO SQL</strong>
+</dt>
+<dd>Indicates that the function cannot execute any SQL statements</dd>
+<dt>
+<strong>READS SQL DATA</strong>
+</dt>
+<dd>Indicates that some SQL statements that do not modify SQL data can be included in the function. Statements that are not supported in any stored function return a different error. This is the default value.</dd>
+</dl>
+<p>
+<strong>RETURNS NULL ON NULL INPUT or CALLED ON NULL INPUT</strong>
+</p>
+<p>Specifies whether the function is called if any of the input arguments is null. The result is the null value.</p>
+<dl>
+<dt>
+<strong>RETURNS NULL ON NULL INPUT</strong>
+</dt>
+<dd>Specifies that the function is not invoked if any of the input arguments is null. The result is the null value.</dd>
+<dt>
+<strong>CALLED ON NULL INPUT</strong>
+</dt>
+<dd>Specifies that the function is invoked if any or all input arguments are null. This specification means that the function must be coded to test for null argument values. The function can return a null or non-null value. This is the default setting.</dd>
+</dl>
+<p>The function elements may appear in any order, but each type of element can only appear once. A function definition must contain these elements:</p>
+<ul>
+<li>
+<strong>LANGUAGE</strong>
+</li>
+<li>
+<strong>PARAMETER STYLE</strong>
+</li>
+<li>
+<strong>EXTERNAL NAME</strong>
+</li>
+</ul>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>CREATE FUNCTION TO_DEGREES(RADIANS DOUBLE) RETURNS DOUBLE
+PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA
+EXTERNAL NAME 'java.lang.Math.toDegrees'</strong>
+
+</pre>
+</div>
+<a name="N100D9"></a><a name="CREATE+INDEX+statement"></a>
+<h3>CREATE INDEX statement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="SPTI1013640"></a>
+</p>
+<p>
+<a name="SPTSII-SQLJ-31027"></a>A CREATE INDEX statement creates an index on a table. Indexes can be on one or more columns in the table.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>
+<strong>CREATE [UNIQUE] INDEX index-Name
+ON table-Name ( Simple-column-Name [ ASC | DESC ]
+    [ , Simple-column-Name [ ASC | DESC ]] * )</strong>
+
+</pre>
+<p>The maximum number of columns for an index key in Derby is 16.</p>
+<p>An index name cannot exceed 18 characters.</p>
+<p>A column must not be named more than once in a single CREATE INDEX statement. Different indexes can name the same column, however.</p>
+<p>Derby can use indexes to improve the performance of data manipulation statements (see <cite>Tuning Derby</cite>). In addition, UNIQUE indexes provide a form of data integrity checking.</p>
+<p>Index names are unique within a schema. (Some database systems allow different tables in a single schema to have indexes of the same name, but Derby does not.) Both index and table are assumed to be in the same schema if a schema name is specified for one of the names, but not the other. If schema names are specified for both index and table, an exception will be thrown if the schema names are not the same. If no schema name is specified for either table or index, the current schema is used.</p>
+<p>
+<a name="IDX777"></a>  By default, Derby uses the ascending order of each column to create the index. Specifying ASC after the column name does not alter the default behavior. The DESC keyword after the column name causes Derby to use descending order for the column to create the index. Using the descending order for a column can help improve the performance of queries that require the results in mixed sort order or descending order and for queries that select the minimum or maximum value of an indexed column.</p>
+<p>
+<a name="IDX779"></a>
+</p>
+<p>If a qualified index name is specified, the schema name cannot begin with <tt>SYS</tt>.</p>
+<p>
+<a name="HDRSII-SQLJ-27363"></a><strong>Indexes and Constraints</strong>
+</p>
+<p>
+<a name="IDX780"></a>  Unique, primary key, and foreign key constraints generate indexes that enforce or "back" the constraint (and are thus sometimes called <em>backing indexes</em>). If a column or set of columns has a UNIQUE or PRIMARY KEY constraint on it, you can not create an index on those columns. Derby has already created it for you with a system-generated name. System-generated names for indexes that back up constraints are easy to find by querying the system tables if you name your constraint. For example, to find out the name of the index that backs a constraint called FLIGHTS_PK:</p>
+<pre>
+<strong>SELECT CONGLOMERATENAME FROM SYS.SYSCONGLOMERATES,
+SYS.SYSCONSTRAINTS WHERE
+SYS.SYSCONGLOMERATES.TABLEID = SYSCONSTRAINTS.TABLEID 
+AND CONSTRAINTNAME = 'FLIGHTS_PK'</strong>
+
+</pre>
+<p>
+<strong>Examples</strong>
+</p>
+<pre>
+<strong>CREATE INDEX OrigIndex ON Flights(orig_airport);
+</strong>-- money is usually ordered from greatest to least,
+-- so create the index using the descending order
+CREATE INDEX PAY_DESC ON SAMP.EMPLOYEE (SALARY);
+ -- use a larger page size for the index 
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','8192');
+CREATE INDEX IXSALE ON SAMP.SALES (SALES);
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize',NULL);
+</pre>
+<p>
+<strong>Page Size and Key Size</strong>
+</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>The size of the key columns in an index must be equal to or smaller than half the page size. If the length of the key columns in an existing row in a table is larger than half the page size of the index, creating an index on those key columns for the table will fail. This error only occurs when creating an index if an existing row in the table fails the criteria. After an index is created, inserts may fail if the size of their associated key exceeds the criteria.</dd>
+</dl>
+<p>
+<strong>Statement Dependency System</strong>
+</p>
+<p>Prepared statements that involve SELECT, INSERT, UPDATE, UPDATE WHERE CURRENT, DELETE, and DELETE WHERE CURRENT on the table referenced by the CREATE INDEX statement are invalidated when the index is created. Open cursors on the table are not affected.</p>
+</div>
+<a name="N10124"></a><a name="CREATE+PROCEDURE+Statement"></a>
+<h3>CREATE PROCEDURE Statement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The CREATE PROCEDURE statement allows you to create Java stored procedures, which you can then call using the CALL PROCEDURE statement.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>
+<strong>CREATE PROCEDURE procedure-Name ( [ ProcedureParameter [, ProcedureParameter] ] * )
+[ ProcedureElement ] *</strong>
+
+</pre>
+</div>
+<a name="N10131"></a><a name="procedure-Name"></a>
+<h3>procedure-Name</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>[ schema-Name. ] SQL92Identifier</strong>
+
+</pre>
+<p>If schema-Name is not provided, the current schema is the default schema. If a qualified procedure name is specified, the schema name cannot begin with SYS.</p>
+</div>
+<a name="N1013B"></a><a name="ProcedureParameter"></a>
+<h3>ProcedureParameter</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>[ { IN | OUT | INOUT } ] [ parameter-Name ] DataType</strong>
+
+</pre>
+<p>The default value for a parameter is IN. ParameterName must be unique within a procedure.</p>
+<p>The syntax of <em>DataType</em> is described in <a href="sqlj122.html#HDRSII-SQLJ-31068">Data Types</a>.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Long data-types such as LONG VARCHAR, LONG VARCHAR FOR BIT DATA, CLOB, and BLOB are not allowed as parameters in a CREATE PROCEDURE statement.</dd>
+</dl>
+</div>
+<a name="N10155"></a><a name="ProcedureElement"></a>
+<h3>ProcedureElement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>{ 
+SPECIFIC</strong> [ <em>schema-Name.</em> ] <em>SQL92Identifier</em>
+| [ DYNAMIC ] RESULT SETS <em>INTEGER</em>
+| LANGUAGE { JAVA }
+| EXTERNAL NAME <em>string</em>
+| PARAMETER STYLE JAVA
+| { NO SQL | MODIFIES SQL DATA | CONTAINS SQL | READS SQL DATA }
+ }
+</pre>
+<p>
+<strong>DYNAMIC RESULT SETS integer</strong>
+</p>
+<p>Indicates the estimated upper bound of returned result sets for the procedure. Default is no (zero) dynamic result sets.</p>
+<p>
+<strong>LANGUAGE</strong>
+</p>
+<p>
+<strong>JAVA</strong>- the database manager will call the procedure as a public static method in a Java class.</p>
+<p>
+<strong>EXTERNAL NAME string</strong>
+</p>
+<p>
+<em>String</em> describes the Java method to be called when the procedure is executed, and takes the following form:</p>
+<pre>class_name.method_name
+</pre>
+<p>The External Name cannot have any extraneous spaces.</p>
+<p>
+<strong>PARAMETER STYLE</strong>
+</p>
+<p>
+<strong>JAVA</strong> - The procedure will use a parameter-passing convention that conforms to the Java language and SQL Routines specification. INOUT and OUT parameters will be passed as single entry arrays to facilitate returning values. Result sets are returned through additional parameters to the Java method of type java.sql.ResultSet [] that are passed single entry arrays.</p>
+<p>Derby does not support long column types (for example Long Varchar, BLOB, and so on). An error will occur if you try to use one of these long column types.</p>
+<p>
+<strong>NO SQL, CONTAINS SQL, READS SQL DATA, MODIFIES SQL DATA</strong>
+</p>
+<p>Indicates whether the stored procedure issues any SQL statements and, if so, what type.</p>
+<dl>
+<dt>
+<strong>CONTAINS SQL</strong>
+</dt>
+<dd>Indicates that SQL statements that neither read nor modify SQL data can be executed by the stored procedure. Statements that are not supported in any stored procedure return a different error. MODIFIES SQL DATA is the default value.</dd>
+<dt>
+<strong>NO SQL</strong>
+</dt>
+<dd>Indicates that the stored procedure cannot execute any SQL statements</dd>
+<dt>
+<strong>READS SQL DATA</strong>
+</dt>
+<dd>Indicates that some SQL statements that do not modify SQL data can be included in the stored procedure. Statements that are not supported in any stored procedure return a different error.</dd>
+<dt>
+<strong>MODIFIES SQL DATA</strong>
+</dt>
+<dd>Indicates that the stored procedure can execute any SQL statement except statements that are not supported in stored procedures.</dd>
+</dl>
+<p>The procedure elements may appear in any order, but each type of element can only appear once. A procedure definition must contain these elements:</p>
+<ul>
+<li>
+<strong>LANGUAGE</strong>
+</li>
+<li>
+<strong>PARAMETER STYLE</strong>
+</li>
+<li>
+<strong>EXTERNAL NAME</strong>
+</li>
+</ul>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>CREATE PROCEDURE SALES.TOTAL_REVENUE(IN S_MONTH INTEGER,
+IN S_YEAR INTEGER, OUT TOTAL DECIMAL(10,2))
+PARAMETER STYLE JAVA READS SQL DATA LANGUAGE JAVA EXTERNAL NAME 
+'com.acme.sales.calculateRevenueByMonth'</strong>
+
+</pre>
+</div>
+<a name="N101B7"></a><a name="CREATE+SCHEMA+statement"></a>
+<h3>CREATE SCHEMA statement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>A schema is a way to logically group objects in a single collection and provide a unique namespace for objects.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>
+<strong>CREATE SCHEMA schema-Name</strong>
+
+</pre>
+<p>The CREATE SCHEMA statement is used to create a schema. A schema name cannot exceed 30 characters. Schema names must be unique within the database.</p>
+<p>
+<strong>Examples</strong>
+</p>
+<pre>
+<strong>-- Create a schema for employee-related tables 
+CREATE SCHEMA EMP;
+ -- Create a schema for airline-related tables 
+CREATE SCHEMA Flights
+ -- Create a table called "Availability" in each schema 
+CREATE TABLE FLIGHTS.AVAILABILITY
+    (FLIGHT_ID CHAR(6) NOT NULL, SEGMENT_NUMBER INT NOT NULL,
+    FLIGHT_DATE DATE NOT NULL, ECONOMY_SEATS_TAKEN INT,
+    BUSINESS_SEATS_TAKEN INT, FIRSTCLASS_SEATS_TAKEN INT, 
+    CONSTRAINT FLT_AVAIL_PK
+    PRIMARY KEY (FLIGHT_ID, SEGMENT_NUMBER, FLIGHT_DATE));
+ 
+CREATE TABLE EMP.AVAILABILITY
+    (HOTEL_ID INT NOT NULL, BOOKING_DATE DATE NOT NULL, ROOMS_TAKEN INT,
+    CONSTRAINT HOTELAVAIL_PK PRIMARY KEY (HOTEL_ID, BOOKING_DATE));</strong>
+
+</pre>
+</div>
+<a name="N101CE"></a><a name="CREATE+TABLE+statement"></a>
+<h3>CREATE TABLE statement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>A CREATE TABLE statement creates a table. Tables contain columns and constraints, rules to which data must conform. Table-level constraints specify a column or columns. Columns have a data type and can specify column constraints (column-level constraints).</p>
+<p>For information about constraints, see <a href="sqlj32.html#HDRSII-SQLJ-13590">CONSTRAINT clause</a>.</p>
+<p>You can specify a default value for a column. A default value is the value to be inserted into a column if no other value is specified. If not explicitly specified, the default value of a column is NULL. See <a href="#HDRSII-SQLJ-64478">Column Default</a>.</p>
+<p>You can specify storage properties such as page size for a table by calling the <tt>SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY</tt> system procedure.</p>
+<p>If a qualified table name is specified, the schema name cannot begin with <em>SYS</em>.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>
+<strong>CREATE TABLE table-Name
+    ( {column-definition | Table-Level Constraint}
+    [ , {column-definition | Table-Level Constraint} ] * )</strong>
+
+</pre>
+<p>
+<em>column-definition:&nbsp;</em>&nbsp;</p>
+<pre>
+<strong>Simple-column-Name DataType
+    [ Column-Level-Constraint ]*
+    [ generated-column-spec ]
+    [ Column-Level-Constraint ]*
+</strong>
+</pre>
+<p>
+<em>generated-column-spec:&nbsp;</em>&nbsp;</p>
+<pre>
+<strong>[ [ WITH ] DEFAULT {ConstantExpression | NULL }
+|
+[ GENERATED ALWAYS AS IDENTITY 
+[ ( START WITH IntegerConstant 
+[ ,INCREMENT BY IntegerConstant] ) ]  ]  ]
+</strong>
+</pre>
+<p>The syntax of <em>Data-Type</em> is described in <a href="sqlj122.html#HDRSII-SQLJ-31068">Data Types</a>.</p>
+<p>The syntaxes of <em>Column-Level-Constraint</em> and <em>Table-Level Constraint</em> are described in <a href="sqlj32.html#HDRSII-SQLJ-13590">CONSTRAINT clause</a>.</p>
+<p>The IDENTITY keyword can only be specified if the data type associated with the column is one of the following exact integer types.</p>
+<ul>
+<li>SMALLINT</li>
+<li>INT</li>
+<li>BIGINT</li>
+</ul>
+<p>
+<a name="HDRSII-SQLJ-64478"></a><strong>Column Default</strong>
+</p>
+<p>
+<a name="IDX787"></a>  For the definition of a default value, a <em>ConstantExpression</em> is an expression that does not refer to any table. It can include constants, date-time special registers, current schemas, users, and null.</p>
+<p>
+<a name="HDRSII-SQLJ-69411"></a><strong>Identity column attributes</strong>
+</p>
+<p>
+<a name="IDX789"></a> For SMALLINT, INT, and BIGINT columns with identity attributes, Derby automatically assigns increasing integer values to the column. Identity column attributes behave like other defaults in that when an insert statement does not specify a value for the column, Derby automatically provides the value. However, the value is not a constant; Derby automatically increments the default value every time a row is inserted. Also, unlike other defaults, you are not allowed to insert a value directly into or update an identity column.</p>
+<p>By default, the initial value of an identity column is 1, and the amount of the increment is 1. You can specify non-default values for both the initial value and the interval amount when you define the column with the key words START WITH and INCREMENT BY. And if you specify a negative number for the increment value, Derby <em>decrements</em> the value with each insert. If this value is 0, or positive, Derby increments the value with each insert.</p>
+<p>The maximum and minimum values allowed in identity columns are determined by the data type of the column. Attempting to insert a value outside the range of values supported by the data type raises an exception.<br>
+</p>
+<p>
+<strong>Table 1. Maximum and Minimum Values for Columns with Generated Column Specs</strong>
+<br>
+</p>
+<table class="ForrestTable" cellspacing="1" cellpadding="4">
+<tr>
+<th><a name="WQ1"></a>Data type</th><th><a name="WQ2"></a>Maximum Value</th><th><a name="WQ3"></a>Minimum Value</th>
+</tr>
+<tr>
+<td headers="WQ1" width="16%">SMALLINT</td><td headers="WQ2" width="42%">32767 (<em>java.lang.Short.MAX_VALUE</em>)</td><td headers="WQ3" width="42%">-32768 (<em>java.lang.Short.MIN_VALUE</em>)</td>
+</tr>
+<tr>
+<td headers="WQ1" width="16%">INT</td><td headers="WQ2" width="42%">2147483647 (<em>java.lang.Integer.MAX_VALUE</em>)</td><td headers="WQ3" width="42%">-2147483648 (<em>java.lang.Integer.MIN_VALUE</em>)</td>
+</tr>
+<tr>
+<td headers="WQ1" width="16%">BIGINT</td><td headers="WQ2" width="42%">9223372036854775807 (<em>java.lang.Long.MAX_VALUE</em>)</td><td headers="WQ3" width="42%">-9223372036854775808 (<em>java.lang.Long.MIN_VALUE</em>)</td>
+</tr>
+</table>
+<p>Automatically generated values in an identity column are unique. Use a primary key or unique constraint on a column to guarantee uniqueness. Creating an identity column <em>does not</em> create an index on the column.</p>
+<p>The <tt>IDENTITY_VAL_LOCAL</tt> function is a non-deterministic function that returns the most recently assigned value for an identity column. See <a href="sqlj82.html#HDRIDENTITYVALLOCAL">IDENTITY_VAL_LOCAL</a> for more information.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Specify the schema, table, and column name using the same case as those names are stored in the system tables--that is, all upper case unless you used delimited identifiers when creating those database objects.</dd>
+</dl>
+<p>Derby keeps track of the last increment value for a column in a cache. It also stores the value of what the next increment value will be for the column on disk in the <em>AUTOINCREMENTVALUE</em> column of the <em>SYS.SYSCOLUMNS</em> system table. Rolling back a transaction does not undo this value, and thus rolled-back transactions can leave "gaps" in the values automatically inserted into an identity column. Derby behaves this way to avoid locking a row in <em>SYS.SYSCOLUMNS</em> for the duration of a transaction and keeping concurrency high.</p>
+<p>
+<a name="IDX790"></a> When an insert happens within a triggered-SQL-statement, the value inserted by the triggered-SQL-statement into the identity column is available from <em>ConnectionInfo</em> only within the trigger code. The trigger code is also able to see the value inserted by the statement that caused the trigger to fire. However, the statement that caused the trigger to fire is not able to see the value inserted by the triggered-SQL-statement into the identity column. Likewise, triggers can be nested (or recursive). An SQL statement can cause trigger T1 to fire. T1 in turn executes an SQL statement that causes trigger T2 to fire. If both T1 and T2 insert rows into a table that cause Derby to insert into an identity column, trigger T1 cannot see the value caused by T2's insert, but T2 can see the value caused by T1's insert. Each nesting level can see increment values generated by itself and previous nesting levels, all the way to the top-level SQL statement that initiated the recursive triggers. You can only have 16 levels of trigger recursion.</p>
+<p>
+<strong>Examples</strong>
+</p>
+<pre>
+<strong>CREATE TABLE HOTELAVAILABILITY
+    (HOTEL_ID INT NOT NULL, BOOKING_DATE DATE NOT NULL,
+    ROOMS_TAKEN INT DEFAULT 0, PRIMARY KEY (HOTEL_ID, BOOKING_DATE));
+ -- the table-level primary key definition allows you to
+-- include two columns in the primary key definition 
+PRIMARY KEY (hotel_id, booking_date))
+ -- assign an identity column attribute to an INTEGER
+-- column, and also define a primary key constraint
+-- on the column 
+CREATE TABLE PEOPLE
+    (PERSON_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY
+    CONSTRAINT PEOPLE_PK PRIMARY KEY, PERSON VARCHAR(26));
+ -- assign an identity column attribute to a SMALLINT
+-- column with an initial value of 5 and an increment value
+-- of 5. 
+CREATE TABLE GROUPS
+    (GROUP_ID SMALLINT NOT NULL GENERATED ALWAYS AS IDENTITY 
+    (START WITH 5, INCREMENT BY 5), ADDRESS VARCHAR(100), PHONE VARCHAR(15));</strong>
+
+</pre>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>For more examples of CREATE TABLE statements using the various constraints, see <a href="sqlj32.html#HDRSII-SQLJ-13590">CONSTRAINT clause</a>.</dd>
+</dl>
+</div>
+<a name="N102B7"></a><a name="CREATE+TRIGGER+statement"></a>
+<h3>CREATE TRIGGER statement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>A trigger defines a set of actions that are executed when a database event occurs on a specified table. A <em>database event</em> is a delete, insert, or update operation. For example, if you define a trigger for a delete on a particular table, the trigger's action occurs whenever someone deletes a row or rows from the table.</p>
+<p>Along with constraints, triggers can help enforce data integrity rules with actions such as cascading deletes or updates. Triggers can also perform a variety of functions such as issuing alerts, updating other tables, sending e-mail, and other useful actions.</p>
+<p>You can define any number of triggers for a single table, including multiple triggers on the same table for the same event.</p>
+<p>You can create a trigger in any schema except <em>SYS</em>. The trigger need not reside in the same schema as the table on which it is defined.</p>
+<p>If a qualified trigger name is specified, the schema name cannot begin with <em>SYS</em>.</p>
+<p>
+<a name="HDRSYN001"></a><strong>Syntax</strong>
+</p>
+<pre>
+<strong>CREATE TRIGGER TriggerName
+AFTER 
+{ INSERT | DELETE | UPDATE [ OF column-Name [, column-Name]* ]
+ON table-Name
+[ ReferencingClause ]
+FOR EACH { ROW | STATEMENT } MODE DB2SQL 
+Triggered-SQL-statement</strong>
+
+</pre>
+<p>
+<em>ReferencingClause:&nbsp;</em>&nbsp;</p>
+<pre>
+<strong>REFERENCING
+{
+{ OLD | NEW } [ AS ] correlation-Name [ { OLD | NEW } [ AS ] correlation-Name ] | 
+{ OLD_TABLE | NEW_TABLE } [ AS ] Identifier [ { OLD_TABLE | NEW_TABLE }
+[AS] Identifier ] 
+}</strong>
+
+</pre>
+<p>
+<strong>Before or After: When Triggers Fire</strong>
+</p>
+<p>
+<a name="IDX793"></a> Triggers fire after all constraints have been satisfied and after the changes have been applied to the target table. Also called <em>After</em> triggers, they can be either row or statement triggers (see <a href="#HDRSII-SQLJ-54276">Statement versus Row Triggers</a>).</p>
+<p>
+<strong>Insert, Delete, or Update: What Causes the Trigger to Fire</strong>
+</p>
+<p>
+<a name="IDX794"></a> A trigger is fired by one of the following database events, depending on how you define it (in <a href="#HDRSYN001">Syntax</a> above, see the third line):</p>
+<ul>
+<li>INSERT</li>
+<li>UPDATE</li>
+<li>DELETE</li>
+</ul>
+<p>You can define any number of triggers for a given event on a given table. For update, you can specify columns.</p>
+<p>
+<a name="HDRSII-SQLJ-67748"></a><strong>Referencing Old and New Values: The Referencing Clause</strong>
+</p>
+<p>
+<a name="IDX795"></a>  Many triggered-SQL-statements need to refer to data that is currently being changed by the database event that caused them to fire. The triggered-SQL-statement might need to refer to the new (post-change or "after") values.</p>
+<p>Derby provides you with a number of ways to refer to data that is currently being changed by the database event that caused the trigger to fire. The easiest way to refer to the changed data in the triggered-SQL-statement is use the <em>transition variables</em> or <em>transition tables</em>.</p>
+<p>The referencing clause allows you to provide a correlation name or alias for these transition variables by specifying OLD/NEW AS <em>correlation-Name</em> .</p>
+<p>For example, if you add the following clause to the trigger definition:</p>
+<pre>
+<strong>REFERENCING OLD AS DELETEDROW</strong>
+
+</pre>
+<p>you can then refer to this correlation name in the triggered-SQL-statement:</p>
+<pre>
+<strong>DELETE FROM HotelAvailability WHERE hotel_id = DELETEDROW.hotel_id</strong>
+
+</pre>
+<p>The OLD and NEW transition variables map to a <em>java.sql.ResultSet</em> with a single row.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Only row triggers (see <a href="#HDRSII-SQLJ-54276">Statement versus Row Triggers</a>) can use the transition variables. INSERT row triggers cannot reference an OLD row. DELETE row triggers cannot reference a NEW row.</dd>
+</dl>
+<p>For statement triggers, transition <em>tables</em> serve as a table identifier for the triggered-SQL-statement or the trigger qualification. The referencing clause allows you to provide a correlation name or alias for these transition tables by specifying OLD_TABLE/NEW_TABLE AS correlation-Name</p>
+<p>For example:</p>
+<pre>
+<strong>REFERENCING OLD_TABLE AS DeletedHotels</strong>
+
+</pre>
+<p>allows you to use that new identifier (<em>DeletedHotels</em>) in the triggered-SQL-statement:</p>
+<pre>
+<strong>DELETE FROM HotelAvailability WHERE hotel_id IN
+    (SELECT hotel_id FROM DeletedHotels)</strong>
+
+</pre>
+<p>The old and new transition tables map to a <em>java.sql.ResultSet</em> with cardinality equivalent to the number of rows affected by the triggering event.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Only statement triggers (see <a href="#HDRSII-SQLJ-54276">Statement versus Row Triggers</a>) can use the transition tables. INSERT statement triggers cannot reference an OLD table. DELETE statement triggers cannot reference a NEW table.</dd>
+</dl>
+<p>The referencing clause can designate only one new correlation or identifier and only one old correlation or identifier. Row triggers cannot designate an identifier for a transition table and statement triggers cannot designate a correlation for transition variables.</p>
+<p>
+<a name="HDRSII-SQLJ-54276"></a><strong>Statement versus Row Triggers</strong>
+</p>
+<p>
+<a name="IDX797"></a> You must specify whether a trigger is a <em>statement trigger</em> or a <em>row trigger</em>:</p>
+<ul>
+<li>
+<em>statement triggers</em> 
+<p>A statement trigger fires once per triggering event and regardless of whether any rows are modified by the insert, update, or delete event.</p>
+</li>
+<li>
+<em>row triggers</em> 
+<p>A row trigger fires once for each row affected by the triggering event. If no rows are affected, the trigger does not fire.</p>
+</li>
+</ul>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>An update that sets a column value to the value that it originally contained (for example, UPDATE T SET C = C) causes a row trigger to fire, even though the value of the column is the same as it was prior to the triggering event.</dd>
+</dl>
+<p>
+<a name="HDRI1149821"></a><strong>Triggered-SQL-statement</strong>
+</p>
+<p>
+<a name="IDX798"></a> The action defined by the trigger is called the triggered-SQL-statement (in <a href="#HDRSYN001">Syntax</a> above, see the last line). It has the following limitations:</p>
+<ul>
+<li>It must not contain any dynamic parameters (?).</li>
+<li>It must not create, alter, or drop the table upon which the trigger is defined.</li>
+<li>It must not add an index to or remove an index from the table on which the trigger is defined.</li>
+<li>It must not add a trigger to or drop a trigger from the table upon which the trigger is defined.</li>
+<li>It must not commit or roll back the current transaction or change the isolation level.</li>
+<li>It must not execute a CALL statement.</li>
+</ul>
+<p>The triggered-SQL-statement can reference database objects other than the table upon which the trigger is declared. If any of these database objects is dropped, the trigger is invalidated. If the trigger cannot be successfully recompiled upon the next execution, the invocation throws an exception and the statement that caused it to fire will be rolled back.</p>
+<p>For more information on triggered-SQL-statements, see the <cite>Derby Developer's Guide</cite>.</p>
+<p>
+<strong>Order of Execution</strong>
+</p>
+<p>
+<a name="IDX799"></a> When a database event occurs that fires a trigger, Derby performs actions in this order:</p>
+<ul>
+<li>It performs constraint checking (primary key, unique key, foreign key, check).</li>
+<li>It performs the insert, update, or delete.</li>
+<li>It fires <em>after</em> triggers.</li>
+</ul>
+<p>When multiple triggers are defined for the same database event for the same table for the same trigger time (before or after), triggers are fired in the order in which they were created.</p>
+<p>
+<strong>Examples</strong>
+</p>
+<pre>
+<strong>-- Statements and after triggers:
+ 
+CREATE TRIGGER FLIGHTSDELETE
+AFTER DELETE ON FLIGHTS
+REFERENCING OLD_TABLE AS DELETEDFLIGHTS
+FOR EACH STATEMENT MODE DB2SQL
+DELETE FROM FLIGHTAVAILABILITY WHERE FLIGHT_ID IN
+(SELECT FLIGHT_ID FROM DELETEDFLIGHTS);
+ 
+CREATE TRIGGER FLIGHTSDELETE3
+AFTER DELETE ON FLIGHTS
+REFERENCING OLD AS OLD
+FOR EACH ROW MODE DB2SQL
+DELETE FROM FLIGHTAVAILABILITY WHERE FLIGHT_ID = OLD.FLIGHT_ID;
+</strong>
+</pre>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>You can find more examples in the <cite>Derby Developer's Guide</cite>.</dd>
+</dl>
+<p>
+<strong>Trigger Recursion</strong>
+</p>
+<p>
+<a name="IDX800"></a>
+</p>
+<p>The maximum trigger recursion depth is 16.</p>
+<p>
+<strong>Related Information</strong>
+</p>
+<p>Special system functions that return information about the current time or current user are evaluated when the trigger fires, not when it is created. Such functions include:</p>
+<ul>
+<li>
+<a href="sqlj70.html#HDRSII-SQLJ-34177">CURRENT_DATE</a>
+</li>
+<li>
+<a href="sqlj74.html#HDRSII-SQLJ-33772">CURRENT_TIME</a>
+</li>
+<li>
+<a href="sqlj76.html#HDRSII-SQLJ-15866">CURRENT_TIMESTAMP</a>
+</li>
+<li>
+<a href="sqlj77.html#HDRSII-SQLJ-42324">CURRENT_USER</a>
+</li>
+<li>
+<a href="sqlj94.html#HDRSII-SQLJ-25228">SESSION_USER</a>
+</li>
+<li>
+<a href="sqlj102.html#HDRSII-SQLJ-42476">USER</a>
+</li>
+</ul>
+</div>
+<a name="N103D7"></a><a name="CREATE+VIEW+statement"></a>
+<h3>CREATE VIEW statement</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Views are virtual tables formed by a query. A view is a dictionary object that you can use until you drop it.</p>
+<p>Views are not updatable.</p>
+<p>If a qualified view name is specified, the schema name cannot begin with <em>SYS</em>.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>
+<strong>CREATE VIEW view-Name
+    [ ( Simple-column-Name [, Simple-column-Name] * ) ]
+AS Query</strong> 
+
+</pre>
+<p>A view definition can contain an optional view column list to explicitly name the columns in the view. If there is no column list, the view inherits the column names from the underlying query. All columns in a view must be uniquely named.</p>
+<p>
+<strong>Examples</strong>
+</p>
+<pre>
+<strong>CREATE VIEW SAMP.V1 (COL_SUM, COL_DIFF)
+    AS SELECT COMM + BONUS, COMM - BONUS
+    FROM SAMP.EMPLOYEE;
+ 
+CREATE VIEW SAMP.VEMP_RES (RESUME)
+    AS VALUES 'Delores M. Quintana', 'Heather A. Nicholls', 'Bruce Adamson';
+ 
+CREATE VIEW SAMP.PROJ_COMBO 
+    (PROJNO, PRENDATE, PRSTAFF, MAJPROJ) 
+    AS SELECT PROJNO, PRENDATE, PRSTAFF, MAJPROJ
+    FROM SAMP.PROJECT UNION ALL 
+SELECT PROJNO, EMSTDATE, EMPTIME, EMPNO 
+    FROM SAMP.EMP_ACT 
+    WHERE EMPNO IS NOT NULL;</strong>
+
+</pre>
+<p>
+<strong>Statement Dependency System</strong>
+</p>
+<p>View definitions are dependent on the tables and views referenced within the view definition. DML (data manipulation language) statements that contain view references depend on those views, as well as the objects in the view definitions that the views are dependent on. Statements that reference the view depend on indexes the view uses; which index a view uses can change from statement to statement based on how the query is optimized. For example, given:</p>
+<pre>
+<strong>CREATE TABLE T1 (C1 DOUBLE PRECISION);
+ 
+CREATE FUNCTION SIN (DATA DOUBLE) 
+    RETURNS DOUBLE EXTERNAL NAME 'java.lang.Math.sin'
+    LANGUAGE JAVA PARAMETER STYLE JAVA;
+ 
+CREATE VIEW V1 (C1) AS SELECT SIN(C1) FROM T1;</strong>
+
+</pre>
+<p>the following SELECT:</p>
+<pre>
+<strong>SELECT * FROM V1
+</strong>
+</pre>
+<p>is dependent on view <em>V1</em>, table <em>T1,</em> and external scalar function <em>SIN.</em>
+</p>
+<hr>
+<a href="sqlj26.html">Previous Page</a>
+<br>
+<a href="sqlj28.html">Next Page</a>
+<br>
+<a href="sqlj02.html#ToC">Table of Contents</a>
+<br>
+<a href="sqlj275.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

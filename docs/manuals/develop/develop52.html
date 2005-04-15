@@ -1,0 +1,1068 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Database-Side JDBC Procedures and SQLExceptions</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Database-Side JDBC Procedures and SQLExceptions</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Database-Side+JDBC+Procedures+and+SQLExceptions">Database-Side JDBC Procedures and SQLExceptions</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Database-Side+JDBC+Procedures+and+SQLExceptions"></a>
+<h3>Database-Side JDBC Procedures and SQLExceptions</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>It is possible to code database-side procedures, like application-side methods, to catch <em>SQLExceptions</em>. <tt><em>SQLExceptions</em></tt> that are caught within a procedure are hidden from the calling application code. When such <tt><em>SQLExceptions</em></tt> are of transaction severity (such as deadlocks), this "hiding" of the exception causes unexpected problems.</p>
+<p>This is because errors of transaction severity roll back work already done by a transaction (not just the piece executed by the called method) and silently begin a new transaction. When the method execution is complete, Derby detects that the outer statement was invalidated by a deadlock and rolls back any work done <em>in the new transaction</em> as well. This is the expected behavior, because all the statements in between explicit commits should be treated atomically; the new transaction implicitly begun by Derby's rollback was not intended by the application designer.</p>
+<p>However, this is not the same behavior that would happen if the method were invoked in the application. In that situation, Derby would roll back the work done by the transaction and silently begin a new transaction. Work in the new transaction would not be rolled back when the method returned. However, coding the application in that way means that the transaction did not end where you expected it to and is probably a programming mistake. Coding in this manner is not recommended.</p>
+<p>A method that catches a deadlock exception and then continues is probably making a mistake. Errors of transaction severity should be caught not by nested code, but only by the outermost application code. That is the only way to ensure that transactions begin and end where you expect them to.</p>
+<p>Not all database vendors handle nested deadlocks the same way. For this and other reasons, it is not possible to write portable SQL-invoking methods. However, it is possible to write SQL-invoking methods that behave identically <em>regardless of whether you invoke them in the application or as a procedure in the database</em>.</p>
+<p>In order to ensure identical application- and database-side handling of nested errors, code try-catch blocks to check for the severity of exceptions as follows:</p>
+<pre>try {
+    preparedStatement.execute();
+} catch (SQLException se ) {
+        String SQLState = se.getSQLState();
+    if ( SQLState.equals( "23505" ) ) 
+        { correctDuplicateKey(); }
+    else if ( SQLState.equals( "22003" ) ) { 
+        correctArithmeticOverflow(); }
+    else { throw se; }
+}
+</pre>
+<p>Of course, users also have the choice of not wrapping SQL statements in try-catch blocks within methods. In that case, <em>SQLExceptions</em> are caught higher up in their applications, which is the desired behavior.</p>
+<hr>
+<a href="develop51.html">Previous Page</a>
+<br>
+<a href="develop53.html">Next Page</a>
+<br>
+<a href="develop02.html#ToC">Table of Contents</a>
+<br>
+<a href="develop157.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

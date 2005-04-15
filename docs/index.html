@@ -1,0 +1,466 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>The Apache Derby Project</title>
+<link type="text/css" href="skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="index.html">Home</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="manuals/index.html">Manuals</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="http://incubator.apache.org/derby/papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Derby</font>
+<ul>
+    
+<li>
+<span class="sel"><font color="#ffcc00">Welcome</font></span>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/license.html">License</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/derby_proposal.html">Proposal</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/faq.html">FAQs</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/derby_downloads.html">Downloads</a>
+</li>
+    
+  
+</ul>
+</li>
+<li>
+<font color="#CFDCED">Community</font>
+<ul>
+    
+<li>
+<a href="http://incubator.apache.org/derby/ApacheConUS04.html">ApacheCon US 2004</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/derby_comm.html">Get Involved!</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/derby_mail.html">Mailing Lists</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/DerbyBugGuidelines.html">BUGS</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/DerbyToDo.html">To-Do</a>
+</li>
+    
+<li>
+<a href="http://incubator.apache.org/derby/papers/">Integration Topics</a>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>The Apache Derby Project</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Derby+Incubator+Project">Derby Incubator Project</a>
+</li>
+<li>
+<a href="#Derby+Project+Charter">Derby Project Charter</a>
+<ul class="minitoc">
+<li>
+<a href="#Database+Technology">Database Technology</a>
+</li>
+<li>
+<a href="#Pure+Java">Pure Java</a>
+</li>
+<li>
+<a href="#Easy+to+Use">Easy to Use</a>
+</li>
+<li>
+<a href="#Small+Footprint">Small Footprint</a>
+</li>
+<li>
+<a href="#Standards+based">Standards based</a>
+</li>
+<li>
+<a href="#Secure">Secure</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#Derby+Technologies">Derby Technologies</a>
+<ul class="minitoc">
+<li>
+<a href="#Derby+embedded+database+engine">Derby embedded database engine</a>
+</li>
+<li>
+<a href="#Derby+network+server">Derby network server</a>
+</li>
+<li>
+<a href="#Database+Utilities">Database Utilities</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#Derby+History">Derby History</a>
+</li>
+</ul> 
+
+
+<a name="N1000C"></a><a name="Derby+Incubator+Project"></a>
+<h3>Derby Incubator Project</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+Derby is an effort undergoing incubation at the Apache Software Foundation.  
+Incubation is required of all newly accepted projects until a further review 
+indicates that the infrastructure, communications, and decision-making 
+process have stabilised in a manner consistent with other successful 
+ASF projects.  
+While incubation status is not necessarily a reflection of the 
+completeness or stability of the code, 
+it does indicate that the project has yet to be fully endorsed by the ASF.
+</p>
+</div>
+
+
+<a name="N10015"></a><a name="Derby+Project+Charter"></a>
+<h3>Derby Project Charter</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+The Derby project develops open source database technology that is:
+</p>
+<ul>
+   
+<li>Pure Java</li>
+   
+<li>Easy to use</li>
+   
+<li>Small footprint</li>
+   
+<li>Standards based</li>
+   
+<li>Secure</li>
+
+</ul>
+<a name="N1002F"></a><a name="Database+Technology"></a>
+<h4>Database Technology</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+  Database technology is defined as software that processes data related 
+  requests from applications. 
+  Data requests include data definition, data modification and data retrieval.
+  Database GUI tooling and IDEs are not developed by the Derby project.
+  </p>
+</div>
+<a name="N10038"></a><a name="Pure+Java"></a>
+<h4>Pure Java</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+  Derby technology is written in Java to take advantage of Java&rsquo;s write 
+  once, run anywhere promise. 
+  Java platforms such as OSGi, J2ME, J2SE and J2EE are supported as appropriate.
+  </p>
+</div>
+<a name="N10041"></a><a name="Easy+to+Use"></a>
+<h4>Easy to Use</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+  Derby technology aims to be easy to use for software developers and zero administration for end users.
+  </p>
+</div>
+<a name="N1004A"></a><a name="Small+Footprint"></a>
+<h4>Small Footprint</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+  Derby technologies are designed to provide significant useful 
+  functionality in a small code size footprint with efficient runtime 
+  resource usage.
+  </p>
+</div>
+<a name="N10053"></a><a name="Standards+based"></a>
+<h4>Standards based</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+  Derby technology adheres to database standards such as JDBC
+  and ANSI SQL standards.
+  This means Derby provides the functionality expected of a modern relational
+  database, 
+  including SQL syntax, transaction management, concurrency, triggers, 
+  and online backups.
+  And it also means developers can later migrate to other databases if they
+  so choose.
+  </p>
+</div>
+<a name="N1005C"></a><a name="Secure"></a>
+<h4>Secure</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+  Derby technology provides secure data management appropriate to environment 
+  the engine is executing in. Traditional enterprise database systems rely on 
+  the machine being physically protected (locked machine room) for security, 
+  Derby databases are often in unprotected environments, such as laptops and 
+  unattended hardware.
+  </p>
+</div>
+</div>
+
+
+<a name="N10066"></a><a name="Derby+Technologies"></a>
+<h3>Derby Technologies</h3>
+<div style="margin-left: 0 ; border: 2px">
+<a name="N1006B"></a><a name="Derby+embedded+database+engine"></a>
+<h4>Derby embedded database engine</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+   The core of the technology, Derby&rsquo;s database engine is a full 
+   functioned relational embedded database engine. JDBC and SQL are the 
+   programming APIs. 
+  </p>
+</div>
+<a name="N10074"></a><a name="Derby+network+server"></a>
+<h4>Derby network server</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+   The Derby network server increases the reach of the Derby database
+   engine by providing traditional client server functionality. 
+   The network server allows clients to connect over TCP/IP using the standard 
+   DRDA protocol. 
+   The network server allows the Derby engine to support networked JDBC, 
+   ODBC/CLI, Perl and PHP.
+  </p>
+</div>
+<a name="N1007D"></a><a name="Database+Utilities"></a>
+<h4>Database Utilities</h4>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+   
+<li> 
+<span class="codefrag">ij</span> -- a tool that allows SQL scripts to be executed
+        against any JDBC database.
+   </li>
+   
+<li> 
+<span class="codefrag">dblook</span> -- Schema extraction tool for a Derby database.
+   </li>
+   
+<li> 
+<span class="codefrag">sysinfo</span> -- Utility to display version numbers and
+        class path.
+   </li>
+  
+</ul>
+</div>
+</div>
+
+
+<a name="N10099"></a><a name="Derby+History"></a>
+<h3>Derby History</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+Cloudscape Inc, an Oakland, California start-up, was founded in 1996 to 
+develop Java database technology. The first release of the database engine, 
+then called JBMS, was in 1997. 
+Subsequently the product was renamed Cloudscape and releases were made about 
+every six months. 
+In 1999 Informix Software, Inc., acquired Cloudscape, Inc. 
+In 2001 IBM acquired the database assets of Informix Software, 
+including Cloudscape. 
+The database engine was re-branded to IBM Cloudscape and releases continued, 
+mainly focussing on embedded use with IBM's Java products and middleware. 
+In August 2004 IBM contributed the code to the Apache Software Foundation
+as Derby, an incubator project sponsored by the Apache DB project.
+</p>
+</div>
+
+
+<p>
+
+<em>Last updated: 13-August-2004</em>
+
+</p>
+
+
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="skin/images/spacer.gif" class="spacer"><a href="skin/images/label.gif"></a><a href="skin/images/page.gif"></a><a href="skin/images/chapter.gif"></a><a href="skin/images/chapter_open.gif"></a><a href="skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos">
+<div>
+<a href="http://validator.w3.org/check/referer"><img width="88" height="31" alt="Valid HTML 4.01!" src="skin/images/valid-html401.png" class="logoImage"></a><a href="http://jigsaw.w3.org/css-validator/"><img width="88" height="31" alt="Valid CSS!" src="skin/images/vcss.png" class="logoImage"></a><img alt="" height="1" width="10" src="skin/images/spacer.gif"><a href="http://xml.apache.org/forrest/"><img border="0" alt="Built with Apache Forrest logo" src="images/built-with-forrest-button.png" width="88" height="31"><img height="1" width="5" alt="" src="skin/images/spacer.gif" class="spacer"></a>
+</div>
+</td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

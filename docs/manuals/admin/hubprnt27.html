@@ -1,0 +1,1163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Servlet Interface</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Servlet Interface</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Servlet+Interface">Servlet Interface</a>
+</li>
+<li>
+<a href="#Start-up+page">Start-up page</a>
+</li>
+<li>
+<a href="#Running+page">Running page</a>
+</li>
+<li>
+<a href="#Trace+session+page">Trace session page</a>
+</li>
+<li>
+<a href="#Trace+directory+page">Trace directory page</a>
+</li>
+<li>
+<a href="#Test+Connection">Test Connection</a>
+</li>
+<li>
+<a href="#Set+Network+Server+Parameters">Set Network Server Parameters</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Servlet+Interface"></a>
+<h3>Servlet Interface</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The servlet interface can be used to start the network server remotely. To use the servlet interface, the servlet must be registered with a web server and <em>derby.system.home</em> must be known to the web server.</p>
+<p>A Web application archive (WAR) file, <em>derby.war</em>, for the Derby Network Server is available in <em>$DERBY_INSTALL/frameworks/NetworkServer/war.</em> This WAR registers the Network Server's servlet at the relative path <em>/derbynet</em>. Please see the documentation for your Application Server for instructions on how to install it.</p>
+<p>For example, if <em>derby.war</em> is installed in Websphere Application Server with a context root of <em>cns</em>, then the URL of the server is:</p>
+<pre>http://server[:port]/cns/derbynet
+</pre>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>A servlet engine is not part of the Network Server.</dd>
+</dl>
+<p>The servlet takes the following optional configuration parameters:</p>
+<ul>
+<li>
+<em>portNumber</em> 
+<p>specifies the port number to be used by the network server.</p>
+</li>
+<li>
+<em>startNetworkServerOnInit</em> 
+<p>specifies that the network server is to be started when the servlet is initialized.</p>
+</li>
+<li>
+<em>tracingDirectory</em> 
+<p>specifies the location for trace files. If the tracing directory is not specified, the traces are placed in <em>derby.system.home</em>.</p>
+</li>
+</ul>
+<p>The servlet displays the following pages:</p>
+</div>
+<a name="N1007D"></a><a name="Start-up+page"></a>
+<h3>Start-up page</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Use the Start-up page to start the server.</p>
+<p>You can choose the following options from the startup page:</p>
+<ul>
+<li>turn logging on when the server is started.</li>
+<li>turn tracing on for all sessions when the server is started.</li>
+<li>start the server.</li>
+</ul>
+</div>
+<a name="N1008D"></a><a name="Running+page"></a>
+<h3>Running page</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>If the network server is running (whether it was started by initializing the servlet or in some other manner), the running page is displayed. The running page indicates whether logging is on or off, whether tracing is on or off, and if tracing is on, indicates for which session.</p>
+<p>You can use the running page to stop the server and turn logging and tracing on or off, boot or shut down databases. The following options are available from the running page:</p>
+<ul>
+<li>start or stop logging.</li>
+<li>start or stop tracing all sessions.</li>
+<li>specify session to trace. (If you choose this option, the Trace session page is displayed.)</li>
+<li>change tracing directory (If you choose this option, the Trace directory page is displayed.)</li>
+<li>specify threading parameters for network server. (If you choose this option, the Thread parameters page is displayed.)</li>
+<li>stop the application server.</li>
+</ul>
+</div>
+<a name="N100A3"></a><a name="Trace+session+page"></a>
+<h3>Trace session page</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>If on the running page you choose to specify a session to trace, this page is displayed. You must enter the Session ID.</p>
+<p>You are given the option to turn tracing on or off or return to the previous menu. When you push the Trace On/Off button, information indicating the current tracing state is displayed.</p>
+</div>
+<a name="N100AC"></a><a name="Trace+directory+page"></a>
+<h3>Trace directory page</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>This page is displayed if the you choose to change the tracing directory on the Running page. You must enter the Trace Directory.</p>
+<p>You are given the option to set a tracing directory or return to the previous menu. Additional information is displayed indicating the current tracing directory when you push the Set Directory button.</p>
+</div>
+<a name="N100B5"></a><a name="Test+Connection"></a>
+<h3>Test Connection</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>This page is displayed if the test connection button is pressed.</p>
+<p>Enter the following applicable information:</p>
+<ul>
+<li>Database Directory (optional). <p>Specify database to test connection to or leave blank to test connecting to network server.</p>
+</li>
+<li>UserID (required if user authentication is enabled)</li>
+<li>Password (required if user authentication is enabled)</li>
+</ul>
+<p>You are given the option to test the connection or return to the previous Menu.</p>
+<p>Information about the success or failure of the connection test will be displayed when the test connection button is pushed.</p>
+</div>
+<a name="N100CB"></a><a name="Set+Network+Server+Parameters"></a>
+<h3>Set Network Server Parameters</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The first page is displayed if the thread parameter button is pressed. This page sets the new parameters. Enter the following applicable information:</p>
+<ul>
+<li>New maximum number of threads</li>
+<li>New thread time slice</li>
+</ul>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>If the either the maximum or time slice parameters are left blank, that value is left unchanged from the current setting.</dd>
+</dl>
+<p>You are given the option of setting the parameters or returning to the previous menu.</p>
+<p>The updated values for the maximum and the time slice are displayed when Set Network Server Parameters is pressed.</p>
+<hr>
+<a href="hubprnt26.html">Previous Page</a>
+<br>
+<a href="hubprnt28.html">Next Page</a>
+<br>
+<a href="hubprnt02.html#ToC">Table of Contents</a>
+<br>
+<a href="hubprnt65.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

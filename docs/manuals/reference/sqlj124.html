@@ -1,0 +1,1235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Numeric Types</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Numeric Types</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Numeric+Type+Overview">Numeric Type Overview</a>
+</li>
+<li>
+<a href="#Numeric+Type+Promotion+in+Expressions">Numeric Type Promotion in Expressions</a>
+</li>
+<li>
+<a href="#Storing+Values+of+One+Numeric+Data+Type+in+Columns+of+Another+Numeric+Data+Type">Storing Values of One Numeric Data Type in Columns of Another Numeric Data Type</a>
+</li>
+<li>
+<a href="#Scale+for+Decimal+Arithmetic">Scale for Decimal Arithmetic</a>
+</li>
+</ul>
+<a name="N10043"></a><a name="Numeric+Type+Overview"></a>
+<h3>Numeric Type Overview</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Numeric types include the following types, which provide storage of varying sizes:</p>
+<ul>
+<li>Integer numerics <ul>
+<li>
+<a href="sqlj141.html#HDRSII-SQLJ-16221">SMALLINT</a> (2 bytes)</li>
+<li>
+<a href="sqlj136.html#HDRSII-SQLJ-10696">INTEGER</a> (4 bytes)</li>
+<li>
+<a href="sqlj126.html#HDRSII-SQLJ-30435">BIGINT</a> (8 bytes)</li>
+</ul>
+</li>
+<li>Approximate or floating-point numerics <ul>
+<li>
+<a href="sqlj140.html#HDRSII-SQLJ-14122">REAL</a> (4 bytes)</li>
+<li>
+<a href="sqlj134.html#SPTSII-SQLJ-DOUBLEPRECISION">DOUBLE PRECISION</a> (8 bytes)</li>
+<li>
+<a href="sqlj135.html#HDRSII-SQLJ-27281">FLOAT</a> (an alias for <a href="sqlj134.html#SPTSII-SQLJ-DOUBLEPRECISION">DOUBLE PRECISION</a> or <a href="sqlj140.html#HDRSII-SQLJ-14122">REAL</a>)</li>
+</ul>
+</li>
+<li>Exact numeric <ul>
+<li>
+<a href="sqlj132.html#HDRSII-SQLJ-15260">DECIMAL</a> (storage based on precision)</li>
+<li>
+<a href="sqlj139.html#HDRSII-SQLJ-12362">NUMERIC</a> (an alias for <a href="sqlj132.html#HDRSII-SQLJ-15260">DECIMAL</a>)</li>
+</ul>
+</li>
+</ul>
+</div>
+<a name="N10087"></a><a name="Numeric+Type+Promotion+in+Expressions"></a>
+<h3>Numeric Type Promotion in Expressions</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>In expressions that use only integer types, Derby promotes the type of the result to at least INTEGER. In expressions that mix integer with non-integer types, Derby promotes the result of the expression to the highest type in the expression. <a href="#TBLSII-SQLJ-39640">Table 4</a> shows the promotion of data types in expressions.<br>
+</p>
+<p>
+<strong>Table 4. Type Promotion in Expressions</strong>
+<br>
+</p>
+<table class="ForrestTable" cellspacing="1" cellpadding="4">
+<tr>
+<th><a name="WQ32"></a>Largest Type That Appears in Expression</th><th><a name="WQ33"></a>Resulting Type of Expression</th>
+</tr>
+<tr>
+<td headers="WQ32" width="62%">DOUBLE PRECISION</td><td headers="WQ33" width="38%">DOUBLE PRECISION</td>
+</tr>
+<tr>
+<td headers="WQ32" width="62%">REAL</td><td headers="WQ33" width="38%">DOUBLE PRECISION</td>
+</tr>
+<tr>
+<td headers="WQ32" width="62%">DECIMAL</td><td headers="WQ33" width="38%">DECIMAL</td>
+</tr>
+<tr>
+<td headers="WQ32" width="62%">BIGINT</td><td headers="WQ33" width="38%">BIGINT</td>
+</tr>
+<tr>
+<td headers="WQ32" width="62%">INTEGER</td><td headers="WQ33" width="38%">INTEGER</td>
+</tr>
+<tr>
+<td headers="WQ32" width="62%">SMALLINT</td><td headers="WQ33" width="38%">INTEGER</td>
+</tr>
+</table>
+<p>For example:</p>
+<pre>
+<strong>-- returns a double precision 
+VALUES 1 + 1.0e0
+ -- returns a decimal 
+VALUES 1 + 1.0
+ -- returns an integer 
+VALUES CAST (1 AS INT) + CAST (1 AS INT)</strong>
+
+</pre>
+</div>
+<a name="N100DC"></a><a name="Storing+Values+of+One+Numeric+Data+Type+in+Columns+of+Another+Numeric+Data+Type"></a>
+<h3>Storing Values of One Numeric Data Type in Columns of Another Numeric Data Type</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>An attempt to put a floating-point type of a larger storage size into a location of a smaller size fails only if the value cannot be stored in the smaller-size location. For example:</p>
+<pre>
+<strong>create table mytable (r REAL, d DOUBLE PRECISION);</strong>
+0 rows inserted/updated/deleted
+<strong>INSERT INTO mytable (r, d) values (3.4028236E38, 3.4028235E38);</strong>
+ERROR X0X41: The number '3.4028236E38' is outside the range for
+the data type REAL.
+</pre>
+<p>You can store a floating point type in an INTEGER column; the fractional part of the number is truncated. For example:</p>
+<pre>
+<strong>INSERT INTO mytable(integer_column) values (1.09e0); 
+1 row inserted/updated/deleted
+ SELECT integer_column
+FROM mytable; 
+I
+---------------
+1</strong>
+
+</pre>
+<p>Integer types can always be placed successfully in approximate numeric values, although with the possible loss of some precision.</p>
+<p>Integers can be stored in decimals if the DECIMAL precision is large enough for the value. For example:</p>
+<pre>
+<strong>ij&gt;  insert into mytable (decimal_column)
+VALUES (55555555556666666666); 
+ERROR X0Y21: The number '55555555556666666666' is outside the
+range of the target DECIMAL/NUMERIC(5,2) datatype.</strong>
+
+</pre>
+<p>An attempt to put an integer value of a larger storage size into a location of a smaller size fails if the value cannot be stored in the smaller-size location. For example:</p>
+<pre>
+<strong>INSERT INTO mytable (int_column) values 2147483648; 
+ERROR 22003: The resulting value is outside the range for the 
+data type INTEGER.</strong>
+
+</pre>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>When truncating trailing digits from a NUMERIC value, Derby rounds down.</dd>
+</dl>
+</div>
+<a name="N10103"></a><a name="Scale+for+Decimal+Arithmetic"></a>
+<h3>Scale for Decimal Arithmetic</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX992"></a>  SQL statements can involve arithmetic expressions that use decimal data types of different <em>precision</em>s (the total number of digits, both to the left and to the right of the decimal point) and <em>scale</em>s (the number of digits of the fractional component). The precision and scale of the resulting decimal type depend on the precision and scale of the operands.</p>
+<p>Given an arithmetic expression that involves two decimal operands:</p>
+<ul>
+<li>
+<em>lp</em> stands for the precision of the left operand</li>
+<li>
+<em>rp</em> stands for the precision of the right operand</li>
+<li>
+<em>ls</em> stands for the scale of the left operand</li>
+<li>
+<em>rs</em> stands for the scale of the right operand</li>
+</ul>
+<p>Use the following formulas to determine the scale of the resulting data type for the following kinds of arithmetical expressions:</p>
+<ul>
+<li>
+<em>multiplication</em> 
+<p>ls + rs</p>
+</li>
+<li>
+<em>division</em> 
+<p>31 - lp + ls - rs</p>
+</li>
+<li>
+<em>AVG()</em> 
+<p>max(max(ls, rs), 4)</p>
+</li>
+<li>
+<em>all others</em> 
+<p>max(ls, rs)</p>
+</li>
+</ul>
+<p>For example, the scale of the resulting data type of the following expression is 27:</p>
+<pre>11.0/1111.33
+<strong>// 31 - 3 + 1 - 2 = 27</strong> 
+
+</pre>
+<p>Use the following formulas to determine the precision of the resulting data type for the following kinds of arithmetical expressions:</p>
+<ul>
+<li>
+<em>multiplication</em> 
+<p>lp + rp</p>
+</li>
+<li>
+<em>addition</em> 
+<p>2 * (p - s) + s</p>
+</li>
+<li>
+<em>division</em> 
+<p>lp - ls + rp + max(ls + rp - rs + 1, 4)</p>
+</li>
+<li>
+<em>all others</em> 
+<p>max(lp - ls, rp - rs) + 1 + max(ls, rs)</p>
+</li>
+</ul>
+<hr>
+<a href="sqlj123.html">Previous Page</a>
+<br>
+<a href="sqlj125.html">Next Page</a>
+<br>
+<a href="sqlj02.html#ToC">Table of Contents</a>
+<br>
+<a href="sqlj275.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

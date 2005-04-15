@@ -1,0 +1,1220 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Connecting to Databases</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Connecting to Databases</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Connecting+to+Databases">Connecting to Databases</a>
+</li>
+<li>
+<a href="#Standard+Connections--Connecting+to+Databases+in+the+File+System">Standard Connections--Connecting to Databases in the File System</a>
+</li>
+<li>
+<a href="#Within+the+System">Within the System</a>
+</li>
+<li>
+<a href="#Outside+the+System+Directory">Outside the System Directory</a>
+</li>
+<li>
+<a href="#Conventions+for+Specifying+the+Database+Path">Conventions for Specifying the Database Path</a>
+</li>
+<li>
+<a href="#Special+Database+Access">Special Database Access</a>
+</li>
+<li>
+<a href="#From+the+Class+Path">From the Class Path</a>
+</li>
+<li>
+<a href="#From+a+Jar+or+Zip+File">From a Jar or Zip File</a>
+</li>
+<li>
+<a href="#Examples">Examples</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Connecting+to+Databases"></a>
+<h3>Connecting to Databases</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You connect to a database using a form of the Derby connection URL as an argument to the <em>DriverManager.getConnection</em> call (see <a href="develop11.html#HDRSII-DEVELOP-17453">Derby JDBC Database Connection URL</a>). You specify a path to the database within this connection URL.</p>
+</div>
+<a name="N1004C"></a><a name="Standard+Connections--Connecting+to+Databases+in+the+File+System"></a>
+<h3>Standard Connections--Connecting to Databases in the File System</h3>
+<div style="margin-left: 0 ; border: 2px"></div>
+<a name="N10051"></a><a name="Within+the+System"></a>
+<h3>Within the System</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The standard way to access databases is in the file system by specifying the path to the database, either absolute or relative to the system directory. In a client/server environment, this path is always on the <em>server</em> machine.</p>
+<p>By default, you can connect to databases within the current system directory (see <a href="develop12.html#HDRSII-DEVELOP-13018">Defining the System Directory</a>). To connect to databases within the current system, just specify the database name on the connection URL. For example, if your system directory contains a database called <em>myDB</em>, you can connect to that database with the following connection URL:</p>
+<pre>jdbc:derby:myDB
+</pre>
+<p>The full call within a Java program would be:</p>
+<pre>Connection conn =DriverManager.getConnection("jdbc:derby:myDB");
+</pre>
+</div>
+<a name="N1006A"></a><a name="Outside+the+System+Directory"></a>
+<h3>Outside the System Directory</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You can also connect to databases in other directories (including subdirectories of the system directory) by specifying a relative or absolute path name to identify the database. The way you specify an absolute path is defined by the host operating system (see <cite>java.io.File.isAbsolute</cite>). You must specify a path for a database in a directory other than the system directory even if you have defined the <tt><em>derby.service</em></tt> property to have Derby boot the database automatically (see <em>"derby.service"</em> in <cite>Tuning Derby</cite>).</p>
+<p>Using the connection URL as described here, you can connect to databases in more than one directory at a time.</p>
+<p>Two examples:</p>
+<pre>jdbc:derby:../otherDirectory/myDB
+ 
+jdbc:derby:c:/otherDirectory/myDB
+</pre>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Once connected to, such a database becomes a part of the Derby system, even though it is not in the system directory. This means that it takes on the system-wide properties of the system and that no other instance of Derby should access that database, among other things. It is recommended that you connect to databases only in the system directory. See <a href="develop12.html#HDRSII-DEVELOP-19297">Recommended Practices</a> for suggestions about working with a Derby system.</dd>
+</dl>
+</div>
+<a name="N1008E"></a><a name="Conventions+for+Specifying+the+Database+Path"></a>
+<h3>Conventions for Specifying the Database Path</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When accessing databases from the file system (instead of from class path or a jar file), any path that is not absolute is interpreted as relative to the system directory.</p>
+<p>The path must do one of the following:</p>
+<ul>
+<li>refer to a previously created Derby database</li>
+<li>specify the <em>create=true</em> attribute</li>
+</ul>
+<p>The path separator in the connection URL is / (forward slash), as in the standard <em>file://</em> URL protocol.</p>
+<p>You can specify only databases that are local to the machine on which the JVM is running. NFS file systems on UNIX and remote shared files on Windows (//<em>machine/directory</em>) are not guaranteed to work. Using <em>derby.system.home</em> and forward slashes is recommended practice for platform independent applications.</p>
+<p>If two different database name values, relative or absolute, refer to the same actual directory, they are considered equivalent. This means that connections to a database through its absolute path and its relative path are connections to the same database. Within Derby, the name of the database is defined by the canonical path of its directory from <cite>java.io.File.getCanonicalPath</cite>.</p>
+<p>Derby automatically creates any intermediate directory that does not already exist when creating a new database. If it cannot create the intermediate directory, the database creation fails.</p>
+<p>
+<a name="IDX553"></a> If the path to the database is ambiguous, i.e., potentially the same as that to a database that is available on the class path (see "Special Database Access"), use the <em>directory:</em> subsubprotocol to specify the one in the file system. For example:</p>
+<pre>jdbc:derby:directory:myDB
+</pre>
+</div>
+<a name="N100BB"></a><a name="Special+Database+Access"></a>
+<h3>Special Database Access</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You can also access databases from the class path or from a jar file (in the class path or not) as read-only databases.</p>
+</div>
+<a name="N100C2"></a><a name="From+the+Class+Path"></a>
+<h3>From the Class Path</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>In most cases, you access databases from the file system as described above. However, it is also possible to access databases from the class path. The databases can be archived into a jar or zip file or left as is.</p>
+<p>All such databases are read-only.</p>
+<p>To access an unarchived database from the class path, specify the name of the database relative to the directory in the class path. You can use the class path subprotocol if such a database is ambiguous within the directory system. See <a href="develop26.html#HDRSII-DEVELOP-38881">Embedded Derby JDBC Database Connection URL</a> for more information.</p>
+<p>For example, for a database called <em>sample</em> in <em>C:\derby\demo\databases</em>, you can put the <em>C:\derby\demo\databases</em> directory in the class path and access <em>sample</em> like this:</p>
+<pre>jdbc:derby:/sample
+ 
+</pre>
+<p>The forward slash is required before <em>sample</em> to indicate that it is relative to <em>C:\derby\demo\databases</em> directory.</p>
+<p>If only <em>C:\derby</em> were in the class path, you could access <em>sample</em> (read-only) like this:</p>
+<pre>jdbc:derby:/demo/databases/sample
+ 
+</pre>
+</div>
+<a name="N100F3"></a><a name="From+a+Jar+or+Zip+File"></a>
+<h3>From a Jar or Zip File</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>It is possible to access databases from a jar file. The jar file can be, but does not have to be, on the class path.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>All such databases are read-only.</dd>
+</dl>
+<p>For example, suppose you have archived the database <em>jarDB1</em> into a file called <em>jar1.jar</em>. This archive is in the class path before you start up Derby. You can access <em>jarDB1</em> with the following connection URL</p>
+<pre>jdbc:derby:/jarDB1
+</pre>
+<p>To access a database in a jar file that is not on the class path, use the jar subprotocol.</p>
+<p>For example, suppose you have archived the database <em>jarDB2</em> into a file called <em>jar2.jar</em>. This archive is not in the class path. You can access <em>jarDB2</em> by specifying the path to the jar file along with the jar subsubprotocol, like this:</p>
+<pre>jdbc:derby:jar:(c:/derby/lib/jar2.jar)jarDB2
+ 
+</pre>
+<p>For complete instructions and examples of accessing databases in jar files, see <a href="develop37.html#HDRSII-DEPLOY-11201">Accessing a Read-Only Database in a Zip/Jar</a>.</p>
+</div>
+<a name="N10122"></a><a name="Examples"></a>
+<h3>Examples</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX555"></a>
+</p>
+<p>The examples in this section use the syntax of the connection URL for use in an embedded environment. This information also applies to the client connection URL in a client/server environment. For reference information about client connection URLs, see <em>"java.sql.Connection"</em> in the <cite>Derby Reference Manual</cite>.</p>
+<ul>
+<li>
+<em>jdbc:derby:db1</em> 
+<p>Open a connection to the database <em>db1</em>. <em>db1</em> is a directory located in the system directory.</p>
+</li>
+<li>
+<em>jdbc:derby:london/sales</em> 
+<p>Open a connection to the database <em>london/sales</em>. <em>london</em> is a subdirectory of the system directory, and <em>sales</em> is a subdirectory of the directory <em>london</em>.</p>
+</li>
+<li>
+<em>jdbc:derby:/reference/phrases/french</em> 
+<p>Open a connection to the database <em>/reference/phrases/french</em>.</p>
+<p>On a UNIX system, this would be the path of the directory. On a Windows system, the path would be <em>C:\reference\phrases\french</em> if the current drive were <em>C.</em> If a jar file storing databases were in the user's class path, this could also be a path within the jar file.</p>
+</li>
+<li>
+<em>jdbc:derby:a:/demo/sample</em> 
+<p>Open a connection to the database stored in the directory <em>\demo\sample</em> on drive <em>A</em> (usually the floppy drive) on a Windows system.</p>
+</li>
+<li>
+<em>jdbc:derby:c:/databases/salesdb jdbc:derby:salesdb</em> 
+<p>These two connection URLs connect to the same database, <em>salesdb</em>, on a Windows platform if the system directory of the Derby system is <em>C:\databases</em>.</p>
+</li>
+<li>
+<em>jdbc:derby:support/bugsdb;create=true</em> 
+<p>Create the database <em>support/bugsdb</em> in the system directory, automatically creating the intermediate directory <em>support</em> if it does not exist.</p>
+</li>
+<li>
+<em>jdbc:derby:sample;shutdown=true</em> 
+<p>Shut down the <em>sample</em> database.</p>
+</li>
+<li>
+<em>jdbc:derby:/myDB</em> 
+<p>Access <em>myDB</em> (which is directly in a directory in the class path) as a read-only database.</p>
+</li>
+<li>
+<em>jdbc:derby:classpath:/myDB</em> 
+<p>Access <em>myDB</em> (which is directly in a directory in the class path) as a read-only database. The reason for using the subsubprotocol is that it might have the same path as a database in the directory structure.</p>
+</li>
+<li>
+<em>jdbc:derby:jar:(C:/dbs.jar)products/boiledfood</em> 
+<p>Access the read-only database <em>boiledfood</em> in the <em>products</em> directory from the jar file <em>C:/dbs.jar</em>.</p>
+</li>
+<li>
+<em>jdbc:derby:directory:myDB</em> 
+<p>Access <em>myDB</em>, which is in the system directory. The reason for using the <tt><em>directory:</em></tt> subsubprotocol is that it might happen to have the same path as a database in the class path.</p>
+</li>
+</ul>
+<hr>
+<a href="develop13.html">Previous Page</a>
+<br>
+<a href="develop15.html">Next Page</a>
+<br>
+<a href="develop02.html#ToC">Table of Contents</a>
+<br>
+<a href="develop157.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

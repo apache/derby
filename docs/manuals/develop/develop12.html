@@ -1,0 +1,1198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Derby System</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Derby System</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Derby+System">Derby System</a>
+</li>
+<li>
+<a href="#One+Derby+per+Java+Virtual+Machine">One Derby per Java Virtual Machine</a>
+</li>
+<li>
+<a href="#Booting">Booting</a>
+</li>
+<li>
+<a href="#Shutting+Down+the+System">Shutting Down the System</a>
+</li>
+<li>
+<a href="#Defining+the+System+Directory">Defining the System Directory</a>
+</li>
+<li>
+<a href="#The+Error+Log">The Error Log</a>
+</li>
+<li>
+<a href="#derby.properties">derby.properties</a>
+</li>
+<li>
+<a href="#Double-Booting+System+Behavior">Double-Booting System Behavior</a>
+</li>
+<li>
+<a href="#Recommended+Practices">Recommended Practices</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Derby+System"></a>
+<h3>Derby System</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>A Derby database exists within a <em>system</em>.</p>
+<p>A Derby system is a single instance of the Derby database engine and the environment in which it runs. It consists of a system directory, zero or more databases, and a system-wide configuration. The system directory contains any persistent system-wide configuration parameters, or properties, specific to that system in a properties file called <a href="#HDRSII-DEVELOP-39943">derby.properties</a>. This file is not automatically created; you must create it yourself.  </p>
+<p>The Derby system is not persistent; you must specify the location of the system directory at every startup.</p>
+<p>However, the system - as well as its directory, which you name - is an essential part of a running database or databases. Understanding the Derby system is essential to successful development and deployment of Derby applications.</p>
+<p>
+<strong>Figure 1. Derby databases live in a system, which includes system-wide properties, an error log, and one or more databases.</strong>
+<br>
+<br>
+<img alt="Derby databases live in a system, which includes system-wide properties, an error log, and one or more databases." src="images/system.gif"><br>
+</p>
+<p>The system directory can also contain an error log file called <em>derby.log</em> (see <a href="#HDRSII-DEVELOP-25889">The Error Log</a>).  </p>
+<p>Each database within that system is contained in a subdirectory, which has the same name as the database (see <a href="develop13.html#HDRSII-DEVELOP-21955">A Derby Database</a>).</p>
+<p>You can use a property (see <em>"derby.service"</em> in <cite>Tuning Derby</cite>) to include databases in other directories or in subdirectories of the system directory in the current system when you start it up.</p>
+<p>In addition, if you connect to a database outside the current system, it automatically becomes part of the current system.</p>
+</div>
+<a name="N10074"></a><a name="One+Derby+per+Java+Virtual+Machine"></a>
+<h3>One Derby per Java Virtual Machine</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You could potentially have two instances of a Derby system (JVM) running on the same machine at the same time. Each instance must run in a different JVM. Two separate instances of Derby must not access the same database. For example, in an embedded environment, an application that accesses Derby databases starts up the local JDBC driver, which starts up an instance of Derby. If you start another application, such as ij, and connect to the same database, severe database corruption can result. See <a href="#HDRSII-DEVELOP-20458">Double-Booting System Behavior</a>.</p>
+</div>
+<a name="N1007F"></a><a name="Booting"></a>
+<h3>Booting</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The default configuration for Derby is to <em>boot</em> (or start) a database when an application first makes a connection to it. When Derby boots a database, it checks to see if recovery needs to be run on the database, so in some unusual cases booting can take some time.</p>
+<p>You can also configure your system to automatically boot all databases in the system when it starts up; see <em>derby.system.bootAll</em> in the Tuning Derby manual. Because of the time needed to boot a database, the number of databases in the system directory affects startup performance if you use that configuration.</p>
+<p>Once a database has been booted within a Derby system, it remains active until the Derby system has been shut down or until you shut down the database individually.</p>
+<p>When Derby boots a database, it prints a message in the error log:</p>
+<pre>2004-06-10 03:54:06.196 GMT: Booting Derby version
+- 10.0.0.1 alpha - (29612): instance c013800d-00fd-0cb0-e736-ffffd1025a25 on
+database directory sample
+</pre>
+<p>The number of databases running in a Derby system is limited only by the amount of memory available in the JVM.</p>
+</div>
+<a name="N10096"></a><a name="Shutting+Down+the+System"></a>
+<h3>Shutting Down the System</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>In an embedded environment, when an application shuts down, it should first shut down Derby.</p>
+<p>If the application that started the embedded Derby quits but leaves the JVM running, Derby continues to run and is available for database connections.</p>
+<p>In an embedded system, the application shuts down the Derby system by issuing the following JDBC call:</p>
+<pre>DriverManager.getConnection("jdbc:derby:cs;shutdown=true");
+</pre>
+<p>Shutdown commands always raise <em>SQLExceptions</em>.</p>
+<p>When a Derby system shuts down, a message goes to the error log:</p>
+<pre>Sat Jan 10 14:31:54 PDT 2004:
+Shutting down instance 80000001-00d0-8bdf-d115-000a0a0b2d00
+</pre>
+<p>
+<a name="IDX515"></a> Typically, an application using an embedded Derby engine shuts down Derby just before shutting itself down. However, an application can shut down Derby and later restart it in the same JVM session. To restart Derby successfully, the JVM needs to unload <em>org.apache.derby.jdbc.EmbeddedDriver</em>, so that it can reload it when it restarts Derby. (Loading the local driver starts Derby.)</p>
+<p>You cannot explicitly request that the JVM unload a class, but you can ensure that the <em>EmbeddedDriver</em> class is unloaded by using a <tt><em>System.gc()</em></tt> to force it to garbage collect classes that are no longer needed. Running with <tt><em>-nogc</em></tt> or <tt><em>-noclassgc</em></tt> definitely <em>prevents</em> the class from being unloaded and makes you unable to restart Derby in the same JVM.</p>
+<p>It is also possible to shut down a single database instead of the entire Derby system. See <a href="develop15.html#HDRSII-DEVELOP-40464">Shutting Down Derby or an Individual Database</a>. You can reboot a database in the same Derby session after shutting it down.</p>
+</div>
+<a name="N100CC"></a><a name="Defining+the+System+Directory"></a>
+<h3>Defining the System Directory</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX517"></a> You define the system directory when Derby starts up by specifying a Java <em>system property</em> called <tt><em>derby.system.home</em></tt>. If you do not specify the system directory when starting up Derby, the current directory becomes the system directory.</p>
+<p>It is recommended that you always explicitly specify the system directory when starting up Derby.</p>
+<p>Derby uses the <em>derby.system.home</em> property to determine which directory is its system directory - and thus what databases are in its system, where to create new databases, and what configuration parameters to use. See <cite>Tuning Derby</cite> for more information on setting this property.</p>
+<p>If you specify a system directory at startup that does not exist, Derby creates this new directory - and thus a new system with no databases--automatically. </p>
+</div>
+<a name="N100E7"></a><a name="The+Error+Log"></a>
+<h3>The Error Log</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Once you create or connect to a database within a system, Derby begins outputting information and error messages, if any. Typically, Derby writes this information to a log called <em>derby.log</em> in the system directory, although you can also have Derby send messages to a stream, using a property. By default, Derby overwrites <em>derby.log</em> when you start the system. You can configure Derby to append to the log with the <tt><em>derby.infolog.append</em></tt> property. For information on setting this and other properties, see <cite>Tuning Derby</cite>.</p>
+</div>
+<a name="N100FB"></a><a name="derby.properties"></a>
+<h3>derby.properties</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The text file <em>derby.properties</em> contains the definition of properties, or configuration parameters valid for the entire system. This file is not automatically created; if you wish to set Derby properties with this file, you need to create it yourself. The file should be in the format created by the <tt><em>java.util.Properties.save</em></tt> method. For more information about properties and the derby.properties file, see <cite>Tuning Derby</cite>.</p>
+</div>
+<a name="N1010C"></a><a name="Double-Booting+System+Behavior"></a>
+<h3>Double-Booting System Behavior</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Derby attempts to prevent two instances of Derby from booting the same database by using a file called <em>db.lck</em> inside the database directory (see "The Database Directory").</p>
+<p>On all platforms running with a JDK of 1.4 or higher, Derby can successfully prevent a second instance of Derby from booting the database and thus prevents corruption.</p>
+<p>On some platforms running with a JDK lower than 1.4, Derby may prevent a second instance of Derby from booting the database (previous to JDK 1.4 the ability to do this was OS dependent).</p>
+<p>If this is the case, you will see an <em>SQLException</em> like the following:</p>
+<pre>ERROR XJ040: Failed to start database 'sample', see the next exception for details.
+ERROR XSDB6: Another instance of Derby might have already booted
+the databaseC:\databases\sample. 
+ 
+</pre>
+<p>The error is also written to the error log.</p>
+<p>If you are running a JVM prior to 1.4, Derby issues a warning message on some platforms if an instance of Derby attempts to boot a database that already has a running instance of Derby attached to it. However, it does not prevent the second instance from booting, and thus potentially corrupting, the database. (You can change this behavior with the property <tt><em>derby.database.forceDatabaseLock</em></tt>.)</p>
+<p>If a warning message has been issued, corruption might already have occurred. Corruption can occur even if one of the two booting systems has "readonly" access to the database.</p>
+<p>The warning message looks like this:</p>
+<pre>WARNING: Derby 
+(instance 80000000-00d2-3265-de92-000a0a0a0200) is
+attempting to boot the database /export/home/sky/wombat
+even though Derby
+(instance 80000000-00d2-3265-8abf-000a0a0a0200) might still be active.
+Only one instance of Derby
+should boot a database at a time. Severe and non-recoverable corruption can
+result and might have already occurred.
+</pre>
+<p>The warning is also written to the error log.</p>
+<p>If you see this warning, you should close the connection and exit the JVM, minimizing the risk of a corruption. Close all instances of Derby, then restart one instance of Derby and shut down the database properly so that the <em>db.lck</em> file can be removed. The warning message continues to appear until a proper shutdown of the Derby system can delete the <em>db.lck</em> file.</p>
+<p>When developing applications, you might want to configure Derby to append to the log. Doing so will help you detect when you have inadvertently started more than one instance of Derby in the same system. For example, when the <em>derby.infolog.append</em> property is set to true for a system, booting two instances of Derby in the same system produces the following in the log:</p>
+<pre>Sat Aug 14 09:42:51 PDT 2004:
+Booting Derby version - 10.0.0.1 alpha - (29612): 
+ 
+instance 80000000-00d2-1c87-7586-000a0a0b1300 on database at
+directory C:\tutorial_system\sample
+------------------------------------------------------------
+Sat Aug 14 09:42:59 PDT 2004:
+Booting Derby version - 10.0.0.1 alpha - (29612):
+instance 80000000-00d2-1c87-9143-000a0a0b1300 on database at
+directory C:\tutorial_system\HelloWorldDB
+</pre>
+<p>Derby allows you to boot databases that are not in the system directory. While this might seem more convenient, check that you do not boot the same database with two JVMs. If you need to access a single database from more than one JVM, you will need to put a server solution in place. You can allow multiple JVMs that need to access that database to connect to the server. Derby includes the Network Server as a server solution. See the <cite>Derby Server and Administration Guide</cite> for more information on the Network Server.</p>
+</div>
+<a name="N10145"></a><a name="Recommended+Practices"></a>
+<h3>Recommended Practices</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When developing Derby applications, create a single directory to hold your database or databases. Give this directory a unique name, to help you remember that:</p>
+<ul>
+<li>All databases exist within a system.</li>
+<li>System-wide properties affect the entire system, and persistent system-wide properties live in the system directory.</li>
+<li>You can boot all the databases in the system, and the boot-up times of all databases affect the performance of the system.</li>
+<li>You can preboot databases only if they are within the system. (Databases do not necessarily have to live inside the system <em>directory</em>, but keeping your databases there is the recommended practice.)</li>
+<li>Once you connect to a database, it is part of the current system and thus inherits all system-wide properties.</li>
+<li>Only one instance of Derby can run in a JVM at a single time, and only one instance of Derby should boot a database at one time. Keeping databases in the system directory makes it less likely that you would use more than one instance of Derby.</li>
+<li>The error log is located inside the system directory.</li>
+</ul>
+<hr>
+<a href="develop11.html">Previous Page</a>
+<br>
+<a href="develop13.html">Next Page</a>
+<br>
+<a href="develop02.html#ToC">Table of Contents</a>
+<br>
+<a href="develop157.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

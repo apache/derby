@@ -1,0 +1,1170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Differences between running Derby in embedded mode and using the Network Server</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Differences between running Derby in embedded mode and using the Network Server</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Differences+between+running+Derby+in+embedded+mode+and+using+the+Network+Server">Differences between running Derby in embedded mode and using the Network Server</a>
+</li>
+<li>
+<a href="#Features+not+supported">Features not supported</a>
+</li>
+<li>
+<a href="#XA">XA</a>
+</li>
+<li>
+<a href="#Isolation+level">Isolation level</a>
+</li>
+<li>
+<a href="#Error+messages">Error messages</a>
+</li>
+<li>
+<a href="#User+authentication">User authentication</a>
+</li>
+<li>
+<a href="#Network+Server+user+authentication+when+user+authentication+is+on+in+Derby">Network Server user authentication when user authentication is on in Derby</a>
+</li>
+<li>
+<a href="#Network+Server+user+authentication+when+user+authentication+is+off+in+Derby">Network Server user authentication when user authentication is off in Derby</a>
+</li>
+<li>
+<a href="#Encrypted+user+ID+and+password">Encrypted user ID and password</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Differences+between+running+Derby+in+embedded+mode+and+using+the+Network+Server"></a>
+<h3>Differences between running Derby in embedded mode and using the Network Server</h3>
+<div style="margin-left: 0 ; border: 2px"></div>
+<a name="N10043"></a><a name="Features+not+supported"></a>
+<h3>Features not supported</h3>
+<div style="margin-left: 0 ; border: 2px"></div>
+<a name="N10048"></a><a name="XA"></a>
+<h3>XA</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>XA is not supported.</p>
+</div>
+<a name="N1004F"></a><a name="Isolation+level"></a>
+<h3>Isolation level</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When you use the Derby Network Server, the <em>java.sql.Connection.setTransactionIsolation()</em> method behaves somewhat differently than when Derby runs in embedded mode:</p>
+<ol>
+<li>
+<em>setTransactionIsolation()</em> does not commit the transaction.</li>
+<li>The new isolation level is applied only to statements created after <em>setTransactionIsolation()</em> is called. Statements created with the previous isolation level will continue to be executed with the isolation level that was set when they were created.</li>
+</ol>
+</div>
+<a name="N10063"></a><a name="Error+messages"></a>
+<h3>Error messages</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The Network Server reports only the first error/warning if multiple errors or warnings occur for a given statement. For example:</p>
+<pre>ij&gt; create table ai (x int, y int generated always as identity
+    (increment by 200000000));
+ij&gt; insert into ai (x) values (1),(2),(3),(4),(5),(6),(7),
+(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19);
+</pre>
+<p>The Network Server generates the following error with the exception message appended to error:</p>
+<pre>ERROR 42Z24: Overflow occurred in identity for column 'Y' in table 'A I':
+SQLSTATE: 22003: The resulting value is outside the range 
+for the data type INTEGER.
+</pre>
+<p>Using the Derby embedded driver, you would see the following two SQL exceptions: :</p>
+<pre>ERROR 42Z24: Overflow occurred in identity for column 'Y' in table 'AI'. 
+ 
+</pre>
+<pre>ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+</pre>
+<p>This is because the Universal Driver reports only one SQLException or one <em>SQLWarning</em> per statement.</p>
+<p>By default, the Universal Driver will not return message text. Use the <tt>retrieveMessagesFromServerOnGetMessage</tt> attribute to see message text. For example, if <tt>retrieveMessagesFromServerOnGetMessage=false</tt>:</p>
+<pre>ij&gt; select * from akdfj;
+ERROR 42X05: DB2 SQL error: SQLCODE: -1, SQLSTATE: 42X05, SQLERRMC: AKDFJ 42X05
+</pre>
+<p>If <tt>retrieveMessagesFromServerOnGetMessage=true</tt>:</p>
+<pre>ij&gt; select * from akdfj;
+ERROR 42X05: Table 'AKDFJ' does not exist.
+</pre>
+</div>
+<a name="N1008C"></a><a name="User+authentication"></a>
+<h3>User authentication</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>As when running Derby in embedded mode, you can enable or disable server-side user authentication when using the Derby Network Server. However, the default security mechanism (<tt>CLEAR_TEXT_PASSWORD</tt>) requires that you supply both the user name and password.</p>
+<p>
+<a name="IDX199"></a> In addition to the default user name and password security mechanism, <em>com.ibm.db2.jcc.DB2BaseDataSource.CLEAR_TEXT_PASSWORD_SECURITY,</em> Derby Network Server supports the following security properties   :</p>
+<ul>
+<li>
+<em> UserID (</em><tt><em>com.ibm.db2.jcc.DB2BaseDataSource.USER_ONLY_SECURITY)</em></tt> 
+<p>When using this mechanism, only the user property needs to be specified.</p>
+</li>
+<li>
+<em> Encrypted UserID and encrypted password (com.ibm.db2.jcc.DB2BaseDataSource.ENCRYPTED_USER AND_PASSWORD_SECURITY)</em> 
+<p>When using this mechanism, both password and user are encrypted.</p>
+</li>
+</ul>
+<p>The user's name specified upon connection is the default schema for the connection, if a schema with that name exists. See the "User Names and Schemas" section in the <cite>Derby Developer's Guide</cite>.</p>
+<p>If you specify any other security mechanism, you will receive an exception.</p>
+<p>To change the default, you can specify another security mechanism as a property or on the URL (using the securityMechanism attribute) when making the connection.</p>
+</div>
+<a name="N100B5"></a><a name="Network+Server+user+authentication+when+user+authentication+is+on+in+Derby"></a>
+<h3>Network Server user authentication when user authentication is on in Derby</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When user authentication is enabled in Derby, you have the option of using the default security mechanism, user name and password, or of specifying that the security mechanism be encrypted user and password.</p>
+</div>
+<a name="N100BC"></a><a name="Network+Server+user+authentication+when+user+authentication+is+off+in+Derby"></a>
+<h3>Network Server user authentication when user authentication is off in Derby</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When user authentication is turned off in Derby, you can use any of the security mechanism options.</p>
+<p>A user and password need to be provided for all security mechanisms except <em>USER_ONLY_SECURITY</em>. However, because user authentication is disabled in the Derby server, the user name and password you supply does not have to be one recognized as valid by Derby.</p>
+</div>
+<a name="N100C8"></a><a name="Encrypted+user+ID+and+password"></a>
+<h3>Encrypted user ID and password</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX205"></a> To use encrypted user id and password, you need to have IBM JCE (Java Cryptography Extension) 1.2.1 or later. You can use it with any versions of IBM or Sun's Java<sup>(TM)</sup> 2 Platform, Standard Edition, v 1.2 (J2SE).</p>
+<p>IBM JDK 1.4 or later comes with IBM JCE, so there's no separate IBM JCE installation needed. For earlier versions of IBM JDK or other JDK's:</p>
+<ol>
+<li>Copy the IBM JCE jar files to the <em>jre/lib/ext</em> directory of the IBM SDK's installation home. The jar files include:  <tt><em>ibmjceprovider.jar</em></tt>, <tt><em> ibmjcefw.jar</em></tt>,  <tt><em>ibmpkderby.jar</em></tt>, and  <tt><em>ibmpkcs11.jar</em></tt>.</li>
+<li>Modify the <em>java.security</em> file under <tt><em>jre/lib/security</em></tt>, in the list of providers (and preference order) section, change it to be: <pre>security.provider.1=sun.security.provider.Sun
+security.provider.2=com.ibm.crypto.provider.IBMJCE
+</pre>
+<p>Note that you need both lines (if you are installing the IBM JCE on a Dun JDK) and that order is important.</p>
+</li>
+<li>During JDBC connection using JCC, specify <em>9</em> as <tt><em>securityMechanism</em></tt> in the connection property to use encrypted user id and password. <p>If an encrypted database is booted in the Network Server, users can connect to the database without giving the <em>bootPassword</em>. The first connection to the database must provide the <em>bootPassword</em> , but all subsequent connections do not need to supply the <em>bootPassword</em>. To remove access from the encrypted database, use the <em>dbshutdown</em> option to shutdown the database.</p>
+<p>The Network Server uses IBM JCE 1.2.1 to do the encryption, as does the IBM DB2 JDBC Universal Driver.</p>
+</li>
+</ol>
+<hr>
+<a href="hubprnt18.html">Previous Page</a>
+<br>
+<a href="hubprnt20.html">Next Page</a>
+<br>
+<a href="hubprnt02.html#ToC">Table of Contents</a>
+<br>
+<a href="hubprnt65.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

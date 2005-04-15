@@ -1,0 +1,1252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CAST</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>CAST</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#CAST">CAST</a>
+</li>
+</ul>
+<a name="N10043"></a><a name="CAST"></a>
+<h3>CAST</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>CAST converts a value from one data type to another and provides a data type to a dynamic parameter (?) or a NULL value.</p>
+<p>CAST expressions are permitted anywhere expressions are permitted.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>
+<strong>CAST ( [ Expression | NULL | ? ]
+    AS Datatype)</strong>
+
+</pre>
+<p>The data type to which you are casting an expression is the <em>target type</em>. The data type of the expression from which you are casting is the <em>source type</em>.</p>
+<p>
+<strong>CAST Conversions Among SQL-92 Data Types</strong>
+</p>
+<p>
+<a name="IDX905"></a>  The following table shows valid explicit conversions between source types and target types for SQL data types.<br>
+</p>
+<p>
+<strong>Table 3. Explicit conversions between source types and target types for SQL data types</strong>
+<br>
+</p>
+<table class="ForrestTable" cellspacing="1" cellpadding="4">
+<tr>
+<td colspan="19" width="100%">This table shows which explicit conversions between data types are valid. The first column on the table lists the source types, while the first row lists the target types. A "Y" indicates that the source to the target is a valid conversion.</td>
+</tr>
+<tr>
+<th><a name="WQ12"></a>Types</th><th><a name="WQ13"></a>S<br>M<br>A<br>L<br>L<br>I<br>N<br>T<br>
+</th><th><a name="WQ14"></a>I<br>N<br>T<br>E<br>G<br>E<br>R<br>
+</th><th><a name="WQ15"></a>B<br>I<br>G<br>I<br>N<br>T<br>
+</th><th><a name="WQ16"></a>D<br>E<br>C<br>I<br>M<br>A<br>L<br>
+</th><th><a name="WQ17"></a>R<br>E<br>A<br>L<br>
+</th><th><a name="WQ18"></a>D<br>O<br>U<br>B<br>L<br>E<br>
+</th><th><a name="WQ19"></a>F<br>L<br>O<br>A<br>T<br>
+</th><th><a name="WQ20"></a>C<br>H<br>A<br>R<br>
+</th><th><a name="WQ21"></a>V<br>A<br>R<br>C<br>H<br>A<br>R<br>
+</th><th><a name="WQ22"></a>L<br>O<br>N<br>G<br>
+<p>
+<br>V<br>A<br>R<br>C<br>H<br>A<br>R<br>
+</p>
+</th><th><a name="WQ23"></a>C<br>H<br>A<br>R<br>
+<p>
+<br>F<br>O<br>R<br>
+</p>
+<p>
+<br>B<br>I<br>T<br>
+</p>
+<p>
+<br>D<br>A<br>T<br>A<br>
+</p>
+</th><th><a name="WQ24"></a>V<br>A<br>R<br>C<br>H<br>A<br>R<br>
+<p>
+<br>F<br>O<br>R<br>
+</p>
+<p>
+<br>B<br>I<br>T<br>
+</p>
+<p>
+<br>D<br>A<br>T<br>A<br>
+</p>
+</th><th><a name="WQ25"></a>L<br>O<br>N<br>G<br>
+<p>
+<br>V<br>A<br>R<br>C<br>H<br>A<br>R<br>
+</p>
+<p>
+<br>F<br>O<br>R<br>
+</p>
+<p>
+<br>B<br>I<br>T<br>
+</p>
+<p>
+<br>D<br>A<br>T<br>A<br>
+</p>
+</th><th><a name="WQ26"></a>C<br>L<br>O<br>B<br>
+</th><th><a name="WQ27"></a>B<br>L<br>O<br>B<br>
+</th><th><a name="WQ28"></a>D<br>A<br>T<br>E<br>
+</th><th><a name="WQ29"></a>T<br>I<br>M<br>E<br>
+</th><th><a name="WQ30"></a>T<br>I<br>M<br>E<br>S<br>T<br>A<br>M<br>P<br>
+</th>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">SMALLINT</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">Y</td><td headers="WQ18" width="5%">Y</td><td headers="WQ19" width="5%">Y</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">INTEGER</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">Y</td><td headers="WQ18" width="5%">Y</td><td headers="WQ19" width="5%">Y</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">BIGINT</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">Y</td><td headers="WQ18" width="5%">Y</td><td headers="WQ19" width="5%">Y</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">DECIMAL</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">Y</td><td headers="WQ18" width="5%">Y</td><td headers="WQ19" width="5%">Y</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">REAL</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">Y</td><td headers="WQ18" width="5%">Y</td><td headers="WQ19" width="5%">Y</td><td headers="WQ20" width="5%">--</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">DOUBLE</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">Y</td><td headers="WQ18" width="5%">Y</td><td headers="WQ19" width="5%">Y</td><td headers="WQ20" width="5%">--</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">FLOAT</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">Y</td><td headers="WQ18" width="5%">Y</td><td headers="WQ19" width="5%">Y</td><td headers="WQ20" width="5%">--</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">CHAR</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">Y</td><td headers="WQ22" width="4%">Y</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">Y</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">Y</td><td headers="WQ29" width="5%">Y</td><td headers="WQ30" width="5%">Y</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">VARCHAR</td><td headers="WQ13" width="5%">Y</td><td headers="WQ14" width="5%">Y</td><td headers="WQ15" width="5%">Y</td><td headers="WQ16" width="5%">Y</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">Y</td><td headers="WQ22" width="4%">Y</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">Y</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">Y</td><td headers="WQ29" width="5%">Y</td><td headers="WQ30" width="5%">Y</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">LONG VARCHAR</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">Y</td><td headers="WQ22" width="4%">Y</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">Y</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">CHAR FOR BIT DATA</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">--</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">Y</td><td headers="WQ24" width="5%">Y</td><td headers="WQ25" width="4%">Y</td><td headers="WQ26" width="5%">Y</td><td headers="WQ27" width="5%">Y</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">VARCHAR FOR BIT DATA</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">--</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">Y</td><td headers="WQ24" width="5%">Y</td><td headers="WQ25" width="4%">Y</td><td headers="WQ26" width="5%">Y</td><td headers="WQ27" width="5%">Y</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">LONG VARCHAR FOR BIT DATA</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">--</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">Y</td><td headers="WQ24" width="5%">Y</td><td headers="WQ25" width="4%">Y</td><td headers="WQ26" width="5%">Y</td><td headers="WQ27" width="5%">Y</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">CLOB</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">Y</td><td headers="WQ22" width="4%">Y</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">Y</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">BLOB</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">--</td><td headers="WQ21" width="5%">--</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">Y</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">--</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">DATE</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">Y</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">Y</td><td headers="WQ29" width="5%">--</td><td headers="WQ30" width="5%">Y</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">TIME</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">Y</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">--</td><td headers="WQ29" width="5%">Y</td><td headers="WQ30" width="5%">Y</td>
+</tr>
+<tr>
+<td headers="WQ12" width="17%">TIMESTAMP</td><td headers="WQ13" width="5%">--</td><td headers="WQ14" width="5%">--</td><td headers="WQ15" width="5%">--</td><td headers="WQ16" width="5%">--</td><td headers="WQ17" width="4%">--</td><td headers="WQ18" width="5%">--</td><td headers="WQ19" width="5%">--</td><td headers="WQ20" width="5%">Y</td><td headers="WQ21" width="5%">Y</td><td headers="WQ22" width="4%">--</td><td headers="WQ23" width="5%">--</td><td headers="WQ24" width="5%">--</td><td headers="WQ25" width="4%">--</td><td headers="WQ26" width="5%">--</td><td headers="WQ27" width="5%">--</td><td headers="WQ28" width="5%">Y</td><td headers="WQ29" width="5%">Y</td><td headers="WQ30" width="5%">Y</td>
+</tr>
+</table>
+<p>If a conversion is valid, CASTs are allowed. Size incompatibilities between the source and target types might cause runtime errors.</p>
+<p>
+<strong>Notes</strong>
+</p>
+<p>In this discussion, the Derby SQL-92 data types are categorized as follows:</p>
+<ul>
+<li>
+<em>numeric</em> 
+<ul>
+<li>exact numeric (SMALLINT, INTEGER, BIGINT, DECIMAL, NUMERIC)</li>
+<li>approximate numeric (FLOAT, REAL, DOUBLE PRECISION)</li>
+</ul>
+</li>
+<li>
+<em>string</em> 
+<ul>
+<li>character string (CLOB, CHAR, VARCHAR, <a href="sqlj137.html#HDRSII-SQLJ-15147">LONG VARCHAR</a>)</li>
+<li>bit string (BLOB, CHAR FOR BIT DATA, VARCHAR FOR BIT DATA, <a href="sqlj138.html#HDRSII-SQLJ-30118">LONG VARCHAR FOR BIT DATA</a>)</li>
+</ul>
+</li>
+<li>
+<em>date/time</em> 
+<ul>
+<li>
+<a href="sqlj131.html#HDRSII-SQLJ-18730">DATE</a>
+</li>
+<li>
+<a href="sqlj142.html#HDRSII-SQLJ-21908">TIME</a>
+</li>
+<li>
+<a href="sqlj143.html#HDRSII-SQLJ-27620">TIMESTAMP</a>
+</li>
+</ul>
+</li>
+</ul>
+<p>
+<strong>Conversions from Numeric Types</strong>
+</p>
+<p>A numeric type can be converted to any other numeric type. If the target type cannot represent the non-fractional component without truncation, an exception is raised. If the target numeric cannot represent the fractional component (scale) of the source numeric, then the source is silently truncated to fit into the target. For example, casting 763.1234 as INTEGER yields 763.</p>
+<p>
+<strong>Conversions from and to Bit Strings</strong>
+</p>
+<p>Bit strings can be converted to other bit strings, but not character strings. Strings that are converted to bit strings are padded with trailing zeros to fit the size of the target bit string. The BLOB type is more limited and requires explicit casting. In most cases the BLOB type cannot be casted to and from other types.</p>
+<p>
+<a name="HDRSII-SQLJ-75614"></a><strong>Conversions of Date/Time Values</strong>
+</p>
+<p>A date/time value can always be converted to and from a TIMESTAMP. If a DATE is converted to a TIMESTAMP, the TIME component of the resulting TIMESTAMP is always 00:00:00. If a TIME data value is converted to a TIMESTAMP, the DATE component is set to the value of CURRENT_DATE at the time the CAST is executed. If a TIMESTAMP is converted to a DATE, the TIME component is silently truncated. If a TIMESTAMP is converted to a TIME, the DATE component is silently truncated.</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>SELECT CAST (miles AS INT)
+FROM Flights
+-- convert timestamps to text
+INSERT INTO mytable (text_column)
+VALUES (CAST (CURRENT_TIMESTAMP AS VARCHAR(100)))
+-- you must cast NULL as a data type to use it
+SELECT airline
+FROM Airlines
+UNION ALL
+VALUES (CAST (NULL AS CHAR(2)))
+-- cast a double as a decimal
+SELECT CAST (FLYING_TIME AS DECIMAL(5,2))
+FROM FLIGHTS
+-- cast a SMALLINT to a BIGINT
+VALUES CAST (CAST (12 as SMALLINT) as BIGINT)</strong>
+
+</pre>
+<hr>
+<a href="sqlj61.html">Previous Page</a>
+<br>
+<a href="sqlj63.html">Next Page</a>
+<br>
+<a href="sqlj02.html#ToC">Table of Contents</a>
+<br>
+<a href="sqlj275.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

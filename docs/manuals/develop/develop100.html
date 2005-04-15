@@ -1,0 +1,1339 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>External Directory Service</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>External Directory Service</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#External+Directory+Service">External Directory Service</a>
+</li>
+<li>
+<a href="#LDAP+Directory+Service">LDAP Directory Service</a>
+</li>
+<li>
+<a href="#Libraries+for+LDAP+User+Authentication">Libraries for LDAP User Authentication</a>
+</li>
+<li>
+<a href="#Setting+Up+Derby+to+Use+Your+LDAP+Directory+Service">Setting Up Derby to Use Your LDAP Directory Service</a>
+</li>
+<li>
+<a href="#Guest+Access+to+Search+for+DNs">Guest Access to Search for DNs</a>
+</li>
+<li>
+<a href="#Performance+Issues">Performance Issues</a>
+</li>
+<li>
+<a href="#Windows+NT+Users">Windows NT Users</a>
+</li>
+<li>
+<a href="#Restrictions">Restrictions</a>
+</li>
+<li>
+<a href="#JNDI-Specific+Properties+for+External+Directory+Services">JNDI-Specific Properties for External Directory Services</a>
+</li>
+<li>
+<a href="#User-Defined+Class">User-Defined Class</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="External+Directory+Service"></a>
+<h3>External Directory Service</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>A directory service stores names and attributes of those names. A typical use for a directory service is to store user names and passwords for a computer system. Derby uses the Java naming and directory interface (JNDI) to interact with external directory services that can provide authentication of users' names and passwords.</p>
+<p>Derby can use the following services:</p>
+<ul>
+<li>
+<a href="#HDRSII-CSECUR-41285">LDAP Directory Service</a>
+</li>
+<li>
+<a href="#HDRSII-CSECUR-21561">User-Defined Class</a>
+</li>
+</ul>
+</div>
+<a name="N10050"></a><a name="LDAP+Directory+Service"></a>
+<h3>LDAP Directory Service</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You can allow Derby to authenticate users against an existing LDAP directory service within your enterprise. LDAP (lightweight directory access protocol) provides an open directory access protocol running over TCP/IP. An LDAP directory service can quickly authenticate a user's name and password.</p>
+<p>To use an LDAP directory service, set <em>derby.authentication.provider</em> to <em>LDAP</em>.</p>
+<p>Examples of LDAP service providers are:</p>
+<ul>
+<li>Netscape Directory Server <p>Netscape Directory Server is an LDAP directory server. In addition, the Netscape Directory Synchronization Service synchronizes entries in a Windows NT directory with the entries in Netscape's Directory Server. It allows you to use the Windows NT directory as a repository for Derby users.</p>
+</li>
+<li>UMich slapd (freeware for the UNIX platform from the University of Michigan)</li>
+<li>AE SLAPD for Windows NT, from AEInc</li>
+</ul>
+</div>
+<a name="N1006A"></a><a name="Libraries+for+LDAP+User+Authentication"></a>
+<h3>Libraries for LDAP User Authentication</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>To use an LDAP directory service with Derby, you need the following libraries in your class path:</p>
+<ul>
+<li>
+<em> jndi.jar</em> 
+<p>JNDI classes</p>
+</li>
+<li>
+<em> ldap.jar</em> 
+<p>LDAP provider from Sun</p>
+</li>
+<li>
+<em> providerutil.jar</em> 
+<p>JNDI classes for a provider</p>
+</li>
+</ul>
+<p>Derby does not provide these libraries; they are available from Sun on the JNDI page at Use the 1.1.x versions of these libraries, not the 1.2.x versions. You might need to do two separate downloads to obtain all the required libraries.</p>
+</div>
+<a name="N10086"></a><a name="Setting+Up+Derby+to+Use+Your+LDAP+Directory+Service"></a>
+<h3>Setting Up Derby to Use Your LDAP Directory Service</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When specifying LDAP as your authentication service, you must specify the location of the server and its port number.</p>
+<ul>
+<li>
+<em>derby.authentication.server</em> 
+<p>Set the property <em>derby.authentication.server</em> to the location and port number of the LDAP server. For example:</p>
+<pre>derby.authentication.server=godfrey:389
+</pre>
+</li>
+</ul>
+</div>
+<a name="N10099"></a><a name="Guest+Access+to+Search+for+DNs"></a>
+<h3>Guest Access to Search for DNs</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>In an LDAP system, users are hierarchically organized in the directory as a set of entries. An <em>entry</em> is a set of name-attribute pairs identified by a unique name, called a DN (distinguished name). An entry is unambiguously identified by a DN, which is the concatenation of selected attributes from each entry in the tree along a path leading from the root down to the named entry, ordered from right to left. For example, a DN for a user might look like this:</p>
+<pre>cn=mary,ou=People,o=FlyTours.com
+ 
+uid=mary,ou=People,o=FlyTours.com
+</pre>
+<p>The allowable entries for the name are defined by the entry's <em>objectClass</em>.</p>
+<p>An LDAP client can bind to the directory (successfully log in) if it provides a user ID and password. The user ID must be a DN, the fully qualified list of names and attributes. This means that the user must provide a very long name.</p>
+<p>Typically, the user knows only a simple user name (e.g., the first part of the DN above, <em>WilliamS</em>). With Derby, you do not need the full DN, because an LDAP client (Derby) can go to the directory first as a guest or even an anonymous user, search for the full DN, then rebind to the directory using the full DN (and thus authenticate the user).</p>
+<p>Derby typically initiates a search for a full DN before binding to the directory using the full DN for user authentication. Derby does not initiate a search in the following cases:</p>
+<ul>
+<li>You have set <em>derby.authentication.ldap.searchFilter</em> to <em>derby.user</em>.</li>
+<li>A user DN has been cached locally for the specific user with the <em>derby.user.UserName</em> property.</li>
+</ul>
+<p>For more information, see <em>derby.authentication.ldap.searchFilter</em> in <cite>Tuning Derby</cite>.</p>
+<p>Some systems permit anonymous searches; other require a user DN and password. You can specify a user's DN and password for the search with the properties listed below. In addition, you can limit the scope of the search by specifying a filter (definition of the object class for the user) and a base (directory from which to begin the search) with the properties listed below.</p>
+<ul>
+<li>
+<em>derby.authentication.ldap.searchAuthDN (optional)</em> 
+<p>Specifies the DN with which to bind (authenticate) to the server when searching for user DNs. This parameter is optional if anonymous access is supported by your server. If specified, this value must be a DN recognized by the directory service, and it must also have the authority to search for the entries.</p>
+<p>If not set, it defaults to an anonymous search using the root DN specified by the <em>derby.authentication.ldap.searchBase</em> property. For example:</p>
+<pre>uid=guest,o=FlyTours.com
+</pre>
+</li>
+<li>
+<em>derby.authentication.ldap.searchAuthPW (optional)</em> 
+<p>Specifies the password to use for the guest user configured above to bind to the directory service when looking up the DN. If not set, it defaults to an anonymous search using the root DN specified by the <em>derby.authentication.ldap.searchBase</em> property.</p>
+<pre>myPassword
+</pre>
+</li>
+<li>
+<em>derby.authentication.ldap.searchBase (optional)</em> 
+<p>Specifies the root DN of the point in your hierarchy from which to begin a guest search for the user's DN. For example:</p>
+<pre>ou=people,o=FlyTours.com
+</pre>
+<p>When using Netscape Directory Server, set this property to the root DN, the special entry to which access control does not apply (optional).</p>
+</li>
+</ul>
+<p>To narrow the search, you can specify a user's <em>objectClass</em>.</p>
+<ul>
+<li>
+<em>derby.authentication.ldap.searchFilter (optional)</em> 
+<p>Set <em>derby.authentication.ldap.searchFilter</em> to a logical expression that specifies what constitutes a user for your LDAP directory service. The default value of this property is <tt><em>objectClass=inetOrgPerson</em></tt>. For example:</p>
+<pre>objectClass=person
+</pre>
+</li>
+</ul>
+</div>
+<a name="N10103"></a><a name="Performance+Issues"></a>
+<h3>Performance Issues</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>For performance reasons, the LDAP directory server should be in the same LAN as Derby. Derby does not cache the user's credential information locally and thus must connect to the directory server every time a user connects.</p>
+<p>Connection requests that provide the full DN are faster than those that must search for the full DN.</p>
+</div>
+<a name="N1010C"></a><a name="Windows+NT+Users"></a>
+<h3>Windows NT Users</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Netscape provides LDAP functionality for Windows NT systems with its Netscape Directory Synchronization service, which synchronizes the Windows NT users with the Netscape Directory Server. SSL is recommended in this configuration.</p>
+</div>
+<a name="N10113"></a><a name="Restrictions"></a>
+<h3>Restrictions</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Derby does not support LDAP groups.</p>
+</div>
+<a name="N1011A"></a><a name="JNDI-Specific+Properties+for+External+Directory+Services"></a>
+<h3>JNDI-Specific Properties for External Directory Services</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Derby allows you to set a few advanced JNDI properties, which you can set in any of the supported ways of setting Derby properties. Typically you would set these at the same level (database or system) for which you configured the external authentication service.</p>
+<p>The list of supported properties can be found in Appendix A: JNDI Context Environment in the Java Naming and Direction API at <var>http://java.sun.com/products/jndi/reference/api/index.html</var>. The external directory service must support the property.</p>
+<p>Each JNDI provider has its set of properties that you can set within the Derby system.</p>
+<p>For example, you can set the property <em>java.naming.security.authentication</em> to allow user credentials to be encrypted on the network if the provider supports it. You can also specify that SSL be used with LDAP (LDAPS).</p>
+</div>
+<a name="N1012D"></a><a name="User-Defined+Class"></a>
+<h3>User-Defined Class</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Set <em>derby.authentication.provider</em> to the full name of a class that implements the public interface <em>org.apache.derby.authentication.UserAuthenticator</em>.</p>
+<p>By writing your own class that fulfills some minimal requirements, you can hook Derby up to an <em>external authentication service</em> other than LDAP. To do so, specify an external authentication service by setting the property <tt><em>derby.authentication.provider</em></tt> to a class name that you want Derby to load at startup.</p>
+<p>The class that provides the external authentication service must implement the public interface <em>org.apache.derby.authentication</em>.<em>UserAuthenticator</em> and throw exceptions of the type <em>java.sql.SQLException</em> where appropriate.</p>
+<p>Using a user-defined class makes Derby adaptable to various naming and directory services.</p>
+<p>A very simple example of a class that implements the interface follows.</p>
+<pre>import org.apache.derby.authentication.UserAuthenticator;
+import java.io.FileInputStream;
+import java.util.Properties;
+import java.sql.SQLException;
+<strong>/**
+  * A simple example of a specialized Authentication scheme.
+  * The system property 'derby.connection.requireAuthentication'
+  * must be set
+  * to true and 'derby.connection.specificAuthentication' must
+  * contain the full class name of the overriden authentication
+  * scheme,  i.e., the name of this class.
+  *
+  * @see org.apache.derby.authentication.UserAuthenticator 
+  */</strong>
+ 
+public class MyAuthenticationSchemeImpl implements
+UserAuthenticator {
+    private static final String USERS_CONFIG_FILE = "myUsers.cfg";
+    private static Properties usersConfig;
+ 
+   <strong>// Constructor
+    // We get passed some Users properties if the 
+    //authentication service could not set them as 
+    //part of System properties.
+    //</strong>
+    public MyAuthenticationSchemeImpl() {
+    }
+ <strong>   /* static block where we load the users definition from a
+users configuration file.*/</strong>
+ 
+    static {
+ <strong>      /* load users config file as Java properties
+        File must be in the same directory where
+        Derby  gets started.
+       (otherwise full path must be specified) */</strong>
+       FileInputStream in = null;
+       usersConfig = new Properties();
+       try {
+           in = new FileInputStream(USERS_CONFIG_FILE);
+           usersConfig.load(in);
+           in.close();
+       } catch (java.io.IOException ie) {
+           // No Config file. Raise error message
+           System.err.println(
+             "WARNING: Error during Users Config file
+retrieval");
+           System.err.println("Exception: " + ie);
+       }
+    }
+ <strong>   /**
+     * Authenticate the passed-in user's credentials.
+     * A more complex class could make calls
+     * to any external users directory.
+     *
+     * @param userName               The user's name
+     * @param userPassword           The user's password 
+     * @param databaseName           The database 
+     * @param infoAdditional jdbc connection info.
+     * @exception SQLException on failure
+     */</strong>
+    public boolean authenticateUser(String userName,
+     String userPassword,
+     String databaseName,
+     Properties info)
+       throws SQLException 
+    {
+ <strong>     /* Specific Authentication scheme logic.
+        If user has been authenticated, then simply return.
+        If user name and/or password are invalid, 
+        then raise the appropriate exception.
+ 
+       This example allows only users defined in the
+       users config properties object.
+ 
+       Check if the passed-in user has been defined for the system.
+       We expect to find and match the property corresponding to
+       the credentials passed in. */</strong>
+       if (userName == null)
+          <strong>// We do not tolerate 'guest' user for now.
+      </strong>     return false;
+ <strong>      //
+       // Check if user exists in our users config (file)
+       // properties set.
+       // If we did not find the user in the users config set, then
+       // try to find if the user is defined as a System property.
+       //</strong>
+       String actualUserPassword;
+       actualUserPassword = usersConfig.getProperty(userName);
+       if (actualUserPassword == null)
+           actualUserPassword = System.getProperty(userName);
+       if (actualUserPassword == null)
+            <strong>// no such passed-in user found</strong>
+            return false;
+            <strong>// check if the password matches</strong>
+       if (!actualUserPassword.equals(userPassword))
+       return false;
+       <strong>// Now, check if the user is a valid user of the database</strong>
+       if (databaseName != null)
+       {
+             <strong>/* if database users restriction lists present, then check 
+            if there is one for this database and if so, 
+            check if the user is a valid one of that database.
+            For this example, the only user we authorize in database
+            DarkSide is user 'DarthVader'. This is the only database
+            users restriction list we have for this example.
+            We authorize any valid (login) user to access the
+            OTHER databases in the system.
+            Note that database users ACLs could be set in the same
+            properties file or a separate one and implemented as you
+            wish. */</strong>
+            <strong>//</strong>
+           if (databaseName.equals("DarkSide")) {
+              <strong>// check if user is a valid one.</strong>
+              if (!userName.equals("DarthVader"))
+                  <strong>// This user is not a valid one of the passed-in</strong>
+                  return false;
+           }
+       }
+       <strong>// The user is a valid one in this database</strong>
+       return true;
+    }
+}
+</pre>
+<hr>
+<a href="develop99.html">Previous Page</a>
+<br>
+<a href="develop101.html">Next Page</a>
+<br>
+<a href="develop02.html#ToC">Table of Contents</a>
+<br>
+<a href="develop157.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

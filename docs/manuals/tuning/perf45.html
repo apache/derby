@@ -1,0 +1,1321 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Derby's Cost-Based Optimization</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Derby's Cost-Based Optimization</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Derby%27s+Cost-Based+Optimization">Derby's Cost-Based Optimization</a>
+</li>
+<li>
+<a href="#About+the+Optimizer%27s+Choice+of+Access+Path">About the Optimizer's Choice of Access Path</a>
+</li>
+<li>
+<a href="#About+the+Optimizer%27s+Choice+of+Join+Order">About the Optimizer's Choice of Join Order</a>
+</li>
+<li>
+<a href="#Join+Order+Case+Study">Join Order Case Study</a>
+</li>
+<li>
+<a href="#About+the+Optimizer%27s+Choice+of+Join+Strategy">About the Optimizer's Choice of Join Strategy</a>
+</li>
+<li>
+<a href="#About+the+Optimizer%27s+Choice+of+Sort+Avoidance">About the Optimizer's Choice of Sort Avoidance</a>
+</li>
+<li>
+<a href="#Cost-Based+ORDER+BY+Sort+Avoidance">Cost-Based ORDER BY Sort Avoidance</a>
+</li>
+<li>
+<a href="#About+the+System%27s+Selection+of+Lock+Granularity">About the System's Selection of Lock Granularity</a>
+</li>
+<li>
+<a href="#How+the+System+Makes+Its+Decision+if+it+Has+a+Choice">How the System Makes Its Decision if it Has a Choice</a>
+</li>
+<li>
+<a href="#Lock+Escalation+Threshold">Lock Escalation Threshold</a>
+</li>
+<li>
+<a href="#About+the+Optimizer%27s+Selection+of+Bulk+Fetch">About the Optimizer's Selection of Bulk Fetch</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Derby%27s+Cost-Based+Optimization"></a>
+<h3>Derby's Cost-Based Optimization</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX481"></a> The query optimizer makes cost-based decisions to determine:</p>
+<ul>
+<li>Which index (if any) to use on each table in a query (see <a href="#HDRSII-OPTIMZ-32184">About the Optimizer's Choice of Access Path</a>)</li>
+<li>The join order (see <a href="#HDRSII-OPTIMZ-20327">About the Optimizer's Choice of Join Order</a>)</li>
+<li>The join strategy (see <a href="#HDRSII-OPTIMZ-11941">About the Optimizer's Choice of Join Strategy</a>)</li>
+<li>Whether to avoid additional sorting (see <a href="#HDRSII-OPTIMZ-27036">About the Optimizer's Choice of Sort Avoidance</a>)</li>
+<li>Automatic lock escalation (see <a href="#HDRSII-OPTIMZ-19357">About the System's Selection of Lock Granularity</a>)</li>
+<li>Whether to use bulk fetch (see <a href="#HDRSII-OPTIMZ-29384">About the Optimizer's Selection of Bulk Fetch</a>)</li>
+</ul>
+</div>
+<a name="N1006B"></a><a name="About+the+Optimizer%27s+Choice+of+Access+Path"></a>
+<h3>About the Optimizer's Choice of Access Path</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The optimizer's choice of access path can depend on the number of rows it will have to read. It tries to choose a path that requires the fewest number of rows read. For joins, the number of rows read also depends heavily on the join order (discussed in <a href="#HDRSII-OPTIMZ-20327">About the Optimizer's Choice of Join Order</a>.)</p>
+<p>How does the optimizer know how many rows a particular access path will read? The answer: sometimes it knows exactly, and sometimes it has to make an educated guess. See <a href="perf52.html#HDRSII-STATS-18908">"Selectivity and Cardinality Statistics"</a>.</p>
+</div>
+<a name="N1007B"></a><a name="About+the+Optimizer%27s+Choice+of+Join+Order"></a>
+<h3>About the Optimizer's Choice of Join Order</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The optimizer chooses the optimal join order as well as the optimal index for each table. The join order can affect which index is the best choice. The optimizer can choose an index as the access path for a table if it is the inner table, but not if it is the outer table (and there are no further qualifications).</p>
+<p>The optimizer chooses the join order of tables only in simple FROM clauses. Most joins using the JOIN keyword are flattened into simple joins, so the optimizer chooses their join order.</p>
+<p>The optimizer does not choose the join order for outer joins; it uses the order specified in the statement.</p>
+<p>When selecting a join order, the optimizer takes into account:</p>
+<ul>
+<li>the size of each table</li>
+<li>the indexes available on each table</li>
+<li>whether an index on a table is useful in a particular join order</li>
+<li>the number of rows and pages to be scanned for each table in each join order</li>
+</ul>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Derby does transitive closure on qualifications. For details, see <a href="perf99.html#HDRSII-TRANSFORM-37032">Transitive Closure</a>.</dd>
+</dl>
+</div>
+<a name="N1009A"></a><a name="Join+Order+Case+Study"></a>
+<h3>Join Order Case Study</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>For example, consider the following situation:</p>
+<p>The <em>Flights</em> table (as you know) stores information about flight segments. It has a primary key on the <em>flight_id</em> and <em>segment_number</em> columns. This primary key constraint is backed up by a unique index on those columns.</p>
+<p>The <em>FlightAvailability</em> table, which stores information about the availability of flight segments on particular days, can store several rows for a particular row in the <em>Flights</em> table (one for each date).</p>
+<p>You want to see information about all the flights, and you issue the following query:</p>
+<pre>
+<strong>SELECT *
+FROM FlightAvailability AS fa, Flights AS fts
+WHERE fa.flight_id = fts.flight_id
+AND fa.segment_number = fts.segment_number</strong>
+
+</pre>
+<p>First imagine the situation in which there are no useful indexes on the <em>FlightAvailability</em> table.</p>
+<p>Using the join order with <em>FlightAvailability</em> as the outer table and <em>Flights</em> as the inner table is cheaper because it allows the <em>flight_id</em>/<em>segment_number</em> columns from <em>FlightAvailability</em> to be used to probe into and find matching rows in <em>Flights,</em> using the primary key index on <em>Flights.flight_id</em> and <em>Flights.segment_number</em>.</p>
+<p>This is preferable to the opposite join order (with <em>Flights</em> as the outer table and <em>FlightAvailability</em> as the inner table) because in that case, for each row in <em>Flights,</em> the system would have to scan the entire <em>FlightAvailability</em> table to find the matching rows (because there is no useful index-- an index on the <em>flight_id</em>/<em>segment_number</em> columns).</p>
+<p>Second, imagine the situation in which there is a useful index on the <em>FlightAvailability</em> table (this is actually the case in the sample database). <em>FlightAvailability</em> has a primary key index on <em>flight_id</em>, <em>segment_number</em>, and <em>booking_date</em>. In that index, the <em>flight_id</em>-<em>segment_number</em> combination is not unique, since there is a one-to-many correspondence between the <em>Flights</em> table and the <em>FlightAvailability</em> table. However, the index is still very useful for finding rows with particular <em>flight_id</em>/<em>segment_number</em> values.</p>
+<p>You issue the same query:</p>
+<pre>
+<strong>SELECT *
+FROM FlightAvailability AS fa, Flights AS fts
+WHERE fa.flight_id = fts.flight_id
+AND fa.segment_number = fts.segment_number</strong>
+
+</pre>
+<p>Although the difference in cost is smaller, it is still cheaper for the <em>Flights</em> table to be the inner table, because its index is unique, whereas <em>FlightAvailability</em>'s index is not. That is because it is cheaper for Derby to step through a unique index than through a non-unique index.</p>
+</div>
+<a name="N1011D"></a><a name="About+the+Optimizer%27s+Choice+of+Join+Strategy"></a>
+<h3>About the Optimizer's Choice of Join Strategy</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The optimizer compares the cost of choosing a hash join (if a hash join is possible) to the cost of choosing a nested loop join and chooses the cheaper strategy. For information about when hash joins are possible, see <a href="perf44.html#HDRSII-OPTIMZ-23173">Join Strategies</a>.</p>
+<p>In some cases, the size of the hash table that Derby would have to build is prohibitive and can cause the JVM to run out of memory. For this reason, the optimizer has an upper limit on the size of a table on which it will consider a hash join. It will not consider a hash join for a statement if it estimates that the size of the hash table would exceed the system-wide limit of memory use for a table, the optimizer chooses a nested loop join instead. The optimizer's estimates of size of hash tables are approximate only.</p>
+</div>
+<a name="N1012A"></a><a name="About+the+Optimizer%27s+Choice+of+Sort+Avoidance"></a>
+<h3>About the Optimizer's Choice of Sort Avoidance</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Some SQL statements require that data be ordered, including those with ORDER BY, GROUP BY, and DISTINCT. MIN() and MAX() aggregates also require ordering of data.</p>
+<p>Derby can sometimes avoid sorting steps for:</p>
+<ul>
+<li>statements with ORDER BY <p>See <a href="#HDRSII-OPTIMZ-56859">Cost-Based ORDER BY Sort Avoidance</a>
+</p>
+</li>
+</ul>
+<p>Derby can also perform the following optimizations, but they are not based on cost:</p>
+<ul>
+<li>sort avoidance for DISTINCT and GROUP BYs <p>See <a href="perf50.html#HDRSII-OPTIMZ-22460">Non-Cost-Based Sort Avoidance (Tuple Filtering)</a>
+</p>
+</li>
+<li>statements with a MIN() aggregate <p>See <a href="perf51.html#HDRSII-OPTIMZ-22111">The MIN() and MAX() Optimizations</a>
+</p>
+</li>
+</ul>
+</div>
+<a name="N1014B"></a><a name="Cost-Based+ORDER+BY+Sort+Avoidance"></a>
+<h3>Cost-Based ORDER BY Sort Avoidance</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Usually, sorting requires an extra step to put the data into the right order. This extra step can be avoided for data that are already in the right order. For example, if a single-table query has an ORDER BY on a single column, and there is an index on that column, sorting can be avoided if Derby uses the index as the access path.</p>
+<p>Where possible, Derby's query compiler transforms an SQL statement internally into one that avoids this extra step. For information about internal transformations, see <a href="perf113.html#HDRSII-TRANSFORM-16033">Sort Avoidance</a>. This transformation, if it occurs, happens before optimization. After any such transformations are made, the optimizer can do its part to help avoid a separate sorting step by choosing an already sorted access path. It compares the cost of using that path with the cost of sorting. Derby does this for statements that use an ORDER BY clause in the following situations:</p>
+<ul>
+<li>The statements involve tables with indexes that are in the correct order.</li>
+<li>The statements involve scans of unique indexes that are guaranteed to return only one row per scan.</li>
+</ul>
+<p>ORDER BY specifies a priority of ordering of columns in a result set. For example, ORDER BY X, Y means that column <em>X</em> has a more significant ordering than column <em>Y</em>.</p>
+<p>The situations that allow Derby to avoid a separate ordering step for statements with ORDER BY clauses are:</p>
+<ul>
+<li>Index scans, which provide the correct order. <pre>
+<strong>-- covering index 
+SELECT flight_id FROM Flights ORDER BY flight_id</strong>
+
+</pre>
+</li>
+<li>The rows from a table when fetched through an index scan. <pre>
+<strong>-- if Derby  uses the index on orig_airport
+-- to access the data, it can avoid the sort
+-- required by the final ORDER BY 
+SELECT orig_airport, miles
+FROM FLIGHTS
+WHERE orig_airport &lt; 'DDD'
+ORDER BY orig_airport</strong>
+
+</pre>
+</li>
+<li>The rows from a join when ordered by the indexed column or columns in the outer table. <pre>
+<strong>-- if Derby  chooses Cities as the outer table, it
+-- can avoid a separate sorting step 
+SELECT * FROM cities, countries
+WHERE cities.country_ISO_code = countries.country_ISO_code
+AND cities.country_ISO_code &lt; 'DD'
+ORDER BY cities.country_ISO_code</strong>
+
+</pre>
+</li>
+<li>Result sets that are guaranteed to return a single row. They are ordered on <em>all</em> of their columns (for example, if there are equality conditions on all the columns in a unique index, all the columns returned for that table can be considered ordered, with any priority of ordering of the columns). <pre>
+<strong>-- query will only return one row, so that row is
+-- "in order" for ANY column 
+SELECT miles
+FROM Flights
+WHERE flight_id = 'US1381' AND segment_number = 2
+ORDER BY miles</strong>
+
+</pre>
+</li>
+<li>Any column in a result set that has an equality comparison with a constant. The column is considered ordered with no priority to its ordering. <pre>
+<strong>-- The comparison of segment_number
+-- to a constant means that it is always correctly
+-- ordered. Using the index on (flight_id, segment_number)
+-- as the access path means
+-- that the ordering will be correct for the ORDER BY
+-- clause in this query. The same thing would be true if
+-- flight_id were compared to a constant instead. 
+SELECT segment_number, flight_id
+FROM Flights
+WHERE segment_number=2
+ORDER BY segment_number, flight_id</strong>
+
+</pre>
+<p>And because of transitive closure, this means that even more complex statements can avoid sorting. For example:</p>
+<pre>
+<strong>-- transitive closure means that Derby  will
+-- add this clause:
+-- AND countries.country_ISO_code = 'CL', which means
+-- that the ordering column is now compared to a constant,
+-- and sorting can be avoided. 
+SELECT * FROM cities, countries
+WHERE cities.country_ISO_code = 'CL'
+AND cities.country_ISO_code = countries.country_ISO_code
+ORDER BY countries.country_ISO_code</strong>
+
+</pre>
+<p>For more information about transitive closure and other statement transformations, see <a href="perf93.html#HDRSII-TRANSFORM-13966">Appendix A, Internal Language Transformations</a>.</p>
+</li>
+</ul>
+</div>
+<a name="N10194"></a><a name="About+the+System%27s+Selection+of+Lock+Granularity"></a>
+<h3>About the System's Selection of Lock Granularity</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX489"></a> When a system is configured for row-level locking, it decides whether to use table-level locking or row-level locking for each table in each DML statement. The system bases this decision on the number of rows read or written for each table, and on whether a full conglomerate scan is done for each table.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>When you have turned off row-level locking for your system, Derby always uses table-level locking.</dd>
+</dl>
+<p>The first goal of the system's decision is concurrency; wherever possible, the system chooses row-level locking. However, row-level locking uses a lot of resources and might have a negative impact on performance. Sometimes row-level locking does not provide much more concurrency than table-level locking. In those situations, the system might choose to escalate the locking scheme from row-level locking to table-level locking to improve performance. For example, if a connection is configured for TRANSACTION_SERIALIZABLE isolation, the system chooses table-level locking for the following statement:</p>
+<pre>
+<strong>SELECT *
+FROM FlightAvailability AS fa, Flights AS fts
+WHERE fts.flight_id = fa.flight_id
+AND fts.segment_number = fa.segment_number</strong>
+
+</pre>
+<p>To satisfy the isolation requirements, Derby would have to lock all the rows in both the <em>FlightAvailability</em> and the <em>Flights</em> tables. Locking both the tables would be cheaper, would provide the same isolation, and would allow the same concurrency.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>You can force lock escalation for specific tables when you alter them with the LOCKSIZE clause. For these tables, Derby always chooses table-level locking. For more information, see the <cite>Derby Reference Manual</cite>.</dd>
+</dl>
+</div>
+<a name="N101B9"></a><a name="How+the+System+Makes+Its+Decision+if+it+Has+a+Choice"></a>
+<h3>How the System Makes Its Decision if it Has a Choice</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>If the lock granularity (whether to lock rows or entire tables) is not forced by the user, the system makes a decision using the following rules:</p>
+<ul>
+<li>For SELECT statements running in READ_COMMITTED isolation, the system always chooses row-level locking.</li>
+<li>If the statement scans the entire table or index and it does not meet the criteria above, the system chooses table-level locking. (A statement scans the entire table whenever it chooses a table as the access path.)</li>
+<li>If a statement partially scans the index, the system uses row-level locking, until the number of rows touched on a table reaches lock escalation threshold. It is then escalated to a table lock. (You can configure this threshold number; see <a href="#HDRSII-OPTIMZ-26019">Lock Escalation Threshold</a>.) <ul>
+<li>For SELECT, UPDATE, and DELETE statements, the number of rows touched is different from the number of rows read. If the same row is read more than once, it is considered to have been touched only once. Each row in the inner table of a join can be read many times, but can be touched at most one time.</li>
+</ul>
+</li>
+</ul>
+</div>
+<a name="N101CD"></a><a name="Lock+Escalation+Threshold"></a>
+<h3>Lock Escalation Threshold</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The system property <em>derby.locks.escalationThreshold</em> determines the threshold for number of rows touched for a particular table above which the system will escalate to table-level locking. The default value of this property is 5000. For large systems, set this property to a higher value. For smaller systems, lower it.</p>
+<p>This property also sets the threshold for transaction-based lock escalation (see <a href="perf47.html#HDRSII-OPTIMZ-42065">Transaction-Based Lock Escalation</a>).</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>For more information about lock escalation, see <a href="perf46.html#HDRSII-OPTIMZ-27975">Locking and Performance</a>.</dd>
+</dl>
+</div>
+<a name="N101E7"></a><a name="About+the+Optimizer%27s+Selection+of+Bulk+Fetch"></a>
+<h3>About the Optimizer's Selection of Bulk Fetch</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX494"></a> When Derby retrieves data from a conglomerate, it can fetch more than one row at a time. Fetching more than one row at a time is called bulk fetch. By default, Derby fetches 16 rows at a time.</p>
+<p>Bulk fetch is faster than retrieving one row at a time when a large number of rows qualify for each scan of the table or index. Bulk fetch uses extra memory to hold the pre-fetched rows, so it should be avoided in situations in which memory is scarce.</p>
+<p>Bulk fetch is automatically turned off for updatable cursors, for hash joins, for statements in which the scan returns a single row, and for subqueries. It is useful, however, for table scans or index range scans:</p>
+<pre>
+<strong>SELECT *
+FROM Flights
+WHERE miles &gt; 4
+ 
+ 
+SELECT *
+FROM Flights</strong>
+
+</pre>
+<p>The default size for bulk fetch (16 rows) typically provides good performance.</p>
+<hr>
+<a href="perf44.html">Previous Page</a>
+<br>
+<a href="perf46.html">Next Page</a>
+<br>
+<a href="perf02.html#ToC">Table of Contents</a>
+<br>
+<a href="perf121.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

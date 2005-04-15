@@ -1,0 +1,1212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Network Server sample programs for embedded and client connections</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Network Server sample programs for embedded and client connections</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Network+Server+sample+programs+for+embedded+and+client+connections">Network Server sample programs for embedded and client connections</a>
+</li>
+<li>
+<a href="#The+SimpleNetworkServerSample+Program">The SimpleNetworkServerSample Program</a>
+</li>
+<li>
+<a href="#Running+the+SimpleNetworkServerSample+Program">Running the SimpleNetworkServerSample Program</a>
+</li>
+<li>
+<a href="#Connecting+a+Client+to+the+Network+Server+with+the+SimpleNetworkClientSample+program">Connecting a Client to the Network Server with the SimpleNetworkClientSample program</a>
+</li>
+<li>
+<a href="#Running+the+SimpleNetworkClientSample+Program">Running the SimpleNetworkClientSample Program</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Network+Server+sample+programs+for+embedded+and+client+connections"></a>
+<h3>Network Server sample programs for embedded and client connections</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>This Derby Network Server sample program demonstrates how to obtain an embedded connection and client connections to the same database using the Network Server. This program shows how to use either the DriverManager or a DataSource to obtain client connections.</p>
+<p>For a database to be consistent, only one JVM can access it at a time. The embedded driver is loaded when the Network Server is started. The JVM that starts the Network Server can get an embedded connection to the same database that the Network Server is accessing to serve clients from other JVMs. This solution allows you to take advantage of the performance benefits of the embedded driver while also allowing client connections from other JVMs to connect to the same database.</p>
+<p>This topic contains the following sections:</p>
+<ul>
+<li>
+<a href="#HDRSII-OVERVIEW-SERV-SAMP-PRGM">The SimpleNetworkServerSample Program</a>
+</li>
+<li>
+<a href="#HDRSII-OVERVIEW-RUN-SERV-PRGM">Running the SimpleNetworkServerSample Program</a>
+</li>
+<li>
+<a href="#HDRSII-OVERVIEW-CLIENT-CONNECT">Connecting a Client to the Network Server with the SimpleNetworkClientSample program</a>
+</li>
+<li>
+<a href="#HDRSII-OVERVIEW-CLIENT-RUN">Running the SimpleNetworkClientSample Program</a>
+</li>
+</ul>
+</div>
+<a name="N1005A"></a><a name="The+SimpleNetworkServerSample+Program"></a>
+<h3>The SimpleNetworkServerSample Program</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The <em>SimpleNetworkServerSample</em> program starts the Derby Network Server as well as the embedded driver and waits for clients to connect. The program performs the following tasks.</p>
+<ul>
+<li>starts the Derby Network Server using a property and also loads the embedded driver</li>
+<li>checks if the Network Server is up and running</li>
+<li>creates the database <em>NSSimpleDB</em> if it is not already created</li>
+<li>obtains an embedded database connection</li>
+<li>tests the database connection by executing a sample query.</li>
+<li>allows client connections to connect to the server until you decide to stop the server and exit the program</li>
+<li>closes the connection</li>
+<li>shuts down the Network Server before exiting the program.</li>
+</ul>
+<p>To run the sample program, the following files should be installed in the <tt>%DERBY_INSTALL%\demo\programs\nserverdemo\</tt> directory:</p>
+<ul>
+<li>The source file: <em>SimpleNetworkServerSample.java</em>
+</li>
+<li>The compiled class file: <em>SimpleNetworkServerSample.class</em>
+</li>
+</ul>
+</div>
+<a name="N10086"></a><a name="Running+the+SimpleNetworkServerSample+Program"></a>
+<h3>Running the SimpleNetworkServerSample Program</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>To run the Derby Network Server sample program:</p>
+<ol>
+<li>Open a command prompt and change directories to the <tt>%DERBY_INSTALL%\demo\programs\nserverdemo</tt> directory, where <tt>%DERBY_INSTALL%</tt> is the directory where you installed Derby.</li>
+<li>Set the CLASSPATH to include the following jar files in order to run this program: <ul>
+<li>the current directory (".")</li>
+<li>
+<em>derbynet.jar</em> 
+<p>The Network Server jar file. It must be in your CLASSPATH because we start the Network Server in this program.</p>
+</li>
+<li>
+<em>derby.jar</em> 
+<p>The database engine jar file.</p>
+</li>
+</ul>
+</li>
+<li>Test the CLASSPATH settings by running the following Java command: <pre>java org.apache.derby.tools.sysinfo
+</pre>
+<p>This command will show the Derby jar files that are in the CLASSPATH.</p>
+</li>
+<li>Once you have set up your environment correctly, execute the application from the same directory: <pre>java SimpleNetworkServerSample
+</pre>
+</li>
+</ol>
+<p>You should receive output similar to the following if the program runs successfully:</p>
+<pre>Starting Network Server
+Testing if Network Server is up and running!
+Derby Network Server now running
+Got an embedded connection.
+Testing embedded connection by executing a sample query
+number of rows in sys.systables = 16
+While my app is busy with embedded work, ij might connect like this:
+ 
+        $ java -Dij.user=me -Dij.password=pw -Dij.protocol=
+            jdbc:derby:net:\\localhost:1527\ org.apache.derby.tools.ij
+        ij&gt; connect 'NSSimpleDB:retrieveMessagesFromServerOnGetMessage=true;';
+Watch that punctuation.  Put a ':' before the jcc
+attributes and a ';' after each one (even the last).
+ 
+ 
+Clients can continue to connect:
+Press [Enter] to stop Server
+</pre>
+<p>Running the <em>SimpleNetworkServerSample</em> program will also create the following new directories and files:</p>
+<ul>
+<li>
+<em>NSSimpleDB</em> 
+<p>This directory makes up the <em>NSSimpleDB</em> database.</p>
+</li>
+<li>
+<em>derby.log</em> 
+<p>This log file contains Derby progress and error messages.</p>
+</li>
+</ul>
+</div>
+<a name="N100CA"></a><a name="Connecting+a+Client+to+the+Network+Server+with+the+SimpleNetworkClientSample+program"></a>
+<h3>Connecting a Client to the Network Server with the SimpleNetworkClientSample program</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The <em>SimpleNetworkClientSample</em> program is a client program that interacts with the Derby Network Server from another JVM. The program performs the following tasks.</p>
+<ul>
+<li>loads the DB2 Universal JDBC Driver</li>
+<li>obtains a client connection using the DriverManager</li>
+<li>obtains a client connection using a DataSource</li>
+<li>tests the database connections by executing a sample query</li>
+<li>closes the connections and then exits the program.</li>
+</ul>
+<p>The following files should be installed in the <tt>%DERBY_INSTALL%\demo\programs\nserverdemo\</tt> directory in order to run the sample program:</p>
+<ul>
+<li>The source file: <em>SimpleNetworkClientSample.java</em>
+</li>
+<li>The compiled class file: <em>SimpleNetworkClientSample.class</em>
+</li>
+</ul>
+</div>
+<a name="N100ED"></a><a name="Running+the+SimpleNetworkClientSample+Program"></a>
+<h3>Running the SimpleNetworkClientSample Program</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>To connect to the Network Server that has been started as part of the SimpleNetworkServerSample program:</p>
+<ol>
+<li>Open a command prompt and change directories to the <tt>%DERBY_INSTALL%\demo\programs\nserverdemo</tt> directory, where <tt>%DERBY_INSTALL%</tt> is the directory where you installed Derby.</li>
+<li>Network Server clients need only the following jar files in the CLASSPATH to connect to the Network Server. Set the CLASSPATH to include the following jar files: <ul>
+<li>the current directory (".")</li>
+<li>
+<em>db2jcc.jar</em> 
+<p>This jar file must be in your CLASSPATH to use the DB2 JDBC Universal Driver.</p>
+</li>
+<li>
+<em>db2jcc_license_c.jar</em> 
+<p>This jar file is the license file for the Universal Driver for Derby.</p>
+</li>
+</ul>
+</li>
+<li>Once you have set up your environment correctly, execute the application from the same directory: <pre>java SimpleNetworkClientSample
+</pre>
+</li>
+</ol>
+<p>You should receive output similar to the following if the program runs successfully:</p>
+<pre>Starting Sample client program
+Got a client connection via the DriverManager.
+connection from datasource; getDriverName = 
+    IBM DB2 JDBC Universal Driver Architecture
+Got a client connection via a DataSource.
+Testing the connection obtained via DriverManager by executing a sample query
+number of rows in sys.systables = 16
+Testing the connection obtained via a DataSource by executing a sample query
+number of rows in sys.systables = 16
+Goodbye!
+</pre>
+<hr>
+<a href="hubprnt35.html">Previous Page</a>
+<br>
+<a href="hubprnt37.html">Next Page</a>
+<br>
+<a href="hubprnt02.html#ToC">Table of Contents</a>
+<br>
+<a href="hubprnt65.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

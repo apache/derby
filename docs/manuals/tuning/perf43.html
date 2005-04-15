@@ -1,0 +1,1408 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Index use and access paths</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Index use and access paths</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Index+use+and+access+paths">Index use and access paths</a>
+</li>
+<li>
+<a href="#What+Is+an+Index%3F">What Is an Index?</a>
+</li>
+<li>
+<a href="#What%27s+Optimizable%3F">What's Optimizable?</a>
+</li>
+<li>
+<a href="#Directly+Optimizable+Predicates">Directly Optimizable Predicates</a>
+</li>
+<li>
+<a href="#Indirectly+Optimizable+Predicates">Indirectly Optimizable Predicates</a>
+</li>
+<li>
+<a href="#Joins">Joins</a>
+</li>
+<li>
+<a href="#Covering+Indexes">Covering Indexes</a>
+</li>
+<li>
+<a href="#Single-Column+Index+Examples">Single-Column Index Examples</a>
+</li>
+<li>
+<a href="#Multiple-Column+Index+Example">Multiple-Column Index Example</a>
+</li>
+<li>
+<a href="#Useful+Indexes+Can+Use+Qualifiers">Useful Indexes Can Use Qualifiers</a>
+</li>
+<li>
+<a href="#When+a+Table+Scan+Is+Better">When a Table Scan Is Better</a>
+</li>
+<li>
+<a href="#Indexes+Have+a+Cost+for+Inserts%2C+Updates%2C+and+Deletes">Indexes Have a Cost for Inserts, Updates, and Deletes</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Index+use+and+access+paths"></a>
+<h3>Index use and access paths</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>If you define an index on a column or columns, the query optimizer can use the index to find data in the column more quickly. Derby automatically creates indexes to back up primary key, foreign key, and unique constraints, so those indexes are always available to the optimizer, as well as those that you explicitly create with the CREATE INDEX command. The way Derby gets to the data--via an index or directly via the table--is called the <em>access path</em>.</p>
+<p>This section covers the following topics:</p>
+<ul>
+<li>
+<a href="#HDRSII-OPTIMZ-33368">What Is an Index?</a>
+</li>
+<li>
+<a href="#HDRSII-OPTIMZ-39106">What's Optimizable?</a>
+</li>
+<li>
+<a href="#HDRSII-OPTIMZ-30768">Covering Indexes</a>
+</li>
+<li>
+<a href="#HDRSII-OPTIMZ-41314">Useful Indexes Can Use Qualifiers</a>
+</li>
+<li>
+<a href="#HDRSII-OPTIMZ-22900">When a Table Scan Is Better</a>
+</li>
+</ul>
+</div>
+<a name="N1005F"></a><a name="What+Is+an+Index%3F"></a>
+<h3>What Is an Index?</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>An index is a database structure that provides quick lookup of data in a column or columns of a table. It is probably best described through examples.</p>
+<p>For example, the <em>Flights</em> table in the <em>toursDB</em> database has three indexes:</p>
+<ul>
+<li>an index on the <em>orig_airport</em> column (called <em>OrigIndex</em>)</li>
+<li>an index on the <em>dest_airport</em> column (called <em>DestIndex</em>)</li>
+<li>an index enforcing the <em>primary key</em> constraint on the <em>flight_id</em> and <em>segment_number</em> columns (which has a system-generated name)</li>
+</ul>
+<p>This means there are three separate structures that provide shortcuts into the <em>Flights</em> table. Let's look at one of those structures, <em>OrigIndex</em>.</p>
+<p>
+<em>OrigIndex</em> stores every value in the <em>orig_airport</em> column, plus information on how to retrieve the entire corresponding row for each value.</p>
+<ul>
+<li>For every row in <em>Flights</em>, there is an entry in <em>OrigIndex</em> that includes the value of the <em>orig_airport</em> column and the address of the row itself. The entries are stored in ascending order by the <em>orig_airport</em> values.</li>
+</ul>
+<p>When an index includes more than one column, the first column is the main one by which the entries are ordered. For example, the index on (<em>flight_id</em>, <em>segment_number</em>) is ordered first by <em>flight_id</em>. If there is more than one <em>flight_id</em> of the same value, those entries are then ordered by <em>segment_number</em>. An excerpt from the entries in the index might look like this:</p>
+<pre>'AA1111' 1
+'AA1111' 2
+'AA1112' 1
+'AA1113' 1
+'AA1113' 2
+</pre>
+<p>
+<a name="IDX458"></a> Indexes are helpful only sometimes. This particular index is useful when a statement's WHERE clause is looking for rows for which the value of <em>orig_airport</em> is some specific value or range of values. SELECTs, UPDATEs, and DELETEs can all have WHERE clauses.</p>
+<p>For example, <em>OrigIndex</em> is helpful for statements such as the following:</p>
+<pre>
+<strong>SELECT *
+FROM Flights
+WHERE orig_airport = 'SFO'
+ 
+ 
+SELECT *
+FROM Flights
+WHERE orig_airport &lt; 'BBB'
+ 
+ 
+SELECT *
+FROM Flights
+WHERE orig_airport &gt;= 'MMM'</strong>
+
+</pre>
+<p>
+<em>DestIndex</em> is helpful for statements such as the following:</p>
+<pre>
+<strong>SELECT *
+FROM Flights
+WHERE dest_airport = 'SCL'</strong>
+
+</pre>
+<p>The primary key index (on <em>flight_id</em> and <em>segment_number</em>) is helpful for statements such as the following:</p>
+<pre>
+<strong>SELECT *
+FROM Flights
+WHERE flight_id = 'AA1111'
+ 
+ 
+SELECT *
+FROM Flights
+WHERE flight_id BETWEEN 'AA1111' AND 'AA1115'
+ 
+ 
+SELECT *
+FROM FlightAvailability AS fa, Flights AS fts
+WHERE flight_date &gt; CURRENT_DATE
+AND fts.flight_id = fa.flight_id
+AND fts.segment_number = fa.segment_number</strong>
+
+</pre>
+<p>The next section discusses why the indexes are helpful for these statements but not for others.</p>
+</div>
+<a name="N100DF"></a><a name="What%27s+Optimizable%3F"></a>
+<h3>What's Optimizable?</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>As you learned in the previous section, Derby might be able to use an index on a column to find data more quickly. If Derby can use an index for a statement, that statement is said to be <em>optimizable</em>. The statements shown in the preceding section allow Derby to use the index because their WHERE clauses provide start and stop conditions. That is, they tell Derby the point at which to begin its scan of the index and where to end the scan.</p>
+<p>For example, a statement with a WHERE clause looking for rows for which the <em>orig_airport</em> value is less than <em>BBB</em> means that Derby must begin the scan at the beginning of the index; it can end the scan at <em>BBB</em>. This means that it avoids scanning the index for most of the entries.</p>
+<p>An index scan that uses start or stop conditions is called a <em>matching index scan</em>.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>A WHERE clause can have more than one part. Parts are linked with the word <em>AND</em> or <em>OR</em>. Each part is called a <em>predicate</em>. WHERE clauses with predicates joined by OR are not optimizable. WHERE clauses with predicates joined by AND are optimizable if <em>at least one</em> of the predicates is optimizable. For example: <pre>
+<strong>SELECT * FROM Flights
+WHERE flight_id = 'AA1111' AND
+segment_number &lt;&gt; 2</strong>
+
+</pre>
+</dd>
+</dl>
+<p>In this example, the first predicate is optimizable; the second predicate is not. Therefore, the statement is optimizable.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>In a few cases, a WHERE clause with predicates joined by OR can be transformed into an optimizable statement. See <a href="perf98.html#HDRSII-TRANSFORM-15090">OR Transformations</a>.</dd>
+</dl>
+</div>
+<a name="N1011A"></a><a name="Directly+Optimizable+Predicates"></a>
+<h3>Directly Optimizable Predicates</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a name="IDX461"></a>   Some predicates provide clear-cut starting and stopping points. A predicate provides start or stop conditions, and is therefore optimizable, when:</p>
+<ul>
+<li>It uses a simple column reference to a column (the name of the column, not the name of the column within an expression or method call). For example, the following is a simple column reference: <pre>
+<strong>WHERE orig_airport = 'SFO'</strong>
+
+</pre>
+<p>The following is not:</p>
+<pre>
+<strong>WHERE lower(orig_airport) = 'sfo'</strong>
+
+</pre>
+</li>
+<li>It refers to a column that is the first or only column in the index. <p>References to <em>contiguous</em> columns in other predicates in the statement when there is a multi-column index can further define the starting or stopping points. (If the columns are not contiguous with the first column, they are not optimizable predicates but can be used as <em>qualifiers</em>.) For example, given a composite index on <em>FlightAvailability</em> (<em>flight_id</em>, <em>segment_number,</em> and <em>flight_date</em>), the following predicate satisfies that condition:</p>
+<pre>
+<strong>WHERE flight_id = 'AA1200' AND segment_number = 2</strong>
+
+</pre>
+<p>The following one does not:</p>
+<pre>
+<strong>WHERE flight_id = 'AA1200' AND flight_date = CURRENT_DATE</strong>
+
+</pre>
+</li>
+<li>
+<a name="IDX464"></a> The column is compared to a <em>constant</em> or to an expression that does not include columns in the same table. Examples of valid expressions: <em>other_table.column_a</em>, <em>?</em> (dynamic parameter), <em>7+9</em>. The comparison must use the following operators: <ul>
+<li>=</li>
+<li>&lt;</li>
+<li>&lt;=</li>
+<li>&gt;</li>
+<li>&gt;=</li>
+<li>IS NULL</li>
+</ul>
+</li>
+</ul>
+</div>
+<a name="N1016A"></a><a name="Indirectly+Optimizable+Predicates"></a>
+<h3>Indirectly Optimizable Predicates</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Some predicates are transformed internally into ones that provide starting and stopping points and are therefore optimizable.</p>
+<p>Predicates that use the following comparison operators can be transformed internally into optimizable predicates:</p>
+<ul>
+<li>BETWEEN</li>
+<li>LIKE (in certain situations)</li>
+<li>IN (in certain situations)</li>
+</ul>
+<p>For details on these and other transformations, see <a href="perf93.html#HDRSII-TRANSFORM-13966">Appendix A, Internal Language Transformations</a>. </p>
+</div>
+<a name="N10180"></a><a name="Joins"></a>
+<h3>Joins</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Joins specified by the JOIN keyword are optimizable. This means that Derby can use an index on the inner table of the join (start and stop conditions are being supplied implicitly by the rows in the outer table).</p>
+<p>Note that joins built using traditional predicates are also optimizable. For example, the following statement is optimizable:</p>
+<pre>
+<strong>SELECT * FROM Countries, Cities
+WHERE Countries.country_ISO_code = Cities.country_ISO_code</strong>
+
+</pre>
+</div>
+<a name="N1018D"></a><a name="Covering+Indexes"></a>
+<h3>Covering Indexes</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Even when there is no definite starting or stopping point for an index scan, an index can speed up the execution of a query if the index covers the query. An index <em>covers the query</em> if all the columns specified in the query are part of the index. These are the columns that are all columns referenced in the query, not just columns in a WHERE clause. If so, Derby never has to go to the data pages at all, but can retrieve all data through index access alone. For example, in the following queries, <em>OrigIndex</em> covers the query:</p>
+<pre>
+<strong>SELECT orig_airport
+FROM Flights
+ 
+ 
+SELECT DISTINCT lower(orig_airport) FROM Flights 
+FROM Flights</strong>
+
+</pre>
+<p>Derby can get all required data out of the index instead of from the table.</p>
+</div>
+<a name="N101A0"></a><a name="Single-Column+Index+Examples"></a>
+<h3>Single-Column Index Examples</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The following queries do <em>not</em> provide start and stop conditions for a scan of <em>OrigIndex</em>, the index on the <em>orig_airport</em> column in <em>Flights.</em> However, some of these queries allow Derby to do an index rather than a table scan because the index covers the query.</p>
+<pre>
+<strong>-- Derby  would scan entire table; comparison is not with a 
+-- constant or with a column in another table 
+SELECT *
+FROM Flights
+WHERE orig_airport = dest_airport
+ -- Derby  would scan entire table; &lt;&gt; operator is not optimizable 
+SELECT *
+FROM Flights
+WHERE orig_airport &lt;&gt; 'SFO'
+ -- not valid operator for matching index scan
+-- However, Derby  would do an index 
+-- rather than a table scan because
+-- index covers query 
+SELECT orig_airport
+FROM Flights
+WHERE orig_airport &lt;&gt; 'SFO'
+ -- use of a function is not simple column reference
+-- Derby  would scan entire index, but not table
+-- (index covers query) 
+SELECT orig_airport
+FROM Flights
+WHERE lower(orig_airport) = 'sfo'</strong>
+
+</pre>
+</div>
+<a name="N101B6"></a><a name="Multiple-Column+Index+Example"></a>
+<h3>Multiple-Column Index Example</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>The following queries do provide start and stop conditions for a scan of the primary key index on the <em>flight_id</em> and <em>segment_number</em> columns in <em>Flights</em>:</p>
+<pre>
+<strong>-- the where clause compares both columns with valid
+-- operators to constants 
+SELECT *
+FROM Flights
+WHERE flight_id = 'AA1115'
+AND segment_number &lt; 2
+ -- the first column is in a valid comparison 
+SELECT *
+FROM Flights
+WHERE flight_id &lt; 'BB'
+ -- LIKE is transformed into &gt;= and &lt;=, providing
+-- start and stop conditions 
+ 
+SELECT *
+FROM Flights
+WHERE flight_id LIKE 'AA%'</strong>
+
+</pre>
+<p>The following queries do not:</p>
+<pre>
+<strong>-- segment_number is in the index, but it's not the first column;
+-- there's no logical starting and stopping place 
+SELECT *
+FROM Flights
+WHERE segment_number = 2
+ -- Derby  would scan entire table; comparison of first column
+-- is not with a constant or column in another table
+-- and no covering index applies 
+SELECT *
+FROM Flights
+WHERE orig_airport = dest_airport
+AND segment_number &lt; 2</strong>
+
+</pre>
+</div>
+<a name="N101D0"></a><a name="Useful+Indexes+Can+Use+Qualifiers"></a>
+<h3>Useful Indexes Can Use Qualifiers</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Matching index scans can use qualifiers that further restrict the result set. Remember that a WHERE clause that contains at least one optimizable predicate is optimizable. Nonoptimizable predicates can be useful in other ways.</p>
+<p>Consider the following query:</p>
+<pre>
+<strong>SELECT *
+FROM FLIGHTS
+WHERE orig_airport &lt; 'BBB'
+AND orig_airport &lt;&gt; 'AKL'</strong>
+
+</pre>
+<p>The second predicate is not optimizable, but the first predicate is. The second predicate becomes a qualification for which Derby evaluates the entries in the index as it traverses it.</p>
+<ul>
+<li>The following comparisons are valid qualifiers: <ul>
+<li>=</li>
+<li>&lt;</li>
+<li>&lt;=</li>
+<li>&gt;</li>
+<li>&gt;=</li>
+<li>IS NULL</li>
+<li>BETWEEN</li>
+<li>LIKE</li>
+<li>&lt;&gt;</li>
+<li>IS NOT NULL</li>
+</ul>
+</li>
+<li>The qualifier's reference to the column does not have to be a simple column reference; you can put the column in an expression.</li>
+<li>The qualifier's column does not have to be the first column in the index and does not have to be contiguous with the first column in the index.</li>
+</ul>
+</div>
+<a name="N101FB"></a><a name="When+a+Table+Scan+Is+Better"></a>
+<h3>When a Table Scan Is Better</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Sometimes a table scan is the most efficient way to access data, even if a potentially useful index is available. For example, if the statement returns virtually all the data in the table, it is more efficient to go straight to the table instead of looking values up in an index, because then Derby is able to avoid the intermediate step of retrieving the rows from the index lookup values.</p>
+<p>For example:</p>
+<pre>
+<strong>SELECT *
+FROM Flights
+WHERE dest_airport &lt; 'Z'</strong>
+
+</pre>
+<p>In the <em>Flights</em> table, most of the airport codes begin with letters that are less than <em>Z</em>. Depending on the number of rows in the table, it is probably more efficient for Derby to go straight to the table to retrieve the appropriate rows. However, for the following query, Derby uses the index:</p>
+<pre>
+<strong>SELECT *
+FROM Flights
+WHERE dest_airport &lt; 'B'</strong>
+
+</pre>
+<p>Only a few flights have airport codes that begin with a letter less than <em>B</em>.</p>
+</div>
+<a name="N10218"></a><a name="Indexes+Have+a+Cost+for+Inserts%2C+Updates%2C+and+Deletes"></a>
+<h3>Indexes Have a Cost for Inserts, Updates, and Deletes</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Derby has to do work to maintain indexes. If you insert into or delete from a table, the system has to insert or delete rows in all the indexes on the table. If you update a table, the system has to maintain those indexes that are on the columns being updated. So having a lot of indexes can speed up select statements, but slow down inserts, updates, and deletes.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>Updates and deletes with WHERE clauses can use indexes for scans, even if the indexed column is being updated.</dd>
+</dl>
+<hr>
+<a href="perf42.html">Previous Page</a>
+<br>
+<a href="perf44.html">Next Page</a>
+<br>
+<a href="perf02.html#ToC">Table of Contents</a>
+<br>
+<a href="perf121.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

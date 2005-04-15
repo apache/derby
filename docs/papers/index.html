@@ -1,0 +1,377 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Apache Derby White Papers</title>
+<link type="text/css" href="../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../manuals/index.html">Manuals</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../papers/index.html">Papers</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">About</font>
+<ul>
+       
+<li>
+<span class="sel"><font color="#ffcc00">Index</font></span>
+</li>
+       
+<li>
+<a href="../papers/derby_web.html">Derby Web Site</a>
+</li>
+  
+</ul>
+</li>
+<li>
+<font color="#CFDCED">Derby Engine</font>
+<ul>
+      
+<li>
+<a href="../papers/derby_arch.html">Architecture</a>
+</li>
+      
+<li>
+<a href="../papers/JDBCImplementation.html">JDBC</a>
+</li>
+      
+<li>
+<a href="../papers/../binaries/ApacheDerbyInternals_1_1.sxi">Internals</a>
+</li>
+  
+</ul>
+</li>
+<li>
+<font color="#CFDCED">Integration</font>
+<ul>
+      
+<li>
+<a href="../papers/../DOTS_Derby.html">DOTS + Derby</a>
+</li>
+      
+<li>
+<a href="../papers/../derby_resources.html">Resources</a>
+</li>
+      
+<li>
+<a href="../papers/misc.html">Miscellaneous</a>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Apache Derby White Papers</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Table+of+Contents">Table of Contents</a>
+</li>
+<li>
+<a href="#How+to+Contribute+Papers">How to Contribute Papers</a>
+</li>
+</ul> 
+
+
+<p>
+This <em>ad hoc</em> spot in the Derby site hosts white papers.
+The categories in the left-hand navigation bar will grow and
+change as papers get contributed.
+</p>
+
+
+<a name="N10012"></a><a name="Table+of+Contents"></a>
+<h3>Table of Contents</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+The names in the left-hand navigation bar are deliberately short to keep
+it from getting too wide.
+The actual titles are listed below:
+</p>
+<ul>
+
+<li> Derby Engine
+     <ul>
+	
+<li>
+<a href="derby_arch.html">Derby Engine Architecture
+	 Overview</a>
+</li>
+	
+<li>
+<a href="JDBCImplementation.html">Derby JDBC Implementation
+		Notes</a>
+</li>
+        
+<li>
+<a href="http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgNo=903">Dan Debrunner's</a>
+	<a href="../binaries/ApacheDerbyInternals_1_1.sxi">Derby
+	Internals Presentation</a> (Open Office format)
+	from the 2004 <a href="http://www.softwaresummit.com">Colorado Software Summit</a>.
+	</li>
+     
+</ul>
+     
+<p></p>
+
+</li>
+
+<li> Integration
+     <ul>
+        
+<li>
+<a href="../DOTS_Derby.html">Running DOTS (Database open Source
+Test Suite) with Derby</a>
+</li>
+        
+<li>
+<a href="../derby_resources.html">Resources</a>
+</li>
+        
+<li>
+<a href="misc.html">Miscellaneous Integration Topics</a>
+</li>
+     
+</ul>
+     
+<p></p>
+
+</li>
+
+</ul>
+</div>
+
+
+<a name="N10056"></a><a name="How+to+Contribute+Papers"></a>
+<h3>How to Contribute Papers</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+If you have figured out how something works in Derby
+or how to do something cool and have produced a white
+paper you would like to contribute, please post it to the 
+<a href="../derby_mail.html">derby-dev@db.apache.org</a> mail list.
+</p>
+<p>
+As time permits, somebody will take the document from the 
+<a href="../derby_mail.html">derby-dev@db.apache.org</a>
+list and put it on the Derby web site.
+You can speed the posting process up by 
+<a href="derby_web.html#Testing+New+Pages+for+the+Derby+Site">testing 
+your white paper in Forrest</a> to verify it works well before you post it to
+<a href="../derby_mail.html">derby-dev@db.apache.org</a>.
+</p>
+<p>
+It is easiest to incorporate files that are already in one of the
+formats listed below:
+</p>
+<ul>
+   
+<li> HTML (an example is <a href="JDBCImplementation.html">Derby JDBC
+   	Implementation Notes</a>).</li>
+   
+<li> XML, using the
+        <a href="http://forrest.apache.org/docs/your-project.html">Forrest 
+        DTD</a>
+	(an example is <a href="derby_arch.html">Derby Engine Architecture
+		Overview</a>).
+   </li>
+   
+<li> ASCII text embedded in XML 
+        (an example is the <a href="../BUILDING.html">BUILDING.txt</a>
+	file).
+   </li>
+
+</ul>
+<p>
+That much said, even though your favorite word processing program can
+produce an HTML file, that doesn't necessarily mean that forrest can read it
+and do something visually pleasing with it.
+If forrest can't consume your document, 
+or you don't like what forrest did with it, 
+it can be included in its native HTML on the site -- it just
+won't have the forrest-generated left hand navigation and top banner.
+An example is 
+<a href="../DOTS_Derby.html">Running DOTS (Database open Source
+Test Suite) with Derby</a>.
+</p>
+</div>
+
+
+<p>
+<em>Last Updated: November 11, 2004</em>
+</p>
+
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"><a href="../skin/images/label.gif"></a><a href="../skin/images/page.gif"></a><a href="../skin/images/chapter.gif"></a><a href="../skin/images/chapter_open.gif"></a><a href="../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos">
+<div>
+<a href="http://validator.w3.org/check/referer"><img width="88" height="31" alt="Valid HTML 4.01!" src="../skin/images/valid-html401.png" class="logoImage"></a><a href="http://jigsaw.w3.org/css-validator/"><img width="88" height="31" alt="Valid CSS!" src="../skin/images/vcss.png" class="logoImage"></a><img alt="" height="1" width="10" src="../skin/images/spacer.gif"><a href="http://xml.apache.org/forrest/"><img border="0" alt="Built with Apache Forrest logo" src="../images/built-with-forrest-button.png" width="88" height="31"><img height="1" width="5" alt="" src="../skin/images/spacer.gif" class="spacer"></a>
+</div>
+</td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

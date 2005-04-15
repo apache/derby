@@ -1,0 +1,710 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Derby JDBC Implementation Notes</title>
+<link type="text/css" href="../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../manuals/index.html">Manuals</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../papers/index.html">Papers</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">About</font>
+<ul>
+       
+<li>
+<a href="../papers/index.html">Index</a>
+</li>
+       
+<li>
+<a href="../papers/derby_web.html">Derby Web Site</a>
+</li>
+  
+</ul>
+</li>
+<li>
+<font color="#CFDCED">Derby Engine</font>
+<ul>
+      
+<li>
+<a href="../papers/derby_arch.html">Architecture</a>
+</li>
+      
+<li>
+<span class="sel"><font color="#ffcc00">JDBC</font></span>
+</li>
+      
+<li>
+<a href="../papers/../binaries/ApacheDerbyInternals_1_1.sxi">Internals</a>
+</li>
+  
+</ul>
+</li>
+<li>
+<font color="#CFDCED">Integration</font>
+<ul>
+      
+<li>
+<a href="../papers/../DOTS_Derby.html">DOTS + Derby</a>
+</li>
+      
+<li>
+<a href="../papers/../derby_resources.html">Resources</a>
+</li>
+      
+<li>
+<a href="../papers/misc.html">Miscellaneous</a>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Derby JDBC Implementation Notes</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Derby+JDBC+Implementation+Notes">Derby JDBC Implementation Notes</a>
+<ul class="minitoc">
+<li>
+<a href="#%3FOverview">&nbsp;Overview</a>
+</li>
+<li>
+<a href="#Java.sql.ResultSet">Java.sql.ResultSet</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#Binary+Column">Binary Column</a>
+<ul class="minitoc">
+<li>
+<a href="#java.sql.Blob">java.sql.Blob</a>
+</li>
+<li>
+<a href="#java.sql.Clob">java.sql.Clob</a>
+</li>
+<li>
+<a href="#Date+Handling">Date Handling</a>
+</li>
+</ul>
+</li>
+</ul>
+<a name="N10052"></a><a name="Derby+JDBC+Implementation+Notes"></a>
+<h3>Derby JDBC Implementation Notes</h3>
+<div style="margin-left: 0 ; border: 2px">
+<a name="N10056"></a><a name="%3FOverview"></a>
+<h4>&nbsp;Overview</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>The JDBC specification is sometimes unclear or contradictory. This document covers how Derby implements some JDBC features where the specification might be unclear.</p>
+<p>The JDBC 3.0 specicification is in theory a single document however clarifications or addiitonal information can also be found in the Javadoc for java.sql and javax.sql, and in the offical JDBC tutorial book.</p>
+<p>[JDBC3] &ndash; Downloadable from <a href="http://java.sun.com/products/jdbc/index.jsp">http://java.sun.com/products/jdbc/index.jsp</a>
+</p>
+<p>[JAVADOC14] &ndash; downloadable from <a href="http://java.sun.com/products/jdbc/index.jsp">http://java.sun.com/products/jdbc/index.jsp</a>
+</p>
+<p>[TUTORIAL3] &ndash; JDBC API Tutorial and Reference, Third Edition. ISBN 0321173848 <a href="http://java.sun.com/developer/Books/jdbc/Fisher/index.html">http://java.sun.com/developer/Books/jdbc/Fisher/index.html</a>
+</p>
+</div>
+<a name="N1006D"></a><a name="Java.sql.ResultSet"></a>
+<h4>Java.sql.ResultSet</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>Support for data conversion using the getXXX() methods matches Table B-6 in the [JDBC3], with some extensions described below.</p>
+<p>
+<strong>Extension -</strong> If the value column is null, then generally any getXXX method can be used to fetch the null value and a null or a representation of zero will be returned and a subsequent call to wasNull() will return true. It is not recommended that applications take advantage of this liberal conversion of SQL NULL values, use of a getXXX() method that works against NULL and non-NULL values is strongly recommended.</p>
+<a name="N10077"></a><a name="getAsciiStream%28%29"></a>
+<h5>getAsciiStream()</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Behavior Clarification</strong>
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An ASCII character is defined as an eight bit character (range 0x00 to 0xff), see CHAR() function definition by [JDBC3] in appendix C.2.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; For character types&nbsp; (Types.CHAR, Types.VARCHAR &amp;amp; Types.LONGVARCHAR) &ndash; Each character in the value is translated to one byte in the ASCII stream, For Unicode characters in the range 0x0000 to 0x00ff, they are translated to a byte with the matching value (0x00 to 0xff). Characters outside this range, (0x0100 to 0xffff) are translated to 0x3f (&lsquo;?&rsquo;).</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; For binary types (Types.BINARY, Types.VARBINARY, and Types.LONGVARBINARY) getAsciiStream() returns a stream with identical contents to that returned by getBinaryStream() on the same column.</p>
+<p>&nbsp;</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Extensions</strong>
+</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On Types.CLOB columns returns a stream with identical contents to that returned by getClob().getAsciiStream() on the same column if the CLOB value is not NULL. If the CLOB value is NULL then null is returned.</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On Types.BLOB columns returns a stream with identical contents to that returned by getBlob().getBinaryStream() on the same column if the BLOB value is not NULL. If the BLOB value is NULL then null is returned.</p>
+<p>&nbsp;</p>
+</div>
+<a name="N10091"></a><a name="getBinaryStream%28%29"></a>
+<h5>getBinaryStream()</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Extensions</strong>
+</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On Types.BLOB columns returns a stream with identical contents to that returned by getBlob().getBinaryStream() on the same column if the BLOB value is not NULL. If the BLOB value is NULL then null is returned.</p>
+<p>&nbsp;</p>
+</div>
+<a name="N1009D"></a><a name="getCharacterStream%28%29"></a>
+<h5>getCharacterStream()</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Behavior Clarification</strong>
+</p>
+<p>For binary types (Types.BINARY, Types.VARBINARY, and Types.LONGVARBINARY, Types.BLOB) getString() the value is converted to a stream of characters as though it is encoded using UTF-16BE.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Extensions</strong>
+</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On Types.CLOB columns returns a reader with identical contents to that returned by getClob().getCharacterStream() on the same column if the CLOB value is not NULL. If the CLOB value is NULL then null is returned.</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On Types.BLOB columns supported with conversion as a binary type.</p>
+</div>
+<a name="N100AF"></a><a name="getString%28%29"></a>
+<h5>getString()</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Behavior Clarification</strong>
+</p>
+<p>For binary types (Types.BINARY, Types.VARBINARY, and Types.LONGVARBINARY, Types.BLOB) getString() returns String containing a two character hexadecimal representation for every byte in a non-null value.&nbsp; The two characters are in the range &lsquo;0&rsquo; &ndash; &lsquo;9&rsquo; and &lsquo;a&rsquo; &ndash; &lsquo;f&rsquo;. For NULL values, null is returned. Note, that this String does not match the contents of the stream returned by getAsciiStream or getCharacterStream on the same column.</p>
+<p>&nbsp;</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Extensions</strong>
+</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On Types.CLOB columns returns a String representing the contents of the CLOB value is not NULL. If the CLOB value is NULL then null is returned.</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On Types.BLOB columns supported with conversion as a binary type.</p>
+</div>
+<a name="N100C3"></a><a name="getUnicodeStream%28%29"></a>
+<h5>getUnicodeStream()</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>Not implemented, deprecated by [JDBC3].</p>
+</div>
+<a name="N100C9"></a><a name="Examples"></a>
+<h5>Examples</h5>
+<div style="margin-left: 0 ; border: 2px"></div>
+</div>
+</div>
+<a name="N100CD"></a><a name="Binary+Column"></a>
+<h3>Binary Column</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>If a binary column has been set with the Java byte array containing fours bytes, byte[] data = {0x34, 0x87, 0xc2, 0x1f} then:</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; getBinaryStream() returns a java.io.InputStream containing four bytes - 0x34, 0x87, 0xc2, 0x1f</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; getAsciiStream() returns a java.io.InputStream containing four bytes -&nbsp; 0x34, 0x87, 0xc2, 0x1f&nbsp; [ same as getBinaryStream() ]</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; getCharacterStream() returns a java.io.Reader containing two characters - 0x3487, 0xc21f</p>
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; getString() returns a String with eight characters &ldquo;3487c21f&rdquo;</p>
+<a name="N100DB"></a><a name="java.sql.Blob"></a>
+<h4>java.sql.Blob</h4>
+<div style="margin-left: 0 ; border: 2px">
+<a name="N100DF"></a><a name="getBytes%28int+pos%2C+int+length%29"></a>
+<h5>getBytes(int pos, int length)</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Behavior Clarification</strong>
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If the pos (position) argument is greater than the length of the BLOB then an exception is thrown. This matches the semantics of the SQL SUBSTR function.</p>
+</div>
+<a name="N100E9"></a><a name="position%28byte+pattern%2C+int+start%29"></a>
+<h5>position(byte pattern, int start)position(Blob pattern, int start)</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Behavior Clarification</strong>
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If the pattern argument has length zero, then the value of start argument will be returned. This matches the semantics of the SQL LOCATE function.</p>
+</div>
+</div>
+<a name="N100F5"></a><a name="java.sql.Clob"></a>
+<h4>java.sql.Clob</h4>
+<div style="margin-left: 0 ; border: 2px">
+<a name="N100F9"></a><a name="getSubString%28int+pos%2C+int+length%29"></a>
+<h5>getSubString(int pos, int length)</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Behavior Clarification</strong>
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If the pos (position) argument is greater than the length of the CLOB then an exception is thrown. This matches the semantics of the SQL SUBSTR function.</p>
+</div>
+<a name="N10103"></a><a name="position%28String+searchstr%2C+int+start%29"></a>
+<h5>position(String searchstr, int start)position(Clob searchstr, int start)</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Behavior Clarification</strong>
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If the searchstr argument has length zero (the empty string), then the value of start argument will be returned. This matches the semantics of the SQL LOCATE function.</p>
+</div>
+</div>
+<a name="N1010F"></a><a name="Date+Handling"></a>
+<h4>Date Handling</h4>
+<div style="margin-left: 0 ; border: 2px">
+<a name="N10113"></a><a name="Derby+SQL+DATE"></a>
+<h5>Derby SQL DATE</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>Derby&rsquo;s SQL DATE type represents a date in the form yyyy-mm-dd with no associated time zone information.</p>
+</li>
+</ul>
+</div>
+<a name="N1011B"></a><a name="java.sql.Date"></a>
+<h5>java.sql.Date</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>A JDBC Date (java.sql.Date) by definition represents a point in time on a given date in a given time zone.</p>
+</li>
+<li>
+<p>[JDBC3] intends that the point in time for a java.sql.Date object is 00:00 (midnight), but this is not enforced by the class.</p>
+</li>
+<li>
+<p>JDBC drivers are required to return java.sql.Date objects that are normalized to 00:00 according to the required time zone.</p>
+</li>
+<li>
+<p>Applications are expected to pass in java.sql.Date instances that are normalized to 00:00 (see section 18.1.1 of [TUTORIAL3]).</p>
+</li>
+</ul>
+</div>
+<a name="N1012C"></a><a name="Conversion+of+a+JDBC+java.sql.Date+to+a+Derby+DATE+value"></a>
+<h5>Conversion of a JDBC java.sql.Date to a Derby DATE value</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ol>
+<li>
+<p>setDate() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>The yyyy-mm-dd values will be calculated from the milli-seconds value of the java.sql.Date instance using a Calendar object set to the time zone of the virtual machine.</p>
+</li>
+<li>
+<p>This yyyy-mm-dd value will match the output of java.sql.Date.toString().</p>
+</li>
+</ul>
+</li>
+<li>
+<p>setDate() with a Calendar object</p>
+<ul>
+<li>
+<p>The yyyy-mm-dd values will be calculated from the milliseconds value of the java.sql.Date instance using the passed in Calendar.</p>
+</li>
+<li>
+<p>The code for this is<br>cal.setTimeInMillis(value.getTime());<br>yyyy = cal.get(Calendar.YEAR);<br>mm = cal.get(Calendar.MONTH) + 1;<br>dd = cal.get(Calendar.DAY_OF_MONTH);</p>
+</li>
+<li>
+<p>This yyyy-mm-dd value may not match the output of java.sql.Date.toString() for the value, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Derby does not require that the application&rsquo;s java.sql.Date value is normalized to 00:00 according to the required time zone.</p>
+<p>In both cases no time zone information is stored with the SQL DATE value.</p>
+</div>
+<a name="N10154"></a><a name="Conversion+of+a+Derby+DATE+value+to+a+JDBC+java.sql.Date"></a>
+<h5>Conversion of a Derby DATE value to a JDBC java.sql.Date</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>getDate() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Date instance is returned with a millisecond value corresponding to 00:00 on yyyy-mm-dd according to the time zone of the java virtual machine</p>
+</li>
+<li>
+<p>The toString() method of the returned value will return &lsquo;yyyy-mm-dd&rsquo;</p>
+</li>
+</ul>
+</li>
+<li>
+<p>getDate() with a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Date instance is returned with a millisecond value corresponding to 00:00 on yyyy-mm-dd according to the time zone of the Calendar</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>
+<p>The toString() method of the returned value may not return &lsquo;yyyy-mm-dd&rsquo;, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</div>
+<a name="N1016E"></a><a name="Conversion+of+a+string+type+to+a+JDBC+java.sql.Date"></a>
+<h5>Conversion of a string type to a JDBC java.sql.Date</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>Three different date formats are built into Derby.</p>
+</li>
+</ul>
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ISO/JIS) yyyy-mm-dd e.g. &ldquo;1980-03-21&rdquo;,</p>
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (IBM USA) mm/dd/yyyy e.g. &ldquo;03/21/1980&rdquo;, and</p>
+<p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (IBM European) dd.mm.yyyy e.g. &ldquo;21.03.1980&rdquo;.</p>
+<ul>
+<li>
+<p>If the format of the string matches one of the built in formats then a conversion to a java.sql.Date matches that of a SQL DATE value with value yyyy-mm-dd.</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</p>
+</li>
+</ul>
+</div>
+<a name="N10184"></a><a name="Derby+SQL+TIME"></a>
+<h5>Derby SQL TIME</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>Derby&rsquo;s SQL TIME type represents a time of day in the form hh:mm:ss with no associated time zone information.</p>
+</li>
+</ul>
+</div>
+<a name="N1018C"></a><a name="java.sql.Time"></a>
+<h5>java.sql.Time</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>A JDBC Time (java.sql.Time) by definition represents a point in time on an unspecified day in a given time zone.</p>
+</li>
+<li>
+<p>Java.sql.Time extends java.util.date, so it includes a date. [JDBC3] intends that the date stored in a java.sql.Time be Jan 1 1970, but this is not enforced by the class.</p>
+</li>
+<li>
+<p>JDBC drivers are required to return java.sql.Time objects that are normalized to Jan. 1 1970 according to the required time zone.</p>
+</li>
+<li>
+<p>Applications are expected to pass in java.sql.Time instances that are normalized to Jan. 1 1970.</p>
+</li>
+</ul>
+</div>
+<a name="N1019D"></a><a name="Conversion+of+a+JDBC+java.sql.Time+to+a+Derby+TIME+value"></a>
+<h5>Conversion of a JDBC java.sql.Time to a Derby TIME value</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; setTime() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>The hh:mm:ss values will be calculated from the milli-seconds value of the java.sql.Time instance using a Calendar object set to the time zone of the virtual machine.</p>
+</li>
+<li>
+<p>This hh:mm:ss value will match the output of java.sql.Date.toString().</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>setTime() with a Calendar object</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>The hh:mm:ss values will be calculated from the milliseconds value of the java.sql.Date instance using the passed in Calendar.</p>
+</li>
+<li>
+<p>The code for this is<br>cal.setTimeInMillis(value.getTime());<br>hh = cal.get(Calendar.HOUR);<br>mm = cal.get(Calendar.MINUTE);<br>ss = cal.get(Calendar.SECOND);</p>
+</li>
+<li>
+<p>This hh:mm:dd value may not match the output of java.sql.Date.toString() for the value, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+<p>Derby does not require that the application&rsquo;s java.sql.Time value be normalized to Jan 1 1970 according to the required time zone.</p>
+<p>In both cases no time zone information is stored with the SQL TIME value.</p>
+</div>
+<a name="N101C4"></a><a name="Conversion+of+a+Derby+TIME+value+to+a+JDBC+java.sql.Time"></a>
+<h5>Conversion of a Derby TIME value to a JDBC java.sql.Time</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>getTime() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Time instance is returned with a millisecond value corresponding to hh:mm:ss on Jan. 1 1970 according to the time zone of the java virtual machine</p>
+</li>
+<li>
+<p>The toString() method of the returned value will return &lsquo;hh:mm:ss&rsquo;.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>getTime() with a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Time instance is returned with a millisecond value corresponding to hh:mm:ss on Jan. 1 1970 according to the time zone of the Calendar</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>
+<p>The toString() method of the returned value may not return &lsquo;hh:mm:ss&rsquo;, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</div>
+<a name="N101DE"></a><a name="Conversion+of+a+string+type+to+a+JDBC+java.sql.Time"></a>
+<h5>Conversion of a string type to a JDBC java.sql.Time</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>Three different time formats are built into Derby.</p>
+</li>
+</ul>
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ISO/EUR) hh.mm.ss e.g. &ldquo;13.52.03&rdquo;,</p>
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (IBM USA) hh:mm [AM|PM] e.g. &ldquo;1:52 PM&rdquo;, and</p>
+<p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (JIS) hh:mm:ss e.g. &ldquo;13:52:03&rdquo;.</p>
+<ul>
+<li>
+<p>If the format of the string matches one of the built in formats then a conversion to a java.sql.Time matches that of a SQL TIME value with value hh:mm:ss.</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</p>
+</li>
+</ul>
+</div>
+<a name="N101F4"></a><a name="Derby+SQL+TIMESTAMP"></a>
+<h5>Derby SQL TIMESTAMP</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>Derby&rsquo;s SQL TIMESTAMP type represents a time of day in the form yyyy-mm-dd hh:mm:ss.fffffffff (nanosecond granularity) with no associated time zone information.</p>
+</li>
+</ul>
+</div>
+<a name="N101FC"></a><a name="java.sql.Timestamp"></a>
+<h5>java.sql.Timestamp</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A JDBC Timestamp (java.sql.Timestamp) by definition represents a point in time, with nanosecond resolution, in a given time zone.</p>
+</div>
+<a name="N10202"></a><a name="Conversion+of+a+JDBC+java.sql.Timestamp+to+a+Derby+TIMESTAMP+value"></a>
+<h5>Conversion of a JDBC java.sql.Timestamp to a Derby TIMESTAMP value</h5>
+<div style="margin-left: 0 ; border: 2px">
+<p>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; setTimestamp() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>The year, month, day, hour, minute, and second values will be calculated from the milli-seconds value of the java.sql.Timestamp instance using a Calendar object set to the time zone of the virtual machine. The nanosecond value will be calculated from the nanoseconds value of the java.sql.Timestamp.</p>
+</li>
+<li>
+<p>The timestamp component values will match the output of java.sql.Timestamp.toString().</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>setTime() with a Calendar object</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>The year, month, day, hour, minute, and second values will be calculated from the milliseconds value of the java.sql.Date instance using the passed in Calendar. The nanosecond value will be calculated from the nanoseconds value of the java.sql.Timestamp.</p>
+</li>
+<li>
+<p>The code for this is<br>cal.setTimeInMillis(value.getTime());<br>year = cal.get(Calendar.YEAR);<br>month = cal.get(Calendar.MONTH) + 1;<br>day = cal.get(Calendar.DAY_OF_MONTH);<br>hour = cal.get(Calendar.HOUR);<br>minute = cal.get(Calendar.MINUTE);<br>second = cal.get(Calendar.SECOND);<br>nanos = value.getNanos();</p>
+</li>
+<li>
+<p>This stored timestamp component value may not match the output of java.sql.Timestamp.toString() for the value, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</div>
+<a name="N1022D"></a><a name="Conversion+of+a+Derby+TIMESTAMP+value+to+a+JDBC+java.sql.Timestamp"></a>
+<h5>Conversion of a Derby TIMESTAMP value to a JDBC java.sql.Timestamp</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>getTimestamp() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Timestamp instance is returned with a nanosecond value corresponding to yyyy-mm-dd hh:mm:ss.fffffffff according to the time zone of the java virtual machine</p>
+</li>
+<li>
+<p>The toString() method of the returned value will return &lsquo;yyyy-mm-dd hh:mm:ss.fffffffff&rsquo;.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>getTime() with a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Time instance is returned with a nanosecond value corresponding to yyyy-mm-dd hh:mm:ss.fffffffff according to the time zone of the Calendar</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>
+<p>The toString() method of the returned value may not return &lsquo;yyyy-mm-dd hh:mm:ss.fffffffff&rsquo;, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</div>
+<a name="N10247"></a><a name="Conversion+of+a+string+type+to+a+JDBC+java.sql.Timestamp"></a>
+<h5>Conversion of a string type to a JDBC java.sql.Timestamp</h5>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<p>Two different timestamp formats are built into Derby.</p>
+</li>
+</ul>
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ISO) yyyy-mm-dd hh:mm:ss[.ffffff]e.g. &ldquo;1980-10-25 13:01:23.123456&rdquo;, and</p>
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (IBM) yyyy-mm-dd-hh.mm.ss[.ffffff]e.g. &ldquo;1980-10-25-13.01.23.123456&rdquo;.</p>
+<ul>
+<li>
+<p>Note that only microsecond resolution is supported in converting strings to timestamps.</p>
+</li>
+<li>
+<p>If the format of the string matches one of the built in formats then a conversion to a java.sql.Timestamp matches that of a SQL TIMESTAMP value with value yyyy-mm-dd hh:mm:ss.ffffff.</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</p>
+</li>
+</ul>
+<p>
+<em>Last Updated: September 10, 2004</em>
+</p>
+</div>
+</div>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"><a href="../skin/images/label.gif"></a><a href="../skin/images/page.gif"></a><a href="../skin/images/chapter.gif"></a><a href="../skin/images/chapter_open.gif"></a><a href="../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

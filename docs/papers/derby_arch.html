@@ -1,0 +1,463 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Derby Engine Architecture Overview</title>
+<link type="text/css" href="../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../manuals/index.html">Manuals</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../papers/index.html">Papers</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">About</font>
+<ul>
+       
+<li>
+<a href="../papers/index.html">Index</a>
+</li>
+       
+<li>
+<a href="../papers/derby_web.html">Derby Web Site</a>
+</li>
+  
+</ul>
+</li>
+<li>
+<font color="#CFDCED">Derby Engine</font>
+<ul>
+      
+<li>
+<span class="sel"><font color="#ffcc00">Architecture</font></span>
+</li>
+      
+<li>
+<a href="../papers/JDBCImplementation.html">JDBC</a>
+</li>
+      
+<li>
+<a href="../papers/../binaries/ApacheDerbyInternals_1_1.sxi">Internals</a>
+</li>
+  
+</ul>
+</li>
+<li>
+<font color="#CFDCED">Integration</font>
+<ul>
+      
+<li>
+<a href="../papers/../DOTS_Derby.html">DOTS + Derby</a>
+</li>
+      
+<li>
+<a href="../papers/../derby_resources.html">Resources</a>
+</li>
+      
+<li>
+<a href="../papers/misc.html">Miscellaneous</a>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Derby Engine Architecture Overview</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Module+View">Module View</a>
+<ul class="minitoc">
+<li>
+<a href="#Monitor">Monitor</a>
+</li>
+<li>
+<a href="#Modules">Modules</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#Layer%2FBox+View">Layer/Box View</a>
+<ul class="minitoc">
+<li>
+<a href="#JDBC">JDBC</a>
+</li>
+<li>
+<a href="#SQL">SQL</a>
+</li>
+<li>
+<a href="#Store">Store</a>
+</li>
+<li>
+<a href="#Services">Services</a>
+</li>
+</ul>
+</li>
+</ul> 
+
+
+<p>
+
+<em>
+This paper summarizes a discussion 
+about Derby engine architecture
+on the <a href="../derby_mail.html">derby-dev@db.apache.org</a> list
+that started on
+<a href="http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgNo=18">August 14, 2004</a>.
+Please post any corrections or additional information to the
+<a href="../derby_mail.html">derby-dev@db.apache.org</a> list.
+</em>
+
+</p>
+
+
+<a name="N1001E"></a><a name="Module+View"></a>
+<h3>Module View</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+A running system is comprised of a monitor and a collection of modules.
+</p>
+<a name="N10027"></a><a name="Monitor"></a>
+<h4>Monitor</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+The monitor is code that maps module requests,
+which are described in the next section,
+to implementations based
+upon the request and the environment. E.g. with JDK 1.3 the internal
+request for a JDBC driver the monitor selects Derby's JDBC 2.0
+implementation, while in JDK 1.4 the driver is the JDBC 3.0
+implementation. This allows Derby to present a single JDBC driver to the
+application regardless of JDK and internally the correct driver is loaded.
+</p>
+</div>
+<a name="N10031"></a><a name="Modules"></a>
+<h4>Modules</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+A module is a set of discrete functionality, such as a lock manager,
+JDBC driver, indexing method etc. A module's interface is typically
+defined by a set of Java interfaces, e.g. the java.sql interfaces define
+a interface for a JDBC driver. All callers of a module do so purely
+through its interface to separate api from implementation. A module's
+implementation is a set of classes that implement the required behavior
+and interfaces. Thus a module implementation can change or be replaced
+with a different implementation without affecting the callers' code.
+</p>
+</div>
+<p>
+Modules are either system wide (shared), e.g. error logging, or
+per-service with a service corresponding to a database, e.g. a lock
+manager would be a module in a service (database)
+</p>
+<p>
+This architecture allows different modules to be loaded depending on the
+environment and in the past also supported different product
+configurations out of the same code base.
+</p>
+</div>
+
+
+<a name="N10042"></a><a name="Layer%2FBox+View"></a>
+<h3>Layer/Box View</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+There are four main code areas: JDBC, SQL, Store and Services.
+</p>
+<a name="N1004B"></a><a name="JDBC"></a>
+<h4>JDBC</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+JDBC presents the only api to Derby to applications and consists of
+implementations of the java.sql and javax.sql classes for JDBC 2.0 and
+3.0. Applications use Derby solely through its implementations of the
+top-level JDBC interfaces (Driver, DataSource, ConnectionPoolDataSource
+and XADataSource) and the remaining  JDBC interfaces. E.g. applications
+can only use a Derby prepared statement through
+java.sql.PreparedStatement and not some class specific to Derby with
+additional methods.
+</p>
+<p>
+The JDBC layer sits on top of the SQL layer.
+</p>
+</div>
+<a name="N10058"></a><a name="SQL"></a>
+<h4>SQL</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+The SQL layer is split into two main logical areas, compilation and
+execution.
+</p>
+<p>
+SQL compilation is a five step process:
+</p>
+<ol>
+   
+<li> parse using a parser generated by Javacc, results in a tree of
+          query nodes</li>
+   
+<li>bind to resolve all objects (e.g. table names)</li>
+   
+<li>optimize to determine the best access path</li>
+   
+<li>generation of a Java class (directly to byte code)  to represent
+       the statement plan</li>
+   
+<li>loading of the class and creation of an instance to represent that
+connection's state of the query</li>
+
+</ol>
+<p>
+The generated statement plan is cached and can be shared by multiple
+connections. DDL statements (e.g. CREATE TABLE) use a common statement
+plan to avoid generation of a Java class file.
+</p>
+<p>
+This implementation was driven by the original goal to have a small footprint.
+Using the JVM's interepter was thought 
+to be less code than having an internal one. 
+It does mean that the first couple of times the statement plan is executed,
+it would be interpreted.
+After a number of executions, the Just-In-Time (JIT) compiler will decide
+to compile it into native code.
+Thus, running performance tests will see a boost after a
+number of iterations. In addition, calling into Java user-supplied
+methods (functions and procedures) is direct, rather than through reflection.
+</p>
+<p>
+SQL Execution is calling execute methods on the instance of the
+generated class that return a result set object. This result set is a
+Derby ResultSet class, not a JDBC one. The JDBC layer presents the Derby
+ResultSet as a JDBC one to the application. For a simple table scan the
+query would consist of a single result set object representing the table
+scan. For a more complex query the top-level result set "hides" a tree
+of result sets that correspond to the correct query. E.g. a
+project-restrict result set on top of a join result set that is joining
+a table scan result set on T1 with a index scan on table T2.
+DML (INSERT/UPDATE/DELETE) are handled the same way, with a ResultSet
+that performs all of its work in its open method and returns an update
+count.
+</p>
+<p>
+These result set objects interface with the Store layer to fetch rows
+from tables, indexes or perform sorts.
+</p>
+</div>
+<a name="N10083"></a><a name="Store"></a>
+<h4>Store</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+The Store layer is split into two main areas, access and raw.
+The access layer presents a conglomerate (table or index)/row based
+interface to the SQL layer. It handles table scans, index scans, index
+lookups, indexing, sorting, locking policies, transactions, isolation
+levels.
+</p>
+<p>
+The access layer sits on top of the raw store which provides the raw
+storage of rows in pages in files, transaction logging, transaction
+management. JCE encryption is plugged in here at the page level. The raw
+store works with a pluggable file system api that allows the data files
+to be stored in the Java filesystem, jar files, jar files in the
+classpath, or any other mechanism.
+</p>
+</div>
+<a name="N10090"></a><a name="Services"></a>
+<h4>Services</h4>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+Services are utility modules such as lock management, cache management
+(single cache module used to cache many different types from pages to
+string translations), error logging etc.
+</p>
+<p>
+The services/cache component
+is a general purpose caching mechanism that simply
+caches objects that implement the Cacheable interface. It is used by the
+store for buffer caching, but it is also used to cache compiled plans
+for SQL statements, open containers and their file descriptors, string
+conversions, table descriptors and maybe more.
+</p>
+<p>
+The interface/implementation split ensures that the cache algorithm is
+not known by the users of the cache and can be changed with affecting
+them. The currrent algorithm is a "clock or ring" based algorithm.
+</p>
+</div>
+</div>
+
+
+<p>
+<em>Last Updated: September 10, 2004</em>
+</p>
+
+
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../skin/images/spacer.gif" class="spacer"><a href="../skin/images/label.gif"></a><a href="../skin/images/page.gif"></a><a href="../skin/images/chapter.gif"></a><a href="../skin/images/chapter_open.gif"></a><a href="../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

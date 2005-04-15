@@ -1,0 +1,1333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Setting Network Server Properties</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Setting Network Server Properties</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Setting+Network+Server+Properties">Setting Network Server Properties</a>
+</li>
+<li>
+<a href="#derby.drda.startNetworkServer">derby.drda.startNetworkServer</a>
+</li>
+<li>
+<a href="#derby.drda.portNumber">derby.drda.portNumber</a>
+</li>
+<li>
+<a href="#derby.drda.host">derby.drda.host</a>
+</li>
+<li>
+<a href="#derby.drda.traceDirectory">derby.drda.traceDirectory</a>
+</li>
+<li>
+<a href="#derby.drda.traceAll">derby.drda.traceAll</a>
+</li>
+<li>
+<a href="#derby.drda.logConnections">derby.drda.logConnections</a>
+</li>
+<li>
+<a href="#derby.drda.minThreads">derby.drda.minThreads</a>
+</li>
+<li>
+<a href="#derby.drda.maxThreads">derby.drda.maxThreads</a>
+</li>
+<li>
+<a href="#derby.drda.timeslice">derby.drda.timeslice</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Setting+Network+Server+Properties"></a>
+<h3>Setting Network Server Properties</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You can specify Network Server properties on the command line, in the <em>.bat</em> or <em>.ksh</em> file (loading the properties by executing 'java -D'), or in the <tt><em>derby.properties</em></tt> file. Properties in the command line or <em>.bat</em> or <em>.ksh</em> file take precedence over properties in the <tt><em>derby.properties</em></tt> file. Arguments given to commands on the command line take precedence over properties values.</p>
+<p>The following properties can be specified:</p>
+<ul>
+<li>
+<a href="#SPTSII-CONFIG-STARTNETWORKSERVER">derby.drda.startNetworkServer</a>
+</li>
+<li>
+<a href="#SPTSII-CONFIG-PORTNUMBER">derby.drda.portNumber</a>
+</li>
+<li>
+<a href="#HDRSII-CONFIG-DB2JDRDATRACEDIRECTORY">derby.drda.traceDirectory</a>
+</li>
+<li>
+<a href="#HDRSII-CONFIG-">derby.drda.traceAll</a>
+</li>
+<li>
+<a href="#HDRSII-CONFIG-DB2JDRDALOGCONNECTIONS">derby.drda.logConnections</a>
+</li>
+<li>
+<a href="#SPTDRDAHOST">derby.drda.host</a>
+</li>
+<li>
+<a href="#SPTDRDAMINTHREADS">derby.drda.minThreads</a>
+</li>
+<li>
+<a href="#SPTDRDAMAXTHREADS">derby.drda.maxThreads</a>
+</li>
+<li>
+<a href="#SPTDRDATIMESLICE">derby.drda.timeslice</a>
+</li>
+</ul>
+</div>
+<a name="N10080"></a><a name="derby.drda.startNetworkServer"></a>
+<h3>derby.drda.startNetworkServer</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Use the <em>derby.drda.startNetworkServer</em> property to simplify embedding the Network Server in your application. When you set <em>derby.drda.startNetworkServer</em>, the Network Server will automatically start when you start Derby. Only one Network Server can be started in a JVM.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.startNetworkServer=[true<br>false]&gt;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>false</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.startNetworkServer=true</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Static. You must shut down the Network Server and restart Derby for this change to take effect. </p>
+</div>
+<a name="N100A5"></a><a name="derby.drda.portNumber"></a>
+<h3>derby.drda.portNumber</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Indicates the port number to use. </p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.portNumber=<em>portnumber</em>&gt;;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>If no port number is specified, 1527 is the default.</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.portNumber=1110</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Static. You must restart the Network Server for changes to take effect. </p>
+</div>
+<a name="N100C5"></a><a name="derby.drda.host"></a>
+<h3>derby.drda.host</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Indicates that Network Server listen on a specific network interface. This allows multiple instances of Network Server to run on a single machine each using its own unique host:port combination. The host needs to be set to enable remote connections. By default, the Network Server will only listen on the loopback address. If the property is set to 0.0.0.0, Network Server will listen on all interfaces. Ensure that you are running under the security manager and that you have user authorization enabled before enabling remote connections with this property.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.host=<em>hostname</em>&gt;;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>If no host is specified, the Network Server listens on the loopback address of the current machine (localhost).</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.host=myhost</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Static. You must restart the Network Server for changes to take effect.</p>
+</div>
+<a name="N100E5"></a><a name="derby.drda.traceDirectory"></a>
+<h3>derby.drda.traceDirectory</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Indicates the location for tracing files.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.traceDirectory=<em>tracefiledirectory</em>&gt;;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>If the <em>derby.system.home</em> property has been set, it is the default. Otherwise, the default is the current directory.</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.traceDirectory=c:/Derby/trace</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Dynamic. System values can be changed using commands or the servlet interface after the Network Server has been started.</p>
+</div>
+<a name="N10108"></a><a name="derby.drda.traceAll"></a>
+<h3>derby.drda.traceAll</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Turns tracing on for all sessions.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.traceAll=[true|false]&gt;;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>False.</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.traceAll=true</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>
+<a name="IDX224"></a> Dynamic. System values can be changed using commands or the servlet interface after the Network Server has been started.</p>
+</div>
+<a name="N10126"></a><a name="derby.drda.logConnections"></a>
+<h3>derby.drda.logConnections</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Indicates whether to log connections and disconnections.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.logConnections=[true|false]&gt;t;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>False.</p>
+<p>
+<strong>Example</strong>
+</p>
+<p>
+<strong>derby.drda.logConnections=true</strong>
+</p>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Dynamic. System values can be changed using commands or the servlet interface after the Network Server has been started. </p>
+</div>
+<a name="N10142"></a><a name="derby.drda.minThreads"></a>
+<h3>derby.drda.minThreads</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Use the <em>derby.drda.minThreads</em> property to set a minimum number of connection threads that Network Server will allocate. By default, connection threads are allocated as needed.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.minThreads=<em>numthreads</em>&gt;;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>1</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.minThreads=10</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Static. </p>
+</div>
+<a name="N10165"></a><a name="derby.drda.maxThreads"></a>
+<h3>derby.drda.maxThreads</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Use the <em>derby.drda.maxThreads</em> property to set a maximum number of connection threads that Network Server will allocate. If all of the connection threads are currently being used and the Network Server has already allocated the maximum amount of threads, then threads will be shared using the <em>derby.drda.timeslice</em> property to determine when sessions will be swapped.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.maxThreads=<em>numthreads</em>&gt;;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>1</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.maxThreads=50</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Static. </p>
+</div>
+<a name="N1018B"></a><a name="derby.drda.timeslice"></a>
+<h3>derby.drda.timeslice</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Use the <em>derby.drda.timeslice</em> to set the number of milliseconds each connection will use before yielding to another connection. This property is only relevant if the <em>derby.drda.maxThreads</em> property is set.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+<pre>&lt;derby.drda.timeslice=<em>milliseconds</em>&gt;;
+</pre>
+<p>
+<strong>Default</strong>
+</p>
+<p>1</p>
+<p>
+<strong>Example</strong>
+</p>
+<pre>
+<strong>derby.drda.timeslice=2000</strong>
+
+</pre>
+<p>
+<strong>Static or Dynamic</strong>
+</p>
+<p>Static.</p>
+<hr>
+<a href="hubprnt22.html">Previous Page</a>
+<br>
+<a href="hubprnt24.html">Next Page</a>
+<br>
+<a href="hubprnt02.html#ToC">Table of Contents</a>
+<br>
+<a href="hubprnt65.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

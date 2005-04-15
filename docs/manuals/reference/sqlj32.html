@@ -1,0 +1,1348 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CONSTRAINT clause</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>CONSTRAINT clause</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#CONSTRAINT+clause">CONSTRAINT clause</a>
+</li>
+<li>
+<a href="#Column-Level-Constraint">Column-Level-Constraint</a>
+</li>
+<li>
+<a href="#Table-Level+Constraint">Table-Level Constraint</a>
+</li>
+<li>
+<a href="#ReferencesSpecification">ReferencesSpecification</a>
+</li>
+<li>
+<a href="#searchCondition">searchCondition</a>
+</li>
+</ul>
+<a name="N10043"></a><a name="CONSTRAINT+clause"></a>
+<h3>CONSTRAINT clause</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>A CONSTRAINT clause is an optional part of a <a href="sqlj27.html#HDRSII-SQLJ-24513">CREATE TABLE statement</a> or <a href="sqlj26.html#HDRSII-SQLJ-33145">ALTER TABLE</a>. A constraint is a rule to which data must conform. Constraint names are optional.</p>
+<p>A CONSTRAINT can be one of the following:</p>
+<ul>
+<li>
+<a name="IDX826"></a>  a column-level constraint <p>Column-level constraints refer to a single column in the table and do not specify a column name (except check constraints). They refer to the column that they follow.</p>
+</li>
+<li>
+<a name="IDX828"></a>  a table-level constraint <p>Table-level constraints refer to one or more columns in the table. Table-level constraints specify the names of the columns to which they apply. Table-level CHECK constraints can refer to 0 or more columns in the table.</p>
+</li>
+</ul>
+<p>
+<a name="IDX830"></a>  Column constraints include:</p>
+<ul>
+<li>NOT NULL <p>Specifies that this column cannot hold NULL values (constraints of this type are not nameable).</p>
+</li>
+<li>NULL <p>The opposite of NOT NULL (not really a constraint), it specifies that the column can hold NULL values. Specifying NULL is the same as saying nothing at all, except when the column is included in a PRIMARY KEY constraint.</p>
+</li>
+<li>PRIMARY KEY   <p>Specifies the column that uniquely identifies a row in the table. The identified columns must be defined as NOT NULL.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>If you attempt to add a primary key using ALTER TABLE and any of the columns included in the primary key contain null values, an error will be generated and the primary key will not be added. See <a href="sqlj26.html#HDRSII-SQLJ-33145">ALTER TABLE</a> for more information.</dd>
+</dl>
+</li>
+<li>UNIQUE <p>Specifies that values in the column must be unique. NULL values are not allowed.</p>
+</li>
+<li>FOREIGN KEY <p>Specifies that the values in the column must correspond to values in a referenced primary key or unique key column or that they are NULL.</p>
+</li>
+<li>CHECK <p>Specifies rules for values in the column.</p>
+</li>
+</ul>
+<p>
+<a name="IDX834"></a>  Table constraints include:</p>
+<ul>
+<li>PRIMARY KEY   <p>Specifies the column or columns that uniquely identify a row in the table. NULL values are not allowed.</p>
+</li>
+<li>UNIQUE <p>Specifies that values in the columns must be unique. The identified columns must be defined as NOT NULL.</p>
+</li>
+<li>FOREIGN KEY <p>Specifies that the values in the columns must correspond to values in referenced primary key or unique columns or that they are NULL.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>If the foreign key consists of multiple columns, and <em>any</em> column is NULL, the whole key is considered NULL. The insert is permitted no matter what is on the non-null columns.</dd>
+</dl>
+</li>
+<li>CHECK <p>Specifies a wide range of rules for values in the table.</p>
+</li>
+</ul>
+<p>
+<a name="IDX838"></a> Column constraints and table constraints have the same function; the difference is in where you specify them. Table constraints allow you to specify more than one column in a PRIMARY KEY, UNIQUE, CHECK, or FOREIGN KEY constraint definition. Column-level constraints (except for check constraints) refer to only one column.</p>
+<p>
+<strong>Syntax</strong>
+</p>
+</div>
+<a name="N100A7"></a><a name="Column-Level-Constraint"></a>
+<h3>Column-Level-Constraint</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>{
+    NOT NULL |
+    [ [CONSTRAINT constraint-Name]
+    {
+        CHECK (searchCondition) |
+        {
+            PRIMARY KEY |
+            UNIQUE |
+            ReferencesSpecification
+        } 
+    }
+}</strong>
+
+</pre>
+</div>
+<a name="N100B0"></a><a name="Table-Level+Constraint"></a>
+<h3>Table-Level Constraint</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>[CONSTRAINT constraint-Name]
+{
+    CHECK (searchCondition) |
+    {
+        PRIMARY KEY ( Simple-column-Name [ , Simple-column-Name ]* ) |
+        UNIQUE ( Simple-column-Name [ , Simple-column-Name ]* ) |
+        FOREIGN KEY ( Simple-column-Name [ , Simple-column-Name ]* )
+            ReferencesSpecification
+    }
+}</strong>
+
+</pre>
+</div>
+<a name="N100B9"></a><a name="ReferencesSpecification"></a>
+<h3>ReferencesSpecification</h3>
+<div style="margin-left: 0 ; border: 2px">
+<pre>
+<strong>REFERENCES table-Name [ ( Simple-column-Name [ , Simple-column-Name ]* ) ]
+[ ON DELETE {NO ACTION | RESTRICT | CASCADE | SET NULL}]
+   [ ON UPDATE {NO ACTION | RESTRICT }]
+|
+[ ON UPDATE {NO ACTION | RESTRICT }] [ ON DELETE
+   {NO ACTION | RESTRICT | CASCADE | SET NULL}]</strong> 
+
+</pre>
+</div>
+<a name="N100C2"></a><a name="searchCondition"></a>
+<h3>searchCondition</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>A <em>searchCondition</em> is any <a href="sqlj148.html#HDRSII-SQLJ-23075">Boolean expression</a> that meets the requirements specified in <a href="#HDRSII-SQLJ-57077">Requirements for Search Condition</a>.</p>
+<p>If a <em>constraint-Name</em> is not specified, Derby generates a unique constraint name (for either column or table constraints).</p>
+<p>
+<strong>Primary Key and Unique Constraints</strong>
+</p>
+<p>
+<a name="IDX839"></a>  A primary key defines the set of columns that uniquely identifies rows in a table.</p>
+<p>When you create a primary key constraint, none of the columns included in the primary key can have NULL constraints; that is, they must not permit NULL values.</p>
+<p>ALTER TABLE ADD PRIMARY KEY allows you to include existing columns in a primary key if they were first defined as NOT NULL. NULL values are not allowed. If the column(s) contain NULL values, the system will not add the primary key constraint. See <a href="sqlj26.html#HDRSII-SQLJ-33145">ALTER TABLE</a> for more information.</p>
+<p>A table can have at most one PRIMARY KEY constraint, but can have multiple UNIQUE constraints.</p>
+<p>
+<strong>Foreign Key Constraints</strong>
+</p>
+<p>
+<a name="IDX841"></a>  Foreign keys provide a way to enforce the referential integrity of a database. A foreign key is a column or group of columns within a table that references a key in some other table (or sometimes, though rarely, the same table). The foreign key must always include the columns of which the types exactly match those in the referenced primary key or unique constraint.</p>
+<p>For a table-level foreign key constraint in which you specify the columns in the table that make up the constraint, you cannot use the same column more than once.</p>
+<p>If there is a column list in the <em>ReferencesSpecification</em> (a list of columns in the referenced table), it must correspond either to a unique constraint or to a primary key constraint in the referenced table. The <em>ReferencesSpecification</em> can omit the column list for the referenced table if that table has a declared primary key.</p>
+<p>If there is no column list in the <em>ReferencesSpecification</em> and the referenced table has no primary key, a statement exception is thrown. (This means that if the referenced table has only unique keys, you must include a column list in the <em>ReferencesSpecification.</em>)</p>
+<p>A foreign key constraint is satisfied if there is a matching value in the referenced unique or primary key column. If the foreign key consists of multiple columns, the foreign key value is considered NULL if any of its columns contains a NULL.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>It is possible for a foreign key consisting of multiple columns to allow one of the columns to contain a value for which there is no matching value in the referenced columns, per the SQL-92 standard. To avoid this situation, create NOT NULL constraints on all of the foreign key's columns.</dd>
+</dl>
+<p>
+<strong>Foreign Key Constraints and DML</strong>
+</p>
+<p>When you insert into or update a table with an enabled foreign key constraint, Derby checks that the row does not violate the foreign key constraint by looking up the corresponding referenced key in the referenced table. If the constraint is not satisfied, Derby rejects the insert or update with a statement exception.</p>
+<p>When you update or delete a row in a table with a referenced key (a primary or unique constraint referenced by a foreign key), Derby checks every foreign key constraint that references the key to make sure that the removal or modification of the row does not cause a constraint violation. If removal or modification of the row would cause a constraint violation, the update or delete is not permitted and Derby throws a statement exception.</p>
+<p>Derby performs constraint checks at the time the statement is executed, not when the transaction commits.</p>
+<p>
+<strong>Backing Indexes</strong>
+</p>
+<p>
+<a name="IDX843"></a>  UNIQUE, PRIMARY KEY, and FOREIGN KEY constraints generate indexes that enforce or "back" the constraint (and are sometimes called <em>backing indexes</em>). UNIQUE and PRIMARY KEY constraints generate unique indexes. FOREIGN KEY constraints generate non-unique indexes. Therefore, if a column or set of columns has a UNIQUE, PRIMARY KEY, or FOREIGN KEY constraint on it, you do not need to create an index on those columns for performance. Derby has already created it for you. See <a href="sqlj27.html#HDRSII-SQLJ-27363">Indexes and Constraints</a>.</p>
+<p>
+<a name="IDX845"></a>    For backing indexes, you can specify only page size.</p>
+<p>These indexes are available to the optimizer for query optimization (see <a href="sqlj27.html#HDRSII-SQLJ-20937">CREATE INDEX statement</a>) and have system-generated names.</p>
+<p>You cannot drop backing indexes with a DROP INDEX statement; you must drop the constraint or the table.</p>
+<p>
+<strong>Check Constraints</strong>
+</p>
+<p>
+<a name="IDX849"></a> A check constraint can be used to specify a wide range of rules for the contents of a table. A search condition (which is a boolean expression) is specified for a check constraint. This search condition must be satisfied for all rows in the table. The search condition is applied to each row that is modified on an INSERT or UPDATE at the time of the row modification. The entire statement is aborted if any check constraint is violated.</p>
+<p>
+<a name="HDRSII-SQLJ-57077"></a><strong>Requirements for Search Condition</strong>
+</p>
+<p>If a check constraint is specified as part of a column-definition, a column reference can only be made to the same column. Check constraints specified as part of a table definition can have column references identifying columns previously defined in the CREATE TABLE statement.</p>
+<p>The search condition must always return the same value if applied to the same values. Thus, it cannot contain any of the following:</p>
+<ul>
+<li>Dynamic parameters (?)</li>
+<li>Date/Time Functions (CURRENT_DATE, CURRENT_TIME, CURRENT_TIMESTAMP)</li>
+<li>Subqueries</li>
+<li>User Functions (such as USER, SESSION_USER, CURRENT_USER)</li>
+</ul>
+<p>
+<strong>Referential Actions</strong>
+</p>
+<p>
+<a name="IDX850"></a>  You can specify an ON DELETE clause and/or an ON UPDATE clause, followed by the appropriate action (CASCADE, RESTRICT, SET NULL, or NO ACTION) when defining foreign keys. These clauses specify whether Derby should modify corresponding foreign key values or disallow the operation, to keep foreign key relationships intact when a primary key value is updated or deleted from a table.</p>
+<p>You specify the update and delete rule of a referential constraint when you define the referential constraint.</p>
+<p>The update rule applies when a row of either the parent or dependent table is updated. The choices are NO ACTION and RESTRICT.</p>
+<p>When a value in a column of the parent table's primary key is updated and the update rule has been specified as RESTRICT, Derby checks dependent tables for foreign key constraints. If any row in a dependent table violates a foreign key constraint, the transaction is rolled back.</p>
+<p>If the update rule is NO ACTION, Derby checks the dependent tables for foreign key constraints <em>after</em> all deletes have been executed but <em>before</em> triggers have been executed. If any row in a dependent table violates a foreign key constraint, the statement is rejected.</p>
+<p>When a value in a column of the dependent table is updated, and that value is part of a foreign key, NO ACTION is the implicit update rule. NO ACTION means that if a foreign key is updated with a non-null value, the update value must match a value in the parent table's primary key when the update statement is completed. If the update does not match a value in the parent table's primary key, the statement is rejected.</p>
+<p>The delete rule applies when a row of the parent table is deleted and that row has dependents in the dependent table of the referential constraint. If rows of the dependent table are deleted, the delete operation on the parent table is said to be <em>propagated</em> to the dependent table. If the dependent table is also a parent table, the action specified applies, in turn, to its dependents.</p>
+<p>The choices are NO ACTION, RESTRICT, CASCADE, or SET NULL. SET NULL can be specified only if some column of the foreign key allows null values.</p>
+<p>If the delete rule is:</p>
+<p>NO ACTION, Derby checks the dependent tables for foreign key constraints <em>after</em> all deletes have been executed but <em>before</em> triggers have been executed. If any row in a dependent table violates a foreign key constraint, the statement is rejected.</p>
+<p>RESTRICT, Derby checks dependent tables for foreign key constraints. If any row in a dependent table violates a foreign key constraint, the transaction is rolled back.</p>
+<p>CASCADE, the delete operation is propagated to the dependent table (and that table's dependents, if applicable).</p>
+<p>SET NULL, each nullable column of the dependent table's foreign key is set to null. (Again, if the dependent table also has dependent tables, nullable columns in those tables' foreign keys are also set to null.)</p>
+<p>Each referential constraint in which a table is a parent has its own delete rule; all applicable delete rules are used to determine the result of a delete operation. Thus, a row cannot be deleted if it has dependents in a referential constraint with a delete rule of RESTRICT or NO ACTION. Similarly, a row cannot be deleted if the deletion cascades to any of its descendants that are dependents in a referential constraint with the delete rule of RESTRICT or NO ACTION.</p>
+<p>Deleting a row from the parent table involves other tables. Any table involved in a delete operation on the parent table is said to be delete-connected to the parent table. The delete can affect rows of these tables in the following ways:</p>
+<ul>
+<li>If the delete rule is RESTRICT or NO ACTION, a dependent table is involved in the operation but is not affected by the operation. (That is, Derby checks the values within the table, but does not delete any values.)</li>
+<li>If the delete rule is SET NULL, a dependent table's rows can be updated when a row of the parent table is the object of a delete or propagated delete operation.</li>
+<li>If the delete rule is CASCADE, a dependent table's rows can be deleted when a parent table is the object of a delete.</li>
+<li>If the dependent table is also a parent table, the actions described in this list apply, in turn, to its dependents.</li>
+</ul>
+<p>
+<a name="HDRSII-SQLJ-IDX6080"></a><strong>Examples</strong>
+</p>
+<pre>
+<strong>-- column-level primary key constraint named OUT_TRAY_PK:
+CREATE TABLE SAMP.OUT_TRAY
+    (
+    SENT TIMESTAMP,
+    DESTINATION CHAR(8),
+    SUBJECT CHAR(64) NOT NULL CONSTRAINT OUT_TRAY_PK PRIMARY KEY,
+    NOTE_TEXT VARCHAR(3000) 
+   );
+ 
+-- the table-level primary key definition allows you to
+-- include two columns in the primary key definition:
+CREATE TABLE SAMP.SCHED 
+    (
+    CLASS_CODE CHAR(7) NOT NULL, 
+    DAY SMALLINT NOT NULL, 
+    STARTING TIME, 
+    ENDING TIME,
+    PRIMARY KEY (CLASS_CODE, DAY)
+    );
+ 
+-- Use a column-level constraint for an arithmetic check
+-- Use a table-level constraint
+-- to make sure that a employee's taxes does not 
+-- exceed the bonus
+CREATE TABLE SAMP.EMP 
+    (
+    EMPNO CHAR(6) NOT NULL CONSTRAINT EMP_PK PRIMARY KEY,
+    FIRSTNME CHAR(12) NOT NULL,
+    MIDINIT vARCHAR(12) NOT NULL,
+    LASTNAME VARCHAR(15) NOT NULL,
+    SALARY DECIMAL(9,2) CONSTRAINT SAL_CK CHECK (SALARY &gt;= 10000),
+    BONUS DECIMAL(9,2), 
+    TAX DECIMAL(9,2),
+    CONSTRAINT BONUS_CK CHECK (BONUS &gt; TAX)
+    );
+ 
+-- use a check constraint to allow only appropriate
+-- abbreviations for the meals
+CREATE TABLE FLIGHTS
+    (
+    FLIGHT_ID CHAR(6) NOT NULL ,
+    SEGMENT_NUMBER INTEGER NOT NULL ,
+    ORIG_AIRPORT CHAR(3),
+    DEPART_TIME TIME,
+    DEST_AIRPORT CHAR(3),
+    ARRIVE_TIME TIME,
+    MEAL CHAR(1) CONSTRAINT MEAL_CONSTRAINT 
+    CHECK (MEAL IN ('B', 'L', 'D', 'S')),
+    PRIMARY KEY (FLIGHT_ID, SEGMENT_NUMBER)
+    );
+ 
+CREATE TABLE METROPOLITAN
+    (
+    HOTEL_ID INT NOT NULL CONSTRAINT HOTELS_PK PRIMARY KEY,
+    HOTEL_NAME VARCHAR(40) NOT NULL,
+    CITY_ID INT CONSTRAINT METRO_FK REFERENCES CITIES
+    );
+ 
+-- create a table with a table-level primary key constraint
+-- and a table-level foreign key constraint 
+CREATE TABLE FLTAVAIL
+    (
+    FLIGHT_ID CHAR(6) NOT NULL, 
+    SEGMENT_NUMBER INT NOT NULL, 
+    FLIGHT_DATE DATE NOT NULL, 
+    ECONOMY_SEATS_TAKEN INT,
+    BUSINESS_SEATS_TAKEN INT,
+    FIRSTCLASS_SEATS_TAKEN INT, 
+    CONSTRAINT FLTAVAIL_PK PRIMARY KEY (FLIGHT_ID, SEGMENT_NUMBER), 
+    CONSTRAINT FLTS_FK
+    FOREIGN KEY (FLIGHT_ID, SEGMENT_NUMBER)
+    REFERENCES Flights (FLIGHT_ID, SEGMENT_NUMBER)
+    );
+ -- add a unique constraint to a column 
+ALTER TABLE SAMP.PROJECT 
+ADD CONSTRAINT P_UC UNIQUE (PROJNAME);
+ 
+-- create a table whose city_id column references the
+-- primary key in the Cities table
+-- using a column-level foreign key constraint 
+CREATE TABLE CONDOS
+    (
+    CONDO_ID INT NOT NULL CONSTRAINT hotels_PK PRIMARY KEY,
+    CONDO_NAME VARCHAR(40) NOT NULL,
+    CITY_ID INT CONSTRAINT city_foreign_key
+    REFERENCES Cities ON DELETE CASCADE ON UPDATE RESTRICT
+    );</strong>
+
+</pre>
+<p>
+<strong>Statement Dependency System</strong>
+</p>
+<p>INSERT and UPDATE statements depend on all constraints on the target table. DELETEs depend on unique, primary key, and foreign key constraints. These statements are invalidated if a constraint is added to or dropped from the target table.</p>
+<hr>
+<a href="sqlj31.html">Previous Page</a>
+<br>
+<a href="sqlj33.html">Next Page</a>
+<br>
+<a href="sqlj02.html#ToC">Table of Contents</a>
+<br>
+<a href="sqlj275.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

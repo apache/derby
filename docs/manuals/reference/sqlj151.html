@@ -1,0 +1,1783 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Derby Support for SQL-92 Features</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Derby Support for SQL-92 Features</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Derby+Support+for+SQL-92+Features">Derby Support for SQL-92 Features</a>
+</li>
+</ul>
+<a name="N10043"></a><a name="Derby+Support+for+SQL-92+Features"></a>
+<h3>Derby Support for SQL-92 Features</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>
+<a href="#TBLSQL921038347">Table 9</a> shows the SQL-92 features that Derby 10 supports. There are four levels of SQL-92 support:</p>
+<ul>
+<li>SQL92E <p>Entry</p>
+</li>
+<li>SQL92T <p>Transitional, a level defined by NIST in a publication called FIPS 127-2</p>
+</li>
+<li>SQL92I <p>Intermediate</p>
+</li>
+<li>SQL92F <p>Full</p>
+</li>
+</ul>
+<p>
+<br>
+</p>
+<p>
+<strong>Table 9. Support for SQL-92 Features</strong>
+<br>
+</p>
+<table class="ForrestTable" cellspacing="1" cellpadding="4">
+<tr>
+<th colspan="2"><a name="WQ87"></a>Feature</th><th><a name="WQ89"></a>Source</th><th><a name="WQ90"></a>Derby 10</th>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Basic types</em> </td><td headers="WQ89" rowspan="9" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">SMALLINT</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">INTEGER</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">DECIMAL(p,s)</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">NUMERIC(p,s)</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">REAL</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">FLOAT(p)</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">DOUBLE PRECISION</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CHAR(n)</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Basic math operations</em> </td><td headers="WQ89" rowspan="2" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">+, *, -, /, unary +, unary -</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Basic comparisons</em> </td><td headers="WQ89" rowspan="2" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">&lt;, &gt;, &lt;= ,&gt;=, &lt;&gt;, =</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Basic predicates</em> </td><td headers="WQ89" rowspan="2" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">BETWEEN, LIKE, NULL</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Quantified predicates</em> </td><td headers="WQ89" rowspan="2" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">IN, ALL/SOME, EXISTS</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>schema definition</em> </td><td headers="WQ89" rowspan="4" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">tables</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">views</td><td headers="WQ90" width="31%">yes (not updatable)</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">privileges</td><td headers="WQ90" width="31%">no, but you can configure databases for user authentication and restriction to read-only access</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>column attributes</em> </td><td headers="WQ89" rowspan="3" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">default values</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">nullability</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>constraints (non-deferrable)</em> </td><td headers="WQ89" rowspan="6" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">NOT NULL</td><td headers="WQ90" width="31%">yes (not stored in SYSCONSTRAINTS)</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">UNIQUE/PRIMARY KEY</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">FOREIGN KEY</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CHECK</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">View WITH CHECK OPTION</td><td headers="WQ90" width="31%">no, since views are not updatable</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Delimited identifiers</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Correlated subqueries</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Cursors</em> </td><td headers="WQ89" rowspan="3" width="25%">SQL92E</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">DECLARE, OPEN, FETCH, CLOSE</td><td headers="WQ90" width="31%">done through JDBC</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">UPDATE, DELETE CURRENT</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Insert, Update, Delete statements</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Joins</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Where qualifications</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Group by</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Having</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Aggregate functions</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Order by</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Select expressions</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Select *</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">SQLCODE</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">no, deprecated in SQL-92</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">SQLSTATE</td><td headers="WQ89" width="25%">SQL92E</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Dynamic SQL 1</em> </td><td headers="WQ89" rowspan="5" width="25%">SQL92T</td><td headers="WQ90" rowspan="5" width="31%">done through JDBC</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">ALLOCATE/DEALLOCATE/ GET/SET DESCRIPTOR</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">PREPARE/EXECUTE/ EXECUTE IMMEDIATE</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">DECLARE, OPEN, FETCH, CLOSE, UPDATE, DELETE dynamic cursor</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">DESCRIBE output</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Basic information schema</em> </td><td headers="WQ89" rowspan="4" width="25%">SQL92T</td><td headers="WQ90" rowspan="4" width="31%"><em>SYS.SYSTABLES, SYS.SYSVIEWS, SYS.SYSCOLUMNS</em> </td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">TABLES</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">VIEWS</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">COLUMNS</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Basic schema manipulation</em> </td><td headers="WQ89" rowspan="6" width="25%">SQL92T</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CREATE/DROP TABLE</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CREATE/DROP VIEW</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">GRANT/REVOKE</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">ALTER TABLE ADD COLUMN</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">ALTER TABLE DROP COLUMN</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Joined table</em> </td><td headers="WQ89" rowspan="6" width="25%">SQL92T</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">INNER JOIN</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">natural join</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">LEFT, RIGHT OUTER JOIN</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">join condition</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">named columns join</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>DATETIME data types 1</em> </td><td headers="WQ89" rowspan="6" width="25%">SQL92T</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">simple DATE, TIME, TIMESTAMP, INTERVAL</td><td headers="WQ90" width="31%">yes, not INTERVAL</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">datetime constants</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">datetime math</td><td headers="WQ90" width="31%">can do with Java methods</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">datetime comparisons</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">predicates: OVERLAPS</td><td headers="WQ90" width="31%">can do with Java methods</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>VARCHAR</em> </td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">LENGTH</td><td headers="WQ89" rowspan="2" width="25%">
+<br>
+</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">concatenation (||)</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">UNION in views</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Implicit numeric casting</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Implicit character casting</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Transaction isolation</em> </td><td headers="WQ89" rowspan="3" width="25%">SQL92T</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">READ WRITE/READ ONLY</td><td headers="WQ90" width="31%">through JDBC, database properties, and storage media.</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">RU, RC, RR, SER</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Get diagnostics</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">use JDBC <em>SQLExceptions</em> </td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Grouped operations</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Qualified * in select list</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Lowercase identifiers</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">nullable PRIMARY KEYs</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Multiple schemas per user</em> </td><td headers="WQ89" rowspan="2" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">SCHEMATA view</td><td headers="WQ90" width="31%"><em>SYS.SYSSCHEMAS</em> </td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Multiple module support</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">no (not required and not part of JDBC)</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Referential delete actions</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">CASCADE, SET NULL, RESTRICT, and NO ACTION.</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">CAST functions</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">INSERT expressions</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Explicit defaults</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Privilege tables</em> </td><td headers="WQ89" rowspan="4" width="25%">SQL92T</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">TABLE_PRIVILEGES</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">COLUMNS_PRIVILEGES</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">USAGE_PRIVILEGES</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Keyword relaxations</td><td headers="WQ89" width="25%">SQL92T</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Domain definition</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">CASE expression</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">partial support</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Compound character string constantss</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">use concatenation</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">LIKE enhancements</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">UNIQUE predicate</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Table operations</em> </td><td headers="WQ89" rowspan="5" width="25%">SQL92I</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">UNION relaxations</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">EXCEPT</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">INTERSECT</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CORRESPONDING</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Schema definition statement</em> </td><td headers="WQ89" rowspan="2" width="25%">SQL92I</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CREATE SCHEMA</td><td headers="WQ90" width="31%">yes, partially</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>User authorization</em> </td><td headers="WQ89" rowspan="5" width="25%">SQL92I</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">SET SESSION AUTHORIZATION</td><td headers="WQ90" width="31%">use set schema</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CURRENT_USER</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">SESSION_USER</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">SYSTEM_USER</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Constraint tables</em> </td><td headers="WQ89" rowspan="4" width="25%">SQL92I</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">TABLE_CONSTRAINTS</td><td headers="WQ90" width="31%"><em>SYS.SYSCONSTRAINTS</em> </td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">REFERENTIAL_CONSTRAINTS</td><td headers="WQ90" width="31%"><em>SYS.SYSFOREIGNKEYS</em> </td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">CHECK_CONSTRAINTS</td><td headers="WQ90" width="31%"><em>SYS.SYSCHECKS</em> </td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Usage tables</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%"><em>SYS.SYSDEPENDS</em> </td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Intermediate information schema</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">use JDBC <em>DatabaseMetaData</em> and Derby system tables</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Subprogram support</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">not relevant to JDBC, which is much richer</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Intermediate SQL Flagging</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Schema manipulation</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">yes, to drop a default, set it to NULL.</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Long identifiers</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Full outer join</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Time zone specification</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Scrolled cursors</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">partial (scrolling insensitive result sets through JDBC 2.0)</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Intermediate set function support</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">partial</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Character set definition</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">supports Java locales</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Named character sets</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">supports Java locales</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Scalar subquery values</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Expanded null predicate</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Constraint management</td><td headers="WQ89" width="25%">SQL92I</td><td headers="WQ90" width="31%">yes (ADD/DROP CONSTRAINT)</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Documentation schema</em> </td><td headers="WQ89" rowspan="3" width="25%">SQL92I/FIPS 127-2</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">SQL_FEATURES</td><td headers="WQ90" width="31%">use JDBC <em>DatabaseMetaData</em> </td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">SQL_SIZING</td><td headers="WQ90" width="31%">use JDBC <em>DatabaseMetaData</em> </td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">FOR BIT DATA types</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Assertion constraints</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Temporary tables</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">IBM specific syntax only</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Full dynamic SQL</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Full DATETIME</em> </td><td headers="WQ89" rowspan="2" width="25%">SQL92F</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">precision for TIME and TIMESTAMP</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Full value expressions</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Truth value tests</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%"><em>Full character functions</em> </td><td headers="WQ89" rowspan="3" width="25%">SQL92F</td><td headers="WQ90" width="31%">
+<br>
+</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">POSITION expression</td><td headers="WQ90" width="31%">use Java methods or LOCATE</td>
+</tr>
+<tr>
+<td headers="WQ87" width="4%">
+<br>
+</td><td headers="WQ87" width="40%">UPPER/LOWER functions</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Derived tables in FROM</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Trailing underscore</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Indicator data types</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">not relevant to JDBC</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Referential name order</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Full SQL Flagging</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Row and table constructors</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Catalog name qualifiers</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Simple tables</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Subqueries in CHECK</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no, but can do with Java methods</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Union join</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Collation and translation</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">Java locales supported</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Referential update actions</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">RESTRICT and NO ACTION. Can do others with triggers.</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">ALTER domain</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">INSERT column privileges</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Referential MATCH types</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">View CHECK enhancements</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no, views not updateable</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Session management</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">use JDBC</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Connection management</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">use JDBC</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Self-referencing operations</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">yes</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Insensitive cursors</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">Yes through JDBC 2.0</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Full set function</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">partially</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Catalog flagging</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Local table references</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+<tr>
+<td colspan="2" headers="WQ87" width="44%">Full cursor update</td><td headers="WQ89" width="25%">SQL92F</td><td headers="WQ90" width="31%">no</td>
+</tr>
+</table>
+<hr>
+<a href="sqlj150.html">Previous Page</a>
+<br>
+<a href="sqlj152.html">Next Page</a>
+<br>
+<a href="sqlj02.html#ToC">Table of Contents</a>
+<br>
+<a href="sqlj275.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>

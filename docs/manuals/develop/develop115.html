@@ -1,0 +1,1214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Working with Encryption</title>
+<link type="text/css" href="../../skin/page.css" rel="stylesheet">
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+<!--================= start Navigation Path ==================-->
+<table summary="navigation path" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td nowrap="nowrap" valign="middle" bgcolor="#CFDCED" height="20"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><!--===== breadcrumb trail (javascript-generated) ====--><font size="2" face="Arial, Helvetica, Sans-serif"><script src="../../skin/breadcrumbs.js" language="JavaScript" type="text/javascript"></script></font></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" height="2"><img height="2" width="2" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Navigation Path ==================-->
+<!--================= start Banner ==================-->
+<table summary="header with logos" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<!--================= start Group Logo ==================-->
+<td bgcolor="#294563"><a href="http://incubator.apache.org"><img border="0" class="logoImage" alt="" src="../../resources/images/apache-incubator.png" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Group Logo ==================-->
+<!--================= start Project Logo ==================--><td width="100%" align="center" bgcolor="#294563"><a href="http://incubator.apache.org/derby/"><img border="0" class="logoImage" alt="Derby" src="../../images/derby-logo.jpg" title="Derby is a zero admin java based embedded database."></a></td>
+<!--================= end Project Logo ==================-->
+<!--================= start Search ==================--><td valign="top" rowspan="2" bgcolor="#294563">
+<form target="_blank" action="http://www.google.com/search" method="get">
+<table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="#4C6C8F">
+<tr>
+<td colspan="3"><img height="10" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap"><input value="incubator.apache.org" name="sitesearch" type="hidden"><input size="15" name="q" id="query" type="text"><img height="1" width="5" alt="" src="../../skin/images/spacer.gif" class="spacer"><input name="Search" value="Search" type="submit">
+<br>
+<font face="Arial, Helvetica, Sans-serif" size="2" color="white">
+                      the Derby site
+                      
+                      
+                    </font></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-left.gif"></td><td><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td><img alt="" border="0" height="10" width="9" src="../../skin/images/search-right.gif"></td>
+</tr>
+</table>
+</form>
+</td>
+<!--================= start Search ==================--><td bgcolor="#294563"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" bgcolor="#294563" colspan="2">
+<!--================= start Tabs ==================-->
+<div class="tab">
+<table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../index.html">Home</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="selected tab" style="height: 1.8em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-left.gif"></td><td valign="middle" bgcolor="#4C6C8F"><font color="#ffffff" size="2" face="Arial, Helvetica, Sans-serif"><b><a class="base-selected" href="../../manuals/index.html">Manuals</a></b></font></td><td valign="top" width="5" bgcolor="#4C6C8F"><img height="5" width="5" alt="" src="../../skin/images/tabSel-right.gif"></td>
+</tr>
+</table>
+</td><td width="6"><img alt="" height="8" width="6" src="../../skin/images/spacer.gif"></td><td valign="bottom">
+<table summary="non selected tab" style="height: 1.6em" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-left.gif"></td><td valign="middle" bgcolor="#B2C4E0"><a class="base-not-selected" href="../../papers/index.html">Papers</a></td><td valign="top" width="5" bgcolor="#B2C4E0"><img height="5" width="5" alt="" src="../../skin/images/tab-right.gif"></td>
+</tr>
+<tr>
+<td colspan="3" height="1"></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<!--================= end Tabs ==================-->
+</td><td bgcolor="#294563"><img alt="" width="1" height="1" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#4C6C8F" colspan="4"><img width="1" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+<!--================= end Banner ==================-->
+<!--================= start Menu, NavBar, Content ==================-->
+<table summary="page content" bgcolor="#ffffff" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table summary="menu" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<!--================= start left top NavBar ==================-->
+<td rowspan="3" valign="top">
+<table summary="blue line" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td bgcolor="#CFDCED"><font color="#4C6C8F" size="4" face="Arial, Helvetica, Sans-serif">&nbsp;</font></td>
+</tr>
+<tr>
+<td bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td>
+<!--================= end left top NavBar ==================--><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td nowrap="nowrap" valign="top" bgcolor="#4C6C8F">
+<!--================= start Menu items ==================-->
+<div class="menu">
+<ul>
+<li>
+<font color="#CFDCED">Manuals</font>
+<ul>
+     
+<li>
+<a href="../../manuals/index.html">About</a>
+</li>
+     
+<li>
+<font color="#CFDCED">Getting Started</font>
+<ul>
+         
+<li>
+<a href="../../manuals/getstart/gspr02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/getstart/gspr40.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Reference Manual</font>
+<ul>
+         
+<li>
+<a href="../../manuals/reference/sqlj02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/reference/sqlj275.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Developer's Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/develop/develop02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/develop/develop157.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+     
+<li>
+<font color="#CFDCED">Tuning Derby</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tuning/perf02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tuning/perf121.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+     
+</ul>
+</li>
+
+     
+<li>
+<font color="#CFDCED">Server &amp; Admin Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/admin/hubprnt02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/admin/hubprnt65.html" title="Index">Index</a>
+</li>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+        
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+</ul>
+</li>
+
+    
+<li>
+<font color="#CFDCED">Tools &amp; Utility Guide</font>
+<ul>
+         
+<li>
+<a href="../../manuals/tools/tools02.html" title="Table of Contents">Table of Contents</a>
+</li>
+         
+<li>
+<a href="../../manuals/tools/tools113.html" title="Index">Index</a>
+</li>
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+    
+</ul>
+</li>
+  
+</ul>
+</li>
+</ul>
+</div>
+<!--================= end Menu items ==================-->
+</td><td valign="bottom" bgcolor="#4C6C8F"><img width="10" height="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td valign="bottom" align="left" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-left.gif"></td><td bgcolor="#4C6C8F"><img height="10" width="10" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td valign="bottom" align="right" colspan="2" rowspan="2" bgcolor="#4C6C8F"><img height="10" width="10" border="0" alt="" src="../../skin/images/menu-right.gif"></td>
+</tr>
+<tr>
+<td height="1" bgcolor="#294563"><img width="1" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+</table>
+</td><td valign="top" width="100%">
+<table summary="content" width="100%" border="0" cellpadding="0" cellspacing="0">
+<!--================= start middle NavBar ==================-->
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td align="left" width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="left" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td align="right" width="50%" bgcolor="#CFDCED"><font color="#4C6C8F" size="3" face="Arial, Helvetica, Sans-serif">
+                &nbsp;
+                
+                </font><img width="10" height="8" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td width="10" bgcolor="#CFDCED"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<tr>
+<td colspan="4" bgcolor="#294563"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end middle NavBar ==================-->
+<!--================= start Content==================-->
+<tr>
+<td align="left" width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td><td colspan="2" align="left" width="100%">
+<div class="content">
+<table class="title" summary="">
+<tr>
+<td valign="middle">
+<h1>Working with Encryption</h1>
+</td>
+</tr>
+</table>
+<ul class="minitoc">
+<li>
+<a href="#Working+with+Encryption">Working with Encryption</a>
+</li>
+<li>
+<a href="#Encrypting+Databases+on+Creation">Encrypting Databases on Creation</a>
+</li>
+<li>
+<a href="#Creating+the+Boot+Password">Creating the Boot Password</a>
+</li>
+<li>
+<a href="#Specifying+an+Alternate+Encryption+Provider">Specifying an Alternate Encryption Provider</a>
+</li>
+<li>
+<a href="#Specifying+an+Alternate+Encryption+Algorithm">Specifying an Alternate Encryption Algorithm</a>
+</li>
+<li>
+<a href="#Booting+an+Encrypted+Database">Booting an Encrypted Database</a>
+</li>
+<li>
+<a href="#Changing+the+Boot+Password">Changing the Boot Password</a>
+</li>
+</ul>
+<a name="N1003F"></a><a name="Working+with+Encryption"></a>
+<h3>Working with Encryption</h3>
+<div style="margin-left: 0 ; border: 2px">
+<ul>
+<li>
+<a href="#HDRSII-CSECUR-88690">Encrypting Databases on Creation</a>
+</li>
+<li>
+<a href="#HDRSII-CSECUR-60146">Booting an Encrypted Database</a>
+</li>
+<li>
+<a href="#HDRSII-CSECUR-55054">Changing the Boot Password</a>
+</li>
+</ul>
+</div>
+<a name="N10050"></a><a name="Encrypting+Databases+on+Creation"></a>
+<h3>Encrypting Databases on Creation</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Derby allows you to configure a database for encryption when you create it. To do so, you specify <em>dataEncryption=true</em> on the connection URL.</p>
+<p>The Java Runtime Environment (JRE) determines the default encryption provider, as follows:</p>
+<ul>
+<li>For J2SE/J2EE 1.4 or higher, the JRE's provider is the default.</li>
+<li>For an IBM Corp J2SE/J2EE 1.3 JRE, the default provider is <em>com.ibm.crypto.provider</em>.</li>
+<li>For a Sun Microsystem J2SE/J2EE 1.3 JRE, the default provider is <em>com.sun.crypto.provider.SunJCE</em>.</li>
+<li>For any other J2SE/J2EE 1.3 JRE, a provider must be specified.</li>
+</ul>
+<p>You have the option of specifying an alternate encryption provider; see <a href="#HDRSII-CSECUR-31493">Specifying an Alternate Encryption Provider</a>. The default encryption algorithm is DES, but you have the option of specifying an alternate algorithm; see <a href="#HDRSII-CSECUR-67151">Specifying an Alternate Encryption Algorithm</a>.</p>
+</div>
+<a name="N10075"></a><a name="Creating+the+Boot+Password"></a>
+<h3>Creating the Boot Password</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>When you encrypt a database you must also specify a boot password, which is an alpha-numeric string used to generate the encryption key. The length of the encryption key depends on the algorithm used:</p>
+<ul>
+<li>DES (the default) (56 bits)</li>
+<li>DESede (168 bits)</li>
+<li>all other algorithms (128 bits)</li>
+</ul>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>The boot password should have at least as many characters as number of bytes in the encryption key (56 bits=8 bytes, 168 bits=24 bytes, 128 bits=16 bytes). The minimum number of characters for the boot password allowed by Derby is eight.</dd>
+</dl>
+<p>It is a good idea not to use words that would be easily guessed, such as a login name or simple words or numbers. A <em>bootPassword</em>, like any password, should be a mix of numbers and upper- and lowercase letters.</p>
+<p>You turn on and configure encryption and specify the corresponding boot password on the connection URL for a database when you create it:</p>
+<pre>jdbc:derby:encryptionDB1;create=true;dataEncryption=true;
+    bootPassword=clo760uds2caPe
+</pre>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>If you lose the <em>bootPassword</em> and the database is not currently booted, you will not be able to connect to the database anymore. (If you know the current <em>bootPassword</em>, you can change it. See <a href="#HDRSII-CSECUR-55054">Changing the Boot Password</a>.)</dd>
+</dl>
+</div>
+<a name="N100A2"></a><a name="Specifying+an+Alternate+Encryption+Provider"></a>
+<h3>Specifying an Alternate Encryption Provider</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You can specify an alternate provider when you create the database with the <tt><em>encryptionProvider=providerName</em></tt> attribute.</p>
+<p>You must specify the full package and class name of the provider, and you must also add the libraries to the application's class path.</p>
+<pre>
+<strong>-- using the the provider library jce_jdk13-10b4.zip|
+-- available from www.bouncycastle.org</strong>
+jdbc:derby:encryptedDB3;create=true;dataEncryption=true;
+bootPassword=clo760uds2caPe;
+encryptionProvider=org.bouncycastle.jce.provider.BouncyCastleProvider;
+encryptionAlgorithm=DES/CBC/NoPadding
+ 
+<strong>-- using a provider
+-- available from
+-- http://jcewww.iaik.tu-graz.ac.at/download.html</strong>
+jdbc:derby:encryptedDB3;create=true;dataEncryption=true;
+bootPassword=clo760uds2caPe;
+encryptionProvider=iaik.security.provider.IAIK;encryptionAlgorithm=
+DES/CBC/NoPadding
+</pre>
+</div>
+<a name="N100B6"></a><a name="Specifying+an+Alternate+Encryption+Algorithm"></a>
+<h3>Specifying an Alternate Encryption Algorithm</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Derby supports the following encryption algorithms:</p>
+<ul>
+<li>DES (the default)</li>
+<li>DESede (also known as triple DES)</li>
+<li>Any encryption algorithm that fulfills the following requirements: <ul>
+<li>it is symmetric</li>
+<li>it is a block cipher, with a block size of 8 bytes</li>
+<li>it uses the <em>NoPadding</em> padding scheme</li>
+<li>its secret key can be represented as an arbitrary byte array</li>
+<li>it requires exactly one initialization parameter, an initialization vector of type <em>javax.crypto.spec.IvParameterSpec</em>
+</li>
+<li>it can use <em>javax.crypto.spec.SecretKeySpec</em> to represent its key</li>
+</ul>
+<p>For example, the algorithm <em>Blowfish</em> implemented in the Sun JCE package fulfills these requirements.</p>
+</li>
+</ul>
+<p>By Java convention, an encryption algorithm is specified like this:</p>
+<pre>
+<strong>algorithmName/feedbackMode/padding</strong>
+
+</pre>
+<p>The only feedback modes allowed are:</p>
+<ul>
+<li>CBC</li>
+<li>CFB</li>
+<li>ECB</li>
+<li>OCB</li>
+</ul>
+<p>By default, Derby uses the DES algorithm of <em>DES/CBC/NoPadding</em>.</p>
+<p>Specify an alternate encryption algorithm when you create a database with the <em>encryptionAlgorithm=algorithm</em> attribute. If the algorithm you specify is not supported by the provider you have specified, Derby throws an exception.</p>
+</div>
+<a name="N100F9"></a><a name="Booting+an+Encrypted+Database"></a>
+<h3>Booting an Encrypted Database</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>Once you have created an encrypted database, you must supply the boot password to reboot it. Encrypted databases cannot be booted automatically along with all other system databases on system startup (see <em>"derby.system.bootAll"</em> in <cite>Tuning Derby</cite>). Instead, you boot encrypted databases when you first connect to them.</p>
+<p>For example, to access an encrypted database called <em>wombat,</em> created with the boot password clo760uds2caPe<em>,</em> you would use the following connection URL:</p>
+<pre>jdbc:derby:wombat;bootPassword=clo760uds2caPe
+</pre>
+<p>Once the database is booted, all connections can access the database without the boot password. Only a connection that boots the database requires the key.</p>
+<p>For example, the following connections would boot the database and thus require the boot password:</p>
+<ul>
+<li>the first connection to the database in the JVM session</li>
+<li>the first connection to the database after the database has been explicitly shut down</li>
+<li>the first connection to the database after the system has been shut down and then rebooted</li>
+</ul>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>The boot password is not meant to prevent unauthorized connections to the database once it has been booted. To protect a database once it has been booted, turn on user authentication (see <a href="develop96.html#HDRSII-CSECUR-42374">Working with User Authentication</a>).</dd>
+</dl>
+</div>
+<a name="N10125"></a><a name="Changing+the+Boot+Password"></a>
+<h3>Changing the Boot Password</h3>
+<div style="margin-left: 0 ; border: 2px">
+<p>You can change the boot password for the current database.</p>
+<pre>
+<strong>CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(
+    'bootPasword', 'oldbpw , newbpw');</strong>
+
+</pre>
+<p>where <em>oldbpw</em> is the current boot password and <em>newbpw</em> is the new boot password. This call commits immediately; it is not transactional.</p>
+<dl>
+<dt>
+<strong>Note:</strong>
+</dt>
+<dd>
+<tt><em>PropertyInfo.getDatabaseProperty("bootPassword")</em></tt>, or <tt>VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('bootPassword')</tt>, will not return the boot password.</dd>
+</dl>
+<hr>
+<a href="develop114.html">Previous Page</a>
+<br>
+<a href="develop116.html">Next Page</a>
+<br>
+<a href="develop02.html#ToC">Table of Contents</a>
+<br>
+<a href="develop157.html#HDRINDEX_START">Index</a>
+</div>
+<div class="attribution"></div>
+</div>
+</td><td width="10"><img width="10" height="1" alt="" src="../../skin/images/spacer.gif" class="spacer"></td>
+</tr>
+<!--================= end Content==================-->
+</table>
+</td>
+</tr>
+</table>
+<!--================= end Menu, NavBar, Content ==================-->
+<!--================= start Footer ==================-->
+<table summary="footer" cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr>
+<td colspan="2" height="1" bgcolor="#4C6C8F"><img height="1" width="1" alt="" src="../../skin/images/spacer.gif" class="spacer"><a href="../../skin/images/label.gif"></a><a href="../../skin/images/page.gif"></a><a href="../../skin/images/chapter.gif"></a><a href="../../skin/images/chapter_open.gif"></a><a href="../../skin/images/current.gif"></a><a href="/favicon.ico"></a></td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="#CFDCED" class="copyright" align="center"><font size="2" face="Arial, Helvetica, Sans-Serif">Copyright &copy;
+          2004&nbsp;Apache Software Foundation All rights reserved.<script type="text/javascript" language="JavaScript"><!--
+              document.write(" - "+"Last Published: " + document.lastModified);
+            //  --></script></font></td>
+</tr>
+<tr>
+<td colspan="2" align="left" bgcolor="#CFDCED" class="logos"></td>
+</tr>
+</table>
+<!--================= end Footer ==================-->
+</body>
+</html>
