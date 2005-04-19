@@ -202,7 +202,6 @@ public class OnlineCompress
                     index_cc,
                     index_row);
 
-                SanityManager.DEBUG_PRINT("OnlineCompress", "index_col_map = " + index_col_map);
             }
 
 			/* Open the heap for reading */
@@ -228,9 +227,6 @@ public class OnlineCompress
                     {
                         for (int index = 0; index < num_indexes; index++)
                         {
-                            SanityManager.DEBUG_PRINT("OnlineCompress", "calling fixIndex, row = " + row + "; index = " + index);
-                SanityManager.DEBUG_PRINT("OnlineCompress", "before fixIndex call index_col_map = " + index_col_map);
-                SanityManager.DEBUG_PRINT("OnlineCompress", "before fixIndex call index_col_map[0] = " + index_col_map[0]);
                             fixIndex(
                                 row_array[row],
                                 index_row[index],
@@ -391,7 +387,6 @@ public class OnlineCompress
         int index_idx = 0;
         for (int cd_idx = 0; cd_idx < conglom_descriptors.length; cd_idx++)
         {
-            SanityManager.DEBUG_PRINT("OnlineCompress", "setup loop: " + cd_idx);
             ConglomerateDescriptor index_cd = conglom_descriptors[cd_idx];
 
             if (!index_cd.isIndex())
@@ -399,7 +394,6 @@ public class OnlineCompress
                 // skip the heap descriptor entry
                 continue;
             }
-            SanityManager.DEBUG_PRINT("OnlineCompress", "setup loop 1: " + cd_idx);
 
             // ScanControllers are used to delete old index row
             index_scan[index_idx] = 

@@ -6887,9 +6887,6 @@ public class StoredPage extends CachedPage
 
             if (dest_page != null)
             {
-                SanityManager.DEBUG_PRINT("moveRecordForCompressAtSlot", 
-                        "last = " + dest_page.getPageNumber()); 
-
                 if ((dest_page.getPageNumber() >= getPageNumber()) ||
                     (!dest_page.spaceForCopy(row_size)))
                 {
@@ -6908,9 +6905,6 @@ public class StoredPage extends CachedPage
 
                 if (dest_page != null)
                 {
-                    SanityManager.DEBUG_PRINT("moveRecordForCompressAtSlot", 
-                            "unfill = " + dest_page.getPageNumber()); 
-
                     if ((dest_page.getPageNumber() >= getPageNumber()) ||
                         (!dest_page.spaceForCopy(row_size)))
                     {
@@ -6925,9 +6919,6 @@ public class StoredPage extends CachedPage
             {
                 // last and unfilled page did not work, try getting a free page
                 dest_page = (StoredPage) owner.addPage();
-
-                SanityManager.DEBUG_PRINT("moveRecordForCompressAtSlot", 
-                        "addPage = " + dest_page.getPageNumber()); 
 
                 if (dest_page.getPageNumber() >= getPageNumber())
                 {

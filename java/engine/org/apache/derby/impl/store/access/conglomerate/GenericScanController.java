@@ -1015,11 +1015,6 @@ public abstract class GenericScanController
     boolean closeHeldScan)
         throws StandardException
 	{
-        SanityManager.DEBUG_PRINT("GenericScanController.closeForEndTransaction", 
-                "closeHeldScan = " + closeHeldScan +
-                "open_conglom.getHold() = " + open_conglom.getHold());
-                
-
         if ((!open_conglom.getHold()) || closeHeldScan) 
         {
             // close the scan as part of the commit/abort
