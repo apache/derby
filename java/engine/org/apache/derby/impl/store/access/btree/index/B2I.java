@@ -759,7 +759,7 @@ public class B2I extends BTree
      * <p>
      * B2I does not support a compress scan.
      * <p>
-	 * @see Conglomerate#openCompressScan
+	 * @see Conglomerate#defragmentConglomerate
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

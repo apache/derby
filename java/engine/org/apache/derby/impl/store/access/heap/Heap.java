@@ -870,7 +870,7 @@ public final class Heap
      * Open a heap compress scan.
      * <p>
      *
-     * @see Conglomerate#openCompressScan
+     * @see Conglomerate#defragmentConglomerate
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
