@@ -73,7 +73,12 @@ public class SystemProcedures  {
 	  @param sqlerrmc	sql error message tokens, variable part of error message (ie.,
 						arguments) plus messageId, separated by separator.
 	  @param sqlerrp	not used
-	  @param errd0-5	not used
+	  @param errd0  	not used
+	  @param errd1  	not used
+	  @param errd2  	not used
+	  @param errd3  	not used
+	  @param errd4  	not used
+	  @param errd5  	not used
 	  @param warn		not used
 	  @param sqlState	5-char sql state
 	  @param file		not used
@@ -175,12 +180,12 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLProcedures to EmbedDatabaseMetaData.getProcedures
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *			containing the result of getProcedures
 	 *  @param catalogName SYSIBM.SQLProcedures CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLProcedures SchemaName  varchar(128),
 	 *  @param procName    SYSIBM.SQLProcedures ProcName    varchar(128),
 	 *  @param options     SYSIBM.SQLProcedures Options     varchar(4000))
+	 *  @param rs          output parameter, the resultset object containing 
+     *                     the result of getProcedures
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
 	 */
