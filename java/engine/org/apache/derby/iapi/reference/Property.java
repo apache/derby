@@ -580,19 +580,16 @@ public interface Property {
 
 	/**
 		Property name for specifying log switch interval
-		@see #checkpoint
 	 */
 	public static final String LOG_SWITCH_INTERVAL = "derby.storage.logSwitchInterval";
 
 	/**
 		Property name for specifying checkpoint interval
-		@see #checkpoint
 	 */
 	public static final String CHECKPOINT_INTERVAL = "derby.storage.checkpointInterval";
 
 	/**
 		Property name for specifying log archival location
-		@see #logArchived
 	 */
 	public static final String LOG_ARCHIVAL_DIRECTORY = "derby.storage.logArchive";
 
