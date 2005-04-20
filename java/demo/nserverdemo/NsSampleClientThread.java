@@ -319,7 +319,7 @@ class NsSampleWork {
 	 /**
 	  * Create necessary schema if schema not already created
 	  */
-	 public static void checkAndCreateSchema(com.ibm.db2.jcc.DB2Connection conn,PrintWriter pw) {
+	 public static void checkAndCreateSchema(Connection conn,PrintWriter pw) {
 		Statement stmt = null;
 		ResultSet rs = null;
 
@@ -378,7 +378,7 @@ class NsSampleWork {
 	 /**
 	  * Loads schema , inserts 'rowsToInsert' number of rows into the table
 	  */
-	 public static void loadSchema(com.ibm.db2.jcc.DB2Connection conn,int rowsToInsert,PrintWriter pw)	 {
+	 public static void loadSchema(Connection conn,int rowsToInsert,PrintWriter pw)	 {
 		 int insertsRemaining = rowsToInsert;
 		 PreparedStatement ps=null;
 

@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,7 +71,7 @@ public class NsSample {
 	// To connect to Derby Network Server
 	// This URL describes the target database for type 4 connectivity
 	// Notice that the properties may be established via the URL syntax
-	private static final String CS_NS_DBURL= "jdbc:derby:net://localhost:"+NETWORKSERVER_PORT+"/NSSampledb;create=true:retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
+	private static final String CS_NS_DBURL= "jdbc:derby:net://localhost:"+NETWORKSERVER_PORT+"/NSSampledb;create=true;retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
 
 	public static void main(String[] args) throws Exception {
 
@@ -78,7 +79,7 @@ public class NsSample {
 
 	  // DB2Connection provides additional functionality than java.sql.Connection
 	  // One can use either depending on the requirements
-	  com.ibm.db2.jcc.DB2Connection conn = null;
+	  Connection conn = null;
 
 	  PrintWriter pw = null;
 
@@ -149,7 +150,8 @@ public class NsSample {
 
 		// Get database connection using the JCC client via DriverManager api
 		try	{
-			conn =  (com.ibm.db2.jcc.DB2Connection) DriverManager.getConnection(CS_NS_DBURL, properties);
+			
+			conn =  (Connection) DriverManager.getConnection(CS_NS_DBURL, properties);
 		} catch(Exception e) {
 			pw.println("[NsSample] Connection request unsuccessful, exception thrown was: ");
 			pw.println("[NsSample] Please check if all the jar files are in the classpath and the dbUrl is set correctly.");
