@@ -201,13 +201,13 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLTables to EmbedDatabaseMetaData.getSchemas, getCatalogs, getTableTypes and getTables
 	 *
-	 *  @param resultset   output parameter, the resultset object 
 	 *                     containing the result of the DatabaseMetaData calls
 	 *  @param catalogName SYSIBM.SQLTables CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLTables SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLTables TableName   varchar(128),
 	 *  @param tableType   SYSIBM.SQLTables TableType   varchar(4000))
 	 *  @param options     SYSIBM.SQLTables Options     varchar(4000))
+	 *  @param rs          output parameter, the resultset object 
 	 *			JCC overloads this method:
 	 *  			If options contains the string 'GETSCHEMAS=1', call getSchemas
 	 *  			If options contains the string 'GETCATALOGS=1', call getCatalogs
@@ -258,8 +258,6 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLForeignKeys to EmbedDatabaseMetaData.getImportedKeys, getExportedKeys, and getCrossReference
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *                     	containing the result of the DatabaseMetaData calls
 	 *  @param pkCatalogName SYSIBM.SQLForeignKeys PKCatalogName varchar(128),
 	 *  @param pkSchemaName  SYSIBM.SQLForeignKeys PKSchemaName  varchar(128),
 	 *  @param pkTableName   SYSIBM.SQLForeignKeys PKTableName   varchar(128),
@@ -267,6 +265,8 @@ public class SystemProcedures  {
 	 *  @param fkSchemaName  SYSIBM.SQLForeignKeys FKSchemaName  varchar(128),
 	 *  @param fkTableName   SYSIBM.SQLForeignKeys FKTableName   varchar(128),
 	 *  @param options       SYSIBM.SQLForeignKeys Options       varchar(4000))
+	 *  @param rs            output parameter, the resultset object 
+	 *                     	 containing the result of the DatabaseMetaData calls
 	 *  			 JCC overloads this method:
 	 *  			 If options contains the string 'EXPORTEDKEY=1', call getImportedKeys
 	 *  			 If options contains the string 'IMPORTEDKEY=1', call getExportedKeys
@@ -323,13 +323,13 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLProcedureCols to EmbedDatabaseMetaData.getProcedureColumns
 	 *
-	 *  @param resultset   output parameter, the resultset object containing 
-	 *			the result of getProcedureColumns
 	 *  @param catalogName SYSIBM.SQLProcedureCols CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLProcedureCols SchemaName  varchar(128),
 	 *  @param procName    SYSIBM.SQLProcedureCols ProcName    varchar(128),
 	 *  @param paramName   SYSIBM.SQLProcedureCols ParamName   varchar(128),
 	 *  @param options     SYSIBM.SQLProcedureCols Options     varchar(4000))
+	 *  @param rs          output parameter, the resultset object containing 
+	 *			           the result of getProcedureColumns
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
 	 */
@@ -346,8 +346,6 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLColumns to EmbedDatabaseMetaData.getColumns
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *			containing the result of getProcedures
 	 *  @param catalogName SYSIBM.SQLColumns CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLColumns SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLColumns TableName   varchar(128),
@@ -355,6 +353,8 @@ public class SystemProcedures  {
 	 *  @param options     SYSIBM.SQLColumns Options     varchar(4000))
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
+	 *  @param rs          output parameter, the resultset object containing 
+     *                     the result of getProcedures
 	 */
 	public static void SQLCOLUMNS (String catalogName, String schemaName, String tableName,
 										String columnName, String options, ResultSet[] rs)
@@ -369,13 +369,13 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLColPrivileges to EmbedDatabaseMetaData.getColumnPrivileges
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *			containing the result of getColumnPrivileges
 	 *  @param catalogName SYSIBM.SQLColPrivileges CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLColPrivileges SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLColPrivileges ProcName    varchar(128),
 	 *  @param columnName  SYSIBM.SQLColPrivileges ColumnName  varchar(128),
 	 *  @param options     SYSIBM.SQLColPrivileges Options     varchar(4000))
+	 *  @param rs          output parameter, the resultset object containing 
+     *                     the result of getColumnPrivileges
 	 */
 	public static void SQLCOLPRIVILEGES (String catalogName, String schemaName, String tableName,
 										String columnName, String options, ResultSet[] rs)
@@ -387,12 +387,12 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLTablePrivileges to EmbedDatabaseMetaData.getTablePrivileges
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *			containing the result of getTablePrivileges
 	 *  @param catalogName SYSIBM.SQLTablePrivileges CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLTablePrivileges SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLTablePrivileges ProcName    varchar(128),
 	 *  @param options     SYSIBM.SQLTablePrivileges Options     varchar(4000))
+	 *  @param rs          output parameter, the resultset object containing 
+     *                     the result of getTablePrivileges
 	 */
 	public static void SQLTABLEPRIVILEGES (String catalogName, String schemaName, String tableName,
 										String options, ResultSet[] rs)
@@ -404,14 +404,14 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLPrimaryKeys to EmbedDatabaseMetaData.getPrimaryKeys
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *			containing the result of getPrimaryKeys
 	 *  @param catalogName SYSIBM.SQLPrimaryKeys CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLPrimaryKeys SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLPrimaryKeys TableName   varchar(128),
 	 *  @param options     SYSIBM.SQLPrimaryKeys Options     varchar(4000))
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
+	 *  @param rs          output parameter, the resultset object containing 
+     *                     the result of getPrimaryKeys
 	 */
 	public static void SQLPRIMARYKEYS (String catalogName, String schemaName, String tableName, String options, ResultSet[] rs)
 		throws SQLException
