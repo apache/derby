@@ -425,11 +425,12 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLGetTypeInfo to EmbedDatabaseMetaData.getTypeInfo
 	 *
-	 *  @param resultset output parameter, the resultset object containing the result of getTypeInfo
-	 *  @param datatType SYSIBM.SQLGetTypeInfo DataType smallint,
+	 *  @param dataType  SYSIBM.SQLGetTypeInfo DataType smallint,
 	 *  @param options   SYSIBM.SQLGetTypeInfo Options  varchar(4000))
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
+	 *  @param rs        output parameter, the resultset object containing the
+     *                   result of getTypeInfo
 	 */
 	public static void SQLGETTYPEINFO (short dataType, String options, ResultSet[] rs)
 		throws SQLException
@@ -442,8 +443,6 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLStatistics to EmbedDatabaseMetaData.getIndexInfo
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *			containing the result of getIndexInfo
 	 *  @param catalogName SYSIBM.SQLStatistics CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLStatistics SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLStatistics TableName   varchar(128),
@@ -452,6 +451,8 @@ public class SystemProcedures  {
 	 *  @param options     SYSIBM.SQLStatistics Options     varchar(4000))
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
+	 *  @param rs          output parameter, the resultset object containing 
+     *                     the result of getIndexInfo
 	 */
 	public static void SQLSTATISTICS (String catalogName, String schemaName, String tableName,
 										short unique, short approximate, String options, ResultSet[] rs)
@@ -469,9 +470,7 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLSpecialColumns to EmbedDatabaseMetaData.getBestRowIdentifier and getVersionColumns
 	 *
-	 *  @param resultset   output parameter, the resultset object 
-	 *			containing the result of the DatabaseMetaData call
-	 *  @param coltype     SYSIBM.SQLSpecialColumns ColType     smallint,
+	 *  @param colType     SYSIBM.SQLSpecialColumns ColType     smallint,
 	 *			where 1 means getBestRowIdentifier and 2 getVersionColumns was called.
 	 *  @param catalogName SYSIBM.SQLSpecialColumns CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLSpecialColumns SchemaName  varchar(128),
@@ -481,6 +480,8 @@ public class SystemProcedures  {
 	 *  @param options     SYSIBM.SQLSpecialColumns Options     varchar(4000))
 	 *  	If options contains the string 'DATATYPE='ODBC'', call the ODBC
 	 *  	version of this procedure.
+	 *  @param rs          output parameter, the resultset object containing 
+     *                     the result of the DatabaseMetaData call
 	 */
 	public static void SQLSPECIALCOLUMNS (short colType, String catalogName, String schemaName, String tableName,
 										short scope, short nullable, String options, ResultSet[] rs)
@@ -507,13 +508,13 @@ public class SystemProcedures  {
 	/**
 	 *  Map SQLUDTS to EmbedDatabaseMetaData.getUDTs
 	 *
-	 *  @param resultset       output parameter, the resultset object 
-	 *				containing the result of getUDTs, which will be empty
 	 *  @param catalogName     SYSIBM.SQLUDTS CatalogName          varchar(128),
 	 *  @param schemaPattern   SYSIBM.SQLUDTS Schema_Name_Pattern  varchar(128),
 	 *  @param typeNamePattern SYSIBM.SQLUDTS Type_Name_Pattern    varchar(128),
 	 *  @param udtTypes        SYSIBM.SQLUDTS UDTTypes             varchar(128),
 	 *  @param options         SYSIBM.SQLUDTS Options              varchar(4000))
+	 *  @param rs              output parameter, the resultset object containing
+     *                         the result of getUDTs, which will be empty
 	 */
 	public static void SQLUDTS (String catalogName, String schemaPattern, String typeNamePattern,
 										String udtTypes, String options, ResultSet[] rs)
@@ -610,7 +611,7 @@ public class SystemProcedures  {
     }
 
     /**
-     * compress the table
+     * Compress the table.
      * <p>
      * Calls the "alter table compress {sequential}" sql.  This syntax
      * is not db2 compatible so it mapped by a system routine.  This
@@ -852,8 +853,8 @@ public class SystemProcedures  {
 	/**
 		Remove a jar file from the database.
 
-		@param jar SQL name of jar to be replaced.
-		@param deploy Ignored.
+		@param jar      SQL name of jar to be replaced.
+		@param undeploy Ignored.
 
 		@exception SQLException Error removing jar file.
 	*/

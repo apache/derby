@@ -101,6 +101,26 @@ public class OnlineCompress
 
 	}
 
+    /**
+     * Defragment rows in the given table.
+     * <p>
+     * Scans the rows at the end of a table and moves them to free spots
+     * towards the beginning of the table.  In the same transaction all
+     * associated indexes are updated to reflect the new location of the
+     * base table row.
+     * <p>
+     * After a defragment pass, if was possible, there will be a set of
+     * empty pages at the end of the table which can be returned to the
+     * operating system by calling truncateEnd().  The allocation bit
+     * maps will be set so that new inserts will tend to go to empty and
+     * half filled pages starting from the front of the conglomerate.
+     *
+     * @param schemaName        schema of table to defragement
+     * @param tableName         name of table to defragment
+     * @param data_dictionary   An open data dictionary to look up the table in.
+     * @param tc                transaction controller to use to do updates.
+     *
+     **/
 	private static void defragmentRows(
     String                  schemaName, 
     String                  tableName,
@@ -288,6 +308,20 @@ public class OnlineCompress
 		return;
 	}
 
+    /**
+     * Purge committed deleted rows from conglomerate.
+     * <p>
+     * Scans the table and purges any committed deleted rows from the 
+     * table.  If all rows on a page are purged then page is also 
+     * reclaimed.
+     * <p>
+     *
+     * @param schemaName        schema of table to defragement
+     * @param tableName         name of table to defragment
+     * @param data_dictionary   An open data dictionary to look up the table in.
+     * @param tc                transaction controller to use to do updates.
+     *
+     **/
 	private static void purgeRows(
     String                  schemaName, 
     String                  tableName,
@@ -325,6 +359,20 @@ public class OnlineCompress
         return;
     }
 
+    /**
+     * Truncate end of conglomerate.
+     * <p>
+     * Returns the contiguous free space at the end of the table back to
+     * the operating system.  Takes care of space allocation bit maps, and
+     * OS call to return the actual space.
+     * <p>
+     *
+     * @param schemaName        schema of table to defragement
+     * @param tableName         name of table to defragment
+     * @param data_dictionary   An open data dictionary to look up the table in.
+     * @param tc                transaction controller to use to do updates.
+     *
+     **/
 	private static void truncateEnd(
     String                  schemaName, 
     String                  tableName,
@@ -449,10 +497,14 @@ public class OnlineCompress
      * Delete old index row and insert new index row in input index.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
-     * @param param1 param1 does this.
-     * @param param2 param2 does this.
+     * @param base_row      all columns of base row
+     * @param index_row     an index row template, filled in by this routine
+     * @param old_row_loc   old location of base row, used to delete index
+     * @param new_row_loc   new location of base row, used to update index
+     * @param index_cc      index conglomerate to insert new row
+     * @param index_scan    index scan to delete old entry
+     * @param index_col_map description of mapping of index row to base row,
+     *                      
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -484,9 +536,6 @@ public class OnlineCompress
         // last column in index in the RowLocation
         index_row[index_row.length - 1] = old_row_loc;
 
-        SanityManager.DEBUG_PRINT("OnlineCompress", "row before delete = " +
-                RowUtil.toString(index_row));
-
         // position the scan for the delete, the scan should already be open.
         // This is done by setting start scan to full key, GE and stop scan
         // to full key, GT.
@@ -517,8 +566,6 @@ public class OnlineCompress
         // insert the new index row into the conglomerate
         index_row[index_row.length - 1] = new_row_loc;
 
-        SanityManager.DEBUG_PRINT("OnlineCompress", "row before insert = " +
-                RowUtil.toString(index_row));
         index_cc.insert(index_row);
 
         return;
