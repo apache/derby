@@ -58,7 +58,7 @@ public interface TypeDescriptor
 	 *
 	 * @return	a jdbc type, e.g. java.sql.Types.DECIMAL 
 	 *
-	 * @see Types
+	 * @see java.sql.Types
 	 */
 	public int getJDBCTypeId();
 

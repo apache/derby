@@ -741,7 +741,7 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 								feasible(this, predList, optimizer);
 	}
 
-    /** @see Optimizable#considerMemoryUsageOK */
+    /** @see Optimizable#memoryUsageOK */
     public boolean memoryUsageOK( double rowCount, int maxMemoryPerTable)
 			throws StandardException
     {

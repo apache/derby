@@ -309,22 +309,22 @@ public class ClassHolder {
 	}
 
 
-	/** @see ClassHolder#addInteger */
+	/** @see ClassHolder#addConstant */
 	public int addConstant(int value) {
 		return addDirectEntry(new CONSTANT_Integer_info(value));
 	}
 
-	/** @see ClassHolder#addFloat */
+	/** @see ClassHolder#addConstant */
 	public int addConstant(float value) {
 		return addDirectEntry(new CONSTANT_Float_info(value));
 	}
 
-	/** @see ClassHolder#addLong */
+	/** @see ClassHolder#addConstant */
 	public int addConstant(long value) {
 		return addDirectEntry(new CONSTANT_Long_info(value));
 	}
 
-	/** @see ClassHolder#addDouble */
+	/** @see ClassHolder#addConstant */
 	public int addConstant(double value) {
 		return addDirectEntry(new CONSTANT_Double_info(value));
 	}
@@ -597,7 +597,9 @@ public class ClassHolder {
 
 	/**
 		Find a name and type descriptor (section 4.4.6) and
-		return ita index. returns -1 if not found.
+		return it's index. 
+        <p>
+        returns -1 if not found.
 	*/
 	public int findNameAndType(String name, String descriptor) {
 

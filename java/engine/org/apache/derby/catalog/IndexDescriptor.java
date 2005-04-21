@@ -48,12 +48,16 @@ public interface IndexDescriptor
 	public int[]	baseColumnPositions();
 
 	/**
+     * Returns the postion of a column.
+     * <p>
 	 * Returns the position of a column within the key (1-based).
 	 * 0 means that the column is not in the key.
 	 */
 	public Integer getKeyColumnPosition(Integer heapColumnPosition);
 
 	/**
+     * Returns the postion of a column.
+     * <p>
 	 * Returns the position of a column within the key (1-based).
 	 * 0 means that the column is not in the key.  Same as the above
 	 * method, but it uses int instead of Integer.
@@ -61,7 +65,9 @@ public interface IndexDescriptor
 	public int getKeyColumnPosition(int heapColumnPosition);
 
 	/**
-	 * Returns the number of ordered columns.  In the future, it will be
+	 * Returns the number of ordered columns.  
+     * <p>
+	 * In the future, it will be
 	 * possible to store non-ordered columns in an index.  These will be
 	 * useful for covered queries.  The ordered columns will be at the
 	 * beginning of the index row, and they will be followed by the

@@ -46,10 +46,7 @@ import java.sql.SQLException;
  * <I> IBM Corp. reserves the right to change, rename, or
  * remove this interface at any time. </I>
  *
- * @see com.ibm.db2j.aggregates.Aggregator
  * @see org.apache.derby.catalog.TypeDescriptor
- * @see com.ibm.db2j.types.TypeFactory
- * @see org.apache.derby.iapi.db.Factory#getTypeFactory
  */
 interface AggregateDefinition
 {
@@ -85,8 +82,6 @@ interface AggregateDefinition
 	 *		To construct a type descriptor see <i>com.ibm.db2j.types.TypeFactory</i>.
 	 *
 	 * @see org.apache.derby.catalog.TypeDescriptor
-	 * @see com.ibm.db2j.types.TypeFactory
-	 * @see com.ibm.db2j.aggregates.Aggregator
 	 *
 	 * @exception SQLException Thrown on error.
 	 */
