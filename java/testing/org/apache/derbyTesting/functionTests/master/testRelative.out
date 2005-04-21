@@ -4,6 +4,5 @@ isFirst=false isLast=false isAfterLast=false
 Value=work3
 Value=work1
 isFirst=false isLast=false isAfterLast=true
-FAIL -- unexpected exception
-SQLSTATE(24000): SQL Exception: Invalid cursor state - no current row.
-SQL Exception: Invalid cursor state - no current row.
+PASS -- expected exception
+SQLSTATE(24000): Invalid cursor state - no current row.
