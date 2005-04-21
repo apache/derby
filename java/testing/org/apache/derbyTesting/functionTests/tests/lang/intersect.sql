@@ -143,3 +143,20 @@ select ? from t1 except select i1 from t2;
 -- Invalid order by
 select id,i1,i2 from t1 intersect select id,i1,i2 from t2 order by t1.i1;
 select id,i1,i2 from t1 except select id,i1,i2 from t2 order by t1.i1;
+
+-- views using intersect and except
+create view view_intr_uniq as select id,i1,i2 from t1 intersect select id,i1,i2 from t2;
+select * from view_intr_uniq order by 1 DESC,2,3;
+
+create view view_intr_all as select id,i1,i2 from t1 intersect all select id,i1,i2 from t2;
+select * from  view_intr_all order by 1,2,3;
+
+create view view_ex_uniq as select id,i1,i2 from t1 except select id,i1,i2 from t2;
+select * from view_ex_uniq order by 1,2,3;
+
+create view view_ex_all as select id,i1,i2 from t1 except all select id,i1,i2 from t2;
+select * from view_ex_all order by 1 DESC,2,3;
+
+-- intersect joins
+select t1.id,t1.i1,t2.i1 from t1 join t2 on t1.id = t2.id
+intersect select t1.id,t1.i2,t2.i2 from t1 join t2 on t1.id = t2.id;
