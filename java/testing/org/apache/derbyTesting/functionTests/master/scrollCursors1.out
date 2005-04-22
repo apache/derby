@@ -408,6 +408,7 @@ I
 -----------
 2          
 ij> rollback;
+ij> close c1;
 ij> -- verify that statement cache works
 -- correctly with scroll and forward only
 -- cursors on same query text

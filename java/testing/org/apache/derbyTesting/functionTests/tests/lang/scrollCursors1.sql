@@ -233,6 +233,7 @@ next c1;
 update t1 set i = 666 where i = 2;
 first c1;
 rollback;
+close c1;
 
 -- verify that statement cache works
 -- correctly with scroll and forward only

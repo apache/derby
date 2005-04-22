@@ -408,6 +408,7 @@ I
 -----
 2          
 ij> rollback;
+ij> close c1;
 ij> -- verify that statement cache works
 ----- correctly with scroll and forward only
 ----- cursors on same query text
@@ -561,7 +562,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 -----
 Statement Name: 
-	SQL_CURSH200C3
+	SQL_CURSH200C2
 Statement Text: 
 	select * from t1
 Parse Time: 0
