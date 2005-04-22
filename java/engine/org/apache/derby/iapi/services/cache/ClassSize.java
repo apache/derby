@@ -191,7 +191,7 @@ public class ClassSize
      *
      * @see #estimateBaseFromCoefficients
      * @see #getSizeCoefficients
-     * @see ClassSizeCrawler
+     * see org.apache.derbyBuild.ClassSizeCrawler
      */
     public static int estimateBaseFromCatalog( Class cls)
     {
@@ -236,7 +236,7 @@ public class ClassSize
      *
      * @see #estimateBaseFromCoefficients
      * @see #getSizeCoefficients
-     * @see ClassSizeCrawler
+     * see org.apache.derbyBuild.ClassSizeCrawler
      */
     public static int estimateAndCatalogBase( Class cls)
     {
@@ -254,7 +254,7 @@ public class ClassSize
      * Note that this method will throw a SecurityException if the SecurityManager does not
      * let this class execute the method Class.getDeclaredFields(). If this is a concern try
      * to compute the size coefficients at build time.
-     * @see ClassSizeCrawler
+     * see org.apache.derbyBuild.ClassSizeCrawler
      * @see #estimateBaseFromCatalog
      */
     public static int estimateBase( Class cl)

@@ -58,6 +58,8 @@ import org.apache.derby.iapi.error.StandardException;
 public interface Cacheable  {
 
 	/**
+        Set the identity of the object.
+        <p>
 		Set the identity of the object to represent an item that already exists,
 		e.g. an existing container.
 		The object will be in the No Identity state,
@@ -86,6 +88,8 @@ public interface Cacheable  {
 	public Cacheable setIdentity(Object key) throws StandardException;
 
 	/**
+        Create a new item.
+        <p>
 		Create a new item and set the identity of the object to represent it.
 		The object will be in the No Identity state,
 		ie. it will have just been created or clearIdentity() was just called. 

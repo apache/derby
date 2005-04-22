@@ -44,6 +44,8 @@ public interface CacheManager {
 	public void resize( long newSize) throws StandardException;
 
 	/**
+        Find an object in the cache.
+        <p>
 		Find an object in the cache that matches the key provided using the equals()
 		method, i.e. the return Cacheable will have getIdentifier.equals(key) true.
 		If the object does not exist in the cache it will be added by one of:
@@ -82,6 +84,8 @@ public interface CacheManager {
 	public Cacheable find(Object key) throws StandardException;
 
 	/**
+        Find an object in the cache.
+        <p>
 		Find an object in the cache that matches the key provided using the equals()
 		method, i.e. the return Cacheable will have getIdentifier.equals(key) true.
 		If a matching object does not exist in the cache, null is returned.
@@ -119,7 +123,7 @@ public interface CacheManager {
      * of find() or findCached. If the entry has been replaced then this method
      * does nothing.
      *
-     * @param key the key of the used entry.
+     * @param keys the key of the used entry.
      */
     public void setUsed( Object[] keys);
     

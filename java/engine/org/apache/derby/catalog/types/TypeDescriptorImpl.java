@@ -262,7 +262,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 
 	/**
 	  Compare if two TypeDescriptors are exactly the same
-	  @param typeDescriptor the dataTypeDescriptor to compare to.
+	  @param object the dataTypeDescriptor to compare to.
 	  */
 	public boolean equals(Object object)
 	{

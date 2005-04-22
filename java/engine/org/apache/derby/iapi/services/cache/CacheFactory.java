@@ -31,7 +31,6 @@ public interface CacheFactory {
 
 		@param holderFactory The factory for the objects that are to be cached.
 		@param name			The name of the cache
-		@param initParam	The object passed to each holder object's initParameter() method.
 		@param initialSize	The number of initial holder objects that will be created
 		@param maximumSize  The maximum number of objects the cache will hold
  
@@ -44,9 +43,8 @@ public interface CacheFactory {
 		Create a cache that uses the class represented by holderClass as
 		the holder class. This holderClass must implement Cacheable.
 
-		@param holderClass	The Class object representing the holder class.
+		@param holderFactory    The Class object representing the holder class.
 		@param name			The name of the cache
-		@param initParam	The object passed to each holder object's initParameter() method.
 		@param initialSize	The number of initial holder objects that will be created
 		@param maximumSize  The maximum total size of the objects that the cache will hold
  

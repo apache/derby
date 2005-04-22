@@ -68,7 +68,6 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 	 * so it can implement the DatabaseMetaData.getURL() method.
 	 *
 	 * @param user	The UserID of the user getting the connection
-	 * @param unicode	True means unicode codeset, false means ASCII codeset
 	 * @param drdaID	The drda id of the connection (from network server)
 	 * @param dbname	The database name
 	 *

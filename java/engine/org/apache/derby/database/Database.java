@@ -47,7 +47,7 @@ import java.io.File;
  * <I>IBM Corp. reserves the right to change, rename, or
  * remove this interface at any time.</I>
 
-   @see Factory
+   @see org.apache.derby.iapi.db.Factory
  */
 public interface Database
 {

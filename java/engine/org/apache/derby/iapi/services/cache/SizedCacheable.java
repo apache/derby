@@ -27,7 +27,6 @@ package org.apache.derby.iapi.services.cache;
  * CacheManagers constructed with the CacheFactory use regulate the total number of cache entries.
  *
  * @see Cacheable
- * @see SizedCacheableFactory
  * @see CacheFactory
  *
  * @author Jack Klebanoff

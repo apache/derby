@@ -150,7 +150,6 @@ public final class PropertyInfo
      *
 	 * @param schemaName    	The name of the schema that the conglomerate is in.
 	 * @param conglomerateName  The name of the conglomerate.
-	 * @param conglomerateType	TABLE or INDEX.
 	 * 
 	 * @return Properties   The Properties associated with the specified conglomerate.
      *                      (An empty Properties is returned if the conglomerate does not exist.)
