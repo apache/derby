@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.iapi.services.loader.InstanceGetter;
 
@@ -691,28 +692,23 @@ public class Monitor {
 
 	/**
 		Single point for checking if an upgrade is allowed.
+		@return true a full upgrade has been requested, false soft upgrade mode is active.
 	 */
 	public static boolean isFullUpgrade(Properties startParams, String oldVersionInfo) throws StandardException {
 
 		boolean fullUpgrade = Boolean.valueOf(startParams.getProperty(org.apache.derby.iapi.reference.Attribute.UPGRADE_ATTR)).booleanValue();
 
-		if (true || !fullUpgrade) {
+		ProductVersionHolder engineVersion = Monitor.getMonitor().getEngineVersion();
 
-			ProductVersionHolder engineVersion = Monitor.getMonitor().getEngineVersion();
-
-			if (engineVersion.isBeta() || engineVersion.isAlpha()) {
-				// soft upgrade not supported for beta.
-				throw StandardException.newException(SQLState.NO_UPGRADE, oldVersionInfo, engineVersion.getSimpleVersionString());
+		if (engineVersion.isBeta() || engineVersion.isAlpha()) {
+					
+			if (!PropertyUtil.getSystemBoolean(Property.ALPHA_BETA_ALLOW_UPGRADE))
+			{
+				//  upgrade not supported for alpha/beta.
+				throw StandardException.newException(SQLState.UPGRADE_UNSUPPORTED,
+						oldVersionInfo, engineVersion.getSimpleVersionString());
 			}
-
-			// Gandalf release does not support any soft or hard upgrade,
-			// remove this exception when upgrade support is added, and
-			// add back in the following code which has been commented out
-			// as it is currently unreachable.
-			throw StandardException.newException(
-				SQLState.LANG_CANT_UPGRADE_DATABASE, oldVersionInfo, engineVersion);
 		}
-
 
 		return fullUpgrade;
 	}

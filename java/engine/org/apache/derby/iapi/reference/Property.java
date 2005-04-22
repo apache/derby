@@ -43,9 +43,9 @@ package org.apache.derby.iapi.reference;
 public interface Property { 
 
 	/**
-		Name of the file that contains system wide properties.
-		Has to be located in ${derby.system.home} if set, otherwise ${user.dir}
-	*/
+	 * Name of the file that contains system wide properties. Has to be located
+	 * in ${derby.system.home} if set, otherwise ${user.dir}
+	 */
 	public static final String PROPERTIES_FILE = "derby.properties";
 
 
@@ -602,6 +602,13 @@ public interface Property {
 	/*
 	** Upgrade
 	*/
+	
+	/**
+	 * Allow database upgrade during alpha/beta time. Only intended
+	 * to be used to allow Derby developers to test their upgrade code.
+	 * Only supported as a system/application (derby.properties) property.
+	 */
+	String ALPHA_BETA_ALLOW_UPGRADE = "derby.database.allowPreReleaseUpgrade";
 	    
 	/**
 		db2j.inRestore

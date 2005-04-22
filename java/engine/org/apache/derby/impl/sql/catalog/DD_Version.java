@@ -236,8 +236,16 @@ public	class DD_Version implements	Formatable
 	/**
 		Apply changes that can safely be made in soft upgrade.
 		Any changes must not prevent the database from being re-booted
-		by the a Cloudscape engine at the older version fromMajorVersionNumber
+		by the a Derby engine at the older version fromMajorVersionNumber.
+		<BR>
+		Examples are fixes to catalog meta data, e.g. fix nullability of
+		a system column.
 
+		<BR>
+		<B>Upgrade items for 10.1</B>
+		<UL>
+		<LI> None.
+		</UL>
 	  *
 	  * @param	tc	transaction controller
 	  * @param	fromMajorVersionNumber	version of the on-disk database
@@ -249,6 +257,12 @@ public	class DD_Version implements	Formatable
 		throws StandardException
 	{
 
+		/*
+		 * OLD Cloudscape 5.1 upgrade code, Derby does not support
+		 * upgrade from Cloudscape 5.x databases. If it ever is changed
+		 * to do so, this code would be useful.
+		 * 
+		 * 
 		if (lastSoftUpgradeVersion <= DataDictionary.DD_VERSION_CS_5_1)
 		{
 
@@ -262,12 +276,19 @@ public	class DD_Version implements	Formatable
 					DataDictionaryImpl.SYSSTATEMENTS_CATALOG_NUM);
 
 		}
+		*/
 
 		tc.setProperty(DataDictionary.SOFT_DATA_DICTIONARY_VERSION, this, true);
 	}
 
 	/**
 		Do full upgrade.  Apply changes that can NOT be safely made in soft upgrade.
+		
+		<BR>
+		<B>Upgrade items for 10.1</B>
+		<UL>
+		<LI> None.
+		</UL>
 
 	  *
 	  * @param	tc	transaction controller
@@ -278,6 +299,18 @@ public	class DD_Version implements	Formatable
 	private	void	doFullUpgrade(TransactionController tc, int fromMajorVersionNumber)
 		throws StandardException
 	{
+		// Only supports upgrade from Derby 10.0 releases onwards
+		if (fromMajorVersionNumber < DataDictionary.DD_VERSION_CS_10_0)
+		{
+			throw StandardException.newException(SQLState.UPGRADE_UNSUPPORTED,
+					DD_Version.majorToString(fromMajorVersionNumber), this);			
+		}
+
+		/*
+		 * OLD Cloudscape 5.1 upgrade code, Derby does not support
+		 * upgrade from Cloudscape 5.x databases. If it ever is changed
+		 * to do so, this code would be useful.
+	
 		if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_CS_5_1)
 		{
 			// drop sps in SYSIBM, SYSIBM, recreate SYSIBM, SYSDUMMY1, populate SYSDUMMY1, create procs
@@ -292,6 +325,8 @@ public	class DD_Version implements	Formatable
 			bootingDictionary.create_SYSIBM_procedures(tc);
 			bootingDictionary.createSystemSps(tc);
 		}
+		
+		*/
 	}
 
 	/**
@@ -593,9 +628,10 @@ public	class DD_Version implements	Formatable
 	}
 	
 	/**
+	 * 
 	 * Modifies the nullability of the system table corresponding
 	 * to the received catalog number.
-	 *
+	 * OLD Cloudscape 5.1 upgrade code
 	 * @param tc			TransactionController.
 	 * @param catalogNum	The catalog number corresponding
 	 *  to the table for which we will modify the nullability.
@@ -607,6 +643,8 @@ public	class DD_Version implements	Formatable
 	 *
 	 * @exception StandardException
 	 */
+
+	/* OLD Cloudscape 5.1 upgrade code. See applySafeChanges().
 
 	private void modifySysTableNullability(TransactionController tc, int catalogNum)
 	throws StandardException
@@ -624,9 +662,8 @@ public	class DD_Version implements	Formatable
 			bootingDictionary.upgrade_setNullability(rowFactory,
 				SYSSTATEMENTSRowFactory.SYSSTATEMENTS_LASTCOMPILED, true, tc);
 		}
-
 	}
-
+*/
 	/**
 		Check to see if a database has been upgraded to the required
 		level in order to use a language feature.

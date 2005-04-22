@@ -365,7 +365,7 @@ public	class	DataDictionaryImpl
 	public void boot(boolean create, Properties startParams) 
 			throws StandardException
 	{
-		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_CS_10_0);
+		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_1);
 
 		/* There is a bootstrapping problem here. We would like to use
          * a language connection context to find the name of the system and default
@@ -7985,7 +7985,7 @@ public	class	DataDictionaryImpl
     }
 	/**
 		Check to see if a database has been upgraded to the required
-		level in order to use a langauge feature.
+		level in order to use a language feature. 
 
 		@param majorVersion Data Dictionary major version
 		@param feature Non-null to throw an error, null to return the state of the version match.
