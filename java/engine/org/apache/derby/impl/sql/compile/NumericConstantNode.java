@@ -235,7 +235,7 @@ public final class NumericConstantNode extends ConstantNode
 			break;
 		case C_NodeTypes.DECIMAL_CONSTANT_NODE:
 			mb.pushNewStart("java.math.BigDecimal");
-			mb.push(value.toString());
+			mb.push(value.getString());
 			mb.pushNewComplete(1);
 			break;
 		case C_NodeTypes.DOUBLE_CONSTANT_NODE:

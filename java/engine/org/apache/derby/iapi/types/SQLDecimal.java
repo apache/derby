@@ -931,7 +931,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 									divisorBigDecimal,
 									scale > -1 ? scale :
 									Math.max((dividendBigDecimal.scale() + 
-											getWholeDigits(divisorBigDecimal) +
+											SQLDecimal.getWholeDigits(divisorBigDecimal) +
 											1), 
 										NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE),
 									BigDecimal.ROUND_DOWN));
@@ -1051,7 +1051,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	{
 		if (isNull())
 			return this;
-
+				
 		// the getWholeDigits() call will ensure via getBigDecimal()
 		// that the rawData is translated into the BigDecimal in value.
 		if (desiredPrecision != IGNORE_PRECISION &&
@@ -1083,7 +1083,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			return 0;
 		}	
 
-		return getWholeDigits(decimalValue) + decimalValue.scale();
+		return SQLDecimal.getWholeDigits(decimalValue) + decimalValue.scale();
 	}
 
 	public int getDecimalValueScale()
@@ -1127,7 +1127,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 	private int getWholeDigits()
 	{
-		return getWholeDigits(getBigDecimal());
+		return SQLDecimal.getWholeDigits(getBigDecimal());
 	}
 
 	private static int getWholeDigits(BigDecimal decimalValue)
