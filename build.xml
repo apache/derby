@@ -506,7 +506,7 @@
     </copy>
 
     <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
-             classpath="${compile.classpath};${osgi};${servlet22};${out.dir}"
+             classpath="${compile.classpath};${osgi};${servlet24};${out.dir}"
              breakiterator="true"
              destdir="${out.javadoc.dir}/publishedapi"
              packagenames="org.apache.derby.authentication,org.apache.derby.drda,org.apache.derby.jdbc.io,org.apache.derby.jdbc,org.apache.derby.tools"
