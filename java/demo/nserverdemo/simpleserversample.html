@@ -3,12 +3,12 @@
 
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>Cloudscape Network Server Simple sample program</title>
+<title>Derby Network Server Simple sample program</title>
 </head>
 
 <body>
 
-<h2>Simple Cloudscape Network Server Example</h2>
+<h2>Simple Derby Network Server Example</h2>
 
 <h2>Overview</h2>
 
@@ -29,11 +29,11 @@ JVMs to connect to the same database.</p>
 client programs when interacting with the Network Server.</p>
 
 <p>SimpleNetworkServerSample.java:
-This program starts the Cloudscape Network Server as well as the embedded
+This program starts the Derby Network Server as well as the embedded
 driver and waits for clients to connect.</p>
 
 <p>SimpleNetworkClientSample.java:
-This is the client program that interacts with the Cloudscape Network Server
+This is the client program that interacts with the Derby Network Server
 from another JVM.</p>
 
 <h3>SimpleNetworkServerSample program</h3>
@@ -41,18 +41,18 @@ from another JVM.</p>
 <p>In particular, this program:</p>
 
 <ul>
- <li>starts the Cloudscape Network Server using a property and also loads the embedded driver</li>
- <li>checks if the Cloudscape Network Server is up and running</li>
+ <li>starts the Derby Network Server using a property and also loads the embedded driver</li>
+ <li>checks if the Derby Network Server is up and running</li>
  <li>creates the database 'NSSimpleDB' if not already created </li>
  <li>obtains an embedded database connection</li>
  <li>tests the database connection by executing a sample query</li>
  <li>allows for client connections to connect to the server until the user decides to stop the server and exit the program</li>
  <li>closes the connection</li>
- <li>shuts down the Cloudscape
+ <li>shuts down the Derby
      Network Server before exiting the program.</li>
 </ul>
 
-<p>The following files should be installed in the <font style=italic>%CLOUDSCAPE_INSTALL%</font><tt><span>\demo\programs\nserverdemo\</span></tt> directory in
+<p>The following files should be installed in the <font style=italic>%DERBY_INSTALL%</font><tt><span>\demo\programs\nserverdemo\</span></tt> directory in
 order to run this sample program:</p>
 
 <ul>
@@ -68,26 +68,26 @@ order to run this sample program:</p>
 
 <h2>How to run the SimpleNetworkServerSample program</h2>
 
-<p>To run this simple Cloudscape Network Server sample program:</p>
+<p>To run this simple Derby Network Server sample program:</p>
 
 <ol>
- <li>Open a command prompt and change directories to the <span class=italic>%CLOUDSCAPE_INSTALL%</span>\demo\programs\nserverdemo
-     directory, where <span class=italic>%CLOUDSCAPE_INSTALL%</span> is the directory
-     where you installed Cloudscape.</li>
+ <li>Open a command prompt and change directories to the <span class=italic>%DERBY_INSTALL%</span>\demo\programs\nserverdemo
+     directory, where <span class=italic>%DERBY_INSTALL%</span> is the directory
+     where you installed Derby.</li>
  <li>Set the CLASSPATH to include the following jar files in order to run this
      program.</li>
 <ul><li>the current directory (".")</li>
 <li><tt>derbynet.jar</tt>: <BR>The Network Server jar file. It must be in your CLASSPATH since we start the Network Server in this program.</li>
-<li><tt>derby.jar</tt>: <BR>The Cloudscape database engine jar file.</li>
+<li><tt>derby.jar</tt>: <BR>The Derby database engine jar file.</li>
 </ul>
 
 <li>Test the CLASSPATH settings by running the following java command:
 
 <pre>java org.apache.derby.tools.sysinfo</pre>
 
-<p>This command will show the Cloudscape jar files that are in the CLASSPATH. </p></li>
+<p>This command will show the Derby jar files that are in the CLASSPATH. </p></li>
 
-<li>Once you have set up your environment correctly, execute the application from the <br><span class=italic>%CLOUDSCAPE_INSTALL%</span>\demo\programs\nserverdemo directory:
+<li>Once you have set up your environment correctly, execute the application from the <br><span class=italic>%DERBY_INSTALL%</span>\demo\programs\nserverdemo directory:
 
 <pre>java SimpleNetworkServerSample</pre>
 </li></ol>
@@ -101,7 +101,7 @@ order to run this sample program:</p>
 This directory makes up the <span>NSSimpleDB</span> database.
 </li>
 <li><tt>derby.log</tt><br>
-This log file contains Cloudscape progress and error messages.
+This log file contains Derby progress and error messages.
 </li></ul>
 
 
@@ -119,7 +119,7 @@ This log file contains Cloudscape progress and error messages.
  <li>closes the connections and then exits the program.</li>
 </ul>
 
-<p>The following files should be installed in the <span class=italic>%CLOUDSCAPE_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory in order to run this sample program:</p>
+<p>The following files should be installed in the <span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory in order to run this sample program:</p>
 <ul>
  <li>Source file: <br><tt>SimpleNetworkClientSample.java</tt></li>
  <li>Compiled class file: <br><tt>SimpleNetworkClientSample.class</tt></li>
@@ -130,15 +130,15 @@ This log file contains Cloudscape progress and error messages.
 <p>To connect to the Network Server that has been started as part of the SimpleNetworkServerSample program:</p>
 
 <ol>
- <li>Open a command prompt and change directories to the <span class=italic>%CLOUDSCAPE_INSTALL%</span><tt>\demo\programs\nserverdemo</tt> directory, where <span class=italic>%CLOUDSCAPE_INSTALL%</span> is the directory where you installed Cloudscape.</li>
- <li>Clients of Cloudscape Network Server only need the following jar files in the CLASSPATH in order to connect to the Network Server.<span>  </span>Set the CLASSPATH to include the following jar files:
+ <li>Open a command prompt and change directories to the <span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo</tt> directory, where <span class=italic>%DERBY_INSTALL%</span> is the directory where you installed Derby.</li>
+ <li>Clients of Derby Network Server only need the following jar files in the CLASSPATH in order to connect to the Network Server.<span>  </span>Set the CLASSPATH to include the following jar files:
  <ul>
   <li>the current directory (".")</li>
   <li><tt>db2jcc.jar</tt><br>This jar file must be in your CLASSPATH to use the DB2 JDBC Universal Driver.</li>
-  <li><tt>db2jcc_license_c.jar</tt><br>This jar file is the license file for the Universal Driver for Cloudscape.</li>
+  <li><tt>db2jcc_license_c.jar</tt><br>This jar file is the license file for the Universal Driver for Derby.</li>
  </ul></li>
 <li>Once you have set up your environment correctly, execute the
-application from the <br><span class=italic>%CLOUDSCAPE_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory:
+application from the <br><span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory:
 <pre><tt>java SimpleNetworkClientSample</tt></pre>
 </li>
 </ol>

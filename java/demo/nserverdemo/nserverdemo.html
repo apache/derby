@@ -1,17 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-<TITLE>Cloudscape Network Server sample program</TITLE>
+<TITLE>Derby Network Server sample program</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
 </HEAD>
 <BODY>
-<H2><A name=Top_Of_Page></A><A name=nsrun></A><A name=nssample></A>Cloudscape 
+<H2><A name=Top_Of_Page></A><A name=nsrun></A><A name=nssample></A>Derby 
 Network Server sample program</H2>
 <P>The Network Server sample demo program (NsSample) is a simple JDBC application that 
-interacts with the Cloudscape Network Server. The program:</P>
+interacts with the Derby Network Server. The program:</P>
 <UL>
-  <LI>starts the Cloudscape Network Server 
-  <LI>checks if the Cloudscape Network Server is running 
+  <LI>starts the Derby Network Server 
+  <LI>checks if the Derby Network Server is running 
   <LI>loads the DB2 JDBC Universal Driver 
   <LI>creates the database '<tt>NsSampledb</tt>' if not already created 
   <LI>checks to see if the schema is already created, and if not, 
@@ -23,17 +23,17 @@ interacts with the Cloudscape Network Server. The program:</P>
   <LI>has each of the clients perform DML operations (select, insert, delete, update) 
   using JDBC calls, in particular one client opens an embedded connection to 
   perform database operations while the other client opens a client connection 
-  to the Cloudscape Network Server to perform database operations. 
+  to the Derby Network Server to perform database operations. 
   <LI>waits for the client threads to finish the tasks 
-  <LI>shuts down the Cloudscape Network Server at the end of the demo </LI></UL>
+  <LI>shuts down the Derby Network Server at the end of the demo </LI></UL>
 <P>The following files should be installed in the <SPAN 
-class=italic>%CLOUDSCAPE_INSTALL%</SPAN><TT>\demo\programs\nserverdemo\</TT> directory in 
+class=italic>%DERBY_INSTALL%</SPAN><TT>\demo\programs\nserverdemo\</TT> directory in 
 order to run the sample program:</P>
 <UL>
   <LI><TT>NsSample.java</tt><br>
 This is the entry point into the demo application. The program starts up two clients. One client opens an embedded 
 connection to perform database operations while the other client opens a client 
-connection to the Cloudscape Network Server to perform database operations.  This program provides the following constants that 
+connection to the Derby Network Server to perform database operations.  This program provides the following constants that 
 can be changed to modify the sample demo:
 <UL>
 
@@ -61,7 +61,7 @@ part of this sample program.</LI>
 </UL>
 </li>
   <LI><tt>NetworkServerUtil.java</tt><br>
-This file contains helper methods to start the Cloudscape Network Server and to shutdown the server.
+This file contains helper methods to start the Derby Network Server and to shutdown the server.
 </li>
   <LI>Compiled class files:
 <UL>
@@ -75,27 +75,27 @@ This file contains helper methods to start the Cloudscape Network Server and to 
 
 
 <H2>Running the Network Server demo program</H2>
-<P>To run the Cloudscape Network Server demonstration program:</P>
+<P>To run the Derby Network Server demonstration program:</P>
 <OL>
   <LI>Open a command prompt and change directories to the <SPAN 
-  class=italic>%CLOUDSCAPE_INSTALL%</SPAN><tt>\demo\programs\</tt> directory, where <SPAN 
-  class=italic>%CLOUDSCAPE_INSTALL%</SPAN> is the directory where you installed Cloudscape. 
+  class=italic>%DERBY_INSTALL%</SPAN><tt>\demo\programs\</tt> directory, where <SPAN 
+  class=italic>%DERBY_INSTALL%</SPAN> is the directory where you installed Derby. 
   <LI>Set the CLASSPATH to the current directory (".") and also include the following 
-  jar files in order to use the Cloudscape Network Server and the DB2 JDBC Universal Driver.
+  jar files in order to use the Derby Network Server and the DB2 JDBC Universal Driver.
 <ul>
-<li><tt>derbynet.jar</tt><br>The Network Server jar file. It must be in your CLASSPATH to use any of the Cloudscape Network 
+<li><tt>derbynet.jar</tt><br>The Network Server jar file. It must be in your CLASSPATH to use any of the Derby Network 
 Server functions.</li>
 <li><tt>db2jcc.jar</tt><br>This jar file must be in your CLASSPATH to use the 
 DB2 JDBC Universal Driver.</li>
 <li><tt>db2jcc_license_c.jar</tt><br>This jar file is the license file for the Universal 
 Driver.</li>
-<li><tt>derby.jar</tt><br>The Cloudscape database engine jar file.</li>
+<li><tt>derby.jar</tt><br>The Derby database engine jar file.</li>
 </ul>
 </LI>
-<li>Test the CLASSPATH settings by running the following java command:<pre>java org.apache.derby.tools.sysinfo</pre>This command will show the Cloudscape jar files that are in the CLASSPATH as well as 
+<li>Test the CLASSPATH settings by running the following java command:<pre>java org.apache.derby.tools.sysinfo</pre>This command will show the Derby jar files that are in the CLASSPATH as well as 
 the DB2 JDBC Universal Driver along with their respective versions.</li>
 <li>Once you have set up your environment correctly, execute the application from the <br> <SPAN 
-  class=italic>%CLOUDSCAPE_INSTALL%</SPAN><tt>\demo\programs\</tt> directory:<br>
+  class=italic>%DERBY_INSTALL%</SPAN><tt>\demo\programs\</tt> directory:<br>
 <pre>java nserverdemo.NsSample</pre>
 </li>
 </OL>
@@ -149,7 +149,7 @@ Shutdown successful.<br>
 <UL>
   <LI><A name=Bot_Of_Page></A><tt>NSSampledb</tt><br>This directory makes up the 
 NSSampledb database.</li>
-  <LI><tt>derby.log</tt><br>This log file contains Cloudscape progress and error messages.</li>
+  <LI><tt>derby.log</tt><br>This log file contains Derby progress and error messages.</li>
 </ul>
 
 
