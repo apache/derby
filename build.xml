@@ -749,7 +749,7 @@
     <manifest file="${derby.jar.dir}/lists/smf.mf">
       <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
       <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
-      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}"/>
+      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
     </manifest> 
 
     <jar destfile="${derby.jar.dir}/derby.jar"
@@ -767,8 +767,7 @@
       <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
       <attribute name="Bundle-Activator" value="org.apache.derby.osgi.EmbeddedActivator"/>
       <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
-      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}"/>
-      <attribute name="Import-Package" value="java.sql"/>
+      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
       <attribute name="DynamicImport-Package" value="*"/>
       <attribute name="Export-Package" value="org.apache.derby.authentication,org.apache.derby.database,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti"/> 
     </manifest> 
