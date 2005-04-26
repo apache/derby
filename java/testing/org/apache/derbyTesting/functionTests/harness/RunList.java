@@ -62,6 +62,7 @@ public class RunList
 	static boolean needJdk12 = false;
 	static boolean needJdk12ext = false;
 	static boolean excludedFromJCC = false;
+	static String clientExclusionMessage;
 	static Boolean needIBMjvm = null;
 	static boolean needJdk14 = false;
         static boolean needEncryption = false;
@@ -117,6 +118,11 @@ public class RunList
 	static Properties suiteProperties;
 	static Properties specialProperties; // for testSpecialProps
 	static BufferedReader runlistFile;
+
+    static String [] clientExclusionKeywords = new String [] {
+        "at-or-before:", "at-or-after:", "when-at-or-before:jdk",
+        "when-at-or-after:jdk", "when:jdk"
+    };
 
     public RunList()
     {
@@ -270,8 +276,8 @@ public class RunList
 					else if(needJdk14)
                     	pwOut.println("Cannot run the suite, requires jdk14 or higher, have jdk" + javaVersion);
 					else if(excludedFromJCC)
-                    	pwOut.println("Cannot run the suite on JCC version " + excludeJCC + " or lower.");                                     
-                                        else if((needIBMjvm == null || needIBMjvm.booleanValue() == false))
+                    	pwOut.println(clientExclusionMessage);
+					else if((needIBMjvm == null || needIBMjvm.booleanValue() == false))
                     	pwOut.println("Cannot run the suite, requires IBM jvm, jvm vendor is " + System.getProperty("java.vendor"));
 					else
                     	pwOut.println("Cannot run the suite, have jdk" + javaVersion);
@@ -1115,25 +1121,14 @@ public class RunList
 	        if (verbose) System.out.println("Exception in shouldSkipTest: " + e);
             }
 
-	    if (excludeJCC != null) {
-		int excludeMajor = 0;
-		int excludeMinor = 0;
-		try 
-		{
-		    excludeMajor = Integer.parseInt(excludeJCC.substring(0,excludeJCC.indexOf(".")));
-		    excludeMinor = Integer.parseInt(excludeJCC.substring(excludeJCC.indexOf(".")+1));
-		} catch (NumberFormatException nfe) {
-		    System.out.println("excludeJCC property poorly formatted: " + excludeJCC);
-		} catch (NullPointerException npe) {
-		    System.out.println("excludeJCC property poorly formatted: " + excludeJCC);
+		try {
+			checkClientExclusion(excludeJCC, "JCC", jccMajor, jccMinor, javaVersion);
+		} catch (Exception e) {
+			excludedFromJCC = true;
+			clientExclusionMessage = e.getMessage();
+			return true;
 		}
-		if (excludeMajor >= jccMajor && excludeMinor >= jccMinor)
-		{
-		    excludedFromJCC = true;
-		    return true;
-		}
-	    }
-	} 
+    }
 
 	return result; // last test result is returned
     }
@@ -1240,5 +1235,309 @@ public class RunList
 		ps.flush();
     }
 	
+    /* ****
+     * Look at the received exclusion property and use it to
+     * figure out if this test/suite should be skipped based
+     * on the actual client and JVM versions in question.
+     * @param exclusion The harness property indicating the
+     *  rules for skipping this test.  For example:
+     *  "at-or-before:2.0,when-at-or-after:jdk1.5.1".
+     * @param clientName Name of the client being used.
+     * @param clientMajor The 'major' part of the client version
+     *  that is actually being used for the test.
+     * @param clientMinor The 'minor' part of the client version
+     *  that is actually being used for the test.
+     * @param javaVersion JVM being used, as a string.
+     * @return Exception is thrown if this test/suite should
+     *  be skipped; else we simply return.
+     */
+    public static void checkClientExclusion(String exclusion,
+        String clientName, int clientMajor, int clientMinor,
+        String javaVersion) throws Exception
+    {
+
+        if (exclusion == null)
+        // we already know the test isn't excluded.
+            return;
+
+        // These tell us whether we want to 1) exclude version
+        // numbers that are lower than the target version, or
+        // 2) exclude version numbers that are higher than the
+        // target version.
+        int clientComparisonType = 0;
+        int jvmComparisonType = 0;
+
+        exclusion = exclusion.toLowerCase();
+        String clientVersion = null;
+
+        // Figure out what kind of comparison we need for the client version.
+        int comma = exclusion.indexOf(",");
+        if (comma != -1)
+            clientVersion = exclusion.substring(0, comma);
+        else
+            clientVersion = exclusion;
+
+        try {
+            clientComparisonType = getVersionCompareType(clientVersion);
+        } catch (Exception e) {
+            System.out.println("exclusion property poorly formatted: " + exclusion);
+            return;
+        }
+
+        // Figure out what kind of comparison we need for the JVM version.
+        boolean jvmDependent;
+        if (comma == -1)
+            jvmDependent = false;
+        else {
+            jvmDependent = true;
+            // "+6" in next line is length of ",when-", which is the
+            // keyword used to begin the jvm exclusion string.
+            String jvmVersion = exclusion.substring(comma+6);
+            try {
+                jvmComparisonType = getVersionCompareType(jvmVersion);
+            } catch (Exception e) {
+                System.out.println("exclusion property poorly formatted: " + exclusion);
+                return;
+            }
+        }
+
+        // Load the client and JVM target versions.  The "5" in the
+        // next line means that we want to parse out 5 numbers from
+        // the property: 2 numbers for the client version (ex. "2.0")
+        // and 3 numbers for the JVM version (ex. "1.5.1").
+        int [] excludeInfo = null;
+        try {
+            excludeInfo = getVersionArray(exclusion, 5);
+        } catch (Exception e) {
+            System.out.println("Unexpected text in exclusion property: " + e.getMessage());
+            return;
+        }
+
+        // Now check to see if this test/suite should be excluded.
+        // First check the client version.
+        if (versionExcluded(new int [] {clientMajor, clientMinor}, 0,
+            excludeInfo, 0, 2, clientComparisonType))
+        {
+
+            if (!jvmDependent) {
+            // then skip it regardless of JVM.
+                throw new Exception("This test/suite is excluded from running with " +
+                    clientName + " versions at or " +
+                    (clientComparisonType == -1 ? "before " : "after ") +
+                    excludeInfo[0] + "." + excludeInfo[1] + ".");
+            }
+
+            // Now check the JVM version.
+            int [] jvmInfo = null;
+            try {
+                jvmInfo = getVersionArray(javaVersion, 3);
+            } catch (Exception e) {
+                System.out.println("Unexpected text in exclusion property: " + e.getMessage());
+                return;
+            }
+
+            if (versionExcluded(jvmInfo, 0, excludeInfo, 2, 3, jvmComparisonType)) {
+                throw new Exception("This test/suite is excluded from running with " +
+                    clientName + " versions at or " +
+                    (clientComparisonType == -1 ? "before " : "after ") +
+                    excludeInfo[0] + "." + excludeInfo[1] + " when JVM versions at or " +
+                    (jvmComparisonType == -1 ? "before " : "after ") +
+                    excludeInfo[2] + "." + excludeInfo[3] + "." + excludeInfo[4] +
+                    " are being used.");
+            }
+        }
+
+    }
+
+    /* ****
+     * Parses a versionString property and returns the specified
+     * number of integers as found in that string.  If the number
+     * of integers requested is larger than the number of integers
+     * found in the version string, -1 will be used as filler.
+     *
+     * An example versionString might be any of the following:
+     * "2.4" or "at-or-after:2.4" or "when:jdk1.3.1" or 
+     * "when-at-or-after:jdk1.3.1", etc.  In these examples,
+     * the resultant int arrays would be:
+     *
+     * "2.4"                        ==> [2,4]         // if resultSize == 2.
+     * "at-or-after:2.4"            ==> [2.4]         // if resultSize == 2.
+     * "when:jdk1.3.1"              ==> [1,3,1]       // if resultSize == 3.
+     * "when-at-or-after:jdk1.3.1"  ==> [1,3,1,-1]    // if resultSize == 4.
+     *
+     * @param versionString The version string to parse.
+     * @param resultSize The number of integers to parse out of the
+     *   received version string.
+     * @return An integer array holding resultSize integers as parsed
+     *   from the version string (with -1 as a filler if needed).
+     */
+    private static int [] getVersionArray(String versionString, int resultSize)
+        throws Exception
+    {
+
+        if (versionString == null)
+        // Use an empty string so that tokenizer will still work;
+        // result will be an array of "-1" values.
+            versionString = "";
+
+        int [] result = new int[resultSize];
+
+        String tok = null;
+        String text = null;
+        StringTokenizer st = new StringTokenizer(versionString, ".,_");
+        for (int i = 0; i < resultSize; i++) {
+    
+            if (!st.hasMoreTokens()) {
+            // if we're out of integers, use -1 as a filler.
+                result[i] = -1;
+                continue;
+            }
+
+            // Get the token and parse out an integer.
+            tok = st.nextToken();
+            int pos = 0;
+            for (; !Character.isDigit(tok.charAt(pos)); pos++);
+            text = tok.substring(0, pos);
+
+            // If we have text, make sure it's a valid keyword
+            // and then move past it.
+            if ((text.length() > 0) && !isClientExclusionKeyword(text))
+                throw new Exception(text);
+
+            // Load the int.
+            tok = tok.substring(pos);
+            if (tok.length() == 0) {
+            // no integer found, so don't count this iteration.
+                i--;
+                continue;
+            }
+
+            result[i] = Integer.parseInt(tok);
+
+        }
+
+        return result;
+
+    }
+
+    /* ****
+     * Looks at a version string and searches for an indication
+     * of what kind of versions (lower or higher) need to be
+     * excluded.  This method just looks for the keywords
+     * "at-or-before" and "at-or-after", and then returns
+     * a corresponding value.  If neither of those keywords
+     * is found, the default is to exclude versions that are
+     * lower (i.e. "at-or-before").
+     * @param versionString The version string in question,
+     *  for example "2.4" or "jdk1.3.1" or "at-or-before:jdk1.3.1".
+     * @return -1 if we want to exclude versions that come
+     *  before the target, 1 if we want to exclude versions
+     *  that come after the target.  Default is -1.
+     */
+    private static int getVersionCompareType(String versionString)
+        throws Exception
+    {
+
+        if (versionString == null)
+        // just return the default.
+            return -1;
+
+        int colon = versionString.indexOf(":");
+        if (colon != -1) {
+            if (versionString.startsWith("at-or-before"))
+                return -1;
+            else if (versionString.startsWith("at-or-after"))
+                return 1;
+            else
+                throw new Exception("bad exclusion property format");
+        }
+
+        return -1;
+
+    }
+
+    /* ****
+     * Takes two versions, each of which is an array of integers,
+     * and determines whether or not the first (actual) version
+     * should be excluded from running based on the second (target)
+     * version and on the received comparisonType.
+     * 
+     * For example, let vActual be [2,1] and vTarget be [2,4]. Then
+     * if comparisonType indicates that versions "at or before" the
+     * the target version (2.4) should be excluded, this method
+     * would return true (because 2.1 is before 2.4); if comparisonType
+     * indicates that versions "at or after" the target type should
+     * be excluded, this method would return false (because 2.1 is
+     * NOT at or after 2.4).
+     *
+     * @param vActual The actual version, as an int array.
+     * @param vTarget The target version, as an int array.
+     * @param offset1 Offset into vActual at which to start the
+     *  comparison.
+     * @param offset2 Offset into vTarget at which to start the
+     *  comparison.
+     * @param numParts The maximum number of integer parts to compare.
+     * @param comparisonType -1 if we want to exclude versions
+     *  at or before the target; 1 if we want to exclude versions
+     *  at or after the target.
+     * @return True if the actual version should be excluded from
+     *  running, false otherwise.
+     */
+    private static boolean versionExcluded(int [] vActual, int offset1,
+        int [] vTarget, int offset2, int numParts, int comparisonType)
+    {
+
+        // Figure out how many integer parts we can actually compare.
+        // The max is "len", but if len is greater than the length of
+        // either of the versions, then we have to compensate for
+        // the shortest version.
+        int compareLen = (vActual.length >= vTarget.length ? vTarget.length : vActual.length);
+        compareLen = (compareLen <= numParts ? compareLen : numParts);
+
+        // Now do the comparison.
+        for (int i = 0; i < compareLen; i++) {
+
+            if (comparisonType * vActual[offset1] > comparisonType * vTarget[offset2])
+                return true;
+
+            if (comparisonType * vActual[offset1] < comparisonType * vTarget[offset2])
+                return false;
+
+            offset1++;
+            offset2++;
+
+        }
+
+        // If we get here, the two versions are the same thru
+        // compareLen parts.  If that's as far as we're supposed
+        // to compare, then we treat them as equal.  Else, we take
+        // the version having more parts as the greater of the two.
+
+        if (compareLen == numParts)
+        // treat them as equal.
+            return true;
+
+        return (comparisonType * vActual.length > comparisonType * vTarget.length);
+
+    }
+
+    /* ****
+     * Checks to see if the received string is a recognized
+     * keyword for an exclusion property.
+     * @param text The string in question.
+     * @return True if the received text is a valid keyword
+     *  for exclusion properties; false otherwise.
+     */
+    private static boolean isClientExclusionKeyword(String text) {
+
+        for (int i = 0; i < clientExclusionKeywords.length; i++) {
+            if (clientExclusionKeywords[i].equals(text))
+                return true;
+        }
+
+        return false;
+
+    }
+
 }
 
