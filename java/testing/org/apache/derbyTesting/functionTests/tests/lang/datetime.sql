@@ -540,7 +540,13 @@ insert into t values ('24.00.00');
 insert into t values ('17.05.11  ');
 insert into t values ('17:05:11  ');
 
--- 7 rows
+-- seconds can be omitted
+insert into t values ('1:01');
+insert into t values ('1:02 ');
+insert into t values ('2.01');
+insert into t values ('2.02 ');
+
+-- 11 rows
 select * from t;
 
 delete from t;
@@ -578,3 +584,105 @@ values date('2004-04-15 16:15:32.387');
 values date('2004-04-15-16.15.32.387');
 values date('2004-04-15-16.15.32.387 zz');
 values date('2004-04-15-16.15.32.y');
+
+values time('13:59');
+values time('1:00');
+
+-- Test unary date and datetime functions. Test with both constant and variable arguments.
+
+autocommit off;
+
+-- test date(integer)
+create table t( i int, d date);
+commit;
+
+insert into t values( 1, date(1)),(10, date(10.1)),(365,date(365.1e0)),(366,date(366)),(789,date(789)),(790,date(790)),(791,date(791));
+
+-- should fail
+insert into t values( 0, date(0));
+insert into t values( -1, date(-1));
+insert into t values( 3652060, date( 3652060));
+select i,d,date(i),date(d) from t order by i;
+
+rollback;
+insert into t(i) values( 0);
+select date(i) from t;
+
+rollback;
+insert into t(i) values( -1);
+select date(i) from t;
+
+
+rollback;
+insert into t(i) values( 3652060);
+select date(i) from t;
+
+rollback;
+
+drop table t;
+create table t( s varchar(32), d date);
+commit;
+
+insert into t values('1900060', date('1900060')),
+                    ('1904060', date('1904060')),
+                    ('1904366', date('1904366')),
+                    ('2000060', date('2000060')),
+                    ('2001060', date('2001060')),
+                    ('2001365', date('2001365'));
+select s,d,date(s) from t order by s;
+rollback;
+
+-- failure cases
+values( date('2001000'));
+values( date('2001366'));
+values( date('2000367'));
+values( date('xxxxxxx'));
+
+insert into t(s) values( '2001000');
+select date(s) from t;
+rollback;
+
+insert into t(s) values( '2001366');
+select date(s) from t;
+rollback;
+
+insert into t(s) values( '2000367');
+select date(s) from t;
+rollback;
+
+insert into t(s) values( 'xxxxxxx');
+select date(s) from t;
+rollback;
+
+-- test parameter
+prepare dateTimePS as 'values( date(cast(? as integer)),timestamp(cast(? as varchar(32))))';
+execute dateTimePS using 'values(cast(1 as integer), ''2003-03-05-17.05.43.111111'')';
+execute dateTimePS using 'values(2, ''20030422190200'')';
+
+values( date(date(1)), date(timestamp('2003-03-05-17.05.43.111111')));
+
+drop table t;
+create table t( s varchar(32), ts timestamp, expected timestamp);
+commit;
+
+insert into t(ts) values( timestamp('2003-03-05-17.05.43.111111'));
+select date(ts) from t;
+rollback;
+
+-- Test special unary timestamp function rules: yyyyxxddhhmmss
+insert into t values('20000228235959', timestamp('20000228235959'), '2000-02-28-23.59.59'),
+                    ('20000229000000', timestamp('20000229000000'), '2000-02-29-00.00.00');
+select s from t where ts <> expected or timestamp(s) <> expected or timestamp(ts) <> expected;
+rollback;
+
+-- invalid
+values( timestamp('2000 1 1 0 0 0'));
+values( timestamp('aaaaaaaaaaaaaa'));
+
+insert into t(s) values('2000 1 1 0 0 0');
+select timestamp(s) from t;
+rollback;
+
+insert into t(s) values('aaaaaaaaaaaaaa');
+select timestamp(s) from t;
+rollback;

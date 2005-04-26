@@ -61,7 +61,7 @@ public interface C_NodeTypes
 	static final int UNARY_MINUS_OPERATOR_NODE = 29;
 	static final int UNARY_PLUS_OPERATOR_NODE = 30;
 	static final int SQL_BOOLEAN_CONSTANT_NODE = 31;
-	// 32 is available
+	static final int UNARY_DATE_TIMESTAMP_OPERATOR_NODE = 32;
 	static final int TIMESTAMP_OPERATOR_NODE = 33;
 	static final int TABLE_NAME = 34;
 	static final int GROUP_BY_COLUMN = 35;

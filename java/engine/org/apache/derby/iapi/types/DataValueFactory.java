@@ -395,6 +395,14 @@ public interface DataValueFactory
         DateTimeDataValue       getDataValue(Timestamp value,
                                                                                 DateTimeDataValue previous)
                                                         throws StandardException;
+
+        /**
+         * Implement the timestamp SQL function: construct a SQL timestamp from a string, or timestamp.
+         *
+         * @param operand Must be a timestamp or a string convertible to a timestamp.
+         */
+        DateTimeDataValue getTimestamp( DataValueDescriptor operand) throws StandardException;
+
         /**
          * Construct a SQL timestamp from a date and time.
          *
@@ -402,6 +410,17 @@ public interface DataValueFactory
          * @param time Must be convertible to a time.
          */
         DateTimeDataValue getTimestamp( DataValueDescriptor date, DataValueDescriptor time) throws StandardException;
+
+        /**
+         * Implements the SQL date function
+         *
+         * @param operand A date, timestamp, string or integer.
+         *
+         * @return the corresponding date value
+         *
+         * @exception StandardException if the syntax is invalid or the date is out of range.
+         */
+        public DateTimeDataValue getDate( DataValueDescriptor operand) throws StandardException;
 
         /**
          * @param dateStr A date in one of the DB2 standard date formats or the local format.

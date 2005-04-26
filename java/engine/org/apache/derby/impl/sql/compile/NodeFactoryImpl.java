@@ -554,6 +554,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.SAVEPOINT_NODE:
 		  	return C_NodeNames.SAVEPOINT_NODE_NAME;
 
+          case C_NodeTypes.UNARY_DATE_TIMESTAMP_OPERATOR_NODE:
+            return C_NodeNames.UNARY_DATE_TIMESTAMP_OPERATOR_NODE_NAME;
+
 		  case C_NodeTypes.TIMESTAMP_OPERATOR_NODE:
             return C_NodeNames.TIMESTAMP_OPERATOR_NODE_NAME;
 

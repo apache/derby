@@ -998,6 +998,58 @@ public final class SQLTimestamp extends DataType
 
                   ps.setTimestamp(position, getTimestamp((Calendar) null));
      }
+
+    /**
+     * Compute the SQL timestamp function.
+     *
+     * @exception StandardException
+     */
+    public static DateTimeDataValue computeTimestampFunction( DataValueDescriptor operand,
+                                                              DataValueFactory dvf) throws StandardException
+    {
+        try
+        {
+            if( operand.isNull())
+                return new SQLTimestamp();
+            if( operand instanceof SQLTimestamp)
+                return (SQLTimestamp) operand.getClone();
+
+            String str = operand.getString();
+            if( str.length() == 14)
+            {
+                int year = parseDateTimeInteger( str, 0, 4);
+                int month = parseDateTimeInteger( str, 4, 2);
+                int day = parseDateTimeInteger( str, 6, 2);
+                int hour = parseDateTimeInteger( str, 8, 2);
+                int minute = parseDateTimeInteger( str, 10, 2);
+                int second = parseDateTimeInteger( str, 12, 2);
+                return new SQLTimestamp( SQLDate.computeEncodedDate( year, month, day),
+                                         SQLTime.computeEncodedTime( hour,minute,second),
+                                         0);
+            }
+            // else use the standard cast
+            return dvf.getTimestampValue( str, false);
+        }
+        catch( StandardException se)
+        {
+            if( SQLState.LANG_DATE_SYNTAX_EXCEPTION.startsWith( se.getSQLState()))
+                throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
+                                                      operand.getString(), "timestamp");
+            throw se;
+        }
+    } // end of computeTimestampFunction
+
+    static int parseDateTimeInteger( String str, int start, int ndigits) throws StandardException
+    {
+        int end = start + ndigits;
+        int retVal = 0;
+        for( int i = start; i < end; i++)
+        {
+            char c = str.charAt( i);
+            if( !Character.isDigit( c))
+                throw StandardException.newException( SQLState.LANG_DATE_SYNTAX_EXCEPTION);
+            retVal = 10*retVal + Character.digit( c, 10);
+        }
+        return retVal;
+    } // end of parseDateTimeInteger
 }
-
-

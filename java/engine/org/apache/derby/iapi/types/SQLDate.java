@@ -379,7 +379,7 @@ public final class SQLDate extends DataType
 	{
 		parseDate(value);
 	}
-
+    
     private void parseDate( java.util.Date value) throws StandardException
 	{
 		encodedDate = computeEncodedDate(value);
@@ -929,5 +929,72 @@ public final class SQLDate extends DataType
 		currentCal.setTime(value);
 		return SQLDate.computeEncodedDate(currentCal);
 	}
-}
 
+
+        /**
+         * Implement the date SQL function: construct a SQL date from a string, number, or timestamp.
+         *
+         * @param operand Must be a date or a string convertible to a date.
+         * @param dvf the DataValueFactory
+         *
+         * @exception StandardException standard error policy
+         */
+    public static DateTimeDataValue computeDateFunction( DataValueDescriptor operand,
+                                                         DataValueFactory dvf) throws StandardException
+    {
+        try
+        {
+            if( operand.isNull())
+                return new SQLDate();
+            if( operand instanceof SQLDate)
+                return (SQLDate) operand.getClone();
+
+            if( operand instanceof SQLTimestamp)
+            {
+                DateTimeDataValue retVal = new SQLDate();
+                retVal.setValue( operand);
+                return retVal;
+            }
+            if( operand instanceof NumberDataValue)
+            {
+                int daysSinceEpoch = operand.getInt();
+                if( daysSinceEpoch <= 0 || daysSinceEpoch > 3652059)
+                    throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
+                                                          operand.getString(), "date");
+                Calendar cal = new GregorianCalendar( 1970, 0, 1, 12, 0, 0);
+                cal.add( Calendar.DATE, daysSinceEpoch - 1);
+                return new SQLDate( computeEncodedDate( cal.get( Calendar.YEAR),
+                                                        cal.get( Calendar.MONTH) + 1,
+                                                        cal.get( Calendar.DATE)));
+            }
+            String str = operand.getString();
+            if( str.length() == 7)
+            {
+                // yyyyddd where ddd is the day of the year
+                int year = SQLTimestamp.parseDateTimeInteger( str, 0, 4);
+                int dayOfYear = SQLTimestamp.parseDateTimeInteger( str, 4, 3);
+                if( dayOfYear < 1 || dayOfYear > 366)
+                    throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
+                                                          operand.getString(), "date");
+                Calendar cal = new GregorianCalendar( year, 0, 1, 2, 0, 0);
+                cal.add( Calendar.DAY_OF_YEAR, dayOfYear - 1);
+                int y = cal.get( Calendar.YEAR);
+                if( y != year)
+                    throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
+                                                          operand.getString(), "date");
+                return new SQLDate( computeEncodedDate( year,
+                                                        cal.get( Calendar.MONTH) + 1,
+                                                        cal.get( Calendar.DATE)));
+            }
+            // Else use the standard cast.
+            return dvf.getDateValue( str, false);
+        }
+        catch( StandardException se)
+        {
+            if( SQLState.LANG_DATE_SYNTAX_EXCEPTION.startsWith( se.getSQLState()))
+                throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
+                                                      operand.getString(), "date");
+            throw se;
+        }
+    } // end of computeDateFunction
+}

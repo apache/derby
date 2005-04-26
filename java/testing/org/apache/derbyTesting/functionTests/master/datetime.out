@@ -148,21 +148,21 @@ xxxxxxFILTERED-TIMESTAMPxxxxx|xxxxxxFILTERED-TIMESTAMPxxxxx
 ij> -- show that overflow and underflow are not allowed
 -- (SQL92 would have these report errors)
 values( date('0000-01-01'));
-ERROR 22007: The string representation of a datetime value is out of range.
+ERROR 22008: '0000-01-01' is an invalid argument to the date function.
 ij> values( date('2000-00-01'));
-ERROR 22007: The string representation of a datetime value is out of range.
+ERROR 22008: '2000-00-01' is an invalid argument to the date function.
 ij> values( date('2000-01-00'));
-ERROR 22007: The string representation of a datetime value is out of range.
+ERROR 22008: '2000-01-00' is an invalid argument to the date function.
 ij> values( date('10000-01-01'));
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22008: '10000-01-01' is an invalid argument to the date function.
 ij> values( date('2000-13-01'));
-ERROR 22007: The string representation of a datetime value is out of range.
+ERROR 22008: '2000-13-01' is an invalid argument to the date function.
 ij> values( date('2000-01-32'));
-ERROR 22007: The string representation of a datetime value is out of range.
+ERROR 22008: '2000-01-32' is an invalid argument to the date function.
 ij> values( date('1900-02-29'));
-ERROR 22007: The string representation of a datetime value is out of range.
+ERROR 22008: '1900-02-29' is an invalid argument to the date function.
 ij> values( date('2001-02-29'));
-ERROR 22007: The string representation of a datetime value is out of range.
+ERROR 22008: '2001-02-29' is an invalid argument to the date function.
 ij> values( time('25.00.00'));
 ERROR 22007: The string representation of a datetime value is out of range.
 ij> values( time('24.00.01'));
@@ -173,15 +173,15 @@ ij> values( time('00:00:60'));
 ERROR 22007: The string representation of a datetime value is out of range.
 ij> -- show garbage in == errors out
 select date( 'xxxx') from t where p is null;
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22008: 'xxxx' is an invalid argument to the date function.
 ij> select time( '') from t where p is null;
 ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
 ij> select timestamp( 'is there anything here?' )from t where p is null;
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22008: 'is there anything here?' is an invalid argument to the timestamp function.
 ij> select timestamp( '1992-01- there anything here?' )from t where p is null;
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22008: '1992-01- there anything here?' is an invalid argument to the timestamp function.
 ij> select timestamp( '--::' )from t where p is null;
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22008: '--::' is an invalid argument to the timestamp function.
 ij> select time('::::') from t where p is null;
 ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
 ij> -- show is not null at work
@@ -957,7 +957,16 @@ insert into t values ('17.05.11  ');
 1 row inserted/updated/deleted
 ij> insert into t values ('17:05:11  ');
 1 row inserted/updated/deleted
-ij> -- 7 rows
+ij> -- seconds can be omitted
+insert into t values ('1:01');
+1 row inserted/updated/deleted
+ij> insert into t values ('1:02 ');
+1 row inserted/updated/deleted
+ij> insert into t values ('2.01');
+1 row inserted/updated/deleted
+ij> insert into t values ('2.02 ');
+1 row inserted/updated/deleted
+ij> -- 11 rows
 select * from t;
 T       
 --------
@@ -968,8 +977,12 @@ T
 00:00:00
 17:05:11
 17:05:11
+01:01:00
+01:02:00
+02:01:00
+02:02:00
 ij> delete from t;
-7 rows inserted/updated/deleted
+11 rows inserted/updated/deleted
 ij> -- end value tests...
 insert into t values ('24.60.60');
 ERROR 22007: The string representation of a datetime value is out of range.
@@ -1027,7 +1040,174 @@ ij> values date('2004-04-15-16.15.32.387');
 ----------
 2004-04-15
 ij> values date('2004-04-15-16.15.32.387 zz');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22008: '2004-04-15-16.15.32.387 zz' is an invalid argument to the date function.
 ij> values date('2004-04-15-16.15.32.y');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22008: '2004-04-15-16.15.32.y' is an invalid argument to the date function.
+ij> values time('13:59');
+1       
+--------
+13:59:00
+ij> values time('1:00');
+1       
+--------
+01:00:00
+ij> -- Test unary date and datetime functions. Test with both constant and variable arguments.
+autocommit off;
+ij> -- test date(integer)
+create table t( i int, d date);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into t values( 1, date(1)),(10, date(10.1)),(365,date(365.1e0)),(366,date(366)),(789,date(789)),(790,date(790)),(791,date(791));
+7 rows inserted/updated/deleted
+ij> -- should fail
+insert into t values( 0, date(0));
+ERROR 22008: '0' is an invalid argument to the date function.
+ij> insert into t values( -1, date(-1));
+ERROR 22008: '-1' is an invalid argument to the date function.
+ij> insert into t values( 3652060, date( 3652060));
+ERROR 22008: '3652060' is an invalid argument to the date function.
+ij> select i,d,date(i),date(d) from t order by i;
+I          |D         |3         |4         
+--------------------------------------------
+1          |1970-01-01|1970-01-01|1970-01-01
+10         |1970-01-10|1970-01-10|1970-01-10
+365        |1970-12-31|1970-12-31|1970-12-31
+366        |1971-01-01|1971-01-01|1971-01-01
+789        |1972-02-28|1972-02-28|1972-02-28
+790        |1972-02-29|1972-02-29|1972-02-29
+791        |1972-03-01|1972-03-01|1972-03-01
+ij> rollback;
+ij> insert into t(i) values( 0);
+1 row inserted/updated/deleted
+ij> select date(i) from t;
+1         
+----------
+ERROR 22008: '0' is an invalid argument to the date function.
+ij> rollback;
+ij> insert into t(i) values( -1);
+1 row inserted/updated/deleted
+ij> select date(i) from t;
+1         
+----------
+ERROR 22008: '-1' is an invalid argument to the date function.
+ij> rollback;
+ij> insert into t(i) values( 3652060);
+1 row inserted/updated/deleted
+ij> select date(i) from t;
+1         
+----------
+ERROR 22008: '3652060' is an invalid argument to the date function.
+ij> rollback;
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> create table t( s varchar(32), d date);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into t values('1900060', date('1900060')),
+                    ('1904060', date('1904060')),
+                    ('1904366', date('1904366')),
+                    ('2000060', date('2000060')),
+                    ('2001060', date('2001060')),
+                    ('2001365', date('2001365'));
+6 rows inserted/updated/deleted
+ij> select s,d,date(s) from t order by s;
+S                               |D         |3         
+------------------------------------------------------
+1900060                         |1900-03-01|1900-03-01
+1904060                         |1904-02-29|1904-02-29
+1904366                         |1904-12-31|1904-12-31
+2000060                         |2000-02-29|2000-02-29
+2001060                         |2001-03-01|2001-03-01
+2001365                         |2001-12-31|2001-12-31
+ij> rollback;
+ij> -- failure cases
+values( date('2001000'));
+ERROR 22008: '2001000' is an invalid argument to the date function.
+ij> values( date('2001366'));
+ERROR 22008: '2001366' is an invalid argument to the date function.
+ij> values( date('2000367'));
+ERROR 22008: '2000367' is an invalid argument to the date function.
+ij> values( date('xxxxxxx'));
+ERROR 22008: 'xxxxxxx' is an invalid argument to the date function.
+ij> insert into t(s) values( '2001000');
+1 row inserted/updated/deleted
+ij> select date(s) from t;
+1         
+----------
+ERROR 22008: '2001000' is an invalid argument to the date function.
+ij> rollback;
+ij> insert into t(s) values( '2001366');
+1 row inserted/updated/deleted
+ij> select date(s) from t;
+1         
+----------
+ERROR 22008: '2001366' is an invalid argument to the date function.
+ij> rollback;
+ij> insert into t(s) values( '2000367');
+1 row inserted/updated/deleted
+ij> select date(s) from t;
+1         
+----------
+ERROR 22008: '2000367' is an invalid argument to the date function.
+ij> rollback;
+ij> insert into t(s) values( 'xxxxxxx');
+1 row inserted/updated/deleted
+ij> select date(s) from t;
+1         
+----------
+ERROR 22008: 'xxxxxxx' is an invalid argument to the date function.
+ij> rollback;
+ij> -- test parameter
+prepare dateTimePS as 'values( date(cast(? as integer)),timestamp(cast(? as varchar(32))))';
+ij> execute dateTimePS using 'values(cast(1 as integer), ''2003-03-05-17.05.43.111111'')';
+1         |2                         
+-------------------------------------
+1970-01-01|2003-03-05-17.05.43.111111
+ij> execute dateTimePS using 'values(2, ''20030422190200'')';
+1         |2                         
+-------------------------------------
+1970-01-02|xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> values( date(date(1)), date(timestamp('2003-03-05-17.05.43.111111')));
+1         |2         
+---------------------
+1970-01-01|2003-03-05
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> create table t( s varchar(32), ts timestamp, expected timestamp);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> insert into t(ts) values( timestamp('2003-03-05-17.05.43.111111'));
+1 row inserted/updated/deleted
+ij> select date(ts) from t;
+1         
+----------
+2003-03-05
+ij> rollback;
+ij> -- Test special unary timestamp function rules: yyyyxxddhhmmss
+insert into t values('20000228235959', timestamp('20000228235959'), '2000-02-28-23.59.59'),
+                    ('20000229000000', timestamp('20000229000000'), '2000-02-29-00.00.00');
+2 rows inserted/updated/deleted
+ij> select s from t where ts <> expected or timestamp(s) <> expected or timestamp(ts) <> expected;
+S                               
+--------------------------------
+ij> rollback;
+ij> -- invalid
+values( timestamp('2000 1 1 0 0 0'));
+ERROR 22008: '2000 1 1 0 0 0' is an invalid argument to the timestamp function.
+ij> values( timestamp('aaaaaaaaaaaaaa'));
+ERROR 22008: 'aaaaaaaaaaaaaa' is an invalid argument to the timestamp function.
+ij> insert into t(s) values('2000 1 1 0 0 0');
+1 row inserted/updated/deleted
+ij> select timestamp(s) from t;
+1                         
+--------------------------
+ERROR 22008: '2000 1 1 0 0 0' is an invalid argument to the timestamp function.
+ij> rollback;
+ij> insert into t(s) values('aaaaaaaaaaaaaa');
+1 row inserted/updated/deleted
+ij> select timestamp(s) from t;
+1                         
+--------------------------
+ERROR 22008: 'aaaaaaaaaaaaaa' is an invalid argument to the timestamp function.
+ij> rollback;
 ij> 

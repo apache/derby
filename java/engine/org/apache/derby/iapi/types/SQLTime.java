@@ -446,7 +446,7 @@ public final class SQLTime extends DataType
     private static final char IBM_EUR_SEPARATOR = '.';
     private static final char[] IBM_EUR_SEPARATOR_OR_END = {IBM_EUR_SEPARATOR, (char) 0};
     static final char JIS_SEPARATOR = ':';
-    private static final char[] US_OR_JIS_MINUTE_END = {JIS_SEPARATOR, ' '};
+    private static final char[] US_OR_JIS_MINUTE_END = {JIS_SEPARATOR, ' ', (char) 0};
     private static final char[] ANY_SEPARATOR = { '.', ':', ' '};
     private static final String[] AM_PM = {"AM", "PM"};
     private static final char[] END_OF_STRING = {(char) 0};
@@ -503,8 +503,7 @@ public final class SQLTime extends DataType
                     second = parser.parseInt( 2, false, END_OF_STRING, false);
                     break;
 
-                default:
-                    validSyntax = false;
+                    // default is end of string, meaning that the seconds part is zero.
                 }
                 break;
 

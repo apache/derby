@@ -606,6 +606,30 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
+        /**
+         * Implement the date SQL function: construct a SQL date from a string, number, or timestamp.
+         *
+         * @param operand Must be a date, a number, or a string convertible to a date.
+         *
+         * @exception StandardException standard error policy
+         */
+        public DateTimeDataValue getDate( DataValueDescriptor operand) throws StandardException
+        {
+                return SQLDate.computeDateFunction( operand, this);
+        }
+
+        /**
+         * Implement the timestamp SQL function: construct a SQL timestamp from a string, or timestamp.
+         *
+         * @param operand Must be a timestamp or a string convertible to a timestamp.
+         *
+         * @exception StandardException standard error policy
+         */
+        public DateTimeDataValue getTimestamp( DataValueDescriptor operand) throws StandardException
+        {
+                return SQLTimestamp.computeTimestampFunction( operand, this);
+        }
+
         public DateTimeDataValue getTimestamp( DataValueDescriptor date, DataValueDescriptor time) throws StandardException
         {
             return new SQLTimestamp( date, time);

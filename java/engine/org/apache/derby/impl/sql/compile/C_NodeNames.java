@@ -250,6 +250,9 @@ public interface C_NodeNames
 
 	static final String UNARY_ARITHMETIC_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.UnaryArithmeticOperatorNode";
 
+	static final String UNARY_DATE_TIMESTAMP_OPERATOR_NODE_NAME
+    = "org.apache.derby.impl.sql.compile.UnaryDateTimestampOperatorNode";
+
 	static final String UNION_NODE_NAME = "org.apache.derby.impl.sql.compile.UnionNode";
 
 	static final String INTERSECT_OR_EXCEPT_NODE_NAME = "org.apache.derby.impl.sql.compile.IntersectOrExceptNode";
