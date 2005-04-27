@@ -326,7 +326,7 @@
 <!-- =================================================================== -->
 <!--                 Remove all built objects (except jars)              -->
 <!-- =================================================================== -->
-  <target name="clobber" depends="showenv,clean,cleanstate,cleanparsers,cleancatalog"/>
+  <target name="clobber" depends="clean,cleanstate,cleanparsers,cleancatalog"/>
 
 <!-- =================================================================== -->
 <!--                       Remove output tree                            -->
@@ -1044,7 +1044,7 @@
 
   </target>
 
-  <target name="snapshot" depends="clobber,init,snapshotError">
+  <target name="snapshot" depends="clobber,snapshotError,init,initjars">
 
     <antcall target="insane"/>
     <antcall target="all"/>
