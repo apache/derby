@@ -104,7 +104,7 @@ public abstract class SortScan extends Scan
     coding this differently saves in sort scans, as did the
     heap recoding.
 
-    @param template The template row into which the value
+    @param row The template row into which the value
 	of the next position in the scan is to be stored.
 
     @return True if there is a next position in the scan,

@@ -229,7 +229,7 @@ public class RowLocking3 extends NoLocking
      *
      * @param t                        transaction to associate the lock with.
      * @param record                   The record to be locked.
-     * @param lockForInsertPreviouskey Lock is for a previous key of a insert.
+     * @param lockForInsertPreviousKey Lock is for a previous key of a insert.
      * @param waitForLock              Should lock request wait until granted?
      *
      * @return true if the lock was granted, false if waitForLock was false 
@@ -240,13 +240,13 @@ public class RowLocking3 extends NoLocking
 	public boolean zeroDurationLockRecordForWrite(
     Transaction     t, 
     RecordHandle    record,
-    boolean         lockForPreviousKey,
+    boolean         lockForInsertPreviousKey,
     boolean         waitForLock)
 		throws StandardException
 	{
         return(lf.zeroDurationlockObject(
                 t.getCompatibilitySpace(), record, 
-                (lockForPreviousKey ? RowLock.RIP : getWriteLockType()),
+                (lockForInsertPreviousKey ? RowLock.RIP : getWriteLockType()),
                 waitForLock ? C_LockFactory.TIMED_WAIT : C_LockFactory.NO_WAIT));
 	}
 

@@ -333,7 +333,7 @@ public abstract class Scan implements ScanManager, ScanInfo
      * For some conglomerates this may be a no-op.
      * <p>
      *
-     * @param conlgom   Conglomerate object of the conglomerate being changed.
+     * @param conglom   Conglomerate object of the conglomerate being changed.
      * @param page      Page in the conglomerate being changed.
      *
 	 * @exception  StandardException  Standard exception policy.

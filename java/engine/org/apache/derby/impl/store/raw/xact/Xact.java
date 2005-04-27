@@ -373,8 +373,6 @@ public class Xact extends RawTransaction implements Limit  {
 
 	/** 
 		Add this to the xactFactory list of update transaction.
-		@param rollbackFirst true if this transaction should be rolled back
-				first during recovery
 	*/
 	public void addUpdateTransaction(int transactionStatus)
 	{
@@ -1607,8 +1605,7 @@ public class Xact extends RawTransaction implements Limit  {
      *
 	 * @return The identifier to be used to open the conglomerate later.
      *
-     * @param old_ent The original entry we are assuming the identity of.
-     * @param new_ent The new permanent entry in the transaction table.
+     * @param ent The original entry we are assuming the identity of.
      *
      **/
 	protected void assumeGlobalXactIdentity(

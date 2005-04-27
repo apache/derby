@@ -236,8 +236,8 @@ public class RowLocking2 extends RowLockingRR
      * will be called when the container is closed.
      * <p>
      *
-     * @param t             The transaction to associate the lock with.
-     * @param container     Container to unlock.
+     * @param t                 The transaction to associate the lock with.
+     * @param container_handle  Container to unlock.
      **/
 	public void unlockContainer(
     Transaction     t, 

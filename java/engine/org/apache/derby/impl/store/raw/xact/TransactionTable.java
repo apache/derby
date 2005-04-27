@@ -300,7 +300,6 @@ public class TransactionTable implements Formatable
      *
 	 * @return The ContextManager of the transaction being searched for.
      *
-     * @param global_id The global transaction we are searching for.
      **/
 	public Hashtable getTableForXA()
 	{
@@ -506,7 +505,7 @@ public class TransactionTable implements Formatable
 	}
 
 	/**
-		Return the largest update transactionId I have seen so far
+		Return the largest update transactionId I have seen so far.
 
 		<P>MT - unsafe, caller is recovery, which is single threaded.
 	*/
@@ -517,7 +516,7 @@ public class TransactionTable implements Formatable
 
 
 	/**
-		Is there an active internal transaction in the transaction table
+		Is there an active internal transaction in the transaction table.
 
 		<P>MT - unsafe, caller is recovery, which is single threaded.
 	*/

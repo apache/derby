@@ -96,7 +96,6 @@ public class EndXact implements Loggable {
 		@param xact			the Transaction
 		@param instant		the log instant of this operation
 		@param in			optional data
-		@param dataLengt	optional data length
 
 	*/
 	public void doMe(Transaction xact, LogInstant instant, LimitObjectInput in)
@@ -119,7 +118,6 @@ public class EndXact implements Loggable {
 
 		EndXact has no optional data to write out
 
-		@param out Where and how to write to optional data.
 		@see ObjectOutput
 	*/
 	public ByteArray getPreparedLog()

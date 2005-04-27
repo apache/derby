@@ -34,11 +34,16 @@ import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
-/**
-	Store the transaction opened within a context manager (ie. typically
-	a single user) for a single RawStoreFactory.
 
-*/
+/**
+The context associated with the transaction.
+
+This object stores the context associated with the raw store transaction
+on the stack.  It stores info about the transaction opened within a 
+context manager (ie. typically a single user) for a single RawStoreFactory.
+
+**/
+
 public class XactContext extends ContextImpl {
 
 	private		RawTransaction	xact;
