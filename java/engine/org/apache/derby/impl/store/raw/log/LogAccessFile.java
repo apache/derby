@@ -35,6 +35,7 @@ import java.util.LinkedList;
 
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;
+import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 
 /**
@@ -116,7 +117,7 @@ public class LogAccessFile
 	private long checksumInstant = -1;
 	private int checksumLength;
 	private int checksumLogRecordSize;      //checksumLength + LOG_RECORD_FIXED_OVERHEAD_SIZE
-	private boolean writeChecksum = true;  //gets set to false incase of a soft upgrade.
+	private boolean writeChecksum; 
 	private ChecksumOperation checksumLogOperation;
 	private LogRecord checksumLogRecord;
 	private LogToFile logFactory;
@@ -152,7 +153,14 @@ public class LogAccessFile
         }
 
 		currentBuffer = (LogAccessFileBuffer) freeBuffers.removeFirst();
-
+		
+		// Support for Transaction Log Checksum in Derby was added in 10.1
+		// Check to see if the Store have been upgraded to 10.1 or later before
+		// writing the checksum log records.  Otherwise recovery will fail
+		// incase user tries to revert back to versions before 10.1 in 
+		// soft upgrade mode. 
+		writeChecksum = logFactory.checkVersion(RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10, 
+												RawStoreFactory.DERBY_STORE_MINOR_VERSION_1);
 		if(writeChecksum)
 		{
 			/**

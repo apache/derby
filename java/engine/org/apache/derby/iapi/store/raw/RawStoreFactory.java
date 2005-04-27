@@ -94,6 +94,14 @@ import java.io.File;
 
 public interface RawStoreFactory extends Corruptable {
 
+	/** Store engine version numbers indicating the database must be upgraded to 
+	 * or created at the current engine level 
+	 */
+
+	/** Derby Store Minor Version (1) **/
+	public static final int DERBY_STORE_MINOR_VERSION_1    = 1;
+	/** Derby 10 Store Major version */
+	public static final int DERBY_STORE_MAJOR_VERSION_10   = 10;
 
 	/**
 		Default value for PAGE_SIZE_PARAMETER (4096).

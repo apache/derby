@@ -3885,6 +3885,29 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		return logArchived;
 	}
 
+	/**
+	   Check to see if a database has been upgraded to the required
+	   level in order to use a store feature.
+	   @param requiredMajorVersion  required database Engine major version
+	   @param requiredMinorVersion  required database Engine minor version
+	   @return True if the database has been upgraded to the required level, false otherwise.
+	**/
+	boolean checkVersion(int requiredMajorVersion, int requiredMinorVersion) 
+	{
+		if(onDiskMajorVersion > requiredMajorVersion )
+		{
+			return true;
+		}
+		else
+		{
+			if(onDiskMajorVersion == requiredMajorVersion &&  
+			   onDiskMinorVersion >= requiredMinorVersion)
+				return true;
+		}
+		
+		return false;
+	}
+
 	/*
 	** Sending information to the user without throwing exception.
 	** There are times when unusual external or system related things happen in
