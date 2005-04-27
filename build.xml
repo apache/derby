@@ -593,7 +593,7 @@
 <!-- =================================================================== -->
 <!-- Eclipse Plugin                                                     -->
 <!-- =================================================================== -->
-  <target name="plugin" depends= "buildjars">
+  <target name="plugin" depends="buildjars">
        <echo message="Begining Derby Eclipse plugin build"/>
        <property name="plugin.tmp.dir" value ="plugintmp"/>
        <mkdir dir="${derby.jar.dir}/${plugin.tmp.dir}"/>
@@ -1027,23 +1027,56 @@
 
   <target name="buildworld">
 
-    <property name="proceed" value="true"/>
-
     <!-- Build insane product jars -->
     <antcall target="clobber"/>
     <antcall target="insane"/>
     <antcall target="all"/>
-    <antcall target="jars"/>
+    <antcall target="buildjars"/>
 
     <!-- Build sane product jars -->
     <antcall target="clobber"/>
     <antcall target="sane"/>
     <antcall target="all"/>
-    <antcall target="jars"/>
+    <antcall target="buildjars"/>
 
     <!-- Build everything else -->
     <antcall target="javadoc"/>
 
   </target>
 
+  <target name="snapshot" depends="init,snapshotError">
+
+    <antcall target="clobber"/>
+    <antcall target="insane"/>
+    <antcall target="all"/>
+    <antcall target="buildjars"/>
+    <antcall target="plugin"/>
+    <antcall target="publishedapi"/>
+
+    <mkdir dir="${basedir}/snapshot"/>
+    <zip destfile="${basedir}/snapshot/incubating-derby-snapshot-10.0-${changenumber}.zip">
+      <fileset dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <fileset dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <fileset dir="${basedir}/java" includes="demo/**"/>
+    </zip>
+    <tar destfile="${basedir}/snapshot/incubating-derby-snapshot-10.0-${changenumber}.tar.gz"
+         compression="gzip">
+      <tarfileset dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <tarfileset dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <tarfileset dir="${basedir}/java" includes="demo/**"/>
+    </tar>
+
+    <copy file="${basedir}/jars/insane/derby_core_plugin_10.0.2.zip"
+          tofile="${basedir}/snapshot/derby_core_plugin_10.0.2.${changenumber}.zip"/>
+   
+  </target>
+
+  <target name="snapshotError" if="sane" depends="init">
+    <echo message="Please generate the snapshot using an insane build."/>
+    <echo message="Either run &quot;ant -Dsane=false snapshot&quot;, or run"/>
+    <echo message="the insane target before running the snapshot target."/>
+    <echo message=""/>
+    <fail message="Exiting snapshot build..."/>
+  </target>
+         
 </project>

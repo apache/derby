@@ -413,7 +413,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	   connection attributes with the same format as the connectionAttributes property.
 
 	 *
-	 * @param user the database user on whose behalf the Connection is 
+	 * @param username the database user on whose behalf the Connection is 
 	 *  being made
 	 * @param password the user's password
 	 * @return  a Connection to the database

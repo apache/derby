@@ -1,3 +1,14 @@
+Changes in Derby 10.0.2.2 - Still in development / Not yet released
+
+ *) Make LOCAL an unreserved word. (Derby-139)
+    [Dan Debrunner <djd@debrunners.com>]
+
+ *) Fix Eclipse plugin version specification. (Derby-153)
+    [Rajesh Kartha <kartha@source-zone.org>]
+
+ *) Build number added to Bundle-Version in derby.jar manifest. (Derby-228)
+    [Andrew McIntyre <mcintyre.a@gmail.com>]
+
 Changes in Derby 10.0.2.1
     
  *) For Network Server, clear back to appropriate point if
@@ -9,22 +20,23 @@ Changes in Derby 10.0.2.1
 
  *) Triggers do not evaluate functions in VALUES trigger actions. (Derby-14)
     
- *) Method calls on a closed Connection from a PooledConnection no longer
-    cause connection closed events to be sent to any listeners.
-    Minor clean up of BrokeredConnection as well, remove an unused 
-    constructor, make the control field final and remove incorrect comment 
-    and unused imports. (Derby-24)
+ *) Method calls on a closed Connection from a PooledConnection no
+    longer cause connection closed events to be sent to any listeners.
+    Minor clean up of BrokeredConnection as well, remove an unused
+    constructor, make the control field final and remove incorrect
+    comment and unused imports. (Derby-24)
     [Dan Debrunner <djd@debrunners.com>]
     
- *) Connection.close() on a closed connection is defined by JDBC javadoc to 
-    be a no-op. (Derby-30)
+ *) Connection.close() on a closed connection is defined by JDBC
+    javadoc to be a no-op. (Derby-30)
     [Dan Debrunner]
     
- *) Multiple jvms prevented from booting the same database in parallel to 
-    avoid accidental corruptions in Unix environments. (Derby-32)
+ *) Multiple jvms prevented from booting the same database in parallel
+    to avoid accidental corruptions in Unix environments. (Derby-32)
     [Suresh Thalamati <tsuresh@source-zone.org>]
     
- *) Allow default to be specified for CHAR FOR BIT DATA columns (Derby-34)
+ *) Allow default to be specified for CHAR FOR BIT DATA columns
+    (Derby-34)
     [Satheesh Bandaram <satheesh@sourcery.org>]
 
  *) Fix dss chaining problems for network server. (Derby-35)
@@ -36,53 +48,58 @@ Changes in Derby 10.0.2.1
  *) Allow BIGINT default values in create table. (Derby-40)
     [Satheesh Bandaram]
 
- *) Encryption key length no longer stored in service.properties. (Derby-42)
+ *) Encryption key length no longer stored in
+    service.properties. (Derby-42)
     [Sunitha Kambhampati <skambha@Yngvi.Org>]
 
  *) Enable LIKE ? ESCAPE ? syntax that was disabled before (Derby-44)
     [Satheesh Bandaram]
 
- *) Allow expressions that result in string types as arguments to a LIKE
-    expression (Derby-45)
+ *) Allow expressions that result in string types as arguments to a
+    LIKE expression (Derby-45)
     [Satheesh Bandaram]
 
  *) Make RETAIN a non-reserved keyword (Derby-54)
     [Satheesh Bandaram]
     
- *) Faster create database by moving DatabaseMetaData SPS creation into the 
-    DataDictionary. Means creation of these statements is not logged and 
-    compilation is delayed until the matching DatabaseMetaData method is 
-    first called.
+ *) Faster create database by moving DatabaseMetaData SPS creation
+    into the DataDictionary. Means creation of these statements is not
+    logged and compilation is delayed until the matching
+    DatabaseMetaData method is first called.
     [Dan Debrunner]
     
- *) dblook argument handling has been improved. Bad arguments now generate 
-    an error, and connection URLs in quotes are handled properly.
+ *) dblook argument handling has been improved. Bad arguments now
+    generate an error, and connection URLs in quotes are handled
+    properly.
     [Jalud Abdulmenan <tendi@rogers.com>]
     
  *) Localization of dblook messages enabled.
     [Satheesh Bandaram]
     
  *) Extension Packaging:
-       1. The monitor is changed to read multiple module.properties files,
-          using method ClassLoader.getSystemResources.
+       1. The monitor is changed to read multiple module.properties
+          files, using method ClassLoader.getSystemResources.
        2. The monitor reads sub-sub-protocol properties from the
-          modules.properties files, instead of just the system properties.
-       3. Sub-sub-protocol property values can name either a StorageFactory
-          or a PersistentService implementation. Previously it could only
-          name a StorageFactory implementation.
+          modules.properties files, instead of just the system
+          properties.
+       3. Sub-sub-protocol property values can name either a
+          StorageFactory or a PersistentService
+          implementation. Previously it could only name a
+          StorageFactory implementation.
     [Jack Klebanoff]
 
- *) Latent bug fixed in org.apache.derby.impl.store.access.sort.ExternalSortFactory. 
-    Its canSupport method throws an exception if it is called with a null 
+ *) Latent bug fixed in
+    org.apache.derby.impl.store.access.sort.ExternalSortFactory.  Its
+    canSupport method throws an exception if it is called with a null
     startParams argument.
     [Jack Klebanoff]
     
- *) Prevent empty log switches by rechecking the conditions that trigger the
-    log switched in synchronized blocks, and make backward scans skip the 
-    empty log files. In multi-threaded application when many threads are 
-    executing commits in parallel, empty log files might be created.
-    Recovery log scan does not expect empty log files while scanning log
-    records to undo incomplete transactions.
+ *) Prevent empty log switches by rechecking the conditions that
+    trigger the log switched in synchronized blocks, and make backward
+    scans skip the empty log files. In multi-threaded application when
+    many threads are executing commits in parallel, empty log files
+    might be created.  Recovery log scan does not expect empty log
+    files while scanning log records to undo incomplete transactions.
     [Suresh Thalamati] 
     
  *) Add derby.war file
@@ -95,12 +112,11 @@ Changes in Derby 10.0.2.1
     length, maximum schema name length, etc.
     [Satheesh Bandaram]
 
- *) Add static property derby.drda.keepAlive to Network Server, to set the
-    use of TCP keepalive for Network Server connections on the server side,
-    with the use of keepalive on by default.
+ *) Add static property derby.drda.keepAlive to Network Server, to set
+    the use of TCP keepalive for Network Server connections on the
+    server side, with the use of keepalive on by default.
     [Kathey Marsden]
 
- *) Ensure BrokeredStatement and PreparedStatement always throw a Statement
-    is closed exception if the statement is closed.
+ *) Ensure BrokeredStatement and PreparedStatement always throw a
+    Statement is closed exception if the statement is closed.
     [Dan Debrunner]
-
