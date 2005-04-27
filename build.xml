@@ -1044,9 +1044,8 @@
 
   </target>
 
-  <target name="snapshot" depends="init,snapshotError">
+  <target name="snapshot" depends="clobber,init,snapshotError">
 
-    <antcall target="clobber"/>
     <antcall target="insane"/>
     <antcall target="all"/>
     <antcall target="buildjars"/>
