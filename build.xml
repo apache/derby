@@ -1071,7 +1071,7 @@
    
   </target>
 
-  <target name="snapshotError" if="sane" depends="init">
+  <target name="snapshotError" if="is.sane">
     <echo message="Please generate the snapshot using an insane build."/>
     <echo message="Either run &quot;ant -Dsane=false snapshot&quot;, or run"/>
     <echo message="the insane target before running the snapshot target."/>
