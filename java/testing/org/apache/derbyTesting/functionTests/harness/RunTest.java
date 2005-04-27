@@ -871,7 +871,7 @@ public class RunTest
 		        upgradetest = true;
 		}
 	
-        if ( framework.startsWith("DB2") && (! jvmName.equals("j9_foundation")))
+        if ( framework.startsWith("Derby") && (! jvmName.equals("j9_foundation")))
 		{	
 
 			Class c = null;
@@ -891,22 +891,11 @@ public class RunTest
 			} catch (ClassNotFoundException e) {}
 
 			String excludeJcc = sp.getProperty("excludeJCC");
-			if (excludeJcc != null) {
-				int excludeMajor = 0;
-				int excludeMinor = 0;
-				try {
-					excludeMajor = Integer.parseInt(excludeJcc.substring(0,excludeJcc.indexOf(".")));
-					excludeMinor = Integer.parseInt(excludeJcc.substring(excludeJcc.indexOf(".")+1));
-				} catch (NumberFormatException nfe) {
-					System.out.println("excludeJCC property poorly formatted: " + excludeJcc);
-				} catch (NullPointerException npe) {
-					System.out.println("excludeJCC property poorly formatted: " + excludeJcc);
-				}
-				if (excludeMajor >= jccMajor && excludeMinor >= jccMinor)
-				{
-					skiptest = true;
-		    		addSkiptestReason("This test is excluded from running with JCC versions " + excludeJcc + " and below");
-		  		}
+			try {
+				RunList.checkClientExclusion(excludeJcc, "JCC", jccMajor, jccMinor, javaVersion);
+			} catch (Exception e) {
+				skiptest = true;
+				addSkiptestReason(e.getMessage());
 			}
 		}
 			
@@ -1389,28 +1378,16 @@ clp.list(System.out);
                 j9net = true;
 
             String excludeJcc = ap.getProperty("excludeJCC");
-            if ( framework.startsWith("DB2") )
+            if ( framework.startsWith("Derby") )
             {	
-                if (excludeJcc != null) {
-                    int excludeMajor = 0;
-                    int excludeMinor = 0;
-                    try {
-                        excludeMajor = Integer.parseInt(excludeJcc.substring(0,excludeJcc.indexOf(".")));
-                        excludeMinor = Integer.parseInt(excludeJcc.substring(excludeJcc.indexOf(".")+1));
-                    } catch (NumberFormatException nfe) {
-                        System.out.println("excludeJCC property poorly formatted: " + excludeJcc);
-                    } catch (NullPointerException npe) {
-  	                    System.out.println("excludeJCC property poorly formatted: " + excludeJcc);
-                    }
-                    if (excludeMajor >= jccMajor && excludeMinor >= jccMinor)
-                    {
-                        skiptest = true;
-                        addSkiptestReason("This test is excluded from running with JCC versions " + excludeJcc + " and below");
-                    }
+                try {
+                    RunList.checkClientExclusion(excludeJcc, "JCC", jccMajor, jccMinor, javaVersion);
+                } catch (Exception e) {
+                    skiptest = true;
+                    addSkiptestReason(e.getMessage());
                 }
             }
 		
-
             // for now we want just want to have a single property
             // for all j9 versions; use j9_13 for the jvmname
             String testJVM = (jvmName.startsWith("j9") ? "j9" : jvmName);

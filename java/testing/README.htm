@@ -933,8 +933,38 @@ Sun Hotspot jvm version 14, then set runwithjdk14=true.<br>
 The skip setting does not go into the subversion level, i.e. setting
 runwithjdk141=false has no effect, and setting runwithjdk14 affects
 runs with jdk141 as well as jdk142.<br>
-Other skip reasons are encryption protocols specific to a certain jvm. <br>
+Other skip reasons are encryption protocols specific to a certain
+jvm.<br>
 </p>
+<p>The property for skipping a test based on the version of the IBM
+Universal Driver is "excludeJCC".&nbsp; The keywords "<span
+ style="font-weight: bold;">at-or-before</span>" and "<span
+ style="font-weight: bold;">at-or-after</span>" can be used to specify
+which range of JCC versions should be excluded.&nbsp; If neither of
+these keywords is provided, the default is "<span
+ style="font-weight: bold;">at-or-before</span>".&nbsp; For example:<br>
+</p>
+To skip a test when running with any version of the IBM Universal
+Driver that is 2.4 or earlier:<br>
+excludeJCC=at-or-before:2.4<br>
+<br>
+To skip a test when running with any version of the IBM Universal
+Driver that is 2.0 or later:<br>
+excludeJCC=at-or-after:2.0<br>
+</>
+<p>You can also specify an (optional) jvm clause to further tune the
+exclusion criteria.&nbsp; This clause starts with the "<span
+ style="font-weight: bold;">,when</span>" tag and is followed by a
+three-part jvm version.&nbsp; In this case, a test will only be skipped
+if BOTH the JCC clause AND the jvm clause are true. For example:<br>
+</p>
+<p>To skip a test when running with any version of the IBM Universal
+Driver that is 2.4 or later, but ONLY if the jvm is 1.3 or earlier:<br>
+excludeJCC=at-or-after:2.4,when-at-or-before:jdk1.3.1<br>
+</p>
+To skip a test when running with any version of the IBM Universal
+Driver that is 2.0 or earlier, but ONLY if the jvm is 1.5 or later:<br>
+excludeJCC=at-or-before:2.0,when-at-or-after:jdk1.5.1<br>
 <br>
 <h3><a name="frameworks"></a>4.11 Frameworks</h3>
 <p>
@@ -978,7 +1008,11 @@ TestSpecialFlags<br>
 &nbsp;&nbsp;&nbsp; sets additional properties.<br>
 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
 -D=TestSpecialFlags=derby.infolog.append=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</td>
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
+excludeJCC<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; See above section <a
+ href="#skipping">4.10</a><br>
+      </td>
     </tr>
   </tbody>
 </table>
