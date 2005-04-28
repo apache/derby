@@ -1,0 +1,1193 @@
+/*
+
+   Derby - Class org.apache.derby.client.net.NetXAResource
+
+   Copyright (c) 2003, 2005 The Apache Software Foundation or its licensors, where applicable.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
+/**********************************************************************
+ *
+ *
+ *  Component Name =
+ *
+ *      Package Name = org.apache.derby.client.net
+ *
+ *  Descriptive Name = class implements XAResource
+ *
+ *  Status = New code
+ *
+ *  Function = Handle XA methods
+ *
+ *  List of Classes
+ *              - NetXAResource
+ *
+ *  Restrictions : None
+ *
+ **********************************************************************/
+package org.apache.derby.client.net;
+
+import org.apache.derby.client.net.NetXACallInfo;
+import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.SqlException;
+import java.util.*;
+import org.apache.derby.client.ClientXid;
+import javax.transaction.xa.*;
+import javax.sql.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+public class NetXAResource implements XAResource
+{
+  public static final int TMTIMEOUT = 0x00000100;
+  public static final int ACTIVE_ONLY = -1;
+  public static final int XA_NULL_XID = -1; // null Xid has Format Id of -1
+  public static final int INITIAL_CALLINFO_ELEMENTS = 1;
+  public static final int RECOVER_XID_ARRAY_LENGTH  = 10;
+  public static final ClientXid nullXid = new ClientXid();
+
+  // xaretval defines
+  public static final int XARETVAL_XALCSNOTSUPP	= 99; // Loosely Coupled Not Supported
+  public static final int XARETVAL_RBROLLBACK   = 100; // Rollback
+  public static final int XARETVAL_RBCOMMFAIL   = 101; // Rollback Communication Failure
+  public static final int XARETVAL_RBDEADLOCK   = 102; // Rollback Deadlock
+  public static final int XARETVAL_RBINTEGRITY  = 103; // Rollback integrity violation
+  public static final int XARETVAL_RBOTHER      = 104; // Rollback Other
+  public static final int XARETVAL_RBPROTO      = 105; // Rollback Protocol
+  public static final int XARETVAL_RBTIMEOUT    = 106; // Rollback Timeout
+  public static final int XARETVAL_RBTRANSIENT  = 107; // Rollback Transaction branch
+  public static final int XARETVAL_NODISSOCIATE = 108; // Unable to Dissociate resources from connection
+  public static final int XARETVAL_XATWOPHASE   = 13; // TwoPhase commit required
+  public static final int XARETVAL_XAPROMOTED   = 12; // Promoted - unused
+  public static final int XARETVAL_XADEFERRED   = 11; // Deferred - unused
+  public static final int XARETVAL_XACOMMFAIL   = 10; // Communication Failure
+  public static final int XARETVAL_XANOMIGRATE  = 9; // No Migration
+  public static final int XARETVAL_XAHEURHAZ    = 8; // Heuristically completed
+  public static final int XARETVAL_XAHEURCOM    = 7; // Heuristically Commited
+  public static final int XARETVAL_XAHEURRB     = 6; // Heuristically Rolledback
+  public static final int XARETVAL_XAHEURMIX    = 5; // Branch heuristically commit and rollback
+  public static final int XARETVAL_XARETRY      = 4; // Retry Commit
+  public static final int XARETVAL_XARDONLY     = 3; // Read Only
+  public static final int XARETVAL_XAOK         = 0; // OK
+  public static final int XARETVAL_XAERASYNC    = -2; // Async Request not possible
+  public static final int XARETVAL_XAERRMERR    = -3; // RM Error
+  public static final int XARETVAL_XAERNOTA     = -4; // XID does not exist
+  public static final int XARETVAL_XAERINVAL    = -5; // Invalid arguments
+  public static final int XARETVAL_XAERPROTO    = -6; // Protocol Violation
+  public static final int XARETVAL_XAERRMFAIL   = -7; // RM Failed
+  public static final int XARETVAL_XAERDUPID    = -8; // Duplicate XID
+  public static final int XARETVAL_XAEROUTSIDE  = -9; // Local tansaction active
+  public static final int XARETVAL_XAEROPENRES  = -10; // Open resources
+
+  // xaFunction defines, shows which queued XA function is being performed
+  public static final int XAFUNC_NONE           = 0;
+  public static final int XAFUNC_COMMIT         = 1;
+  public static final int XAFUNC_END            = 2;
+  public static final int XAFUNC_FORGET         = 3;
+  public static final int XAFUNC_PREPARE        = 4;
+  public static final int XAFUNC_RECOVER        = 5;
+  public static final int XAFUNC_ROLLBACK       = 6;
+  public static final int XAFUNC_START          = 7;
+  public static final String XAFUNCSTR_NONE     = "No XA Function";
+  public static final String XAFUNCSTR_COMMIT   = "XAResource.commit()";
+  public static final String XAFUNCSTR_END      = "XAResource.end()";
+  public static final String XAFUNCSTR_FORGET   = "XAResource.forget()";
+  public static final String XAFUNCSTR_PREPARE  = "XAResource.prepare()";
+  public static final String XAFUNCSTR_RECOVER  = "XAResource.recover()";
+  public static final String XAFUNCSTR_ROLLBACK = "XAResource.rollback()";
+  public static final String XAFUNCSTR_START    = "XAResource.start()";
+
+  public int nextElement = 0;
+
+  // XAResources with same RM group list
+  protected static Vector xaResourceSameRMGroup_ = new Vector();
+  protected int sameRMGroupIndex_ = 0;
+  protected NetXAResource nextSameRM_ = null;
+  protected boolean ignoreMe_ = false;
+
+  /* KATHEY CHECK THIS COMMENT TOO. 
+   * Need to remove NetXAResource objects from this group when they are
+   *  freed.
+   */
+
+  public org.apache.derby.client.am.SqlException exceptionsOnXA = null;
+
+  XAConnection xaconn_;
+  org.apache.derby.client.net.NetXAConnection conn_;
+  int rmId_; // unique RmId generated by XAConnection
+	// KATHEY change to a single callInfo field (not an array)
+  NetXACallInfo callInfoArray_[] =
+      new NetXACallInfo[INITIAL_CALLINFO_ELEMENTS];
+  int numXACallInfo_ = INITIAL_CALLINFO_ELEMENTS;
+  int connectionCount_ = 1;
+  int activeXATransCount_ = 0;
+  String rmIdx_; // userid in case we need to create a secondary connection
+  String rmIdy_; // password in case we need to create a secondary connection
+	// KATHEY remove port and ipaddr_
+  int port_;     // port needed to make secondary connection for recover in DS mode.
+  String ipaddr_;  // ip address needed to make secondary connection for recover in DS mode.
+
+  private List specialRegisters_ = Collections.synchronizedList(new LinkedList());
+  public NetXAResource( XAConnection xaconn, int rmId,
+                       String userId, String password,
+                       org.apache.derby.client.net.NetXAConnection conn )
+  {
+    xaconn_ = xaconn;
+    rmId_ = rmId;
+    conn_ = conn;
+    rmIdx_ = userId;
+    rmIdy_ = password;
+    port_ = conn.netAgent_.getPort();
+    ipaddr_ = conn.netAgent_.socket_.getLocalAddress().getHostAddress();
+    conn.setNetXAResource(this);
+
+    // link the primary connection to the first XACallInfo element
+    conn_.currXACallInfoOffset_ = 0;
+
+    // construct the NetXACallInfo object for the array.
+    for (int i = 0; i < INITIAL_CALLINFO_ELEMENTS; ++i)
+      callInfoArray_[i] = new NetXACallInfo(null,XAResource.TMNOFLAGS,
+                                           Connection.XA_OPEN_IDLE, this,
+                                           null);
+
+    // initialize the first XACallInfo element with the information from the
+    //  primary connection
+    callInfoArray_[0].actualConn_ = conn_;
+    callInfoArray_[0].currConnection_ = true;
+    callInfoArray_[0].freeEntry_ = false;
+    // ~~~ save conn_ connection variables in callInfoArray_[0]
+    callInfoArray_[0].saveConnectionVariables();
+
+    // add this new XAResource to the list of other XAResources for the Same RM
+    initForReuse();
+  }
+
+  public void commit( Xid xid, boolean onePhase ) throws XAException
+  {
+	NetAgent netAgent = conn_.netAgent_;
+	int rc = XAResource.XA_OK;
+
+	exceptionsOnXA = null;
+	if (conn_.agent_.loggingEnabled())
+	  conn_.agent_.logWriter_.traceEntry (this, "commit", xid, onePhase);
+	if( conn_.isClosed() )
+	  connectionClosedFailure();
+
+	// update the XACallInfo
+	NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+	callInfo.xaFlags_ = ( onePhase ? XAResource.TMONEPHASE:
+						  XAResource.TMNOFLAGS);
+	callInfo.xid_ = xid;
+	callInfo.xaResource_ = this;
+	callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+	try {
+	  netAgent.beginWriteChainOutsideUOW();
+	  netAgent.netConnectionRequest_.writeXaCommit(conn_, xid);
+	  netAgent.flowOutsideUOW();
+	  netAgent.netConnectionReply_.readXaCommit(conn_);
+	  if( callInfo.xaRetVal_ != XARETVAL_XAOK )
+          { // xaRetVal has possible error, format it
+            callInfo.xaFunction_ = XAFUNC_COMMIT;
+            rc = xaRetValErrorAccumSQL( callInfo, rc );
+            callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+          }
+	  netAgent.endReadChain();
+	}
+	catch( SqlException sqle )
+	{
+	  rc = XAException.XAER_RMERR;
+	  exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+		(sqle, exceptionsOnXA);
+	}
+	finally
+	{
+	  conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
+	}
+	if (rc != XAResource.XA_OK)
+		throwXAException(rc, false);
+  }
+
+  /** Ends the work performed on behalf of a transaction branch.
+   * The resource manager dissociates the XA resource from the
+   * transaction branch specified and let the transaction be
+   * completed.
+   *
+   * If TMSUSPEND is specified in flags, the transaction branch
+   * is temporarily suspended in incomplete state. The transaction
+   * context is in suspened state and must be resumed via start
+   * with TMRESUME specified.
+   *
+   * If TMFAIL is specified, the portion of work has failed.
+   * The resource manager may mark the transaction as rollback-only
+   *
+   * If TMSUCCESS is specified, the portion of work has completed
+   * successfully.
+   *
+   * @param xid A global transaction identifier that is the same as
+   * what was used previously in the start method.
+   *
+   * @param flags One of TMSUCCESS, TMFAIL, or TMSUSPEND
+   *
+   * @exception XAException An error has occurred. Possible XAException
+   * values are XAER_RMERR, XAER_RMFAILED, XAER_NOTA, XAER_INVAL,
+   * XAER_PROTO, or XA_RB*.
+   */
+
+  public void end( Xid xid, int flags ) throws XAException
+  {
+
+	NetAgent netAgent = conn_.netAgent_;
+	int rc = XAResource.XA_OK;
+    exceptionsOnXA = null;
+	if (conn_.agent_.loggingEnabled())
+      conn_.agent_.logWriter_.traceEntry (this, "end", xid, flags);
+    if( conn_.isClosed() )
+      connectionClosedFailure();
+
+    NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+    callInfo.setReadOnlyTransactionFlag(conn_.readOnlyTransaction_);
+	callInfo.xaFlags_ = flags;
+	callInfo.xid_ = xid;
+	callInfo.xaResource_ = this;
+    callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+	try
+	{
+	  netAgent.beginWriteChainOutsideUOW();
+	  netAgent.netConnectionRequest_.writeXaEndUnitOfWork(conn_);
+	  netAgent.flowOutsideUOW();
+	  rc = netAgent.netConnectionReply_.readXaEndUnitOfWork(conn_);
+	  conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending end
+	  if( callInfo.xaRetVal_ != XARETVAL_XAOK )
+	  { // xaRetVal has possible error, format it
+		callInfo.xaFunction_ = XAFUNC_END;
+		rc = xaRetValErrorAccumSQL( callInfo, rc );
+		callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+	  }
+	  netAgent.endReadChain();
+	}
+	catch( SqlException sqle )
+	{
+	  rc = XAException.XAER_RMERR;
+	  exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+		(sqle, exceptionsOnXA);
+	}
+	finally
+	{
+	  conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
+	}
+	if (rc != XAResource.XA_OK)
+	  throwXAException(rc, false);
+	else
+		conn_.setXAState(Connection.XA_ENDED);
+
+  }
+
+  /** Tell the resource manager to forget about a heuristically (MANUALLY)
+   * completed transaction branch.
+   *
+   * @param xid A global transaction identifier
+   *
+   * @exception XAException An error has occurred. Possible exception
+   * values are XAER_RMERR, XAER_RMFAIL, XAER_NOTA, XAER_INVAL, or
+   * XAER_PROTO.
+   */
+
+  public void forget (Xid xid) throws XAException
+  {
+	NetAgent netAgent = conn_.netAgent_;
+	int rc = XAResource.XA_OK;
+    exceptionsOnXA = null;
+
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceEntry (this, "forget", xid);
+    if( conn_.isClosed() )
+      connectionClosedFailure();
+	NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+	callInfo.xid_ = xid;
+	callInfo.xaResource_ = this;
+	callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+	try
+    {
+	  // flow the required PROTOCOL to the server
+      netAgent.beginWriteChainOutsideUOW();
+
+      // sent the commit PROTOCOL
+      netAgent.netConnectionRequest_.writeXaForget(netAgent.netConnection_, xid);
+
+      netAgent.flowOutsideUOW();
+
+      // read the reply to the commit
+      netAgent.netConnectionReply_.readXaForget(netAgent.netConnection_);
+
+      netAgent.endReadChain();
+	  if( callInfo.xaRetVal_ != XARETVAL_XAOK )
+	  { // xaRetVal has possible error, format it
+		callInfo.xaFunction_ = XAFUNC_FORGET;
+		rc = xaRetValErrorAccumSQL( callInfo, rc );
+		callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+	  }
+    }
+    catch( SqlException sqle )
+    {
+      exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+                      (sqle, exceptionsOnXA);
+      throwXAException(XAException.XAER_RMERR);
+    }
+    finally {
+	conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
+	}
+	if (rc != XAResource.XA_OK)
+	  throwXAException(rc, false);
+
+  }
+
+  /** Obtain the current transaction timeout value set for this
+   * XAResource instance. If <CODE>XAResource.setTransactionTimeout</CODE>
+   * was not use prior to invoking this method, the return value
+   * is the default timeout set for the resource manager; otherwise,
+   * the value used in the previous <CODE>setTransactionTimeout</CODE> call is
+   * returned.
+   *
+   * @return the transaction timeout value in seconds.
+   *
+   * @exception XAException An error has occurred. Possible exception
+   * values are XAER_RMERR, XAER_RMFAIL.
+   */
+  public int getTransactionTimeout() throws XAException
+  {
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceEntry (this, "getTransactionTimeout");
+    exceptionsOnXA = null;
+    if( conn_.isClosed() )
+      connectionClosedFailure();
+
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceExit (this, "getTransactionTimeout", 0);
+    return 0; // we don't support transaction timeout
+  }
+
+  /** Ask the resource manager to prepare for a transaction commit
+   * of the transaction specified in xid.
+   *
+   * @param xid A global transaction identifier
+   *
+   * @exception XAException An error has occurred. Possible exception
+   * values are: XA_RB*, XAER_RMERR, XAER_RMFAIL, XAER_NOTA, XAER_INVAL,
+   * or XAER_PROTO.
+   *
+   * @return A value indicating the resource manager's vote on the
+   * outcome of the transaction. The possible values are: XA_RDONLY
+   * or XA_OK. If the resource manager wants to roll back the
+   * transaction, it should do so by raising an appropriate XAException
+   * in the prepare method.
+   */
+  public int prepare(Xid xid) throws XAException
+  { // public interface for prepare
+    // just call prepareX with the recursion flag set to true
+    exceptionsOnXA = null;
+
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceEntry (this, "prepare", xid);
+    if( conn_.isClosed() )
+      connectionClosedFailure();
+
+	/// update the XACallInfo
+	NetAgent netAgent = conn_.netAgent_;
+	int rc = XAResource.XA_OK;
+	NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+	callInfo.xid_ = xid;
+	callInfo.xaResource_ = this;
+	callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+	try {
+	     netAgent.beginWriteChainOutsideUOW();
+		  // sent the prepare PROTOCOL
+		 netAgent.netConnectionRequest_.writeXaPrepare(conn_);
+		 netAgent.flowOutsideUOW();
+
+		 // read the reply to the prepare
+		 rc = netAgent.netConnectionReply_.readXaPrepare(conn_);
+		 if( (callInfo.xaRetVal_ != XARETVAL_XAOK) &&
+			 (callInfo.xaRetVal_ != XARETVAL_XARDONLY) )
+		 { // xaRetVal has possible error, format it
+		   callInfo.xaFunction_ = XAFUNC_PREPARE;
+		   rc = xaRetValErrorAccumSQL( callInfo, rc );
+		   callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+		 }
+
+		 netAgent.endReadChain();
+	}
+	catch( SqlException sqle )
+	{
+	  rc = XAException.XAER_RMERR;
+	  exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+		(sqle, exceptionsOnXA);
+	}
+	finally
+	{
+	  conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
+	}
+	if (rc != XAResource.XA_OK)
+		throwXAException(rc, false);
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceExit (this, "prepare", rc);
+    return rc;
+  }
+
+  /** Obtain a list of prepared transaction branches from a resource
+   * manager. The transaction manager calls this method during recovery
+   * to obtain the list of transaction branches that are currently in
+   * prepared or heuristically completed states.
+   *
+   * @param flag One of TMSTARTRSCAN, TMENDRSCAN, TMNOFLAGS. TMNOFLAGS
+   * must be used when no other flags are set in flags.
+   *
+   * @exception XAException An error has occurred. Possible values are
+   * XAER_RMERR, XAER_RMFAIL, XAER_INVAL, and XAER_PROTO.
+   *
+   * @return The resource manager returns zero or more XIDs for the
+   * transaction branches that are currently in a prepared or
+   * heuristically completed state. If an error occurs during the
+   * operation, the resource manager should raise the appropriate
+   * XAException.
+   *
+   */
+  public Xid[] recover(int flag) throws XAException
+  {
+    int rc = XAResource.XA_OK;
+    NetAgent netAgent = conn_.netAgent_;
+
+	if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceEntry (this, "recover", flag);
+    exceptionsOnXA = null;
+    if( conn_.isClosed() )
+      connectionClosedFailure();
+
+	Xid[] xidList = null;
+    int numXid = 0;
+
+	NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+	callInfo.xaFlags_ = flag;
+	callInfo.xaResource_ = this;
+	callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+	try {
+	  netAgent.beginWriteChainOutsideUOW();
+      // sent the recover PROTOCOL
+      netAgent.netConnectionRequest_.writeXaRecover(conn_, flag);
+      netAgent.flowOutsideUOW();
+	  netAgent.netConnectionReply_.readXaRecover(conn_);
+      if( callInfo.xaRetVal_ != XARETVAL_XAOK )
+      { // xaRetVal has possible error, format it
+        callInfo.xaFunction_ = XAFUNC_RECOVER;
+        rc = xaRetValErrorAccumSQL( callInfo, rc );
+        callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+      }
+      netAgent.endReadChain();
+	  if (conn_.indoubtTransactions_ != null)
+	  {
+		numXid = conn_.indoubtTransactions_.size();
+		xidList = new Xid[numXid];
+		int i=0;
+		nextElement = 0;
+		for (Enumeration e = conn_.indoubtTransactions_.keys() ;
+			 e.hasMoreElements(); i++)
+		{
+		  xidList[i] = (Xid) e.nextElement();
+		}
+	  }
+	}
+	catch( SqlException sqle )
+	{
+	  rc = XAException.XAER_RMERR;
+	  exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+		(sqle, exceptionsOnXA);
+	}
+	finally
+	{
+	  conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
+	}
+	if (rc != XAResource.XA_OK)
+		throwXAException(rc, false);
+
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceExit (this, "recover", xidList);
+    return xidList;
+  }
+
+  /** Inform the resource manager to roll back work done on behalf
+   * of a transaction branch
+   *
+   * @param xid A global transaction identifier
+   *
+   * @exception XAException An error has occurred
+   */
+  public void rollback(Xid xid) throws XAException
+  {
+	NetAgent netAgent = conn_.netAgent_;
+	int rc = XAResource.XA_OK;
+    exceptionsOnXA = null;
+
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceEntry (this, "rollback", xid);
+    if( conn_.isClosed() )
+      connectionClosedFailure();
+
+	// update the XACallInfo
+	NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+	callInfo.xid_ = xid;
+	callInfo.xaResource_ = this;
+	callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+	try {
+	  netAgent.beginWriteChainOutsideUOW();
+	  netAgent.netConnectionRequest_.writeXaRollback(conn_, xid);
+	  netAgent.flowOutsideUOW();
+	  // read the reply to the rollback
+	  rc = netAgent.netConnectionReply_.readXaRollback(conn_);
+	  netAgent.endReadChain();
+	  if(callInfo.xaRetVal_ != XARETVAL_XAOK )
+	  { // xaRetVal has possible error, format it
+		callInfo.xaFunction_ = XAFUNC_END;
+		rc = xaRetValErrorAccumSQL(callInfo, rc );
+		callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+	  }
+	}
+	catch( SqlException sqle )
+	{
+	  rc = XAException.XAER_RMERR;
+	  exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+		(sqle, exceptionsOnXA);
+	}
+	finally
+	{
+	  conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
+	}
+	if (rc != XAResource.XA_OK)
+		throwXAException(rc, false);
+
+  }
+
+  /** <P>Set the current transaction timeout value for this <CODE>XAResource</CODE>
+   * instance. This value overwrites the default transaction timeout
+   * value in the resource manager. The newly assigned timeout value
+   * is effective for the life of this <CODE>XAResource</CODE> instance unless
+   * a new value is set.<P>
+   *
+   * @param the transaction timeout value in seconds.
+   *
+   * @exception XAException An error has occurred. Possible exception values
+   * are XAER_RMERR, XAER_RMFAIL, or XAER_INVAL.
+   */
+  public boolean setTransactionTimeout(int seconds) throws XAException
+  {
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceExit (this, "setTransactionTimeout", false);
+    exceptionsOnXA = null;
+    return false; // we don't support transaction timeout in our layer.
+    /* int rc = xaSetTransTimeOut(seconds);
+       if (rc != XAResource.XA_OK)
+         throwXAException(rc); */
+  }
+
+  /** Start work on behalf of a transaction branch specified in xid
+   *
+   * @param xid A global transaction identifier to be associated
+   * with the resource
+   *
+   * @param flags One of TMNOFLAGS, TMJOIN, or TMRESUME
+   *
+   * @exception XAException An error has occurred. Possible exceptions   * are XA_RB*, XAER_RMERR, XAER_RMFAIL, XAER_DUPID, XAER_OUTSIDE,
+   * XAER_NOTA, XAER_INVAL, or XAER_PROTO.
+   *
+   */
+  public synchronized void start(Xid xid, int flags) throws XAException
+  {
+
+	NetAgent netAgent = conn_.netAgent_;
+	int rc = XAResource.XA_OK;
+	exceptionsOnXA = null;
+	if (conn_.agent_.loggingEnabled())
+	  conn_.agent_.logWriter_.traceEntry (this, "start", xid, flags);
+	if( conn_.isClosed() )
+	  connectionClosedFailure();
+
+	// update the XACallInfo
+	NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+	callInfo.xaFlags_ = flags;
+	callInfo.xaInProgress_ = true;
+	callInfo.xid_ = xid;
+	callInfo.xaResource_ = this;
+	callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+	try {
+	  netAgent.beginWriteChainOutsideUOW();
+	  netAgent.netConnectionRequest_.writeXaStartUnitOfWork(conn_);
+	  netAgent.flowOutsideUOW();
+	  netAgent.netConnectionReply_.readXaStartUnitOfWork(conn_);
+	  if( callInfo.xaRetVal_ != XARETVAL_XAOK )
+	  { // xaRetVal has possible error, format it
+		callInfo.xaFunction_ = XAFUNC_START;
+		rc = xaRetValErrorAccumSQL( callInfo, rc );
+		callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+	  }
+	  // Setting this is currently required to avoid client from sending
+	  // commit for autocommit.
+	  if (rc == XARETVAL_XAOK)
+		  conn_.setXAState(Connection.XA_ACTIVE);
+
+	}
+	catch( SqlException sqle )
+	{
+	  rc = XAException.XAER_RMERR;
+	  exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+		(sqle, exceptionsOnXA);
+	}
+	finally
+	{
+	  conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
+	}
+	if (rc != XAResource.XA_OK)
+		throwXAException(rc, false);
+  }
+
+
+
+  protected void throwXAException(int rc) throws XAException
+  {
+    // By default, throwXAException will reset the state of the failed connection
+    throwXAException(rc, rc!=XAException.XAER_NOTA);
+  }
+
+  private String getXAExceptionText( int rc )
+  {
+    String xaExceptionText;
+    switch( rc )
+    {
+      case javax.transaction.xa.XAException.XA_RBROLLBACK:
+        xaExceptionText = "XA_RBROLLBACK";
+        break;
+      case javax.transaction.xa.XAException.XA_RBCOMMFAIL:
+        xaExceptionText = "XA_RBCOMMFAIL";
+        break;
+      case javax.transaction.xa.XAException.XA_RBDEADLOCK:
+        xaExceptionText = "XA_RBDEADLOCK";
+        break;
+      case javax.transaction.xa.XAException.XA_RBINTEGRITY:
+        xaExceptionText = "XA_RBINTEGRITY";
+        break;
+      case javax.transaction.xa.XAException.XA_RBOTHER:
+        xaExceptionText = "XA_RBOTHER";
+        break;
+      case javax.transaction.xa.XAException.XA_RBPROTO:
+        xaExceptionText = "XA_RBPROTO";
+        break;
+      case javax.transaction.xa.XAException.XA_RBTIMEOUT:
+        xaExceptionText = "XA_RBTIMEOUT";
+        break;
+      case javax.transaction.xa.XAException.XA_RBTRANSIENT:
+        xaExceptionText = "XA_RBTRANSIENT";
+        break;
+      case javax.transaction.xa.XAException.XA_NOMIGRATE:
+        xaExceptionText = "XA_NOMIGRATE";
+        break;
+      case javax.transaction.xa.XAException.XA_HEURHAZ:
+        xaExceptionText = "XA_HEURHAZ";
+        break;
+      case javax.transaction.xa.XAException.XA_HEURCOM:
+        xaExceptionText = "XA_HEURCOM";
+        break;
+      case javax.transaction.xa.XAException.XA_HEURRB:
+        xaExceptionText = "XA_HEURRB";
+        break;
+      case javax.transaction.xa.XAException.XA_HEURMIX:
+        xaExceptionText = "XA_HEURMIX";
+        break;
+      case javax.transaction.xa.XAException.XA_RETRY:
+        xaExceptionText = "XA_RETRY";
+        break;
+      case javax.transaction.xa.XAException.XA_RDONLY:
+        xaExceptionText = "XA_RDONLY";
+        break;
+      case javax.transaction.xa.XAException.XAER_ASYNC:
+        xaExceptionText = "XAER_ASYNC";
+        break;
+      case javax.transaction.xa.XAException.XAER_RMERR:
+        xaExceptionText = "XAER_RMERR";
+        break;
+      case javax.transaction.xa.XAException.XAER_NOTA:
+        xaExceptionText = "XAER_NOTA";
+        break;
+      case javax.transaction.xa.XAException.XAER_INVAL:
+        xaExceptionText = "XAER_INVAL";
+        break;
+      case javax.transaction.xa.XAException.XAER_PROTO:
+        xaExceptionText = "XAER_PROTO";
+        break;
+      case javax.transaction.xa.XAException.XAER_RMFAIL:
+        xaExceptionText = "XAER_RMFAIL";
+        break;
+      case javax.transaction.xa.XAException.XAER_DUPID:
+        xaExceptionText = "XAER_DUPID";
+        break;
+      case javax.transaction.xa.XAException.XAER_OUTSIDE:
+        xaExceptionText = "XAER_OUTSIDE";
+        break;
+      case XAResource.XA_OK:
+        xaExceptionText = "XA_OK";
+        break;
+      default:
+        xaExceptionText = "Unknown Error";
+        break;
+    }
+    return xaExceptionText;
+  }
+
+  protected void throwXAException(int rc, boolean resetFlag) throws XAException
+  { // ~~~
+    String xaExceptionText;
+    if (resetFlag)
+    {
+    // reset the state of the failed connection
+    NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
+    callInfo.xaInProgress_ = false;
+    callInfo.xaWasSuspended = false;
+    callInfo.xaState_ = Connection.XA_OPEN_IDLE;
+    conn_.setXAState( Connection.XA_OPEN_IDLE );
+    }
+
+    xaExceptionText = getXAExceptionText( rc );
+    // save the SqlException chain to add it to the XAException
+    org.apache.derby.client.am.SqlException sqlExceptions = exceptionsOnXA;
+
+    while( exceptionsOnXA != null )
+    { // one or more SqlExceptions received, format them
+      xaExceptionText = xaExceptionText + " : " + exceptionsOnXA.getMessage();
+      exceptionsOnXA = (org.apache.derby.client.am.SqlException)
+                           exceptionsOnXA.getNextException();
+    }
+    org.apache.derby.client.am.XaException xaException =
+        new org.apache.derby.client.am.XaException( conn_.agent_.logWriter_,
+                                            sqlExceptions,
+                                            xaExceptionText );
+    xaException.errorCode = rc;
+    throw xaException;
+  }
+
+  public boolean isSameRM(XAResource xares) throws XAException
+  {
+    boolean isSame = false; // preset that the RMs are NOT the same
+    exceptionsOnXA = null;
+
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceEntry (this, "isSameRM", xares);
+    if( conn_.isClosed() )
+      connectionClosedFailure();
+
+    if ( xares instanceof org.apache.derby.client.net.NetXAResource )
+    { // both are NetXAResource so check to see if this is the same RM
+      // remember, isSame is initialized to false
+      NetXAResource derbyxares = (NetXAResource) xares;
+      while( true )
+      {
+        if( !conn_.databaseName_.equalsIgnoreCase(derbyxares.conn_.databaseName_) )
+          break; // database names are not equal, not same RM
+        if( !conn_.netAgent_.server_.equalsIgnoreCase
+            (derbyxares.conn_.netAgent_.server_) )
+        { // server name strings not equal, compare IP addresses
+          try
+          {
+            // 1st convert "localhost" to actual server name
+            String server1 = this.processLocalHost( conn_.netAgent_.server_ );
+            String server2 =
+                this.processLocalHost( derbyxares.conn_.netAgent_.server_ );
+            // now convert the server name to ip address
+            InetAddress serverIP1 = InetAddress.getByName( server1 );
+            InetAddress serverIP2 = InetAddress.getByName( server2 );
+            if( !serverIP1.equals( serverIP2 ) )
+              break; // server IPs are not equal, not same RM
+          }
+          catch(  UnknownHostException ue ) {break;}
+        }
+        if( conn_.netAgent_.port_ != derbyxares.conn_.netAgent_.port_ )
+          break; // ports are not equal, not same RM
+        isSame = true; // everything the same, set RMs are the same
+        break;
+      }
+    }
+
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceExit
+      (this, "isSameRM", isSame);
+    return isSame;
+  }
+
+  public static boolean xidsEqual( Xid xid1, Xid xid2 )
+  { // determine if the 2 xids contain the same values even if not same object
+    // comapre the format ids
+    if( xid1.getFormatId() != xid2.getFormatId() )
+      return false; // format ids are not the same
+
+    // compare the global transaction ids
+    int xid1Length = xid1.getGlobalTransactionId().length;
+    if( xid1Length != xid2.getGlobalTransactionId().length )
+      return false; // length of the global trans ids are not the same
+    byte[] xid1Bytes = xid1.getGlobalTransactionId();
+    byte[] xid2Bytes = xid2.getGlobalTransactionId();
+    int i;
+    for( i=0; i<xid1Length; ++i )
+    { // check all bytes are the same
+      if( xid1Bytes[i] != xid2Bytes[i] )
+        return false; // bytes in the global trans ids are not the same
+    }
+
+    // compare the branch qualifiers
+    xid1Length = xid1.getBranchQualifier().length;
+    if( xid1Length != xid2.getBranchQualifier().length )
+      return false; // length of the global trans ids are not the same
+    xid1Bytes = xid1.getBranchQualifier();
+    xid2Bytes = xid2.getBranchQualifier();
+    for( i=0; i<xid1Length; ++i )
+    { // check all bytes are the same
+      if( xid1Bytes[i] != xid2Bytes[i] )
+        return false; // bytes in the global trans ids are not the same
+    }
+
+    return true; // all of the fields are the same, xid1 == xid2
+  }
+
+
+	// KATHEY remove
+  protected void makeEntryCurrent( int offset ) throws SqlException
+  {
+    int currOffset = conn_.currXACallInfoOffset_; // offset of current XACallInfo
+    NetXACallInfo newCallInfo = callInfoArray_[offset];
+    if (conn_.agent_.loggingEnabled()) conn_.agent_.logWriter_.traceEntry
+      (this, "makeEntryCurrent", offset, currOffset);
+
+    if( currOffset == offset )
+    { // entry is already current
+      if( newCallInfo.convReleased_ &&
+          !newCallInfo.xaInProgress_ )
+      { // connection reuse, XA is not in Progress, reset connection
+        // transaction pooling
+        newCallInfo.convReleased_ = false;
+        if( !conn_.resetConnectionAtFirstSql_ )
+        { // resetConnectionAtFirstSql_ is false
+          /*
+            * at this point we have determined that a reset of this connection
+            * is required. We are already inside beginWriteChain() where a
+            * deferred reset would be done, however we might have switched
+            * connection to a connection that needed reset from a connection
+            * that didn't need reset. It is too late for the test for deferred
+            * reset in beginWriteChain so we call writeDeferredReset here.
+            * by setting the resetConnectionAtFirstSql_ flag we trigger the
+            * readDeferredReset in beginReadChain. This is done ONLY if
+            * resetConnectionAtFirstSql_ is not set, if it is then
+            * writeDeferredReset() has already been done.
+            */
+          conn_.resetConnectionAtFirstSql_ = true;
+          conn_.writeDeferredReset();
+        }
+      }
+      return; // entry is already current, nothing to do
+    }
+
+    callInfoArray_[currOffset].currConnection_ = false; // reset old current conn
+    callInfoArray_[currOffset].xaState_ = conn_.getXAState(); // save XA state
+    callInfoArray_[currOffset].freeEntry_ = false; // set entry in use
+
+    // set the new entry as the current entry, update conn_
+    newCallInfo.currConnection_ = true;
+    conn_.currXACallInfoOffset_ = offset;
+    conn_.setXAState(newCallInfo.xaState_);
+
+    if( newCallInfo.convReleased_ &&
+        !newCallInfo.xaInProgress_ )
+    { // connection reuse, XA is not in Progress, reset connection
+      // transaction pooling
+      newCallInfo.convReleased_ = false;
+      if( !conn_.resetConnectionAtFirstSql_ )
+      { // resetConnectionAtFirstSql_ is false
+        /*
+          * at this point we have determined that a reset of this connection
+          * is required. We are already inside beginWriteChain() where a
+          * deferred reset would be done, however we might have switched
+          * connection to a connection that needed reset from a connection
+          * that didn't need reset. It is too late for the test for deferred
+          * reset in beginWriteChain so we call writeDeferredReset here.
+          * by setting the resetConnectionAtFirstSql_ flag we trigger the
+          * readDeferredReset in beginReadChain. This is done ONLY if
+          * resetConnectionAtFirstSql_ is not set, if it is then
+          * writeDeferredReset() has already been done.
+          */
+        conn_.resetConnectionAtFirstSql_ = true;
+        conn_.writeDeferredReset();
+      }
+    }
+
+    if( conn_.agent_.loggingEnabled() )
+    { // logging enabled
+      conn_.agent_.logWriter_.traceExit (this, "makeEntryCurrent", offset);
+    }
+  }
+
+
+  public List getSpecialRegisters()
+  {
+    return specialRegisters_;
+  }
+
+  public void addSpecialRegisters(String s)
+  {
+    if (s.substring(0,1).equals("@"))
+    {
+      // SET statement is coming from Client
+      if (specialRegisters_.remove(s.substring(1)))
+      {
+        specialRegisters_.remove(s);
+        specialRegisters_.add(s.substring(1));
+        }
+        else
+        {
+        specialRegisters_.remove(s);
+        specialRegisters_.add(s);
+        }
+      }
+      else
+    { // SET statement is coming from Server
+    specialRegisters_.remove(s);
+    specialRegisters_.add(s);
+    }
+  }
+
+  private void connectionClosedFailure() throws XAException
+  { // throw an XAException XAER_RMFAIL, with a chained SqlException - closed
+    exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+                    (new SqlException( null, "Connection is Closed."),
+                     exceptionsOnXA);
+    throwXAException(javax.transaction.xa.XAException.XAER_RMFAIL);
+  }
+
+  private String getXAFuncStr( int xaFunc )
+  {
+    switch( xaFunc )
+    {
+      case XAFUNC_COMMIT:
+        return XAFUNCSTR_COMMIT;
+      case XAFUNC_END:
+        return XAFUNCSTR_END;
+      case XAFUNC_FORGET:
+        return XAFUNCSTR_FORGET;
+      case XAFUNC_PREPARE:
+        return XAFUNCSTR_PREPARE;
+      case XAFUNC_RECOVER:
+        return XAFUNCSTR_RECOVER;
+      case XAFUNC_ROLLBACK:
+        return XAFUNCSTR_ROLLBACK;
+      case XAFUNC_START:
+        return XAFUNCSTR_START;
+    }
+    return XAFUNCSTR_NONE;
+  }
+
+  protected int xaRetValErrorAccumSQL( NetXACallInfo callInfo, int currentRC )
+  {
+    int rc;
+    switch (callInfo.xaRetVal_)
+    {
+      case XARETVAL_XAOK:
+      case XARETVAL_NODISSOCIATE:
+        rc = XAResource.XA_OK;
+        break;
+      case XARETVAL_XALCSNOTSUPP:
+        rc = XAResource.XA_OK;
+        break;
+      case XARETVAL_RBROLLBACK:
+        rc = XAException.XA_RBROLLBACK;
+        break;
+      case XARETVAL_RBOTHER:
+        rc = XAException.XA_RBOTHER;
+        break;
+      case XARETVAL_RBDEADLOCK:
+        rc = XAException.XA_RBDEADLOCK;
+        break;
+      case XARETVAL_RBPROTO:
+        rc = XAException.XA_RBPROTO;
+        break;
+      case XARETVAL_XAERPROTO:
+        rc = XAException.XAER_PROTO;
+        break;
+      case XARETVAL_XARDONLY:
+        rc = XAException.XA_RDONLY;
+        break;
+      case XARETVAL_XAHEURCOM:
+        rc = XAException.XA_HEURCOM;
+        break;
+      case XARETVAL_XAHEURRB:
+        rc = XAException.XA_HEURRB;
+        break;
+      case XARETVAL_XAERDUPID:
+        rc = XAException.XAER_DUPID;
+        break;
+      case XARETVAL_XAERNOTA:
+        rc = XAException.XAER_NOTA;
+        break;
+      case XARETVAL_XAERRMERR:
+        rc = XAException.XAER_RMERR;
+        break;
+      case XARETVAL_XAERRMFAIL:
+        rc = XAException.XAER_RMFAIL;
+        break;
+      case XARETVAL_XAERINVAL:
+        rc = XAException.XAER_INVAL;
+        break;
+      default:
+        rc = XAException.XAER_RMFAIL;
+        break;
+    }
+
+    if( rc != XAResource.XA_OK )
+    { // error was detected
+      // create an SqlException to report this error within
+      String xaRetValStr = "Error executing a " +
+          getXAFuncStr( callInfo.xaFunction_ ) + ", " +
+          "Server returned " + getXAExceptionText( rc );
+      SqlException accumSql = new SqlException( conn_.netAgent_.logWriter_,
+          xaRetValStr, org.apache.derby.client.am.SqlState.undefined,
+          org.apache.derby.client.am.SqlCode.queuedXAError );
+      exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+                                                    (accumSql, exceptionsOnXA);
+
+      if( currentRC != XAResource.XA_OK )
+      { // the rc passed into this function had an error also, prioritize error
+        if( currentRC < 0 )
+        { // rc passed in was a major error use it instead of current error
+          return currentRC;
+        }
+      }
+    }
+    return rc;
+  }
+
+  private String processLocalHost( String serverName )
+  {
+    if( serverName.equalsIgnoreCase("localhost") )
+    { // this is a localhost, find hostname
+      try
+      {
+        InetAddress localhostNameIA = InetAddress.getLocalHost();
+        String localhostName = localhostNameIA.getHostName();
+        return localhostName;
+      }
+      catch( SecurityException se ) {return serverName;}
+      catch( UnknownHostException ue ) {return serverName;}
+    }
+    // not "localhost", return original server name
+    return serverName;
+  }
+
+  protected void removeXaresFromSameRMchain()
+  {
+    // check all NetXAResources on the same RM for the NetXAResource to remove
+    try
+    {
+      this.ignoreMe_ = true; // use the ignoreMe_ flag to indicate the
+      // XAResource to remove
+      NetXAResource prevXAResource = null;
+      NetXAResource currXAResource;
+      synchronized( xaResourceSameRMGroup_ )
+      { // make sure no one changes this vector list
+        currXAResource = (NetXAResource) xaResourceSameRMGroup_.elementAt(
+                                                           sameRMGroupIndex_ );
+        while( currXAResource != null )
+        { // is this the XAResource to remove?
+          if( currXAResource.ignoreMe_ )
+          { // this NetXAResource is the one to remove
+            if( prevXAResource != null )
+            { // this XAResource is not first in chain, just move next to prev
+              prevXAResource.nextSameRM_ = currXAResource.nextSameRM_;
+            }
+            else
+            { // this XAResource is  first in chain, just move next to root
+              xaResourceSameRMGroup_.set( sameRMGroupIndex_,
+                  currXAResource.nextSameRM_ );
+            }
+            return;
+          }
+          // this is not the NetXAResource to remove, try the next one
+          prevXAResource = currXAResource;
+          currXAResource = currXAResource.nextSameRM_;
+        }
+      }
+    }
+    finally
+    {
+      this.ignoreMe_ = false;
+    }
+  }
+
+
+  public void initForReuse()
+  {
+    // add this new XAResource to the list of other XAResources for the Same RM
+    // first find out if there are any other XAResources for the same RM
+    // then check to make sure it is not already in the chain
+    synchronized(xaResourceSameRMGroup_)
+    { // make sure no one changes this vector list
+      int groupCount = xaResourceSameRMGroup_.size();
+      int index = 0;
+      int firstFreeElement = -1;
+      NetXAResource xaResourceGroup = null;
+
+      for( ; index<groupCount; ++index )
+      { // check if this group is the same RM
+        xaResourceGroup = (NetXAResource) xaResourceSameRMGroup_.elementAt( index );
+        if( xaResourceGroup == null )
+        { // this is a free element, save its index if first found
+          if( firstFreeElement == -1 )
+          { // first free element, save index
+            firstFreeElement = index;
+          }
+          continue; // go to next element
+        }
+        try
+        {
+          if( xaResourceGroup.isSameRM(this) )
+          { // it is the same RM add this XAResource to the chain if not there
+            NetXAResource nextXares = (NetXAResource)
+                          xaResourceSameRMGroup_.elementAt( sameRMGroupIndex_ );
+            while( nextXares != null )
+            { // is this NetXAResource the one we are trying to add?
+              if( nextXares.equals( this ) )
+              { // the XAResource to be added already is in chain, don't add
+                break;
+              }
+              // Xid was not on that NetXAResource, try the next one
+              nextXares = nextXares.nextSameRM_;
+            }
+
+            if( nextXares == null )
+            { // XAResource to be added is not in the chain already, add it
+              // add it at the head of the chain
+              sameRMGroupIndex_ = index;
+              this.nextSameRM_ = xaResourceGroup.nextSameRM_;
+              xaResourceGroup.nextSameRM_ = this;
+            }
+            return; // done
+          }
+        }
+        catch( XAException xae )
+        {}  
+      }
+
+      // no other same RM was found, add this as first of new group
+      if( firstFreeElement == -1 )
+      { // no free element found, add new element to end
+        xaResourceSameRMGroup_.add(this);
+        sameRMGroupIndex_ = groupCount;
+      }
+      else
+      { // use first free element found
+        xaResourceSameRMGroup_.setElementAt( this, firstFreeElement );
+        sameRMGroupIndex_ = firstFreeElement;
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="init,engine,tools,drda,build,versioninfo,localeinfo"/>
+  <target name="buildsource" depends="init,engine,tools,drda,client,build,versioninfo,localeinfo"/>
   <target name="all" depends="buildsource,demo,testing"/>
 
 <!-- ==================================================================== -->
@@ -74,6 +74,7 @@
         <available file="${out.dir}/org/apache/derby/info/DBMS.properties"/>
         <available file="${out.dir}/org/apache/derby/info/tools.properties"/>
         <available file="${out.dir}/org/apache/derby/info/net.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/dnc.properties"/>
       </and>
     </condition>
   </target>
@@ -102,12 +103,20 @@
       <param name="info.productfile" value="codeline"/>
       <param name="info.file" value="${out.dir}/org/apache/derby/info/net.properties"/>
     </antcall>
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.iname" value="Apache Derby Network Client"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="codeline"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/dnc.properties"/>
+    </antcall>
   </target>
 
   <target name="cleanversion">
     <delete file="${out.dir}/org/apache/derby/info/DBMS.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/tools.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/net.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/dnc.properties"/>
   </target>
 <!-- ==================================================================== -->
 <!--                         Info writer build target                     -->
@@ -265,6 +274,10 @@
 
   <target name="drda" depends="engine">
     <ant dir="${derby.drda.src.dir}"/>
+  </target>
+
+  <target name="client" depends="engine,init">
+    <ant dir="${derby.client.src.dir}"/>
   </target>
 
   <target name="build">
@@ -493,6 +506,7 @@
       <fileset dir="${derby.drda.src.dir}"
                includesfile="${javadoctools.dir}/publishedapi.ant"/>
     </copy>
+
 	
     <!-- engine files -->
     <copy todir="${out.javadoc.dir}/sourcedir">
@@ -634,8 +648,8 @@
 <!--                               Jar targets                           -->
 <!-- =================================================================== -->
 
-  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar,derbylocalejars,derbytestingjar"/>
-  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbywar,derbylocalejars,derbytestingjar"/>
+  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbywar,derbylocalejars,derbytestingjar"/>
+  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbywar,derbylocalejars,derbytestingjar"/>
 
   <target name="initjars" depends="setsanityname,getsvnversion">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
@@ -884,6 +898,45 @@
                includes="META-INF/**"/>
     </jar>
 
+  </target>
+
+<!-- - - - - - - - - - - - - - derbyclient.jar target - - - - - - - - -->
+
+ <target name="derbyclientjar" depends="setsanityname,initjars">
+
+    <echo message="Beginning derbyclient.jar ${sanity.name} build"/>
+
+    <echo message=" creating new dnc.properties file "/>
+
+    <mkdir dir="${out.dir}/org/apache/derby/info/"/>
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="${changenumber}"/>
+      <param name="info.iname" value="Apache Derby Network Client"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="codeline"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/info/dnc.properties"/>
+    </antcall>
+
+    <!-- copy license file to lists dir for inclusion in derbyclient.jar -->
+
+    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
+    <copy todir="${derby.jar.dir}/lists/META-INF">
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
+    </copy>
+   
+    <delete file="${derby.jar.dir}/derbyclient.jar"/>
+
+    <jar destfile="${derby.jar.dir}/derbyclient.jar"
+         compress="true"
+         filesonly="true"
+         update="true">
+      <fileset dir="${out.dir}"
+               includes="org/apache/derby/client/**,
+			org/apache/derby/client/jdbc/Client**,org/apache/derby/jdbc/Client**,org/apache/derby/iapi/services/info/**
+                         org/apache/derby/info/dnc.properties"/>
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="META-INF/**"/>
+    </jar>
   </target>
 
 <!-- - - - - - - - - - - - - - derby.war target - - - - - - - - - - - -->

@@ -367,6 +367,7 @@ to specify your environment and options:
     - derbytools.jar (utilities: sysinfo, dblook, ij) 
     - derbynet.jar (network server).
     - derbyLocale_*.jar (9 jar files with locale support).
+    - derbyclient.jar (derby network client)
     If the tests were built, the following jar file will also be built:
     - derbyTesting.jar (the test framework and related files)
 
@@ -377,6 +378,7 @@ to specify your environment and options:
     - command "ant derbynetjar" to build derbynet.jar
     - command "ant derbylocalejars" to build the derby locale jar files.
     - command "ant derbytestingjar" to build derbyTesting.jar
+    - command "ant derbyclientjar" to build derbyclient.jar
 
 Notes: 
 (1) The estimated total time for build completion is ~5-10 minutes.

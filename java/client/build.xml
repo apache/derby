@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!-- ==================================================================== -->
+<!--                       Derby Client build file                        -->
+<!-- ==================================================================== -->
+<project default="client" basedir="../..">
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="tools/ant/properties"/>
+
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/defaultcompiler.properties"/>
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+
+
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
+  
+
+<!-- Targets -->
+
+<!-- compile classes  -->
+  <target name="compile">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.client.src.dir}"
+      includes="org/apache/derby/**"
+      destdir="${out.dir}">
+      <classpath>
+          <pathelement path="${jce1_2_1}"/>
+          <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+    </javac>
+</target>
+  
+
+<!-- default target  -->
+  <target name="client" depends="compile"/>
+</project>
+
