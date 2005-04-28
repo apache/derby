@@ -441,7 +441,6 @@ public class FileLogger implements Logger {
 		@param undoInstant the log instant of the operation that is to be
 		rolled back
 		@param in optional data input for the compenastion doMe method
-		@param dataLength optional data length
 
 		@return the instant in the log that can be used to identify the log
 		record
@@ -1104,12 +1103,7 @@ public class FileLogger implements Logger {
 
 		<P> MT - caller provides synchronization
 
-		@param logData          - a scratch area to put the log record in
-		@param rawStoreFactory  - the raw store factory
 		@param transFactory     - the transaction factory
-		@param redoStart        - if > 0, a checkpoint was found.
-		                          Start the log scan from here to rebuild 
-                                  transaction table.
 		@param redoLWM          - if checkpoint seen, starting from this point
                                   on, apply redo if necessary
 

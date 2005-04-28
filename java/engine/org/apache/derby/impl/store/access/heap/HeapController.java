@@ -687,10 +687,10 @@ public class HeapController
      *
 	 * @return true if lock was granted, only can be false if wait was false.
      *
-	 * @param loc       The "RowLocation" which describes the exact row to lock.
-     * @param forUpdate Lock the record for read or write.
-     * @param forInsert is row Lock for insert?
-     * @param wait      Should the lock call wait to be granted?
+     * @param page_num          Page number of row to lock.
+     * @param record_id         Record id of row on page_num to lock.
+     * @param lock_operation    Desc of what to lock for, ie. update, insert ...
+     * @param wait              Should the lock call wait to be granted?
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

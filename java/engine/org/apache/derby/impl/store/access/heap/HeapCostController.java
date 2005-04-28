@@ -289,7 +289,7 @@ public class HeapCostController
      *                        conglomerate.  The startKeyValue must only
      *                        reference columns included in the scanColumnList.
      *
-	 * @param startSearchOperation 
+	 * @param startSearchOperator 
      *                        an operator which defines how the startKeyValue
      *                        is to be searched for.  If startSearchOperation 
      *                        is ScanController.GE, the scan starts on the 
@@ -308,7 +308,7 @@ public class HeapCostController
      *                        stopKeyValue must only reference columns included
      *                        in the scanColumnList.
      *
-	 * @param stopSearchOperation
+	 * @param stopSearchOperator
      *                        an operator which defines how the stopKeyValue
      *                        is used to determine the scan stopping position. 
      *                        If stopSearchOperation is ScanController.GE, the
@@ -343,7 +343,7 @@ public class HeapCostController
     long                    row_count,
     int                     group_size,
     boolean                 forUpdate,
-    FormatableBitSet                 scanColumnList,
+    FormatableBitSet        scanColumnList,
     DataValueDescriptor[]   template,
     DataValueDescriptor[]   startKeyValue,
     int                     startSearchOperator,

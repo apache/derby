@@ -112,8 +112,8 @@ class HeapPostCommit implements Serviceable
      * This routine will latch the page and hold the latch due to interface
      * requirement from Page.purgeAtSlot.
      *
-     * @param open_btree The btree already opened.
-     * @param pageno The page number of the page to look for committed deletes.
+     * @param heap_control  The heap, already opened.
+     * @param pageno        number of page to look for committed deletes.
      *
      * @see Page#purgeAtSlot
      * @exception  StandardException  Standard exception policy.

@@ -46,14 +46,15 @@ public interface StreamLogScan extends LogScan {
 		transaction Id and a group mask.  If provided, only log record that
 		matches the transaction Id and the group mask is returned.
 
-		@param input the ArrayInputStream to put the log record
-		@param logicalInput the logical input stream that is attached to input
-		@param tranId if non-null, only log record that equals tranId will be
-		returned.  If null, log records are not filtered on transaction Id. 
-		@param groupmask, if non-zero, only log record whose Loggable's group
-		value is included in the groupmask is returned.  groupmask can be a bit
-		wise OR of many Loggable groups.  If zero, log records are not filtered
-		on the Loggable's group.
+		@param input        the ArrayInputStream to put the log record
+		@param tranId       if non-null, only log record that equals tranId 
+                            will be returned.  If null, log records are not 
+                            filtered on transaction Id. 
+		@param groupmask    if non-zero, only log record whose Loggable's group
+                            value is included in the groupmask is returned.  
+                            groupmask can be a bit wise OR of many Loggable 
+                            groups.  If zero, log records are not filtered on 
+                            the Loggable's group.
 
 		@return an object that represents the log record, return null if the
 		scan has completed. 

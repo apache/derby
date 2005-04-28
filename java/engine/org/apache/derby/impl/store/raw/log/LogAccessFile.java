@@ -735,9 +735,11 @@ public class LogAccessFile
 
 	/**
 	 * reserve the space for the checksum log record in the log file. 
-	 * @param  the length of the log record that is going to be written
-	 * @param  logFileNumber current log file number 
+     *
+	 * @param  length           the length of the log record to be written
+	 * @param  logFileNumber    current log file number 
 	 * @param  currentPosition  current position in the log file. 
+     *
 	 * @return the space that is needed to write a checksum log record.
 	 */
 	protected long reserveSpaceForChecksum(int length, long logFileNumber, long currentPosition )

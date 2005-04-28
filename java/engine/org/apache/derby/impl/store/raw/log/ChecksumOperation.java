@@ -177,7 +177,6 @@ public class ChecksumOperation implements Loggable
 
 		Checksum has no optional data to write out
 
-		@param out Where and how to write to optional data.
 		
 	*/
 	public ByteArray getPreparedLog()

@@ -238,8 +238,6 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      * @param compatibilitySpace 
      *               if null, use the transaction being created, else if 
      *               non-null use this compatibilitySpace.
-     * @param cm     true if transaction should be waited for and halted 
-     *               during refresh.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

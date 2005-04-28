@@ -162,7 +162,7 @@ public final class Heap
     /* Constructors for This class: */
 
     /**
-     * Zero arg. constructor for Monitor to create empty object.
+     * Zero arg constructor for Monitor to create empty object.
      **/
     public Heap()
     {
@@ -982,7 +982,7 @@ public final class Heap
      */
 
     /**
-     * return the "Conglomerate"
+     * return the "Conglomerate".
      * <p>
      * For heap just return "this", which both implements Conglomerate and
      * StaticCompiledOpenConglomInfo.

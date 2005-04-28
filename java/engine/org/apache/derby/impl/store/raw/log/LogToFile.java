@@ -1639,7 +1639,6 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		<P>MT - not needed, no global variables used
 
 		@param logFileName the name of the log file
-		@param version the log version 
 		@param number the log file number
 		@return true if the log file is of the current version and of the
 		correct format
@@ -1711,7 +1710,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 		<P>MT - synchornization provided by caller
 
-		@param newLog the new log file to be initialized
+		@param newlog the new log file to be initialized
 		@param number the log file number
 		@param prevLogRecordEndInstant the end position of the  previous log record
 
@@ -1975,7 +1974,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 		<P>MT - not needed, wrapper method
 
-		@param where flush log up to here
+		@param wherePosition flush log up to here
 
 		@exception IOException Failed to flush to the log
 	*/
