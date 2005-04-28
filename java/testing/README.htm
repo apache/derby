@@ -13,7 +13,7 @@ org.apache.derbyTesting<!--mozToc h1 1 h2 2 h3 3 h4 4 h5 5 h6 6--><br>
 </h2>
 <p>
 <small>created by myrna@golux.com<br>
-last updated on 12/02/2004 by: myrna@golux.com<br>
+last updated on 04/18/2005 by: m.v.lunteren@gmail.com<br>
 </small>
 </p>
 <ul>
@@ -90,7 +90,9 @@ The derbyTesting package enables you to run 1 test or a suite of tests.
 Before you can run, you need to setup your environment:<br>
 </p>
 <ul>
-  <li>Obtain a jdk or jre (based on jdk 1.3.1 specification or higher).
+  <li>Obtain a jdk or jre (based on jdk 1.3.1 specification <small><a
+ href="README.htm#Note1:"><small>See Note1</small></a></small> or
+higher).
 Add the bin directory to your $PATH. Currently supported are:<br>
   </li>
 </ul>
@@ -134,8 +136,10 @@ file, or <a
     <small>&nbsp;&nbsp;&nbsp; derby tools classes for tools like ij
 and dblook</small><li><small>derbynet.jar<br>
       </small></li>
-    <small>&nbsp;&nbsp;&nbsp; derby network server classes</small><li><small>db2jcc.jar
-and db2jcc_license_c.jar <br>
+    <small>&nbsp;&nbsp;&nbsp; derby network server classes</small><li><small>derbyclient.jar<br>
+      </small></li>
+    <small>&nbsp;&nbsp;&nbsp; derby client classes</small><li><small>db2jcc.jar
+and db2jcc_license_c.jar<br>
       </small></li>
     <small>&nbsp;&nbsp;&nbsp; IBM Universal JDBC Driver classes. (See
 IBM <a href="http://www-106.ibm.com/developerworks/db2/downloads/jcc/">developerworks</a>
@@ -158,12 +162,14 @@ For example:<br>
   <tbody>
     <tr>
       <td style="vertical-align: top;"><small>(note that $jardir is
-only a convenience variable and that the command below has carriage
+only a convenience variable and that the set CLASSPATH command below
+has carriage
 returns for formatting reasons):<br>
       </small><small>set jardir=/local/derbyjar<br>
 set
-CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbynet.jar:$jardir/db2jcc.jar:<br>
-$jardir/db2jcc_license_c.jar:$jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<br>
+CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbynet.jar:$jardir/derbyclient.jar:<br>
+$jardir/db2jcc.jar:$jardir/db2jcc_license_c.jar:<br>
+$jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<br>
 $jardir/derbyLocale_de_DE.jar:$jardir/derbyLocale_es.jar:$jardir/derbyLocale_fr.jar:<br>
 $jardir/derbyLocale_it.jar:$jardir/derbyLocale_ja_JP.jar:$jardir/derbyLocale_ko_KR.jar:<br>
 $jardir/derbyLocale_pt_BR.jar:$jardir/derbyLocale_zh_CN.jar:$jardir/derbyLocale_zh_TW.jar:<br>
@@ -205,12 +211,13 @@ to run the test supersimple against the embedded driver:<br>
 org.apache.derbyTesting.functionTests.harness.RunTest
 lang/supersimple.sql<br>
       <br>
-To run a test with network server, add -Dframework=DerbyNet to the run.
+To run a test with network server, using the derbyclient driver, add
+-Dframework=DerbyNetClient to the run.
 The test harness will to start
 network server at port 1527 or connect to a running one, run the test,
 and stop network server thereafter.<br>
 for example:<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; java </small><small>-Dframework=DerbyNet
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; java </small><small>-Dframework=DerbyNetClient
       </small><small>org.apache.derbyTesting.functionTests.harness.RunTest
 lang/supersimple.sql<br>
       </small><small> </small></td>
@@ -275,16 +282,24 @@ language implementation in derby. <br>
     <li>tested on a variety of hardware takes from 1.15m to 2.00 hours<br>
     </li>
   </ul>
+  <li>derbynetclientmats</li>
+  <ul>
+    <li>basic network server tests using the derby client<br>
+    </li>
+    <li>variety of tests, including some from derbylang suite</li>
+    <li>tested on a variety of hardware takes from 15 to 30 minutes</li>
+  </ul>
   <li>derbynetmats</li>
   <ul>
-    <li>basic network server tests.</li>
+    <li>basic network server tests using the IBM Universal JDBC driver<br>
+    </li>
     <li>variety of tests, including some from derbylang suite</li>
     <li>tested on a variety of hardware takes from 15 to 30 minutes</li>
   </ul>
   <li>derbynetautostart</li>
   <ul>
-    <li>tests networkserver functionality without requiring
-networkserver framework<br>
+    <li>tests network server functionality without requiring
+network server framework<br>
     </li>
   </ul>
   <li>propertyinfo</li>
@@ -437,7 +452,7 @@ in errors. </li>
   <ul>
     <li>tested on a variety of hardware takes from 3.00 - 6.00 hours </li>
   </ul>
-  <li><a href="#Note1:"><small>See Note1</small></a><br>
+  <li><a href="#Note2:"><small>See Note2</small></a><br>
   </li>
 </ul>
 <p>
@@ -548,9 +563,8 @@ executed using a class called 'RunSuite'.<br>
 <p>See section 2.1 for the basic steps to run 1 test.
 </p>
 <p>To pass on system level properties to the test harness, use the test
-harness property -DtestSpecialFlags. For
-example, to run a test forcing
-the message text to be retrieved from the network server:
+harness property -DtestSpecialFlags. For example, to ensure extra
+information is appended to the log:&nbsp;<br>
 </p>
 <table
  style="text-align: left; width: 558px; height: 32px; margin-left: 40px;"
@@ -558,8 +572,8 @@ the message text to be retrieved from the network server:
   <tbody>
     <tr>
       <td style="vertical-align: top;"> <small>java
--Dframework=DerbyNet
--DtestSpecialFlags=RetrieveMessagesFromServerOnGetMessage=true&nbsp;
+-Dframework=DerbyNetClient
+-DtestSpecialFlags=derby.infolo.append=true&nbsp;
 org.apache.derbyTesting.functionTests.harness.RunTest
 lang/supersimple.sql</small></td>
     </tr>
@@ -568,9 +582,10 @@ lang/supersimple.sql</small></td>
 <p><br>
 Tests will be executed in the current directory. When
 running a test
-using the network server, i.e. -Dframework=DerbyNet, the test will run
-in a subdirectory (automatically created) 'DerbyNet'. <small> <br>
-<a href="#Note2:">See Note2</a>.<br>
+using the network server and derby client, i.e.
+-Dframework=DerbyNetClient, the test will run
+in a subdirectory (automatically created) 'DerbyNetClient'. <small> <a
+ href="#Note3:"></a><br>
 </small></p>
 <p>
 The test will normally create the following:<br>
@@ -604,7 +619,7 @@ additional error output.</li>
 When the test is successful, cleanup will occur unless the test harness
 property -Dkeepfiles=true is used. Cleanup will attempt to cleanup all
 files except for .pass. <small><br>
-<a href="#Note3:_">See Note3.</a></small>
+<a href="#Note3:">See Note3.</a></small>
 </p>
 <p>
 A successful run (this example is from a dos environment) would
@@ -840,7 +855,8 @@ based on certain input<br>
 </ul>
 <p>
 For example, if we are running a test and the flag -Dframework=DerbyNet
-is used and the jvm we are
+is used, to use network server and the IBM Universal JDBC Driver
+('jcc'), and the jvm we are
 using is Sun's jdk 142, and the jcc version is 2.4 (not available at
 time of writing) then the search for the master to compare with
 starts in the functionTests/derbynet/jcc2.4/jdk14 directory. If a .out
@@ -956,7 +972,7 @@ refers to other suites in the 'suites' property:
   <tbody>
     <tr>
       <td style="vertical-align: top;"><small>-----------------------derbyall.properties---------------<br>
-suites=derbylang derbynetmats storeall xa derbytools<br>
+suites=derbylang derbynetclientmats derbynetmats storeall xa derbytools<br>
 derby.debug.true=enableBtreeConsistencyCheck<br>
 derby.stream.error.logSeverityLevel=0<br>
       </small></td>
@@ -965,7 +981,8 @@ derby.stream.error.logSeverityLevel=0<br>
 </table>
 <p>
 The derbylang suite is only a derbylang.runall, which lists the tests.
-The derbynetmats suite has both a .runall and a .properties file, so
+The derbynetclientmats suite has both a .runall and a .properties file,
+so
 some additional properties can be specified that are true for all tests
 in that suite. </p>
 <table
@@ -973,9 +990,9 @@ in that suite. </p>
  border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
-      <td style="vertical-align: top;"><small>------------------derbynetmats.properties-----------------<br>
-framework=DerbyNet<br>
-suites=derbynetmats<br>
+      <td style="vertical-align: top;"><small>------------------derbynetclientmats.properties-----------------<br>
+framework=DerbyNetClient<br>
+suites=derbynetclientmats derbynetmats<br>
 jdk12test=true<br>
 runwithj9=false<br>
 timeout=60<br>
@@ -1066,8 +1083,7 @@ Sun Hotspot jvm version 14, then set runwithjdk14=true.<br>
 The skip setting does not go into the subversion level, i.e. setting
 runwithjdk141=false has no effect, and setting runwithjdk14 affects
 runs with jdk141 as well as jdk142.<br>
-Other skip reasons are encryption protocols specific to a certain
-jvm.<br>
+Other skip reasons are encryption protocols specific to a certain jvm. <br>
 </p>
 <p>The property for skipping a test based on the version of the IBM
 Universal Driver is "excludeJCC".&nbsp; The keywords "<span
@@ -1099,9 +1115,9 @@ To skip a test when running with any version of the IBM Universal
 Driver that is 2.0 or earlier, but ONLY if the jvm is 1.5 or later:<br>
 excludeJCC=at-or-before:2.0,when-at-or-after:jdk1.5.1<br>
 <p>Another skipping mechanism works on entire 'frameworks'. Currently
-there are only 3 supported in the harness, embedded, NetworkServer with
-the IBM Universal JDBC Driver ('DerbyNet') and NetworkServer with the
-not yet available new driver ('DerbyNetClient'). In the suites
+there are only 3 supported in the harness, embedded, network server
+with the derbyclient driver ('DerbyNetClient') and network server with
+the IBM Universal JDBC Driver ('DerbyNet'). In the suites
 directory there are .exclude files for each of the frameworks - if for
 some reason an exclude file were not there, you would see a warning
 message show up for every test run. In this 'framework'.exclude file
@@ -1114,13 +1130,17 @@ result file. This still needs to be corrected.</p>
 <br>
 <h3><a name="frameworks"></a>4.11 Frameworks</h3>
 <p>
-Currently, the only framework used is DerbyNet for network server. <br>
-Setting framework property setting will invoke the test harness class
-NetServer, which currently has configuration for connecting to DB2 via
-jcc (the IBM Universal Driver), and via the older db2 driver. But there
-are currently no tests to exercise these settings.<br>
+Currently, there are two frameworks used for network server,&nbsp;<span
+ style=""></span><span class="SpellE"></span><span class="SpellE">DerbyNetClient</span>,
+which uses the derby Client driver, and DerbyNet, which uses the IBM
+Universal JDBC Driver. <br>
+Setting the framework property will invoke the test harness class
+NetServer which has the actual configuration (driver name, portnumber
+etc.) used for the individual frameworks. <small><a
+ href="README.htm#Note3:">See Note4.</a></small><br>
 Setting this framework also causes the search for expected output to
-include DerbyNet and jcc version specific subdirectories under master.<br>
+include appropriate DerbyNetClient or&nbsp; DerbyNet and jcc version
+specific subdirectories under the master directory.<br>
 </p>
 <br>
 <h3><a name="props"></a>4.12 Some test harness properties</h3>
@@ -1138,7 +1158,8 @@ some valuable test properties which can be passed to the RunTest class:
 section <a href="#skipping">4.10</a><br>
 framework<br>
 &nbsp;&nbsp;&nbsp; specifies which framework to run with. For example:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java -Dframework=DerbyNet
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java
+-Dframework=DerbyNetClient
 org.apache.derbyTesting.functionTests.RunTest <br>
 lang/supersimple.sql<br>
 verbose<br>
@@ -1154,7 +1175,7 @@ TestSpecialFlags<br>
 &nbsp;&nbsp;&nbsp; sets additional properties.<br>
 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
 -D=TestSpecialFlags=derby.infolog.append=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql <br>
 excludeJCC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; See above section <a
  href="#skipping">4.10</a><br>
@@ -1164,12 +1185,18 @@ excludeJCC<br>
 </table>
 <br>
 <br>
-<h3><br>
-</h3>
-<br>
 <br>
 <h2>Notes</h2>
-<small><a name="Note1:"></a> Note1:<br>
+<small><a name="Note1:"></a>Note1:<br>
+</small>
+<div style="margin-left: 40px;"><small>A number of tests require
+packages that are optional with jdk13, but included with later jvms:
+jdbc20ext.jar and jta1_2.jar</small><small>. When running with jdk131,
+these need to be downloaded separately &amp; placed in the jre/lib/ext
+directory of your jvm installation.</small><br>
+</div>
+<small><br>
+<a name="Note2:"></a> Note2:<br>
 </small>
 <div style="margin-left: 40px;"><small>There is one more suite
 included: the j9derbynetmats
@@ -1190,34 +1217,28 @@ network server with the 'j9' jvm files (the reference to 'j9' is based
 on the executable, j9.exe), based on the property 'serverJvm'. Running
 this suite requires providing the property&nbsp; bootcp,
 which is&nbsp; interpreted from the test harness class j9_13. See also
-section on adding a new <a href="#ov9%22">jvm setup</a>.
+section on adding a new <a href="#ov9">jvm setup</a>.
 <br>
-Another suite is derbynetclientmats. This suite is for testing the
-networkserver with a yet to be contributed open source client. IBM
-staff is working on contributing this. In essence it is the same as the
-derbynetmats suite.&nbsp; At this time, it can only be run by the IBM
-staff working on this driver.<br>
 </small></div>
 <br>
-<small><a name="Note2:"></a>Note2:<br>
+<small><a name="Note3:"></a>Note3:<br>
 </small>
-<div style="margin-left: 40px;"><small>setting
-RetrieveMessagesFromServerOnGetMessage to true
-for the test harness is purely for
-illustration, the test harness actually forces
-RetrieveMessagesFromServerOnGetMessage to true for the tests so the
-output is always as expected.</small><br>
-</div>
-<br>
-<small><a name="Note3:_"></a>Note3: <br>
-</small>
-<div style="margin-left: 40px;"><small>occasionally, cleanup is
+<div style="margin-left: 40px;">O<small>ccasionally, cleanup is
 unsuccessful. This does not
-constitute a problem in any way, as the harness starts with a clean
+constitute a problem in any way, as the harness for most suites starts
+with a clean
 database, and clean copies of all files. However, you will see
 something like this in the output:</small><br>
 <small>Warning: Cleanup failed on baseDir:
-/local/myrun1/DerbyNet/supersimple</small><br>
+/local/myrun1/DerbyNet/supersimpl</small><small>e.</small><br>
+</div>
+<br>
+<small><a name="Note4:_"></a>Note4: <br>
+</small>
+<div style="margin-left: 40px;"><small>NetServer also has a
+configuration for connecting to DB2 via jcc - the IBM Universal Driver
+- and via the older DB2 driver. But there are currently no tests to
+exercise these settings.</small><br>
 </div>
 <br>
 </body>
