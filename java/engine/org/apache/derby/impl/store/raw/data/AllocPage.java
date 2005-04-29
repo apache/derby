@@ -635,7 +635,7 @@ public class AllocPage extends StoredPage
 
 		<BR> MT - thread aware (latched)
 
-		@param container (future) allows the alloc page to call back to the
+		@param mycontainer (future) allows the alloc page to call back to the
 			container to grow the container by creating and syncing multiple
 			pages at once
 		@param ntt the nested top action that is the allocation transaction.

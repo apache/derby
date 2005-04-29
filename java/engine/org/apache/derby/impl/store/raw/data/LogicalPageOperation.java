@@ -130,7 +130,6 @@ public abstract class LogicalPageOperation
 		be rolled back (redo only), overwrite this function to return null.
 
 		@see LogicalUndo
-		@see #findLogicalPage
 		@exception StandardException Standard Cloudscape policy.
 		@exception IOException Method may read from ObjectInput
 	*/

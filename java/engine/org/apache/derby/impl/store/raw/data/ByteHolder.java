@@ -106,6 +106,8 @@ public interface ByteHolder
 		 throws IOException;
 
 	/**
+      Read from the ByteHolder.
+      <p>
 	  Read up to 'len' bytes from this ByteHolder and write them to
 	  the OutputStream
 

@@ -44,7 +44,7 @@ import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
 
 
 /**
-	This class helps a BaseDataFactory reclaims unused space
+	This class helps a BaseDataFactory reclaims unused space.
 
 Space needs to be reclaimed in the following cases:
 <BR><NL>

@@ -153,7 +153,6 @@ public class LogicalUndoOperation extends PageBasicOperation implements Compensa
 		@param xact			the Transaction that is doing the rollback
 		@param instant		the log instant of this undo operation
 		@param in			optional data
-		@param dataLengt	optional data length
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
 		@exception StandardException Standard Cloudscape policy.

@@ -155,7 +155,10 @@ public final class RecordId implements RecordHandle {
 
 
 	/**
-		Can this request be granted?
+		Determine if this request can be granted.
+        <p)
+        Implements the grant/wait lock logic for row locks.  See the
+        table in RowLock for more information.
 
 		<BR>
 		MT - Single thread required (methods of Lockable)
@@ -194,6 +197,9 @@ public final class RecordId implements RecordHandle {
 
 	/**
 		Is a caller that holds a lock compatible with themselves?
+        <p>
+        Row locks held in the same transaction are always compatible with
+        themselves.
 
 		<BR>
 		MT - Single thread required (methods of Lockable)

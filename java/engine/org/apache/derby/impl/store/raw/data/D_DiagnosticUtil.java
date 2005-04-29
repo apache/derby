@@ -142,7 +142,7 @@ public class D_DiagnosticUtil
     }
     
     /**
-     * Given a Database name and conglomid, return diagnositic string
+     * Given a Database name and conglomid, return diagnositic string.
      * <p>
      * Return a string with diagnostic information about a particular
      * conglomerate, can be called for any type of conglomerate (some types
@@ -268,7 +268,7 @@ public class D_DiagnosticUtil
 	}
 
     /**
-     * Given a Database name and conglomid, return container id
+     * Given a Database name and conglomid, return container id.
      * <p>
      * Return the containerid of a given conglomerate id.
      * <p>
@@ -341,7 +341,7 @@ public class D_DiagnosticUtil
     }
 
     /**
-     * Given a Database name and containerid, return conglomerate id
+     * Given a Database name and containerid, return conglomerate id.
      * <p>
      * Return the conglomerate id of a given conainer id.
      * <p>

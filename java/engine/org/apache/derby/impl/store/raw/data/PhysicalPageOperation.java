@@ -93,7 +93,6 @@ public abstract class PhysicalPageOperation extends PageBasicOperation implement
 
 	  @param xact	the transaction doing the compensating
 	  @param in		optional input
-	  @param dataLength optional input length
 
 	  @return the compensation operation that will rollback this change 
 

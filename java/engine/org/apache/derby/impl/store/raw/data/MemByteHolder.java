@@ -233,6 +233,10 @@ implements ByteHolder
 		return (read(b, off, (OutputStream) null, len));
 	}
 
+	/**
+	  @see ByteHolder#read
+	  @exception IOException	Thrown on error
+	  */
 	public int read(OutputStream out,
 					int len)
 		throws IOException

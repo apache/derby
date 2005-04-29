@@ -381,7 +381,7 @@ public final class StoredFieldHeader
     }
 
     /**
-     * read the length of the field and hdr
+     * read the length of the field and hdr.
      * <p>
      * Optimized routine used to skip a field on a page.  It returns the
      * total length of the field including the header portion.  It operates

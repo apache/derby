@@ -538,15 +538,13 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 	}
 
     /**
-     * Short one line description of routine.
+     * Truncate pages of a container.
      * <p>
-     * Longer descrption of routine.
+     * Truncate all pages from lastValidPagenum+1 through the end of the file.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
-     * @param param1 param1 does this.
-     * @param param2 param2 does this.
+     * @param lastValidPagenum  The page number of the last valid page of the
+     *                          file.  All pages after this one are truncated.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

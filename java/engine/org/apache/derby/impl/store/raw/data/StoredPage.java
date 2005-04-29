@@ -356,7 +356,7 @@ public class StoredPage extends CachedPage
 
 
     /**
-     * Constants used in call to logColumn
+     * Constants used in call to logColumn.
      * <p>
      * Action taken in this routine is determined by the kind of column as
      * specified in the columnFlag:
@@ -688,7 +688,7 @@ public class StoredPage extends CachedPage
      */
 
     /**
-	 * use this passed in page buffer as this object's page data
+	 * use this passed in page buffer as this object's page data.
      * <p>
 	 * The page content may not have been read in from disk yet.
 	 * For pagesize smaller than 64K:
@@ -1411,16 +1411,8 @@ public class StoredPage extends CachedPage
      *
      * @param slot              the slot number
      * @param row (out)         filled in sparse row
-     * @param validColumns      A bit map indicating which columns to return, if
-     *                          null return all the columns.
-     * @param qualifier_list    An array of qualifiers to apply to the row, only
-     *                          return row if qualifiers are all true, if array
-     *                          is null always return the row.
-     * @param materializedCols  If a non-null qualifier_list is provided, then 
-     *                          this array of int's will be used to track which
-     *                          cols have been materialized during the 
-     *                          qualification phase, so that they are not 
-     *                          materialized again during the fetch phase.
+     * @param fetchDesc         Information describing fetch, including what
+     *                          columns to fetch and qualifiers.
      * @param recordToLock      the record handle for the row at top level,
      *                          and is used in OverflowInputStream to lock the 
      *                          row for Blobs/Clobs.
@@ -4353,13 +4345,12 @@ public class StoredPage extends CachedPage
      * @param in           the limit input stream
      * @param row          (IN/OUT) row that is to be restored 
      *                     (sparse representation)
-     * @param validColumns the columns of the row that we are interested in.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
 	public void restoreRecordFromStream(
-    LimitObjectInput        in, 
-    Object[]   row) 
+    LimitObjectInput    in, 
+    Object[]            row) 
 		throws StandardException, IOException
 	{
 
@@ -6848,18 +6839,17 @@ public class StoredPage extends CachedPage
      * <BR>
      * A page latch on the new page will be requested and released.
      *
+     * @param slot           slot of original row to move.
+     * @param row            a row template to hold all columns of row.
      * @param old_handle     An array to be filled in by the call with the 
      *                       old handles of all rows moved.
      * @param new_handle     An array to be filled in by the call with the 
      *                       new handles of all rows moved.
-     * @param new_pageno     An array to be filled in by the call with the 
-     *                       new page number of all rows moved.
      *
      * @return the number of rows processed.
      *
      * @exception StandardException	Standard Cloudscape error policy
      *
-     * @see LockingPolicy
      **/
 	public int moveRecordForCompressAtSlot(
     int             slot,

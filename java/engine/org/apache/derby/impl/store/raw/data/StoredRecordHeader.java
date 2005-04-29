@@ -341,7 +341,7 @@ public final class StoredRecordHeader
      */
 
     /**
-     * Set the deleted state of the record
+     * Set the deleted state of the record.
      * <p>
      * return	1, if delete status from not deleted to deleted
      * return  -1, if delete status from deleted to not deleted

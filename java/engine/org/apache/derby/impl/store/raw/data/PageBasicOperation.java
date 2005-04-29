@@ -392,7 +392,6 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 
 		@param xact			the Transaction doing the rollback
 		@param undoPage		the page to rollback changes on
-		@param undoRecordId	the recordId to rollback changes on
 		@param CLRinstant	the log instant of this (PageUndo) operation
 		@param in			optional data for the rollback operation
 

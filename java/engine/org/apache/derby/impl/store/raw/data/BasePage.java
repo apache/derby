@@ -136,6 +136,8 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	protected boolean		inClean;	// is the page being cleaned
 
     /**
+     * Used to determine latch state of a page.
+     *
      * MT - mutable
      *
      * There are 3 latch states for a page:
@@ -224,8 +226,10 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	}
 
 	/**
-		Initialize the object, ie. perform work normally perfomed in constructor.
-		Called by setIdentity() and createIdentity().
+        Initialized the BasePage.
+        <p>
+		Initialize the object, ie. perform work normally perfomed in 
+        constructor.  Called by setIdentity() and createIdentity().
 	*/
 	protected void initialize()
 	{
@@ -2140,6 +2144,8 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	}
 
 	/**
+        Remove record at slot.
+        <p>
 		Remove the slot at the in-memory slot table, i.e.,
 		slots from 0 to deleteSlot-1 is untouched, deleteSlot is removed from
 		in memory slot table, deleteSlot+1 .. recordCount()-1 move to
@@ -2247,7 +2253,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 		page lock on the page, AND that the record has no uncommitted
 		updates.
 
-	  @param record Handle to deleted or non-deleted record
+	  @param handle Handle to deleted or non-deleted record
 	  @see ContainerHandle#compactRecord
 
 	  @exception StandardException	Standard Cloudscape error policy
@@ -2407,12 +2413,9 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
      *
      * @param slot              the slot number
      * @param row (out)         filled in sparse row
-     * @param validColumns      A bit map indicating which columns to return, if
-     *                          null return all the columns.
-     * @param qualifier_list    An array of qualifiers to apply to the row, only
-     *                          return row if qualifiers are all true, if array
-     *                          is null always return the row.
-     * @param recordToLock      the record handle for the row at top level,
+     * @param fetchDesc         A set of information about the fetch: what
+     *                          columns to fetch, any qualifiers, ...
+     * @param rh                the record handle for the row at top level,
      *                          and is used in OverflowInputStream to lock the 
      *                          row for Blobs/Clobs.
      * @param isHeadRow         Is the head row portion of the row, false if
@@ -2426,7 +2429,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
      **/
 	protected abstract boolean restoreRecordFromSlot(
     int                     slot, 
-    Object[]   row,
+    Object[]                row,
     FetchDescriptor         fetchDesc,
     RecordHandle            rh,
     StoredRecordHeader      recordHeader,
@@ -2439,8 +2442,6 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 
 		<BR> MT - latched, page is latched when this methods is called.
 
-		@param slot is the slot number
-		@param row filled in row
 
 		@exception StandardException	Standard Cloudscape error policy
 	*/

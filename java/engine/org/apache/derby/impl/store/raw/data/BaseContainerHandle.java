@@ -879,6 +879,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
 		Was I opened for updates?
+        <p>
 
 		<BR> MT - thread safe
 	*/

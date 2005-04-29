@@ -69,14 +69,14 @@ public interface PageActions
      * <p>
      * <BR> MT - latched, page is latched when this methods is called.
      *
-     * @param RawTransaction	The transaction
-     * @param page			the updated page
-     * @param slot			the slot number of the record 
-     * @param recordId		the recordID of the record 
-     * @param row			The new storable row
-     * @param validColumns	the columns that needs to be updated
+     * @param t         	    The transaction
+     * @param page			    the updated page
+     * @param slot			    the slot number of the record 
+     * @param recordId		    the recordID of the record 
+     * @param row			    The new storable row
+     * @param validColumns	    the columns that needs to be updated
      * @param realStartColumn	the first column that is updated
-     * @param logBuffer		where to prepare the log record
+     * @param logBuffer		    where to prepare the log record
      * @param realSpaceOnPage	??
      * @param headRowHandle	the record handle of the head row
      *
@@ -88,16 +88,16 @@ public interface PageActions
      * @see org.apache.derby.iapi.store.raw.Page#updateAtSlot
      **/
 	public int actionUpdate(
-    RawTransaction          t, 
-    BasePage                page, 
-    int                     slot, 
-    int                     recordId,
-    Object[]   row, 
-    FormatableBitSet                 validColumns,
-    int                     realStartColumn, 
-    DynamicByteArrayOutputStream  logBuffer, 
-    int                     realSpaceOnPage, 
-    RecordHandle            headRowHandle)
+    RawTransaction                  t, 
+    BasePage                        page, 
+    int                             slot, 
+    int                             recordId,
+    Object[]                        row, 
+    FormatableBitSet                validColumns,
+    int                             realStartColumn, 
+    DynamicByteArrayOutputStream    logBuffer, 
+    int                             realSpaceOnPage, 
+    RecordHandle                    headRowHandle)
 		throws StandardException;
 
     /**
@@ -132,11 +132,11 @@ public interface PageActions
      *
      * <BR> MT - latched, page is latched when this methods is called.
      *
-     * @param RawTransaction	The transaction
+     * @param t         	The transaction
      * @param slot			the slot number of the record 
      * @param recordId		the recordID of the record 
      * @param fieldId		the fieldId of the value
-     * @param value			the new value for the field
+     * @param newValue      the new value for the field
      * @param undo          if logical undo may be necessary, a function 
      *                      pointer to the access code where the logical undo 
      *                      logic resides.   Null if logical undo is not 
@@ -163,7 +163,7 @@ public interface PageActions
      *
      * <BR> MT - latched, page is latched when this methods is called.
      *
-     * @param RawTransaction	The transaction
+     * @param t             	The transaction
      * @param slot			    the slot number of the record 
      * @param recordId		    the recordID of the record 
      * @param row			    The storable row
@@ -195,11 +195,11 @@ public interface PageActions
 		throws StandardException;
 
     /**
-     * Copy num_rows from srcPage into deestpage
+     * Copy num_rows from srcPage into deestpage.
      * <p>
      * Longer descrption of routine.
      * <p>
-     * @param RawTransaction	The transaction
+     * @param t             	The transaction
      * @param destPage			the destination page
      * @param srcPage			the source page
      * @param destSlot			starting slot # of destination page to copy to
@@ -229,7 +229,7 @@ public interface PageActions
      * page.
      * <p>
      *
-     * @param RawTransaction	The transaction
+     * @param t             	The transaction
      * @param page				that page to be invalidated
      *
      * @exception StandardException Standard Cloudscape policy.  
@@ -246,7 +246,7 @@ public interface PageActions
      * it could be being re-allocated.
      * <p>
      *
-     * @param RawTransaction	The transaction
+     * @param t             	The transaction
      * @param page				that page to be initialized
      * @param initFlag			flags set to values in BasePage.INIT_PAGE_* 
      *                          which indicates how the new page is to be
@@ -268,7 +268,7 @@ public interface PageActions
      * <p>
      * Shrink the reserved space to the new value.  This action is not undoable.
      * <p>
-     * @param RawTransaction	The transaction
+     * @param t             	The transaction
      * @param page				that page to be initialized
      * @param slot				the slot number of the record 
      * @param recordId			the recordID of the record 

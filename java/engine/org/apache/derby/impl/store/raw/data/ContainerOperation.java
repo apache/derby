@@ -144,6 +144,8 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 	 * override ContainerBasicOperation's findContainerForLoadTran
 	 */
 	/**
+        Find container for load tran.
+        <p>
 		If we are in load tran, and the operation is a create, the container
 		may not (should not?) exist yet.  We need to recreate it.
 
@@ -210,7 +212,6 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 		container.  Either case, release resource at the end is safe
 		@param CLRInstant the log instant of the CLR
 		@param in optional data
-		@param dataLength optional data length
 
 		@exception StandardException Standard Cloudscape error policy
 	*/

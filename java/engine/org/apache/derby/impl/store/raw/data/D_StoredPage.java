@@ -248,6 +248,7 @@ public class D_StoredPage implements Diagnosticable
 
 	/**
 		Checks the slot table.
+        <p>
 
 		1) checks the number of slot entries matches the record count
 		2) checks the slot table lengths match the field lengths

@@ -136,8 +136,10 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	}
 
 	/**
-		Initialize the object, ie. perform work normally perfomed in constructor.
-		Called by setIdentity() and createIdentity().
+        Initialize a CachedPage.
+        <p>
+		Initialize the object, ie. perform work normally perfomed in 
+        constructor.  Called by setIdentity() and createIdentity().
 	*/
 	protected void initialize()
 	{

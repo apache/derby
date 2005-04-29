@@ -39,7 +39,7 @@ public class LoggableAllocActions implements AllocationActions {
 		operation, set the allocation status of pageNumber to undoStatus
 		
 		@param t				The transaction
-		@param allocpage		the allocation page
+		@param allocPage		the allocation page
 		@param pageNumber		the page to allocation or deallocation
 		@param doStatus			set the allocation status of the page this value
 		@param undoStatus		on undo, set the allocation status of the page
@@ -65,7 +65,7 @@ public class LoggableAllocActions implements AllocationActions {
 		Chain one allocation page to the next.
 
 		@param t				The transaction
-		@param allocpage		the allocation page whose next page chain needs
+		@param allocPage		the allocation page whose next page chain needs
 								to be changed
 		@param pageNumber		the next allocation page's number 
 		@param pageOffset		the next allocation page's page offset

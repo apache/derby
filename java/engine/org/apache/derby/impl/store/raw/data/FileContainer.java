@@ -2132,7 +2132,7 @@ public abstract class FileContainer
 
 		@param allochandle the contianer handle to initialize the page with - the ntt
 		@param pkey the page number of the page to be initialized
-		@param createPageArgs the int array for page creation
+		@param createArgs the int array for page creation
 		@param reuse is true if we are reusing a page that has 
 				already been initialized once
 
