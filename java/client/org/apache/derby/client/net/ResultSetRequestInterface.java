@@ -26,24 +26,25 @@ import org.apache.derby.client.am.Section;
 // In addition, ResultSet objects are passed for convenient access to any material result set caches.
 // Implementations of this interface should not dereference common layer ResultSet state, as it is passed in,
 // but may dereference material layer ResultSet state if necessary for performance.
-public interface ResultSetRequestInterface
-{
-  public void writeFetch (NetResultSet resultSet,
-			  Section section,
-                          int fetchSize) throws org.apache.derby.client.am.SqlException;
-  public void writeScrollableFetch (NetResultSet resultSet,
-                                    Section section,
-                                    int fetchSize,
-                                    int orientation,
-                                    long rowToFetch,
-                                    boolean resetQueryBlocks) throws org.apache.derby.client.am.SqlException;
 
-  public void writePositioningFetch (NetResultSet resultSet,
+public interface ResultSetRequestInterface {
+    public void writeFetch(NetResultSet resultSet,
+                           Section section,
+                           int fetchSize) throws org.apache.derby.client.am.SqlException;
+
+    public void writeScrollableFetch(NetResultSet resultSet,
                                      Section section,
+                                     int fetchSize,
                                      int orientation,
-                                     long rowToFetch) throws org.apache.derby.client.am.SqlException;
+                                     long rowToFetch,
+                                     boolean resetQueryBlocks) throws org.apache.derby.client.am.SqlException;
 
-  public void writeCursorClose (NetResultSet resultSet,
-				Section section) throws org.apache.derby.client.am.SqlException;
+    public void writePositioningFetch(NetResultSet resultSet,
+                                      Section section,
+                                      int orientation,
+                                      long rowToFetch) throws org.apache.derby.client.am.SqlException;
+
+    public void writeCursorClose(NetResultSet resultSet,
+                                 Section section) throws org.apache.derby.client.am.SqlException;
 
 }

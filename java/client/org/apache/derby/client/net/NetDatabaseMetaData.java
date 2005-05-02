@@ -24,57 +24,54 @@ import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
 
 
-public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMetaData
-{
+public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMetaData {
 
-  private final NetAgent netAgent_;
-
-
-  public NetDatabaseMetaData (NetAgent netAgent, NetConnection netConnection)
-  {
-    // Consider setting product level during parse
-    super (netAgent, netConnection, new ProductLevel (netConnection.productID_,
-                          netConnection.targetSrvclsnm_,
-                          netConnection.targetSrvrlslv_));
-    // Set up cheat-links
-    netAgent_ = netAgent;
-  }
-
-  //---------------------------call-down methods--------------------------------
-
-  public String getURL_ () throws SqlException
-  {
-    String urlProtocol;
-
-      urlProtocol = Configuration.jdbcDerbyNETProtocol;
-
-    return
-      urlProtocol +
-      connection_.serverNameIP_+
-      ":" +
-      connection_.portNumber_ +
-      "/" +
-      connection_.databaseName_;
-  }
-
-  //-----------------------------helper methods---------------------------------
-
-  // Set flags describing the level of support for this connection.
-  // Flags will be set based on manager level and/or specific product identifiers.
-  // Support for a specific server version can be set as follows. For example
-  // if (productLevel_.greaterThanOrEqualTo(11,1,0))
-  //  supportsTheBestThingEver = true
-  protected void computeFeatureSet_ ()
-  {
-    if (connection_.resultSetHoldability_ == 0)  // property not set
-      setDefaultResultSetHoldability ();
-
-  }
+    private final NetAgent netAgent_;
 
 
-  public void setDefaultResultSetHoldability ()
-  {
-	  connection_.resultSetHoldability_ = org.apache.derby.jdbc.ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
-  }
+    public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
+        // Consider setting product level during parse
+        super(netAgent, netConnection, new ProductLevel(netConnection.productID_,
+                netConnection.targetSrvclsnm_,
+                netConnection.targetSrvrlslv_));
+        // Set up cheat-links
+        netAgent_ = netAgent;
+    }
+
+    //---------------------------call-down methods--------------------------------
+
+    public String getURL_() throws SqlException {
+        String urlProtocol;
+
+        urlProtocol = Configuration.jdbcDerbyNETProtocol;
+
+        return
+                urlProtocol +
+                connection_.serverNameIP_ +
+                ":" +
+                connection_.portNumber_ +
+                "/" +
+                connection_.databaseName_;
+    }
+
+    //-----------------------------helper methods---------------------------------
+
+    // Set flags describing the level of support for this connection.
+    // Flags will be set based on manager level and/or specific product identifiers.
+    // Support for a specific server version can be set as follows. For example
+    // if (productLevel_.greaterThanOrEqualTo(11,1,0))
+    //  supportsTheBestThingEver = true
+    protected void computeFeatureSet_() {
+        if (connection_.resultSetHoldability_ == 0)  // property not set
+        {
+            setDefaultResultSetHoldability();
+        }
+
+    }
+
+
+    public void setDefaultResultSetHoldability() {
+        connection_.resultSetHoldability_ = org.apache.derby.jdbc.ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
+    }
 
 }

@@ -20,45 +20,42 @@
 
 package org.apache.derby.client.am;
 
-public class Savepoint implements java.sql.Savepoint
-{
-  // ----------------- internals -----------------------------------------------
+public class Savepoint implements java.sql.Savepoint {
+    // ----------------- internals -----------------------------------------------
 
-  int savepointId_ = 0;
-  String savepointName_ = null;
-  Agent agent_;
+    int savepointId_ = 0;
+    String savepointName_ = null;
+    Agent agent_;
 
-  //---------------------constructors/finalizer---------------------------------
+    //---------------------constructors/finalizer---------------------------------
 
-  // create a named savepoint.
-  Savepoint (Agent agent, String savepointName)
-  {
-    agent_ = agent;
-    savepointName_ = savepointName;
-  }
+    // create a named savepoint.
+    Savepoint(Agent agent, String savepointName) {
+        agent_ = agent;
+        savepointName_ = savepointName;
+    }
 
-  // create an un-named savepoint.
-  Savepoint (Agent agent, int savepointId)
-  {
-    agent_ = agent;
-    savepointId_ = savepointId;
-  }
+    // create an un-named savepoint.
+    Savepoint(Agent agent, int savepointId) {
+        agent_ = agent;
+        savepointId_ = savepointId;
+    }
 
-  // ----------------- externals -----------------------------------------------
+    // ----------------- externals -----------------------------------------------
 
-  public int getSavepointId() throws SqlException
-  {
-    if (savepointId_ != 0)
-      return savepointId_;
-    else
-      throw new SqlException (agent_.logWriter_, "This is a named savepoint.");
-  }
+    public int getSavepointId() throws SqlException {
+        if (savepointId_ != 0) {
+            return savepointId_;
+        } else {
+            throw new SqlException(agent_.logWriter_, "This is a named savepoint.");
+        }
+    }
 
-  public String getSavepointName() throws SqlException
-  {
-    if (savepointName_ != null)
-      return savepointName_;
-    else
-      throw new SqlException (agent_.logWriter_, "This is an un-named savepoint.");
-  }
+    public String getSavepointName() throws SqlException {
+        if (savepointName_ != null) {
+            return savepointName_;
+        } else {
+            throw new SqlException(agent_.logWriter_, "This is an un-named savepoint.");
+        }
+    }
 }

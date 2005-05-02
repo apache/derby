@@ -20,19 +20,16 @@
 
 package org.apache.derby.client.net;
 
-public class OpenSocketAction implements java.security.PrivilegedExceptionAction
-{
-  private String server_;
-  private int port_;
-  
-  public OpenSocketAction (String server, int port)
-  {
-    server_ = server;
-    port_ = port;
-  }
+public class OpenSocketAction implements java.security.PrivilegedExceptionAction {
+    private String server_;
+    private int port_;
 
-  public Object run () throws java.net.UnknownHostException, java.io.IOException
-  {
-    return new java.net.Socket (server_, port_);
-  }
+    public OpenSocketAction(String server, int port) {
+        server_ = server;
+        port_ = port;
+    }
+
+    public Object run() throws java.net.UnknownHostException, java.io.IOException {
+        return new java.net.Socket(server_, port_);
+    }
 }

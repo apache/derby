@@ -21,52 +21,47 @@
 package org.apache.derby.client.am;
 
 
-public class ClobOutputStream extends java.io.OutputStream
-{
-  private Clob clob_;
-  private long offset_;
+public class ClobOutputStream extends java.io.OutputStream {
+    private Clob clob_;
+    private long offset_;
 
-  public ClobOutputStream (Clob clob, long offset) throws SqlException
-  {
-    clob_ = clob;
-    offset_ = offset;
-    if (offset_ > clob_.sqlLength_)
-      throw new IndexOutOfBoundsException();
-  }
-
-  public void write (int b) throws java.io.IOException
-  {
-    clob_.string_ = clob_.string_.substring(0, (int)offset_ - 1);
-    clob_.string_ = clob_.string_.concat("" + b + "");
-    clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_. characterStream_ = new java.io.StringReader(clob_.string_);
-    clob_.sqlLength_ = clob_.string_.length();
-  }
-
-
-  public void write (byte b[], int off, int len) throws java.io.IOException
-  {
-    if (b == null) {
-        throw new NullPointerException();
-    }
-    else if ((off < 0) || (off > b.length) || (len < 0) ||
-               ((off + len) > b.length) || ((off + len) < 0)) {
-        throw new IndexOutOfBoundsException();
-    }
-    else if (len == 0) {
-        return;
+    public ClobOutputStream(Clob clob, long offset) throws SqlException {
+        clob_ = clob;
+        offset_ = offset;
+        if (offset_ > clob_.sqlLength_) {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
-    byte[] newByte = new byte[len];
-    System.arraycopy(b,off,newByte,0,len);
-    String str = new String (newByte);
-    clob_.string_ = clob_.string_.substring(0, (int)offset_ - 1);
-    clob_.string_ = clob_.string_.concat(str);
-    clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_. characterStream_ = new java.io.StringReader(clob_.string_);
-    clob_.sqlLength_ = clob_.string_.length();
-  }
+    public void write(int b) throws java.io.IOException {
+        clob_.string_ = clob_.string_.substring(0, (int) offset_ - 1);
+        clob_.string_ = clob_.string_.concat("" + b + "");
+        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
+        clob_.sqlLength_ = clob_.string_.length();
+    }
+
+
+    public void write(byte b[], int off, int len) throws java.io.IOException {
+        if (b == null) {
+            throw new NullPointerException();
+        } else if ((off < 0) || (off > b.length) || (len < 0) ||
+                ((off + len) > b.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
+
+        byte[] newByte = new byte[len];
+        System.arraycopy(b, off, newByte, 0, len);
+        String str = new String(newByte);
+        clob_.string_ = clob_.string_.substring(0, (int) offset_ - 1);
+        clob_.string_ = clob_.string_.concat(str);
+        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
+        clob_.sqlLength_ = clob_.string_.length();
+    }
 }
 

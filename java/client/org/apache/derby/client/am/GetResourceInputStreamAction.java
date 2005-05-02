@@ -21,80 +21,72 @@
 package org.apache.derby.client.am;
 
 /**
- * Java 2 PrivilegedAction encapsulation of attempting to acquire driver-general
- * properties as a System resource.
+ * Java 2 PrivilegedAction encapsulation of attempting to acquire driver-general properties as a System resource.
  */
-public class GetResourceInputStreamAction implements java.security.PrivilegedAction
-{
-  // Name for loading the resource.
-  private String resourceName_ = null;
-  // Path of the resource being loaded.
-  private String resourcePath_ = null;
-  // Class loader being used to load the resource.
-  private String resourceLoaderId_ = null;
+public class GetResourceInputStreamAction implements java.security.PrivilegedAction {
+    // Name for loading the resource.
+    private String resourceName_ = null;
+    // Path of the resource being loaded.
+    private String resourcePath_ = null;
+    // Class loader being used to load the resource.
+    private String resourceLoaderId_ = null;
 
-  //-------------------- Constructors --------------------
-  
-  public GetResourceInputStreamAction (String resourceName)
-  {
-    resourceName_ = resourceName;
-  }
+    //-------------------- Constructors --------------------
 
-  //-------------------- methods --------------------
-
-  public Object run()
-  {
-    try {
-      ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-      if (contextLoader != null) {
-        java.net.URL resourceUrl = contextLoader.getResource (resourceName_);
-        if (resourceUrl != null) {
-          resourcePath_ = resourceUrl.getPath();
-          resourceLoaderId_ = "Context ClassLoader: " + contextLoader;
-          return contextLoader.getResourceAsStream (resourceName_);
-        }
-      }
-      ClassLoader thisLoader = getClass().getClassLoader();
-      if (thisLoader != contextLoader) {
-        java.net.URL resourceUrl = thisLoader.getResource (resourceName_);
-        if (resourceUrl != null) {
-          resourcePath_ = resourceUrl.getPath();
-          resourceLoaderId_ = "Driver ClassLoader: " + thisLoader;
-          return thisLoader.getResourceAsStream (resourceName_);
-        }
-      }
-      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
-      if (systemLoader != contextLoader &&
-          systemLoader != thisLoader) {
-        java.net.URL resourceUrl = systemLoader.getResource (resourceName_);
-        if (resourceUrl != null) {
-          resourcePath_ = resourceUrl.getPath();
-          resourceLoaderId_ = "System ClassLoader: " + systemLoader;
-          return systemLoader.getResourceAsStream (resourceName_);
-        }
-      }
-      return null;
+    public GetResourceInputStreamAction(String resourceName) {
+        resourceName_ = resourceName;
     }
-    catch (java.security.AccessControlException ace) {
-      // This happens in an Applet environment,
-      // so return with null.
-      return null;
+
+    //-------------------- methods --------------------
+
+    public Object run() {
+        try {
+            ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+            if (contextLoader != null) {
+                java.net.URL resourceUrl = contextLoader.getResource(resourceName_);
+                if (resourceUrl != null) {
+                    resourcePath_ = resourceUrl.getPath();
+                    resourceLoaderId_ = "Context ClassLoader: " + contextLoader;
+                    return contextLoader.getResourceAsStream(resourceName_);
+                }
+            }
+            ClassLoader thisLoader = getClass().getClassLoader();
+            if (thisLoader != contextLoader) {
+                java.net.URL resourceUrl = thisLoader.getResource(resourceName_);
+                if (resourceUrl != null) {
+                    resourcePath_ = resourceUrl.getPath();
+                    resourceLoaderId_ = "Driver ClassLoader: " + thisLoader;
+                    return thisLoader.getResourceAsStream(resourceName_);
+                }
+            }
+            ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+            if (systemLoader != contextLoader &&
+                    systemLoader != thisLoader) {
+                java.net.URL resourceUrl = systemLoader.getResource(resourceName_);
+                if (resourceUrl != null) {
+                    resourcePath_ = resourceUrl.getPath();
+                    resourceLoaderId_ = "System ClassLoader: " + systemLoader;
+                    return systemLoader.getResourceAsStream(resourceName_);
+                }
+            }
+            return null;
+        } catch (java.security.AccessControlException ace) {
+            // This happens in an Applet environment,
+            // so return with null.
+            return null;
+        }
     }
-  }
-  
-  public void setResourceName (String resourceName)
-  {
-    resourceName_ = resourceName;
-  }
-  
-  public String getResourcePath()
-  {
-    return resourcePath_;
-  }
-  
-  public String getResourceLoaderId()
-  {
-    return resourceLoaderId_;
-  }
+
+    public void setResourceName(String resourceName) {
+        resourceName_ = resourceName;
+    }
+
+    public String getResourcePath() {
+        return resourcePath_;
+    }
+
+    public String getResourceLoaderId() {
+        return resourceLoaderId_;
+    }
 
 }

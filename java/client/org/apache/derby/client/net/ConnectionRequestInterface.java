@@ -24,12 +24,17 @@ package org.apache.derby.client.net;
 // In addition, Connection objects are passed for convenient access to any material connection caches.
 // Implementations of this interface should not dereference common layer Connection state, as it is passed in,
 // but may dereference material layer Connection state if necessary for performance.
-public interface ConnectionRequestInterface
-{
-  public void writeCommitSubstitute (NetConnection connection) throws org.apache.derby.client.am.SqlException;
-  public void writeLocalCommit (NetConnection connection) throws org.apache.derby.client.am.SqlException;
-  public void writeLocalRollback (NetConnection connection) throws org.apache.derby.client.am.SqlException;
-  public void writeLocalXAStart(NetConnection connection) throws org.apache.derby.client.am.SqlException;
-  public void writeLocalXACommit (NetConnection connection) throws org.apache.derby.client.am.SqlException;
-  public void writeLocalXARollback (NetConnection connection) throws org.apache.derby.client.am.SqlException;
+
+public interface ConnectionRequestInterface {
+    public void writeCommitSubstitute(NetConnection connection) throws org.apache.derby.client.am.SqlException;
+
+    public void writeLocalCommit(NetConnection connection) throws org.apache.derby.client.am.SqlException;
+
+    public void writeLocalRollback(NetConnection connection) throws org.apache.derby.client.am.SqlException;
+
+    public void writeLocalXAStart(NetConnection connection) throws org.apache.derby.client.am.SqlException;
+
+    public void writeLocalXACommit(NetConnection connection) throws org.apache.derby.client.am.SqlException;
+
+    public void writeLocalXARollback(NetConnection connection) throws org.apache.derby.client.am.SqlException;
 }

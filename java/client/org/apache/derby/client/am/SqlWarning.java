@@ -28,130 +28,136 @@ import org.apache.derby.client.resources.ResourceKeys;
 
 // Until the "Error Cycle" pass is complete.
 // Use the temporary constructors at the bottom.
-public class SqlWarning extends java.sql.SQLWarning implements Diagnosable
-{
-  private java.lang.Throwable throwable_ = null;
-  protected Sqlca sqlca_ = null; // for engine generated errors only
 
-  //-----------------constructors-----------------------------------------------
+public class SqlWarning extends java.sql.SQLWarning implements Diagnosable {
+    private java.lang.Throwable throwable_ = null;
+    protected Sqlca sqlca_ = null; // for engine generated errors only
 
-  public SqlWarning (LogWriter logWriter, ErrorKey errorKey)
-  {
-    super (ResourceUtilities.getResource (ResourceKeys.driverOriginationIndicator) +
-           ResourceUtilities.getResource (errorKey.getResourceKey()),
-           errorKey.getSQLState(),
-           errorKey.getErrorCode());
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    //-----------------constructors-----------------------------------------------
 
-  public SqlWarning (LogWriter logWriter, ErrorKey errorKey, Object[] args)
-  {
-    super (ResourceUtilities.getResource (ResourceKeys.driverOriginationIndicator) +
-           ResourceUtilities.getResource (errorKey.getResourceKey(), args),
-           errorKey.getSQLState(),
-           errorKey.getErrorCode());
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    public SqlWarning(LogWriter logWriter, ErrorKey errorKey) {
+        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
+                ResourceUtilities.getResource(errorKey.getResourceKey()),
+                errorKey.getSQLState(),
+                errorKey.getErrorCode());
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  public SqlWarning (LogWriter logWriter, ErrorKey errorKey, Object arg)
-  {
-    this (logWriter, errorKey, new Object[] {arg});
-  }
+    public SqlWarning(LogWriter logWriter, ErrorKey errorKey, Object[] args) {
+        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
+                ResourceUtilities.getResource(errorKey.getResourceKey(), args),
+                errorKey.getSQLState(),
+                errorKey.getErrorCode());
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  public SqlWarning (LogWriter logWriter, Sqlca sqlca)
-  {
-    super ();
-    sqlca_ = sqlca;
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    public SqlWarning(LogWriter logWriter, ErrorKey errorKey, Object arg) {
+        this(logWriter, errorKey, new Object[]{arg});
+    }
 
-  // Temporary constructor until all error keys are defined.
-  public SqlWarning (LogWriter logWriter)
-  {
-    super ();
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
-
-  // Temporary constructor until all error keys are defined.
-  public SqlWarning (LogWriter logWriter, String text)
-  {
-    super (text);
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    public SqlWarning(LogWriter logWriter, Sqlca sqlca) {
+        super();
+        sqlca_ = sqlca;
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
     // Temporary constructor until all error keys are defined.
-  public SqlWarning (LogWriter logWriter, java.lang.Throwable throwable, String text)
-  {
-    super (text);
-    throwable_ = throwable;
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    public SqlWarning(LogWriter logWriter) {
+        super();
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  // Temporary constructor until all error keys are defined.
-  public SqlWarning (LogWriter logWriter, String text, SqlState sqlState)
-  {
-    super (text, sqlState.getState());
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    // Temporary constructor until all error keys are defined.
+    public SqlWarning(LogWriter logWriter, String text) {
+        super(text);
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  // Temporary constructor until all error keys are defined, for subsystem use only
-  public SqlWarning (LogWriter logWriter, String text, String sqlState)
-  {
-    super (text, sqlState);
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    // Temporary constructor until all error keys are defined.
+    public SqlWarning(LogWriter logWriter, java.lang.Throwable throwable, String text) {
+        super(text);
+        throwable_ = throwable;
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  // Temporary constructor until all error keys are defined.
-  public SqlWarning (LogWriter logWriter, String text, SqlState sqlState, SqlCode errorCode)
-  {
-    super (text, sqlState.getState(), errorCode.getCode());
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    // Temporary constructor until all error keys are defined.
+    public SqlWarning(LogWriter logWriter, String text, SqlState sqlState) {
+        super(text, sqlState.getState());
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  // Temporary constructor until all error keys are defined, for subsystem use only.
-  public SqlWarning (LogWriter logWriter, String text, String sqlState, int errorCode)
-  {
-    super (text, sqlState, errorCode);
-    if (logWriter != null) logWriter.traceDiagnosable (this);
-  }
+    // Temporary constructor until all error keys are defined, for subsystem use only
+    public SqlWarning(LogWriter logWriter, String text, String sqlState) {
+        super(text, sqlState);
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  public java.lang.Throwable getThrowable ()
-  {
-    return throwable_;
-  }
+    // Temporary constructor until all error keys are defined.
+    public SqlWarning(LogWriter logWriter, String text, SqlState sqlState, SqlCode errorCode) {
+        super(text, sqlState.getState(), errorCode.getCode());
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  public Sqlca getSqlca ()
-  {
-    return sqlca_;
-  }
+    // Temporary constructor until all error keys are defined, for subsystem use only.
+    public SqlWarning(LogWriter logWriter, String text, String sqlState, int errorCode) {
+        super(text, sqlState, errorCode);
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
 
-  public String getMessage ()
-  {
-    if (sqlca_ == null)
-      return super.getMessage();
-    else
-      return ((Sqlca) sqlca_).getJDBCMessage();
-  }
+    public java.lang.Throwable getThrowable() {
+        return throwable_;
+    }
 
-  public String getSQLState ()
-  {
-    if (sqlca_ == null)
-      return super.getSQLState();
-    else
-      return sqlca_.getSqlState();
-  }
+    public Sqlca getSqlca() {
+        return sqlca_;
+    }
 
-  public int getErrorCode ()
-  {
-    if (sqlca_ == null)
-      return super.getErrorCode();
-    else
-      return sqlca_.getSqlCode();
-  }
+    public String getMessage() {
+        if (sqlca_ == null) {
+            return super.getMessage();
+        } else {
+            return ((Sqlca) sqlca_).getJDBCMessage();
+        }
+    }
 
-  public void printTrace (java.io.PrintWriter printWriter, String header)
-  {
-    ExceptionFormatter.printTrace (this, printWriter, header);
-  }
+    public String getSQLState() {
+        if (sqlca_ == null) {
+            return super.getSQLState();
+        } else {
+            return sqlca_.getSqlState();
+        }
+    }
+
+    public int getErrorCode() {
+        if (sqlca_ == null) {
+            return super.getErrorCode();
+        } else {
+            return sqlca_.getSqlCode();
+        }
+    }
+
+    public void printTrace(java.io.PrintWriter printWriter, String header) {
+        ExceptionFormatter.printTrace(this, printWriter, header);
+    }
 }
 

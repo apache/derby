@@ -20,53 +20,48 @@
 
 package org.apache.derby.client.am;
 
-public class DisconnectException extends SqlException
-{
+public class DisconnectException extends SqlException {
 
-  public DisconnectException (Agent agent, String reason, SqlState sqlstate, SqlCode sqlcode) 
-  {
-    super (agent.logWriter_, reason, sqlstate, sqlcode);
-  }  
-    
-  public DisconnectException (Agent agent, String reason, SqlState sqlstate)
-  {
-    super (agent.logWriter_, reason, sqlstate, SqlCode.disconnectError);
-    // make the call to close the streams and socket.
-    if (agent != null) agent.disconnectEvent();
-  }
+    public DisconnectException(Agent agent, String reason, SqlState sqlstate, SqlCode sqlcode) {
+        super(agent.logWriter_, reason, sqlstate, sqlcode);
+    }
 
-  public DisconnectException (java.lang.Throwable throwable, Agent agent, String reason, SqlState sqlstate)
-  {
-    super (agent.logWriter_, throwable, reason, sqlstate, SqlCode.disconnectError);
-    // make the call to close the streams and socket.
-    if (agent != null) agent.disconnectEvent();
-  }
+    public DisconnectException(Agent agent, String reason, SqlState sqlstate) {
+        super(agent.logWriter_, reason, sqlstate, SqlCode.disconnectError);
+        // make the call to close the streams and socket.
+        if (agent != null) {
+            agent.disconnectEvent();
+        }
+    }
 
-  public DisconnectException (Agent agent)
-  {
-    this (agent, null, SqlState.undefined);
-  }
+    public DisconnectException(java.lang.Throwable throwable, Agent agent, String reason, SqlState sqlstate) {
+        super(agent.logWriter_, throwable, reason, sqlstate, SqlCode.disconnectError);
+        // make the call to close the streams and socket.
+        if (agent != null) {
+            agent.disconnectEvent();
+        }
+    }
 
-  public DisconnectException (java.lang.Throwable throwable, Agent agent)
-  {
-    this (throwable, agent, null, SqlState.undefined);
-  }
+    public DisconnectException(Agent agent) {
+        this(agent, null, SqlState.undefined);
+    }
 
-  public DisconnectException (Agent agent, String reason)
-  {
-    this (agent, reason, SqlState.undefined);
-  }
+    public DisconnectException(java.lang.Throwable throwable, Agent agent) {
+        this(throwable, agent, null, SqlState.undefined);
+    }
 
-  public DisconnectException (Throwable throwable, Agent agent, String reason)
-  {
-    this (throwable, agent, reason, SqlState.undefined);
-  }
+    public DisconnectException(Agent agent, String reason) {
+        this(agent, reason, SqlState.undefined);
+    }
 
-  public DisconnectException (Agent agent, SqlException e)
-  {
-    this (agent, e.getMessage());
-    setNextException (e);
-  }
+    public DisconnectException(Throwable throwable, Agent agent, String reason) {
+        this(throwable, agent, reason, SqlState.undefined);
+    }
+
+    public DisconnectException(Agent agent, SqlException e) {
+        this(agent, e.getMessage());
+        setNextException(e);
+    }
 }
 
 

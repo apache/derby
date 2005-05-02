@@ -20,21 +20,21 @@
 
 package org.apache.derby.client.am;
 
-public class ConversionException extends java.lang.Exception
-{
-  String sqlState_;
-  int errorCode_;
+public class ConversionException extends java.lang.Exception {
+    String sqlState_;
+    int errorCode_;
 
-  public ConversionException (String s, String sqlState, int errorCode)
-  {
-    super ("[converters] " + s);
-    sqlState_ = sqlState;
-    errorCode_ = errorCode;
-  }
+    public ConversionException(String s, String sqlState, int errorCode) {
+        super("[converters] " + s);
+        sqlState_ = sqlState;
+        errorCode_ = errorCode;
+    }
 
-  public ConversionException (String s)
-  { super ("[converters] " + s); }
+    public ConversionException(String s) {
+        super("[converters] " + s);
+    }
 
-  public ConversionException ()
-  { this ("[converters] "); }
+    public ConversionException() {
+        this("[converters] ");
+    }
 }

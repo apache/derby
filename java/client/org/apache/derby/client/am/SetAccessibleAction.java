@@ -21,25 +21,28 @@
 package org.apache.derby.client.am;
 
 // Java 2 PrivilegedExceptionAction encapsulation of the action to set accessible flag of an object
-public class SetAccessibleAction implements java.security.PrivilegedExceptionAction
-{
-  private boolean accessible_ = false;
 
-  // provides information about, and dynamic access to, a single field of a class or an interface
-  private java.lang.reflect.Field field_ = null;
+public class SetAccessibleAction implements java.security.PrivilegedExceptionAction {
+    private boolean accessible_ = false;
 
-  public SetAccessibleAction (java.lang.reflect.Field field, boolean accessible)
-  {
-    field_ = field;
-    accessible_ = accessible;
-  }
+    // provides information about, and dynamic access to, a single field of a class or an interface
+    private java.lang.reflect.Field field_ = null;
 
-  public Object run ()
-  {
-    field_.setAccessible (accessible_);
-    return null;
-  }
+    public SetAccessibleAction(java.lang.reflect.Field field, boolean accessible) {
+        field_ = field;
+        accessible_ = accessible;
+    }
 
-  public void setAccessible (boolean accessible) { accessible_ = accessible; }
-  public void setField (java.lang.reflect.Field field) { field_ = field; }
+    public Object run() {
+        field_.setAccessible(accessible_);
+        return null;
+    }
+
+    public void setAccessible(boolean accessible) {
+        accessible_ = accessible;
+    }
+
+    public void setField(java.lang.reflect.Field field) {
+        field_ = field;
+    }
 }

@@ -21,23 +21,20 @@
 package org.apache.derby.client.am;
 
 // Java 2 PrivilegedExceptionAction encapsulation of java.util.ResourceBundle.getBundle() action
-public class GetResourceBundleAction implements java.security.PrivilegedExceptionAction
-{
-  private String resourceBundleName_ = null; // class name for resources
 
-  // the base name of the resource bundle, a fully qualified class name
-  public GetResourceBundleAction (String resourceBundleName)
-  {
-    resourceBundleName_ = resourceBundleName;
-  }
+public class GetResourceBundleAction implements java.security.PrivilegedExceptionAction {
+    private String resourceBundleName_ = null; // class name for resources
 
-  public Object run () throws NullPointerException, java.util.MissingResourceException
-  {
-    return java.util.ResourceBundle.getBundle (resourceBundleName_);
-  }
+    // the base name of the resource bundle, a fully qualified class name
+    public GetResourceBundleAction(String resourceBundleName) {
+        resourceBundleName_ = resourceBundleName;
+    }
 
-  public void setResourceBundleName (String resourceBundleName)
-  {
-    resourceBundleName_ = resourceBundleName;
-  }
+    public Object run() throws NullPointerException, java.util.MissingResourceException {
+        return java.util.ResourceBundle.getBundle(resourceBundleName_);
+    }
+
+    public void setResourceBundleName(String resourceBundleName) {
+        resourceBundleName_ = resourceBundleName;
+    }
 }

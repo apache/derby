@@ -22,45 +22,39 @@ package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.Sqlca;
 
-public class NetSqlca extends Sqlca
-{
-  // these are the same variables that are in the Sqlca except ccsids
-  // are a little different
+public class NetSqlca extends Sqlca {
+    // these are the same variables that are in the Sqlca except ccsids
+    // are a little different
 
-  NetSqlca (org.apache.derby.client.am.Connection connection,
-         int sqlCode,
-         byte[] sqlStateBytes,
-         byte[] sqlErrpBytes,
-         int ccsid)
-  {
-    super(connection);
-    sqlCode_ = sqlCode;
-    sqlStateBytes_ = sqlStateBytes;
-    sqlErrpBytes_ = sqlErrpBytes;
-    ccsid_ = ccsid;
-  }
+    NetSqlca(org.apache.derby.client.am.Connection connection,
+             int sqlCode,
+             byte[] sqlStateBytes,
+             byte[] sqlErrpBytes,
+             int ccsid) {
+        super(connection);
+        sqlCode_ = sqlCode;
+        sqlStateBytes_ = sqlStateBytes;
+        sqlErrpBytes_ = sqlErrpBytes;
+        ccsid_ = ccsid;
+    }
 
-  protected void setSqlerrd (int[] sqlErrd)
-  {
-    sqlErrd_ = sqlErrd;
-  }
+    protected void setSqlerrd(int[] sqlErrd) {
+        sqlErrd_ = sqlErrd;
+    }
 
-  protected void setSqlwarnBytes (byte[] sqlWarnBytes)
-  {
-    sqlWarnBytes_ = sqlWarnBytes;
-  }
+    protected void setSqlwarnBytes(byte[] sqlWarnBytes) {
+        sqlWarnBytes_ = sqlWarnBytes;
+    }
 
-  protected void setSqlerrmcBytes (byte[] sqlErrmcBytes, int sqlErrmcCcsid)
-  {
-    sqlErrmcBytes_ = sqlErrmcBytes;
-    sqlErrmcCcsid_ = sqlErrmcCcsid;
-  }
+    protected void setSqlerrmcBytes(byte[] sqlErrmcBytes, int sqlErrmcCcsid) {
+        sqlErrmcBytes_ = sqlErrmcBytes;
+        sqlErrmcCcsid_ = sqlErrmcCcsid;
+    }
 
-  public long getRowCount (Typdef typdef) throws org.apache.derby.client.am.DisconnectException
-  {
-    int byteOrder = typdef.getByteOrder();
-    long num = (byteOrder == org.apache.derby.client.am.SignedBinary.BIG_ENDIAN) ?
-      super.getRowCount() : ((long)sqlErrd_[1]<<32) + sqlErrd_[0];
-    return num;
-  }
+    public long getRowCount(Typdef typdef) throws org.apache.derby.client.am.DisconnectException {
+        int byteOrder = typdef.getByteOrder();
+        long num = (byteOrder == org.apache.derby.client.am.SignedBinary.BIG_ENDIAN) ?
+                super.getRowCount() : ((long) sqlErrd_[1] << 32) + sqlErrd_[0];
+        return num;
+    }
 }

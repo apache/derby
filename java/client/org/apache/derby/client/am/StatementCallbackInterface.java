@@ -20,40 +20,43 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.client.am.Section;
+
 
 // Methods implemented by the common Statement class to handle
 // certain events that may originate from the material or common layers.
 //
 // Reply implementations may update statement state via this interface.
 //
-public interface StatementCallbackInterface
-{
-  // A query has been opened on the server.
-  public void completeOpenQuery (Sqlca sqlca, ResultSet resultSet) throws DisconnectException;
-  public void completeExecuteCallOpenQuery (Sqlca sqlca, ResultSet resultSet, ColumnMetaData resultSetMetaData, Section generatedSection);
 
-  // Chains a warning onto the statement.
-  public void accumulateWarning (SqlWarning e);
+public interface StatementCallbackInterface {
+    // A query has been opened on the server.
+    public void completeOpenQuery(Sqlca sqlca, ResultSet resultSet) throws DisconnectException;
 
-  public void completePrepare (Sqlca sqlca);
+    public void completeExecuteCallOpenQuery(Sqlca sqlca, ResultSet resultSet, ColumnMetaData resultSetMetaData, Section generatedSection);
 
-  public void completePrepareDescribeOutput (ColumnMetaData columnMetaData, Sqlca sqlca);
+    // Chains a warning onto the statement.
+    public void accumulateWarning(SqlWarning e);
 
-  public void completeExecuteImmediate (Sqlca sqlca);
+    public void completePrepare(Sqlca sqlca);
 
-  public void completeExecuteSetStatement (Sqlca sqlca);
+    public void completePrepareDescribeOutput(ColumnMetaData columnMetaData, Sqlca sqlca);
+
+    public void completeExecuteImmediate(Sqlca sqlca);
+
+    public void completeExecuteSetStatement(Sqlca sqlca);
 
 
-  public void completeExecute (Sqlca sqlca);
-  public void completeExecuteCall (Sqlca sqlca, Cursor params, ResultSet[] resultSets);
-  public void completeExecuteCall (Sqlca sqlca, Cursor params);
+    public void completeExecute(Sqlca sqlca);
 
-  public int completeSqlca (Sqlca sqlca);
+    public void completeExecuteCall(Sqlca sqlca, Cursor params, ResultSet[] resultSets);
 
-  public ConnectionCallbackInterface getConnectionCallbackInterface ();
+    public void completeExecuteCall(Sqlca sqlca, Cursor params);
 
-  public ColumnMetaData getGuessedResultSetMetaData ();
+    public int completeSqlca(Sqlca sqlca);
+
+    public ConnectionCallbackInterface getConnectionCallbackInterface();
+
+    public ColumnMetaData getGuessedResultSetMetaData();
 
 
 }

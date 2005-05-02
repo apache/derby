@@ -23,12 +23,16 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.DisconnectException;
 
-public interface ConnectionReplyInterface
-{
-  public void readCommitSubstitute (ConnectionCallbackInterface connection) throws DisconnectException;
-  public void readLocalCommit (ConnectionCallbackInterface connection) throws DisconnectException;
-  public void readLocalRollback (ConnectionCallbackInterface connection) throws DisconnectException;
-  public void readLocalXAStart (ConnectionCallbackInterface connection) throws DisconnectException;
-  public void readLocalXACommit (ConnectionCallbackInterface connection) throws DisconnectException;
-  public void readLocalXARollback (ConnectionCallbackInterface connection) throws DisconnectException;
+public interface ConnectionReplyInterface {
+    public void readCommitSubstitute(ConnectionCallbackInterface connection) throws DisconnectException;
+
+    public void readLocalCommit(ConnectionCallbackInterface connection) throws DisconnectException;
+
+    public void readLocalRollback(ConnectionCallbackInterface connection) throws DisconnectException;
+
+    public void readLocalXAStart(ConnectionCallbackInterface connection) throws DisconnectException;
+
+    public void readLocalXACommit(ConnectionCallbackInterface connection) throws DisconnectException;
+
+    public void readLocalXARollback(ConnectionCallbackInterface connection) throws DisconnectException;
 }

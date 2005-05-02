@@ -20,103 +20,92 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.CallableStatement;
-import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.ColumnMetaData;
-import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.MaterialPreparedStatement;
+import org.apache.derby.client.am.Section;
+import org.apache.derby.client.am.SqlException;
 
 public class NetCallableStatement extends NetPreparedStatement
-  implements MaterialPreparedStatement
-{
+        implements MaterialPreparedStatement {
 
-  CallableStatement callableStatement_;
+    CallableStatement callableStatement_;
 
-  //-----------------------------state------------------------------------------
+    //-----------------------------state------------------------------------------
 
-  //---------------------constructors/finalizer---------------------------------
+    //---------------------constructors/finalizer---------------------------------
 
-  private void initNetCallableStatement()
-  {
-    callableStatement_ = null;
-  }
+    private void initNetCallableStatement() {
+        callableStatement_ = null;
+    }
 
-  // Relay constructor for all NetCallableStatement constructors
-  NetCallableStatement (CallableStatement statement,
-                       NetAgent netAgent,
-                       NetConnection netConnection) throws SqlException
-  {
-    super (statement, netAgent, netConnection);
-    initNetCallableStatement();
-    initNetCallableStatement (statement);
-  }
+    // Relay constructor for all NetCallableStatement constructors
+    NetCallableStatement(CallableStatement statement,
+                         NetAgent netAgent,
+                         NetConnection netConnection) throws SqlException {
+        super(statement, netAgent, netConnection);
+        initNetCallableStatement();
+        initNetCallableStatement(statement);
+    }
 
-  void resetNetCallableStatement (CallableStatement statement,
-                                 NetAgent netAgent,
-                                 NetConnection netConnection) throws SqlException
-  {
-    super.resetNetPreparedStatement(statement, netAgent, netConnection);
-    initNetCallableStatement();
-    initNetCallableStatement (statement);
-  }
+    void resetNetCallableStatement(CallableStatement statement,
+                                   NetAgent netAgent,
+                                   NetConnection netConnection) throws SqlException {
+        super.resetNetPreparedStatement(statement, netAgent, netConnection);
+        initNetCallableStatement();
+        initNetCallableStatement(statement);
+    }
 
-  private void initNetCallableStatement (CallableStatement statement
-                                        ) throws SqlException
-  {
-    callableStatement_ = statement;
-    callableStatement_.materialCallableStatement_ = this;
+    private void initNetCallableStatement(CallableStatement statement) throws SqlException {
+        callableStatement_ = statement;
+        callableStatement_.materialCallableStatement_ = this;
 
-  }
+    }
 
 
-  // Called by abstract Connection.prepareCall().newCallableStatement()
-  // for jdbc 2 callable statements with scroll attributes.
-  NetCallableStatement (NetAgent netAgent,
-                       NetConnection netConnection,
-                       String sql,
-                       int type,
-                       int concurrency,
-                       int holdability) throws SqlException
-  {
-    this (new CallableStatement (netAgent, netConnection, sql, type, concurrency, holdability),
-          netAgent,
-          netConnection);
-  }
+    // Called by abstract Connection.prepareCall().newCallableStatement()
+    // for jdbc 2 callable statements with scroll attributes.
+    NetCallableStatement(NetAgent netAgent,
+                         NetConnection netConnection,
+                         String sql,
+                         int type,
+                         int concurrency,
+                         int holdability) throws SqlException {
+        this(new CallableStatement(netAgent, netConnection, sql, type, concurrency, holdability),
+                netAgent,
+                netConnection);
+    }
 
-  void resetNetCallableStatement (NetAgent netAgent,
-                                 NetConnection netConnection,
-                                 String sql,
-                                 int type,
-                                 int concurrency,
-                                 int holdability) throws SqlException
-  {
-    callableStatement_.resetCallableStatement(netAgent, netConnection, sql, type, concurrency, holdability);
-    resetNetCallableStatement(callableStatement_, netAgent, netConnection);
-  }
+    void resetNetCallableStatement(NetAgent netAgent,
+                                   NetConnection netConnection,
+                                   String sql,
+                                   int type,
+                                   int concurrency,
+                                   int holdability) throws SqlException {
+        callableStatement_.resetCallableStatement(netAgent, netConnection, sql, type, concurrency, holdability);
+        resetNetCallableStatement(callableStatement_, netAgent, netConnection);
+    }
 
-  void resetNetCallableStatement (NetAgent netAgent,
-                                 NetConnection netConnection,
-                                 String sql,
-                                 Section section) throws SqlException
-  {
-    callableStatement_.resetCallableStatement(netAgent, netConnection, sql, section);
-    resetNetCallableStatement(callableStatement_, netAgent, netConnection);
-  }
+    void resetNetCallableStatement(NetAgent netAgent,
+                                   NetConnection netConnection,
+                                   String sql,
+                                   Section section) throws SqlException {
+        callableStatement_.resetCallableStatement(netAgent, netConnection, sql, section);
+        resetNetCallableStatement(callableStatement_, netAgent, netConnection);
+    }
 
 
-  void resetNetCallableStatement (NetAgent netAgent,
-                                 NetConnection netConnection,
-                                 String sql,
-                                 Section section,
-                                 ColumnMetaData parameterMetaData,
-                                 ColumnMetaData resultSetMetaData) throws SqlException
-  {
-    callableStatement_.resetCallableStatement(netAgent, netConnection, sql, section, parameterMetaData, resultSetMetaData);
-    resetNetCallableStatement(callableStatement_, netAgent, netConnection);
-  }
+    void resetNetCallableStatement(NetAgent netAgent,
+                                   NetConnection netConnection,
+                                   String sql,
+                                   Section section,
+                                   ColumnMetaData parameterMetaData,
+                                   ColumnMetaData resultSetMetaData) throws SqlException {
+        callableStatement_.resetCallableStatement(netAgent, netConnection, sql, section, parameterMetaData, resultSetMetaData);
+        resetNetCallableStatement(callableStatement_, netAgent, netConnection);
+    }
 
-  protected void finalize () throws java.lang.Throwable
-  {
-    super.finalize();
-  }
+    protected void finalize() throws java.lang.Throwable {
+        super.finalize();
+    }
 
 }

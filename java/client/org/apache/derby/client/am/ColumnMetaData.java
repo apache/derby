@@ -22,918 +22,904 @@ package org.apache.derby.client.am;
 
 // Under JDBC 2, we must new up our parameter meta data as column meta data instances
 // Once we move to JDK 1.4 pre-req, create a ResultSetMetaData class and make this class abstract
-public class ColumnMetaData implements java.sql.ResultSetMetaData
-{
 
-  public int columns_;
+public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
-  public boolean[] nullable_;
+    public int columns_;
 
-  // Although this is describe information, it is tagged transient for now becuase it is not currently used.
-  transient public int[] singleMixedByteOrDouble_; // 1 means single, 2 means double, 3 means mixed-byte, 0 not applicable
+    public boolean[] nullable_;
 
-  // All of the following state data comes from the SQLDA reply.
+    // Although this is describe information, it is tagged transient for now becuase it is not currently used.
+    transient public int[] singleMixedByteOrDouble_; // 1 means single, 2 means double, 3 means mixed-byte, 0 not applicable
 
-  //Data from SQLDHGRP
-  public short sqldHold_;
-  public short sqldReturn_;
-  public short sqldScroll_;
-  public short sqldSensitive_;
-  public short sqldFcode_;
-  public short sqldKeytype_;
-  public String sqldRdbnam_; // catalog name, not used by driver, placeholder only
-  public String sqldSchema_; // schema name, not used by driver, placeholder only
+    // All of the following state data comes from the SQLDA reply.
 
-  //data comes from SQLDAGRP
-  public int[] sqlPrecision_; // adjusted sqllen;
-  public int[] sqlScale_;
-  public long[] sqlLength_;  // This is maximum length for varchar fields
-  // These are the derby sql types, for use only by ResultSetMetaData, other code should use jdbcTypes_.
-  // sqlTypes_ is currently not set for input column meta data.
-  public int[] sqlType_;
-  public int[] sqlCcsid_;
+    //Data from SQLDHGRP
+    public short sqldHold_;
+    public short sqldReturn_;
+    public short sqldScroll_;
+    public short sqldSensitive_;
+    public short sqldFcode_;
+    public short sqldKeytype_;
+    public String sqldRdbnam_; // catalog name, not used by driver, placeholder only
+    public String sqldSchema_; // schema name, not used by driver, placeholder only
 
-  // With the exception of sqlNames_ and sqlxParmmode_, the following members are only allocated when needed
+    //data comes from SQLDAGRP
+    public int[] sqlPrecision_; // adjusted sqllen;
+    public int[] sqlScale_;
+    public long[] sqlLength_;  // This is maximum length for varchar fields
+    // These are the derby sql types, for use only by ResultSetMetaData, other code should use jdbcTypes_.
+    // sqlTypes_ is currently not set for input column meta data.
+    public int[] sqlType_;
+    public int[] sqlCcsid_;
 
-  //Data from SQLDOPTGRP
-  public String[] sqlName_;   // column name, pre-allocated
-  public String[] sqlLabel_;  // column label
-  public short[] sqlUnnamed_;
-  public String[] sqlComment_;
+    // With the exception of sqlNames_ and sqlxParmmode_, the following members are only allocated when needed
 
-  //Data from SQLDXGRP
-  public short[] sqlxKeymem_;
-  public short[] sqlxGenerated_;
-  public short[] sqlxParmmode_; // pre-allocated
-  public String[] sqlxCorname_;
-  public String[] sqlxName_;
-  public String[] sqlxBasename_;  // table name
-  public int[] sqlxUpdatable_;
-  public String[] sqlxSchema_;    // schema name
-  public String[] sqlxRdbnam_;    // catalog name
+    //Data from SQLDOPTGRP
+    public String[] sqlName_;   // column name, pre-allocated
+    public String[] sqlLabel_;  // column label
+    public short[] sqlUnnamed_;
+    public String[] sqlComment_;
 
-  //-----------------------------transient state--------------------------------
+    //Data from SQLDXGRP
+    public short[] sqlxKeymem_;
+    public short[] sqlxGenerated_;
+    public short[] sqlxParmmode_; // pre-allocated
+    public String[] sqlxCorname_;
+    public String[] sqlxName_;
+    public String[] sqlxBasename_;  // table name
+    public int[] sqlxUpdatable_;
+    public String[] sqlxSchema_;    // schema name
+    public String[] sqlxRdbnam_;    // catalog name
 
-  // For performance only, not part of logical model.
-  public transient int[][] protocolTypesCache_ = null;
-  public transient java.util.Hashtable protocolTypeToOverrideLidMapping_ = null;
-  public transient java.util.ArrayList mddOverrideArray_ = null;
+    //-----------------------------transient state--------------------------------
 
-  public transient int[] types_;
-  public transient int[] clientParamtertype_;
+    // For performance only, not part of logical model.
+    public transient int[][] protocolTypesCache_ = null;
+    public transient java.util.Hashtable protocolTypeToOverrideLidMapping_ = null;
+    public transient java.util.ArrayList mddOverrideArray_ = null;
 
-  public transient LogWriter logWriter_;
+    public transient int[] types_;
+    public transient int[] clientParamtertype_;
 
-  // only set on execute replies, this is not describe information.
-  // only used for result set meta data. 
+    public transient LogWriter logWriter_;
 
-  public transient int resultSetConcurrency_;
+    // only set on execute replies, this is not describe information.
+    // only used for result set meta data.
 
-  transient private java.util.Hashtable columnNameToIndexCache_ = null;
+    public transient int resultSetConcurrency_;
 
-  transient private boolean statementClosed_ = false;
-  void markClosed() {
-    statementClosed_ = true;
-    nullDataForGC();  
-  }
+    transient private java.util.Hashtable columnNameToIndexCache_ = null;
 
-  void checkForClosedStatement() throws SqlException
-  {
-    // agent_.checkForDeferredExceptions(); 
-    if (statementClosed_) throw new SqlException (logWriter_, "Statement closed");
-  }
+    transient private boolean statementClosed_ = false;
 
+    void markClosed() {
+        statementClosed_ = true;
+        nullDataForGC();
+    }
 
-  //---------------------navigational members-----------------------------------
-
-  //---------------------constructors/finalizer---------------------------------
-
-  // Called by NETColumnMetaData constructor before #columns is parsed out yet.
-  public ColumnMetaData (LogWriter logWriter)
-  {
-    logWriter_ = logWriter;
-  }
-
-  // For creating column meta data when describe input is not available.
-  // The upper bound that is passed in is determined by counting the number of parameter markers.
-  // Called by PreparedStatement.flowPrepareStatement() and flowDescribeInputOutput()
-  // only when describe input is not available.
-  public ColumnMetaData (LogWriter logWriter, int upperBound)
-  {
-    logWriter_ = logWriter;
-    initializeCache (upperBound);
-  }
+    void checkForClosedStatement() throws SqlException {
+        // agent_.checkForDeferredExceptions();
+        if (statementClosed_) {
+            throw new SqlException(logWriter_, "Statement closed");
+        }
+    }
 
 
-  public void initializeCache (int upperBound)
-  {
-    columns_ = upperBound;
-    nullable_ = new boolean[upperBound];
-    types_ = new int[upperBound];
-    clientParamtertype_ = new int[upperBound];
-    singleMixedByteOrDouble_ = new int[upperBound]; // 1 means single, 2 means double, 3 means mixed-byte, 0 not applicable
+    //---------------------navigational members-----------------------------------
 
-    sqlPrecision_ = new int[upperBound];
-    sqlScale_ = new int[upperBound];
-    sqlLength_ = new long[upperBound];
-    sqlType_ = new int[upperBound];
-    sqlCcsid_ = new int[upperBound];
+    //---------------------constructors/finalizer---------------------------------
 
-    sqlName_ = new String[upperBound];
-    sqlxParmmode_ = new short[upperBound];
-  }
+    // Called by NETColumnMetaData constructor before #columns is parsed out yet.
+    public ColumnMetaData(LogWriter logWriter) {
+        logWriter_ = logWriter;
+    }
 
-  protected void finalize () throws java.lang.Throwable
-  {
-    super.finalize();
-  }
+    // For creating column meta data when describe input is not available.
+    // The upper bound that is passed in is determined by counting the number of parameter markers.
+    // Called by PreparedStatement.flowPrepareStatement() and flowDescribeInputOutput()
+    // only when describe input is not available.
+    public ColumnMetaData(LogWriter logWriter, int upperBound) {
+        logWriter_ = logWriter;
+        initializeCache(upperBound);
+    }
 
-  //--------------------Abstract material layer call-down methods-----------------
 
-  //------------------material layer event callback methods-----------------------
+    public void initializeCache(int upperBound) {
+        columns_ = upperBound;
+        nullable_ = new boolean[upperBound];
+        types_ = new int[upperBound];
+        clientParamtertype_ = new int[upperBound];
+        singleMixedByteOrDouble_ = new int[upperBound]; // 1 means single, 2 means double, 3 means mixed-byte, 0 not applicable
 
-  // ---------------------------jdbc 1------------------------------------------
+        sqlPrecision_ = new int[upperBound];
+        sqlScale_ = new int[upperBound];
+        sqlLength_ = new long[upperBound];
+        sqlType_ = new int[upperBound];
+        sqlCcsid_ = new int[upperBound];
 
-  public int getColumnCount () throws SqlException
-  {
-    checkForClosedStatement();
-    return columns_;
-  }
+        sqlName_ = new String[upperBound];
+        sqlxParmmode_ = new short[upperBound];
+    }
 
-  public boolean isAutoIncrement (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    return false;
-  }
+    protected void finalize() throws java.lang.Throwable {
+        super.finalize();
+    }
 
-  public boolean isCaseSensitive (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    //return true if the SQLTYPE is CHAR, VARCHAR, LOGVARCHAR or CLOB
-      int type = types_[column-1];
-      return
-        type == Types.CHAR ||
-        type == Types.VARCHAR ||
-        type == Types.LONGVARCHAR ||
-        type == Types.CLOB;
-  }
+    //--------------------Abstract material layer call-down methods-----------------
 
-  // all searchable except distinct
-  public boolean isSearchable (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    return true;
-  }
+    //------------------material layer event callback methods-----------------------
 
-  public boolean isCurrency (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    return false;
-  }
+    // ---------------------------jdbc 1------------------------------------------
 
-  public int isNullable (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    if (nullable_[column-1])
-      return java.sql.ResultSetMetaData.columnNullable;
-    else
-      return java.sql.ResultSetMetaData.columnNoNulls;
-  }
+    public int getColumnCount() throws SqlException {
+        checkForClosedStatement();
+        return columns_;
+    }
 
-  public boolean isSigned (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    //return true only if the SQLType is SMALLINT, INT, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC OR DECIMAL
-      int type = types_[column-1];
-      return
-        type == Types.SMALLINT ||
-        type == Types.INTEGER ||
-        type == Types.BIGINT ||
-        type == java.sql.Types.FLOAT ||
-        type == Types.REAL ||
-        type == Types.DOUBLE ||
-        type == java.sql.Types.NUMERIC ||
-        type == Types.DECIMAL;
-  }
+    public boolean isAutoIncrement(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        return false;
+    }
 
-  public int getColumnDisplaySize (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-      int jdbcType = types_[column-1];
-      switch (jdbcType){
-      case Types.INTEGER:
-	return 11;
-      case Types.SMALLINT:
-	return 6;
-      case Types.BIGINT:
-	return 20;
-      case Types.REAL:
-	return 13;
-      case Types.DOUBLE:
-      case java.sql.Types.FLOAT:
-	return 22;
-      case Types.DECIMAL:
-      case java.sql.Types.NUMERIC:
-	return getPrecision(column) + 2;  // add 1 for sign and 1 for decimal
-      case Types.CHAR:
-      case Types.VARCHAR:
-      case Types.LONGVARCHAR:
-      case Types.CLOB:
-	return (int) sqlLength_[column-1];
-      case Types.DATE:
-	return 10;
-      case Types.TIME:
-	return 8;
-      case Types.TIMESTAMP:
-	return 26;
-      case Types.BINARY:
-      case Types.VARBINARY:
-      case Types.LONGVARBINARY:
-      case Types.BLOB:
-        return (int) (2*sqlLength_[column-1]); // eg. "FF" represents just one byte
-      default:
-	throw new SqlException (logWriter_, "not supported");
-      }
-  }
+    public boolean isCaseSensitive(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        //return true if the SQLTYPE is CHAR, VARCHAR, LOGVARCHAR or CLOB
+        int type = types_[column - 1];
+        return
+                type == Types.CHAR ||
+                type == Types.VARCHAR ||
+                type == Types.LONGVARCHAR ||
+                type == Types.CLOB;
+    }
 
-  public String getColumnLabel (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-      // return labels if label is turned on, otherwise, return column name
-      if (sqlLabel_ != null && sqlLabel_[column-1] != null) return sqlLabel_[column-1];
-      if (sqlName_ == null || sqlName_[column-1] == null)
-        assignColumnName (column);
-      return sqlName_[column-1];
-  }
+    // all searchable except distinct
+    public boolean isSearchable(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        return true;
+    }
 
-  public String getColumnName (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-      // The Javadoc and Jdbc book explicitly state that the empty string ("") is returned if "not applicable"
-      // for the following methods:
-      //   getSchemaName()
-      //   getTableName()
-      //   getCatalogName()
-      // Since the empty string is a valid string and is not really a proper table name, schema name, or catalog name,
-      // we're not sure why the empty string was chosen over null, except possibly to be friendly to lazy jdbc apps
-      // that may not be checking for nulls, thereby minimizing potential NPE's.
-      // By induction, it would make sense to return the empty string when column name is not available/applicable.
-      //
-      // The JDBC specification contains blanket statements about SQL compliance levels,
-      // so elaboration within the JDBC specification is often bypassed.
-      // Personally, I would prefer to return Java null for all the not-applicable cases,
-      // but it appears that we have precedent for the empty ("") string.
-      //
-      // We assume a straightforward induction from jdbc spec that the column name be "" (empty)
-      // in preference to null or NULL for the not applicable case.
-      //
-      if (sqlName_ == null || sqlName_[column-1] == null)
-        assignColumnName (column);
-      return sqlName_[column-1];
-  }
+    public boolean isCurrency(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        return false;
+    }
 
-  public String getSchemaName (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    if (sqlxSchema_ == null || sqlxSchema_[column-1] == null) return ""; // Per jdbc spec
-    return sqlxSchema_[column-1];
-  }
+    public int isNullable(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        if (nullable_[column - 1]) {
+            return java.sql.ResultSetMetaData.columnNullable;
+        } else {
+            return java.sql.ResultSetMetaData.columnNoNulls;
+        }
+    }
 
-  public int getPrecision (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    int jdbcType = types_[column-1];
+    public boolean isSigned(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        //return true only if the SQLType is SMALLINT, INT, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC OR DECIMAL
+        int type = types_[column - 1];
+        return
+                type == Types.SMALLINT ||
+                type == Types.INTEGER ||
+                type == Types.BIGINT ||
+                type == java.sql.Types.FLOAT ||
+                type == Types.REAL ||
+                type == Types.DOUBLE ||
+                type == java.sql.Types.NUMERIC ||
+                type == Types.DECIMAL;
+    }
 
-      switch (jdbcType) {
-      case java.sql.Types.NUMERIC:
-      case Types.DECIMAL:
-	return sqlPrecision_[column-1];
-      case Types.SMALLINT:
-	return 5;
-      case Types.INTEGER:
-	return 10;
-      case Types.BIGINT:
-	return 19;
-      case java.sql.Types.FLOAT:
-	return 15;
-      case Types.REAL:
-	return 7;  // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
-      case Types.DOUBLE:
-	return 15; // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
-      case Types.CHAR:
-      case Types.VARCHAR:
-      case Types.LONGVARCHAR:
-      case Types.BINARY:
-      case Types.VARBINARY:
-      case Types.LONGVARBINARY:
-      case Types.CLOB:
-      case Types.BLOB:
-	return (int) sqlLength_[column-1];
-      case Types.DATE:
-	return 10;
-      case Types.TIME:
-	return 8;
-      case Types.TIMESTAMP:
-	return 26;
-      default:
-        throw new SqlException (logWriter_, "Unregistered column type");
-      }
-  }
+    public int getColumnDisplaySize(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        int jdbcType = types_[column - 1];
+        switch (jdbcType) {
+        case Types.INTEGER:
+            return 11;
+        case Types.SMALLINT:
+            return 6;
+        case Types.BIGINT:
+            return 20;
+        case Types.REAL:
+            return 13;
+        case Types.DOUBLE:
+        case java.sql.Types.FLOAT:
+            return 22;
+        case Types.DECIMAL:
+        case java.sql.Types.NUMERIC:
+            return getPrecision(column) + 2;  // add 1 for sign and 1 for decimal
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+        case Types.CLOB:
+            return (int) sqlLength_[column - 1];
+        case Types.DATE:
+            return 10;
+        case Types.TIME:
+            return 8;
+        case Types.TIMESTAMP:
+            return 26;
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+        case Types.BLOB:
+            return (int) (2 * sqlLength_[column - 1]); // eg. "FF" represents just one byte
+        default:
+            throw new SqlException(logWriter_, "not supported");
+        }
+    }
 
-  public int getScale (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
+    public String getColumnLabel(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        // return labels if label is turned on, otherwise, return column name
+        if (sqlLabel_ != null && sqlLabel_[column - 1] != null) {
+            return sqlLabel_[column - 1];
+        }
+        if (sqlName_ == null || sqlName_[column - 1] == null) {
+            assignColumnName(column);
+        }
+        return sqlName_[column - 1];
+    }
 
-    // We get the scale from the SQLDA as returned by DERBY, but DERBY does not return the ANSI-defined
-    // value of scale 6 for TIMESTAMP.
-    //
-    //   The JDBC drivers should hardcode this info as a short/near term solution.
-    //
-    if (types_[column-1] == Types.TIMESTAMP) return 6;
+    public String getColumnName(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        // The Javadoc and Jdbc book explicitly state that the empty string ("") is returned if "not applicable"
+        // for the following methods:
+        //   getSchemaName()
+        //   getTableName()
+        //   getCatalogName()
+        // Since the empty string is a valid string and is not really a proper table name, schema name, or catalog name,
+        // we're not sure why the empty string was chosen over null, except possibly to be friendly to lazy jdbc apps
+        // that may not be checking for nulls, thereby minimizing potential NPE's.
+        // By induction, it would make sense to return the empty string when column name is not available/applicable.
+        //
+        // The JDBC specification contains blanket statements about SQL compliance levels,
+        // so elaboration within the JDBC specification is often bypassed.
+        // Personally, I would prefer to return Java null for all the not-applicable cases,
+        // but it appears that we have precedent for the empty ("") string.
+        //
+        // We assume a straightforward induction from jdbc spec that the column name be "" (empty)
+        // in preference to null or NULL for the not applicable case.
+        //
+        if (sqlName_ == null || sqlName_[column - 1] == null) {
+            assignColumnName(column);
+        }
+        return sqlName_[column - 1];
+    }
 
-    return sqlScale_[column-1];
-  }
+    public String getSchemaName(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        if (sqlxSchema_ == null || sqlxSchema_[column - 1] == null) {
+            return ""; // Per jdbc spec
+        }
+        return sqlxSchema_[column - 1];
+    }
 
-  public String getTableName (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    if (sqlxBasename_ == null || sqlxBasename_[column-1] == null) return ""; // Per jdbc spec
-    return sqlxBasename_[column-1];
-  }
+    public int getPrecision(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        int jdbcType = types_[column - 1];
+
+        switch (jdbcType) {
+        case java.sql.Types.NUMERIC:
+        case Types.DECIMAL:
+            return sqlPrecision_[column - 1];
+        case Types.SMALLINT:
+            return 5;
+        case Types.INTEGER:
+            return 10;
+        case Types.BIGINT:
+            return 19;
+        case java.sql.Types.FLOAT:
+            return 15;
+        case Types.REAL:
+            return 7;  // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
+        case Types.DOUBLE:
+            return 15; // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+        case Types.CLOB:
+        case Types.BLOB:
+            return (int) sqlLength_[column - 1];
+        case Types.DATE:
+            return 10;
+        case Types.TIME:
+            return 8;
+        case Types.TIMESTAMP:
+            return 26;
+        default:
+            throw new SqlException(logWriter_, "Unregistered column type");
+        }
+    }
+
+    public int getScale(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+
+        // We get the scale from the SQLDA as returned by DERBY, but DERBY does not return the ANSI-defined
+        // value of scale 6 for TIMESTAMP.
+        //
+        //   The JDBC drivers should hardcode this info as a short/near term solution.
+        //
+        if (types_[column - 1] == Types.TIMESTAMP) {
+            return 6;
+        }
+
+        return sqlScale_[column - 1];
+    }
+
+    public String getTableName(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        if (sqlxBasename_ == null || sqlxBasename_[column - 1] == null) {
+            return ""; // Per jdbc spec
+        }
+        return sqlxBasename_[column - 1];
+    }
 
     /**
      * What's a column's table's catalog name?
      *
      * @param column the first column is 1, the second is 2, ...
+     *
      * @return column name or "" if not applicable.
-     * @exception SQLException thrown on failure
+     *
+     * @throws SQLException thrown on failure
      */
-  public String getCatalogName (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-	return "";
-  }
-
-  public int getColumnType (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-
-    return types_[column-1];
-  }
-
-  public String getColumnTypeName (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-
-      int jdbcType = types_[column-1];
-      // So these all come back zero for downlevel servers in PROTOCOL.
-      // John is going to write some code to construct the sqlType_ array
-      // based on the protocol types from the query descriptor.
-      int sqlType = sqlType_[column-1];
-
-      switch (sqlType) {
-      case Types.DERBY_SQLTYPE_DATE:
-      case Types.DERBY_SQLTYPE_NDATE:
-	return "DATE";
-      case Types.DERBY_SQLTYPE_TIME:
-      case Types.DERBY_SQLTYPE_NTIME:
-	return "TIME";
-      case Types.DERBY_SQLTYPE_TIMESTAMP:
-      case Types.DERBY_SQLTYPE_NTIMESTAMP:
-	return "TIMESTAMP";
-      case Types.DERBY_SQLTYPE_BLOB:
-      case Types.DERBY_SQLTYPE_NBLOB:
-	return "BLOB";
-      case Types.DERBY_SQLTYPE_CLOB:
-      case Types.DERBY_SQLTYPE_NCLOB:
-	return "CLOB";
-      case Types.DERBY_SQLTYPE_VARCHAR:
-      case Types.DERBY_SQLTYPE_NVARCHAR:
-	if (jdbcType == Types.VARBINARY)
-	  return "VARCHAR FOR BIT DATA";
-	else
-	  return "VARCHAR";
-      case Types.DERBY_SQLTYPE_CHAR:
-      case Types.DERBY_SQLTYPE_NCHAR:
-	if(jdbcType == Types.BINARY)
-	  return "CHAR FOR BIT DATA";
-	else
-	  return "CHAR";
-      case Types.DERBY_SQLTYPE_LONG:
-      case Types.DERBY_SQLTYPE_NLONG:
-	if(jdbcType == Types.LONGVARBINARY)
-	  return "LONG VARCHAR FOR BIT DATA";
-	else
-	  return "LONG VARCHAR";
-      case Types.DERBY_SQLTYPE_CSTR:
-      case Types.DERBY_SQLTYPE_NCSTR:
-	return "SBCS";
-      case Types.DERBY_SQLTYPE_FLOAT:
-      case Types.DERBY_SQLTYPE_NFLOAT:
-        if(jdbcType == Types.DOUBLE)
-          return "DOUBLE";
-        if(jdbcType == Types.REAL)
-          return "REAL";
-      case Types.DERBY_SQLTYPE_DECIMAL:
-      case Types.DERBY_SQLTYPE_NDECIMAL:
-	return "DECIMAL";
-      case Types.DERBY_SQLTYPE_BIGINT:
-      case Types.DERBY_SQLTYPE_NBIGINT:
-	return "BIGINT";
-      case Types.DERBY_SQLTYPE_INTEGER:
-      case Types.DERBY_SQLTYPE_NINTEGER:
-	return "INTEGER";
-      case Types.DERBY_SQLTYPE_SMALL:
-      case Types.DERBY_SQLTYPE_NSMALL:
-	return "SMALLINT";
-      case Types.DERBY_SQLTYPE_NUMERIC:
-      case Types.DERBY_SQLTYPE_NNUMERIC:
-	return "NUMERIC";
-      default:
-	throw new SqlException (logWriter_, "Not supported");
-      }
-  }
-
-  public boolean isReadOnly (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    if (sqlxUpdatable_ == null)
-      return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY); // If no extended describe, return resultSet's concurrecnty
-    return sqlxUpdatable_[column-1] == 0; // PROTOCOL 0 means not updatable, 1 means updatable
-  }
-
-  public boolean isWritable (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    if (sqlxUpdatable_ == null)
-      return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_UPDATABLE); // If no extended describe, return resultSet's concurrency
-    return sqlxUpdatable_[column-1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
-  }
-
-  public boolean isDefinitelyWritable (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-    if (sqlxUpdatable_ == null) return false;
-    return sqlxUpdatable_[column-1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
-  }
-
-  //--------------------------jdbc 2.0-----------------------------------
-
-  public String getColumnClassName (int column) throws SqlException
-  {
-    checkForClosedStatement();
-    checkForValidColumnIndex (column);
-
-      int jdbcType = types_[column-1];
-      switch (jdbcType) {
-      case java.sql.Types.BIT:
-	return "java.lang.Boolean";
-      case java.sql.Types.TINYINT:
-	return "java.lang.Integer";
-      case Types.SMALLINT:
-	return "java.lang.Integer";
-      case Types.INTEGER:
-	return "java.lang.Integer";
-      case Types.BIGINT:
-	return "java.lang.Long";
-      case java.sql.Types.FLOAT:
-	return "java.lang.Double";
-      case Types.REAL:
-	return "java.lang.Float";
-      case Types.DOUBLE:
-	return "java.lang.Double";
-      case java.sql.Types.NUMERIC:
-      case Types.DECIMAL:
-	return "java.math.BigDecimal";
-      case Types.CHAR:
-      case Types.VARCHAR:
-      case Types.LONGVARCHAR:
-	return "java.lang.String";
-      case Types.DATE:
-	return "java.sql.Date";
-      case Types.TIME:
-	  return "java.sql.Time";
-      case Types.TIMESTAMP:
-	  return "java.sql.Timestamp";
-      case Types.BINARY:
-      case Types.VARBINARY:
-      case Types.LONGVARBINARY:
-	return "byte[]";
-      case java.sql.Types.STRUCT:
-	return "java.sql.Struct";
-      case java.sql.Types.ARRAY:
-	  return "java.sql.Array";
-      case Types.BLOB:
-	  return "java.sql.Blob";
-      case Types.CLOB:
-	  return "java.sql.Clob";
-      case java.sql.Types.REF:
-	  return "java.sql.Ref";
-      default:
-	throw new SqlException (logWriter_, "Not supported");
-      }
-  }
-
-  //----------------------------helper methods----------------------------------
-
-
-  void checkForValidColumnIndex (int column) throws SqlException
-  {
-    if (column < 1 || column > columns_)
-      throw new SqlException (logWriter_, "Invalid argument: column index " +
-                              column + " is out of range.");
-  }
-
-  // If the input parameter has been set, return true, else return false.
-  private boolean isParameterModeGuessedAsAnInput (int parameterIndex)
-  {
-    if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeIn ||
-        sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeInOut) {
-      return true;
+    public String getCatalogName(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        return "";
     }
-    return false;
-  }
 
-  // Does OUT parm registration rely on extended describe?
-  // If the output parameter has been registered, return true, else return false.
-  public boolean isParameterModeGuessedAsOutput (int parameterIndex)
-  {
-    return sqlxParmmode_[parameterIndex - 1] >= java.sql.ParameterMetaData.parameterModeInOut;
-  }
+    public int getColumnType(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
 
-  // Only called when column meta data is not described. Called by setXXX methods.
-  public void guessInputParameterMetaData (int parameterIndex,
-                                            int jdbcType) throws SqlException
-  {
-    guessInputParameterMetaData (parameterIndex, jdbcType, 0);
-  }
-
-  private void setParmModeForInputParameter (int parameterIndex)
-  {
-    if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeOut)
-      sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeInOut;
-    else if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeUnknown)
-      sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeIn;
-  }
-
-  // Only called when column meta data is not described. Called by setXXX methods.
-  // Scale is only applied for Decimal or Numeric JDBC type.
-  public void guessInputParameterMetaData (int parameterIndex,
-                                            int jdbcType,
-                                           int scale) throws SqlException
-  {
-    setParmModeForInputParameter (parameterIndex);
-    int driverType = getInternalTypeForGuessedOrRegisteredJdbcType (jdbcType);
-    // if output parameter has been registered already
-    if (isParameterModeGuessedAsOutput (parameterIndex)) {
-      if (!isCompatibleDriverTypes (types_[parameterIndex-1], driverType)) {
-        throw new SqlException (logWriter_, "The jdbcType " + jdbcType + " does not match between the setter method and " +
-                                "the registerOutParameter method.");
-      }
-      else return; // don't bother guessing if the parameter was already registered
+        return types_[column - 1];
     }
-    guessParameterMetaDataBasedOnSupportedDriverType (parameterIndex, jdbcType==java.sql.Types.BIGINT, driverType, scale);
-  }
 
-  private void setParmModeForOutputParameter (int parameterIndex)
-  {
-    if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeIn)
-      sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeInOut;
-    else if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeUnknown)
-      sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeOut;
-  }
+    public String getColumnTypeName(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
 
-  // Only called when column meta data is not described, called by registerOutParameter methods.
-  public void guessOutputParameterMetaData (int parameterIndex,
-                                            int jdbcType,
-                                            int scale) throws SqlException
-  {
-    setParmModeForOutputParameter (parameterIndex);
-    int driverType = getInternalTypeForGuessedOrRegisteredJdbcType (jdbcType);
-    if (isParameterModeGuessedAsAnInput (parameterIndex)) { // if input parameter has been set already
-      // Verify that "set" and "registered" types are compatible.
-      if (!isCompatibleDriverTypes (driverType, types_[parameterIndex -1])) {
-         throw new SqlException (logWriter_, "The jdbcType does not match between the setter method and " +
-          "the registerOutParameter method.");
-      }
-      // the registered type will take precedence over any previously guessed input "set" type
-    }
-    guessParameterMetaDataBasedOnSupportedDriverType (parameterIndex, jdbcType==java.sql.Types.BIGINT, driverType, scale);
-  }
+        int jdbcType = types_[column - 1];
+        // So these all come back zero for downlevel servers in PROTOCOL.
+        // John is going to write some code to construct the sqlType_ array
+        // based on the protocol types from the query descriptor.
+        int sqlType = sqlType_[column - 1];
 
-  private boolean isCompatibleDriverTypes (int registeredType, int guessedInputType)
-  {
-    switch (registeredType) {
-    case Types.CHAR:
-    case Types.VARCHAR:
-    case Types.LONGVARCHAR:
-      return guessedInputType == Types.CHAR || guessedInputType == Types.VARCHAR || guessedInputType == Types.LONGVARCHAR;
-    case Types.BINARY:
-    case Types.VARBINARY:
-    case Types.LONGVARBINARY:
-      return guessedInputType == Types.BINARY || guessedInputType == Types.VARBINARY || guessedInputType == Types.LONGVARBINARY;
-    default:
-      return registeredType == guessedInputType;
-    }
-  }
-
-  // Only used when describe information is not available.
-  private int getInternalTypeForGuessedOrRegisteredJdbcType (int guessedOrRegisteredJdbcType) throws SqlException
-  {
-    switch (guessedOrRegisteredJdbcType) {
-    case java.sql.Types.BIT:
-    case java.sql.Types.TINYINT:
-    case java.sql.Types.SMALLINT:
-      return Types.SMALLINT;
-    case java.sql.Types.INTEGER:
-      return Types.INTEGER;
-    case java.sql.Types.BIGINT:
-		return Types.BIGINT;
-    case java.sql.Types.REAL:
-      return Types.REAL;
-    case java.sql.Types.DOUBLE:
-    case java.sql.Types.FLOAT:
-      return Types.DOUBLE;
-    case java.sql.Types.DECIMAL:
-    case java.sql.Types.NUMERIC:
-      return Types.DECIMAL;
-    case java.sql.Types.DATE:
-      return Types.DATE;
-    case java.sql.Types.TIME:
-      return Types.TIME;
-    case java.sql.Types.TIMESTAMP:
-      return Types.TIMESTAMP;
-    case java.sql.Types.CHAR:
-      return Types.CHAR;
-    case java.sql.Types.VARCHAR:
-      return Types.VARCHAR;
-    case java.sql.Types.LONGVARCHAR:
-      return Types.LONGVARCHAR;
-    case java.sql.Types.BINARY:
-      return Types.BINARY;
-    case java.sql.Types.VARBINARY:
-      return Types.VARBINARY;
-    case java.sql.Types.LONGVARBINARY:
-      return Types.LONGVARBINARY;
-    case java.sql.Types.BLOB:
-      return Types.BLOB;
-    case java.sql.Types.CLOB:
-      return Types.CLOB;
-    case java.sql.Types.NULL:
-    case java.sql.Types.OTHER:
-      throw new SqlException (logWriter_,  "Jdbc type " + guessedOrRegisteredJdbcType + " not yet supported.");
-    default:
-      throw new SqlException (logWriter_, "Unrecognized jdbc type " + guessedOrRegisteredJdbcType);
-    }
-  }
-
-  private void guessParameterMetaDataBasedOnSupportedDriverType (int parameterIndex,
-                                                                 boolean isBigInt,
-                                                                 int driverType,
-                                                                 int scale) throws SqlException
-  {
-    switch (driverType) {
-    case Types.SMALLINT:
-      guessParameterMetaData (parameterIndex, driverType, 2, 0, 0);
-        break;
-    case Types.INTEGER:
-      guessParameterMetaData (parameterIndex, driverType, 4, 0, 0);
-        break;
-    case Types.BIGINT:
-      guessParameterMetaData (parameterIndex, driverType, 8, 0, 0);
-        break;
-    case Types.REAL:
-      guessParameterMetaData (parameterIndex, driverType, 4, 0, 0);
-        break;
-    case Types.DOUBLE:
-      guessParameterMetaData (parameterIndex, driverType, 8, 0, 0);
-        break;
-    case Types.DECIMAL:
-      if (isBigInt)
-        guessParameterMetaData (parameterIndex, driverType, 0, 19, 0);
-      else
-        guessParameterMetaData (parameterIndex, driverType, 0, 31, scale);
-        break;
-    case Types.DATE:
-      guessParameterMetaData (parameterIndex, driverType, 10, 0, 0);
-        break;
-    case Types.TIME:
-      guessParameterMetaData (parameterIndex, driverType, 8, 0, 0);
-        break;
-    case Types.TIMESTAMP:
-      guessParameterMetaData (parameterIndex, driverType, 26, 0, 0);
-        break;
-    case Types.CHAR:
-    case Types.VARCHAR:
-      guessParameterMetaData (parameterIndex, driverType, 32672, 0, 0);
-        break;
-    case Types.LONGVARCHAR:
-      guessParameterMetaData (parameterIndex, driverType, 32700, 0, 0);
-        break;
-    case Types.BINARY:
-    case Types.VARBINARY:
-      guessParameterMetaData (parameterIndex, driverType, 4000, 0, 0);
-      break;
-    case Types.LONGVARBINARY:
-      guessParameterMetaData (parameterIndex, driverType, 32700, 0, 0);
-      break;
-    case Types.BLOB:
-      // 32768 will cause 8004 for a null placeholder length (could hard code in NET layer)
-      guessParameterMetaData (parameterIndex, driverType, 32768, 0, 0);
-      break;
-    case Types.CLOB:
-      // 32768 will cause 8004 for a null placeholder length (could hard code in NET layer)
-      guessParameterMetaData (parameterIndex, driverType, 32768, 0, 0);
-        break;
-    default:
-      throw new SqlException (logWriter_, "Unrecognized driver type " + driverType);
-      }
-  }
-
-  // Only called when column meta data is not described
-  private void guessParameterMetaData (int parameterIndex,
-                                      int type,
-                                      int length,
-                                      int precision,
-                                      int scale)
-  {
-    // Always guess that the column is nullable
-    nullable_[parameterIndex-1] = true;
-    types_[parameterIndex-1] = type;
-    sqlLength_[parameterIndex-1] = length;
-    sqlPrecision_[parameterIndex-1] = precision;
-    sqlScale_[parameterIndex-1] = scale;
-    sqlType_[parameterIndex-1] = mapDriverToSqlType(type, true);
-  }
-
-  int mapDriverToSqlType(int type, boolean nullable)
-  {
-    int sqlType = 0;
-    switch (type)
-    {
-      case java.sql.Types.SMALLINT:
-        sqlType = Types.DERBY_SQLTYPE_NSMALL;
-        break;
-      case java.sql.Types.INTEGER:
-        sqlType = Types.DERBY_SQLTYPE_NINTEGER;
-        break;
-      case java.sql.Types.BIGINT:
-        sqlType = Types.DERBY_SQLTYPE_NBIGINT;
-        break;
-      case java.sql.Types.REAL:
-      case java.sql.Types.DOUBLE:
-      case java.sql.Types.FLOAT:
-        sqlType = Types.DERBY_SQLTYPE_NFLOAT;
-        break;
-      case java.sql.Types.DATE:
-        sqlType = Types.DERBY_SQLTYPE_NDATE;
-        break;
-      case java.sql.Types.TIME:
-        sqlType = Types.DERBY_SQLTYPE_NTIME;
-        break;
-      case java.sql.Types.TIMESTAMP:
-        sqlType = Types.DERBY_SQLTYPE_NTIMESTAMP;
-        break;
-      case java.sql.Types.CHAR:
-      case java.sql.Types.VARCHAR:
-        sqlType = Types.DERBY_SQLTYPE_NVARCHAR;
-        break;
-      case java.sql.Types.LONGVARCHAR:
-        sqlType = Types.DERBY_SQLTYPE_NLONG;
-        break;
-      case java.sql.Types.BINARY:
-      case java.sql.Types.VARBINARY:
-        sqlType = Types.DERBY_SQLTYPE_NVARCHAR;
-        break;
-      case java.sql.Types.LONGVARBINARY:
-        sqlType = Types.DERBY_SQLTYPE_NLONG;
-        break;
-      case java.sql.Types.NUMERIC:
-      case java.sql.Types.DECIMAL:
-        sqlType = Types.DERBY_SQLTYPE_NDECIMAL;
-        break;
-      case java.sql.Types.BLOB:
-        sqlType = Types.DERBY_SQLTYPE_NBLOB;
-        break;
-      case java.sql.Types.CLOB:
-        sqlType = Types.DERBY_SQLTYPE_NCLOB;
-      break;
-      default:
-        break; // bug check
-      }
-      if (!nullable)
-        sqlType--;
-      return sqlType;
-  }
-
-
-  public void setLogWriter (LogWriter logWriter)
-  {
-    logWriter_ = logWriter;
-  }
-
-  private void nullDataForGC()
-  {
-    columns_ = 0;
-    nullable_ = null;
-    types_ = null;
-    singleMixedByteOrDouble_ = null;
-    sqldRdbnam_ = null;
-    sqldSchema_ = null;
-    sqlPrecision_ = null;
-    sqlScale_ = null;
-    sqlLength_ = null;
-    sqlType_ = null;
-    sqlCcsid_ = null;
-    sqlName_ = null;
-    sqlLabel_ = null;
-    sqlUnnamed_ = null;
-    sqlComment_ = null;
-    sqlxKeymem_ = null;
-    sqlxGenerated_ = null;
-    sqlxParmmode_ = null;
-    sqlxCorname_ = null;
-    sqlxName_ = null;
-    sqlxBasename_ = null;
-    sqlxUpdatable_ = null;
-    sqlxSchema_ = null;
-    sqlxRdbnam_ = null;
-    clientParamtertype_ = null;
-    types_ = null;
-  }
-
-  public boolean hasLobColumns ()
-  {
-    for (int i=0; i<columns_; i++) {
-      switch (org.apache.derby.client.am.Utils.getNonNullableSqlType (sqlType_[i])) {
-        case org.apache.derby.client.am.Types.DERBY_SQLTYPE_BLOB:
-        case org.apache.derby.client.am.Types.DERBY_SQLTYPE_CLOB:
-          return true;
+        switch (sqlType) {
+        case Types.DERBY_SQLTYPE_DATE:
+        case Types.DERBY_SQLTYPE_NDATE:
+            return "DATE";
+        case Types.DERBY_SQLTYPE_TIME:
+        case Types.DERBY_SQLTYPE_NTIME:
+            return "TIME";
+        case Types.DERBY_SQLTYPE_TIMESTAMP:
+        case Types.DERBY_SQLTYPE_NTIMESTAMP:
+            return "TIMESTAMP";
+        case Types.DERBY_SQLTYPE_BLOB:
+        case Types.DERBY_SQLTYPE_NBLOB:
+            return "BLOB";
+        case Types.DERBY_SQLTYPE_CLOB:
+        case Types.DERBY_SQLTYPE_NCLOB:
+            return "CLOB";
+        case Types.DERBY_SQLTYPE_VARCHAR:
+        case Types.DERBY_SQLTYPE_NVARCHAR:
+            if (jdbcType == Types.VARBINARY) {
+                return "VARCHAR FOR BIT DATA";
+            } else {
+                return "VARCHAR";
+            }
+        case Types.DERBY_SQLTYPE_CHAR:
+        case Types.DERBY_SQLTYPE_NCHAR:
+            if (jdbcType == Types.BINARY) {
+                return "CHAR FOR BIT DATA";
+            } else {
+                return "CHAR";
+            }
+        case Types.DERBY_SQLTYPE_LONG:
+        case Types.DERBY_SQLTYPE_NLONG:
+            if (jdbcType == Types.LONGVARBINARY) {
+                return "LONG VARCHAR FOR BIT DATA";
+            } else {
+                return "LONG VARCHAR";
+            }
+        case Types.DERBY_SQLTYPE_CSTR:
+        case Types.DERBY_SQLTYPE_NCSTR:
+            return "SBCS";
+        case Types.DERBY_SQLTYPE_FLOAT:
+        case Types.DERBY_SQLTYPE_NFLOAT:
+            if (jdbcType == Types.DOUBLE) {
+                return "DOUBLE";
+            }
+            if (jdbcType == Types.REAL) {
+                return "REAL";
+            }
+        case Types.DERBY_SQLTYPE_DECIMAL:
+        case Types.DERBY_SQLTYPE_NDECIMAL:
+            return "DECIMAL";
+        case Types.DERBY_SQLTYPE_BIGINT:
+        case Types.DERBY_SQLTYPE_NBIGINT:
+            return "BIGINT";
+        case Types.DERBY_SQLTYPE_INTEGER:
+        case Types.DERBY_SQLTYPE_NINTEGER:
+            return "INTEGER";
+        case Types.DERBY_SQLTYPE_SMALL:
+        case Types.DERBY_SQLTYPE_NSMALL:
+            return "SMALLINT";
+        case Types.DERBY_SQLTYPE_NUMERIC:
+        case Types.DERBY_SQLTYPE_NNUMERIC:
+            return "NUMERIC";
         default:
-          break;
-      }
-    }
-    return false;
-  }
-
-  // Cache the hashtable in ColumnMetaData.
-  int findColumnX (String columnName) throws SqlException
-  {
-    // Create cache if it doesn't exist
-    if (columnNameToIndexCache_ == null) {
-      columnNameToIndexCache_ = new java.util.Hashtable ();
-    }
-    else { // Check cache for mapping
-      Integer index = (Integer) columnNameToIndexCache_.get (columnName);
-      if (index != null)
-        return index.intValue ();
+            throw new SqlException(logWriter_, "Not supported");
+        }
     }
 
-    // Ok, we'll have to search the metadata
-    for (int col = 0; col < this.columns_; col++) {
-      if (this.sqlName_ != null && // sqlName comes from an optional group
-          this.sqlName_[col] != null &&
-          this.sqlName_[col].equalsIgnoreCase (columnName)) {
-        // Found it, add it to the cache
-        columnNameToIndexCache_.put (columnName, new Integer (col+1));
-        return col+1;
-      }
+    public boolean isReadOnly(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        if (sqlxUpdatable_ == null) {
+            return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY); // If no extended describe, return resultSet's concurrecnty
+        }
+        return sqlxUpdatable_[column - 1] == 0; // PROTOCOL 0 means not updatable, 1 means updatable
     }
-    throw new SqlException (logWriter_, "Invalid argument: unknown column name " + columnName);
-  }
 
-  // assign ordinal position as the column name if null.
-  void assignColumnName (int column)
-  {
-    if (columnNameToIndexCache_ == null)
-      columnNameToIndexCache_ = new java.util.Hashtable ();
-    String columnName = (new Integer(column)).toString();
-    columnNameToIndexCache_.put (columnName, new Integer (column));
-    sqlName_[column-1] = columnName;
-  }
+    public boolean isWritable(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        if (sqlxUpdatable_ == null) {
+            return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_UPDATABLE); // If no extended describe, return resultSet's concurrency
+        }
+        return sqlxUpdatable_[column - 1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
+    }
 
-  public boolean columnIsNotInUnicode (int index)
-  {
-    return (sqlCcsid_[index] != 1208);
-  }
+    public boolean isDefinitelyWritable(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+        if (sqlxUpdatable_ == null) {
+            return false;
+        }
+        return sqlxUpdatable_[column - 1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
+    }
+
+    //--------------------------jdbc 2.0-----------------------------------
+
+    public String getColumnClassName(int column) throws SqlException {
+        checkForClosedStatement();
+        checkForValidColumnIndex(column);
+
+        int jdbcType = types_[column - 1];
+        switch (jdbcType) {
+        case java.sql.Types.BIT:
+            return "java.lang.Boolean";
+        case java.sql.Types.TINYINT:
+            return "java.lang.Integer";
+        case Types.SMALLINT:
+            return "java.lang.Integer";
+        case Types.INTEGER:
+            return "java.lang.Integer";
+        case Types.BIGINT:
+            return "java.lang.Long";
+        case java.sql.Types.FLOAT:
+            return "java.lang.Double";
+        case Types.REAL:
+            return "java.lang.Float";
+        case Types.DOUBLE:
+            return "java.lang.Double";
+        case java.sql.Types.NUMERIC:
+        case Types.DECIMAL:
+            return "java.math.BigDecimal";
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+            return "java.lang.String";
+        case Types.DATE:
+            return "java.sql.Date";
+        case Types.TIME:
+            return "java.sql.Time";
+        case Types.TIMESTAMP:
+            return "java.sql.Timestamp";
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+            return "byte[]";
+        case java.sql.Types.STRUCT:
+            return "java.sql.Struct";
+        case java.sql.Types.ARRAY:
+            return "java.sql.Array";
+        case Types.BLOB:
+            return "java.sql.Blob";
+        case Types.CLOB:
+            return "java.sql.Clob";
+        case java.sql.Types.REF:
+            return "java.sql.Ref";
+        default:
+            throw new SqlException(logWriter_, "Not supported");
+        }
+    }
+
+    //----------------------------helper methods----------------------------------
+
+
+    void checkForValidColumnIndex(int column) throws SqlException {
+        if (column < 1 || column > columns_) {
+            throw new SqlException(logWriter_, "Invalid argument: column index " +
+                    column + " is out of range.");
+        }
+    }
+
+    // If the input parameter has been set, return true, else return false.
+    private boolean isParameterModeGuessedAsAnInput(int parameterIndex) {
+        if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeIn ||
+                sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeInOut) {
+            return true;
+        }
+        return false;
+    }
+
+    // Does OUT parm registration rely on extended describe?
+    // If the output parameter has been registered, return true, else return false.
+    public boolean isParameterModeGuessedAsOutput(int parameterIndex) {
+        return sqlxParmmode_[parameterIndex - 1] >= java.sql.ParameterMetaData.parameterModeInOut;
+    }
+
+    // Only called when column meta data is not described. Called by setXXX methods.
+    public void guessInputParameterMetaData(int parameterIndex,
+                                            int jdbcType) throws SqlException {
+        guessInputParameterMetaData(parameterIndex, jdbcType, 0);
+    }
+
+    private void setParmModeForInputParameter(int parameterIndex) {
+        if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeOut) {
+            sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeInOut;
+        } else if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeUnknown) {
+            sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeIn;
+        }
+    }
+
+    // Only called when column meta data is not described. Called by setXXX methods.
+    // Scale is only applied for Decimal or Numeric JDBC type.
+    public void guessInputParameterMetaData(int parameterIndex,
+                                            int jdbcType,
+                                            int scale) throws SqlException {
+        setParmModeForInputParameter(parameterIndex);
+        int driverType = getInternalTypeForGuessedOrRegisteredJdbcType(jdbcType);
+        // if output parameter has been registered already
+        if (isParameterModeGuessedAsOutput(parameterIndex)) {
+            if (!isCompatibleDriverTypes(types_[parameterIndex - 1], driverType)) {
+                throw new SqlException(logWriter_, "The jdbcType " + jdbcType + " does not match between the setter method and " +
+                        "the registerOutParameter method.");
+            } else {
+                return; // don't bother guessing if the parameter was already registered
+            }
+        }
+        guessParameterMetaDataBasedOnSupportedDriverType(parameterIndex, jdbcType == java.sql.Types.BIGINT, driverType, scale);
+    }
+
+    private void setParmModeForOutputParameter(int parameterIndex) {
+        if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeIn) {
+            sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeInOut;
+        } else if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeUnknown) {
+            sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeOut;
+        }
+    }
+
+    // Only called when column meta data is not described, called by registerOutParameter methods.
+    public void guessOutputParameterMetaData(int parameterIndex,
+                                             int jdbcType,
+                                             int scale) throws SqlException {
+        setParmModeForOutputParameter(parameterIndex);
+        int driverType = getInternalTypeForGuessedOrRegisteredJdbcType(jdbcType);
+        if (isParameterModeGuessedAsAnInput(parameterIndex)) { // if input parameter has been set already
+            // Verify that "set" and "registered" types are compatible.
+            if (!isCompatibleDriverTypes(driverType, types_[parameterIndex - 1])) {
+                throw new SqlException(logWriter_, "The jdbcType does not match between the setter method and " +
+                        "the registerOutParameter method.");
+            }
+            // the registered type will take precedence over any previously guessed input "set" type
+        }
+        guessParameterMetaDataBasedOnSupportedDriverType(parameterIndex, jdbcType == java.sql.Types.BIGINT, driverType, scale);
+    }
+
+    private boolean isCompatibleDriverTypes(int registeredType, int guessedInputType) {
+        switch (registeredType) {
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+            return guessedInputType == Types.CHAR || guessedInputType == Types.VARCHAR || guessedInputType == Types.LONGVARCHAR;
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+            return guessedInputType == Types.BINARY || guessedInputType == Types.VARBINARY || guessedInputType == Types.LONGVARBINARY;
+        default:
+            return registeredType == guessedInputType;
+        }
+    }
+
+    // Only used when describe information is not available.
+    private int getInternalTypeForGuessedOrRegisteredJdbcType(int guessedOrRegisteredJdbcType) throws SqlException {
+        switch (guessedOrRegisteredJdbcType) {
+        case java.sql.Types.BIT:
+        case java.sql.Types.TINYINT:
+        case java.sql.Types.SMALLINT:
+            return Types.SMALLINT;
+        case java.sql.Types.INTEGER:
+            return Types.INTEGER;
+        case java.sql.Types.BIGINT:
+            return Types.BIGINT;
+        case java.sql.Types.REAL:
+            return Types.REAL;
+        case java.sql.Types.DOUBLE:
+        case java.sql.Types.FLOAT:
+            return Types.DOUBLE;
+        case java.sql.Types.DECIMAL:
+        case java.sql.Types.NUMERIC:
+            return Types.DECIMAL;
+        case java.sql.Types.DATE:
+            return Types.DATE;
+        case java.sql.Types.TIME:
+            return Types.TIME;
+        case java.sql.Types.TIMESTAMP:
+            return Types.TIMESTAMP;
+        case java.sql.Types.CHAR:
+            return Types.CHAR;
+        case java.sql.Types.VARCHAR:
+            return Types.VARCHAR;
+        case java.sql.Types.LONGVARCHAR:
+            return Types.LONGVARCHAR;
+        case java.sql.Types.BINARY:
+            return Types.BINARY;
+        case java.sql.Types.VARBINARY:
+            return Types.VARBINARY;
+        case java.sql.Types.LONGVARBINARY:
+            return Types.LONGVARBINARY;
+        case java.sql.Types.BLOB:
+            return Types.BLOB;
+        case java.sql.Types.CLOB:
+            return Types.CLOB;
+        case java.sql.Types.NULL:
+        case java.sql.Types.OTHER:
+            throw new SqlException(logWriter_, "Jdbc type " + guessedOrRegisteredJdbcType + " not yet supported.");
+        default:
+            throw new SqlException(logWriter_, "Unrecognized jdbc type " + guessedOrRegisteredJdbcType);
+        }
+    }
+
+    private void guessParameterMetaDataBasedOnSupportedDriverType(int parameterIndex,
+                                                                  boolean isBigInt,
+                                                                  int driverType,
+                                                                  int scale) throws SqlException {
+        switch (driverType) {
+        case Types.SMALLINT:
+            guessParameterMetaData(parameterIndex, driverType, 2, 0, 0);
+            break;
+        case Types.INTEGER:
+            guessParameterMetaData(parameterIndex, driverType, 4, 0, 0);
+            break;
+        case Types.BIGINT:
+            guessParameterMetaData(parameterIndex, driverType, 8, 0, 0);
+            break;
+        case Types.REAL:
+            guessParameterMetaData(parameterIndex, driverType, 4, 0, 0);
+            break;
+        case Types.DOUBLE:
+            guessParameterMetaData(parameterIndex, driverType, 8, 0, 0);
+            break;
+        case Types.DECIMAL:
+            if (isBigInt) {
+                guessParameterMetaData(parameterIndex, driverType, 0, 19, 0);
+            } else {
+                guessParameterMetaData(parameterIndex, driverType, 0, 31, scale);
+            }
+            break;
+        case Types.DATE:
+            guessParameterMetaData(parameterIndex, driverType, 10, 0, 0);
+            break;
+        case Types.TIME:
+            guessParameterMetaData(parameterIndex, driverType, 8, 0, 0);
+            break;
+        case Types.TIMESTAMP:
+            guessParameterMetaData(parameterIndex, driverType, 26, 0, 0);
+            break;
+        case Types.CHAR:
+        case Types.VARCHAR:
+            guessParameterMetaData(parameterIndex, driverType, 32672, 0, 0);
+            break;
+        case Types.LONGVARCHAR:
+            guessParameterMetaData(parameterIndex, driverType, 32700, 0, 0);
+            break;
+        case Types.BINARY:
+        case Types.VARBINARY:
+            guessParameterMetaData(parameterIndex, driverType, 4000, 0, 0);
+            break;
+        case Types.LONGVARBINARY:
+            guessParameterMetaData(parameterIndex, driverType, 32700, 0, 0);
+            break;
+        case Types.BLOB:
+            // 32768 will cause 8004 for a null placeholder length (could hard code in NET layer)
+            guessParameterMetaData(parameterIndex, driverType, 32768, 0, 0);
+            break;
+        case Types.CLOB:
+            // 32768 will cause 8004 for a null placeholder length (could hard code in NET layer)
+            guessParameterMetaData(parameterIndex, driverType, 32768, 0, 0);
+            break;
+        default:
+            throw new SqlException(logWriter_, "Unrecognized driver type " + driverType);
+        }
+    }
+
+    // Only called when column meta data is not described
+    private void guessParameterMetaData(int parameterIndex,
+                                        int type,
+                                        int length,
+                                        int precision,
+                                        int scale) {
+        // Always guess that the column is nullable
+        nullable_[parameterIndex - 1] = true;
+        types_[parameterIndex - 1] = type;
+        sqlLength_[parameterIndex - 1] = length;
+        sqlPrecision_[parameterIndex - 1] = precision;
+        sqlScale_[parameterIndex - 1] = scale;
+        sqlType_[parameterIndex - 1] = mapDriverToSqlType(type, true);
+    }
+
+    int mapDriverToSqlType(int type, boolean nullable) {
+        int sqlType = 0;
+        switch (type) {
+        case java.sql.Types.SMALLINT:
+            sqlType = Types.DERBY_SQLTYPE_NSMALL;
+            break;
+        case java.sql.Types.INTEGER:
+            sqlType = Types.DERBY_SQLTYPE_NINTEGER;
+            break;
+        case java.sql.Types.BIGINT:
+            sqlType = Types.DERBY_SQLTYPE_NBIGINT;
+            break;
+        case java.sql.Types.REAL:
+        case java.sql.Types.DOUBLE:
+        case java.sql.Types.FLOAT:
+            sqlType = Types.DERBY_SQLTYPE_NFLOAT;
+            break;
+        case java.sql.Types.DATE:
+            sqlType = Types.DERBY_SQLTYPE_NDATE;
+            break;
+        case java.sql.Types.TIME:
+            sqlType = Types.DERBY_SQLTYPE_NTIME;
+            break;
+        case java.sql.Types.TIMESTAMP:
+            sqlType = Types.DERBY_SQLTYPE_NTIMESTAMP;
+            break;
+        case java.sql.Types.CHAR:
+        case java.sql.Types.VARCHAR:
+            sqlType = Types.DERBY_SQLTYPE_NVARCHAR;
+            break;
+        case java.sql.Types.LONGVARCHAR:
+            sqlType = Types.DERBY_SQLTYPE_NLONG;
+            break;
+        case java.sql.Types.BINARY:
+        case java.sql.Types.VARBINARY:
+            sqlType = Types.DERBY_SQLTYPE_NVARCHAR;
+            break;
+        case java.sql.Types.LONGVARBINARY:
+            sqlType = Types.DERBY_SQLTYPE_NLONG;
+            break;
+        case java.sql.Types.NUMERIC:
+        case java.sql.Types.DECIMAL:
+            sqlType = Types.DERBY_SQLTYPE_NDECIMAL;
+            break;
+        case java.sql.Types.BLOB:
+            sqlType = Types.DERBY_SQLTYPE_NBLOB;
+            break;
+        case java.sql.Types.CLOB:
+            sqlType = Types.DERBY_SQLTYPE_NCLOB;
+            break;
+        default:
+            break; // bug check
+        }
+        if (!nullable) {
+            sqlType--;
+        }
+        return sqlType;
+    }
+
+
+    public void setLogWriter(LogWriter logWriter) {
+        logWriter_ = logWriter;
+    }
+
+    private void nullDataForGC() {
+        columns_ = 0;
+        nullable_ = null;
+        types_ = null;
+        singleMixedByteOrDouble_ = null;
+        sqldRdbnam_ = null;
+        sqldSchema_ = null;
+        sqlPrecision_ = null;
+        sqlScale_ = null;
+        sqlLength_ = null;
+        sqlType_ = null;
+        sqlCcsid_ = null;
+        sqlName_ = null;
+        sqlLabel_ = null;
+        sqlUnnamed_ = null;
+        sqlComment_ = null;
+        sqlxKeymem_ = null;
+        sqlxGenerated_ = null;
+        sqlxParmmode_ = null;
+        sqlxCorname_ = null;
+        sqlxName_ = null;
+        sqlxBasename_ = null;
+        sqlxUpdatable_ = null;
+        sqlxSchema_ = null;
+        sqlxRdbnam_ = null;
+        clientParamtertype_ = null;
+        types_ = null;
+    }
+
+    public boolean hasLobColumns() {
+        for (int i = 0; i < columns_; i++) {
+            switch (org.apache.derby.client.am.Utils.getNonNullableSqlType(sqlType_[i])) {
+            case org.apache.derby.client.am.Types.DERBY_SQLTYPE_BLOB:
+            case org.apache.derby.client.am.Types.DERBY_SQLTYPE_CLOB:
+                return true;
+            default:
+                break;
+            }
+        }
+        return false;
+    }
+
+    // Cache the hashtable in ColumnMetaData.
+    int findColumnX(String columnName) throws SqlException {
+        // Create cache if it doesn't exist
+        if (columnNameToIndexCache_ == null) {
+            columnNameToIndexCache_ = new java.util.Hashtable();
+        } else { // Check cache for mapping
+            Integer index = (Integer) columnNameToIndexCache_.get(columnName);
+            if (index != null) {
+                return index.intValue();
+            }
+        }
+
+        // Ok, we'll have to search the metadata
+        for (int col = 0; col < this.columns_; col++) {
+            if (this.sqlName_ != null && // sqlName comes from an optional group
+                    this.sqlName_[col] != null &&
+                    this.sqlName_[col].equalsIgnoreCase(columnName)) {
+                // Found it, add it to the cache
+                columnNameToIndexCache_.put(columnName, new Integer(col + 1));
+                return col + 1;
+            }
+        }
+        throw new SqlException(logWriter_, "Invalid argument: unknown column name " + columnName);
+    }
+
+    // assign ordinal position as the column name if null.
+    void assignColumnName(int column) {
+        if (columnNameToIndexCache_ == null) {
+            columnNameToIndexCache_ = new java.util.Hashtable();
+        }
+        String columnName = (new Integer(column)).toString();
+        columnNameToIndexCache_.put(columnName, new Integer(column));
+        sqlName_[column - 1] = columnName;
+    }
+
+    public boolean columnIsNotInUnicode(int index) {
+        return (sqlCcsid_[index] != 1208);
+    }
 
 }

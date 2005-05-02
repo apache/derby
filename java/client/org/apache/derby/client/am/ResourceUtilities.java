@@ -22,42 +22,34 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.client.resources.ResourceKeys;
 
-public final class ResourceUtilities
-{
-  private final static Object[] emptyArgs__ = new Object[] {};
+public final class ResourceUtilities {
+    private final static Object[] emptyArgs__ = new Object[]{};
 
-  // Get resourced text and substitute arguments into text delimited with {i}
-  // using Java's builtin message formatter.
-  static public String getResource (String key, Object[] args)
-  {
-    try {
-      return java.text.MessageFormat.format (Configuration.dncResources__.getString (key), args);
+    // Get resourced text and substitute arguments into text delimited with {i}
+    // using Java's builtin message formatter.
+    static public String getResource(String key, Object[] args) {
+        try {
+            return java.text.MessageFormat.format(Configuration.dncResources__.getString(key), args);
+        } catch (java.util.MissingResourceException e) {
+            try {
+                return java.text.MessageFormat.format(Configuration.dncResources__.getString(ResourceKeys.missingResource__01),
+                        new Object[]{e.getKey(), e.getClassName()});
+            } catch (java.util.MissingResourceException e2) {
+                return java.text.MessageFormat.format("No resource for key {0} could be found in resource bundle {1}.",
+                        new Object[]{e.getKey(), e.getClassName()});
+            }
+        }
     }
-    catch (java.util.MissingResourceException e) {
-      try {
-        return java.text.MessageFormat.format (
-          Configuration.dncResources__.getString (ResourceKeys.missingResource__01),
-          new Object[] {e.getKey(), e.getClassName ()});
-      }
-      catch (java.util.MissingResourceException e2) {
-        return java.text.MessageFormat.format (
-          "No resource for key {0} could be found in resource bundle {1}.",
-          new Object[] {e.getKey(), e.getClassName ()});
-      }
+
+    static public String getResource(String key) {
+        return getResource(key, emptyArgs__);
     }
-  }
 
-  static public String getResource (String key)
-  {
-    return getResource (key, emptyArgs__);
-  }
-
-  // This method is necessary for java.text.MessageFormat.format to work
-  // properly because arguments may not be null.
-  static String getMessage (java.lang.Exception e)
-  {
-    return (e.getMessage() == null) ? "" : e.getMessage();
-  }
+    // This method is necessary for java.text.MessageFormat.format to work
+    // properly because arguments may not be null.
+    static String getMessage(java.lang.Exception e) {
+        return (e.getMessage() == null) ? "" : e.getMessage();
+    }
 
 }
 

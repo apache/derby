@@ -21,138 +21,136 @@
 package org.apache.derby.client.net;
 
 
-
-public class NetSqldta extends NetCursor
-{
-  private NetConnection netConnection_;
+public class NetSqldta extends NetCursor {
+    private NetConnection netConnection_;
 
 
-  public NetSqldta (NetAgent netAgent)
-  {
-    super (netAgent);
-    netConnection_ = netAgent.netConnection_;
-  }
-
-  public boolean next () throws org.apache.derby.client.am.SqlException
-  {
-    if (allRowsReceivedFromServer_)
-      return false;
-    else {
-      allRowsReceivedFromServer_ = true;
-      return true;
+    public NetSqldta(NetAgent netAgent) {
+        super(netAgent);
+        netConnection_ = netAgent.netConnection_;
     }
-  }
 
-  protected boolean calculateColumnOffsetsForRow ()
-  {
-    int colNullIndicator = CodePoint.NULLDATA;
-    int length ;
-
-    extdtaPositions_.clear();  // reset positions for this row
-
-    // read the da null indicator
-    if (readFdocaOneByte() == 0xff)
-      return false;
-
-    incrementRowsReadEvent();
-    // Use the arrays defined on the Cursor for forward-only cursors.
-    // can they ever be null
-    if (columnDataPosition_ == null || columnDataComputedLength_ == null || isNull_ == null)
-      allocateColumnOffsetAndLengthArrays ();
-
-    // Loop through the columns
-    for (int index = 0; index < columns_; index++) {
-      // If column is nullable, read the 1-byte null indicator.
-      if (nullable_[index])
-        // Need to pass the column index so all previously calculated offsets can be
-        // readjusted if the query block splits on a column null indicator.
-
-        // null indicators from FD:OCA data
-        // 0 to 127: a data value will flow.
-        // -1 to -128: no data value will flow.
-        colNullIndicator = readFdocaOneByte ();
-
-      // If non-null column data
-      if (!nullable_[index] || (colNullIndicator >= 0 && colNullIndicator <= 127)) {
-        isNull_[index] = false;
-
-        switch (typeToUseForComputingDataLength_[index]) {
-        // for variable character string and variable byte string,
-        // there are 2-byte of length in front of the data
-        case Typdef.TWOBYTELENGTH:
-          columnDataPosition_[index] = position_;
-          length = readFdocaTwoByteLength ();
-          // skip length + the 2-byte length field
-          if (isGraphic_[index])
-            columnDataComputedLength_[index] = skipFdocaBytes (length*2) + 2;
-          else
-            columnDataComputedLength_[index] = skipFdocaBytes (length) + 2;
-          break;
-
-          // for short variable character string and short variable byte string,
-          // there is a 1-byte length in front of the data
-        case Typdef.ONEBYTELENGTH:
-          columnDataPosition_[index] = position_;
-          length = readFdocaOneByte ();
-          // skip length + the 1-byte length field
-          if (isGraphic_[index])
-            columnDataComputedLength_[index] = skipFdocaBytes (length*2) + 1;
-          else
-            columnDataComputedLength_[index] = skipFdocaBytes (length) + 1;
-          break;
-
-        // For decimal columns, determine the precision, scale, and the representation
-        case Typdef.DECIMALLENGTH:
-          columnDataPosition_[index] = position_;
-          columnDataComputedLength_[index] = skipFdocaBytes (getDecimalLength(index));
-          break;
-
-        case Typdef.LOBLENGTH:
-          columnDataPosition_[index] = position_;
-          columnDataComputedLength_[index] = this.skipFdocaBytes (fdocaLength_[index] & 0x7fff);
-          break;
-
-        default:
-          columnDataPosition_[index] = position_;
-          if (isGraphic_[index])
-            columnDataComputedLength_[index] = skipFdocaBytes (fdocaLength_[index]*2);
-          else
-            columnDataComputedLength_[index] = skipFdocaBytes (fdocaLength_[index]);
-          break;
+    public boolean next() throws org.apache.derby.client.am.SqlException {
+        if (allRowsReceivedFromServer_) {
+            return false;
+        } else {
+            allRowsReceivedFromServer_ = true;
+            return true;
         }
-      }
-      else if ((colNullIndicator & 0x80) == 0x80) {
-        // Null data. Set the isNull indicator to true.
-        isNull_[index] = true;
-      }
     }
 
-    if (!allRowsReceivedFromServer_)
-      calculateLobColumnPositionsForRow();
+    protected boolean calculateColumnOffsetsForRow() {
+        int colNullIndicator = CodePoint.NULLDATA;
+        int length;
 
-    return true; // hardwired for now, this means the current row position is a valid position
-  }
+        extdtaPositions_.clear();  // reset positions for this row
+
+        // read the da null indicator
+        if (readFdocaOneByte() == 0xff) {
+            return false;
+        }
+
+        incrementRowsReadEvent();
+        // Use the arrays defined on the Cursor for forward-only cursors.
+        // can they ever be null
+        if (columnDataPosition_ == null || columnDataComputedLength_ == null || isNull_ == null) {
+            allocateColumnOffsetAndLengthArrays();
+        }
+
+        // Loop through the columns
+        for (int index = 0; index < columns_; index++) {
+            // If column is nullable, read the 1-byte null indicator.
+            if (nullable_[index])
+            // Need to pass the column index so all previously calculated offsets can be
+            // readjusted if the query block splits on a column null indicator.
+
+            // null indicators from FD:OCA data
+            // 0 to 127: a data value will flow.
+            // -1 to -128: no data value will flow.
+            {
+                colNullIndicator = readFdocaOneByte();
+            }
+
+            // If non-null column data
+            if (!nullable_[index] || (colNullIndicator >= 0 && colNullIndicator <= 127)) {
+                isNull_[index] = false;
+
+                switch (typeToUseForComputingDataLength_[index]) {
+                // for variable character string and variable byte string,
+                // there are 2-byte of length in front of the data
+                case Typdef.TWOBYTELENGTH:
+                    columnDataPosition_[index] = position_;
+                    length = readFdocaTwoByteLength();
+                    // skip length + the 2-byte length field
+                    if (isGraphic_[index]) {
+                        columnDataComputedLength_[index] = skipFdocaBytes(length * 2) + 2;
+                    } else {
+                        columnDataComputedLength_[index] = skipFdocaBytes(length) + 2;
+                    }
+                    break;
+
+                    // for short variable character string and short variable byte string,
+                    // there is a 1-byte length in front of the data
+                case Typdef.ONEBYTELENGTH:
+                    columnDataPosition_[index] = position_;
+                    length = readFdocaOneByte();
+                    // skip length + the 1-byte length field
+                    if (isGraphic_[index]) {
+                        columnDataComputedLength_[index] = skipFdocaBytes(length * 2) + 1;
+                    } else {
+                        columnDataComputedLength_[index] = skipFdocaBytes(length) + 1;
+                    }
+                    break;
+
+                    // For decimal columns, determine the precision, scale, and the representation
+                case Typdef.DECIMALLENGTH:
+                    columnDataPosition_[index] = position_;
+                    columnDataComputedLength_[index] = skipFdocaBytes(getDecimalLength(index));
+                    break;
+
+                case Typdef.LOBLENGTH:
+                    columnDataPosition_[index] = position_;
+                    columnDataComputedLength_[index] = this.skipFdocaBytes(fdocaLength_[index] & 0x7fff);
+                    break;
+
+                default:
+                    columnDataPosition_[index] = position_;
+                    if (isGraphic_[index]) {
+                        columnDataComputedLength_[index] = skipFdocaBytes(fdocaLength_[index] * 2);
+                    } else {
+                        columnDataComputedLength_[index] = skipFdocaBytes(fdocaLength_[index]);
+                    }
+                    break;
+                }
+            } else if ((colNullIndicator & 0x80) == 0x80) {
+                // Null data. Set the isNull indicator to true.
+                isNull_[index] = true;
+            }
+        }
+
+        if (!allRowsReceivedFromServer_) {
+            calculateLobColumnPositionsForRow();
+        }
+
+        return true; // hardwired for now, this means the current row position is a valid position
+    }
 
 
+    private int skipFdocaBytes(int length) {
+        position_ += length;
+        return length;
+    }
 
-  private int skipFdocaBytes (int length)
-  {
-    position_ += length;
-    return length;
-  }
-
-  private int readFdocaOneByte ()
-  {
-    return dataBuffer_[position_++] & 0xff;
-  }
+    private int readFdocaOneByte() {
+        return dataBuffer_[position_++] & 0xff;
+    }
 
 
-  private int readFdocaTwoByteLength ()
-  {
-    return
-      ((dataBuffer_[position_++] & 0xff) << 8) +
-      ((dataBuffer_[position_++] & 0xff) << 0);
-  }
+    private int readFdocaTwoByteLength() {
+        return
+                ((dataBuffer_[position_++] & 0xff) << 8) +
+                ((dataBuffer_[position_++] & 0xff) << 0);
+    }
 
 
 }

@@ -22,14 +22,11 @@ package org.apache.derby.client.resources;
 
 
 /**
- * <p>
- * These keys are provided only as a convenience for managing
- * locale-specific resource strings.
- * These keys will change with each release,
- * some may be added and some may be deleted,
- * so do not use these keys for any purpose other than a version-
- * dependent resource bundle.
- * <p>
+ * <p/>
+ * These keys are provided only as a convenience for managing locale-specific resource strings. These keys will change
+ * with each release, some may be added and some may be deleted, so do not use these keys for any purpose other than a
+ * version- dependent resource bundle.
+ * <p/>
  * The resource for any key can be obtained as follows:
  * <pre>
  * java.util.ResourceBundle resources =
@@ -38,24 +35,24 @@ package org.apache.derby.client.resources;
  * </pre>
  *
  * @see Resources
- **/
-public class ResourceKeys
-{
-  // Define a private constructor to prevent default public constructor
-  private ResourceKeys () {}
+ */
+public class ResourceKeys {
+    // Define a private constructor to prevent default public constructor
+    private ResourceKeys() {
+    }
 
 
-  //-----------------Miscellaneous text keys------------------------------------
-  final static public String driverOriginationIndicator = "1";
-  final static public String engineOriginationIndicator = "2";
-  final static public String companyName = "3";
+    //-----------------Miscellaneous text keys------------------------------------
+    final static public String driverOriginationIndicator = "1";
+    final static public String engineOriginationIndicator = "2";
+    final static public String companyName = "3";
 
-  //-----------------Driver.getPropertyInfo() descriptions----------------------
-  final static public String propertyDescription__user = "7";
-  final static public String propertyDescription__password = "8";
-  final static public String propertyDescription__characterEncoding = "9";
-  final static public String propertyDescription__planName = "10";
+    //-----------------Driver.getPropertyInfo() descriptions----------------------
+    final static public String propertyDescription__user = "7";
+    final static public String propertyDescription__password = "8";
+    final static public String propertyDescription__characterEncoding = "9";
+    final static public String propertyDescription__planName = "10";
 
-  //-----------------java.util.MissingResourceException-------------------------
-  final static public String missingResource__01 = "4";
+    //-----------------java.util.MissingResourceException-------------------------
+    final static public String missingResource__01 = "4";
 }

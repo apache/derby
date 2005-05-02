@@ -23,27 +23,24 @@ package org.apache.derby.client.am;
 
 // This class associates the SQL states and error codes with every possible exception
 // as distinguished by a unique resourceKey.
-public class ErrorKey
-{
-  private String resourceKey_;
-  private String sqlState_;
-  private int errorCode_;
+
+public class ErrorKey {
+    private String resourceKey_;
+    private String sqlState_;
+    private int errorCode_;
 
 
-  String getResourceKey ()
-  {
-    return resourceKey_;
-  }
+    String getResourceKey() {
+        return resourceKey_;
+    }
 
-  String getSQLState ()
-  {
-    return sqlState_;
-  }
+    String getSQLState() {
+        return sqlState_;
+    }
 
-  int getErrorCode ()
-  {
-    return errorCode_;
-  }
+    int getErrorCode() {
+        return errorCode_;
+    }
 }
 
 

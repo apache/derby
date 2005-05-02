@@ -24,34 +24,31 @@ package org.apache.derby.client.am;
 /**
  * Java 2 PrivilegedAction encapsulation of System getProperties processing
  */
-public class GetSystemPropertiesAction implements java.security.PrivilegedAction
-{
-  // System properties values, i.e. output from System.getProperties()
-  private java.util.Properties systemProperties_ = null;
+public class GetSystemPropertiesAction implements java.security.PrivilegedAction {
+    // System properties values, i.e. output from System.getProperties()
+    private java.util.Properties systemProperties_ = null;
 
-  //============================== Constructor ==============================
+    //============================== Constructor ==============================
 
-  //-------------------- GetSystemPropertiesAction --------------------
-  /**
-   * Constructor.
-   */
-  public GetSystemPropertiesAction ()
-  {}
+    //-------------------- GetSystemPropertiesAction --------------------
+    /**
+     * Constructor.
+     */
+    public GetSystemPropertiesAction() {
+    }
 
-  /**
-   * Performs the privileged action of System.getProperties()
-   */
-  public Object run()
-  {
-    this.systemProperties_ = System.getProperties();
-    return this.systemProperties_;
-  }
+    /**
+     * Performs the privileged action of System.getProperties()
+     */
+    public Object run() {
+        this.systemProperties_ = System.getProperties();
+        return this.systemProperties_;
+    }
 
-  /**
-   * Accessor for system properties (used after run() method invocation)
-   */
-  public java.util.Properties getSystemProperties()
-  {
-    return this.systemProperties_;
-  }
+    /**
+     * Accessor for system properties (used after run() method invocation)
+     */
+    public java.util.Properties getSystemProperties() {
+        return this.systemProperties_;
+    }
 }

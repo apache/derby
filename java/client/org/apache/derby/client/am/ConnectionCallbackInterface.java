@@ -24,11 +24,15 @@ package org.apache.derby.client.am;
 // certain events that may originate from the material or common layers.
 //
 // Reply implementations may update connection state via this interface.
-public interface ConnectionCallbackInterface
-{
-  public void completeLocalCommit ();
-  public void completeLocalRollback ();
-  public void completeAbnormalUnitOfWork ();
-  public void completeChainBreakingDisconnect ();
-  public void completeSqlca (Sqlca e);
+
+public interface ConnectionCallbackInterface {
+    public void completeLocalCommit();
+
+    public void completeLocalRollback();
+
+    public void completeAbnormalUnitOfWork();
+
+    public void completeChainBreakingDisconnect();
+
+    public void completeSqlca(Sqlca e);
 }

@@ -21,81 +21,78 @@
 package org.apache.derby.client.am;
 
 
-public class ClobWriter extends java.io.Writer
-{
-  private Clob clob_;
-  private long offset_;
+public class ClobWriter extends java.io.Writer {
+    private Clob clob_;
+    private long offset_;
 
-  public ClobWriter()
-  {}
-
-  public ClobWriter(Clob clob, long offset) throws SqlException
-  {
-    clob_ = clob;
-    offset_ = offset;
-
-    if (offset_ - 1 > clob_.sqlLength_)
-      throw new SqlException( clob_.agent_.logWriter_, "Invalid position: " + offset);
-  }
-
-  public void write (int c)
-  {
-    StringBuffer sb = new StringBuffer(clob_.string_.substring(0,(int)offset_-1));
-    sb.append(c);
-    clob_.string_ = sb.toString();
-    clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_. characterStream_ = new java.io.StringReader(clob_.string_);
-    clob_.sqlLength_ = clob_.string_.length();
-    offset_ = clob_.sqlLength_ + 1;
-  }
-
-  public void write(char cbuf[], int off, int len)
-  {
-    if ((off < 0) || (off > cbuf.length) || (len < 0) ||
-        ((off + len) > cbuf.length) || ((off + len) < 0)) {
-        throw new IndexOutOfBoundsException();
+    public ClobWriter() {
     }
-    else if (len == 0) {
-        return;
+
+    public ClobWriter(Clob clob, long offset) throws SqlException {
+        clob_ = clob;
+        offset_ = offset;
+
+        if (offset_ - 1 > clob_.sqlLength_) {
+            throw new SqlException(clob_.agent_.logWriter_, "Invalid position: " + offset);
+        }
     }
-    StringBuffer sb = new StringBuffer(clob_.string_.substring(0,(int)offset_-1));
-    sb.append(cbuf,off,len);
-    clob_.string_ = sb.toString();
-    clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_. characterStream_ = new java.io.StringReader(clob_.string_);
-    clob_.sqlLength_ = clob_.string_.length();
-    offset_ = clob_.sqlLength_ + 1;
-  }
+
+    public void write(int c) {
+        StringBuffer sb = new StringBuffer(clob_.string_.substring(0, (int) offset_ - 1));
+        sb.append(c);
+        clob_.string_ = sb.toString();
+        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
+        clob_.sqlLength_ = clob_.string_.length();
+        offset_ = clob_.sqlLength_ + 1;
+    }
+
+    public void write(char cbuf[], int off, int len) {
+        if ((off < 0) || (off > cbuf.length) || (len < 0) ||
+                ((off + len) > cbuf.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
+        StringBuffer sb = new StringBuffer(clob_.string_.substring(0, (int) offset_ - 1));
+        sb.append(cbuf, off, len);
+        clob_.string_ = sb.toString();
+        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
+        clob_.sqlLength_ = clob_.string_.length();
+        offset_ = clob_.sqlLength_ + 1;
+    }
 
 
-  public void write (String str)
-  {
-    StringBuffer sb = new StringBuffer(clob_.string_.substring(0,(int)offset_-1));
-    sb.append(str);
-    clob_.string_ = sb.toString();
-    clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_. characterStream_ = new java.io.StringReader(clob_.string_);
-    clob_.sqlLength_ = clob_.string_.length();
-    offset_ = clob_.sqlLength_ + 1;
-  }
+    public void write(String str) {
+        StringBuffer sb = new StringBuffer(clob_.string_.substring(0, (int) offset_ - 1));
+        sb.append(str);
+        clob_.string_ = sb.toString();
+        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
+        clob_.sqlLength_ = clob_.string_.length();
+        offset_ = clob_.sqlLength_ + 1;
+    }
 
 
-  public void write(String str, int off, int len)
-  {
-    StringBuffer sb = new StringBuffer(clob_.string_.substring(0,(int)offset_-1));
-    sb.append(str.substring(off, off + len));
-    clob_.string_ = sb.toString();
-    clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
-    clob_. characterStream_ = new java.io.StringReader(clob_.string_);
-    clob_.sqlLength_ = clob_.string_.length();
-    offset_ = clob_.sqlLength_ + 1;
-  }
+    public void write(String str, int off, int len) {
+        StringBuffer sb = new StringBuffer(clob_.string_.substring(0, (int) offset_ - 1));
+        sb.append(str.substring(off, off + len));
+        clob_.string_ = sb.toString();
+        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
+        clob_.sqlLength_ = clob_.string_.length();
+        offset_ = clob_.sqlLength_ + 1;
+    }
 
-  public void flush() {}
-  public void close() throws java.io.IOException {}
+    public void flush() {
+    }
+
+    public void close() throws java.io.IOException {
+    }
 }
 

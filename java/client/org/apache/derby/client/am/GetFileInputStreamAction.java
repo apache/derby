@@ -21,35 +21,30 @@
 package org.apache.derby.client.am;
 
 /**
- * Java 2 PrivilegedExceptionAction encapsulation of creating a new FileInputStream
- * throws FileNotFoundException
+ * Java 2 PrivilegedExceptionAction encapsulation of creating a new FileInputStream throws FileNotFoundException
  */
-public class GetFileInputStreamAction implements java.security.PrivilegedExceptionAction
-{
-  // the pathname used by the input file in the file system
-  private String filePathName_ = null;
-  
-  private String canonicalPath_ = null; 
+public class GetFileInputStreamAction implements java.security.PrivilegedExceptionAction {
+    // the pathname used by the input file in the file system
+    private String filePathName_ = null;
 
-  //-------------------- Constructors --------------------
+    private String canonicalPath_ = null;
 
-  public GetFileInputStreamAction (String filePathName)
-  {
-    filePathName_ = filePathName;
-  }
+    //-------------------- Constructors --------------------
 
-  //-------------------- methods --------------------
+    public GetFileInputStreamAction(String filePathName) {
+        filePathName_ = filePathName;
+    }
 
-  public Object run() throws java.io.IOException
-  {
-    java.io.File file = new java.io.File (filePathName_);
-    java.io.FileInputStream fileInputStream = new java.io.FileInputStream (file);
-    canonicalPath_ = file.getCanonicalPath();
-    return fileInputStream;
-  }
-  
-  public String getCanonicalPath()
-  {
-    return canonicalPath_;
-  }
+    //-------------------- methods --------------------
+
+    public Object run() throws java.io.IOException {
+        java.io.File file = new java.io.File(filePathName_);
+        java.io.FileInputStream fileInputStream = new java.io.FileInputStream(file);
+        canonicalPath_ = file.getCanonicalPath();
+        return fileInputStream;
+    }
+
+    public String getCanonicalPath() {
+        return canonicalPath_;
+    }
 }

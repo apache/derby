@@ -21,48 +21,45 @@
 package org.apache.derby.client.am;
 
 
-public class BlobOutputStream extends java.io.OutputStream
-{
-  private Blob blob_;
-  private long offset_;
+public class BlobOutputStream extends java.io.OutputStream {
+    private Blob blob_;
+    private long offset_;
 
-  public BlobOutputStream (Blob blob, long offset)
-  {
-    blob_ = blob;
-    offset_ = offset;
-    if (offset_ > (blob_.binaryString_.length - blob_.dataOffset_))
-      throw new IndexOutOfBoundsException();
-  }
-  public void write (int b) throws java.io.IOException
-  {
+    public BlobOutputStream(Blob blob, long offset) {
+        blob_ = blob;
+        offset_ = offset;
+        if (offset_ > (blob_.binaryString_.length - blob_.dataOffset_)) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
 
-    byte[] newbuf = new byte[(int)offset_  +  blob_.dataOffset_];
-    System.arraycopy (blob_.binaryString_, 0, newbuf, 0, (int) offset_ -1 +  blob_.dataOffset_);
-    blob_.binaryString_ = newbuf;
-    blob_.binaryString_[(int)offset_ +  blob_.dataOffset_ - 1] = (byte)b;
-    blob_.binaryStream_ = new java.io.ByteArrayInputStream (blob_.binaryString_);
-    blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
-  }
+    public void write(int b) throws java.io.IOException {
 
-  public void write (byte b[], int off, int len) throws java.io.IOException
-  {
-    if (b == null) {
-      throw new NullPointerException();
+        byte[] newbuf = new byte[(int) offset_ + blob_.dataOffset_];
+        System.arraycopy(blob_.binaryString_, 0, newbuf, 0, (int) offset_ - 1 + blob_.dataOffset_);
+        blob_.binaryString_ = newbuf;
+        blob_.binaryString_[(int) offset_ + blob_.dataOffset_ - 1] = (byte) b;
+        blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
+        blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
     }
-    else if ((off < 0) || (off > b.length) || (len < 0) ||
-               ((off + len) > b.length) || ((off + len) < 0)) {
-      throw new IndexOutOfBoundsException();
+
+    public void write(byte b[], int off, int len) throws java.io.IOException {
+        if (b == null) {
+            throw new NullPointerException();
+        } else if ((off < 0) || (off > b.length) || (len < 0) ||
+                ((off + len) > b.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
+        byte[] newbuf = new byte[(int) offset_ - 1 + len + blob_.dataOffset_];
+        System.arraycopy(blob_.binaryString_, 0, newbuf, 0, (int) offset_ - 1 + blob_.dataOffset_);
+        blob_.binaryString_ = newbuf;
+        for (int i = 0; i < len; i++) {
+            blob_.binaryString_[(int) offset_ + i + blob_.dataOffset_ - 1] = b[off + i];
+        }
+        blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
+        blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
     }
-    else if (len == 0) {
-      return;
-    }
-    byte [] newbuf = new byte[(int)offset_ -1 + len  +  blob_.dataOffset_];
-    System.arraycopy(blob_.binaryString_,0,newbuf,0,(int)offset_-1 +  blob_.dataOffset_);
-    blob_.binaryString_ = newbuf;
-    for (int i=0; i<len; i++)
-      blob_.binaryString_[(int)offset_ + i + blob_.dataOffset_ - 1 ] = b[off + i];
-    blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
-    blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
-  }
 }
 

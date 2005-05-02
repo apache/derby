@@ -19,228 +19,215 @@
 */
 
 package org.apache.derby.client.am;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 
-public class Configuration
-{
+import org.apache.derby.iapi.services.info.ProductGenusNames;
+import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
-
-  public static int traceFileSuffixIndex__ = 0;
-
-  public static int traceLevel__ = org.apache.derby.client.ClientBaseDataSource.TRACE_ALL;
-
-  public static String traceFile__ = null;
-
-  public static String traceDirectory__ = null;
-
-  public static boolean traceFileAppend__ = false;
-  public static String jreLevel = "1.3.0"; // default level if unable to read
-  public static int jreLevelMajor = 1;
-  public static int jreLevelMinor = 3;
-
-  private Configuration () {}
-
-  public static boolean traceSuspended__;
-
-  public static boolean[] enableConnectivityToTargetServer__;
-  public static boolean jvmSupportsMicrosClock__ = false;
-
-  // -------------------------- versioning -------------------------------------
-
-  public static ProductVersionHolder dncProductVersionHolder__;
-
-  public static ProductVersionHolder getProductVersionHolder()
-  {
-	return dncProductVersionHolder__;
-  }
+public class Configuration {
 
 
-  // for DatabaseMetaData.getDriverName()
-  public final static String dncDriverName = "Apache Derby Network Client JDBC Driver" ;
+    public static int traceFileSuffixIndex__ = 0;
 
+    public static int traceLevel__ = org.apache.derby.client.ClientBaseDataSource.TRACE_ALL;
 
-  // Hard-wired for JDBC
-  //
-  // Currently ASCII hex value of "SYSLVL01".
-  public final static byte[] dncPackageConsistencyToken =
-    {0x53, 0x59, 0x53, 0x4c, 0x56, 0x4c, 0x30, 0x31};
+    public static String traceFile__ = null;
 
-  // We will not set packagge VERSION in the initial release.
-  // If we have to change the package version in the future then we can.
-  public static String dncPackageVersion = null;
+    public static String traceDirectory__ = null;
 
-  // for Driver.jdbcCompliant()
-  public final static boolean jdbcCompliant = true;
+    public static boolean traceFileAppend__ = false;
+    public static String jreLevel = "1.3.0"; // default level if unable to read
+    public static int jreLevelMajor = 1;
+    public static int jreLevelMinor = 3;
 
-  // for Driver.getCompatibileJREVersions()
-  public final static String[] dncCompatibleJREVersions = new String[] {"1.3", "1.4"};
-
-  //---------------------- database URL protocols ------------------------------
-
-  // For DatabaseMetaData.getURL()
-  public final static String jdbcDerbyNETProtocol = "jdbc:derby://";
-
-  // -------------------------- metrics ----------------------
-  // Not currently used by production builds.
-  // We can't really use this stuff with tracing enabled, the results are not accurate.
-
-  // -------------------------- compiled in properties -------------------------
-
-  public final static boolean enableNetConnectionPooling = true;
-
-  final static boolean rangeCheckCrossConverters = true;
-
-  // Define different levels of bug checking, for now turn all bits on.
-  final static int bugCheckLevel = 0xff;
-
-  // --------------------------- connection defaults ---------------------------
-
-  // This is the DERBY default and maps to DERBY's "Cursor Stability".
-  public final static int defaultIsolation = java.sql.Connection.TRANSACTION_READ_COMMITTED;
-
-  // ---------------------------- statement defaults----------------------------
-
-  public static final int defaultFetchSize = 64;
-
-  // Prepare attribute constants
-  public static final String cursorAttribute_SensitiveStatic = "SENSITIVE STATIC SCROLL ";
-  public static final String cursorAttribute_SensitiveStaticRowset = cursorAttribute_SensitiveStatic;
-  public static final String cursorAttribute_SensitiveDynamic = "SENSITIVE DYNAMIC SCROLL ";
-  public static final String cursorAttribute_SensitiveDynamicRowset = "SENSITIVE DYNAMIC SCROLL WITH ROWSET POSITIONING ";
-  public static final String cursorAttribute_Insensitive = "INSENSITIVE SCROLL ";
-  public static final String cursorAttribute_InsensitiveRowset = cursorAttribute_Insensitive;
-
-  // uncomment the following when we want to use multi-row fetch to support sensitive static and
-  // insensitve cursors whenever the server has support for it.
-  //public static final String cursorAttribute_SensitiveStaticRowset = "SENSITIVE STATIC SCROLL WITH ROWSET POSITIONING ";
-  //public static final String cursorAttribute_InsensitiveRowset = "INSENSITIVE SCROLL WITH ROWSET POSITIONING ";
-
-  public static final String cursorAttribute_ForUpdate = "FOR UPDATE ";
-  public static final String cursorAttribute_ForReadOnly = "FOR READ ONLY ";
-
-  public static final String cursorAttribute_WithHold = "WITH HOLD ";
-
-  // -----------------------Load resource bundles for the driver asap-----------
-
-  private static final String packageNameForDNC = "org.apache.derby.client";
-  private static final String classNameForResources = "org.apache.derby.client.resources.Resources";
-
-  public static SqlException exceptionsOnLoadResources = null; // used by ClientDriver to accumulate load exceptions
-  public static java.util.ResourceBundle dncResources__;
-
-  static {
-	try {
-	  loadProductVersionHolder();
-      loadResources ();
+    private Configuration() {
     }
-    catch (SqlException e) {
-      exceptionsOnLoadResources = e;
-    }
-    try {
-      jreLevel = System.getProperty( "java.version" );
-    }
-    catch (SecurityException e) {} // ignore it, assume 1.3.0
-    java.util.StringTokenizer st = new java.util.StringTokenizer( jreLevel, "." );
-    int jreState = 0;
-    while( st.hasMoreTokens() )
-    {
-      int i;
-      try
-      {
-        i = java.lang.Integer.parseInt(st.nextToken()); // get int value
-      }
-      catch( NumberFormatException e ) { i=0;}
-      switch( jreState++ )
-      {
-        case 0:
-          jreLevelMajor = i; // state 0, this is the major version
-          break;
-        case 1:
-          jreLevelMinor = i; // state 1, this is the minor version
-          break;
-        default:
-          break; // state >1, ignore
-      }
-    }
-  }
 
-  private static void loadResources () throws SqlException
-  {
-    try {
-      dncResources__ = (java.util.ResourceBundle) java.security.AccessController.doPrivileged (
-        new org.apache.derby.client.am.GetResourceBundleAction (classNameForResources));
-    }
-    catch (java.security.PrivilegedActionException e) {
-      throw new SqlException (null,
-                              "[derby] " +
-                              "PrivilegedActionException:" +
-                              e.getException());
-    }
-    catch (java.util.MissingResourceException e) {
-      // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
-      throw new SqlException (null,
-                              "[derby] " +
-                              "Missing resource bundle:" +
-                              " a resource bundle could not be found" +
-                              " in the " + packageNameForDNC + " package for " + Configuration.dncDriverName);
-    }
-  }
+    public static boolean traceSuspended__;
 
-  public static void checkForExceptionsFromLoadConfiguration (LogWriter dncLogWriter) throws SqlException
-  {
-    if (dncResources__ == null) {
-      throw new SqlException (dncLogWriter,
-                              "Missing resource bundle: a resource bundle could not be found" +
-                              " in the " + Configuration.packageNameForDNC + " package for " + Configuration.dncDriverName);
-    }
-  }
+    public static boolean[] enableConnectivityToTargetServer__;
+    public static boolean jvmSupportsMicrosClock__ = false;
 
-  /**
-   * load product version information and accumulate exceptions
-   */
-  private static void loadProductVersionHolder() throws SqlException
-  {
-	try {
-	  dncProductVersionHolder__ = buildProductVersionHolder();
+    // -------------------------- versioning -------------------------------------
+
+    public static ProductVersionHolder dncProductVersionHolder__;
+
+    public static ProductVersionHolder getProductVersionHolder() {
+        return dncProductVersionHolder__;
     }
-    catch (java.security.PrivilegedActionException e) {
-      throw new SqlException (null,
-                              "[derby] " +
-                              "PrivilegedActionException:" +
-                              e.getException());
-    }
-	catch (java.io.IOException ioe) {
-	  throw new SqlException (null,
-                              "[derby] " +
-                              "IOException:" +
-                              ioe);
-	}
-  }
 
 
-  // Create ProductVersionHolder in security block for Java 2 security.
-  private  static ProductVersionHolder buildProductVersionHolder() throws
-  java.security.PrivilegedActionException, IOException
-	{
-	  ProductVersionHolder myPVH= null;
-	  myPVH = (ProductVersionHolder) 
-	    AccessController.doPrivileged(
-					  new PrivilegedExceptionAction() {
-					      
-					      public Object run() throws IOException
-					      {
-						InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.DNC_INFO);
-						
-						return ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
-					      }
-					    });
-	  
-	  return myPVH;
-	}
+    // for DatabaseMetaData.getDriverName()
+    public final static String dncDriverName = "Apache Derby Network Client JDBC Driver";
+
+
+    // Hard-wired for JDBC
+    //
+    // Currently ASCII hex value of "SYSLVL01".
+    public final static byte[] dncPackageConsistencyToken =
+            {0x53, 0x59, 0x53, 0x4c, 0x56, 0x4c, 0x30, 0x31};
+
+    // We will not set packagge VERSION in the initial release.
+    // If we have to change the package version in the future then we can.
+    public static String dncPackageVersion = null;
+
+    // for Driver.jdbcCompliant()
+    public final static boolean jdbcCompliant = true;
+
+    // for Driver.getCompatibileJREVersions()
+    public final static String[] dncCompatibleJREVersions = new String[]{"1.3", "1.4"};
+
+    //---------------------- database URL protocols ------------------------------
+
+    // For DatabaseMetaData.getURL()
+    public final static String jdbcDerbyNETProtocol = "jdbc:derby://";
+
+    // -------------------------- metrics ----------------------
+    // Not currently used by production builds.
+    // We can't really use this stuff with tracing enabled, the results are not accurate.
+
+    // -------------------------- compiled in properties -------------------------
+
+    public final static boolean enableNetConnectionPooling = true;
+
+    final static boolean rangeCheckCrossConverters = true;
+
+    // Define different levels of bug checking, for now turn all bits on.
+    final static int bugCheckLevel = 0xff;
+
+    // --------------------------- connection defaults ---------------------------
+
+    // This is the DERBY default and maps to DERBY's "Cursor Stability".
+    public final static int defaultIsolation = java.sql.Connection.TRANSACTION_READ_COMMITTED;
+
+    // ---------------------------- statement defaults----------------------------
+
+    public static final int defaultFetchSize = 64;
+
+    // Prepare attribute constants
+    public static final String cursorAttribute_SensitiveStatic = "SENSITIVE STATIC SCROLL ";
+    public static final String cursorAttribute_SensitiveStaticRowset = cursorAttribute_SensitiveStatic;
+    public static final String cursorAttribute_SensitiveDynamic = "SENSITIVE DYNAMIC SCROLL ";
+    public static final String cursorAttribute_SensitiveDynamicRowset = "SENSITIVE DYNAMIC SCROLL WITH ROWSET POSITIONING ";
+    public static final String cursorAttribute_Insensitive = "INSENSITIVE SCROLL ";
+    public static final String cursorAttribute_InsensitiveRowset = cursorAttribute_Insensitive;
+
+    // uncomment the following when we want to use multi-row fetch to support sensitive static and
+    // insensitve cursors whenever the server has support for it.
+    //public static final String cursorAttribute_SensitiveStaticRowset = "SENSITIVE STATIC SCROLL WITH ROWSET POSITIONING ";
+    //public static final String cursorAttribute_InsensitiveRowset = "INSENSITIVE SCROLL WITH ROWSET POSITIONING ";
+
+    public static final String cursorAttribute_ForUpdate = "FOR UPDATE ";
+    public static final String cursorAttribute_ForReadOnly = "FOR READ ONLY ";
+
+    public static final String cursorAttribute_WithHold = "WITH HOLD ";
+
+    // -----------------------Load resource bundles for the driver asap-----------
+
+    private static final String packageNameForDNC = "org.apache.derby.client";
+    private static final String classNameForResources = "org.apache.derby.client.resources.Resources";
+
+    public static SqlException exceptionsOnLoadResources = null; // used by ClientDriver to accumulate load exceptions
+    public static java.util.ResourceBundle dncResources__;
+
+    static {
+        try {
+            loadProductVersionHolder();
+            loadResources();
+        } catch (SqlException e) {
+            exceptionsOnLoadResources = e;
+        }
+        try {
+            jreLevel = System.getProperty("java.version");
+        } catch (SecurityException e) {
+        } // ignore it, assume 1.3.0
+        java.util.StringTokenizer st = new java.util.StringTokenizer(jreLevel, ".");
+        int jreState = 0;
+        while (st.hasMoreTokens()) {
+            int i;
+            try {
+                i = java.lang.Integer.parseInt(st.nextToken()); // get int value
+            } catch (NumberFormatException e) {
+                i = 0;
+            }
+            switch (jreState++) {
+            case 0:
+                jreLevelMajor = i; // state 0, this is the major version
+                break;
+            case 1:
+                jreLevelMinor = i; // state 1, this is the minor version
+                break;
+            default:
+                break; // state >1, ignore
+            }
+        }
+    }
+
+    private static void loadResources() throws SqlException {
+        try {
+            dncResources__ = (java.util.ResourceBundle) java.security.AccessController.doPrivileged(new org.apache.derby.client.am.GetResourceBundleAction(classNameForResources));
+        } catch (java.security.PrivilegedActionException e) {
+            throw new SqlException(null,
+                    "[derby] " +
+                    "PrivilegedActionException:" +
+                    e.getException());
+        } catch (java.util.MissingResourceException e) {
+            // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
+            throw new SqlException(null,
+                    "[derby] " +
+                    "Missing resource bundle:" +
+                    " a resource bundle could not be found" +
+                    " in the " + packageNameForDNC + " package for " + Configuration.dncDriverName);
+        }
+    }
+
+    public static void checkForExceptionsFromLoadConfiguration(LogWriter dncLogWriter) throws SqlException {
+        if (dncResources__ == null) {
+            throw new SqlException(dncLogWriter,
+                    "Missing resource bundle: a resource bundle could not be found" +
+                    " in the " + Configuration.packageNameForDNC + " package for " + Configuration.dncDriverName);
+        }
+    }
+
+    /**
+     * load product version information and accumulate exceptions
+     */
+    private static void loadProductVersionHolder() throws SqlException {
+        try {
+            dncProductVersionHolder__ = buildProductVersionHolder();
+        } catch (java.security.PrivilegedActionException e) {
+            throw new SqlException(null,
+                    "[derby] " +
+                    "PrivilegedActionException:" +
+                    e.getException());
+        } catch (java.io.IOException ioe) {
+            throw new SqlException(null,
+                    "[derby] " +
+                    "IOException:" +
+                    ioe);
+        }
+    }
+
+
+    // Create ProductVersionHolder in security block for Java 2 security.
+    private static ProductVersionHolder buildProductVersionHolder() throws
+            java.security.PrivilegedActionException, IOException {
+        ProductVersionHolder myPVH = null;
+        myPVH = (ProductVersionHolder)
+                AccessController.doPrivileged(new PrivilegedExceptionAction() {
+
+                    public Object run() throws IOException {
+                        InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.DNC_INFO);
+
+                        return ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
+                    }
+                });
+
+        return myPVH;
+    }
 
 }

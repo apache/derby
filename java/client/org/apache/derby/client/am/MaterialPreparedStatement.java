@@ -20,41 +20,41 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.client.am.Section;
-
-public interface MaterialPreparedStatement extends MaterialStatement
-{
 
 
-  // ------------------------ abstract box car and callback methods --------------------------------
-
-  public abstract void writeExecute_ (Section section,
-                            ColumnMetaData parameterMetaData,
-                            Object[] inputs,
-                            int numInputColumns,
-                            boolean outputExpected,
-                            // This is a hint to the material layer that more write commands will follow.
-                            // It is ignored by the driver in all cases except when blob data is written,
-                            // in which case this boolean is used to optimize the implementation.
-                            // Otherwise we wouldn't be able to chain after blob data is sent.
-                            // Current servers have a restriction that blobs can only be chained with blobs
-                            // Can the blob code
-                            boolean chainedWritesFollowingSetLob
-                            ) throws SqlException;
+public interface MaterialPreparedStatement extends MaterialStatement {
 
 
-  public abstract void readExecute_ () throws SqlException;
+    // ------------------------ abstract box car and callback methods --------------------------------
 
-  public abstract void writeOpenQuery_ (Section section,
-                              int fetchSize,
-                              int resultSetType,
-                              int numInputColumns,
-                              ColumnMetaData parameterMetaData,
-                              Object[] inputs
-                              ) throws SqlException;
-  public abstract void writeDescribeInput_ (Section section) throws SqlException;
-  public abstract void readDescribeInput_ () throws SqlException;
+    public abstract void writeExecute_(Section section,
+                                       ColumnMetaData parameterMetaData,
+                                       Object[] inputs,
+                                       int numInputColumns,
+                                       boolean outputExpected,
+                                       // This is a hint to the material layer that more write commands will follow.
+                                       // It is ignored by the driver in all cases except when blob data is written,
+                                       // in which case this boolean is used to optimize the implementation.
+                                       // Otherwise we wouldn't be able to chain after blob data is sent.
+                                       // Current servers have a restriction that blobs can only be chained with blobs
+                                       // Can the blob code
+                                       boolean chainedWritesFollowingSetLob) throws SqlException;
 
-  public abstract void writeDescribeOutput_ (Section section) throws SqlException;
-  public abstract void readDescribeOutput_ () throws SqlException;
+
+    public abstract void readExecute_() throws SqlException;
+
+    public abstract void writeOpenQuery_(Section section,
+                                         int fetchSize,
+                                         int resultSetType,
+                                         int numInputColumns,
+                                         ColumnMetaData parameterMetaData,
+                                         Object[] inputs) throws SqlException;
+
+    public abstract void writeDescribeInput_(Section section) throws SqlException;
+
+    public abstract void readDescribeInput_() throws SqlException;
+
+    public abstract void writeDescribeOutput_(Section section) throws SqlException;
+
+    public abstract void readDescribeOutput_() throws SqlException;
 }

@@ -20,297 +20,290 @@
 
 package org.apache.derby.client.net;
 
-import org.apache.derby.client.am.SqlException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-public class NetXAConnectionRequest extends NetResultSetRequest
-{
-  NetXAConnectionRequest (NetAgent netAgent, CcsidManager ccsidManager, int bufferSize)
-  {
-    super (netAgent, ccsidManager, bufferSize);
-  }
-
-  //----------------------------- entry points ---------------------------------
-
-
-  //Build the SYNNCTL commit command
-  public void writeLocalXACommit (NetConnection conn) throws SqlException
-  {
-    NetXACallInfo callInfo =
-          conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-    Xid xid = callInfo.xid_;
-    buildSYNCCTLMigrate();   // xa migrate to resync server
-    buildSYNCCTLCommit(CodePoint.TMLOCAL, xid);   // xa local commit
-  }
-
-  //Build the SYNNCTL rollback command
-  public void writeLocalXARollback (NetConnection conn) throws SqlException
-  {
-    NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-    buildSYNCCTLRollback(CodePoint.TMLOCAL);   // xa local rollback
-  }
-
-  public void writeXaStartUnitOfWork(NetConnection conn) throws SqlException
-  {
-    NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-    Xid xid = callInfo.xid_;
-    int xaFlags = callInfo.xaFlags_;
-
-    // create DSS command with reply.
-    createCommand ();
-
-    // save the length bytes for later update
-    markLengthBytes (CodePoint.SYNCCTL);
-
-    // SYNCTYPE
-    writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_NEW_UOW);
-
-    if (xid.getFormatId() != -1)
-      writeXID(CodePoint.XID, xid);
-    else
-      // write the null XID for local transaction on XA connection
-      writeNullXID(CodePoint.XID);
-
-    writeXAFlags(CodePoint.XAFLAGS, xaFlags);
-    updateLengthBytes();
-  }
-
-  public void writeXaEndUnitOfWork(NetConnection conn) throws SqlException
-  {
-    NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-    Xid xid = callInfo.xid_;
-    int xaFlags = callInfo.xaFlags_;
-
-    createCommand ();
-
-    // save the length bytes for later update
-    markLengthBytes (CodePoint.SYNCCTL);
-
-    // SYNCTYPE
-    writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_END_UOW);
-
-    if (xid.getFormatId() != -1)
-      writeXID(CodePoint.XID, xid);
-    else
-      // write the null XID for local transaction on XA connection
-      writeNullXID(CodePoint.XID);
-
-    writeXAFlags(CodePoint.XAFLAGS, xaFlags);
-
-    updateLengthBytes();
-  }
-
- protected void writeXaPrepare(NetConnection conn) throws SqlException
- {
-   NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-   Xid xid = callInfo.xid_;
-  // don't forget that xars.prepare() does not have flags, assume TMNOFLAGS
-   int xaFlags = XAResource.TMNOFLAGS;
-
-   createCommand ();
-
-   // save the length bytes for later update
-   markLengthBytes (CodePoint.SYNCCTL);
-
-   // SYNCTYPE
-   writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_PREPARE);
-
-   if (xid.getFormatId() != -1)
-     writeXID(CodePoint.XID, xid);
-   else
-     // write the null XID for local transaction on XA connection
-     writeNullXID(CodePoint.XID);
-
-   writeXAFlags(CodePoint.XAFLAGS, xaFlags);
-   updateLengthBytes();
-  }
+import org.apache.derby.client.am.SqlException;
+
+public class NetXAConnectionRequest extends NetResultSetRequest {
+    NetXAConnectionRequest(NetAgent netAgent, CcsidManager ccsidManager, int bufferSize) {
+        super(netAgent, ccsidManager, bufferSize);
+    }
+
+    //----------------------------- entry points ---------------------------------
+
+
+    //Build the SYNNCTL commit command
+    public void writeLocalXACommit(NetConnection conn) throws SqlException {
+        NetXACallInfo callInfo =
+                conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
+        Xid xid = callInfo.xid_;
+        buildSYNCCTLMigrate();   // xa migrate to resync server
+        buildSYNCCTLCommit(CodePoint.TMLOCAL, xid);   // xa local commit
+    }
+
+    //Build the SYNNCTL rollback command
+    public void writeLocalXARollback(NetConnection conn) throws SqlException {
+        NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
+        buildSYNCCTLRollback(CodePoint.TMLOCAL);   // xa local rollback
+    }
+
+    public void writeXaStartUnitOfWork(NetConnection conn) throws SqlException {
+        NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
+        Xid xid = callInfo.xid_;
+        int xaFlags = callInfo.xaFlags_;
+
+        // create DSS command with reply.
+        createCommand();
+
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
+
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_NEW_UOW);
+
+        if (xid.getFormatId() != -1) {
+            writeXID(CodePoint.XID, xid);
+        } else
+        // write the null XID for local transaction on XA connection
+        {
+            writeNullXID(CodePoint.XID);
+        }
+
+        writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+        updateLengthBytes();
+    }
+
+    public void writeXaEndUnitOfWork(NetConnection conn) throws SqlException {
+        NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
+        Xid xid = callInfo.xid_;
+        int xaFlags = callInfo.xaFlags_;
+
+        createCommand();
+
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
+
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_END_UOW);
+
+        if (xid.getFormatId() != -1) {
+            writeXID(CodePoint.XID, xid);
+        } else
+        // write the null XID for local transaction on XA connection
+        {
+            writeNullXID(CodePoint.XID);
+        }
+
+        writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+
+        updateLengthBytes();
+    }
 
-  protected void writeXaCommit(NetConnection conn, Xid xid) throws SqlException
-  {
-   NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-   int xaFlags = callInfo.xaFlags_;
-
-   // create DSS command with no reply.
-   createCommand ();
-
-   // save the length bytes for later update
-   markLengthBytes (CodePoint.SYNCCTL);
+    protected void writeXaPrepare(NetConnection conn) throws SqlException {
+        NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
+        Xid xid = callInfo.xid_;
+        // don't forget that xars.prepare() does not have flags, assume TMNOFLAGS
+        int xaFlags = XAResource.TMNOFLAGS;
 
-   // SYNCTYPE
-   writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_COMMITTED);
+        createCommand();
 
-   if (xid.getFormatId() != -1)
-     writeXID(CodePoint.XID, xid);
-   else
-     // write the null XID for local transaction on XA connection
-     writeNullXID(CodePoint.XID);
-
-   writeXAFlags(CodePoint.XAFLAGS, xaFlags);
-   updateLengthBytes();
- }
-
-  protected void writeXaRollback(NetConnection conn, Xid xid) throws SqlException
-  {
-    int xaFlags = XAResource.TMNOFLAGS;
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
 
-    // create DSS command with no reply.
-    createCommand ();
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_PREPARE);
 
-    // save the length bytes for later update
-    markLengthBytes (CodePoint.SYNCCTL);
+        if (xid.getFormatId() != -1) {
+            writeXID(CodePoint.XID, xid);
+        } else
+        // write the null XID for local transaction on XA connection
+        {
+            writeNullXID(CodePoint.XID);
+        }
 
-    // SYNCTYPE
-    writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_ROLLBACK);
+        writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+        updateLengthBytes();
+    }
 
-    if (xid.getFormatId() != -1)
-      writeXID(CodePoint.XID, xid);
-    else
-      // write the null XID for local transaction on XA connection
-      writeNullXID(CodePoint.XID);
+    protected void writeXaCommit(NetConnection conn, Xid xid) throws SqlException {
+        NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
+        int xaFlags = callInfo.xaFlags_;
 
-    writeXAFlags(CodePoint.XAFLAGS, xaFlags);
-    updateLengthBytes();
- }
+        // create DSS command with no reply.
+        createCommand();
 
- protected void writeXaRecover(NetConnection conn, int flag) throws SqlException
- {
-   // create DSS command with no reply.
-    createCommand ();
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
 
-    // save the length bytes for later update
-    markLengthBytes (CodePoint.SYNCCTL);
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_COMMITTED);
 
-    // SYNCTYPE
-    writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_INDOUBT);
-    writeXAFlags(CodePoint.XAFLAGS, flag);
-    updateLengthBytes();
- }
+        if (xid.getFormatId() != -1) {
+            writeXID(CodePoint.XID, xid);
+        } else
+        // write the null XID for local transaction on XA connection
+        {
+            writeNullXID(CodePoint.XID);
+        }
 
- protected void writeXaForget(NetConnection conn, Xid xid) throws SqlException
- {
+        writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+        updateLengthBytes();
+    }
 
-   // create DSS command with no reply.
-    createCommand ();
+    protected void writeXaRollback(NetConnection conn, Xid xid) throws SqlException {
+        int xaFlags = XAResource.TMNOFLAGS;
 
-    // save the length bytes for later update
-    markLengthBytes (CodePoint.SYNCCTL);
+        // create DSS command with no reply.
+        createCommand();
 
-    // SYNCTYPE
-    writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_REQ_FORGET);
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
 
-    writeXID(CodePoint.XID, xid);
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_ROLLBACK);
 
-    updateLengthBytes();
- }
+        if (xid.getFormatId() != -1) {
+            writeXID(CodePoint.XID, xid);
+        } else
+        // write the null XID for local transaction on XA connection
+        {
+            writeNullXID(CodePoint.XID);
+        }
 
-  public void writeSYNCType(int codepoint, int syncType)
-  {
-    writeScalar1Byte (codepoint, syncType);
-  }
+        writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+        updateLengthBytes();
+    }
 
-  public void writeForget(int codepoint, int value)
-  {
-    writeScalar1Byte (codepoint, value);
-  }
+    protected void writeXaRecover(NetConnection conn, int flag) throws SqlException {
+        // create DSS command with no reply.
+        createCommand();
 
-  public void writeReleaseConversation(int codepoint, int value)
-  {
-    writeScalar1Byte (codepoint, value);
-  }
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
 
-  void writeNullXID(int codepoint)
-  {
-    int nullXID = -1;
-    writeScalar4Bytes (codepoint, nullXID);
-  }
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_INDOUBT);
+        writeXAFlags(CodePoint.XAFLAGS, flag);
+        updateLengthBytes();
+    }
 
-  void writeXID(int codepoint, Xid xid) throws SqlException
-  {
-    int len = 0;
-    int formatId = xid.getFormatId();
-    byte[] gtrid = xid.getGlobalTransactionId();
-    byte[] bqual = xid.getBranchQualifier();
+    protected void writeXaForget(NetConnection conn, Xid xid) throws SqlException {
 
-    markLengthBytes(codepoint);
+        // create DSS command with no reply.
+        createCommand();
 
-    len = 4;                    // length of formatId
-    len += (bqual.length + 4);  // bqual length
-    len += (gtrid.length + 4);  // gtrid length
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
 
-    write4Bytes(formatId);
-    write4Bytes(gtrid.length);
-    write4Bytes(bqual.length);
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_REQ_FORGET);
 
-    // Mare sure request buffer has enough space to write this byte array.
-    ensureLength (offset_ + gtrid.length);
-    System.arraycopy(gtrid, 0, bytes_, offset_, gtrid.length);
-    offset_ += gtrid.length;
+        writeXID(CodePoint.XID, xid);
 
-    ensureLength (offset_ + bqual.length);
-    System.arraycopy(bqual, 0, bytes_, offset_, bqual.length);
-    offset_ += bqual.length;
+        updateLengthBytes();
+    }
 
-    updateLengthBytes();
+    public void writeSYNCType(int codepoint, int syncType) {
+        writeScalar1Byte(codepoint, syncType);
+    }
 
-  }
+    public void writeForget(int codepoint, int value) {
+        writeScalar1Byte(codepoint, value);
+    }
 
+    public void writeReleaseConversation(int codepoint, int value) {
+        writeScalar1Byte(codepoint, value);
+    }
 
-  void writeXAFlags(int codepoint, int xaFlags)
-  {
-    writeScalar4Bytes (codepoint, xaFlags);
-  }
+    void writeNullXID(int codepoint) {
+        int nullXID = -1;
+        writeScalar4Bytes(codepoint, nullXID);
+    }
 
+    void writeXID(int codepoint, Xid xid) throws SqlException {
+        int len = 0;
+        int formatId = xid.getFormatId();
+        byte[] gtrid = xid.getGlobalTransactionId();
+        byte[] bqual = xid.getBranchQualifier();
 
-  //----------------------helper methods----------------------------------------
-  // These methods are "private protected", which is not a recognized java privilege,
-  // but means that these methods are private to this class and to subclasses,
-  // and should not be used as package-wide friendly methods.
+        markLengthBytes(codepoint);
 
+        len = 4;                    // length of formatId
+        len += (bqual.length + 4);  // bqual length
+        len += (gtrid.length + 4);  // gtrid length
 
+        write4Bytes(formatId);
+        write4Bytes(gtrid.length);
+        write4Bytes(bqual.length);
 
+        // Mare sure request buffer has enough space to write this byte array.
+        ensureLength(offset_ + gtrid.length);
+        System.arraycopy(gtrid, 0, bytes_, offset_, gtrid.length);
+        offset_ += gtrid.length;
 
+        ensureLength(offset_ + bqual.length);
+        System.arraycopy(bqual, 0, bytes_, offset_, bqual.length);
+        offset_ += bqual.length;
 
-  void buildSYNCCTLMigrate() throws SqlException
-  {
-  }
+        updateLengthBytes();
 
-  void buildSYNCCTLCommit (int xaFlags, Xid xid) throws SqlException
-  {
-    createCommand ();
+    }
 
-    // save the length bytes for later update
-    markLengthBytes (CodePoint.SYNCCTL);
 
-    // SYNCTYPE
-    writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_COMMITTED);
+    void writeXAFlags(int codepoint, int xaFlags) {
+        writeScalar4Bytes(codepoint, xaFlags);
+    }
 
-    if (xid.getFormatId() != -1)
-      writeXID(CodePoint.XID, xid);
-    else
-      // write the null XID for local transaction on XA connection
-      writeNullXID(CodePoint.XID);
 
-    writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+    //----------------------helper methods----------------------------------------
+    // These methods are "private protected", which is not a recognized java privilege,
+    // but means that these methods are private to this class and to subclasses,
+    // and should not be used as package-wide friendly methods.
 
-    updateLengthBytes();
-  }
 
-  void buildSYNCCTLRollback (int xaFlags) throws SqlException
-  {
-    createCommand ();
 
-    // save the length bytes for later update
-    markLengthBytes (CodePoint.SYNCCTL);
 
-    // SYNCTYPE
-    writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_ROLLBACK);
 
-    // write the null XID for local transaction on XA connection
-    writeNullXID(CodePoint.XID);
-    writeXAFlags(CodePoint.XAFLAGS, xaFlags);
-    updateLengthBytes();
-  }
+    void buildSYNCCTLMigrate() throws SqlException {
+    }
+
+    void buildSYNCCTLCommit(int xaFlags, Xid xid) throws SqlException {
+        createCommand();
+
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
+
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_COMMITTED);
+
+        if (xid.getFormatId() != -1) {
+            writeXID(CodePoint.XID, xid);
+        } else
+        // write the null XID for local transaction on XA connection
+        {
+            writeNullXID(CodePoint.XID);
+        }
+
+        writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+
+        updateLengthBytes();
+    }
+
+    void buildSYNCCTLRollback(int xaFlags) throws SqlException {
+        createCommand();
+
+        // save the length bytes for later update
+        markLengthBytes(CodePoint.SYNCCTL);
+
+        // SYNCTYPE
+        writeSYNCType(CodePoint.SYNCTYPE, CodePoint.SYNCTYPE_ROLLBACK);
+
+        // write the null XID for local transaction on XA connection
+        writeNullXID(CodePoint.XID);
+        writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+        updateLengthBytes();
+    }
 
 }
 

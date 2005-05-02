@@ -19,30 +19,28 @@
 */
 package org.apache.derby.client.am;
 
-public class AsciiStream extends java.io.InputStream
-{
-  private java.io.Reader reader_;
-  private String materializedString_; 
-  private int charsRead_ = 0;
+public class AsciiStream extends java.io.InputStream {
+    private java.io.Reader reader_;
+    private String materializedString_;
+    private int charsRead_ = 0;
 
-  public AsciiStream (String materializedString, java.io.Reader reader)
-  {
-    reader_ = reader;
-    materializedString_ = materializedString;
-  }
+    public AsciiStream(String materializedString, java.io.Reader reader) {
+        reader_ = reader;
+        materializedString_ = materializedString;
+    }
 
-   public int read () throws java.io.IOException
-  {
-    int oneChar = reader_.read();
-    ++charsRead_;
-    if (oneChar != -1) // if not eos
-      return 0x00ff & oneChar;
-    else
-      return -1; // end of stream
-  }
+    public int read() throws java.io.IOException {
+        int oneChar = reader_.read();
+        ++charsRead_;
+        if (oneChar != -1) // if not eos
+        {
+            return 0x00ff & oneChar;
+        } else {
+            return -1; // end of stream
+        }
+    }
 
-  public int available()
-  {
-    return materializedString_.length() - charsRead_;
-  }
+    public int available() {
+        return materializedString_.length() - charsRead_;
+    }
 }

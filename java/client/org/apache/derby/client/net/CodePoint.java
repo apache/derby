@@ -21,706 +21,706 @@
 package org.apache.derby.client.net;
 
 
-public class CodePoint
-{
-  public static final int FIXED_ROW_QUERY_PROTOCOL = 0;
-  public static final int LIMITED_BLOCK_QUERY_PROTOCOL = 1;
-  public static final int FORCE_FIXED_ROW_QUERY_PROTOCOL = 2;
+public class CodePoint {
+    public static final int FIXED_ROW_QUERY_PROTOCOL = 0;
+    public static final int LIMITED_BLOCK_QUERY_PROTOCOL = 1;
+    public static final int FORCE_FIXED_ROW_QUERY_PROTOCOL = 2;
 
 
-  // Character Subtype MBCS
-  static final int CSTMBCS = 0x2435;
+    // Character Subtype MBCS
+    static final int CSTMBCS = 0x2435;
 
 
-  // Force Fixed Row Query Protocol
-  static final int FRCFIXROW = 0x2410;
+    // Force Fixed Row Query Protocol
+    static final int FRCFIXROW = 0x2410;
 
-  // Title
-  static final int TITLE = 0x0045;
+    // Title
+    static final int TITLE = 0x0045;
 
-  // ---------------callable statement codepoints-------------------------------
+    // ---------------callable statement codepoints-------------------------------
 
-  // PKGSNLST
-  static final int PKGSNLST = 0x2139;
+    // PKGSNLST
+    static final int PKGSNLST = 0x2139;
 
-  // Output Expected
-  static final int OUTEXP = 0x2111;
+    // Output Expected
+    static final int OUTEXP = 0x2111;
 
-  // Procedure Name
-  static final int PRCNAM = 0x2138;
+    // Procedure Name
+    static final int PRCNAM = 0x2138;
 
-  // Maximum Result Set Count.
-  static final int MAXRSLCNT = 0x2140;
+    // Maximum Result Set Count.
+    static final int MAXRSLCNT = 0x2140;
 
-  // Maximum Result Set Count No Limit.
-  // Requester is capable of receiving all result sets in the response to EXCSQLSTT.
-  static final int MAXRSLCNT_NOLIMIT = 0xffff;
+    // Maximum Result Set Count No Limit.
+    // Requester is capable of receiving all result sets in the response to EXCSQLSTT.
+    static final int MAXRSLCNT_NOLIMIT = 0xffff;
 
-  // Result Set Flags
-  static final int RSLSETFLG = 0x2142;
+    // Result Set Flags
+    static final int RSLSETFLG = 0x2142;
 
-  static final int RSLSETFLG_RETURN_NAMES = 0x80;
+    static final int RSLSETFLG_RETURN_NAMES = 0x80;
 
-  static final int RSLSETFLG_RETURN_LABELS = 0x40;
+    static final int RSLSETFLG_RETURN_LABELS = 0x40;
 
-  // RSLSETFLGs added in SQLAM 7 for requesting standard, extended, or light sqldas
-  static final int RSLSETFLG_STANDARD_SQLDA = 0x00;
-  static final int RSLSETFLG_EXTENDED_SQLDA = 0x04;
+    // RSLSETFLGs added in SQLAM 7 for requesting standard, extended, or light sqldas
+    static final int RSLSETFLG_STANDARD_SQLDA = 0x00;
+    static final int RSLSETFLG_EXTENDED_SQLDA = 0x04;
 
-  // --------------------code points for constant ddm data----------------------
+    // --------------------code points for constant ddm data----------------------
 
-  // Indicates false state.  This 1-byte code point is used by some DDM parameters.
-  static final byte FALSE = -16;  // was 0xf0
+    // Indicates false state.  This 1-byte code point is used by some DDM parameters.
+    static final byte FALSE = -16;  // was 0xf0
 
-  // Indicates true state.  This 1-byte code point is used by some DDM parameters.
-  static final byte TRUE = -15;  // was 0xf1
+    // Indicates true state.  This 1-byte code point is used by some DDM parameters.
+    static final byte TRUE = -15;  // was 0xf1
 
-  // Zero indicator constant.
-  // Indicates data does flow.
-  static final int ZEROIND = 0x00;
+    // Zero indicator constant.
+    // Indicates data does flow.
+    static final int ZEROIND = 0x00;
 
-  // FDOCA NULL indicator constant.
-  // Indicates data does not flow.
-  static final int NULLDATA = 0xFF;
+    // FDOCA NULL indicator constant.
+    // Indicates data does not flow.
+    static final int NULLDATA = 0xFF;
 
-  // Security check was successful.
-  static final int SECCHKCD_00 = 0x00;
+    // Security check was successful.
+    static final int SECCHKCD_00 = 0x00;
 
-  // SECMEC value not supported.
-  static final int SECCHKCD_01 = 0x01;
+    // SECMEC value not supported.
+    static final int SECCHKCD_01 = 0x01;
 
-  // Local security service info.
-  static final int SECCHKCD_08 = 0x08;
+    // Local security service info.
+    static final int SECCHKCD_08 = 0x08;
 
-  // Local security service retryable error.
-  static final int SECCHKCD_09 = 0x09;
+    // Local security service retryable error.
+    static final int SECCHKCD_09 = 0x09;
 
-  // Local security service non-retryable error.
-  static final int SECCHKCD_0A = 0x0A;
+    // Local security service non-retryable error.
+    static final int SECCHKCD_0A = 0x0A;
 
-  // SECTKN missing or invalid.
-  static final int SECCHKCD_0B = 0x0B;
+    // SECTKN missing or invalid.
+    static final int SECCHKCD_0B = 0x0B;
 
-  // Password expired.
-  static final int SECCHKCD_0E = 0x0E;
+    // Password expired.
+    static final int SECCHKCD_0E = 0x0E;
 
-  // Password invalid.
-  static final int SECCHKCD_0F = 0x0F;
+    // Password invalid.
+    static final int SECCHKCD_0F = 0x0F;
 
-  // Password missing.
-  static final int SECCHKCD_10 = 0x10;
+    // Password missing.
+    static final int SECCHKCD_10 = 0x10;
 
-  // Userid missing.
-  static final int SECCHKCD_12 = 0x12;
+    // Userid missing.
+    static final int SECCHKCD_12 = 0x12;
 
-  // Userid invalid.
-  static final int SECCHKCD_13 = 0x13;
+    // Userid invalid.
+    static final int SECCHKCD_13 = 0x13;
 
-  // Userid revoked.
-  static final int SECCHKCD_14 = 0x14;
+    // Userid revoked.
+    static final int SECCHKCD_14 = 0x14;
 
-  // New password invalid.
-  static final int SECCHKCD_15 = 0x15;
+    // New password invalid.
+    static final int SECCHKCD_15 = 0x15;
 
-  //-----------------------ddm enumerated values-------------------------------
+    //-----------------------ddm enumerated values-------------------------------
 
-  // TYPSQLDA - Standard Output SQLDA
-  static final int TYPSQLDA_STD_OUTPUT = 0;
+    // TYPSQLDA - Standard Output SQLDA
+    static final int TYPSQLDA_STD_OUTPUT = 0;
 
-  // TYPSQLDA - Standard Input SQLDA
-  static final int TYPSQLDA_STD_INPUT = 1;
+    // TYPSQLDA - Standard Input SQLDA
+    static final int TYPSQLDA_STD_INPUT = 1;
 
-  // TYPSQLDA - Light Output SQLDA
-  static final int TYPSQLDA_LIGHT_OUTPUT = 2;
+    // TYPSQLDA - Light Output SQLDA
+    static final int TYPSQLDA_LIGHT_OUTPUT = 2;
 
-  // TYPSQLDA - Light Input SQLDA
-  static final int TYPSQLDA_LIGHT_INPUT = 3;
+    // TYPSQLDA - Light Input SQLDA
+    static final int TYPSQLDA_LIGHT_INPUT = 3;
 
-  // TYPSQLDA - Extended Output SQLDA
-  static final int TYPSQLDA_X_OUTPUT = 4;
+    // TYPSQLDA - Extended Output SQLDA
+    static final int TYPSQLDA_X_OUTPUT = 4;
 
-  // TYPSQLDA - Extended Input SQLDA
-  static final int TYPSQLDA_X_INPUT = 5;
+    // TYPSQLDA - Extended Input SQLDA
+    static final int TYPSQLDA_X_INPUT = 5;
 
-  // QRYCLSIMP - Target Server determines whether to implicitly
-  // close the cursor or not upon SQLSTATE 02000 based on cursor type.
-  static final int QRYCLSIMP_SERVER_CHOICE = 0x00;
+    // QRYCLSIMP - Target Server determines whether to implicitly
+    // close the cursor or not upon SQLSTATE 02000 based on cursor type.
+    static final int QRYCLSIMP_SERVER_CHOICE = 0x00;
 
-  // QRYCLSIMP - Target Server must implicitly close the cursor
-  // upon SQLSTATE 02000.
-  static final int QRYCLSIMP_YES = 0x01;
+    // QRYCLSIMP - Target Server must implicitly close the cursor
+    // upon SQLSTATE 02000.
+    static final int QRYCLSIMP_YES = 0x01;
 
-  // QRYCLSIMP - Target Server must not implicitly close the cursor
-  // upon SQLSTATE 02000.
-  static final int QRYCLSIMP_NO = 0x02;
+    // QRYCLSIMP - Target Server must not implicitly close the cursor
+    // upon SQLSTATE 02000.
+    static final int QRYCLSIMP_NO = 0x02;
 
-  // ----------------------ddm code points--------------------------------------
+    // ----------------------ddm code points--------------------------------------
 
-  // Exchange Server Attributes.
-  final static int EXCSAT = 0x1041;
+    // Exchange Server Attributes.
+    final static int EXCSAT = 0x1041;
 
 
-  // Sync Point Control Request.
-  public final static int SYNCCTL = 0x1055;
+    // Sync Point Control Request.
+    public final static int SYNCCTL = 0x1055;
 
-  // Sync Point Resync Command.
-  final static int SYNCRSY = 0x1069;
+    // Sync Point Resync Command.
+    final static int SYNCRSY = 0x1069;
 
-  // Access Security.
-  final static int ACCSEC = 0x106D;
+    // Access Security.
+    final static int ACCSEC = 0x106D;
 
-  // Security Check.
-  final static int SECCHK = 0x106E;
+    // Security Check.
+    final static int SECCHK = 0x106E;
 
-  // Access RDB.
-  final static int ACCRDB = 0x2001;
+    // Access RDB.
+    final static int ACCRDB = 0x2001;
 
-  // Close Query.
-  final static int CLSQRY = 0x2005;
+    // Close Query.
+    final static int CLSQRY = 0x2005;
 
-  // Continue Query.
-  final static int CNTQRY = 0x2006;
+    // Continue Query.
+    final static int CNTQRY = 0x2006;
 
 
-  // Describe SQL Statement.
-  final static int DSCSQLSTT = 0x2008;
+    // Describe SQL Statement.
+    final static int DSCSQLSTT = 0x2008;
 
 
-  // Execute Immediate SQL Statement.
-  final static int EXCSQLIMM = 0x200A;
+    // Execute Immediate SQL Statement.
+    final static int EXCSQLIMM = 0x200A;
 
-  // Execute SQL Statement.
-  final static int EXCSQLSTT = 0x200B;
+    // Execute SQL Statement.
+    final static int EXCSQLSTT = 0x200B;
 
-  // Set SQL Environment.
-  final static int EXCSQLSET = 0x2014;
+    // Set SQL Environment.
+    final static int EXCSQLSET = 0x2014;
 
-  // Open Query.
-  final static int OPNQRY = 0x200C;
+    // Open Query.
+    final static int OPNQRY = 0x200C;
 
-  // Output override.
-  final static int OUTOVR = 0x2415;
+    // Output override.
+    final static int OUTOVR = 0x2415;
 
-  // Prepare SQL Statement.
-  final static int PRPSQLSTT = 0x200D;
+    // Prepare SQL Statement.
+    final static int PRPSQLSTT = 0x200D;
 
-  // RDB Commit Unit of Work.
-  final static int RDBCMM = 0x200E;
+    // RDB Commit Unit of Work.
+    final static int RDBCMM = 0x200E;
 
-  // RDB Rollback Unit of Work.
-  final static int RDBRLLBCK = 0x200F;
+    // RDB Rollback Unit of Work.
+    final static int RDBRLLBCK = 0x200F;
 
 
-  // Describe RDB Table.
-  final static int DSCRDBTBL = 0x2012;
+    // Describe RDB Table.
+    final static int DSCRDBTBL = 0x2012;
 
-  // SQL Program Variable Data.
-  final static int SQLDTA = 0x2412;
+    // SQL Program Variable Data.
+    final static int SQLDTA = 0x2412;
 
-  // SQL Data Reply Data.
-  public final static int SQLDTARD = 0x2413;
+    // SQL Data Reply Data.
+    public final static int SQLDTARD = 0x2413;
 
-  // SQL Statement.
-  final static int SQLSTT = 0x2414;
+    // SQL Statement.
+    final static int SQLSTT = 0x2414;
 
 
-  // Query Answer Set Description.
-  public final static int QRYDSC = 0x241A;
+    // Query Answer Set Description.
+    public final static int QRYDSC = 0x241A;
 
-  // Query Answer Set Data.
-  public final static int QRYDTA = 0x241B;
+    // Query Answer Set Data.
+    public final static int QRYDTA = 0x241B;
 
-  // SQL Statement Attributes.
-  final static int SQLATTR = 0x2450;
+    // SQL Statement Attributes.
+    final static int SQLATTR = 0x2450;
 
-  // Access Security Reply Data.
-  // Contains the security information from a target server's
-  // security manager.  This information is returned in response
-  // to an ACCSEC command.
-  static final int ACCSECRD = 0x14AC;
+    // Access Security Reply Data.
+    // Contains the security information from a target server's
+    // security manager.  This information is returned in response
+    // to an ACCSEC command.
+    static final int ACCSECRD = 0x14AC;
 
 
-  // Agent codepoint constant.
-  static final int AGENT = 0x1403;
+    // Agent codepoint constant.
+    static final int AGENT = 0x1403;
 
-  // The codepoint for codepoint
-  static final int CODPNT = 0x000C;
+    // The codepoint for codepoint
+    static final int CODPNT = 0x000C;
 
-  // CCSID for Double-Byte Characters codepoint constant.
-  static final int CCSIDDBC = 0x119D;
+    // CCSID for Double-Byte Characters codepoint constant.
+    static final int CCSIDDBC = 0x119D;
 
-  // CCSID for Mixed-Byte Characters codepoint constant.
-  static final int CCSIDMBC = 0x119E;
-  
+    // CCSID for Mixed-Byte Characters codepoint constant.
+    static final int CCSIDMBC = 0x119E;
 
-  // CCSID for Single-Byte Characters codepoint constant.
-  static final int CCSIDSBC = 0x119C;
 
-  // Describes the communications manager that supports
-  // conversational protocols by using System Network
-  // Architecture Logical Unit 6.2 (SNA LU 6.2) local
-  // communications facilities.
-  static final int CMNAPPC = 0x1444;
+    // CCSID for Single-Byte Characters codepoint constant.
+    static final int CCSIDSBC = 0x119C;
 
-  // TCP/IP Communication Manager codepoint constant.  Min. level 5.
-  static final int CMNTCPIP = 0x1474;
+    // Describes the communications manager that supports
+    // conversational protocols by using System Network
+    // Architecture Logical Unit 6.2 (SNA LU 6.2) local
+    // communications facilities.
+    static final int CMNAPPC = 0x1444;
 
-  // Correlation Token codepoint constant.
-  static final int CRRTKN = 0x2135;
+    // TCP/IP Communication Manager codepoint constant.  Min. level 5.
+    static final int CMNTCPIP = 0x1474;
 
-  // Description Error code
-  static final int DSCERRCD = 0x2101;
+    // Correlation Token codepoint constant.
+    static final int CRRTKN = 0x2135;
 
-  // Server Attributes Reply Data codepoint constant.
-  static final int EXCSATRD = 0x1443;
+    // Description Error code
+    static final int DSCERRCD = 0x2101;
 
-  // External Name codepoint constant.
-  static final int EXTNAM = 0x115E;
+    // Server Attributes Reply Data codepoint constant.
+    static final int EXCSATRD = 0x1443;
 
-  // Fixed Row Query Protocol.
-  static final int FIXROWPRC = 0x2418;
+    // External Name codepoint constant.
+    static final int EXTNAM = 0x115E;
 
-  // Limited Block Query Protocol.
-  static final int LMTBLKPRC = 0x2417;
+    // Fixed Row Query Protocol.
+    static final int FIXROWPRC = 0x2418;
 
-  // Maximum Number of Extra Blocks.
-  static final int MAXBLKEXT = 0x2141;
+    // Limited Block Query Protocol.
+    static final int LMTBLKPRC = 0x2417;
 
-  // Manager Level List codepoint constant.
-  static final int MGRLVLLS = 0x1404;
+    // Maximum Number of Extra Blocks.
+    static final int MAXBLKEXT = 0x2141;
 
-  // Manager Level Number Attribute constants.
-  // Specifies the level of a defined DDM manager.
-  static final int MGRLVLN = 0x1473;
+    // Manager Level List codepoint constant.
+    static final int MGRLVLLS = 0x1404;
 
-  // Password
-  static final int PASSWORD = 0x11A1;
+    // Manager Level Number Attribute constants.
+    // Specifies the level of a defined DDM manager.
+    static final int MGRLVLN = 0x1473;
 
-  // Package name & consistency token
-  static final int PKGNAMCT = 0x2112;
+    // Password
+    static final int PASSWORD = 0x11A1;
 
-  // Conversational Protocol Error Code
-  static final int PRCCNVCD = 0x113F;
+    // Package name & consistency token
+    static final int PKGNAMCT = 0x2112;
 
-  // Product Specific Identifier codepoint constant.
-  static final int PRDID = 0x112E;
+    // Conversational Protocol Error Code
+    static final int PRCCNVCD = 0x113F;
 
-  // Product Specific Data
-  static final int PRDDTA = 0x2104;
+    // Product Specific Identifier codepoint constant.
+    static final int PRDID = 0x112E;
 
-  // Query Attribute for Scrollability.
-  static final int QRYATTSCR = 0x2149;
+    // Product Specific Data
+    static final int PRDDTA = 0x2104;
 
-  // Query Attribute for Rowset
-  static final int QRYATTSET = 0x214A;
+    // Query Attribute for Scrollability.
+    static final int QRYATTSCR = 0x2149;
 
-  // Query Attribute for Sensitivity.
-  static final int QRYATTSNS = 0x2157;
+    // Query Attribute for Rowset
+    static final int QRYATTSET = 0x214A;
 
-  // Query Attribute for Updatability.
-  static final int QRYATTUPD = 0x2150;
+    // Query Attribute for Sensitivity.
+    static final int QRYATTSNS = 0x2157;
 
-  // Query Close Implicit
-  static final int QRYCLSIMP = 0x215D;
+    // Query Attribute for Updatability.
+    static final int QRYATTUPD = 0x2150;
 
-  // Query Scroll Orientation.
-  static final int QRYSCRORN = 0x2152;
+    // Query Close Implicit
+    static final int QRYCLSIMP = 0x215D;
 
-  // Query Scroll Relative Orientation.
-  static final int QRYSCRREL = 1;
+    // Query Scroll Orientation.
+    static final int QRYSCRORN = 0x2152;
 
-  // Query Scroll Absolute Orientation.
-  static final int QRYSCRABS = 2;
+    // Query Scroll Relative Orientation.
+    static final int QRYSCRREL = 1;
 
-  // Query Scroll After Orientation.
-  static final int QRYSCRAFT = 3;
+    // Query Scroll Absolute Orientation.
+    static final int QRYSCRABS = 2;
 
-  // Query Scroll Before Orientation.
-  static final int QRYSCRBEF = 4;
+    // Query Scroll After Orientation.
+    static final int QRYSCRAFT = 3;
 
-  // Query Instance Identifier
-  static final int QRYINSID = 0x215B;
+    // Query Scroll Before Orientation.
+    static final int QRYSCRBEF = 4;
 
-  // Query Insensitive to Changes
-  static final int QRYINS = 1;
+    // Query Instance Identifier
+    static final int QRYINSID = 0x215B;
 
-  // Query Attributes is Unknown or Undefined
-  static final int QRYUNK = 0;
+    // Query Insensitive to Changes
+    static final int QRYINS = 1;
 
-  // Query Row Number.
-  static final int QRYROWNBR = 0x213D;
+    // Query Attributes is Unknown or Undefined
+    static final int QRYUNK = 0;
 
-  // Query Block Reset.
-  static final int QRYBLKRST = 0x2154;
+    // Query Row Number.
+    static final int QRYROWNBR = 0x213D;
 
-  // Query Returns Data.
-  static final int QRYRTNDTA = 0x2155;
+    // Query Block Reset.
+    static final int QRYBLKRST = 0x2154;
 
-  // Query Block Protocol Control
-  static final int QRYBLKCTL = 0x2132;
+    // Query Returns Data.
+    static final int QRYRTNDTA = 0x2155;
 
-  // Query Block Size
-  static final int QRYBLKSZ = 0x2114;
+    // Query Block Protocol Control
+    static final int QRYBLKCTL = 0x2132;
 
-  // Query Protocol Type
-  static final int QRYPRCTYP = 0x2102;
+    // Query Block Size
+    static final int QRYBLKSZ = 0x2114;
 
-  // Query Rowset Size.
-  static final int QRYROWSET = 0x2156;
+    // Query Protocol Type
+    static final int QRYPRCTYP = 0x2102;
 
-  // Cursor is Read-only.
-  static final int QRYRDO = 0x1;
+    // Query Rowset Size.
+    static final int QRYROWSET = 0x2156;
 
-  // Cursor Allows Read, Delete, and Update Operations.
-  static final int QRYUPD = 0x4;
+    // Cursor is Read-only.
+    static final int QRYRDO = 0x1;
 
-  // Relational Database codepoint constant.  Min. level 3.
-  static final int RDB = 0x240F;
+    // Cursor Allows Read, Delete, and Update Operations.
+    static final int QRYUPD = 0x4;
 
-  // RDB Access Manager Class.
-  static final int RDBACCCL = 0x210F;
+    // Relational Database codepoint constant.  Min. level 3.
+    static final int RDB = 0x240F;
 
-  // RDB Allow Updates
-  static final int RDBALWUPD = 0x211A;
+    // RDB Access Manager Class.
+    static final int RDBACCCL = 0x210F;
 
-  // Relational Database Name codepoint constant.
-  static final int RDBNAM = 0x2110;
+    // RDB Allow Updates
+    static final int RDBALWUPD = 0x211A;
 
+    // Relational Database Name codepoint constant.
+    static final int RDBNAM = 0x2110;
 
-  // Resynchronization Manager.  Min levl 5.
-  // It is a manager object of DDM that performs
-  // resynchronization for in-doubt units of work after
-  // a sync point operation failure.
-  static final int RSYNCMGR = 0x14C1;
 
-  // Retuan SQL Descriptor Area
-  static final int RTNSQLDA = 0x2116;
+    // Resynchronization Manager.  Min levl 5.
+    // It is a manager object of DDM that performs
+    // resynchronization for in-doubt units of work after
+    // a sync point operation failure.
+    static final int RSYNCMGR = 0x14C1;
 
+    // Retuan SQL Descriptor Area
+    static final int RTNSQLDA = 0x2116;
 
-  // Type of SQL Descriptor Area
-  static final int TYPSQLDA = 0x2146;
 
-  // Security Check Code codepoint constant.
-  static final int SECCHKCD = 0x11A4;
+    // Type of SQL Descriptor Area
+    static final int TYPSQLDA = 0x2146;
 
-  // Security Mechanism codepoint constant.
-  static final int SECMEC = 0x11A2;
+    // Security Check Code codepoint constant.
+    static final int SECCHKCD = 0x11A4;
 
-  // Security Manager codepoint constant.
-  static final int SECMGR = 0x1440;
+    // Security Mechanism codepoint constant.
+    static final int SECMEC = 0x11A2;
 
-  // Security Token codepoint constant.
-  static final int SECTKN = 0x11DC;
+    // Security Manager codepoint constant.
+    static final int SECMGR = 0x1440;
 
-  // SQL Application Manager codepoint constant.  Min. level 3.
-  static final int SQLAM = 0x2407;
+    // Security Token codepoint constant.
+    static final int SECTKN = 0x11DC;
 
-  // SQL Communication Area Reply Data codepoint constant.
-  public static final int SQLCARD = 0x2408;
+    // SQL Application Manager codepoint constant.  Min. level 3.
+    static final int SQLAM = 0x2407;
 
-  // SQL Result Set Column Information Reply Data.
-  public static final int SQLCINRD = 0x240B;
+    // SQL Communication Area Reply Data codepoint constant.
+    public static final int SQLCARD = 0x2408;
 
-  // Hold Cursor Position
-  static final int SQLCSRHLD = 0x211F;
+    // SQL Result Set Column Information Reply Data.
+    public static final int SQLCINRD = 0x240B;
 
-  // SQL Result Set Reply Data.
-  static final int SQLRSLRD = 0x240E;
+    // Hold Cursor Position
+    static final int SQLCSRHLD = 0x211F;
 
-  // SQLDA Reply Data codepoint constant.
-  public static final int SQLDARD = 0x2411;
+    // SQL Result Set Reply Data.
+    static final int SQLRSLRD = 0x240E;
 
-  // Server Class Name codepoint constant.
-  static final int SRVCLSNM = 0x1147;
+    // SQLDA Reply Data codepoint constant.
+    public static final int SQLDARD = 0x2411;
 
-  
-  // Server Name codepoint constant.
-  static final int SRVNAM = 0x116D;
+    // Server Class Name codepoint constant.
+    static final int SRVCLSNM = 0x1147;
 
-  // Server Product Release Level codepoint constant.
-  static final int SRVRLSLV = 0x115A;
 
-  // Severity Code codepoint constant.
-  static final int SVRCOD = 0x1149;
+    // Server Name codepoint constant.
+    static final int SRVNAM = 0x116D;
 
-  // Sync Point Manager.  Min. level 4.
-  // It is a manager object of DDM that coordinates resource
-  // recovery of the units of work associated with recoverable
-  // resources in multiple DDM servers.
-  static final int SYNCPTMGR = 0x14C0;
+    // Server Product Release Level codepoint constant.
+    static final int SRVRLSLV = 0x115A;
 
-  // Syntax Error code
-  static final int SYNERRCD = 0x114A;
+    // Severity Code codepoint constant.
+    static final int SVRCOD = 0x1149;
 
-  // Data Type Definition Name codepoint constant.
-  public static final int TYPDEFNAM = 0x002F;
+    // Sync Point Manager.  Min. level 4.
+    // It is a manager object of DDM that coordinates resource
+    // recovery of the units of work associated with recoverable
+    // resources in multiple DDM servers.
+    static final int SYNCPTMGR = 0x14C0;
 
-  // TYPDEF Overrides codepoint constant.
-  public static final int TYPDEFOVR = 0x0035;
+    // Syntax Error code
+    static final int SYNERRCD = 0x114A;
 
-  // Unit of Work Disposition codepoint constant.
-  static final int UOWDSP = 0x2115;
+    // Data Type Definition Name codepoint constant.
+    public static final int TYPDEFNAM = 0x002F;
 
-  // Unit of Work Disposition.  Committed Enumerated Value.
-  static final int UOWDSP_COMMIT = 0x01;
+    // TYPDEF Overrides codepoint constant.
+    public static final int TYPDEFOVR = 0x0035;
 
-  // Unit of Work Dispostion. Rolled Back Enumerated Value.
-  static final int UOWDSP_ROLLBACK = 0x02;
+    // Unit of Work Disposition codepoint constant.
+    static final int UOWDSP = 0x2115;
 
-  // Usrid codepoint constant.
-  static final int USRID = 0x11A0;
+    // Unit of Work Disposition.  Committed Enumerated Value.
+    static final int UOWDSP_COMMIT = 0x01;
 
-  // Rdb Package Name, Consistency Token, and Section
-  // Number codepoint constant.
-  static final int PKGNAMCSN = 0x2113;
+    // Unit of Work Dispostion. Rolled Back Enumerated Value.
+    static final int UOWDSP_ROLLBACK = 0x02;
 
-  // RDB Package Section Number
-  static final int PKGSN = 0x210C;
+    // Usrid codepoint constant.
+    static final int USRID = 0x11A0;
 
-  // Scalar Data Length
-  static final int SCLDTALEN = 0x0100;
+    // Rdb Package Name, Consistency Token, and Section
+    // Number codepoint constant.
+    static final int PKGNAMCSN = 0x2113;
 
-  // XA Manager
-  static final int XAMGR = 0x1C01;
+    // RDB Package Section Number
+    static final int PKGSN = 0x210C;
 
-  //-----------------------DDM reply codepoints---------------------------------
+    // Scalar Data Length
+    static final int SCLDTALEN = 0x0100;
 
-  // Command Check codepoint constant.
-  public static final int CMDCHKRM = 0x1254;
+    // XA Manager
+    static final int XAMGR = 0x1C01;
 
-  // Command Not Supported codepoint constant.
-  static final int CMDNSPRM = 0x1250;
+    //-----------------------DDM reply codepoints---------------------------------
 
-  // Abnormal End of Unit of Work Condition codepoint constant.
-  static final int ABNUOWRM = 0x220D;
+    // Command Check codepoint constant.
+    public static final int CMDCHKRM = 0x1254;
 
-  // Access to RDB Completed.
-  // Specifies that an instance of the SQL application manager
-  // has been created and is bound to the specified RDB.
-  static final int ACCRDBRM = 0x2201;
+    // Command Not Supported codepoint constant.
+    static final int CMDNSPRM = 0x1250;
 
+    // Abnormal End of Unit of Work Condition codepoint constant.
+    static final int ABNUOWRM = 0x220D;
 
-  final static int MGRLVLRM = 0x1210;
+    // Access to RDB Completed.
+    // Specifies that an instance of the SQL application manager
+    // has been created and is bound to the specified RDB.
+    static final int ACCRDBRM = 0x2201;
 
-  // End Unit of Work Condition codepoint constant.
-  static final int ENDUOWRM = 0x220C;
 
-  // Object Not Supported codepoint constant.
-  static final int OBJNSPRM = 0x1253;
+    final static int MGRLVLRM = 0x1210;
 
-  // Conversational Protocol Error
-  public static final int PRCCNVRM = 0x1245;
+    // End Unit of Work Condition codepoint constant.
+    static final int ENDUOWRM = 0x220C;
 
-  // Query not open codepoint constant.
-  static final int QRYNOPRM = 0x2202;
+    // Object Not Supported codepoint constant.
+    static final int OBJNSPRM = 0x1253;
 
-  // Query previously opened codepoint
-  static final int QRYPOPRM = 0x220F;
+    // Conversational Protocol Error
+    public static final int PRCCNVRM = 0x1245;
 
-  // RDB Currently Accessed Codepoint
-  static final int RDBACCRM = 0x2207;
+    // Query not open codepoint constant.
+    static final int QRYNOPRM = 0x2202;
 
-  // RDB Commit Allowed codepoint
-  static final int RDBCMTOK = 0x2105;
+    // Query previously opened codepoint
+    static final int QRYPOPRM = 0x220F;
 
-  // Security Check.
-  // Indicates the acceptability of the security information.
-  static final int SECCHKRM = 0x1219;
+    // RDB Currently Accessed Codepoint
+    static final int RDBACCRM = 0x2207;
 
-  // RDB Access Failed Reply Message codepoint
-  static final int RDBAFLRM = 0x221A;
+    // RDB Commit Allowed codepoint
+    static final int RDBCMTOK = 0x2105;
 
-  // Not Authorized To RDB reply message codepoint
-  static final int RDBATHRM = 0x22CB;
+    // Security Check.
+    // Indicates the acceptability of the security information.
+    static final int SECCHKRM = 0x1219;
 
-  // RDB Not Accessed codepoint constant.
-  static final int RDBNACRM = 0x2204;
+    // RDB Access Failed Reply Message codepoint
+    static final int RDBAFLRM = 0x221A;
 
-  // RDB not found codepoint
-  static final int RDBNFNRM = 0x2211;
+    // Not Authorized To RDB reply message codepoint
+    static final int RDBATHRM = 0x22CB;
 
-  // RDB Update Reply Message codepoint constant.
-  static final int RDBUPDRM = 0x2218;
+    // RDB Not Accessed codepoint constant.
+    static final int RDBNACRM = 0x2204;
 
-  // Data Stream Syntax Error
-  public static final int SYNTAXRM = 0x124C;
+    // RDB not found codepoint
+    static final int RDBNFNRM = 0x2211;
 
-  // Parameter Value Not Supported codepoint constant.
-  public static final int VALNSPRM = 0x1252;
+    // RDB Update Reply Message codepoint constant.
+    static final int RDBUPDRM = 0x2218;
 
-  // SQL Error Condition codepoint constant.
-  static final int SQLERRRM = 0x2213;
+    // Data Stream Syntax Error
+    public static final int SYNTAXRM = 0x124C;
 
-  // Open Query Complete.
-  public final static int OPNQRYRM = 0x2205;
+    // Parameter Value Not Supported codepoint constant.
+    public static final int VALNSPRM = 0x1252;
 
-  // End of Query.
-  public final static int ENDQRYRM = 0x220B;
+    // SQL Error Condition codepoint constant.
+    static final int SQLERRRM = 0x2213;
 
-  // Data Descriptor Mismatch.
-  final static int DTAMCHRM = 0x220E;
+    // Open Query Complete.
+    public final static int OPNQRYRM = 0x2205;
 
-  // Open Query Failure.
-  final static int OPNQFLRM = 0x2212;
+    // End of Query.
+    public final static int ENDQRYRM = 0x220B;
 
-  // RDB Result Set Reply Message.
-  public final static int RSLSETRM = 0x2219;
+    // Data Descriptor Mismatch.
+    final static int DTAMCHRM = 0x220E;
 
-  // Manager Level Overrides
-  public static final int MGRLVLOVR = 0x1C03;
-  
-  //----------------------------fdoca code points-------------------------------
+    // Open Query Failure.
+    final static int OPNQFLRM = 0x2212;
 
-  static final int RTNEXTDTA = 0x2148;
-  static final int RTNEXTROW = 0x01;
-  static final int RTNEXTALL = 0x02;
+    // RDB Result Set Reply Message.
+    public final static int RSLSETRM = 0x2219;
 
-  // Externalized FD:OCA Data codepoint constant.
-  public static final int EXTDTA = 0x146C;
+    // Manager Level Overrides
+    public static final int MGRLVLOVR = 0x1C03;
 
-  // FDOCA data descriptor
-  static final int FDODSC = 0x0010;
+    //----------------------------fdoca code points-------------------------------
 
-  // FDOCA data
-  static final int FDODTA = 0x147A;
+    static final int RTNEXTDTA = 0x2148;
+    static final int RTNEXTROW = 0x01;
+    static final int RTNEXTALL = 0x02;
 
-  //--------------------------ddm error code points---------------------------------
-  // Syntax Error Code.  DSS header length less than 6.
-  static int SYNERRCD_DSS_LESS_THAN_6 = 0x01;
+    // Externalized FD:OCA Data codepoint constant.
+    public static final int EXTDTA = 0x146C;
 
-  // Syntax Error Code.  DSS header length does not match the number of
-  // bytes of data found.
-  static int SYNERRCD_DSS_LENGTH_BYTE_NUMBER_MISMATCH = 0x02;
+    // FDOCA data descriptor
+    static final int FDODSC = 0x0010;
 
-  // Syntax Error Code.  DSS header C-byte not D0.
-  static int SYNERRCD_CBYTE_NOT_D0 = 0x03;
+    // FDOCA data
+    static final int FDODTA = 0x147A;
 
-  // Syntax Error Code.  DSS header f-bytes either not recognized or not supported.
-  static int SYNERRCD_FBYTE_NOT_SUPPORTED = 0x04;
+    //--------------------------ddm error code points---------------------------------
+    // Syntax Error Code.  DSS header length less than 6.
+    static int SYNERRCD_DSS_LESS_THAN_6 = 0x01;
 
-  // Syntax Error Code.  Object length less than four.
-  static int SYNERRCD_OBJ_LEN_LESS_THAN_4 = 0x07;
+    // Syntax Error Code.  DSS header length does not match the number of
+    // bytes of data found.
+    static int SYNERRCD_DSS_LENGTH_BYTE_NUMBER_MISMATCH = 0x02;
 
-  // Syntax Error Code.  Object length not allowed.
-  static int SYNERRCD_OBJ_LEN_NOT_ALLOWED = 0x0B;
+    // Syntax Error Code.  DSS header C-byte not D0.
+    static int SYNERRCD_CBYTE_NOT_D0 = 0x03;
 
-  // Syntax Error Code.  Required object not found.
-  static int SYNERRCD_REQ_OBJ_NOT_FOUND = 0x0E;
+    // Syntax Error Code.  DSS header f-bytes either not recognized or not supported.
+    static int SYNERRCD_FBYTE_NOT_SUPPORTED = 0x04;
 
-  // Syntax Error Code.  Duplicate object present.
-  static int SYNERRCD_DUP_OBJ_PRESENT = 0x12;
+    // Syntax Error Code.  Object length less than four.
+    static int SYNERRCD_OBJ_LEN_LESS_THAN_4 = 0x07;
 
-  // Syntax Error Code.  Invalid request correlator specified.
-  static int SYNERRCD_INVALID_CORRELATOR = 0x13;
+    // Syntax Error Code.  Object length not allowed.
+    static int SYNERRCD_OBJ_LEN_NOT_ALLOWED = 0x0B;
 
-  // Syntax Error Code.  Incorrect large object extended length field.
-  static int SYNERRCD_INCORRECT_EXTENDED_LEN = 0x0C;
+    // Syntax Error Code.  Required object not found.
+    static int SYNERRCD_REQ_OBJ_NOT_FOUND = 0x0E;
 
-  // Syntax Error Code.  DSS continuation less than or equal to two.
-  static int SYNERRCD_DSS_CONT_LESS_OR_EQUAL_2 = 0x16;
+    // Syntax Error Code.  Duplicate object present.
+    static int SYNERRCD_DUP_OBJ_PRESENT = 0x12;
 
-  // Syntax Error Code.  DSS chaining bit not b'1', but DSSFMT bit3 set to b'1'.
-  static int SYNERRCD_CHAIN_OFF_SAME_NEXT_CORRELATOR = 0x18;
+    // Syntax Error Code.  Invalid request correlator specified.
+    static int SYNERRCD_INVALID_CORRELATOR = 0x13;
 
-  // Syntax Error Code.  DSS chaining bit not b'1', but error continuation requested.
-  static int SYNERRCD_CHAIN_OFF_ERROR_CONTINUE = 0x1A;
+    // Syntax Error Code.  Incorrect large object extended length field.
+    static int SYNERRCD_INCORRECT_EXTENDED_LEN = 0x0C;
 
-  // Conversational Protocol Error Code.  OBJDSS sent when not allowed.
-  static int PRCCNVCD_OBJDSS_SENT_NOT_ALLOWED = 0x03;
+    // Syntax Error Code.  DSS continuation less than or equal to two.
+    static int SYNERRCD_DSS_CONT_LESS_OR_EQUAL_2 = 0x16;
 
-  // Information Only Severity Code.
-  static int SVRCOD_INFO = 0;
+    // Syntax Error Code.  DSS chaining bit not b'1', but DSSFMT bit3 set to b'1'.
+    static int SYNERRCD_CHAIN_OFF_SAME_NEXT_CORRELATOR = 0x18;
 
-  // Warning Severity Code.
-  static int SVRCOD_WARNING = 4;
+    // Syntax Error Code.  DSS chaining bit not b'1', but error continuation requested.
+    static int SYNERRCD_CHAIN_OFF_ERROR_CONTINUE = 0x1A;
 
-  // Error Severity Code.
-  static int SVRCOD_ERROR = 8;
+    // Conversational Protocol Error Code.  OBJDSS sent when not allowed.
+    static int PRCCNVCD_OBJDSS_SENT_NOT_ALLOWED = 0x03;
 
-  // Severe Error Severity Code.
-  static int SVRCOD_SEVERE = 16;
+    // Information Only Severity Code.
+    static int SVRCOD_INFO = 0;
 
-  // Access Damage Severity Code.
-  static int SVRCOD_ACCDMG = 32;
+    // Warning Severity Code.
+    static int SVRCOD_WARNING = 4;
 
-  // Permanent Damage Severity Code.
-  static int SVRCOD_PRMDMG = 64;
+    // Error Severity Code.
+    static int SVRCOD_ERROR = 8;
 
-  // Session Damage Severity Code.
-  static int SVRCOD_SESDMG = 128;
+    // Severe Error Severity Code.
+    static int SVRCOD_SEVERE = 16;
 
+    // Access Damage Severity Code.
+    static int SVRCOD_ACCDMG = 32;
 
-  //--------------------------XA code points---------------------------
+    // Permanent Damage Severity Code.
+    static int SVRCOD_PRMDMG = 64;
 
-  // SYNC Point Control Reply
-  public static final int SYNCCRD = 0x1248;
+    // Session Damage Severity Code.
+    static int SVRCOD_SESDMG = 128;
 
-  // XA Return Value
-  public static final int XARETVAL = 0x1904;
 
-  // new unit of work for XA
-  public static final int SYNCTYPE_NEW_UOW = 0x09;
+    //--------------------------XA code points---------------------------
 
-  // End unit of work (Sync type).
-  public static final int SYNCTYPE_END_UOW = 0x0B;
+    // SYNC Point Control Reply
+    public static final int SYNCCRD = 0x1248;
 
-  // Prepare to commit (Sync type).
-  public static final int SYNCTYPE_PREPARE = 0x01;
+    // XA Return Value
+    public static final int XARETVAL = 0x1904;
 
-  // migrate to resync server sync type
-  public static final int SYNCTYPE_MIGRATE = 0x02;
+    // new unit of work for XA
+    public static final int SYNCTYPE_NEW_UOW = 0x09;
 
-  // commit sync type
-  public static final int SYNCTYPE_COMMITTED = 0x03;
+    // End unit of work (Sync type).
+    public static final int SYNCTYPE_END_UOW = 0x0B;
 
-  // request to forget sync type
-  public static final int SYNCTYPE_REQ_FORGET = 0x06;
+    // Prepare to commit (Sync type).
+    public static final int SYNCTYPE_PREPARE = 0x01;
 
-  //rollback sync type
-  public static final int SYNCTYPE_ROLLBACK = 0x04;
+    // migrate to resync server sync type
+    public static final int SYNCTYPE_MIGRATE = 0x02;
 
+    // commit sync type
+    public static final int SYNCTYPE_COMMITTED = 0x03;
 
-  // migrated unit of work sync type
-  public static final int SYNCTYPE_MIGRATED = 0x0A;
+    // request to forget sync type
+    public static final int SYNCTYPE_REQ_FORGET = 0x06;
 
-  //recover sync type
-  public static final int SYNCTYPE_INDOUBT = 0x0C;
+    //rollback sync type
+    public static final int SYNCTYPE_ROLLBACK = 0x04;
 
-  // Length Codepoint
-  public static final int LLCP = 0x0004;
 
-  // SYNC Type Codepoint
-  public static final int SYNCTYPE = 0x1187;
+    // migrated unit of work sync type
+    public static final int SYNCTYPE_MIGRATED = 0x0A;
 
-  // XId Codepoint
-  public static final int XID = 0x1801;
+    //recover sync type
+    public static final int SYNCTYPE_INDOUBT = 0x0C;
 
-  // XA Flag Codepoint
-  public static final int XAFLAGS = 0x1903;
+    // Length Codepoint
+    public static final int LLCP = 0x0004;
 
+    // SYNC Type Codepoint
+    public static final int SYNCTYPE = 0x1187;
 
-  // Resync Types
-  public static final int RSYNC_FORGET = 0x02;
+    // XId Codepoint
+    public static final int XID = 0x1801;
 
-  // UOW States
-  public static final int RESET_STATE = 0x01;
-  public static final int UNKNOWN_STATE = 0x3;
-  public static final int INDOUBT_STATE = 0x04;
-  public static final int COLD_STATE = 0x05;
+    // XA Flag Codepoint
+    public static final int XAFLAGS = 0x1903;
 
-  // XA Flags
-  public static final int TMNOFLAGS = 0x00000000;
-  public static final int TMLOCAL = 0x10000000;
 
-  // Prepared and hueristic complete list
-  static final int PRPHRCLST = 0x1905;
+    // Resync Types
+    public static final int RSYNC_FORGET = 0x02;
 
-  // XID count
-  static final int XIDCNT = 0x1906;
+    // UOW States
+    public static final int RESET_STATE = 0x01;
+    public static final int UNKNOWN_STATE = 0x3;
+    public static final int INDOUBT_STATE = 0x04;
+    public static final int COLD_STATE = 0x05;
 
+    // XA Flags
+    public static final int TMNOFLAGS = 0x00000000;
+    public static final int TMLOCAL = 0x10000000;
 
-  // hide the default constructor
-  private CodePoint () {}
+    // Prepared and hueristic complete list
+    static final int PRPHRCLST = 0x1905;
+
+    // XID count
+    static final int XIDCNT = 0x1906;
+
+
+    // hide the default constructor
+    private CodePoint() {
+    }
 }
 
 

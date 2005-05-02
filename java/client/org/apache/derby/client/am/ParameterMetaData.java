@@ -26,120 +26,112 @@ package org.apache.derby.client.am;
 //
 // Once we go to JDK 1.4 as runtime pre-req, we can extend ColumnMetaData and new up ParameterMetaData instances directly,
 // and we won't have to wrap column meta data instances directly.
-public class ParameterMetaData implements java.sql.ParameterMetaData
-{
-  ColumnMetaData columnMetaData_;
 
-  // This is false unless for parameterMetaData for a call statement with return clause
-  boolean escapedProcedureCallWithResult_ = false;
+public class ParameterMetaData implements java.sql.ParameterMetaData {
+    ColumnMetaData columnMetaData_;
 
-  public ParameterMetaData (ColumnMetaData columnMetaData)
-  {
-    columnMetaData_ = columnMetaData;
-  }
+    // This is false unless for parameterMetaData for a call statement with return clause
+    boolean escapedProcedureCallWithResult_ = false;
 
-  public int getParameterCount () throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-      return columnMetaData_.columns_++;
-    return columnMetaData_.columns_;
-  }
-
-  public int getParameterType (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return java.sql.Types.INTEGER;
+    public ParameterMetaData(ColumnMetaData columnMetaData) {
+        columnMetaData_ = columnMetaData;
     }
-     return columnMetaData_.getColumnType (param);
-  }
 
-  public String getParameterTypeName (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return "INTEGER";
+    public int getParameterCount() throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            return columnMetaData_.columns_++;
+        }
+        return columnMetaData_.columns_;
     }
-    return columnMetaData_.getColumnTypeName (param);
-  }
 
-  public String getParameterClassName (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return "java.lang.Integer";
+    public int getParameterType(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return java.sql.Types.INTEGER;
+            }
+        }
+        return columnMetaData_.getColumnType(param);
     }
-    return columnMetaData_.getColumnClassName (param);
-  }
 
-  public int getParameterMode (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return java.sql.ParameterMetaData.parameterModeOut;
+    public String getParameterTypeName(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return "INTEGER";
+            }
+        }
+        return columnMetaData_.getColumnTypeName(param);
     }
-    columnMetaData_.checkForValidColumnIndex (param);
-    if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeUnknown)
-      return java.sql.ParameterMetaData.parameterModeUnknown;
-    else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeIn)
-      return java.sql.ParameterMetaData.parameterModeIn;
-    else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeOut)
-      return java.sql.ParameterMetaData.parameterModeOut;
-    else
-      return java.sql.ParameterMetaData.parameterModeInOut;
-  }
 
-  public int isNullable (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return java.sql.ResultSetMetaData.columnNoNulls;
+    public String getParameterClassName(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return "java.lang.Integer";
+            }
+        }
+        return columnMetaData_.getColumnClassName(param);
     }
-    return columnMetaData_.isNullable (param);
-  }
 
-  public boolean isSigned (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return true;
+    public int getParameterMode(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return java.sql.ParameterMetaData.parameterModeOut;
+            }
+        }
+        columnMetaData_.checkForValidColumnIndex(param);
+        if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeUnknown) {
+            return java.sql.ParameterMetaData.parameterModeUnknown;
+        } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeIn) {
+            return java.sql.ParameterMetaData.parameterModeIn;
+        } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeOut) {
+            return java.sql.ParameterMetaData.parameterModeOut;
+        } else {
+            return java.sql.ParameterMetaData.parameterModeInOut;
+        }
     }
-    return columnMetaData_.isSigned (param);
-  }
 
-  public int getPrecision (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return 10;
+    public int isNullable(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return java.sql.ResultSetMetaData.columnNoNulls;
+            }
+        }
+        return columnMetaData_.isNullable(param);
     }
-    return columnMetaData_.getPrecision (param);
-  }
 
-  public int getScale (int param) throws SqlException
-  {
-    if (escapedProcedureCallWithResult_)
-    {
-      param--;
-      if (param == 0)
-        return 0;
+    public boolean isSigned(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return true;
+            }
+        }
+        return columnMetaData_.isSigned(param);
     }
-    return columnMetaData_.getScale (param);
-  }
+
+    public int getPrecision(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return 10;
+            }
+        }
+        return columnMetaData_.getPrecision(param);
+    }
+
+    public int getScale(int param) throws SqlException {
+        if (escapedProcedureCallWithResult_) {
+            param--;
+            if (param == 0) {
+                return 0;
+            }
+        }
+        return columnMetaData_.getScale(param);
+    }
 
 }
 

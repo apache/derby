@@ -24,16 +24,17 @@ package org.apache.derby.client.am;
 // certain events that may originate from the material or common layers.
 //
 // Reply implementations may update result set state via this interface.
-public interface ResultSetCallbackInterface
-{
-  // The query was ended at the server because all rows have been retrieved.
-  public void earlyCloseComplete (Sqlca sqlca);
 
-  public int completeSqlca (Sqlca sqlca);
+public interface ResultSetCallbackInterface {
+    // The query was ended at the server because all rows have been retrieved.
+    public void earlyCloseComplete(Sqlca sqlca);
 
-  // Chain a warning on the result set object.
-  public void accumulateWarning (SqlWarning e);
+    public int completeSqlca(Sqlca sqlca);
 
-  public StatementCallbackInterface getStatementCallbackInterface ();
-  public ConnectionCallbackInterface getConnectionCallbackInterface ();
+    // Chain a warning on the result set object.
+    public void accumulateWarning(SqlWarning e);
+
+    public StatementCallbackInterface getStatementCallbackInterface();
+
+    public ConnectionCallbackInterface getConnectionCallbackInterface();
 }

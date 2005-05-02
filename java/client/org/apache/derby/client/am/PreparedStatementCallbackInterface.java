@@ -27,10 +27,11 @@ package org.apache.derby.client.am;
 //
 // The event interfaces are undergoing change, new events will be added soon
 // We want coarse grained event methods, rather than fine-grained events
-public interface PreparedStatementCallbackInterface extends StatementCallbackInterface
-{
 
-  public void completeDescribeInput (ColumnMetaData parameterMetaData, Sqlca sqlca);
-  public void completeDescribeOutput (ColumnMetaData resultSetMetaData, Sqlca sqlca);
+public interface PreparedStatementCallbackInterface extends StatementCallbackInterface {
+
+    public void completeDescribeInput(ColumnMetaData parameterMetaData, Sqlca sqlca);
+
+    public void completeDescribeOutput(ColumnMetaData resultSetMetaData, Sqlca sqlca);
 
 }

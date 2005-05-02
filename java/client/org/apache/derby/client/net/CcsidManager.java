@@ -22,72 +22,71 @@ package org.apache.derby.client.net;
 
 // Performs character conversions as required to send and receive PROTOCOL control data.
 // User data uses the JVM's built in converters, i18n.jar,
-public abstract class CcsidManager
-{
-  public byte space_; // ' ' character
-  byte dot_;   // '.' character
 
-  // Byte array used to convert numbers into
-  // bytes containing the character representation "value" for the particular ccsid.
-  byte[] numToCharRepresentation_;
+public abstract class CcsidManager {
+    public byte space_; // ' ' character
+    byte dot_;   // '.' character
 
-  // Special byte array to convert first half byte of CRRTKNs TCPIP address and port number
-  // to a character.  This is required for SNA hopping.
-  // This was specifically added to help build the CRRTKNs.
-  byte[] numToSnaRequiredCrrtknChar_;
+    // Byte array used to convert numbers into
+    // bytes containing the character representation "value" for the particular ccsid.
+    byte[] numToCharRepresentation_;
 
-  CcsidManager (byte space,
-                byte dot,
-                byte[] numToCharRepresentation,
-                byte[] numToSnaRequiredCrrtknChar)
-  {
-    space_ = space;
-    dot_ = dot;
-    numToCharRepresentation_ = numToCharRepresentation;
-    numToSnaRequiredCrrtknChar_ = numToSnaRequiredCrrtknChar;
-  }
+    // Special byte array to convert first half byte of CRRTKNs TCPIP address and port number
+    // to a character.  This is required for SNA hopping.
+    // This was specifically added to help build the CRRTKNs.
+    byte[] numToSnaRequiredCrrtknChar_;
 
-
-  // Convert a Java String into bytes for a particular ccsid.
-  //
-  // @param sourceString A Java String to convert.
-  // @return A new byte array representing the String in a particular ccsid.
-  public abstract byte[] convertFromUCS2 (String sourceString, org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
+    CcsidManager(byte space,
+                 byte dot,
+                 byte[] numToCharRepresentation,
+                 byte[] numToSnaRequiredCrrtknChar) {
+        space_ = space;
+        dot_ = dot;
+        numToCharRepresentation_ = numToCharRepresentation;
+        numToSnaRequiredCrrtknChar_ = numToSnaRequiredCrrtknChar;
+    }
 
 
-  // Convert a Java String into bytes for a particular ccsid.
-  // The String is converted into a buffer provided by the caller.
-  //
-  // @param sourceString  A Java String to convert.
-  // @param buffer        The buffer to convert the String into.
-  // @param offset        Offset in buffer to start putting output.
-  // @return An int containing the buffer offset after conversion.
-  public abstract int convertFromUCS2 (String sourceString,
-                                byte[] buffer,
-                                int offset,
-                                org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
-
-  // Convert a byte array representing characters in a particular ccsid into a Java String.
-  //
-  // @param sourceBytes An array of bytes to be converted.
-  // @return String A new Java String Object created after conversion.
-  abstract String convertToUCS2 (byte[] sourceBytes);
+    // Convert a Java String into bytes for a particular ccsid.
+    //
+    // @param sourceString A Java String to convert.
+    // @return A new byte array representing the String in a particular ccsid.
+    public abstract byte[] convertFromUCS2(String sourceString, org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
 
 
-  // Convert a byte array representing characters in a particular ccsid into a Java String.
-  //
-  // @param sourceBytes An array of bytes to be converted.
-  // @param offset  An offset indicating first byte to convert.
-  // @param numToConvert The number of bytes to be converted.
-  // @return A new Java String Object created after conversion.
-  abstract String convertToUCS2 (byte[] sourceBytes, int offset, int numToConvert);
+    // Convert a Java String into bytes for a particular ccsid.
+    // The String is converted into a buffer provided by the caller.
+    //
+    // @param sourceString  A Java String to convert.
+    // @param buffer        The buffer to convert the String into.
+    // @param offset        Offset in buffer to start putting output.
+    // @return An int containing the buffer offset after conversion.
+    public abstract int convertFromUCS2(String sourceString,
+                                        byte[] buffer,
+                                        int offset,
+                                        org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
+
+    // Convert a byte array representing characters in a particular ccsid into a Java String.
+    //
+    // @param sourceBytes An array of bytes to be converted.
+    // @return String A new Java String Object created after conversion.
+    abstract String convertToUCS2(byte[] sourceBytes);
 
 
-  // Convert a byte representing a char in a particular ccsid into a Java char.
-  //
-  // @param sourceByte The byte to be converted
-  // @return The converted Java char.
-  abstract char convertToUCS2Char (byte sourceByte);
+    // Convert a byte array representing characters in a particular ccsid into a Java String.
+    //
+    // @param sourceBytes An array of bytes to be converted.
+    // @param offset  An offset indicating first byte to convert.
+    // @param numToConvert The number of bytes to be converted.
+    // @return A new Java String Object created after conversion.
+    abstract String convertToUCS2(byte[] sourceBytes, int offset, int numToConvert);
+
+
+    // Convert a byte representing a char in a particular ccsid into a Java char.
+    //
+    // @param sourceByte The byte to be converted
+    // @return The converted Java char.
+    abstract char convertToUCS2Char(byte sourceByte);
 
 }
 

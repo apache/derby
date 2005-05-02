@@ -20,11 +20,10 @@
 
 package org.apache.derby.client.am;
 
-public interface UnitOfWorkListener
-{
-  public void listenToUnitOfWork ();
+public interface UnitOfWorkListener {
+    public void listenToUnitOfWork();
 
-  public void completeLocalCommit (java.util.Iterator listenerIterator);
+    public void completeLocalCommit(java.util.Iterator listenerIterator);
 
-  public void completeLocalRollback (java.util.Iterator listenerIterator);
+    public void completeLocalRollback(java.util.Iterator listenerIterator);
 }

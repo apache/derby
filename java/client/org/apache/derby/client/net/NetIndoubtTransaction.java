@@ -19,16 +19,15 @@
 */
 package org.apache.derby.client.net;
 
-import javax.transaction.xa.*;
+import javax.transaction.xa.Xid;
 
 /**
- * <p>Title: dnc Project</p>
- * <p>Description: </p>
+ * <p>Title: dnc Project</p> <p>Description: </p>
+ *
  * @version 1.0
  */
 
-public class NetIndoubtTransaction
-{
+public class NetIndoubtTransaction {
 
     Xid xid_;
     byte[] uowid_;
@@ -38,47 +37,40 @@ public class NetIndoubtTransaction
     int port_;
 
     protected NetIndoubtTransaction(Xid xid,
-                                   byte[] uowid,
-                                   byte[] cSyncLog,
-                                   byte[] pSyncLog,
-                                   String ipaddr,
-                                   int port)
-    {
-      xid_ = xid;
-      uowid_ = uowid;
-      cSyncLog_ = cSyncLog;
-      pSyncLog_ = pSyncLog;
-      ipaddr_ = ipaddr;
-      port_ = port;
+                                    byte[] uowid,
+                                    byte[] cSyncLog,
+                                    byte[] pSyncLog,
+                                    String ipaddr,
+                                    int port) {
+        xid_ = xid;
+        uowid_ = uowid;
+        cSyncLog_ = cSyncLog;
+        pSyncLog_ = pSyncLog;
+        ipaddr_ = ipaddr;
+        port_ = port;
     }
 
-    protected Xid getXid()
-    {
-      return xid_;
+    protected Xid getXid() {
+        return xid_;
     }
 
-    protected byte[] getUOWID()
-    {
-      return uowid_;
+    protected byte[] getUOWID() {
+        return uowid_;
     }
 
-    protected byte[] getCSyncLog()
-    {
-      return cSyncLog_;
+    protected byte[] getCSyncLog() {
+        return cSyncLog_;
     }
 
-    protected byte[] getPSyncLog()
-    {
-      return pSyncLog_;
+    protected byte[] getPSyncLog() {
+        return pSyncLog_;
     }
 
-    protected String getIpAddr()
-    {
-      return ipaddr_;
+    protected String getIpAddr() {
+        return ipaddr_;
     }
 
-    protected int getPort()
-    {
-      return port_;
+    protected int getPort() {
+        return port_;
     }
 }
