@@ -343,6 +343,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 
     private static final Method toPlainString;
+    private static final Method bdPrecision;
     static {
         Method m;
         try {
@@ -351,6 +352,12 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
             m = null;
         }
         toPlainString = m;
+        try {
+            m = BigDecimal.class.getMethod("precision", null);
+        } catch (NoSuchMethodException e) {
+            m = null;
+        }
+        bdPrecision = m;
     }
 
 	public Object	getObject()
@@ -425,8 +432,8 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	/** 
 	 * Distill the BigDecimal to a byte array and
 	 * write out: <UL>
-	 *	<LI> scale (int) </LI>
-	 *	<LI> length of byte array </LI>
+	 *	<LI> scale (zero or positive) as a byte </LI>
+	 *	<LI> length of byte array as a byte</LI>
 	 *	<LI> the byte array </LI> </UL>
 	 *
 	 */
@@ -441,11 +448,42 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 		if (value != null) {
 			scale = value.scale();
+			
+			// J2SE 5.0 introduced negative scale value for BigDecimals.
+			// In previouse Java releases a negative scale was not allowed
+			// (threw an exception on setScale and the constructor that took
+			// a scale).
+			//
+			// Thus the Derby format for DECIMAL implictly assumed a
+			// positive or zero scale value, and thus now must explicitly
+			// be positive. This is to allow databases created under J2SE 5.0
+			// to continue to be supported under JDK 1.3/JDK 1.4, ie. to continue
+			// the platform independence, independent of OS/cpu and JVM.
+			//
+			// If the scale is negative set the scale to be zero, this results
+			// in an unchanged value with a new scale. A BigDecimal with a
+			// negative scale by definition is a whole number.
+			// e.g. 1000 can be represented by:
+			//    a BigDecimal with scale -3 (unscaled value of 1)
+			// or a BigDecimal with scale 0 (unscaled value of 1000)
+			
+			if (scale < 0) {			
+				scale = 0;
+				value = value.setScale(0);
+			}
+
 			BigInteger bi = value.unscaledValue();
 			byteArray = bi.toByteArray();
 		} else {
 			scale = rawScale;
 			byteArray = rawData;
+		}
+		
+		if (SanityManager.DEBUG)
+		{
+			if (scale < 0)
+				SanityManager.THROWASSERT("DECIMAL scale at writeExternal is negative "
+					+ scale + " value " + toString());
 		}
 
 		out.writeByte(scale);
@@ -1051,11 +1089,9 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	{
 		if (isNull())
 			return this;
-				
-		// the getWholeDigits() call will ensure via getBigDecimal()
-		// that the rawData is translated into the BigDecimal in value.
+			
 		if (desiredPrecision != IGNORE_PRECISION &&
-			((desiredPrecision - desiredScale) <  getWholeDigits()))
+			((desiredPrecision - desiredScale) <  SQLDecimal.getWholeDigits(getBigDecimal())))
 		{
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, 
 									("DECIMAL/NUMERIC("+desiredPrecision+","+desiredScale+")"));
@@ -1065,31 +1101,43 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		return this;
 	}
 
+	/**
+	 * Return the SQL scale of this value, number of digits after the
+	 * decimal point, or zero for a whole number. This does not match the
+	 * return from BigDecimal.scale() since in J2SE 5.0 onwards that can return
+	 * negative scales.
+	 */
 	public int getDecimalValuePrecision()
 	{
-		return getPrecision(getBigDecimal());
-	}
-	/**
-	 *
-	 * @param decimalValue the big decimal
-	 *
-	 * @return the precision
-	 */	
-	private static int getPrecision(BigDecimal decimalValue)
-	{
-		if ((decimalValue == null) ||
-			 decimalValue.equals(ZERO))
-		{
+		if (isNull())
 			return 0;
-		}	
+			
+		BigDecimal localValue = getBigDecimal();
 
-		return SQLDecimal.getWholeDigits(decimalValue) + decimalValue.scale();
+		return SQLDecimal.getWholeDigits(localValue) + getDecimalValueScale();
 	}
 
+	/**
+	 * Return the SQL scale of this value, number of digits after the
+	 * decimal point, or zero for a whole number. This does not match the
+	 * return from BigDecimal.scale() since in J2SE 5.0 onwards that can return
+	 * negative scales.
+	 */
 	public int getDecimalValueScale()
 	{
-		BigDecimal localValue = getBigDecimal();
-		return (localValue == null) ? 0 : localValue.scale();
+		if (isNull())
+			return 0;
+		
+		if (value == null)
+			return rawScale;
+	
+		int scale = value.scale();
+		if (scale >= 0)
+			return scale;
+		
+		// BigDecimal scale is negative, so number must have no fractional
+		// part as its value is the unscaled value * 10^-scale
+		return 0;
 	}
 	
 	/**
@@ -1125,19 +1173,14 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		}
 	}
 
-	private int getWholeDigits()
-	{
-		return SQLDecimal.getWholeDigits(getBigDecimal());
-	}
-
+	/**
+	 * Calculate the number of digits to the left of the decimal point
+	 * of the passed in value.
+	 * @param decimalValue Value to get whole digits from, never null.
+	 * @return number of whole digits.
+	 */
 	private static int getWholeDigits(BigDecimal decimalValue)
 	{
-		if ((decimalValue == null) ||
-			 decimalValue.equals(ZERO))
-		{
-			return 0;
-		}
-
         /**
          * if ONE > abs(value) then the number of whole digits is 0
          */
@@ -1146,7 +1189,36 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
         {
             return 0;
         }
-
+        
+        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_15)
+		{
+	        // use reflection so we can still compile using JDK1.4
+			// if we are prepared to require 1.5 to compile then this can be a
+			// direct call
+			try {
+				// precision is the number of digits in the unscaled value,
+				// subtracting the scale (positive or negative) will give the
+				// number of whole digits.
+				int precision = ((Integer) bdPrecision.invoke(decimalValue,
+						null)).intValue();
+				return precision - decimalValue.scale();
+			} catch (IllegalAccessException e) {
+				// can't happen based on the JDK spec
+				throw new IllegalAccessError("precision");
+			} catch (InvocationTargetException e) {
+				Throwable t = e.getTargetException();
+				if (t instanceof RuntimeException) {
+					throw (RuntimeException) t;
+				} else if (t instanceof Error) {
+					throw (Error) t;
+				} else {
+					// can't happen
+					throw new IncompatibleClassChangeError("precision");
+				}
+			}
+            
+		}
+   
 		String s = decimalValue.toString();
         return (decimalValue.scale() == 0) ? s.length() : s.indexOf('.');
 	}
