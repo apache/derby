@@ -629,7 +629,15 @@ public class PersistentServiceImpl implements PersistentService
 		Throwable t = null;
         try
         {
-            return (String) AccessController.doPrivileged(
+			String protocolLeadIn = "";
+			//prepend the subsub protocol name to the storage factoty canonical
+			//name to form the service name except in case of the the 
+			//default subsubprototcol(PersistentService.DIRECTORY)
+
+			if (!(getType().equals( PersistentService.DIRECTORY))) 
+				protocolLeadIn = getType() + ":";
+
+            return protocolLeadIn + (String) AccessController.doPrivileged(
                 new PrivilegedExceptionAction()
                 {
                     public Object run()
