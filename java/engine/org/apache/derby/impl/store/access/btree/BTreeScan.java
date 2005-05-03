@@ -104,9 +104,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
     /**
      * A constant FetchDescriptor which describes the position of the 
-     * RowLocation field within the btree (ie. the last column).  Used by 
-     * lock/unlock to fetch the RowLocation.  Only needs to be allocated once
-     * per scan.
+     * RowLocation field within the btree, currently always the last column).  
+     * Used by lock/unlock to fetch the RowLocation.  
+     * Only needs to be allocated once per scan.
      **/
     protected FetchDescriptor       init_lock_fetch_desc;
 
@@ -1724,7 +1724,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     call.  This interface allows implementations to optimize 
     the 2 calls if possible.
 
-    @param template The template row into which the value
+    @param row The template row into which the value
 	of the next position in the scan is to be stored.
 
     @return True if there is a next position in the scan,
@@ -1995,7 +1995,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 	the scan.  If null, the starting position of the scan
 	is the first row of the conglomerate.
 
-	@param startSearchOperation an operator which defines
+	@param startSearchOperator an operator which defines
 	how the startKeyValue is to be searched for.  If
     startSearchOperation is ScanController.GE, the scan starts on
 	the first row which is greater than or equal to the
@@ -2015,7 +2015,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 	the scan.  If null, the ending position of the scan
 	is the last row of the conglomerate.
 
-	@param stopSearchOperation an operator which defines
+	@param stopSearchOperator an operator which defines
 	how the stopKeyValue is used to determine the scan stopping
 	position. If stopSearchOperation is ScanController.GE, the scan
 	stops just before the first row which is greater than or

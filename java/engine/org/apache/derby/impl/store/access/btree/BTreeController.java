@@ -921,7 +921,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 	*/
 
     /**
-    Close the conglomerate controller
+    Close the conglomerate controller.
 	<p>
 	Any changes to this method will probably have to be reflected in close as 
     well.
@@ -960,10 +960,10 @@ public class BTreeController extends OpenBTree implements ConglomerateController
      * RESOLVE (mikem) - move this call to ConglomerateManager so it is
      * obvious that non-access clients should not call this.
      *
-     * @param closeHeldController     If true, means to close controller even if
-     *                                it has been opened to be kept opened 
-     *                                across commit.  This is
-     *                                used to close these controllers on abort.
+     * @param closeHeldScan     If true, means to close controller even if
+     *                          it has been opened to be kept opened 
+     *                          across commit.  This is
+     *                          used to close these controllers on abort.
      *
 	 * @return boolean indicating that the close has resulted in a real close
      *                 of the controller.  A held scan will return false if 

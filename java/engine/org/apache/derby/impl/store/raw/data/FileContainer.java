@@ -1382,11 +1382,12 @@ public abstract class FileContainer
                 alloc_page.compress(this);
 
 				allocCache.invalidate(); 
-            }
-		}
-		catch (StandardException se)
-		{
 
+            }
+
+		}
+        finally
+        {
 			if (alloc_page != null)
             {
 				alloc_page.unlatch();
@@ -1397,6 +1398,21 @@ public abstract class FileContainer
 				prev_alloc_page.unlatch();
 				prev_alloc_page = null;
             }
+
+            System.out.println("calling flushAll()");
+
+            // flush all changes to this file from cache.
+            flushAll();
+
+            System.out.println("calling discard."); 
+
+            // make sure all truncated pages are removed from the cache,
+            // as it will get confused in the future if we allocate the same
+            // page again, but find an existing copy of it in the cache - 
+            // it expects to not find new pages in the cache.  Could just
+            // get rid of truncated pages, iterface allows one page or
+            // all pages.
+            pageCache.discard(identity);
         }
 	}
 

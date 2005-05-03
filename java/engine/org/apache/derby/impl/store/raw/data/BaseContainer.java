@@ -222,6 +222,7 @@ public abstract class BaseContainer implements Lockable {
 		finally
 		{
             ntt.commitNoSync(Transaction.RELEASE_LOCKS);
+
 			ntt.close();
 		}
     }
@@ -718,7 +719,8 @@ public abstract class BaseContainer implements Lockable {
     long                pageno)
 		 throws StandardException;
 
-	protected abstract void truncatePages(long lastValidPagenum);
+	protected abstract void truncatePages(long lastValidPagenum)
+        throws StandardException;
 
 
 	/**

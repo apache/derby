@@ -20,9 +20,13 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
+
 import org.apache.derby.tools.ij;
 
 import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
@@ -63,6 +67,13 @@ public abstract class BaseTest
         conn.commit();
     }
 
+    protected void testProgress(
+    String      str)
+        throws SQLException
+    {
+        log("Executing test: " + str);
+    }
+
     protected void endTest(
     Connection  conn,
     String      str)
@@ -71,8 +82,49 @@ public abstract class BaseTest
         conn.commit();
         log("Ending test: " + str);
     }
+
     protected void log(String   str)
     {
         System.out.println(str);
+    }
+
+    protected void logError(String   str)
+    {
+        System.out.println("ERROR: " + str);
+    }
+
+    /**
+     * Call consistency checker on the table.
+     * <p>
+     **/
+    protected boolean checkConsistency(
+    Connection  conn,
+    String      schemaName,
+    String      tableName)
+		throws SQLException
+    {
+        Statement s = conn.createStatement();
+
+        ResultSet rs = 
+            s.executeQuery(
+                "values SYSCS_UTIL.SYSCS_CHECK_TABLE('" + 
+                schemaName + "', '" + 
+                tableName  + "')");
+
+        if (!rs.next())
+        {
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT("no value from values clause.");
+            }
+        }
+
+        boolean consistent = rs.getBoolean(1);
+
+        rs.close();
+
+        conn.commit();
+
+        return(consistent);
     }
 }

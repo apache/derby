@@ -206,8 +206,6 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
      * The btree object returned by this routine may be installed in a cache
      * so the object must not change.
      *
-     * @param conglomid      The unique id of the existing conglomerate.
-     *
 	 * @return An instance of the conglomerate.
      *
 	 * @exception  StandardException  Standard exception policy.

@@ -165,8 +165,7 @@ public class B2INoLocking implements BTreeLockingPolicy
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
-     * @param leaf              The control row of the current leaf to lock.
-     * @param slot              The slot position of the row to lock.
+     * @param pos               The position of the row to lock.
      * @param request_scan_lock Whether to request the page scan lock, should
      *                          only be requested once per page in the scan.
      *

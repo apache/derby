@@ -162,7 +162,7 @@ public class B2IController extends BTreeController
 	*/
 
     /**
-    Close the conglomerate controller
+    Close the conglomerate controller.
 	<p>
 	Any changes to this method will probably have to be reflected in close as 
     well.

@@ -114,7 +114,7 @@ public class B2IStaticCompiledInfo implements StaticCompiledOpenConglomInfo
      */
 
     /**
-     * return the "Conglomerate"
+     * return the "Conglomerate".
      * <p>
      * For secondaryindex compiled info return the secondary index conglomerate.
      * <p>

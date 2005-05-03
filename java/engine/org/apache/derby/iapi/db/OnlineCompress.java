@@ -61,12 +61,66 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import java.sql.SQLException;
 
+/**
+
+Implementation of SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE().
+<p>
+Code which implements the following system procedure:
+
+void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
+    IN SCHEMANAME        VARCHAR(128),
+    IN TABLENAME         VARCHAR(128),
+    IN PURGE_ROWS        SMALLINT,
+    IN DEFRAGMENT_ROWS   SMALLINT,
+    IN TRUNCATE_END      SMALLINT)
+<p>
+This system procedure can be used to force 3 levels of in place
+compression of a SQL table.  The table is specified using the
+SCHEMANAME and TABLENAME arguments.  
+<p>
+If PURGE_ROWS is set to non-zero then a single pass is made through the table 
+which will purge committed deleted rows from the table.  This space is then
+available for future inserted rows, but remains allocated to the table.
+As this option scans every page of the table, it's performance is linearly 
+related to the size of the table.
+<p>
+If DEFRAGMENT_ROWS is set to non-zero then a single defragment pass is made
+which will move existing rows from the end of the table towards the front
+of the table.  The goal of the defragment run is to empty a set of pages
+at the end of the table which can then be returned to the OS by the
+TRUNCATE_END option.  It is recommended to only run DEFRAGMENT_ROWS, if also
+specifying the TRUNCATE_END option.  This option scans the whole table and
+needs to update index entries for every base table row move, and thus execution
+time is linearly related to the size of the table.
+<p>
+If TRUNCATE_END is set to non-zero then all contiguous pages at the end of
+the table will be returned to the OS.  Running the DEFRAGMENT_ROWS option may
+increase the number of pages affected.  This option itself does no scans of
+the table, so performs on the order of a few system calls.
+
+**/
 public class OnlineCompress
 {
 
 	/** no requirement for a constructor */
 	private OnlineCompress() {
 	}
+
+    /**
+     * Implementation of SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE().
+     * <p>
+     * Top level implementation of the system procedure.  All the 
+     * real work is found in the other routines in this file implementing
+     * the 3 phases of inplace compression:  purge, defragment, and truncate.
+     * <p>
+     * @param schemaName        schema name of table, required
+     * @param tableName         table name to be compressed
+     * @param purgeRows         if true, do a purge pass on the table
+     * @param defragmentRows    if true, do a defragment pass on the table
+     * @param truncateEnd       if true, return empty pages at end to OS.
+     *
+	 * @exception  SQLException  Errors returned by throwing SQLException.
+     **/
 	public static void compressTable(
     String  schemaName, 
     String  tableName,
@@ -84,6 +138,10 @@ public class OnlineCompress
 
             // Each of the following may give up locks allowing ddl on the
             // table, so each phase needs to do the data dictionary lookup.
+            // The order is important as it makes sense to first purge
+            // deleted rows, then defragment existing non-deleted rows, and
+            // finally to truncate the end of the file which may have been
+            // made larger by the previous purge/defragment pass.
 
             if (purgeRows)
                 purgeRows(schemaName, tableName, data_dictionary, tc);

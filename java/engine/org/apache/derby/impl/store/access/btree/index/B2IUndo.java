@@ -102,19 +102,21 @@ public class B2IUndo implements LogicalUndo, Formatable
 	 * RecordHandle so that the logging system can update the compensation
 	 * Operation with the new location.
      *
-	 * @param transaction the transaction doing the rollback
-	 * @param pageOp the page operation that supports logical undo.  This
-	 * 		LogicalUndo function pointer is a field of that pageOperation
-	 * @param in data stored in the log stream that contains the record data
-	 * 		necessary to restore the row.
+	 * @param rawtran   the transaction doing the rollback
+	 * @param pageOp    the page operation that supports logical undo.  This
+	 * 		            LogicalUndo function pointer is a field of that 
+     * 		            pageOperation
+	 * @param in        data stored in the log stream that contains the record 
+     *                  data necessary to restore the row.
      *
-     *	@exception StandardException Standard Cloudscape error policy
-	 *  @exception IOException Method may read from InputStream
+     * @exception StandardException Standard Cloudscape error policy
+	 * @exception IOException Method may read from InputStream
+     *
 	 */
 	public Page findUndo(
-    Transaction     rawtran, 
-    LogicalUndoable pageOp,
-    LimitObjectInput     in)
+    Transaction         rawtran, 
+    LogicalUndoable     pageOp,
+    LimitObjectInput    in)
         throws StandardException, IOException
     {
         ControlRow            root                      = null;

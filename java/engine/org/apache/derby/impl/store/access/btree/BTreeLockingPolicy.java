@@ -87,7 +87,7 @@ public interface BTreeLockingPolicy
      */
 
     /**
-     * Lock the current leaf page (vs. a row on the page).
+     * Lock the current leaf page.
      * <p>
      * Logically lock the record id's on a leaf page.  This protocol is used
      * by splits/row purgers and scans to coordinate between themselves.
@@ -132,7 +132,7 @@ public interface BTreeLockingPolicy
      * @param aux_control_row   If non-null, this control row is unlatched 
      *                          if the routine has to wait on the lock.
      * @param forUpdate         Whether to wait for lock.
-     * @param lock_oper         For what operation are we requesting the lock, 
+     * @param lock_operation    For what operation are we requesting the lock, 
      *                          this should be one of the following 4 options:
      *                          LOCK_READ [read lock], 
      *                          (LOCK_INS | LOCK_UPD) [ lock for insert], 
@@ -209,14 +209,13 @@ public interface BTreeLockingPolicy
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
-     * @param leaf              The control row of the current leaf to lock.
-     * @param slot              The slot position of the row to lock.
+     * @param pos               Description of position of row to lock.
      * @param request_scan_lock Whether to request the page scan lock, should
      *                          only be requested once per page in the scan.
-     * @param scratch_template  A scratch area to use to read in rows.
+     * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
-     * @param lock_oper         For what operation are we requesting the lock, 
+     * @param lock_operation    For what operation are we requesting the lock, 
      *                          this should be one of the following 4 options:
      *                          LOCK_READ [read lock], 
      *                          (LOCK_INS | LOCK_UPD) [ lock for insert], 
@@ -312,10 +311,10 @@ public interface BTreeLockingPolicy
      * @param btree             The conglomerate we are locking.
      * @param current_leaf      Latched current leaf where "current" key is.
      * @param current_slot      The slot of row on "current_leaf" 
-     * @param template          Empty full template row, to read row into.
+     * @param lock_template     Empty full template row, to read row into.
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
-     * @param lock_oper         For what operation are we requesting the lock, 
+     * @param lock_operation    For what operation are we requesting the lock, 
      *                          this should be one of the following 4 options:
      *                          LOCK_READ [read lock], 
      *                          (LOCK_INS | LOCK_UPD) [ lock for insert], 
@@ -369,7 +368,7 @@ public interface BTreeLockingPolicy
      * @param aux_leaf          If non-null, this leaf is unlatched if the 
      *                          routine has to wait on the lock.
      * @param current_row       In memory, objectified "current" row.
-     * @param lock_oper         For what operation are we requesting the lock, 
+     * @param lock_operation    For what operation are we requesting the lock, 
      *                          this should be one of the following 4 options:
      *                          LOCK_READ [read lock], 
      *                          (LOCK_INS | LOCK_UPD) [ lock for insert], 
@@ -398,13 +397,11 @@ public interface BTreeLockingPolicy
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
-     * @param open_btree        The open_btree to associate latches with - 
-     *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
      * @param leaf              The control row of the current leaf to lock.
      * @param slot              The slot position of the row to lock.
-     * @param scratch_template  A scratch area to use to read in rows.
-     * @param lock_oper         For what operation are we requesting the lock, 
+     * @param lock_template     A scratch area to use to read in rows.
+     * @param lock_operation    For what operation are we requesting the lock, 
      *                          this should be one of the following 4 options:
      *                          LOCK_READ [read lock], 
      *                          (LOCK_INS | LOCK_UPD) [ lock for insert], 

@@ -302,7 +302,6 @@ public class B2I extends BTree
      * raw store will be providing this.
      *
      * @param xact_manager Transaction to associate the lock with.
-     * @param forUpdate    Whether to lock exclusive or share.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

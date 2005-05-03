@@ -569,11 +569,11 @@ public class BranchControlRow extends ControlRow
      *
 	 * @return page number of the newly allocated leaf page created by split.
      *
-     * @param btree      The open btree to associate latches with.
+     * @param open_btree The open btree to associate latches with.
      * @param template   A scratch area to use while searching for split pass.
-     * @param parentpage The parent page of the current page in the split pass.
+     * @param parent     The parent page of the current page in the split pass.
      *                   starts at null for root.
-     * @param row        The key to make room for during the split pass.
+     * @param splitrow   The key to make room for during the split pass.
      * @param flag       A flag used to direct where point of split should be
      *                   chosen.
      *
@@ -1431,7 +1431,7 @@ public class BranchControlRow extends ControlRow
      *
 	 * @return The page which is the leftmost child of this page.
      *
-     * @param btree  The open btree to associate latches/locks with.
+     * @param open_btree  The open btree to associate latches/locks with.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

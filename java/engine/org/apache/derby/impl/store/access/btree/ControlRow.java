@@ -293,7 +293,6 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 	 * corresponding accessor(s).
      *
      * @param btree      Static information about the btree.
-     * @param container  The container in which this btree resides.
      * @param page       The page described by this control row.
      * @param parent     The parent page of this page, "null" if this page is 
      *                   root or if not maintaining parent links.
@@ -1980,7 +1979,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
      *
 	 * @return page number of the newly allocated leaf page created by split.
      *
-     * @param btree      The open btree to associate latches with.
+     * @param open_btree The open btree to associate latches with.
      * @param template   A scratch area to use while searching for split pass.
      * @param parentpage The parent page of the current page in the split pass.
      *                   starts at null for root.

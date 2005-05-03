@@ -550,8 +550,9 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
      **/
 	protected void truncatePages(
     long lastValidPagenum)
+        throws StandardException
 	{  
-		// int n = doTruncatePages(lastValidPagenum); 
+
 
         synchronized(this)
         {
