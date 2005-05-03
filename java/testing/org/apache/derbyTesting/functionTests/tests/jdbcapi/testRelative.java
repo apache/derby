@@ -8,32 +8,34 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 
 public class testRelative {
    
-   static final String EXPECTED_SQL_STATE = "24000";
-   static Connection con;
-   static ResultSet rs;
-   static PreparedStatement stmt = null;
-   static PreparedStatement pStmt = null;
-   static Statement stmt1 = null;
-   static String returnValue = null;
-
+   static final String NO_CURRENT_ROW_SQL_STATE = "24000";
+  
    public static void main(String[] args) {
-        test1(args);        
+	   System.out.println("Test testRelative starting");
+	   Connection con = null;
+	   try {
+		   // use the ij utility to read the property file and
+		   // make the initial connection.
+		   ij.getPropertyArg(args);
+		   con = ij.startJBMS();
+		   test1(con);        
+	   } catch (Exception e)
+	   {
+		   unexpectedException(e);
+	   }
     }
     
-    public static void test1(String []args) {   
-                System.out.println("Test testRelative starting");
-
-                try
-                {
-                        // use the ij utility to read the property file and
-                        // make the initial connection.
-                        ij.getPropertyArg(args);
-                        con = ij.startJBMS();
-					
-			con.setAutoCommit(false);                        			              
-                        
-                        stmt = con.prepareStatement("create table testRelative(name varchar(10), i int)");
-   			stmt.executeUpdate();
+    public static void test1(Connection con) {
+		ResultSet rs = null;
+		PreparedStatement pStmt = null;
+		Statement stmt1 = null;
+		String returnValue = null;
+		
+		try
+		{
+			con.setAutoCommit(false);
+			pStmt = con.prepareStatement("create table testRelative(name varchar(10), i int)");
+   			pStmt.executeUpdate();
    			con.commit();
    			
    			pStmt = con.prepareStatement("insert into testRelative values (?,?)");
@@ -89,7 +91,7 @@ public class testRelative {
    			System.out.println("Value="+returnValue);
 
  		} catch(SQLException sqle) {
- 		   dumpSQLExceptions(sqle);
+ 		   expectedException(sqle, NO_CURRENT_ROW_SQL_STATE);
  		} catch(Throwable e) {
  		   System.out.println("FAIL -- unexpected exception: "+e.getMessage());
                    e.printStackTrace(System.out);
@@ -98,28 +100,42 @@ public class testRelative {
       }
      
       /**
-        * This is to print the expected Exception's details. We are here because we got an Exception
-        * when we expected one, but checking to see that we got the right one.
-        **/
-      static private void dumpSQLExceptions (SQLException se) {
-           if( se.getSQLState() != null && (se.getSQLState().equals(EXPECTED_SQL_STATE))) { 
+	   *  Print the expected Exception's details if the SQLException SQLState
+	   * matches the expected SQLState. Otherwise fail
+	   *
+	   * @param se  SQLException that was thrown by the test
+	   * @param expectedSQLState  The SQLState that we expect. 
+	   *
+	   **/
+	static private void expectedException (SQLException se, String expectedSQLState) {
+           if( se.getSQLState() != null && (se.getSQLState().equals(expectedSQLState))) { 
                 System.out.println("PASS -- expected exception");
                 while (se != null) {
                     System.out.println("SQLSTATE("+se.getSQLState()+"): "+se.getMessage());
                     se = se.getNextException();
                 }
             } else {
-	        System.out.println("FAIL--Unexpected SQLException: "+se.getMessage());
+	        System.out.println("FAIL--Unexpected SQLException: " +
+							   "SQLSTATE(" +se.getSQLState() + ")" +
+							   se.getMessage());
 	        se.printStackTrace(System.out);
 	    }
-        }
+	}
 
      /**
        * We are here because we got an exception when did not expect one.
        * Hence printing the message and stack trace here.
        **/
      static private void unexpectedSQLException(SQLException se) {
-	 System.out.println("FAIL -- Unexpected Exception: "+ se.getMessage());
+	 System.out.println("FAIL -- Unexpected Exception: "+ 
+						"SQLSTATE(" +se.getSQLState() +")" +
+						se.getMessage());
 	 se.printStackTrace(System.out);
      }
+
+	static private void unexpectedException(Exception e) {
+		System.out.println("FAIL -- Unexpected Exception: "+ 
+						   e.getMessage());
+	}
+	
 }

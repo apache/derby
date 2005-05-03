@@ -564,6 +564,28 @@ final class CrossConverters {
         }
     }
 
+    // ------ method to convert to targetJdbcType ------
+    /**
+     * Convert the input targetJdbcType to the correct JdbcType used by CrossConverters.
+     */
+    public static int getInputJdbcType(int jdbcType) {
+        switch (jdbcType) {
+        case java.sql.Types.BIT:
+        case java.sql.Types.BOOLEAN:
+        case java.sql.Types.TINYINT:
+        case java.sql.Types.SMALLINT:
+            return java.sql.Types.INTEGER;
+        case java.sql.Types.NUMERIC:
+            return java.sql.Types.DECIMAL;
+        case java.sql.Types.FLOAT:
+            return java.sql.Types.DOUBLE;
+        default:
+            return jdbcType;
+        }
+
+    }
+
+
     // -- methods in support of setObject(String)/getString() on BINARY columns---
 
 
@@ -1149,7 +1171,6 @@ final class CrossConverters {
 
     final java.sql.Date getDateFromString(String source) throws SqlException {
         try {
-            // We override the JRE's Date.valueOf() in order to support a more Extended ISO format as requested by Toronto team
             return date_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
@@ -1170,7 +1191,6 @@ final class CrossConverters {
 
     final java.sql.Time getTimeFromString(String source) throws SqlException {
         try {
-            // We override the JRE's Time.valueOf() in order to support a more Extended ISO format as requested by Toronto team
             return time_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
@@ -1187,7 +1207,6 @@ final class CrossConverters {
 
     final java.sql.Timestamp getTimestampFromString(String source) throws SqlException {
         try {
-            // We override the JRE's Timestamp.valueOf() in order to support a more Extended ISO format as requested by Toronto team
             return timestamp_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) {  // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, e,
@@ -1205,263 +1224,33 @@ final class CrossConverters {
         return new java.sql.Timestamp(source.getTime());
     }
 
-    //-------------- Customized versions of java.lang parse methods --------------
-
-    // Converts a string in JDBC date "extended" ISO format to a Date value.
-    // yyyy-mm-dd with trailing blanks allowed.
     final java.sql.Date date_valueOf(String s) throws java.lang.IllegalArgumentException {
         String formatError = "JDBC Date format must be yyyy-mm-dd";
         if (s == null) {
             throw new java.lang.IllegalArgumentException(formatError);
         }
-
-        int year = 1000 * getDigit(s, 0);
-        year += 100 * getDigit(s, 1);
-        year += 10 * getDigit(s, 2);
-        year += 1 * getDigit(s, 3);
-
-        char hyphen = s.charAt(4);
-        if (hyphen != '-') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int month = 0;
-        int day = 0;
-        int pos = 0;
-
-        hyphen = s.charAt(6);
-        if (hyphen == '-') { //single digit month
-            month = getDigit(s, 5);
-            pos = 7;
-        } else { //double digit month
-            month = 10 * getDigit(s, 5);
-            month += 1 * getDigit(s, 6);
-            pos = 8;
-            hyphen = s.charAt(7);
-            if (hyphen != '-') {
-                throw new java.lang.IllegalArgumentException(formatError);
-            }
-        }
-
-        if (s.length() == (pos + 1) || Character.digit(s.charAt(pos + 1), 10) == -1) { //single digit day
-            day = getDigit(s, pos);
-            pos++;
-        } else { //double digit day
-            day = 10 * getDigit(s, pos);
-            day += 1 * getDigit(s, pos + 1);
-            pos = pos + 2;
-        }
-        skipPadding(s, pos, s.length());
-        return new java.sql.Date(year - 1900, month - 1, day);
+        s = s.trim();
+        return java.sql.Date.valueOf(s);
     }
 
-    // Customized versions of java.util.Date/Time/Timestamp valueOf methods
-    // We override the JRE's Date/Time/Timestamp.valueOf() methods in order to support a
-    // more Extended ISO format as requested by Toronto team.
-    // Also allows for space-padding of CHAR fields.
 
-    private final int getDigit(String s, int index) throws java.lang.IllegalArgumentException {
-        String formatError = "Date/Time must be JDBC format";
-        int digit = -1;
-        if (s != null && s.length() >= 10) {
-            digit = Character.digit(s.charAt(index), 10);
-        }
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        return digit;
-    }
-
-    // Converts a string in JDBC time "extended" ISO format to a Time value.
-    // hh:mm:ss or hh.mm.ss with trailing blanks allowed.
     final java.sql.Time time_valueOf(String s) throws java.lang.IllegalArgumentException, NumberFormatException {
         String formatError = "JDBC Time format must be hh:mm:ss";
         if (s == null) {
             throw new java.lang.IllegalArgumentException();
         }
-
-        int hour = 10 * getDigit(s, 0);
-        hour += 1 * getDigit(s, 1);
-
-        char colon = s.charAt(2);
-        if (colon != ':' && colon != '.') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int minute = 10 * getDigit(s, 3);
-        minute += 1 * getDigit(s, 4);
-
-        colon = s.charAt(5);
-        if (colon != ':' && colon != '.') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int second = 10 * getDigit(s, 6);
-        second += 1 * getDigit(s, 7);
-
-        skipPadding(s, 8, s.length());
-        return new java.sql.Time(hour, minute, second);
+        s = s.trim();
+        return java.sql.Time.valueOf(s);
     }
 
-    // Converts a string in JDBC date "extended" ISO format to a Timestamp value.
-    // yyyy-mm-dd hh:mm:ss[.[n[n[n[n[n[n[n[n[n]]]]]]]] or yyyy-mm-dd-hh.mm.ss[.[n[n[n[n[n[n[n[n[n]]]]]]]] with trailing blanks allowed.
     final java.sql.Timestamp timestamp_valueOf(String s) throws java.lang.IllegalArgumentException, NumberFormatException {
         String formatError = "JDBC Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff";
         if (s == null) {
             throw new java.lang.IllegalArgumentException();
         }
 
-        int year = 1000 * getDigit(s, 0);
-        year += 100 * getDigit(s, 1);
-        year += 10 * getDigit(s, 2);
-        year += 1 * getDigit(s, 3);
-
-        char hyphen = s.charAt(4);
-        if (hyphen != '-') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int month = 10 * getDigit(s, 5);
-        month += 1 * getDigit(s, 6);
-
-        hyphen = s.charAt(7);
-        if (hyphen != '-') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int day = 10 * getDigit(s, 8);
-        day += 1 * getDigit(s, 9);
-
-        char space = s.charAt(10);
-        if (space != ' ' && space != '-') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int hour = 10 * getDigit(s, 11);
-        hour += 1 * getDigit(s, 12);
-
-        char colon = s.charAt(13);
-        if (colon != ':' && colon != '.') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int minute = 10 * getDigit(s, 14);
-        minute += 1 * getDigit(s, 15);
-
-        colon = s.charAt(16);
-        if (colon != ':' && colon != '.') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-
-        int second = 10 * getDigit(s, 17);
-        second += 1 * getDigit(s, 18);
-
-        if (s.trim().length() == 19) {
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, 0);
-        }
-
-        char period = s.charAt(19);
-        if (period != '.') {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        if (s.length() == 20 || s.charAt(20) == ' ') {
-            skipPadding(s, 20, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, 0);
-        }
-
-        // We can put the following into a while loop later....
-
-        int digit = Character.digit(s.charAt(20), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        int nanos = 100000000 * digit;
-        if (s.length() == 21 || s.charAt(21) == ' ') {
-            skipPadding(s, 21, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(21), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 10000000 * digit;
-        if (s.length() == 22 || s.charAt(22) == ' ') {
-            skipPadding(s, 22, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(22), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 1000000 * digit;
-        if (s.length() == 23 || s.charAt(23) == ' ') {
-            skipPadding(s, 23, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(23), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 100000 * digit;
-        if (s.length() == 24 || s.charAt(24) == ' ') {
-            skipPadding(s, 24, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(24), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 10000 * digit;
-        if (s.length() == 25 || s.charAt(25) == ' ') {
-            skipPadding(s, 25, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(25), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 1000 * digit;
-        if (s.length() == 26 || s.charAt(26) == ' ') {
-            skipPadding(s, 26, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(26), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 100 * digit;
-        if (s.length() == 27 || s.charAt(27) == ' ') {
-            skipPadding(s, 27, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(27), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 10 * digit;
-        if (s.length() == 28 || s.charAt(28) == ' ') {
-            skipPadding(s, 28, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        digit = Character.digit(s.charAt(28), 10);
-        if (digit == -1) {
-            throw new java.lang.IllegalArgumentException(formatError);
-        }
-        nanos += 1 * digit;
-        if (s.length() == 29 || s.charAt(29) == ' ') {
-            skipPadding(s, 29, s.length());
-            return new java.sql.Timestamp(year - 1900, month - 1, day, hour, minute, second, nanos);
-        }
-
-        throw new java.lang.IllegalArgumentException(formatError);
+        s = s.trim();
+        return java.sql.Timestamp.valueOf(s);
     }
 
     private final byte parseByte(String s) throws NumberFormatException {

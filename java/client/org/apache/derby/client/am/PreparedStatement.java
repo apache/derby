@@ -21,7 +21,6 @@
 package org.apache.derby.client.am;
 
 
-
 public class PreparedStatement extends Statement
         implements java.sql.PreparedStatement,
         PreparedStatementCallbackInterface {
@@ -847,6 +846,24 @@ public class PreparedStatement extends Statement
         if (x == null) {
             setNull(parameterIndex, targetJdbcType);
             return;
+        }
+
+        // JDBC Spec specifies that conversion should occur on the client if
+        // the targetJdbcType is specified.
+
+        int inputParameterType = CrossConverters.getInputJdbcType(targetJdbcType);
+        parameterMetaData_.clientParamtertype_[parameterIndex - 1] = inputParameterType;
+        x = agent_.crossConverters_.setObject(inputParameterType, x);
+
+        // Set to round down on setScale like embedded does in SQLDecimal
+        try {
+            if (targetJdbcType == java.sql.Types.DECIMAL || targetJdbcType == java.sql.Types.NUMERIC) {
+                x = ((java.math.BigDecimal) x).setScale(scale, java.math.BigDecimal.ROUND_DOWN);
+            }
+        } catch (ArithmeticException ae) {
+            // Any problems with scale should have already been caught by
+            // checkForvalidScale
+            throw new SqlException(agent_.logWriter_, ae.getMessage());
         }
         setObject(parameterIndex, x);
     }

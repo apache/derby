@@ -296,7 +296,8 @@ class prepStmt
 			test4975(conn);
 			test5130(conn);
 			test5172(conn);
-
+			testBigDecimalSetObject(conn);
+			testBigDecimalSetObjectWithScale(conn);
 			conn.close();
 			System.out.println("prepStmt Test Ends");
         }
@@ -414,7 +415,7 @@ class prepStmt
 
 			rBigDecimalVal = (BigDecimal) rs.getObject(1);
 			logMsg("Returned BigDecimal Value after Updation: " + rBigDecimalVal);
-			logMsg("Value returned from ctssql.stmt: " + minBigDecimalVal);
+			logMsg("Value returned from stmt: " + minBigDecimalVal);
 
 			if(rBigDecimalVal.compareTo(minBigDecimalVal) == 0)
 			{
@@ -528,6 +529,127 @@ class prepStmt
 		ps.close();
    
 	}
+	private static void testBigDecimalSetObject(Connection conn) throws SQLException
+	{
+		setupTestBigDecimalTabs(conn);
+		testBigDecimalToDoubleConversion(conn);
+	}
+
+
+
+	private static void setupTestBigDecimalTabs(Connection conn) throws SQLException
+	{
+		String sql;
+		Statement stmt = conn.createStatement();
+		try {
+			stmt.executeUpdate("DROP TABLE doubletab");
+		}
+		catch (SQLException se)
+		{
+			//System.out.println("Table doubletab not dropped. " + se.getMessage());
+
+		}
+
+		sql = "CREATE TABLE doubletab (d1 DOUBLE , d2 DOUBLE)";
+
+		System.out.println(sql);
+		stmt.executeUpdate(sql);
+
+
+		// Insert little and big values
+		sql = "INSERT INTO doubletab VALUES(1.0E-130,1.0E125)";
+		System.out.println(sql);
+		stmt.executeUpdate(sql);
+		conn.commit();
+		
+	}
+
+	private static void testBigDecimalToDoubleConversion(Connection conn) throws SQLException
+	{
+		System.out.println("\n\ntestBigDecimalToDoubleConversion().");
+		System.out.println(" Check that values are preserved when BigDecimal \n values which have more than 31 digits are converted \n to Double with setObject");		
+		Statement stmt = conn.createStatement();
+		String sql ="SELECT d1, d2 FROM doubletab";		
+		System.out.println(sql);
+		ResultSet rs = stmt.executeQuery(sql);
+		rs.next();
+		String d1String = rs.getString(1);
+		String d2String = rs.getString(2);
+		// make BigDecimals from the Strings
+		BigDecimal bd1FromString = new BigDecimal(d1String);
+		BigDecimal bd2FromString = new BigDecimal(d2String);
+		System.out.println("rs.getString(1)=" + bd1FromString);
+		System.out.println("rs.getString(2)=" + bd2FromString);
+		// prepare a statement which updates the values in the table
+		sql = "UPDATE doubletab SET d1 = ?, d2 = ?";
+		System.out.println("conn.prepareStatement(" + sql + ")");
+		PreparedStatement ps =  conn.prepareStatement(sql);
+		ps = conn.prepareStatement(sql);
+		// setObject using the BigDecimal values
+		System.out.println("ps.setObject(1," + bd1FromString + ",java.sql.Types.DOUBLE)");
+		System.out.println("ps.setObject(2," + bd2FromString + ",java.sql.Types.DOUBLE)");
+		ps.setObject(1,bd1FromString,java.sql.Types.DOUBLE);
+		ps.setObject(2,bd2FromString,java.sql.Types.DOUBLE);
+		ps.executeUpdate();
+		// check that the values did not change
+		sql = "SELECT d1, d2 FROM doubletab";
+		System.out.println(sql);
+		rs = stmt.executeQuery(sql);
+		rs.next();
+		System.out.println("values should match");
+		System.out.println("new d1:" + rs.getObject(1).toString() +
+						   " old d1:"  +  d1String);
+		System.out.println("new d2:" + rs.getObject(2).toString() +
+						   " old d2:"  +  d2String);
+		
+		rs.close();
+		ps.close();
+		stmt.close();
+		conn.commit();
+	}
+
+	static void testBigDecimalSetObjectWithScale(Connection conn) throws Exception
+	{
+		Statement stmt = conn.createStatement();
+		String sql = null;
+
+		System.out.println("\n\ntestBigDecimalSetObjectWithScale(). \nPass scale parameter of setObject");		
+
+		try {
+			stmt.executeUpdate("DROP TABLE numtab");
+		}
+		catch (SQLException se)
+		{
+			//System.out.println("Table numtab not dropped. " + se.getMessage());
+		}
+		sql = "CREATE TABLE numtab (num NUMERIC(10,6))";
+		System.out.println(sql);
+		stmt.executeUpdate(sql);
+		
+		// make a big decimal from string
+		BigDecimal bdFromString = new BigDecimal("2.33333333");
+		
+		// prepare a statement which updates the third column of the table with
+		// the DOUBLE columns
+		sql =  "INSERT INTO  numtab VALUES(?)";
+		System.out.println("conn.prepareStatement(" + sql + ")");
+		PreparedStatement ps =  conn.prepareStatement(sql);
+		// setObject using the big decimal value
+		System.out.println("ps.setObject(1," + bdFromString + ",java.sql.Types.DECIMAL,2)");
+		ps.setObject(1,bdFromString,java.sql.Types.DECIMAL,2);
+		ps.executeUpdate();
+		// check the value
+		sql = "SELECT num FROM numtab";
+		ResultSet rs = stmt.executeQuery(sql);
+		rs.next();
+		System.out.println("num is:" + rs.getObject(1).toString());
+		
+		rs.close();
+		ps.close();
+		stmt.close();
+
+		conn.commit();
+ 	}
 
 	private static String bytesToString(byte[] ba)
 	{
@@ -539,4 +661,7 @@ class prepStmt
 			s += (Integer.toHexString(ba[i] & 0x00ff));
 		return s;
 	}
+
+	
 }
+
