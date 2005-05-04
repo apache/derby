@@ -1399,12 +1399,8 @@ public abstract class FileContainer
 				prev_alloc_page = null;
             }
 
-            System.out.println("calling flushAll()");
-
             // flush all changes to this file from cache.
             flushAll();
-
-            System.out.println("calling discard."); 
 
             // make sure all truncated pages are removed from the cache,
             // as it will get confused in the future if we allocate the same

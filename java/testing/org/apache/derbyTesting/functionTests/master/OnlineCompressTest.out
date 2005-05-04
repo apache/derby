@@ -1,0 +1,35 @@
+conn 2 from ij.startJBMS() = EmbedConnection
+Beginning test: test1
+Executing test: begin 0 row test, create = true, drop = false.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 0 row test.
+Executing test: begin 0 row test, create = false, drop = true.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 0 row test.
+Executing test: begin 1 row test, create = true, drop = false.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 1 row test.
+Executing test: begin 1 row test, create = false, drop = true.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 1 row test.
+Executing test: begin 50 row test, create = true, drop = false.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 50 row test.
+Executing test: begin 50 row test, create = false, drop = true.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 50 row test.
+Executing test: begin 10000 row test, create = true, drop = false.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 10000 row test.
+Executing test: begin 10000 row test, create = false, drop = true.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end 10000 row test.
+Ending test: test1

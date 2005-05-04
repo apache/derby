@@ -36,7 +36,7 @@ import org.apache.derby.tools.ij;
 
 public class OnlineCompressTest extends BaseTest
 {
-    boolean verbose = true;
+    boolean verbose = false;
 
     OnlineCompressTest()
     {
@@ -191,6 +191,24 @@ public class OnlineCompressTest extends BaseTest
 
 
 
+    /**
+     * Create and load a table.
+     * <p>
+     * If create_table is set creates a test data table with indexes.
+     * Loads num_rows into the table.  This table defaults to 32k page size.
+     * This schema fits 25 rows per page
+     * <p>
+     *
+	 * @return The identifier to be used to open the conglomerate later.
+     *
+     * @param conn          Connection to use for sql execution.
+     * @param create_table  If true, create new table - otherwise load into
+     *                      existing table.
+     * @param tblname       table to use.
+     * @param num_rows      number of rows to add to the table.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
     private void createAndLoadTable(
     Connection  conn,
     boolean     create_table,
@@ -373,7 +391,7 @@ public class OnlineCompressTest extends BaseTest
      * loop through testing interesting row count cases.  The cases are
      * 0  rows     - basic edge case, 2 page table: 1 alloc, 1 user page
      * 1  row      - another edge case, 2 page table: 1 alloc, 1 user page
-     * TODO        - 3 page table case: 1 alloc, 1 user page, 1 user page freed
+     * 50 rows     - 3 page table case: 1 alloc, 1 user page, 1 user page freed
      * 10000 rows  - reasonable number of pages to test out, still 1 alloc page
      *
      * These tests can be run relatively quickly, not a lot of rows needed.

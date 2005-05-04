@@ -100,7 +100,6 @@ public class D_DiagnosticUtil
     }
 
     /* Public Methods of This class: */
-
     /**
      * Given a Database name and conglomid print out diagnostic info.
      * <p>
@@ -110,12 +109,19 @@ public class D_DiagnosticUtil
      * configuration, will only print out a fixed length (default 128 bytes),
      * so having ij print the string can be a problem.
      * <p>
-     * RESOLVE - example does not work in version 10.x and later 
      *
      * Can be called from ij to find out info about conglomid 19 in database
      * 'msgdb' by using the following syntax:
      *
-          values 
+       maximumdisplaywidth 9000;
+
+       CREATE FUNCTION D_CONGLOMID_PRINT(DBNAME VARCHAR(128), CONGLOMID INT)
+       RETURNS VARCHAR(32000) RETURNS NULL ON NULL INPUT
+       EXTERNAL NAME
+       'org.apache.derby.impl.store.raw.data.D_DiagnosticUtil.diag_conglomid_print'
+       LANGUAGE JAVA PARAMETER STYLE JAVA;
+
+       values D_CONGLOMID_PRINT('msgdb', 19);
           com.ibm.db2j.protocol.BasicServices.Diagnostic.T_Diagnosticable::
           diag_conglomid_print('msgdb', 19);
      *
@@ -154,6 +160,17 @@ public class D_DiagnosticUtil
      *     values 
      *     com.ibm.db2j.protocol.BasicServices.Diagnostic.T_Diagnosticable::
      *     diag_conglomid('msgdb', 19);
+       maximumdisplaywidth 9000;
+
+       CREATE FUNCTION DIAG_CONGLOMID(DBNAME VARCHAR(128), CONGLOMID INT)
+       RETURNS VARCHAR(32000) RETURNS NULL ON NULL INPUT
+       EXTERNAL NAME
+       'org.apache.derby.impl.store.raw.data.D_DiagnosticUtil.diag_conglomid'
+       LANGUAGE JAVA PARAMETER STYLE JAVA;
+
+       values DIAG_CONGLOMID('msgdb', 19);
+          com.ibm.db2j.protocol.BasicServices.Diagnostic.T_Diagnosticable::
+          diag_conglomid_print('msgdb', 19);
      *
      * RESOLVE - An interface that takes a table name would be nice.
      *
@@ -198,7 +215,6 @@ public class D_DiagnosticUtil
 
         return(ret_string);
     }
-
 
     /**
      * Dump raw contents of a page.

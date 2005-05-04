@@ -26,12 +26,25 @@ import org.apache.derby.tools.ij;
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
+
+/**
+Common utility functions that can be shared across store .java tests.
+<p>
+If more than one store tests wants a function, put it here rather than copy
+it.  Hopefully going forward, with enough utility functions adding new store
+tests will be easier.  New store tests should extend this test to pick
+up access to utility routines - see OnlineCompressTest.java as an example.
+
+**/
 public abstract class BaseTest
 {
+    private static boolean debug_system_procedures_created = false;
+
     abstract void testList(Connection conn) throws SQLException;
 
     void runTests(String[] argv)
@@ -126,5 +139,77 @@ public abstract class BaseTest
         conn.commit();
 
         return(consistent);
+    }
+
+    /**
+     * Create a system procedures to access SANE debug table routines.
+     * <p>
+     **/
+    protected void createDebugSystemProcedures(
+    Connection  conn)
+		throws SQLException
+    {
+        Statement s = conn.createStatement();
+        s.executeUpdate(
+            "CREATE FUNCTION D_CONGLOMID_PRINT(DBNAME VARCHAR(128), CONGLOMID INT) RETURNS VARCHAR(32000) RETURNS NULL ON NULL INPUT EXTERNAL NAME 'org.apache.derby.impl.store.raw.data.D_DiagnosticUtil.diag_conglomid' LANGUAGE JAVA PARAMETER STYLE JAVA");
+        s.executeUpdate(
+            "CREATE FUNCTION DIAG_CONGLOMID(DBNAME VARCHAR(128), CONGLOMID INT) RETURNS VARCHAR(32000) RETURNS NULL ON NULL INPUT EXTERNAL NAME 'org.apache.derby.impl.store.raw.data.D_DiagnosticUtil.diag_conglomid' LANGUAGE JAVA PARAMETER STYLE JAVA");
+        s.close();
+        conn.commit();
+
+        debug_system_procedures_created = true;
+    }
+
+    /**
+     * Return string with table information.
+     * <p>
+     * Dumps summary store information about the table, also dumps extra
+     * information about individual pages into the error log file.
+     **/
+    String dump_table(
+    Connection  conn,
+    String      schemaName,
+    String      tableName)
+		throws SQLException
+    {
+        if (!debug_system_procedures_created)
+            createDebugSystemProcedures(conn);
+
+        // run the following query:
+        //
+        // select
+        //     sys.systables.tablename,
+        //     sys.sysconglomerates.conglomeratenumber,
+        //     DIAG_CONGLOMID('wombat', conglomeratenumber)
+        // from sys.systables, sys.sysconglomerates
+        // where
+        //     sys.systables.tableid = sys.sysconglomerates.tableid and
+        //     sys.systables.schemaid = sys.sysconglomerates.schemaid and
+        //     sys.systables.tablename = tableName;
+        //
+        // TODO - really should join with schemaName too.
+
+        PreparedStatement ps = 
+            conn.prepareStatement(
+                "select sys.systables.tablename, sys.sysconglomerates.conglomeratenumber, DIAG_CONGLOMID('wombat', conglomeratenumber) from sys.systables, sys.sysconglomerates where sys.systables.tableid = sys.sysconglomerates.tableid and sys.systables.schemaid = sys.sysconglomerates.schemaid and sys.systables.tablename = ?");
+        ps.setString(1, tableName);
+        ResultSet rs = ps.executeQuery();
+
+        if (!rs.next())
+        {
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT("no value from values clause.");
+            }
+        }
+
+        String dump_table_info = rs.getString(3);
+
+        rs.close();
+
+        conn.commit();
+
+        return(dump_table_info);
+
     }
 }
