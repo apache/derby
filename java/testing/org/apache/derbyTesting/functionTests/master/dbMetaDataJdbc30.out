@@ -4,7 +4,7 @@ The URL is: jdbc:derby:wombat
 supportsSavepoints() : true
 supportsNamedParameters() : false
 supportsMultipleOpenResults() : true
-supportsGetGeneratedKeys() : true
+supportsGetGeneratedKeys() : false
 supportsResultSetHoldability(HOLD_CURSORS_OVER_COMMIT) : true
 supportsResultSetHoldability(CLOSE_CURSORS_AT_COMMIT) : true
 getJDBCMajorVersion() : 3
