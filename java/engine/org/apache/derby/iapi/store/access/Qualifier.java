@@ -210,8 +210,8 @@ public interface Qualifier
      **/
 	int getOperator();
 
-	/** Should the result from the compare operation be negated?  If true
-     *  then only rows which fail the compare operation will qualify.
+	/** Determine if the result from the compare operation should be negated.  
+     *  If true then only rows which fail the compare operation will qualify.
      *
      *  @see DataValueDescriptor#compare
      **/

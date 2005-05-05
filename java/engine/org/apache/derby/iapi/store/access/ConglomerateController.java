@@ -118,7 +118,7 @@ public interface ConglomerateController extends ConglomPropertyQueryable
      * RESOLVE (mikem) - move this call to ConglomerateManager so it is
      * obvious that non-access clients should not call this.
      *
-     * @param closeHeldController     If true, means to close controller even if
+     * @param closeHeldScan           If true, means to close controller even if
      *                                it has been opened to be kept opened 
      *                                across commit.  This is
      *                                used to close these controllers on abort.
@@ -369,9 +369,18 @@ public interface ConglomerateController extends ConglomPropertyQueryable
      *
 	 * @return true if lock was granted, only can be false if wait was false.
      *
-	 * @param loc           The "RowLocation" of the exact row to lock.
-     * @param forUpdate     Lock the record for read or write.
-     * @param forInsert     Lock the record for insert?
+     * @param page_num      page number of record to lock.
+     * @param record_id     record id of record to lock.
+     * @param lock_oper     For what operation are we requesting the lock, this
+     *                      should be one of the following 4 options:
+     *                      LOCK_READ [read lock], 
+     *                      (LOCK_INS | LOCK_UPD) [ lock for insert], 
+     *                      (LOCK_INSERT_PREVKEY | LOCK_UPD) [lock for 
+     *                      previous key to insert],
+     *                      (LOCK_UPD) [lock for delete or replace]
+     *                      (LOCK_UPD | LOCK_UPDATE_LOCKS) [lock scan for 
+     *                          update, will upgrade lock later if actual update
+     *                          is take place]
      * @param wait          Should the lock call wait to be granted?
      * @param lock_duration If set to TransactionManager.LOCK_INSTANT_DURATION,
      *                      then lock will be released immediately after being

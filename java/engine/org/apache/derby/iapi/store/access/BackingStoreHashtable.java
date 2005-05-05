@@ -156,8 +156,6 @@ public class BackingStoreHashtable
      * be all placed in some sort of Access temporary file on disk.  This 
      * case requires a valid TransactionController.
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param tc                An open TransactionController to be used if the
      *                          hash table needs to overflow to disk.
      *

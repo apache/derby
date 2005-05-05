@@ -154,7 +154,7 @@ public interface TransactionController
 
     /**
      * Read and write locks are held until end of transaction, but no
-     * phantom protection is performed (ie. no previous key locking).
+     * phantom protection is performed (ie no previous key locking).
      * Writes only visible when committed. 
      *
      * Note this constant is currently mapped to ISOLATION_SERIALIZABLE.  
@@ -498,7 +498,7 @@ public interface TransactionController
 
 	@param properties Implementation-specific properties of the conglomerate.  
 
-    @param  temporary  If true, the conglomerate is temporary.
+    @param  temporaryFlag  If true, the conglomerate is temporary.
 	Temporary conglomerates are only visible through the transaction
 	controller that created them.  Otherwise, they are opened,
 	scanned, and dropped in the same way as permanent conglomerates.
@@ -806,7 +806,7 @@ public interface TransactionController
      * @param scanColumnList        see openScan()
      * @param startKeyValue         see openScan()
      * @param startSearchOperator   see openScan()
-     * @param qualifier[]           see openScan()
+     * @param qualifier             see openScan()
      * @param stopKeyValue          see openScan()
      * @param stopSearchOperator    see openScan()
      *
@@ -851,7 +851,7 @@ public interface TransactionController
     int                     open_mode,
     int                     lock_level,
     int                     isolation_level,
-    FormatableBitSet                 scanColumnList,
+    FormatableBitSet        scanColumnList,
     DataValueDescriptor[]   startKeyValue,
     int                     startSearchOperator,
     Qualifier               qualifier[][],
@@ -1019,11 +1019,6 @@ public interface TransactionController
                              ISOLATION_REPEATABLE_READ or 
                              ISOLATION_SERIALIZABLE).
 
-    @param isolation_level   The isolation level to lock the conglomerate at.
-                             One of (ISOLATION_READ_COMMITTED, 
-                             ISOLATION_REPEATABLE_READ or 
-                             ISOLATION_SERIALIZABLE).
-
 	@param scanColumnList A description of which columns to return from 
     every fetch in the scan.  template, and scanColumnList
     work together to describe the row to be returned by the scan - see RowUtil
@@ -1038,7 +1033,7 @@ public interface TransactionController
     The startKeyValue must only reference columns included
     in the scanColumnList.
 	
-	@param startSearchOperation an operator which defines
+	@param startSearchOperator an operator which defines
 	how the startKeyValue is to be searched for.  If 
     startSearchOperation is ScanController.GE, the scan starts on
 	the first row which is greater than or equal to the 
@@ -1067,7 +1062,7 @@ public interface TransactionController
     The stopKeyValue must only reference columns included
     in the scanColumnList.
 	
-	@param stopSearchOperation an operator which defines
+	@param stopSearchOperator an operator which defines
 	how the stopKeyValue is used to determine the scan stopping
 	position. If stopSearchOperation is ScanController.GE, the scan 
 	stops just before the first row which is greater than or
@@ -1090,7 +1085,7 @@ public interface TransactionController
 		int                             open_mode,
         int                             lock_level,
         int                             isolation_level,
-		FormatableBitSet                         scanColumnList,
+		FormatableBitSet                scanColumnList,
 		DataValueDescriptor[]           startKeyValue,
 		int                             startSearchOperator,
 		Qualifier                       qualifier[][],
@@ -1118,14 +1113,13 @@ public interface TransactionController
      *
 	 * @return The identifier to be used to open the conglomerate later.
      *
-	 * @param conglomId             see openScan()
      * @param open_mode             see openScan()
      * @param lock_level            see openScan()
      * @param isolation_level       see openScan()
      * @param scanColumnList        see openScan()
      * @param startKeyValue         see openScan()
      * @param startSearchOperator   see openScan()
-     * @param qualifier[]           see openScan()
+     * @param qualifier             see openScan()
      * @param stopKeyValue          see openScan()
      * @param stopSearchOperator    see openScan()
      * @param static_info       object returned from 
@@ -1140,7 +1134,7 @@ public interface TransactionController
 		int                             open_mode,
         int                             lock_level,
         int                             isolation_level,
-		FormatableBitSet                         scanColumnList,
+		FormatableBitSet                scanColumnList,
 		DataValueDescriptor[]           startKeyValue,
 		int                             startSearchOperator,
 		Qualifier                       qualifier[][],
@@ -1168,7 +1162,7 @@ public interface TransactionController
      * @param scanColumnList        see openScan()
      * @param startKeyValue         see openScan()
      * @param startSearchOperator   see openScan()
-     * @param qualifier[]           see openScan()
+     * @param qualifier             see openScan()
      * @param stopKeyValue          see openScan()
      * @param stopSearchOperator    see openScan()
      *
@@ -1192,7 +1186,7 @@ public interface TransactionController
 			throws StandardException;
 
     /**
-     * Compress table in place
+     * Compress table in place.
      * <p>
      * Returns a GroupFetchScanController which can be used to move rows
      * around in a table, creating a block of free pages at the end of the

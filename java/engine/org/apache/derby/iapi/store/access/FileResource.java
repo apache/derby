@@ -65,7 +65,6 @@ public interface FileResource {
 	  @param name the name of the file resource.
 	  @param source an input stream for reading the content of
 	         the file resource.
-	  @param name the name of the fileResource
 	  @return the generationId for the file resource. This
 	  quantity increases when you replace the file resource.
 

@@ -133,7 +133,6 @@ public class DiskHashtable
      * Put a new row in the overflow structure.
      *
      * @param row The row to be inserted.
-     * @param hashCode The row's hash code.
      *
      * @return true if the row was added,
      *         false if it was not added (because it was a duplicate and we are eliminating duplicates).

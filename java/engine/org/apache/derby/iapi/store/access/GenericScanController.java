@@ -144,9 +144,9 @@ public interface GenericScanController extends RowCountable
 	the scan.  If null, the starting position of the scan
 	is the first row of the conglomerate.
 	
-	@param startSearchOperation an operator which defines
+	@param startSearchOperator an operator which defines
 	how the startKeyValue is to be searched for.  If 
-    startSearchOperation is ScanController.GE, the scan starts on
+    startSearchOperator is ScanController.GE, the scan starts on
 	the first row which is greater than or equal to the 
 	startKeyValue.  If startSearchOperation is ScanController.GT,
 	the scan starts on the first row whose key is greater than
@@ -164,7 +164,7 @@ public interface GenericScanController extends RowCountable
 	the scan.  If null, the ending position of the scan
 	is the last row of the conglomerate.
 	
-	@param stopSearchOperation an operator which defines
+	@param stopSearchOperator an operator which defines
 	how the stopKeyValue is used to determine the scan stopping
 	position. If stopSearchOperation is ScanController.GE, the scan 
 	stops just before the first row which is greater than or
