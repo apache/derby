@@ -445,18 +445,6 @@ public final class SQLDouble extends NumberDataType
 		isnull = false;
 	}
 
-	public void setValue(short theValue)
-	{
-		value = theValue; // no check needed
-		isnull = false;
-	}
-
-	public void setValue(byte theValue)
-	{
-		value = theValue; // no check needed
-		isnull = false;
-	}
-
 	public  void setValue(Number theValue) throws StandardException
 	{
 		if (objectNull(theValue)) 

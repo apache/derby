@@ -362,7 +362,30 @@ public abstract class NumberDataType extends DataType
      *          For positive values or null, return false.
      */
     protected abstract boolean isNegative();
-		
+    
+    /**
+     * Common code to handle converting a short to this value
+     * by using the int to this value conversion.
+     * Simply calls setValue(int).
+     * 
+     */
+	public void setValue(short theValue)
+		throws StandardException
+	{
+		setValue((int) theValue);
+	}
+
+    /**
+     * Common code to handle converting a byte to this value
+     * by using the int to this value conversion.
+     * Simply calls setValue(int).
+     * 
+     */
+	public void setValue(byte theValue)
+		throws StandardException
+	{
+		setValue((int) theValue);
+	}		
 	/**
 	   Common code to handle java.lang.Integer as a Number,
 	   used for TINYINT, SMALLINT, INTEGER

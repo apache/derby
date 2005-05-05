@@ -349,18 +349,6 @@ public final class SQLInteger
 		isnull = false;
 	}
 
-	public void setValue(short theValue)
-	{
-		value = theValue;
-		isnull = false;
-	}
-
-	public void setValue(byte theValue)
-	{
-		value = theValue;
-		isnull = false;
-	}
-
 	/**
 		@exception StandardException thrown on overflow
 	 */

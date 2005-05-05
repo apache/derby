@@ -686,24 +686,6 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 
 	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 */
-	public void setValue(short theValue)
-	{
-		setValue((long)theValue);
-	}
-
-	/**
-	 * @see NumberDataValue#setValue
-	 *
-	 */
-	public void setValue(byte theValue)
-	{
-		setValue((long)theValue);
-	}
-
-	/**
 		Only to be called when the application sets a value using BigDecimal
 		through setBigDecimal calls.
 	*/

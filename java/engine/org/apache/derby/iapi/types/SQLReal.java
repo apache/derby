@@ -426,21 +426,7 @@ public final class SQLReal
 		isnull = false;
 	}
 
-	public void setValue(short theValue)
-	{
-		value = theValue;
-		isnull = false;
-
-	}
-
 	public void setValue(int theValue)
-	{
-		value = theValue;
-		isnull = false;
-
-	}
-
-	public void setValue(byte theValue)
 	{
 		value = theValue;
 		isnull = false;

@@ -375,18 +375,6 @@ public final class SQLLongint
 		isnull = false;
 	}
 
-	public void setValue(short theValue)
-	{
-		value = theValue;
-		isnull = false;
-	}
-
-	public void setValue(byte theValue)
-	{
-		value = theValue;
-		isnull = false;
-	}
-
 	/**
 	 * @see NumberDataValue#setValue
 	 *

@@ -271,17 +271,12 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *								  cannot be received as a stream.
 	 */
 	InputStream	getStream() throws StandardException;
+
 	/**
-	 * <U>Shallow copy</U>. 
-	 * <p> 
-	 * Clone the DataValueDescriptor and copy its contents.
-	 * We clone the data value wrapper (e.g. SQLDecimal)
-	 * and reuse its contents (the underlying BigDecimal).
-	 * The resultant DataValueDescriptor will point to the same
-	 * value as the original DataValueDescriptor (unless the value
-	 * is a primitive type, e.g. SQLInteger/integer).
+	 * Clone this DataValueDescriptor. Results in a new object
+	 * that has the same value as this but can be modified independently.
 	 *
-	 * @return A clone of the DataValueDescriptor reusing its contents.
+	 * @return A clone of the DataValueDescriptor with the same initial value as this.
 	 */
 	public DataValueDescriptor getClone();
 
