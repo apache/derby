@@ -20,16 +20,19 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.SQLException;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.client.am.LogWriter;
 
 /**
  * ClientConnectionPoolDataSource is a factory for PooledConnection objects. An object that implements this interface
  * will typically be registered with a naming service that is based on the Java Naming and Directory Interface (JNDI).
  */
-public class ClientConnectionPoolDataSource extends ClientDataSource implements javax.sql.ConnectionPoolDataSource,
-        java.io.Serializable,
-        javax.naming.Referenceable {
-    static final long serialVersionUID = -539234282156481377L;
+public class ClientConnectionPoolDataSource extends ClientDataSource implements ConnectionPoolDataSource {
+    private static final long serialVersionUID = -539234282156481377L;
     public static final String className__ = "org.apache.derby.jdbc.ClientConnectionPoolDataSource";
 
     private String password = null;
@@ -40,10 +43,6 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
 
     public final static String propertyKey_password = "password";
 
-    // deprecated.  do not use.  this member remains only for serial compatibility.
-    // this member should never be used.  pre-empted by super.traceFileSuffixIndex_.
-    // private int traceFileSuffixIndex = 0;
-
     public ClientConnectionPoolDataSource() {
         super();
     }
@@ -51,12 +50,12 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
     // ---------------------------interface methods-------------------------------
 
     // Attempt to establish a physical database connection that can be used as a pooled connection.
-    public javax.sql.PooledConnection getPooledConnection() throws java.sql.SQLException {
-        org.apache.derby.client.am.LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
+    public PooledConnection getPooledConnection() throws SQLException {
+        LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
         if (dncLogWriter != null) {
             dncLogWriter.traceEntry(this, "getPooledConnection");
         }
-        javax.sql.PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, this.user, this.password);
+        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
         if (dncLogWriter != null) {
             dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
         }
@@ -64,13 +63,12 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
     }
 
     // Standard method that establishes the initial physical connection using CPDS properties.
-    public javax.sql.PooledConnection getPooledConnection(String user,
-                                                          String password) throws java.sql.SQLException {
-        org.apache.derby.client.am.LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
+    public PooledConnection getPooledConnection(String user, String password) throws SQLException {
+        LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
         if (dncLogWriter != null) {
             dncLogWriter.traceEntry(this, "getPooledConnection", user, "<escaped>");
         }
-        javax.sql.PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
+        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
         if (dncLogWriter != null) {
             dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
         }
@@ -78,14 +76,12 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
     }
 
     //  method that establishes the initial physical connection using DS properties instead of CPDS properties.
-    public javax.sql.PooledConnection getPooledConnection(ClientDataSource ds,
-                                                          String user,
-                                                          String password) throws java.sql.SQLException {
-        org.apache.derby.client.am.LogWriter dncLogWriter = ds.computeDncLogWriterForNewConnection("_cpds");
+    public PooledConnection getPooledConnection(ClientDataSource ds, String user, String password) throws SQLException {
+        LogWriter dncLogWriter = ds.computeDncLogWriterForNewConnection("_cpds");
         if (dncLogWriter != null) {
             dncLogWriter.traceEntry(this, "getPooledConnection", ds, user, "<escaped>");
         }
-        javax.sql.PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, ds, user, password);
+        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, ds, user, password);
         if (dncLogWriter != null) {
             dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
         }
@@ -94,10 +90,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
 
     //  method that establishes the initial physical connection
     // using DS properties instead of CPDS properties.
-    private javax.sql.PooledConnection getPooledConnectionX(org.apache.derby.client.am.LogWriter dncLogWriter,
-                                                            ClientDataSource ds,
-                                                            String user,
-                                                            String password) throws java.sql.SQLException {
+    private PooledConnection getPooledConnectionX(LogWriter dncLogWriter, ClientDataSource ds, String user, String password) throws SQLException {
         return new ClientPooledConnection(ds, dncLogWriter, user, password);
     }
 }

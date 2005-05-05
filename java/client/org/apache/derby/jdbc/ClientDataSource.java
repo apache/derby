@@ -20,7 +20,16 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
+import javax.sql.DataSource;
+
 import org.apache.derby.client.ClientBaseDataSource;
+import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.client.net.NetConfiguration;
+import org.apache.derby.client.net.NetConnection;
+import org.apache.derby.client.net.NetLogWriter;
 
 /**
  * ClientDataSource is a simple data source implementation that can be used for establishing connections in a
@@ -67,9 +76,7 @@ import org.apache.derby.client.ClientBaseDataSource;
  * breaches.
  * <p/>
  */
-public class ClientDataSource extends ClientBaseDataSource implements javax.sql.DataSource,
-        java.io.Serializable,
-        javax.naming.Referenceable {
+public class ClientDataSource extends ClientBaseDataSource implements DataSource {
     private final static long serialVersionUID = 1894299584216955553L;
     public static final String className__ = "org.apache.derby.jdbc.ClientDataSource";
 
@@ -133,8 +140,8 @@ public class ClientDataSource extends ClientBaseDataSource implements javax.sql.
      *
      * @throws java.sql.SQLException if a database-access error occurs.
      */
-    public java.sql.Connection getConnection() throws java.sql.SQLException {
-        return getConnection(this.user, this.password);
+    public Connection getConnection() throws SQLException {
+        return getConnection(user, password);
     }
 
     /**
@@ -147,21 +154,15 @@ public class ClientDataSource extends ClientBaseDataSource implements javax.sql.
      *
      * @throws java.sql.SQLException if a database-access error occurs.
      */
-    public java.sql.Connection getConnection(String user, String password) throws java.sql.SQLException {
+    public Connection getConnection(String user, String password) throws SQLException {
         // Jdbc 2 connections will write driver trace info on a
         // datasource-wide basis using the jdbc 2 data source log writer.
         // This log writer may be narrowed to the connection-level
         // This log writer will be passed to the agent constructor.
 
-        org.apache.derby.client.am.LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
+        LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
         updateDataSourceValues(tokenizeAttributes(connectionAttributes, null));
-        return
-                new org.apache.derby.client.net.NetConnection((org.apache.derby.client.net.NetLogWriter) dncLogWriter,
-                        user,
-                        password,
-                        this,
-                        -1,
-                        false);
+        return new NetConnection((NetLogWriter) dncLogWriter, user, password, this, -1, false);
     }
 
     /*
@@ -246,18 +247,17 @@ public class ClientDataSource extends ClientBaseDataSource implements javax.sql.
      * Both user and password need to be set for all security mechanism except USER_ONLY_SECURITY
      */
     // We use the NET layer constants to avoid a mapping for the NET driver.
-    public final static short USER_ONLY_SECURITY = (short) org.apache.derby.client.net.NetConfiguration.SECMEC_USRIDONL;
-    public final static short CLEAR_TEXT_PASSWORD_SECURITY = (short) org.apache.derby.client.net.NetConfiguration.SECMEC_USRIDPWD;
-    public final static short ENCRYPTED_PASSWORD_SECURITY = (short) org.apache.derby.client.net.NetConfiguration.SECMEC_USRENCPWD;
-    public final static short ENCRYPTED_USER_AND_PASSWORD_SECURITY = (short) org.apache.derby.client.net.NetConfiguration.SECMEC_EUSRIDPWD;
+    public final static short USER_ONLY_SECURITY = (short) NetConfiguration.SECMEC_USRIDONL;
+    public final static short CLEAR_TEXT_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_USRIDPWD;
+    public final static short ENCRYPTED_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_USRENCPWD;
+    public final static short ENCRYPTED_USER_AND_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_EUSRIDPWD;
 
     synchronized public void setSecurityMechanism(short securityMechanism) {
         this.securityMechanism = securityMechanism;
     }
 
     public short getSecurityMechanism() {
-        return getUpgradedSecurityMechanism(this.securityMechanism,
-                this.password);
+        return getUpgradedSecurityMechanism(securityMechanism, password);
     }
 
     protected String connectionAttributes = "";
@@ -339,7 +339,7 @@ public class ClientDataSource extends ClientBaseDataSource implements javax.sql.
      * The dataSource keeps individual fields for the values that are relevant to the client. These need to be updated
      * when set connection attributes is called.
      */
-    private void updateDataSourceValues(java.util.Properties prop) {
+    private void updateDataSourceValues(Properties prop) {
         if (prop.containsKey(propertyKey_user)) {
             setUser(getUser(prop));
         }

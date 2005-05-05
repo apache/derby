@@ -20,14 +20,34 @@
 
 package org.apache.derby.client;
 
+import java.io.Serializable;
+import java.io.PrintWriter;
 import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.NoSuchElementException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.sql.SQLException;
+import javax.naming.Referenceable;
+import javax.naming.Reference;
+import javax.naming.NamingException;
+import javax.naming.StringRefAddr;
+import javax.naming.RefAddr;
 
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.SetAccessibleAction;
+import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.net.NetConfiguration;
+import org.apache.derby.client.net.NetLogWriter;
 
-public abstract class ClientBaseDataSource implements java.io.Serializable {
+/**
+ * Base class for client-side DataSource implementations.
+ */
+public abstract class ClientBaseDataSource implements Serializable, Referenceable {
     private static final long serialVersionUID = -7660172643035173692L;
 
     // The loginTimeout jdbc 2 data source property is not supported as a jdbc 1 connection property,
@@ -70,13 +90,13 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
      *
      * @see #traceLevel
      */
-    protected transient java.io.PrintWriter logWriter = null;
+    protected transient PrintWriter logWriter = null;
 
-    public synchronized void setLogWriter(java.io.PrintWriter logWriter) {
+    public synchronized void setLogWriter(PrintWriter logWriter) {
         this.logWriter = logWriter;
     }
 
-    public java.io.PrintWriter getLogWriter() {
+    public PrintWriter getLogWriter() {
         return this.logWriter;
     }
 
@@ -136,7 +156,7 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     public final static String propertyKey_user = "user";
     public final static String propertyDefault_user = "APP";
 
-    public static String getUser(java.util.Properties properties) {
+    public static String getUser(Properties properties) {
         String userString = properties.getProperty(propertyKey_user);
         return parseString(userString, propertyDefault_user);
     }
@@ -190,13 +210,12 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     // Network Server
     //  public final static short propertyDefault_securityMechanism = (short)
     //  org.apache.derby.client.net.NetConfiguration.SECMEC_USRIDONL;
-    public final static short propertyDefault_securityMechanism = (short)
-            org.apache.derby.client.net.NetConfiguration.SECMEC_USRIDONL;
+    public final static short propertyDefault_securityMechanism = (short) NetConfiguration.SECMEC_USRIDONL;
     public final static String propertyKey_securityMechanism = "securityMechanism";
 
 
     // We use the NET layer constants to avoid a mapping for the NET driver.
-    public static short getSecurityMechanism(java.util.Properties properties) {
+    public static short getSecurityMechanism(Properties properties) {
         String securityMechanismString = properties.getProperty(propertyKey_securityMechanism);
         String passwordString = properties.getProperty(propertyKey_password);
         short setSecurityMechanism = parseShort(securityMechanismString, propertyDefault_securityMechanism);
@@ -207,12 +226,10 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     /**
      * Upgrade the security mechansim to USRIDPWD if it is set to USRIDONL but we have a password.
      */
-    public static short getUpgradedSecurityMechanism(short securityMechanism,
-                                                     String password) {
+    public static short getUpgradedSecurityMechanism(short securityMechanism, String password) {
         // if securityMechanism is USER_ONLY (the default) we may need
         // to change it to CLEAR_TEXT_PASSWORD in order to send the password.
-        if ((password != null) &&
-                (securityMechanism == NetConfiguration.SECMEC_USRIDONL)) {
+        if ((password != null) && (securityMechanism == NetConfiguration.SECMEC_USRIDONL)) {
             return (short) NetConfiguration.SECMEC_USRIDPWD;
         } else {
             return securityMechanism;
@@ -226,7 +243,7 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     public final static String propertyKey_retrieveMessageText = "retrieveMessageText";
 
 
-    public static boolean getRetrieveMessageText(java.util.Properties properties) {
+    public static boolean getRetrieveMessageText(Properties properties) {
         String retrieveMessageTextString = properties.getProperty(propertyKey_retrieveMessageText);
         return parseBoolean(retrieveMessageTextString, propertyDefault_retrieveMessageText);
     }
@@ -241,7 +258,7 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
 
     protected int traceLevel = propertyDefault_traceLevel;
 
-    public static int getTraceLevel(java.util.Properties properties) {
+    public static int getTraceLevel(Properties properties) {
         String traceLevelString = properties.getProperty(propertyKey_traceLevel);
         return parseInt(traceLevelString, propertyDefault_traceLevel);
     }
@@ -251,7 +268,7 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     protected String traceFile = null;
     public final static String propertyKey_traceFile = "traceFile";
 
-    public static String getTraceFile(java.util.Properties properties) {
+    public static String getTraceFile(Properties properties) {
         return properties.getProperty(propertyKey_traceFile);
     }
 
@@ -262,7 +279,7 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     protected String traceDirectory = null;
     public final static String propertyKey_traceDirectory = "traceDirectory";
 
-    public static String getTraceDirectory(java.util.Properties properties) {
+    public static String getTraceDirectory(Properties properties) {
         return properties.getProperty(propertyKey_traceDirectory);
     }
 
@@ -272,7 +289,7 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     public final static boolean propertyDefault_traceFileAppend = false;
     public final static String propertyKey_traceFileAppend = "traceFileAppend";
 
-    public static boolean getTraceFileAppend(java.util.Properties properties) {
+    public static boolean getTraceFileAppend(Properties properties) {
         String traceFileAppendString = properties.getProperty(propertyKey_traceFileAppend);
         return parseBoolean(traceFileAppendString, propertyDefault_traceFileAppend);
     }
@@ -284,13 +301,13 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     // dependencies on j2ee for connections that go thru the driver manager.
     public final static String propertyKey_password = "password";
 
-    public static String getPassword(java.util.Properties properties) {
+    public static String getPassword(Properties properties) {
         return properties.getProperty("password");
     }
 
     //------------------------ interface methods ---------------------------------
 
-    public javax.naming.Reference getReference() throws javax.naming.NamingException {
+    public Reference getReference() throws NamingException {
         // This method creates a new Reference object to represent this data source.
         // The class name of the data source object is saved in the Reference,
         // so that an object factory will know that it should create an instance
@@ -309,52 +326,49 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
         // in the reference using the StringRefAddr class.
         // This is all the information needed to reconstruct a ClientBaseDataSource object.
 
-        javax.naming.Reference ref =
-                new javax.naming.Reference(this.getClass().getName(),
-                        ClientDataSourceFactory.className__,
-                        null);
+        Reference ref = new Reference(this.getClass().getName(), ClientDataSourceFactory.className__, null);
 
         Class clz = getClass();
-        java.lang.reflect.Field[] fields = clz.getFields();
+        Field[] fields = clz.getFields();
         for (int i = 0; i < fields.length; i++) {
             String name = fields[i].getName();
             if (name.startsWith("propertyKey_")) {
-                if (java.lang.reflect.Modifier.isTransient(fields[i].getModifiers())) {
+                if (Modifier.isTransient(fields[i].getModifiers())) {
                     continue; // if it is transient, then skip this propertyKey.
                 }
                 try {
                     String propertyKey = fields[i].get(this).toString();
                     // search for property field.
-                    java.lang.reflect.Field propertyField;
+                    Field propertyField;
                     clz = getClass(); // start from current class.
                     while (true) {
                         try {
                             propertyField = clz.getDeclaredField(name.substring(12));
                             break; // found the property field, so break the while loop.
-                        } catch (java.lang.NoSuchFieldException nsfe) {
+                        } catch (NoSuchFieldException nsfe) {
                             // property field is not found at current level of class, so continue to super class.
                             clz = clz.getSuperclass();
                             if (clz == Object.class) {
-                                throw new javax.naming.NamingException("bug check: corresponding property field does not exist");
+                                throw new NamingException("bug check: corresponding property field does not exist");
                             }
                             continue;
                         }
                     }
 
-                    if (!java.lang.reflect.Modifier.isTransient(propertyField.getModifiers())) {
+                    if (!Modifier.isTransient(propertyField.getModifiers())) {
                         // if the property is not transient:
                         // get the property.
-                        java.security.AccessController.doPrivileged(new org.apache.derby.client.am.SetAccessibleAction(propertyField, true));
+                        AccessController.doPrivileged(new SetAccessibleAction(propertyField, true));
                         //propertyField.setAccessible (true);
                         Object propertyObj = propertyField.get(this);
                         String property = (propertyObj == null) ? null : String.valueOf(propertyObj);
                         // add into reference.
-                        ref.add(new javax.naming.StringRefAddr(propertyKey, property));
+                        ref.add(new StringRefAddr(propertyKey, property));
                     }
-                } catch (java.lang.IllegalAccessException e) {
-                    throw new javax.naming.NamingException("bug check: property cannot be accessed");
-                } catch (java.security.PrivilegedActionException e) {
-                    throw new javax.naming.NamingException("Privileged action exception occurred.");
+                } catch (IllegalAccessException e) {
+                    throw new NamingException("bug check: property cannot be accessed");
+                } catch (PrivilegedActionException e) {
+                    throw new NamingException("Privileged action exception occurred.");
                 }
             }
         }
@@ -364,38 +378,37 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     /**
      * Not an external.  Do not document in pubs. Populates member data for this data source given a JNDI reference.
      */
-    public void hydrateFromReference(javax.naming.Reference ref) throws java.sql.SQLException {
-        javax.naming.RefAddr address;
+    public void hydrateFromReference(Reference ref) throws SQLException {
+        RefAddr address;
 
         Class clz = getClass();
-        java.lang.reflect.Field[] fields = clz.getFields();
+        Field[] fields = clz.getFields();
         for (int i = 0; i < fields.length; i++) {
             String name = fields[i].getName();
             if (name.startsWith("propertyKey_")) {
-                if (java.lang.reflect.Modifier.isTransient(fields[i].getModifiers())) {
+                if (Modifier.isTransient(fields[i].getModifiers())) {
                     continue; // if it is transient, then skip this propertyKey.
                 }
                 try {
                     String propertyKey = fields[i].get(this).toString();
                     // search for property field.
-                    java.lang.reflect.Field propertyField;
+                    Field propertyField;
                     clz = getClass(); // start from current class.
                     while (true) {
                         try {
                             propertyField = clz.getDeclaredField(name.substring(12));
                             break; // found the property field, so break the while loop.
-                        } catch (java.lang.NoSuchFieldException nsfe) {
+                        } catch (NoSuchFieldException nsfe) {
                             // property field is not found at current level of class, so continue to super class.
                             clz = clz.getSuperclass();
                             if (clz == Object.class) {
-                                throw new org.apache.derby.client.am.SqlException(new org.apache.derby.client.am.LogWriter(this.logWriter, this.traceLevel),
-                                        "bug check: corresponding property field does not exist");
+                                throw new SqlException(new LogWriter(logWriter, traceLevel), "bug check: corresponding property field does not exist");
                             }
                             continue;
                         }
                     }
 
-                    if (!java.lang.reflect.Modifier.isTransient(propertyField.getModifiers())) {
+                    if (!Modifier.isTransient(propertyField.getModifiers())) {
                         // if the property is not transient:
                         // set the property.
                         address = ref.get(propertyKey);
@@ -431,9 +444,8 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
                             }
                         }
                     }
-                } catch (java.lang.IllegalAccessException e) {
-                    throw new org.apache.derby.client.am.SqlException(new org.apache.derby.client.am.LogWriter(this.logWriter, this.traceLevel),
-                            "bug check: property cannot be accessed");
+                } catch (IllegalAccessException e) {
+                    throw new SqlException(new LogWriter(this.logWriter, this.traceLevel), "bug check: property cannot be accessed");
                 }
             }
         }
@@ -443,38 +455,37 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     /**
      * Not an external.  Do not document in pubs. Returns all non-transient properties of a ClientBaseDataSource.
      */
-    public java.util.Properties getProperties() throws java.sql.SQLException {
-        java.util.Properties properties = new java.util.Properties();
+    public Properties getProperties() throws SQLException {
+        Properties properties = new Properties();
 
         Class clz = getClass();
-        java.lang.reflect.Field[] fields = clz.getFields();
+        Field[] fields = clz.getFields();
         for (int i = 0; i < fields.length; i++) {
             String name = fields[i].getName();
             if (name.startsWith("propertyKey_")) {
-                if (java.lang.reflect.Modifier.isTransient(fields[i].getModifiers())) {
+                if (Modifier.isTransient(fields[i].getModifiers())) {
                     continue; // if it is transient, then skip this propertyKey.
                 }
                 try {
                     String propertyKey = fields[i].get(this).toString();
                     // search for property field.
-                    java.lang.reflect.Field propertyField;
+                    Field propertyField;
                     clz = getClass(); // start from current class.
                     while (true) {
                         try {
                             propertyField = clz.getDeclaredField(name.substring(12));
                             break; // found the property field, so break the while loop.
-                        } catch (java.lang.NoSuchFieldException nsfe) {
+                        } catch (NoSuchFieldException nsfe) {
                             // property field is not found at current level of class, so continue to super class.
                             clz = clz.getSuperclass();
                             if (clz == Object.class) {
-                                throw new org.apache.derby.client.am.SqlException(new org.apache.derby.client.am.LogWriter(this.logWriter, this.traceLevel),
-                                        "bug check: corresponding property field does not exist");
+                                throw new SqlException(new LogWriter(logWriter, traceLevel), "bug check: corresponding property field does not exist");
                             }
                             continue;
                         }
                     }
 
-                    if (!java.lang.reflect.Modifier.isTransient(propertyField.getModifiers())) {
+                    if (!Modifier.isTransient(propertyField.getModifiers())) {
                         // if the property is not transient:
                         // get the property.
                         propertyField.setAccessible(true);
@@ -490,9 +501,8 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
                         // add into prperties.
                         properties.setProperty(propertyKey, property);
                     }
-                } catch (java.lang.IllegalAccessException e) {
-                    throw new org.apache.derby.client.am.SqlException(new org.apache.derby.client.am.LogWriter(this.logWriter, this.traceLevel),
-                            "bug check: property cannot be accessed");
+                } catch (IllegalAccessException e) {
+                    throw new SqlException(new LogWriter(this.logWriter, this.traceLevel), "bug check: property cannot be accessed");
                 }
             }
         }
@@ -504,82 +514,41 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
 
     // The java.io.PrintWriter overrides the traceFile setting.
     // If neither traceFile nor jdbc logWriter are set, then null is returned.
-    public org.apache.derby.client.am.LogWriter computeDncLogWriterForNewConnection(String logWriterInUseSuffix) // used only for trace directories to indicate whether
-            // log writer is use is from xads, cpds, sds, ds, driver, config, reset.
-            throws org.apache.derby.client.am.SqlException {
-        return computeDncLogWriterForNewConnection(this.logWriter,
-                this.traceDirectory,
-                this.traceFile,
-                this.traceFileAppend,
-                this.traceLevel,
-                logWriterInUseSuffix,
-                this.traceFileSuffixIndex_++);
+    // logWriterInUseSuffix used only for trace directories to indicate whether
+    // log writer is use is from xads, cpds, sds, ds, driver, config, reset.
+    public LogWriter computeDncLogWriterForNewConnection(String logWriterInUseSuffix) throws SqlException {
+        return computeDncLogWriterForNewConnection(logWriter, traceDirectory, traceFile, traceFileAppend, traceLevel, logWriterInUseSuffix, traceFileSuffixIndex_++);
     }
 
     // Called on for connection requests.
     // The java.io.PrintWriter overrides the traceFile setting.
     // If neither traceFile, nor logWriter, nor traceDirectory are set, then null is returned.
-    static public org.apache.derby.client.am.LogWriter computeDncLogWriterForNewConnection(java.io.PrintWriter logWriter,
-                                                                                           String traceDirectory,
-                                                                                           String traceFile,
-                                                                                           boolean traceFileAppend,
-                                                                                           int traceLevel,
-                                                                                           String logWriterInUseSuffix, // used only for trace directories to indicate whether
-                                                                                           // log writer is use is from xads, cpds, sds, ds, driver, config.
-                                                                                           int traceFileSuffixIndex) throws org.apache.derby.client.am.SqlException {
+    static public LogWriter computeDncLogWriterForNewConnection(PrintWriter logWriter, String traceDirectory, String traceFile, boolean traceFileAppend, int traceLevel, String logWriterInUseSuffix, int traceFileSuffixIndex) throws SqlException {
         int globaltraceFileSuffixIndex = Configuration.traceFileSuffixIndex__++;
 
-        org.apache.derby.client.am.LogWriter dncLogWriter;
         // compute regular dnc log writer if there is any
-        dncLogWriter =
-                computeDncLogWriter(logWriter,
-                        traceDirectory,
-                        traceFile,
-                        traceFileAppend,
-                        logWriterInUseSuffix,
-                        traceFileSuffixIndex,
-                        traceLevel);
+        LogWriter dncLogWriter = computeDncLogWriter(logWriter, traceDirectory, traceFile, traceFileAppend, logWriterInUseSuffix, traceFileSuffixIndex, traceLevel);
         if (dncLogWriter != null) {
             return dncLogWriter;
         }
         // compute global default dnc log writer if there is any
-        dncLogWriter =
-                computeDncLogWriter(null,
-                        Configuration.traceDirectory__,
-                        Configuration.traceFile__,
-                        Configuration.traceFileAppend__,
-                        "_global",
-                        globaltraceFileSuffixIndex,
-                        Configuration.traceLevel__);
+        dncLogWriter = computeDncLogWriter(null, Configuration.traceDirectory__, Configuration.traceFile__, Configuration.traceFileAppend__, "_global", globaltraceFileSuffixIndex, Configuration.traceLevel__);
         return dncLogWriter;
     }
 
     // Compute a DNC log writer before a connection is created.
-    static org.apache.derby.client.am.LogWriter computeDncLogWriter(java.io.PrintWriter logWriter,
-                                                                    String traceDirectory,
-                                                                    String traceFile,
-                                                                    boolean traceFileAppend,
-                                                                    String logWriterInUseSuffix,
-                                                                    int traceFileSuffixIndex,
-                                                                    int traceLevel) throws org.apache.derby.client.am.SqlException {
+    static LogWriter computeDncLogWriter(PrintWriter logWriter, String traceDirectory, String traceFile, boolean traceFileAppend, String logWriterInUseSuffix, int traceFileSuffixIndex, int traceLevel) throws SqlException {
         // Otherwise, the trace file will still be created even TRACE_NONE.
         if (traceLevel == TRACE_NONE) {
             return null;
         }
 
-        java.io.PrintWriter printWriter =
-                computePrintWriter(logWriter,
-                        traceDirectory,
-                        traceFile,
-                        traceFileAppend,
-                        logWriterInUseSuffix,
-                        traceFileSuffixIndex);
+        PrintWriter printWriter = computePrintWriter(logWriter, traceDirectory, traceFile, traceFileAppend, logWriterInUseSuffix, traceFileSuffixIndex);
         if (printWriter == null) {
             return null;
         }
 
-        org.apache.derby.client.am.LogWriter dncLogWriter;
-        dncLogWriter = new org.apache.derby.client.net.NetLogWriter(printWriter, traceLevel);
+        LogWriter dncLogWriter = new NetLogWriter(printWriter, traceLevel);
         if (printWriter != logWriter && traceDirectory != null)
         // When printWriter is an internal trace file and
         // traceDirectory is not null, each connection has
@@ -593,32 +562,18 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
 
     // Compute a DNC log writer after a connection is created.
     // Declared public for use by am.Connection.  Not a public external.
-    public static org.apache.derby.client.am.LogWriter computeDncLogWriter(org.apache.derby.client.am.Connection connection,
-                                                                           java.io.PrintWriter logWriter,
-                                                                           String traceDirectory,
-                                                                           String traceFile,
-                                                                           boolean traceFileAppend,
-                                                                           String logWriterInUseSuffix,
-                                                                           int traceFileSuffixIndex,
-                                                                           int traceLevel) throws org.apache.derby.client.am.SqlException {
+    public static LogWriter computeDncLogWriter(Connection connection, PrintWriter logWriter, String traceDirectory, String traceFile, boolean traceFileAppend, String logWriterInUseSuffix, int traceFileSuffixIndex, int traceLevel) throws SqlException {
         // Otherwise, the trace file will still be created even TRACE_NONE.
         if (traceLevel == TRACE_NONE) {
             return null;
         }
 
-        java.io.PrintWriter printWriter =
-                computePrintWriter(logWriter,
-                        traceDirectory,
-                        traceFile,
-                        traceFileAppend,
-                        logWriterInUseSuffix,
-                        traceFileSuffixIndex);
+        PrintWriter printWriter = computePrintWriter(logWriter, traceDirectory, traceFile, traceFileAppend, logWriterInUseSuffix, traceFileSuffixIndex);
         if (printWriter == null) {
             return null;
         }
 
-        org.apache.derby.client.am.LogWriter dncLogWriter =
-                connection.agent_.newLogWriter_(printWriter, traceLevel);
+        LogWriter dncLogWriter = connection.agent_.newLogWriter_(printWriter, traceLevel);
         if (printWriter != logWriter && traceDirectory != null)
         // When printWriter is an internal trace file and
         // traceDirectory is not null, each connection has
@@ -633,13 +588,7 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
     // This method handles all the override semantics.
     // The logWriter overrides the traceFile, and traceDirectory settings.
     // If neither traceFile, nor logWriter, nor traceDirectory are set, then null is returned.
-    static java.io.PrintWriter computePrintWriter(java.io.PrintWriter logWriter,
-                                                  String traceDirectory,
-                                                  String traceFile,
-                                                  boolean traceFileAppend,
-                                                  String logWriterInUseSuffix, // used only for trace directories to indicate whether
-                                                  // log writer is use is from xads, cpds, sds, ds, driver, config.
-                                                  int traceFileSuffixIndex) throws org.apache.derby.client.am.SqlException {
+    static PrintWriter computePrintWriter(PrintWriter logWriter, String traceDirectory, String traceFile, boolean traceFileAppend, String logWriterInUseSuffix, int traceFileSuffixIndex) throws SqlException {
         if (logWriter != null)  // java.io.PrintWriter is specified
         {
             return logWriter;
@@ -687,49 +636,23 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
         return defaultInt;
     }
 
-    private static long parseLong(String longString, long defaultLong) {
-        if (longString != null) {
-            return Long.parseLong(longString);
-        }
-        return defaultLong;
-    }
-
-    private static int parseTernaryValue(String valueString, int defaultValue) {
-        if ("true".equalsIgnoreCase(valueString) || "yes".equalsIgnoreCase(valueString)) {
-            return YES;
-        }
-        if ("false".equalsIgnoreCase(valueString) || "no".equalsIgnoreCase(valueString)) {
-            return NO;
-        }
-        if (valueString != null) {
-            int value = Integer.parseInt(valueString);
-            if (value < 0 || value > 2) {
-                throw new java.lang.NumberFormatException(valueString);
-            }
-            return value;
-        }
-        return defaultValue;
-    }
-
     // tokenize "property=value;property=value..." and returns new properties object
     //This method is used both by ClientDriver to parse the url and
     // ClientDataSource.setConnectionAttributes
-    public static java.util.Properties tokenizeAttributes(String attributeString,
-                                                          java.util.Properties properties) throws SqlException {
-        java.util.Properties augmentedProperties;
+    public static Properties tokenizeAttributes(String attributeString, Properties properties) throws SqlException {
+        Properties augmentedProperties;
 
         if (attributeString == null) {
             return properties;
         }
 
         if (properties != null) {
-            augmentedProperties = (java.util.Properties) properties.clone();
+            augmentedProperties = (Properties) properties.clone();
         } else {
             augmentedProperties = new Properties();
         }
         try {
-            java.util.StringTokenizer attrTokenizer =
-                    new java.util.StringTokenizer(attributeString, ";");
+            StringTokenizer attrTokenizer = new StringTokenizer(attributeString, ";");
             while (attrTokenizer.hasMoreTokens()) {
                 String v = attrTokenizer.nextToken();
 
@@ -738,10 +661,9 @@ public abstract class ClientBaseDataSource implements java.io.Serializable {
                     throw new SqlException(null, "Invalid attribute syntax: " + attributeString);
                 }
 
-                augmentedProperties.setProperty((v.substring(0, eqPos)).trim(),
-                        (v.substring(eqPos + 1)).trim());
+                augmentedProperties.setProperty((v.substring(0, eqPos)).trim(), (v.substring(eqPos + 1)).trim());
             }
-        } catch (java.util.NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
             throw new SqlException(null, e, "Invalid attribute syntax: " + attributeString);
         }
