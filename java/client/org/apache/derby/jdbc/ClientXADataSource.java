@@ -35,14 +35,6 @@ public class ClientXADataSource extends ClientDataSource implements XADataSource
     // verify it everytime that ClientXADataSource is modified
     private static final long serialVersionUID = 7057075094707674880L;
 
-    private String password = null;
-
-    synchronized public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public final static String propertyKey_password = "password";
-
     public ClientXADataSource() {
         this.setResultSetHoldability(CLOSE_CURSORS_AT_COMMIT);
     }

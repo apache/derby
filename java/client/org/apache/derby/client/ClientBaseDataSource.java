@@ -248,21 +248,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return parseBoolean(retrieveMessageTextString, propertyDefault_retrieveMessageText);
     }
 
-    // ---------------------------- traceLevel -----------------------------------
-    //
-
-    public final static int TRACE_NONE = 0x0;
-    public final static int TRACE_ALL = 0xFFFFFFFF;
-    public final static int propertyDefault_traceLevel = TRACE_ALL;
-    public final static String propertyKey_traceLevel = "traceLevel";
-
-    protected int traceLevel = propertyDefault_traceLevel;
-
-    public static int getTraceLevel(Properties properties) {
-        String traceLevelString = properties.getProperty(propertyKey_traceLevel);
-        return parseInt(traceLevelString, propertyDefault_traceLevel);
-    }
-
     // ---------------------------- traceFile -----------------------------------
     //
     protected String traceFile = null;
@@ -303,6 +288,12 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     public static String getPassword(Properties properties) {
         return properties.getProperty("password");
+    }
+
+    protected String password = null;
+
+    synchronized public void setPassword(String password) {
+        this.password = password;
     }
 
     //------------------------ interface methods ---------------------------------
@@ -703,6 +694,217 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         throw new SqlException(null, "JDBC attribute " + attribute +
                 "has an invalid value " + value +
                 " Valid values are " + choicesStr);
+    }
+
+    /*
+     * Properties to be seen by Bean - access thru reflection.
+     */
+
+    // -- Stardard JDBC DataSource Properties
+
+    public synchronized void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    public String getDatabaseName() {
+        return this.databaseName;
+    }
+
+
+    public synchronized void setDataSourceName(String dataSourceName) {
+        this.dataSourceName = dataSourceName;
+    }
+
+    public String getDataSourceName() {
+        return this.dataSourceName;
+    }
+
+    public synchronized void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+
+    public synchronized void setPortNumber(int portNumber) {
+        this.portNumber = portNumber;
+    }
+
+    public int getPortNumber() {
+        return this.portNumber;
+    }
+
+    public synchronized void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getServerName() {
+        return this.serverName;
+    }
+
+
+    public synchronized void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getUser() {
+        return this.user;
+    }
+
+    synchronized public void setRetrieveMessageText(boolean retrieveMessageText) {
+        this.retrieveMessageText = retrieveMessageText;
+    }
+
+    public boolean getRetrieveMessageText() {
+        return this.retrieveMessageText;
+    }
+
+    // ---------------------------- securityMechanism -----------------------------------
+    /**
+     * The source security mechanism to use when connecting to this data source.
+     * <p/>
+     * Security mechanism options are: <ul> <li> USER_ONLY_SECURITY <li> CLEAR_TEXT_PASSWORD_SECURITY <li>
+     * ENCRYPTED_PASSWORD_SECURITY <li> ENCRYPTED_USER_AND_PASSWORD_SECURITY - both password and user are encrypted
+     * </ul> The default security mechanism is USER_ONLY SECURITY
+     * <p/>
+     * If the application specifies a security mechanism then it will be the only one attempted. If the specified
+     * security mechanism is not supported by the conversation then an exception will be thrown and there will be no
+     * additional retries.
+     * <p/>
+     * This property is currently only available for the  DNC driver.
+     * <p/>
+     * Both user and password need to be set for all security mechanism except USER_ONLY_SECURITY
+     */
+    // We use the NET layer constants to avoid a mapping for the NET driver.
+    public final static short USER_ONLY_SECURITY = (short) NetConfiguration.SECMEC_USRIDONL;
+    public final static short CLEAR_TEXT_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_USRIDPWD;
+    public final static short ENCRYPTED_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_USRENCPWD;
+    public final static short ENCRYPTED_USER_AND_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_EUSRIDPWD;
+
+    synchronized public void setSecurityMechanism(short securityMechanism) {
+        this.securityMechanism = securityMechanism;
+    }
+
+    public short getSecurityMechanism() {
+        return getUpgradedSecurityMechanism(securityMechanism, password);
+    }
+
+    protected String connectionAttributes = "";
+
+    /**
+     * Set this property to pass in more Derby specific connection URL attributes.
+     *
+     * @param prop set to the list of Cloudscape connection attributes separated by semi-colons.   E.g., to specify an
+     *             encryption bootPassword of "x8hhk2adf", and set upgrade to true, do the following: <PRE>
+     *             ds.setConnectionAttributes("bootPassword=x8hhk2adf;upgrade=true"); </PRE> See Derby documentation for
+     *             complete list.
+     */
+    public final void setConnectionAttributes(String prop) {
+        connectionAttributes = prop;
+    }
+
+    /**
+     * @return Derby specific connection URL attributes
+     */
+    public final String getConnectionAttributes() {
+        return connectionAttributes;
+    }
+
+
+    // ---------------------------- traceLevel -----------------------------------
+    //
+
+    public final static int TRACE_NONE = 0x0;
+    public final static int TRACE_CONNECTION_CALLS = 0x1;
+    public final static int TRACE_STATEMENT_CALLS = 0x2;
+    public final static int TRACE_RESULT_SET_CALLS = 0x4;
+    public final static int TRACE_DRIVER_CONFIGURATION = 0x10;
+    public final static int TRACE_CONNECTS = 0x20;
+    public final static int TRACE_PROTOCOL_FLOWS = 0x40;
+    public final static int TRACE_RESULT_SET_META_DATA = 0x80;
+    public final static int TRACE_PARAMETER_META_DATA = 0x100;
+    public final static int TRACE_DIAGNOSTICS = 0x200;
+    public final static int TRACE_XA_CALLS = 0x800;
+    public final static int TRACE_ALL = 0xFFFFFFFF;
+
+    public final static int propertyDefault_traceLevel = TRACE_ALL;
+    public final static String propertyKey_traceLevel = "traceLevel";
+
+    protected int traceLevel = propertyDefault_traceLevel;
+
+    public static int getTraceLevel(Properties properties) {
+        String traceLevelString = properties.getProperty(propertyKey_traceLevel);
+        return parseInt(traceLevelString, propertyDefault_traceLevel);
+    }
+
+    synchronized public void setTraceLevel(int traceLevel) {
+        this.traceLevel = traceLevel;
+    }
+
+    public int getTraceLevel() {
+        return this.traceLevel;
+    }
+
+
+    public synchronized void setTraceFile(String traceFile) {
+        this.traceFile = traceFile;
+    }
+
+    public String getTraceFile() {
+        return this.traceFile;
+    }
+
+
+    public synchronized void setTraceDirectory(String traceDirectory) {
+        this.traceDirectory = traceDirectory;
+    }
+
+    public String getTraceDirectory() {
+        return this.traceDirectory;
+    }
+
+    synchronized public void setTraceFileAppend(boolean traceFileAppend) {
+        this.traceFileAppend = traceFileAppend;
+    }
+
+    public boolean getTraceFileAppend() {
+        return this.traceFileAppend;
+    }
+
+
+
+
+    // --- private helper methods
+
+
+    /**
+     * The dataSource keeps individual fields for the values that are relevant to the client. These need to be updated
+     * when set connection attributes is called.
+     */
+    protected void updateDataSourceValues(Properties prop) {
+        if (prop.containsKey(propertyKey_user)) {
+            setUser(getUser(prop));
+        }
+        if (prop.containsKey(propertyKey_securityMechanism)) {
+            setSecurityMechanism(getSecurityMechanism(prop));
+        }
+        if (prop.containsKey(propertyKey_traceFile)) {
+            setTraceFile(getTraceFile(prop));
+        }
+        if (prop.containsKey(propertyKey_traceDirectory)) {
+            setTraceDirectory(getTraceDirectory(prop));
+        }
+        if (prop.containsKey(propertyKey_traceFileAppend)) {
+            setTraceFileAppend(getTraceFileAppend(prop));
+        }
+        if (prop.containsKey(propertyKey_securityMechanism)) {
+            setSecurityMechanism(getSecurityMechanism(prop));
+        }
+        if (prop.containsKey(propertyKey_retrieveMessageText)) {
+            setRetrieveMessageText(getRetrieveMessageText(prop));
+        }
     }
 
 

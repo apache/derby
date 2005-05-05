@@ -35,14 +35,6 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
     private static final long serialVersionUID = -539234282156481377L;
     public static final String className__ = "org.apache.derby.jdbc.ClientConnectionPoolDataSource";
 
-    private String password = null;
-
-    synchronized public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public final static String propertyKey_password = "password";
-
     public ClientConnectionPoolDataSource() {
         super();
     }
