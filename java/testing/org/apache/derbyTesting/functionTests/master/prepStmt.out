@@ -54,6 +54,19 @@ SQLState: 42X01 message: Syntax error: Encountered "<EOF>" at line 1, column 29.
 Expected Table does not exist 
 insertTab ( wrongtab,1000)
 SQLState: 42X05 message: Table 'WRONGTAB' does not exist.
+CREATE TABLE doubletab (i int, doubleVal DOUBLE)
+testBigDecimalToDoubleConversion().
+ Check that values are preserved when BigDecimal 
+ values which have more than 31 digits are converted 
+ to Double with setObject
+PASS: Actual value 1.0E-130 matches expected value: 1.0E-130
+PASS: Actual value 1.0E125 matches expected value: 1.0E125
+PASS: Actual value -1.0E124 matches expected value: -1.0E124
+PASS: Actual value 1.2345678901234567E31 matches expected value: 1.2345678901234567E31
+PASS: Actual value 1.2345678901234567 matches expected value: 1.2345678901234567
+testBigDecimalSetObjectWithScale(). 
+Pass scale parameter of setObject
+PASS: Actual value 2.330000 matches expected value: 2.33
 Minimum BigDecimal Value: 0.000000000000001
 Prepared Statement String: update Numeric_Tab set NULL_VAL=?
 Select NULL_VAL from Numeric_Tab
@@ -62,26 +75,4 @@ Value returned from stmt: 0.000000000000001
 setObject Method sets the designated parameter with the Object
 Negative test setString with Invalid Timestamp:20
 SQLState: 22007 message: The syntax of the string representation of a datetime value is incorrect.
-CREATE TABLE doubletab (d1 DOUBLE , d2 DOUBLE)
-INSERT INTO doubletab VALUES(1.0E-130,1.0E125)
-testBigDecimalToDoubleConversion().
- Check that values are preserved when BigDecimal 
- values which have more than 31 digits are converted 
- to Double with setObject
-SELECT d1, d2 FROM doubletab
-rs.getString(1)=0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010
-rs.getString(2)=100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-conn.prepareStatement(UPDATE doubletab SET d1 = ?, d2 = ?)
-ps.setObject(1,0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010,java.sql.Types.DOUBLE)
-ps.setObject(2,100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000,java.sql.Types.DOUBLE)
-SELECT d1, d2 FROM doubletab
-values should match
-new d1:1.0E-130 old d1:1.0E-130
-new d2:1.0E125 old d2:1.0E125
-testBigDecimalSetObjectWithScale(). 
-Pass scale parameter of setObject
-CREATE TABLE numtab (num NUMERIC(10,6))
-conn.prepareStatement(INSERT INTO  numtab VALUES(?))
-ps.setObject(1,2.33333333,java.sql.Types.DECIMAL,2)
-num is:2.330000
 prepStmt Test Ends
