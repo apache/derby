@@ -142,9 +142,6 @@ public class CheckpointOperation implements Loggable
 		the operation need to prepare the optional data for this method.
 
 		Checkpoint has no optional data to write out
-
-		@param out Where and how to write to optional data.
-		
 	*/
 	public ByteArray getPreparedLog()
 	{

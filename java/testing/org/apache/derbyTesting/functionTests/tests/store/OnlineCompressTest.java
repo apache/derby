@@ -54,7 +54,8 @@ public class OnlineCompressTest extends BaseTest
     String      tableName,
     boolean     purgeRows,
     boolean     defragmentRows,
-    boolean     truncateEnd)
+    boolean     truncateEnd,
+    boolean     commit_operation)
         throws SQLException
     {
         CallableStatement cstmt = 
@@ -68,7 +69,8 @@ public class OnlineCompressTest extends BaseTest
 
         cstmt.execute();
 
-        conn.commit();
+        if (commit_operation)
+            conn.commit();
     }
 
     /**
@@ -96,7 +98,8 @@ public class OnlineCompressTest extends BaseTest
     private int[] getSpaceInfo(
     Connection  conn,
     String      schemaName,
-    String      tableName)
+    String      tableName,
+    boolean     commit_xact)
 		throws SQLException
     {
         String stmt_str = 
@@ -146,49 +149,11 @@ public class OnlineCompressTest extends BaseTest
 
         rs.close();
 
-        conn.commit();
+        if (commit_xact)
+            conn.commit();
 
         return(ret_info);
     }
-
-
-    /**
-     * Determine if inplace compress did it's job.
-     * <p>
-     * Figuring out if inplace compress in a fully reproducible way is hard
-     * because derby has background threads which when given a chance do some
-     * of the space reclamation work that this routine does, so the absolute
-     * number of pages sometimes varies depending on machine/OS/JVM issues.
-     * <p>
-     * The approach here is to verify that at least N pages where reclaimed,
-     * assuming other varience is an acceptable difference based on background
-     * thread activity.  
-     * <p>
-     *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
-     **/
-    private boolean checkBaseTableSpaceParameters(
-    Connection  conn,
-    String      schemaName,
-    String      tableName,
-    boolean     check_allocated_pages,
-    int         max_allocated_pages,
-    boolean     check_free_pages,
-    int         max_free_pages)
-		throws SQLException
-    {
-        int[] ret_info = getSpaceInfo(conn, schemaName, tableName);
-
-        int    is_index                 = ret_info[0];
-        int    num_alloc                = ret_info[1];
-        int    num_free                 = ret_info[2];
-        int    page_size                = ret_info[3];
-        int    estimate_space_savings   = ret_info[4];
-
-        return(true);
-    }
-
 
 
     /**
@@ -278,12 +243,15 @@ public class OnlineCompressTest extends BaseTest
 
     private void executeQuery(
     Connection  conn,
-    String      stmt_str)
+    String      stmt_str,
+    boolean     commit_query)
         throws SQLException
     {
         Statement stmt = conn.createStatement();
         stmt.executeUpdate(stmt_str);
-        conn.commit();
+        stmt.close();
+        if (commit_query)
+            conn.commit();
     }
 
     private void log_wrong_count(
@@ -297,21 +265,34 @@ public class OnlineCompressTest extends BaseTest
     {
         System.out.println(error_msg);
         System.out.println("ERROR: for " + num_rows + " row  test. Expected " + expected_val + ", but got " + actual_val );
+        System.out.println("before_info:");
+        System.out.println(
+        "    IS_INDEX         =" + before_info[SPACE_INFO_IS_INDEX]     + 
+        "\n    NUM_ALLOC        =" + before_info[SPACE_INFO_NUM_ALLOC]    +
+        "\n    NUM_FREE         =" + before_info[SPACE_INFO_NUM_FREE]     +
+        "\n    PAGE_SIZE        =" + before_info[SPACE_INFO_PAGE_SIZE]    +
+        "\n    ESTIMSPACESAVING =" + before_info[SPACE_INFO_ESTIMSPACESAVING]);
+        System.out.println("after_info:");
+        System.out.println(
+        "    IS_INDEX         =" + after_info[SPACE_INFO_IS_INDEX]     + 
+        "\n    NUM_ALLOC        =" + after_info[SPACE_INFO_NUM_ALLOC]    +
+        "\n    NUM_FREE         =" + after_info[SPACE_INFO_NUM_FREE]     +
+        "\n    PAGE_SIZE        =" + after_info[SPACE_INFO_PAGE_SIZE]    +
+        "\n    ESTIMSPACESAVING =" + after_info[SPACE_INFO_ESTIMSPACESAVING]);
     }
 
 
-    private void row_count_based_tests(
+    private void deleteAllRows(
     Connection  conn,
     boolean     create_table,
-    boolean     drop_table,
     String      schemaName,
     String      table_name,
     int         num_rows) 
         throws SQLException 
     {
         testProgress(
-            "begin " + num_rows + " row test, create = " + 
-                create_table + ", drop = " + drop_table + ".");
+            "begin deleteAllRows," + num_rows + " row test, create = " + 
+                create_table + ".");
 
 
         createAndLoadTable(conn, create_table, table_name, num_rows);
@@ -320,9 +301,9 @@ public class OnlineCompressTest extends BaseTest
             testProgress("Calling compress.");
 
         // compress with no deletes should not affect size
-        int[] ret_before = getSpaceInfo(conn, "APP", table_name);
-        callCompress(conn, "APP", table_name, true, true, true);
-        int[] ret_after  = getSpaceInfo(conn, "APP", table_name);
+        int[] ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        int[] ret_after  = getSpaceInfo(conn, "APP", table_name, true);
 
         if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
         {
@@ -345,15 +326,14 @@ public class OnlineCompressTest extends BaseTest
         testProgress("no delete case complete.");
 
         // delete all the rows.
-        ret_before = getSpaceInfo(conn, "APP", table_name);
-        executeQuery(conn, "delete from " + table_name);
-        conn.commit();
+        ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        executeQuery(conn, "delete from " + table_name, true);
 
         if (verbose)
             testProgress("deleted all rows, now calling compress.");
 
-        callCompress(conn, "APP", table_name, true, true, true);
-        ret_after  = getSpaceInfo(conn, "APP", table_name);
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, true);
 
         // An empty table has 2 pages, one allocation page and the 1st page
         // which will have a system row in it.  The space vti only reports
@@ -376,54 +356,375 @@ public class OnlineCompressTest extends BaseTest
 
         testProgress("delete all rows case succeeded.");
 
-
-        if (drop_table)
-            executeQuery(conn, "drop table " + table_name);
-
         conn.commit();
 
-        testProgress("end " + num_rows + " row test.");
+        testProgress("end deleteAllRows," + num_rows + " row test.");
+    }
+
+    /**
+     * Check/exercise purge pass phase.
+     * <p>
+     * Assumes that either test creates the table, or called on an empty
+     * table with no committed deleted rows or free pages in the middle of
+     * the table in it.
+     * <p>
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    private void checkPurgePhase(
+    Connection  conn,
+    boolean     create_table,
+    String      schemaName,
+    String      table_name,
+    int         num_rows) 
+        throws SQLException 
+    {
+        testProgress(
+            "begin checkPurgePhase" + num_rows + " row test, create = " + 
+                create_table + ".");
+
+        createAndLoadTable(conn, create_table, table_name, num_rows);
+
+        // dump_table(conn, schemaName, table_name, false);
+
+        // delete all the rows, but don't commit the delete
+        int[] ret_before = getSpaceInfo(conn, "APP", table_name, false);
+        executeQuery(conn, "delete from " + table_name, false);
+
+
+        // dump_table(conn, schemaName, table_name, false);
+
+        // Purge pass on non-committed deleted rows should do nothing.  
+
+        // System.out.println("lock info before compress call:\n " + get_lock_info(conn, true));
+
+        // Calling compress with just the "purge" pass option, no commit called.
+        callCompress(conn, "APP", table_name, true, false, false, false);
+
+        int[] ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+
+        // expect no change in the number of allocated pages!
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change(1).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        // expect no change in the number of free pages, if there are there
+        // is a problem with purge locking recognizing committed deleted rows.
+        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
+        {
+            log_wrong_count(
+                "Expected no free page change(1).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_FREE], 
+                ret_after[SPACE_INFO_NUM_FREE],
+                ret_before, ret_after);
+        }
+
+        // Test that it is ok to call multiple purge passes in single xact.
+
+        // Calling compress with just the "purge" pass option, no commit called.
+        callCompress(conn, "APP", table_name, true, false, false, false);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+
+        // expect no change in the number of allocated pages!
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change(2).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        // expect no change in the number of free pages, if there are there
+        // is a problem with purge locking recognizing committed deleted rows.
+        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
+        {
+            log_wrong_count(
+                "Expected no free page change(2).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_FREE], 
+                ret_after[SPACE_INFO_NUM_FREE],
+                ret_before, ret_after);
+        }
+
+        // since table was just loaded a defragment pass also should
+        // not find anything to do.
+        
+        // Calling compress with just the "defragment" option, no commit called.
+
+        // currently the defragment option requires a table level lock in
+        // the nested user transaction, which will conflict and cause a
+        // lock timeout.
+
+        try
+        {
+            callCompress(conn, "APP", table_name, false, true, false, false);
+            
+            logError("Defragment pass did not get a lock timeout.");
+        }
+        catch (SQLException sqle)
+        {
+            // ignore exception.
+        }
+
+        ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change(3).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
+        {
+            log_wrong_count(
+                "Expected no free page change(3).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_FREE], 
+                ret_after[SPACE_INFO_NUM_FREE],
+                ret_before, ret_after);
+        }
+
+
+        // make sure table is back to all deleted row state.  lock timeout
+        // will abort transaction.
+        executeQuery(conn, "delete from " + table_name, true);
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        createAndLoadTable(conn, create_table, table_name, num_rows);
+        conn.commit();
+        executeQuery(conn, "delete from " + table_name, false);
+
+
+        // Calling compress with just the truncate option, may change allocated
+        // and free page count as they system may have preallocated pages to
+        // the end of the file as part of the load.  The file can't shrink
+        // any more than the free page count before the compress.
+
+        // running the truncate pass only.  If it compresses anything it is
+        // just the preallocated pages at end of the file.
+
+        // currently the defragment option requires a table level lock in
+        // the nested user transaction, which will conflict and cause a
+        // lock timeout.
+
+
+        callCompress(conn, "APP", table_name, false, false, true, false);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+
+        // expect no change in the number of allocated pages!
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change(3).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        // expect no change in the number of free pages, if there are there
+        // is a problem with purge locking recognizing committed deleted rows.
+        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
+        {
+            log_wrong_count(
+                "Expected no free page change(3).", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_FREE], 
+                ret_after[SPACE_INFO_NUM_FREE],
+                ret_before, ret_after);
+        }
+
+        // now commit the deletes, run all phases and make sure empty table
+        // results.
+        conn.commit();
+
+        // check the table.  Note that this will accumulate locks and
+        // will commit the transaction.
+        if (!checkConsistency(conn, schemaName, table_name))
+        {
+            logError("conistency check failed.");
+        }
+
+        // test running each phase in order.
+        callCompress(conn, "APP", table_name, true,  false, false, false);
+        callCompress(conn, "APP", table_name, false, true,  false, false);
+        callCompress(conn, "APP", table_name, false, false, true , false);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+
+        // An empty table has 2 pages, one allocation page and the 1st page
+        // which will have a system row in it.  The space vti only reports
+        // a count of the user pages so the count is 1.
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != 1)
+        {
+            log_wrong_count(
+                "Expected all pages to be truncated.",
+                table_name, num_rows, 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+        if (ret_after[SPACE_INFO_NUM_FREE] != 0)
+        {
+            log_wrong_count(
+                "Expected no free page after all pages truncated.",
+                table_name, num_rows, 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        if (verbose)
+            testProgress("calling consistency checker.");
+
+        if (!checkConsistency(conn, schemaName, table_name))
+        {
+            logError("conistency check failed.");
+        }
+
+        testProgress("end checkPurgePhase" + num_rows + " row test.");
     }
 
     /**
      * Test 1 alloc page test cases.
      * <p>
+     * perform a number of insert/delete/compress operations on a variety
+     * of sized tables, use space allocation information to verify that
+     * compression is happening and use consistency checker to verify that
+     * tables and indexes are all valid following the operations.
+     * <p>
      * loop through testing interesting row count cases.  The cases are
-     * 0  rows     - basic edge case, 2 page table: 1 alloc, 1 user page
-     * 1  row      - another edge case, 2 page table: 1 alloc, 1 user page
-     * 50 rows     - 3 page table case: 1 alloc, 1 user page, 1 user page freed
-     * 10000 rows  - reasonable number of pages to test out, still 1 alloc page
+     * 0    rows  - basic edge case, 2 page table: 1 alloc, 1 user page
+     * 1    row   - another edge case, 2 page table: 1 alloc, 1 user page
+     * 50   rows  - 3 page table case: 1 alloc, 1 user page, 1 user page freed
+     * 4000 rows  - reasonable number of pages to test out, still 1 alloc page
      *
-     * These tests can be run relatively quickly, not a lot of rows needed.
+     * note that row numbers greater than 4000 may lead to lock escalation
+     * issues, if queries like "delete from x" are used to delete all the 
+     * rows.
+     *
      * <p>
      *
      **/
-    private void test1(Connection conn) 
+    private void test1(
+    Connection  conn,
+    String      test_name,
+    String      table_name)
         throws SQLException 
     {
-        beginTest(conn, "test1");
+        beginTest(conn, test_name);
 
-        int[] test_cases = {0, 1, 50, 10000};
+        int[] test_cases = {0, 1, 50, 4000};
 
         for (int i = 0; i < test_cases.length; i++)
         {
             // first create new table and run the tests.
-            row_count_based_tests(
-                conn, true, false, "APP", "TEST1", test_cases[i]);
+            deleteAllRows(
+                conn, true, "APP", table_name, test_cases[i]);
 
             // now rerun tests on existing table, which had all rows deleted
             // and truncated.
-            row_count_based_tests(
-                conn, false, true, "APP", "TEST1", test_cases[i]);
+            deleteAllRows(
+                conn, false, "APP", table_name, test_cases[i]);
+
+            checkPurgePhase(
+                conn, false, "APP", table_name, test_cases[i]);
+
+            executeQuery(conn, "drop table " + table_name, true);
         }
 
-        endTest(conn, "test1");
+        endTest(conn, test_name);
     }
+
+    /**
+     * Purge of uncommitted deletes should not do anything.
+     * <p>
+     * In the same transaction insert a number of rows, delete them all
+     * and then run the purge operation.  The purge operation should find
+     * the rows deleted but not do anything with them as the transaction
+     * has not committed.
+     **/
+    private void test2(
+    Connection  conn,
+    String      test_name,
+    String      table_name,
+    int         num_rows)
+        throws SQLException 
+    {
+        beginTest(conn, test_name);
+
+        createAndLoadTable(conn, true, table_name, num_rows);
+
+        // Purge pass on non-committed deleted rows should do nothing.  
+
+        int[] ret_before = getSpaceInfo(conn, "APP", table_name, false);
+
+        // Calling compress with just the "purge" pass option, no commit called.
+        callCompress(conn, "APP", table_name, true, false, false, false);
+        int[] ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change.", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
+        {
+            log_wrong_count(
+                "Expected no alloc page change.", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        // since table was just loaded there a defragment pass also should
+        // not find anything to do.
+        
+        // Calling compress with just the "defragment" option, no commit called.
+        callCompress(conn, "APP", table_name, false, true, false, false);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change.", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
+        {
+            log_wrong_count(
+                "Expected no alloc page change.", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        executeQuery(conn, "drop table " + table_name, true);
+
+        endTest(conn, test_name);
+    }
+
 
     public void testList(Connection conn)
         throws SQLException
     {
-        test1(conn);
+        test1(conn, "test1", "TEST1");
+        // test2(conn, "test2", "TEST2", 10000);
     }
 
     public static void main(String[] argv) 
@@ -433,7 +734,6 @@ public class OnlineCompressTest extends BaseTest
 
    		ij.getPropertyArg(argv); 
         Connection conn = ij.startJBMS();
-        System.out.println("conn 2 from ij.startJBMS() = " + conn);
         conn.setAutoCommit(false);
 
         try

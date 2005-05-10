@@ -791,7 +791,35 @@ public class B2I extends BTree
     Transaction                     rawtran)
         throws StandardException
     {
-        // TODO - need to implement for btree
+		B2IController b2ic = new B2IController();
+
+		try
+		{
+            int open_mode = TransactionController.OPENMODE_FORUPDATE;
+
+            // Do the actual open of the container in the super class.
+            b2ic.init(
+                xact_manager,                    // current transaction   
+                xact_manager.getRawStoreXact(),  // current raw store xact
+                open_mode,
+                TransactionController.MODE_TABLE,
+                xact_manager.getRawStoreXact().newLockingPolicy(
+                    LockingPolicy.MODE_CONTAINER,
+                    TransactionController.ISOLATION_SERIALIZABLE, true),
+                true,
+                this, 
+                new B2IUndo(),
+                (B2IStaticCompiledInfo) null,
+                (DynamicCompiledOpenConglomInfo) null);
+
+            b2ic.getContainer().compressContainer();
+
+		}
+		finally
+		{
+			b2ic.close();
+		}
+
         return;
     }
 

@@ -757,11 +757,13 @@ public final class Heap
                 this,
                 this.format_ids,
                 nested_xact,
-                rawtran,
+                nested_xact.getRawStoreXact(),
                 true,
                 TransactionController.OPENMODE_FORUPDATE,
                 TransactionController.MODE_RECORD,
-                null,
+                nested_xact.getRawStoreXact().newLockingPolicy(
+                    LockingPolicy.MODE_RECORD,
+                        TransactionController.ISOLATION_REPEATABLE_READ, true),
                 null) == null)
             {
                 throw StandardException.newException(
@@ -791,6 +793,14 @@ public final class Heap
                     // by a remove.
                     open_conglom.getXactMgr().commitNoSync(
                                 TransactionController.RELEASE_LOCKS);
+
+                    // the commit closes the underlying container, so let
+                    // the heapcontroller know this has happened.  Usually
+                    // the transaction takes care of this, but this controller
+                    // is internal, so the transaction does not know about it.
+                    heapcontroller.closeForEndTransaction(false);
+                    
+                    // the commit will close the underlying 
                     open_conglom.reopen();
                 }
                 else
@@ -843,7 +853,9 @@ public final class Heap
                     false,
                     TransactionController.OPENMODE_FORUPDATE,
                     TransactionController.MODE_RECORD,
-                    null,
+                    rawtran.newLockingPolicy(
+                        LockingPolicy.MODE_RECORD,
+                        TransactionController.ISOLATION_REPEATABLE_READ, true),
                     null) == null)
             {
                 throw StandardException.newException(
@@ -895,7 +907,9 @@ public final class Heap
                 hold,
                 open_mode,
                 lock_level,
-                null,
+                rawtran.newLockingPolicy(
+                    LockingPolicy.MODE_RECORD,
+                    TransactionController.ISOLATION_REPEATABLE_READ, true),
                 null) == null)
         {
             throw StandardException.newException(

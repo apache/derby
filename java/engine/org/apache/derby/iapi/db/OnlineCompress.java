@@ -98,6 +98,10 @@ the table will be returned to the OS.  Running the DEFRAGMENT_ROWS option may
 increase the number of pages affected.  This option itself does no scans of
 the table, so performs on the order of a few system calls.
 
+TODO LIST:
+o defragment requires table level lock in nested user transaction, which
+  will conflict with user lock on same table in user transaction.
+
 **/
 public class OnlineCompress
 {

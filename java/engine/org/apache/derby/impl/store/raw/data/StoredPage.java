@@ -2368,13 +2368,10 @@ public class StoredPage extends CachedPage
      * Up here means from low slot to high slot (e.g from slot 2 to slot 3).
      * Our slot table grows backward so we have to be careful here.
      *
-     * @param param1 param1 does this.
-     * @param param2 param2 does this.
-     *
      * @param slot                  Position the new slot will take
      * @param recordOffset          Offset of the record for the new slot
      * @param recordPortionLength   Length of the record stored in the new slot
-     * @param recordPortionLength   Length of reserved space of record in slot
+     * @param reservedSpace         Length of reserved space of record in slot
      *
      **/
 	private void addSlotEntry(
@@ -4541,16 +4538,17 @@ public class StoredPage extends CachedPage
      * <p>
      * The column is read into the object located in row[qual_colid].
      *
-     * @param row           column is read into object in row[qual_colid].
-     * @param colid         the column id to read, colid N is row[N]
-     * @param dataIn        the stream to read the column in row from.
-     * @param recordHeader  the record header of the row to read column from.
-     * @param recordToLock  record handle to lock, used by overflow column code.
+     * @param row                   col is read into object in row[qual_colid].
+     * @param offset_to_field_data  offset in bytes from top of page to field
+     * @param colid                 the column id to read, colid N is row[N]
+     * @param recordHeader          record header of row to read column from.
+     * @param recordToLock          record handle to lock, 
+     *                              used by overflow column code.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
 	private final void readOneColumnFromPage(
-    Object[]   row, 
+    Object[]                row, 
     int                     colid,
     int                     offset_to_field_data,
     StoredRecordHeader      recordHeader,
@@ -4899,18 +4897,15 @@ public class StoredPage extends CachedPage
      *
 	 * @return Whether or not the row input qualifies.
      *
-     * @param row               restore row into this object array.
-     * @param validColumns      If not null, bit map indicates valid cols.
-     * @param materializedCols  Which columns have already been read into row?
-     * @param lrdi              restore row from this stream.
-     * @param recordHeader      The record header of the row, it was read in 
-     *                          from stream and dataIn is positioned after it.
-     * @param inUserCode        see comments above about jit bug. 
-     * @param qualifier_list    An array of qualifiers to apply to the row, only
-     *                          return row if qualifiers are all true, if array
-     *                          is null always return the row.
-     * @param recordToLock      The head row to use for locking, used to lock 
-     *                          head row of overflow columns/rows.
+     * @param row                   restore row into this object array.
+     * @param offset_to_row_data    offset in bytes from top of page to row
+     * @param fetchDesc             Description of fetch including which cols
+     *                              and qualifiers.
+     * @param recordHeader          The record header of the row, it was read 
+     *                              in from stream and dataIn is positioned 
+     *                              after it.
+     * @param recordToLock          The head row to use for locking, used to 
+     *                              lock head row of overflow columns/rows.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -7732,7 +7727,7 @@ public class StoredPage extends CachedPage
 		Shift data within a record to account for an update.
 
 		@param offset  Offset where the update starts, need not be on a field boundry.
-		@param oldLenght length of the data being replaced
+		@param oldLength length of the data being replaced
 		@param newLength length of the data replacing the old data
 
 		@return the length of the data in the record after the replaced data.
@@ -7952,7 +7947,6 @@ public class StoredPage extends CachedPage
 		{
 			if (SanityManager.DEBUG_ON("DeadlockTrace") || SanityManager.DEBUG_ON("userLockStackTrace"))
 				return "page = " + getIdentity();
-
 
 			String str = "---------------------------------------------------\n";
 			str += pageHeaderToString();

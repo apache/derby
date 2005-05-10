@@ -159,10 +159,9 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * have 2 different containerid's, be more creative with the record id, or
      * even add more to the lock key.
      *
-     * @param open_btree        The open btree to associate this lock with.
      * @param aux_leaf          If non-null, this leaf is unlatched if the 
      *                          routine has to wait on the lock.
-     * @param forUpdate         Whether to lock exclusive or share.
+     * @param lock_operation    Whether to lock exclusive or share.
      * @param lock_duration     For what duration should the lock be held,
      *                          if INSTANT_DURATION, then the routine will
      *                          guarantee that lock was acquired while holding
@@ -247,8 +246,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      *                          used for locking.
      * @param check_changed_rowloc
      *                          whether to check for the changed rowloc or not.
-     * @param forUpdate         Whether to wait for lock.
-     * @param forUpdatePrevKey  Whether lock is for key prev to insert or not.
+     * @param lock_operation    Whether lock is for key prev to insert or not.
      * @param lock_duration     For what duration should the lock be held,
      *                          if INSTANT_DURATION, then the routine will
      *                          guarantee that lock was acquired while holding
@@ -499,14 +497,14 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
      * @param leaf              The control row of the current leaf to lock.
-     * @param slot              The slot position of the row to lock.
+     * @param pos               The position of the row to lock.
      * @param request_row_lock  Whether to request the row lock, should
      *                          only be requested once per page in the scan.
      * @param request_scan_lock Whether to request the page scan lock, should
      *                          only be requested once per page in the scan.
-     * @param lock_fetchDescriptor The fetch descriptor to use to fetch the
+     * @param lock_fetch_desc   The fetch descriptor to use to fetch the
      *                          row location for the lock request.
-     * @param scratch_template  A scratch area to use to read in rows.
+     * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
      *
@@ -803,11 +801,10 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
-     * @param leaf              The control row of the current leaf to lock.
-     * @param slot              The slot position of the row to lock.
+     * @param pos               The position of the row to lock.
      * @param request_scan_lock Whether to request the page scan lock, should
      *                          only be requested once per page in the scan.
-     * @param scratch_template  A scratch area to use to read in rows.
+     * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
      *
@@ -846,7 +843,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      *
      * For serializable, there is no work to do.
      *
-     * @param row_qualified     Did the row qualify to be returned to caller.
      *
      **/
     public void unlockScanRecordAfterRead(

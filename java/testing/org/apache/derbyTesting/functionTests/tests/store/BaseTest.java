@@ -169,7 +169,8 @@ public abstract class BaseTest
     String dump_table(
     Connection  conn,
     String      schemaName,
-    String      tableName)
+    String      tableName,
+    boolean     commit_transaction)
 		throws SQLException
     {
         if (!debug_system_procedures_created)
@@ -207,9 +208,93 @@ public abstract class BaseTest
 
         rs.close();
 
-        conn.commit();
+        if (commit_transaction)
+            conn.commit();
 
         return(dump_table_info);
 
+    }
+
+    /**
+     * Get lock table.
+     * <p>
+     * Returns a single string with a dump of the entire lock table.
+     * <p>
+     *
+	 * @return The lock table.
+     *
+     * @param conn                  The connection to use.
+     * @param include_system_locks  If true include non-user locks like those
+     *                              requested by background internal threads.
+     *
+     **/
+    protected String get_lock_info(
+    Connection  conn,
+    boolean     include_system_locks)
+		throws SQLException
+    {
+        // Run the following query to get the current locks in the system,
+        // toggling the "t.type='UserTransaction'" based on 
+        // include_system_locks input:
+        //
+        // select
+        //     cast(l.xid as char(8)) as xid,
+        //     cast(username as char(8)) as username,
+        //     cast(t.type as char(8)) as trantype,
+        //     cast(l.type as char(8)) as type,
+        //     cast(lockcount as char(3)) as cnt,
+        //     cast(mode as char(4)) as mode,
+        //     cast(tablename as char(12)) as tabname,
+        //     cast(lockname as char(10)) as lockname,
+        //     state,
+        //     status
+        // from
+        //     new org.apache.derby.diag.LockTable() l  
+        // right outer join new org.apache.derby.diag.TransactionTable() t
+        //     on l.xid = t.xid where l.tableType <> 'S' and 
+        //        t.type='UserTransaction'
+        // order by
+        //     tabname, type desc, mode, cnt, lockname;
+        String lock_query = 
+            "select cast(l.xid as char(8)) as xid, cast(username as char(8)) as username, cast(t.type as char(8)) as trantype, cast(l.type as char(8)) as type, cast(lockcount as char(3)) as cnt, cast(mode as char(4)) as mode, cast(tablename as char(12)) as tabname, cast(lockname as char(10)) as lockname, state, status from new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t on l.xid = t.xid where l.tableType <> 'S' ";
+        if (!include_system_locks)
+            lock_query += "and t.type='UserTransaction' ";
+        
+        lock_query += "order by tabname, type desc, mode, cnt, lockname";
+
+        PreparedStatement ps = conn.prepareStatement(lock_query);
+
+        ResultSet rs = ps.executeQuery();
+
+        String lock_output = 
+        "xid     |username|trantype|type    |cnt|mode|tabname     |lockname  |state|status\n" +
+        "---------------------------------------------------------------------------------\n";
+        while (rs.next())
+        {
+            String username     = rs.getString(1);
+            String trantype     = rs.getString(2);
+            String type         = rs.getString(3);
+            String lockcount    = rs.getString(4);
+            String mode         = rs.getString(5);
+            String tabname      = rs.getString(6);
+            String lockname     = rs.getString(7);
+            String state        = rs.getString(8);
+            String status       = rs.getString(9);
+
+            lock_output +=
+                username + "|" +
+                trantype + "|" +
+                type     + "|" +
+                lockcount+ "|" +
+                mode     + "|" +
+                tabname  + "|" +
+                lockname + "|" +
+                state    + "|" +
+                status   + "\n";
+        }
+
+        rs.close();
+
+        return(lock_output);
     }
 }

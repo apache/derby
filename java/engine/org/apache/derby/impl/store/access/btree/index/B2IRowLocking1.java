@@ -128,11 +128,10 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
-     * @param leaf              The control row of the current leaf to lock.
-     * @param slot              The slot position of the row to lock.
+     * @param pos               The position of the row to lock.
      * @param request_scan_lock Whether to request the page scan lock, should
      *                          only be requested once per page in the scan.
-     * @param scratch_template  A scratch area to use to read in rows.
+     * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
      *
