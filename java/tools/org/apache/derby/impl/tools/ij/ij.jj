@@ -610,7 +610,6 @@ TOKEN [IGNORE_CASE] :
 |	<SHOW: "show">
 |	<SHUTDOWN: "shutdown">
 |	<STATEMENT: "statement">
-|	<UNICODEESCAPE: "unicodeescape">
 |	<USER: "user">
 |	<USING: "using">
 |	<WAIT: "wait">
@@ -973,7 +972,6 @@ throws SQLException
 |	r=RunStatement()	
 |	r=SetConnectionStatement()	
 |	r=ShowConnectionsStatement()	
-|	r=UnicodeEscape()
 |	r=WaitForStatement()	
 |	r=XA_DataSourceStatement()
 |	r=XA_ConnectStatement()
@@ -2146,28 +2144,6 @@ ijResult LocalizedDisplay()
 }
 
 /**
- * Unicodeescape controls ASCII Unicode escape processing
- * <p>
- * Syntax:
- *   UNICODEESCAPE [ ON | OFF ] ;
- */
-ijResult UnicodeEscape()
-:
-{
- 	Token on=null;
-}
-{
-	<UNICODEESCAPE> 
-	( on=<ON>
-	| <OFF>
-	)
-	{
-		LocalizedResource.setUnicodeEscape((on==null?false:true));
-		return null;
-	}
-}
-
-/**
  * ReadOnly lets you control this aspect of the connection.
  * REMIND: should have a general way to set all connection attributes,
  * this is a shortcut for immediate needs.
@@ -3128,7 +3104,6 @@ keyword() :
 |	tok = <SHOW>
 |	tok = <SHUTDOWN>
 |	tok = <STATEMENT>
-|	tok = <UNICODEESCAPE>
 |	tok = <USER>
 |	tok = <USING>
 |	tok = <WAIT>

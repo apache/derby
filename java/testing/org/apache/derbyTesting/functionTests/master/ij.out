@@ -81,7 +81,6 @@ help;
   GETCURRENTROWNUMBER name;    -- returns the row number for the current position of the named scroll cursor
                                -- (0 is returned when the cursor is not positioned on a row.) 
   CLOSE name;                  -- closes the named cursor
-  UNICODEESCAPE [ ON | OFF ]; -- sets unicode escape mode for the input stream
   LOCALIZEDDISPLAY [ ON | OFF ];
                                -- controls locale sensitive data representation
   EXIT;                        -- exits ij

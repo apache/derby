@@ -1,6 +1,5 @@
 drop table jtest;
 create table jtest(jint integer, jtime time, jvarchar varchar(255));
-UNICODEESCAPE ON;
 insert into jtest values(1,'15:32:06','\u30a4\u30d9\u30f3\u30c8\u30a2\u30e9\u30fc\u30e0\u304c\u6709\u52b9\u3067\u3059\u3002');
 insert into jtest values(2,'15:32:10','DR:DRAUTO\u306f0 (Off)\u3067\u3059\u3002');
 insert into jtest values(3,'15:32:28','INFORMIX-OnLine\u304c\u521d\u671f\u5316\u3055\u308c\u3001\u30c7\u30a3\u30b9\u30af\u306e\u521d\u671f\u5316\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002');

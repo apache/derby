@@ -85,7 +85,6 @@ public class Main {
 		String inputResourceName;
 		boolean gotProp;
 
-		String tmpUnicode = null;
 		Properties connAttributeDefaults = null;
 
 		// load the property file if specified
@@ -133,11 +132,6 @@ public class Main {
       		}
     	}
 
-		// set initial Unicode Escape Mode
-		tmpUnicode = util.getSystemProperty("ij.unicodeEscape");
-		if ((tmpUnicode != null) && tmpUnicode.toUpperCase(Locale.ENGLISH).equals("ON")) {
-			LocalizedResource.setUnicodeEscape(true);
-		} 
 		String outFile = util.getSystemProperty("ij.outfile");
 		if (outFile != null && outFile.length()>0) {
 			LocalizedOutput oldOut = out;
