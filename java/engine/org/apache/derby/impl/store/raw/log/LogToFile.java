@@ -3951,14 +3951,19 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		}
 	}
 
+    /**
+     * print stack trace from the Throwable including
+     * its nested exceptions 
+     * @param t trace starts from this error
+     */
 	private void printErrorStack(Throwable t)
 	{
-		Monitor.logMessage("-------------------------\n");
-		t.printStackTrace(Monitor.getStream().getPrintWriter());
-		Monitor.logMessage("-------------------------\n");
-		ErrorStringBuilder esb = new ErrorStringBuilder(Monitor.getStream().getHeader());
+		ErrorStringBuilder esb = 
+            new ErrorStringBuilder(Monitor.getStream().getHeader());
 		esb.stackTrace(t);
-	}
+        Monitor.logMessage(esb.get().toString());
+        esb.reset();
+    }
 
 
 	/**
