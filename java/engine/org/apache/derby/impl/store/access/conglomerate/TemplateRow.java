@@ -52,19 +52,21 @@ public final class TemplateRow
      * Allocate new objects to array based on format id's and column_list.
      * <p>
      *
-     * @param column_list description of partial set of columns to built as
-     *                    described in RowUtil.  If null do all the columns.
-     * @param format_ids  An array of format ids representing every column
-     *                    in the table.  column_list describes which of these
-     *                    columns to populate into the columns array.
-     * @param columns     The array to place the newly allocated objects into.
+     * @param num_cols_to_allocate  The number of columns to allocate for array.
+     * @param column_list           description of partial set of columns to 
+     *                              built as described in RowUtil.  If null do 
+     *                              all the columns.
+     * @param format_ids            An array of format ids representing every 
+     *                              column in the table.  column_list describes
+     *                              which of these columns to populate into the 
+     *                              columns array.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
     private static DataValueDescriptor[] allocate_objects(
-    int         num_cols_to_allocate,
-    FormatableBitSet     column_list,
-    int[]       format_ids)
+    int                 num_cols_to_allocate,
+    FormatableBitSet    column_list,
+    int[]               format_ids)
 		throws StandardException
     {
         int         dest_pos = 0;
@@ -142,16 +144,13 @@ public final class TemplateRow
      * the Monitor.
      * <p>
      *
-	 * @return The new row.
      *
-     * @param column_list   A column list as described in RowUtil. Describes
-     *                      which columns to pick out of the template and put
-     *                      into returned newRow.  If null just pick all of
-     *                      them.
-     *
-     * @param format_ids an array of format id's, one per column in row.
+     * @param template      An array which represents a row as described in
+     *                      RowUtil.
      *
 	 * @exception  StandardException  Standard exception policy.
+     *
+	 * @return The new row.
      *
      * @see RowUtil
      **/

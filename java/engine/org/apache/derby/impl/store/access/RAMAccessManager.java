@@ -366,7 +366,7 @@ public abstract class RAMAccessManager
      * 4 bits into which factory owns the conglomerate.
      * <p>
      *
-     * @param conglomid The conglomerate id of the conglomerate to look up.
+     * @param conglom_id The conglomerate id of the conglomerate to look up.
      *
 	 * @return The ConglomerateFactory which "owns" this conglomerate.
      *

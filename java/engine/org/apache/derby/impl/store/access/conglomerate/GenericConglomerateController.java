@@ -120,7 +120,7 @@ public abstract class GenericConglomerateController
      * RESOLVE (mikem) - move this call to ConglomerateManager so it is
      * obvious that non-access clients should not call this.
      *
-     * @param closeHeldController     If true, means to close controller even if
+     * @param closeHeldScan           If true, means to close controller even if
      *                                it has been opened to be kept opened 
      *                                across commit.  This is
      *                                used to close these controllers on abort.

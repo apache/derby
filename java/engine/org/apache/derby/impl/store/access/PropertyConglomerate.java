@@ -207,7 +207,7 @@ class PropertyConglomerate
      *
 	 * @param tc        The transaction to do the Conglomerate work under.
      * @param key       The "key" of the property that is being requested.
-     * @param forUpdate Whether we are setting or getting the property.
+     * @param open_mode Whether we are setting or getting the property.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

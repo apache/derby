@@ -1484,7 +1484,7 @@ public class RAMTransaction
     }
 
     /**
-     * Compress table in place
+     * Compress table in place.
      * <p>
      * Returns a GroupFetchScanController which can be used to move rows
      * around in a table, creating a block of free pages at the end of the
@@ -2346,7 +2346,7 @@ public class RAMTransaction
      * For some conglomerates this may be a no-op.
      * <p>
      *
-     * @param conglomid Conglomerate id of the conglomerate being changed.
+     * @param conglom   Conglomerate being changed.
      * @param page      Page in the conglomerate being changed.
      *
 	 * @exception  StandardException  Standard exception policy.

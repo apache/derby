@@ -64,8 +64,10 @@ public class UTFQualifier implements Qualifier
 
 	}
 
-	/** Should the result from the compare operation be negated?  If true
-     *  then only rows which fail the compare operation will qualify.
+	/** 
+     *  Determine if the result from the compare operation is to be negated.  
+     *  <p>
+     *  If true then only rows which fail the compare operation will qualify.
      *
      *  @see DataValueDescriptor#compare
      **/

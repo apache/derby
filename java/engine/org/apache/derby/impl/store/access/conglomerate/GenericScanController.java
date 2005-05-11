@@ -849,7 +849,7 @@ public abstract class GenericScanController
     inserting more data, then continuing the scan is not guaranteed to see
     the new rows - they may be put in the "beginning" of the heap.
 
-	@param startRowLocation  An existing RowLocation within the conglomerate,
+	@param startRecordHandle  An existing RecordHandle within the conglomerate,
     at which to position the start of the scan.  The scan will begin at this
     location and continue forward until the end of the conglomerate.  
     Positioning at a non-existent RowLocation (ie. an invalid one or one that
@@ -864,8 +864,8 @@ public abstract class GenericScanController
 	@exception StandardException Standard exception policy.
     **/
     protected void reopenScanByRecordHandle(
-    RecordHandle startRecordHandle,
-    Qualifier qualifier[][])
+    RecordHandle    startRecordHandle,
+    Qualifier       qualifier[][])
         throws StandardException
     {
         // initialize scan position parameters at beginning of scan
@@ -1240,25 +1240,15 @@ public abstract class GenericScanController
     is reopened with the same "hold" and "forUpdate" parameters passed in
     the original openScan.  The previous template row continues to be used.
 
-    @param template A prototypical row which the scan may use ot
-	maintain its position in the conglomerate.  Not all access method
-	scan types will require this, if they don't it's ok to pass in null.
-    In order to scan a conglomerate one must allocate 2 separate "row"
-    templates.  The "row" template passed into openScan is for the private
-    use of the scan itself, and no access to it should be made
-    by the caller while the scan is still open.  Because of this the 
-    scanner must allocate another "row" template to hold the values returned 
-    from fetch().
-
 	@param startKeyValue  An indexable row which holds a 
 	(partial) key value which, in combination with the
 	startSearchOperator, defines the starting position of
 	the scan.  If null, the starting position of the scan
 	is the first row of the conglomerate.
 	
-	@param startSearchOperation an operator which defines
+	@param startSearchOperator an operator which defines
 	how the startKeyValue is to be searched for.  If 
-    startSearchOperation is ScanController.GE, the scan starts on
+    startSearchOperator is ScanController.GE, the scan starts on
 	the first row which is greater than or equal to the 
 	startKeyValue.  If startSearchOperation is ScanController.GT,
 	the scan starts on the first row whose key is greater than
@@ -1276,7 +1266,7 @@ public abstract class GenericScanController
 	the scan.  If null, the ending position of the scan
 	is the last row of the conglomerate.
 	
-	@param stopSearchOperation an operator which defines
+	@param stopSearchOperator an operator which defines
 	how the stopKeyValue is used to determine the scan stopping
 	position. If stopSearchOperation is ScanController.GE, the scan 
 	stops just before the first row which is greater than or
