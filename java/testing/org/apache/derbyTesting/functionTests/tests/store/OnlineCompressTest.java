@@ -38,7 +38,7 @@ public class OnlineCompressTest extends BaseTest
 {
     boolean verbose = false;
 
-    OnlineCompressTest()
+    public OnlineCompressTest()
     {
     }
 
