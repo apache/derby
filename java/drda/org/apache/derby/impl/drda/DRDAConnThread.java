@@ -118,7 +118,7 @@ public class DRDAConnThread extends Thread {
 	private int [] required = new int[MAX_REQUIRED_LEN];
 
 
-	private DB2jServerImpl server;			// server who created me
+	private NetworkServerControlImpl server;			// server who created me
 	private Session	session;	// information about the session
 	private long timeSlice;				// time slice for this thread
 	private Object timeSliceSync = new Object(); // sync object for updating time slice 
@@ -169,7 +169,7 @@ public class DRDAConnThread extends Thread {
 	 * @param logConnections
 	 **/
 
-	public DRDAConnThread(Session session, DB2jServerImpl server, 
+	public DRDAConnThread(Session session, NetworkServerControlImpl server, 
 						  long timeSlice,
 						  boolean logConnections) {
 	
@@ -177,7 +177,7 @@ public class DRDAConnThread extends Thread {
 
 		// Create a more meaningful name for this thread (but preserve its
 		// thread id from the default name).
-		DB2jServerImpl.setUniqueThreadName(this, "DRDAConnThread");
+		NetworkServerControlImpl.setUniqueThreadName(this, "DRDAConnThread");
 
 		this.session = session;
 		this.server = server;
@@ -323,7 +323,7 @@ public class DRDAConnThread extends Thread {
 	 *
 	 * @return server
 	 */
-	protected DB2jServerImpl getServer()
+	protected NetworkServerControlImpl getServer()
 	{
 		return server;
 	}
@@ -1168,7 +1168,7 @@ public class DRDAConnThread extends Thread {
 					// the protocol exception.  Then hopfully all
 					// will be well when they try again.
 					try {
-						server.startDB2j();
+						server.startNetworkServer();
 					} catch (Exception re) {
 						println2Log(database.dbName, session.drdaID, "Failed attempt to reload driver " +re.getMessage()  );
 					}
@@ -4958,7 +4958,7 @@ public class DRDAConnThread extends Thread {
 			// then we're here because of a shutdown exception;
 			// "clean up" by restarting the server.
 				try {
-					server.startDB2j();
+					server.startNetworkServer();
 				} catch (Exception restart)
 				// any error messages should have already been printed,
 				// so we ignore this exception here.

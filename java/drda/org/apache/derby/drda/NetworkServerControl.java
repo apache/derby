@@ -26,7 +26,7 @@ import java.net.InetAddress;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
 
-import org.apache.derby.impl.drda.DB2jServerImpl;
+import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
 /** 
 	NetworkServerControl provides the ability to start a Network Server or 
@@ -166,7 +166,7 @@ public class NetworkServerControl{
 
 	
 	public final static int DEFAULT_PORTNUMBER = 1527;
-	private DB2jServerImpl serverImpl;
+	private NetworkServerControlImpl serverImpl;
 
 	// constructor
 
@@ -194,7 +194,7 @@ public class NetworkServerControl{
 	public NetworkServerControl(InetAddress address,int portNumber) throws Exception
 	{
 		
-		serverImpl = new DB2jServerImpl(address, 
+		serverImpl = new NetworkServerControlImpl(address, 
 										portNumber);
 
 	}
@@ -219,7 +219,7 @@ public class NetworkServerControl{
 	public NetworkServerControl() throws Exception
 	{
 		
-		serverImpl = new DB2jServerImpl();
+		serverImpl = new NetworkServerControlImpl();
 
 	}
 	
@@ -231,7 +231,7 @@ public class NetworkServerControl{
 	 * See class comments for more information
 	 */
     public static void main(String args[]) {
-		DB2jServerImpl.execute(args);
+		NetworkServerControlImpl.execute(args);
 		
 	}
 

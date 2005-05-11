@@ -281,8 +281,8 @@ class DDMReader
 	protected boolean isCmd() throws DRDAProtocolException, java.io.UnsupportedEncodingException
 	{
 		ensureALayerDataInBuffer(4);
-		String val = new String(buffer, 0, 4, DB2jServerImpl.DEFAULT_ENCODING);
-		return DB2jServerImpl.isCmd(val);
+		String val = new String(buffer, 0, 4, NetworkServerControlImpl.DEFAULT_ENCODING);
+		return NetworkServerControlImpl.isCmd(val);
 	}
 
 	/**
@@ -1259,7 +1259,7 @@ class DDMReader
 	protected String readStringData()
 		throws DRDAProtocolException
 	{
-		return readString((int)ddmScalarLen, DB2jServerImpl.DEFAULT_ENCODING);
+		return readString((int)ddmScalarLen, NetworkServerControlImpl.DEFAULT_ENCODING);
 	}
 
 	/**
@@ -1272,7 +1272,7 @@ class DDMReader
 	protected String readStringData(int length)
 		throws DRDAProtocolException
 	{
-		return readString(length, DB2jServerImpl.DEFAULT_ENCODING);
+		return readString(length, NetworkServerControlImpl.DEFAULT_ENCODING);
 	}
 
 	/**
@@ -1421,7 +1421,7 @@ class DDMReader
 
 		ensureBLayerDataInBuffer (length, ADJUST_LENGTHS);
 		String result = new String (buffer, pos, length,
-										DB2jServerImpl.DEFAULT_ENCODING);
+										NetworkServerControlImpl.DEFAULT_ENCODING);
 		pos += length;
 		return result;
 	}

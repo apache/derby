@@ -1168,7 +1168,7 @@ class DDMWriter
 	protected void writeLDString(String s, int index) throws DRDAProtocolException
 	{
 		try {
-			byte [] byteval = s.getBytes(DB2jServerImpl.DEFAULT_ENCODING);
+			byte [] byteval = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
 			int origLen = byteval.length;
 			boolean multiByteTrunc = false;
 			int writeLen =
@@ -1182,13 +1182,13 @@ class DDMWriter
 			1) Does the current byte start with the bit pattern 10xxxxxx?
 			2) If yes, move left and go to step #1.
 			3) Finished
-			We assume that DB2jServerImpl.DEFAULT_ENCODING remains UTF-8
+			We assume that NetworkServerControlImpl.DEFAULT_ENCODING remains UTF-8
 			*/
 
 			if (SanityManager.DEBUG)
 			{
-				if (!(DB2jServerImpl.DEFAULT_ENCODING.equals("UTF8")))
-					SanityManager.THROWASSERT("Encoding assumed to be UTF8, but is actually" + DB2jServerImpl.DEFAULT_ENCODING);
+				if (!(NetworkServerControlImpl.DEFAULT_ENCODING.equals("UTF8")))
+					SanityManager.THROWASSERT("Encoding assumed to be UTF8, but is actually" + NetworkServerControlImpl.DEFAULT_ENCODING);
 			}
 
 			if (writeLen != origLen)
@@ -1210,7 +1210,7 @@ class DDMWriter
 		}
 		catch (Exception e) {
 			//this should never happen
-			agent.agentError("Encoding " + DB2jServerImpl.DEFAULT_ENCODING + " not supported");
+			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
 		}
 	}
 
@@ -1224,10 +1224,10 @@ class DDMWriter
 	protected void writeString(String s) throws DRDAProtocolException
 	{
 		try {
-			writeBytes(s.getBytes(DB2jServerImpl.DEFAULT_ENCODING));
+			writeBytes(s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING));
 		} catch (Exception e) {
 			//this should never happen
-			agent.agentError("Encoding " + DB2jServerImpl.DEFAULT_ENCODING + " not supported");
+			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
 		}
 	}
 
@@ -1243,10 +1243,10 @@ class DDMWriter
 	{
 		byte[] bs = null;
 		try {
-			bs = s.getBytes(DB2jServerImpl.DEFAULT_ENCODING);
+			bs = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
 		} catch (Exception e) {
 			//this should never happen
-			agent.agentError("Encoding " + DB2jServerImpl.DEFAULT_ENCODING + " not supported");
+			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
 		}
 		int len = bs.length;
 		if (len >= length)
@@ -1254,7 +1254,7 @@ class DDMWriter
 		else
 		{
 			writeBytes(bs);
-			padBytes(DB2jServerImpl.SPACE_CHAR, length-len);
+			padBytes(NetworkServerControlImpl.SPACE_CHAR, length-len);
 		}
 	}
 

@@ -44,7 +44,7 @@ public class DRDAServerStarter implements ModuleControl, Runnable
 	private Method serverShutdownMethod;
     private boolean loadSysIBM;
     private Thread serverThread;
-    private static final String serverClassName = "org.apache.derby.impl.drda.DB2jServerImpl";
+    private static final String serverClassName = "org.apache.derby.impl.drda.NetworkServerControlImpl";
     private Class serverClass;
 	
 	private InetAddress listenAddress =null;

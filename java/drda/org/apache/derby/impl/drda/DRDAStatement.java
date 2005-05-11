@@ -1256,10 +1256,10 @@ class DRDAStatement
 		{
 			try {
 				BigInteger  consistTokenBi = 
-					new BigInteger(consistToken.getBytes(DB2jServerImpl.DEFAULT_ENCODING));
+					new BigInteger(consistToken.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING));
 				BigInteger rsNumBi = BigInteger.valueOf(rsNum);
 				consistTokenBi = consistTokenBi.subtract(rsNumBi);
-				consistToken = new String(consistTokenBi.toByteArray(),DB2jServerImpl.DEFAULT_ENCODING);
+				consistToken = new String(consistTokenBi.toByteArray(),NetworkServerControlImpl.DEFAULT_ENCODING);
 			}
 			catch (UnsupportedEncodingException e)
 			{// Default encoding always supported

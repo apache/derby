@@ -26,22 +26,22 @@ import java.security.*;
 
 class ClientThread extends Thread {
 
-	DB2jServerImpl parent;
+	NetworkServerControlImpl parent;
 	ServerSocket serverSocket;
 	private int timeSlice;
 	private int connNum;
 	private String traceDir;
 	private boolean traceAll;
 
-		protected ClientThread (DB2jServerImpl dsi, ServerSocket ss) {
+		protected ClientThread (NetworkServerControlImpl nsi, ServerSocket ss) {
 
 			// Create a more meaningful name for this thread (but preserve its
 			// thread id from the default name).
-			DB2jServerImpl.setUniqueThreadName(this, "NetworkServerThread");
+			NetworkServerControlImpl.setUniqueThreadName(this, "NetworkServerThread");
 
-			parent=dsi;
+			parent=nsi;
 			serverSocket=ss;
-			timeSlice=dsi.getTimeSlice();
+			timeSlice=nsi.getTimeSlice();
 			traceDir=parent.getTraceDirectory();
 			traceAll=parent.getTraceAll();
 		}

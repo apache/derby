@@ -284,7 +284,7 @@ public class DRDAProtocolException extends Exception
 			DRDAConnThread.println2Log(agent.getDbName(),
 								   agent.getSession().drdaID, 
 								   msg);
-			DB2jServerImpl s = agent.getServer();
+			NetworkServerControlImpl s = agent.getServer();
 			s.consoleMessage(msg);
 			this.printStackTrace(s.logWriter);
 		}
