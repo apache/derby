@@ -325,15 +325,8 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 				dataFactory.writeInProgress();
 				try
 				{
-                    if (Performance.MEASURE)
-                    {
-                        if (!dataFactory.dataNotSyncedAtAllocation)
-                            fileData.sync( false);
-                    }
-                    else
-                    {
+                    if (!dataFactory.dataNotSyncedAtAllocation)
                         fileData.sync( false);
-                    }
 				}
 				finally
 				{
@@ -504,16 +497,9 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 					dataFactory.writeInProgress();
 					inwrite = true;
 
-                    if (Performance.MEASURE)
-                    {
-                        if (!dataFactory.dataNotSyncedAtAllocation)
-                            fileData.sync( false);
-                    }
-                    else
-                    {
-                        fileData.sync( false);
-                    }
-				}
+                    if (!dataFactory.dataNotSyncedAtAllocation)
+                        fileData.sync(false);
+  				}
 				catch (IOException ioe)
 				{
 					// The disk may have run out of space. 
@@ -628,15 +614,9 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 			dataFactory.writeInProgress();
 			try
 			{
-                if (Performance.MEASURE)
-                {
-                    if (!dataFactory.dataNotSyncedAtCheckpoint)
-                        file.sync( false);
-                }
-                else
-                {
-                    file.sync( false);
-                }
+                if (!dataFactory.dataNotSyncedAtCheckpoint)
+                   file.sync(false);
+
 			}
 			finally
 			{

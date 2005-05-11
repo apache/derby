@@ -265,7 +265,32 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 	/* Log Control file flags. */
 	private static final byte IS_BETA_FLAG = 0x1;
-
+	
+    /**
+     * When the derby.system.durability property is set to 'test', the store 
+     * system will not force sync calls in the following cases
+     * - for the log file at each commit
+     * - for the log file before data page is forced to disk
+     * - for page allocation when file is grown
+     * - for data writes during checkpoint
+     * This means it is possible that the recovery system may not work properly,
+     * committed transactions may be lost, and/or database may not
+     * be in a consistent state.
+     * In order that we recognize this case that the database was previously
+     * at any time booted in this mode, this value is written out
+     * into the log control file. This will help prevent us from 
+     * wasting time to resolve issues in such cases. 
+     * @see org.apache.derby.iapi.reference.Property#DURABILITY_PROPERTY
+     * This value is written as part of the log control file flags byte.
+     */
+    private static final byte IS_DURABILITY_TESTMODE_NO_SYNC_FLAG = 0x2;
+	
+    /**
+     * keeps track of if the database was booted previously at any time with 
+     * derby.system.durability=test
+     */
+    private static boolean wasDBInDurabilityTestModeNoSync = false;
+    
 	/* to err on the conservative side, unless otherwise set, assume log
 	 *	archive is ON 
 	 */
@@ -362,7 +387,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	// log goes to the log subdirectory underneath the data directory
 	String logDevice;
 
-    // debug only flag - disable syncing of log file for debugging performance.
+    // disable syncing of log file when running in derby.system.durability=test
     private boolean logNotSynced = false;
 
 	private boolean logArchived = false;
@@ -403,8 +428,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	
 	private CRC32 checksum = new CRC32(); // holder for the checksum
 
-
-	
+ 	
 	/**
 	 * Note: Why logging system support file sync and write sync ?
 	 * Note : The reason to support file and write sync of logs is 
@@ -1194,8 +1218,8 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			tf.resetTranId();
 		}
 
-		// done with recovery
-
+        // done with recovery        
+        
 		/////////////////////////////////////////////////////////////
 		// setup checktpoint daemon
 		/////////////////////////////////////////////////////////////
@@ -1207,6 +1231,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
         }
 	}
 
+ 
 	/**
 		Checkpoint the rawStore.
 
@@ -2136,16 +2161,31 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		// For 2.0 beta we added the build number and the isBeta indication.
 		// (5 bytes from our first spare long)
 		daos.writeInt(jbmsVersion.getBuildNumberAsInt());
+
 		byte flags = 0;
-		if (onDiskBeta) flags |= IS_BETA_FLAG;
-		daos.writeByte(flags);
+		if (onDiskBeta) 
+            flags |= IS_BETA_FLAG;
+        
+        // When database is booted with derby.system.durability=test,
+        // this mode does not guarantee that 
+        // - database will recover 
+        // - committed transactions will not be lost
+        // - database will be in a consistent state
+        // Hence necessary to keep track of this state so we don't 
+        // waste time resolving issues in such cases.
+        // wasDBInDurabilityTestModeNoSync has information if database was
+        // previously booted at any time in this mode
+        if (logNotSynced || wasDBInDurabilityTestModeNoSync)
+            flags |= IS_DURABILITY_TESTMODE_NO_SYNC_FLAG;
+ 		daos.writeByte(flags);
 
 		//
 		// write some spare bytes after 2.0 we have 3 + 2(8) spare bytes.
-		long spare = 0;
+ 		long spare = 0;
+       
 		daos.writeByte(0);
 		daos.writeByte(0);
-		daos.writeByte(0);
+        daos.writeByte(0);
 		daos.writeLong(spare);
 		daos.flush();
 		// write the checksum for the control data written
@@ -2281,9 +2321,24 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 				onDiskMinorVersion = dais.readInt();
 				int dbBuildNumber = dais.readInt();
 				int flags = dais.readByte();
+				
+				// check if the database was booted previously at any time with
+                // derby.system.durability=test mode
+                // If yes, then on a boot error we report that this setting is
+                // probably the cause for the error and also log a warning
+                // in the derby.log that this mode was set previously
+                wasDBInDurabilityTestModeNoSync = 
+                    (flags & IS_DURABILITY_TESTMODE_NO_SYNC_FLAG) != 0;
 
+                if (SanityManager.DEBUG) {
+                    if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
+                        SanityManager.DEBUG(LogToFile.DBG_FLAG,
+                        "log control file, was derby.system.durability set to test = " +
+                        wasDBInDurabilityTestModeNoSync);
+                }
+                    
+				
 				onDiskBeta = (flags & IS_BETA_FLAG) != 0;
-
 				if (onDiskBeta)
 				{
 					// if is beta, can only be booted by exactly the same
@@ -2794,19 +2849,17 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			isWriteSynced = false;
 		}
 
-		if (Performance.MEASURE)
-		{
-			// debug only flag - disable syncing of log.
-			logNotSynced = 
-				PropertyUtil.getSystemBoolean(Property.STORAGE_LOG_NOT_SYNCED);
 
-			if (logNotSynced)
-			{
-				Monitor.logMessage("logNotSynced = true");
-				//if log is Not being synced;files should not be open in write sync mode
-				isWriteSynced = false;
-			}
-			
+        // If derby.system.durability=test is set,then set flag to 
+        // disable sync of log records at commit and log file before 
+        // data page makes it to disk
+        if (Property.DURABILITY_TESTMODE_NO_SYNC.equalsIgnoreCase(
+               PropertyUtil.getSystemProperty(Property.DURABILITY_PROPERTY)))
+        {
+		    // disable syncing of log.
+		    logNotSynced = true;
+  		    //if log not being synced;files shouldn't be open in write sync mode
+		    isWriteSynced = false;	
 		}
 
 		// try to access the log
@@ -2829,11 +2882,30 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			{
                 if (privExists(logControlFileName))
 				{
-					checkpointInstant = readControlFile(logControlFileName, startParams);
+					checkpointInstant = 
+                        readControlFile(logControlFileName, startParams);
+
+					// in case system was running previously with 
+                    // derby.system.durability=test then print a message 
+                    // to the derby log
+                    if (wasDBInDurabilityTestModeNoSync)
+                    {
+                        // print message stating that the database was
+                        // previously atleast at one time running with
+                        // derby.system.durability=test mode
+                        Monitor.logMessage(MessageService.getTextMessage(
+			           		MessageId.LOG_WAS_IN_DURABILITY_TESTMODE_NO_SYNC,
+			           		Property.DURABILITY_PROPERTY,
+                            Property.DURABILITY_TESTMODE_NO_SYNC));
+                    }
+						
 					if (checkpointInstant == LogCounter.INVALID_LOG_INSTANT &&
 										getMirrorControlFileName().exists())
+                    {
 						checkpointInstant =
-									readControlFile(getMirrorControlFileName(), startParams);
+                            readControlFile(
+                                getMirrorControlFileName(), startParams);
+                    }
 
 				}
 				else if (logDevice != null)
@@ -2879,13 +2951,14 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 					// blow away the log file if possible
                     if (!privDelete(logFile) && logFileNumber == 1)
                     {
+                        logErrMsgForDurabilityTestModeNoSync();
 						throw StandardException.newException(
                             SQLState.LOG_INCOMPATIBLE_FORMAT, dataDirectory);
                     }
 
-					// If logFileNumber > 1, we are not going to write that file just
-					// yet.  Just leave it be and carry on.  Maybe when we get there it
-					// can be deleted.
+					// If logFileNumber > 1, we are not going to write that 
+                    // file just yet.  Just leave it be and carry on.  Maybe 
+                    // when we get there it can be deleted.
 
 					createNewLog = true;
 				}
@@ -2913,6 +2986,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
                         if (!privDelete(logFile))
                         {
+                            logErrMsgForDurabilityTestModeNoSync();
 							throw StandardException.newException(
                                     SQLState.LOG_INCOMPATIBLE_FORMAT,
                                     dataDirectory);
@@ -3576,7 +3650,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			if (Performance.MEASURE)
 				mon_syncCalls++;
 
-			if(isWriteSynced)
+			if (isWriteSynced)
 			{
 				//LogAccessFile.flushDirtyBuffers() will allow only one write
 				//sync at a time, flush requests will get queued 
@@ -3584,15 +3658,8 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			}
 			else
 			{
-				if (Performance.MEASURE)
-				{
-					if (!logNotSynced)
-						logOut.syncLogAccessFile();
-				}
-				else
-				{
-					logOut.syncLogAccessFile();
-				}
+				if (!logNotSynced)
+				    logOut.syncLogAccessFile();
 			}
 
 			syncSuceed = true;
@@ -3925,6 +3992,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	*/
 	protected void logErrMsg(String msg)
 	{
+       	logErrMsgForDurabilityTestModeNoSync();
 		Monitor.logTextMessage(MessageId.LOG_BEGIN_ERROR);
 		Monitor.logMessage(msg);
 		Monitor.logTextMessage(MessageId.LOG_END_ERROR);
@@ -3936,6 +4004,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	*/
 	protected void logErrMsg(Throwable t)
 	{
+		logErrMsgForDurabilityTestModeNoSync();
 		if (corrupt != null)
 		{
 			Monitor.logTextMessage(MessageId.LOG_BEGIN_CORRUPT_STACK);
@@ -3950,6 +4019,28 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			Monitor.logTextMessage(MessageId.LOG_END_ERROR_STACK);
 		}
 	}
+
+
+    /**
+     * In case of boot errors, and if database is either booted
+     * with derby.system.durability=test or was previously at any time booted in
+     * this mode, mention in the error message that the error is probably 
+     * because the derby.system.durability was set. 
+     * Dont want to waste time to resolve issues in such
+     * cases
+     * <p>
+     * MT - not needed, informational only
+     */
+    private void logErrMsgForDurabilityTestModeNoSync()
+    {
+        if (logNotSynced || wasDBInDurabilityTestModeNoSync)
+        {
+            Monitor.logTextMessage(
+                MessageId.LOG_DURABILITY_TESTMODE_NO_SYNC_ERR,
+                Property.DURABILITY_PROPERTY,
+                Property.DURABILITY_TESTMODE_NO_SYNC);
+        }
+    }
 
     /**
      * print stack trace from the Throwable including

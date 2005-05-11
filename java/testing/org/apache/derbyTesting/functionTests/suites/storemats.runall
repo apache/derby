@@ -4,3 +4,4 @@ store/access.sql
 store/longColumn.sql
 store/madhare.sql
 store/streamingColumn.java
+store/TestDurabilityProperty.java

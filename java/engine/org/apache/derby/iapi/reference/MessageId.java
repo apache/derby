@@ -58,7 +58,10 @@ public interface MessageId {
     String LOG_CANNOT_CREATE_NEW_DUETO      = "L017";
     String LOG_MAYBE_INCONSISTENT           = "L018";
     String LOG_TRANS_LOG_SCAN               = "L019";
-
+    String LOG_WAS_IN_DURABILITY_TESTMODE_NO_SYNC = "L020"; // database was running in
+                                                            // derby.system.durability set to test 
+    String LOG_DURABILITY_TESTMODE_NO_SYNC_ERR = "L021"; // hint that error could be because 
+                                                         // derby.system.durability was set to test
 
     /*
      * Raw Store data
@@ -75,6 +78,8 @@ public interface MessageId {
     String STORE_BACKUP_ABORTED             = "D010";
     String STORE_REMOVED_BACKUP             = "D011";
     String STORE_BACKUP_COMPLETED           = "D012";
+    String STORE_DURABILITY_TESTMODE_NO_SYNC = "D013"; // for derby.system.durability is 
+                                                       // set to test
 
 
 	/*

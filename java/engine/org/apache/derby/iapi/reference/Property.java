@@ -368,55 +368,62 @@ public interface Property {
 		<P>
 	*/
 	String STORAGE_TEMP_DIRECTORY = "derby.storage.tempDirectory";
-
+	
     /**
-     * derby.storage.dataNotSyncedAtCheckPoint
+     * derby.system.durability
      * <p>
-     * When set, the store system will not force a sync() call on the
-     * containers during a checkpoint.
+     * Currently the only valid supported case insensitive value is 'test' 
+     * Note, if this property is set to any other value other than 'test', this 
+     * property setting is ignored
+     * 
+     * In the future, this property can be used to set different modes - for 
+     * example a form of relaxed durability where database can recover to a 
+     * consistent state, or to enable some kind of in-memory mode.
+     * <BR>
+     * When set to 'test', the store system will not force sync calls in the 
+     * following cases  
+     * - for the log file at each commit
+     * - for the log file before data page is forced to disk
+     * - for page allocation when file is grown
+     * - for data writes during checkpoint
+     * 
+     * That means
+     * - a commit no longer guarantees that the transaction's modification
+     *   will survive a system crash or JVM termination
+     * - the database may not recover successfully upon restart
+     * - a near full disk at runtime may cause unexpected errors
+     * - database can be in an inconsistent state
      * <p>
-     * An internal debug system only flag.  The recovery system will not
-     * work properly if this flag is enabled, it is provided to do performance
-     * debugging to see whether the system is I/O bound based on checkpoint
-     * synchronous I/O.
-     * <p>
-     *
-     **/
-	public static final String STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT = 
-        "derby.storage.dataNotSyncedAtCheckPoint";
-
+     * This setting is provided for performance reasons and should ideally
+     * only be used when the system can withstand the above consequences.
+     * <BR> 
+     * One sample use would be to use this mode (derby.system.durability=test)
+     * when using Derby as a test database, where high performance is required
+     * and the data is not very important
+     * <BR>
+     * Valid supported values are test
+     * <BR>
+     * Example
+     * derby.system.durability=test
+     * One can set this as a command line option to the JVM when starting the
+     * application or in the derby.properties file. It is a system level 
+     * property.
+     * <BR>
+     * This property is static; if you change it while Derby is running, 
+     * the change does not take effect until you reboot.  
+     */
+	public static final String DURABILITY_PROPERTY = 
+        "derby.system.durability";
+ 	
     /**
-     * derby.storage.dataNotSyncedAtAllocation
-     * <p>
-     * When set, the store system will not force a sync() call on the
-     * containers when pages are allocated.
-     * <p>
-     * An internal debug system only flag.  The recovery system will not
-     * work properly if this flag is enabled, it is provided to do performance
-     * debugging to see whether the system is I/O bound based on page allocation
-     * synchronous I/O.
-     * <p>
-     *
-     **/
-	public static final String STORAGE_DATA_NOT_SYNCED_AT_ALLOCATION = 
-        "derby.storage.dataNotSyncedAtAllocation";
-
-    /**
-     * derby.storage.logNotSynced
-     * <p>
-     * When set, the store system will not force a sync() call on the log at 
-     * commit.
-     * <p>
-     * An internal debug system only flag.  The recovery system will not
-     * work properly if this flag is enabled, it is provided to do performance
-     * debugging to see whether the system is I/O bound based on log file
-     * synchronous I/O.
-     * <p>
-     *
-     **/
-	public static final String STORAGE_LOG_NOT_SYNCED = 
-        "derby.storage.logNotSynced";
-
+     * This is a value supported for derby.system.durability
+     * When derby.system.durability=test, the storage system does not
+     * force syncs and the system may not recover. It is also possible that
+     * the database might be in an inconsistent state
+     * @see #DURABILITY_PROPERTY
+     */
+    public static final String DURABILITY_TESTMODE_NO_SYNC = "test";
+    
 	/**
      * derby.storage.fileSyncTransactionLog
      * <p>

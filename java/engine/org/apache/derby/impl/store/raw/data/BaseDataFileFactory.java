@@ -177,13 +177,13 @@ public class BaseDataFileFactory
 	private StorageFile exFileLock; //file handle to get exclusive lock
 	private HeaderPrintWriter istream;
 	private static final String LINE = 
-	"----------------------------------------------------------------";
+        "----------------------------------------------------------------";
 
-    // debug only flag - disable syncing of data during page allocation.
-    boolean dataNotSyncedAtAllocation;
+    // disable syncing of data during page allocation.
+    boolean dataNotSyncedAtAllocation = false;
 
-    // debug only flag - disable syncing of data during checkpoint.
-    boolean dataNotSyncedAtCheckpoint;
+    // disable syncing of data during checkpoint.
+    boolean dataNotSyncedAtCheckpoint = false;
 
 	// these fields can be accessed directly by subclasses if it needs a
 	// different set of actions
@@ -375,29 +375,25 @@ public class BaseDataFileFactory
 
 		droppedTableStubInfo = new Hashtable();
 
-        if (Performance.MEASURE)
+        // If derby.system.durability=test then set flags to disable sync of
+        // data pages at allocation when file is grown, disable sync of data
+        // writes during checkpoint
+        if (Property.DURABILITY_TESTMODE_NO_SYNC.equalsIgnoreCase(
+            PropertyUtil.getSystemProperty(Property.DURABILITY_PROPERTY)))
         {
-            // debug only flag - disable syncing of data during checkpoint.
-            dataNotSyncedAtCheckpoint = 
-                PropertyUtil.getSystemBoolean(
-                    Property.STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT);
+            // - disable syncing of data during checkpoint.
+            dataNotSyncedAtCheckpoint = true;
 
-            // debug only flag - disable syncing of data during page allocation.
-            dataNotSyncedAtAllocation = 
-                PropertyUtil.getSystemBoolean(
-                    Property.STORAGE_DATA_NOT_SYNCED_AT_ALLOCATION);
+            // - disable syncing of data during page allocation.
+            dataNotSyncedAtAllocation = true;
 
-            if (dataNotSyncedAtCheckpoint)
-                Monitor.logMessage(
-                    "Warning: " + 
-                    Property.STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT +
-                    "set to true.");
-
-            if (dataNotSyncedAtAllocation)
-                Monitor.logMessage(
-                    "Warning: " + 
-                    Property.STORAGE_DATA_NOT_SYNCED_AT_ALLOCATION +
-                    "set to true.");
+            // log message stating that derby.system.durability
+            // is set to a mode, where syncs wont be forced and the
+            // possible consequences of setting this mode
+            Monitor.logMessage(MessageService.getTextMessage(
+            	MessageId.STORE_DURABILITY_TESTMODE_NO_SYNC,
+            	Property.DURABILITY_PROPERTY,
+                Property.DURABILITY_TESTMODE_NO_SYNC));
 		}
 
         fileHandler = new RFResource( this);
