@@ -661,6 +661,11 @@ public abstract class ValueNode extends QueryTreeNode
 	}
 
 	/**
+	 * This returns the user-supplied schema name of the column.
+	 * At this class level, it simply returns null. But, the subclasses
+	 * of ValueNode will overwrite this method to return the
+	 * user-supplied schema name.
+	 * 
 	 * When the value node is in a result column of a select list,
 	 * the user can request metadata information. The result column
 	 * won't have a column descriptor, so we return some default
@@ -670,17 +675,37 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return the default schema name for an expression -- null
 	 */
-	public String getSchemaName()
+	public String getSchemaName() throws StandardException
 	{
 		return null;
 	}
 
 	/**
-	 * @return the default schema name for an expression -- null
+	 * This returns the user-supplied table name of the column.
+	 * At this class level, it simply returns null. But, the subclasses
+	 * of ValueNode will overwrite this method to return the
+	 * user-supplied table name.
+	 *
+	 * When the value node is in a result column of a select list,
+	 * the user can request metadata information. The result column
+	 * won't have a column descriptor, so we return some default
+	 * information through the expression. This lets expressions that
+	 * are simply columns return all of the info, and others use
+	 * this supertype's default values.
+	 *
+	 * @return the default table name for an expression -- null
 	 */
 	public String getTableName()
 	{
 		return null;
+	}
+
+	/**
+	 * @return the default updatability for an expression - false
+	 */
+	public boolean updatableByCursor()
+	{
+		return false;
 	}
 
 	/**

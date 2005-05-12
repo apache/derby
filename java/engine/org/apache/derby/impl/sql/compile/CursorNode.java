@@ -295,7 +295,7 @@ public class CursorNode extends ReadCursorNode
 			if (updateMode == READ_ONLY)
 				updatableColumns = null; // don't need them any more
 		}
-	
+
 		// bind the update columns
 		if (updateMode == UPDATE)
 		{
@@ -308,6 +308,11 @@ public class CursorNode extends ReadCursorNode
 			if (updateTable instanceof FromTable)
 			{
 				((FromTable) updateTable).markUpdatableByCursor(updatableColumns);
+				//make sure that alongwith the FromTable, we keep other ResultSetLists
+				//in correct state too. ResultSetMetaData.isWritable looks at this to
+				//return the correct value.
+				resultSet.getResultColumns().markColumnsInSelectListUpdatableByCursor(
+					updatableColumns);
 			}
 		}
 

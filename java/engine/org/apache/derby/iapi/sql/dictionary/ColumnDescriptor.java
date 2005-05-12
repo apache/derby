@@ -104,7 +104,7 @@ public class ColumnDescriptor extends TupleDescriptor
 			this.table = table;
 			this.uuid = table.getUUID();
 		}
-		
+
 		if (SanityManager.DEBUG)
 		{
 			if (autoinc)
@@ -136,7 +136,7 @@ public class ColumnDescriptor extends TupleDescriptor
 	 *							(null if no default)
 	 * @param columnDefaultInfo		The default info for the column.
 	 * @param uuid			A uuid for the object that this column
-	 *						is in. 
+	 *						is in.
 	 * @param defaultUUID			The UUID for the default, if any.
 	 * @param autoincStart	Start value for an autoincrement column.
 	 * @param autoincInc	Increment for autoincrement column
@@ -145,8 +145,8 @@ public class ColumnDescriptor extends TupleDescriptor
 	public ColumnDescriptor(String columnName, int columnPosition,
 		DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 		DefaultInfo columnDefaultInfo,
-		UUID uuid, 
-		UUID defaultUUID, 
+		UUID uuid,
+		UUID defaultUUID,
         long autoincStart, long autoincInc, boolean autoinc)
 
 	{
@@ -220,13 +220,23 @@ public class ColumnDescriptor extends TupleDescriptor
 	}
 
 	/**
-	 * Sets the the column name in case of rename column.
+	 * Sets the column name in case of rename column.
 	 *
 	 * @param newColumnName	The new column name.
 	 */
 	public void	setColumnName(String newColumnName)
 	{
 		this.columnName = newColumnName;
+	}
+
+	/**
+	 * Sets the table descriptor for the column.
+	 *
+	 * @param tableDescriptor	The table descriptor for this column
+	 */
+	public void	setTableDescriptor(TableDescriptor tableDescriptor)
+	{
+		this.table = tableDescriptor;
 	}
 
 	/**
@@ -325,6 +335,10 @@ public class ColumnDescriptor extends TupleDescriptor
 	public boolean isAutoincrement()
 	{
 		return (autoincInc != 0);
+	}
+	public boolean updatableByCursor()
+	{
+		return false;
 	}
 
 	/**

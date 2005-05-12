@@ -204,7 +204,7 @@ public class EmbedResultSetMetaData
 	public String getSchemaName(int column) throws SQLException	{
 		ResultColumnDescriptor cd = columnInfo[column - 1];
 
-		String s = cd.getSchemaName();
+		String s = cd.getSourceSchemaName();
 		// database returns null when no schema name to differentiate from empty name
 		return (s==null? "" : s);
 	}
@@ -308,9 +308,7 @@ public class EmbedResultSetMetaData
      */
 	public boolean isWritable(int column) throws SQLException {
 		validColumnNumber(column);
-
-		// we just don't know if it is a base table column or not
-		return false;
+		return columnInfo[column - 1].updatableByCursor();
 	}
 
     /**

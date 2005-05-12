@@ -51,6 +51,8 @@ SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
+Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
+Will see the warnings in embedded mode only
 Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
 SQL State : XJ083
@@ -64,6 +66,8 @@ Now attempt a deleteRow without first doing next on the resultset.
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Now attempt a updateRow without first doing next on the resultset.
+In embedded mode, updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
+In Network Server mode, if no updateXXX were issued before updateRow, then updateRow is a no-op and doesn't check if it is on a row or not
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
@@ -122,7 +126,8 @@ got CONCUR_UPDATABLE? true
 JDBC 2.0 updatable resultset apis on this ResultSet object will pass because this is an updatable resultset
 column 1 on this row before deleteRow is 1
 column 2 on this row before deleteRow is aa                  
-Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+Since after deleteRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail
+In Network Server mode, the ResultSet stays on the deleted row after deleteRow and hence no error for getXXX
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
@@ -135,7 +140,8 @@ column 1 on this row before updateInt is 1
 column 1 on this row after updateInt is 234
 column 2 on this row before updateString is aa                  
 now updateRow on the row
-Since after updateRow(), ResultSet is positioned before the next row, getXXX will fail
+Since after updateRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail
+In Network Server mode, the ResultSet stays on the updated row after updateRow and hence no error for getXXX
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling updateRow again w/o first positioning the ResultSet on the next row will fail
@@ -269,7 +275,27 @@ Table t1 after updateRow has following rows
 Positive Test9c - try to updateXXX on a readonly column. Should get error
 SQL State : 42X31
 Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR15'.
+attempt to get an updatable resultset using correlation name for an readonly column. It should work
+The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
 Table t1 after updateRow has following rows
+	 C1,C2
+	 -- --
+	{11,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+Positive Test9c - try to updateXXX on a readonly column. Should get error
+SQL State : 42X31
+Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR17'.
+Table t1 has following rows
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+Positive Test9d - try to updateXXX on a readonly column with correlation name. Should get error
+SQL State : 42X31
+Got expected exception Column 'COL2' is not in FOR UPDATE list of cursor 'SQLCUR18'.
+Table t1 has following rows
 	 C1,C2
 	 -- --
 	{1,aa                  }
@@ -279,7 +305,7 @@ Positive Test10 - 2 updatable resultsets going against the same table, will they
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
 SQL State : XCL08
-Got expected exception Cursor 'SQLCUR17' is not on a row.
+Got expected exception Cursor 'SQLCUR20' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
@@ -563,7 +589,9 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : 'updateBinaryStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateClob on a readonly resultset
   Using column position as first parameter to updateClob
+  Got expected exception : 'updateClob' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateClob
+  Got expected exception : 'updateClob' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateDate on a readonly resultset
   Using column position as first parameter to updateDate
   Got expected exception : 'updateDate' not allowed because the ResultSet is not an updatable ResultSet. 
@@ -581,7 +609,9 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : 'updateTimestamp' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBlob on a readonly resultset
   Using column position as first parameter to updateBlob
+  Got expected exception : 'updateBlob' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBlob
+  Got expected exception : 'updateBlob' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBoolean on a readonly resultset
   Using column position as first parameter to updateBoolean
   Got expected exception : 'updateBoolean' not allowed because the ResultSet is not an updatable ResultSet. 
@@ -594,10 +624,14 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : 'updateNull' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateArray on a readonly resultset
   Using column position as first parameter to updateArray
+  Got expected exception : Feature not implemented: no details.
   Using column name as first parameter to updateArray
+  Got expected exception : Feature not implemented: no details.
   Test updateRef on a readonly resultset
   Using column position as first parameter to updateRef
+  Got expected exception : Feature not implemented: no details.
   Using column name as first parameter to updateRef
+  Got expected exception : Feature not implemented: no details.
 Positive Test21 - Test all updateXXX(excluding updateObject) methods on all the supported sql datatypes
 Next datatype to test is SMALLINT
   Testing updateShort on SQL type SMALLINT
@@ -646,7 +680,9 @@ Next datatype to test is SMALLINT
       Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type SMALLINT
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type SMALLINT
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'SMALLINT'.
@@ -664,7 +700,9 @@ Next datatype to test is SMALLINT
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'SMALLINT'.
   Testing updateBlob on SQL type SMALLINT
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type SMALLINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -673,10 +711,14 @@ Next datatype to test is SMALLINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type SMALLINT
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type SMALLINT
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is INTEGER
   Testing updateShort on SQL type INTEGER
     Using column position as first parameter to updateShort
@@ -724,7 +766,9 @@ Next datatype to test is INTEGER
       Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type INTEGER
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type INTEGER
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'INTEGER'.
@@ -742,7 +786,9 @@ Next datatype to test is INTEGER
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'INTEGER'.
   Testing updateBlob on SQL type INTEGER
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type INTEGER
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -751,10 +797,14 @@ Next datatype to test is INTEGER
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type INTEGER
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type INTEGER
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is BIGINT
   Testing updateShort on SQL type BIGINT
     Using column position as first parameter to updateShort
@@ -802,7 +852,9 @@ Next datatype to test is BIGINT
       Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type BIGINT
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type BIGINT
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BIGINT'.
@@ -820,7 +872,9 @@ Next datatype to test is BIGINT
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BIGINT'.
   Testing updateBlob on SQL type BIGINT
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type BIGINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -829,10 +883,14 @@ Next datatype to test is BIGINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BIGINT
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type BIGINT
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is DECIMAL(10,5)
   Testing updateShort on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateShort
@@ -880,7 +938,9 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DECIMAL'.
@@ -898,7 +958,9 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DECIMAL'.
   Testing updateBlob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -907,10 +969,14 @@ Next datatype to test is DECIMAL(10,5)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is REAL
   Testing updateShort on SQL type REAL
     Using column position as first parameter to updateShort
@@ -958,7 +1024,9 @@ Next datatype to test is REAL
       Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type REAL
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type REAL
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'REAL'.
@@ -976,7 +1044,9 @@ Next datatype to test is REAL
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'REAL'.
   Testing updateBlob on SQL type REAL
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type REAL
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -985,10 +1055,14 @@ Next datatype to test is REAL
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type REAL
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type REAL
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is DOUBLE
   Testing updateShort on SQL type DOUBLE
     Using column position as first parameter to updateShort
@@ -1036,7 +1110,9 @@ Next datatype to test is DOUBLE
       Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type DOUBLE
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type DOUBLE
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DOUBLE'.
@@ -1054,7 +1130,9 @@ Next datatype to test is DOUBLE
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DOUBLE'.
   Testing updateBlob on SQL type DOUBLE
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type DOUBLE
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1063,10 +1141,14 @@ Next datatype to test is DOUBLE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DOUBLE
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type DOUBLE
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is CHAR(60)
   Testing updateShort on SQL type CHAR(60)
     Using column position as first parameter to updateShort
@@ -1108,7 +1190,9 @@ Next datatype to test is CHAR(60)
       Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type CHAR(60)
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type CHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1120,7 +1204,9 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type CHAR(60)
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type CHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1129,10 +1215,14 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(60)
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type CHAR(60)
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is VARCHAR(60)
   Testing updateShort on SQL type VARCHAR(60)
     Using column position as first parameter to updateShort
@@ -1174,7 +1264,9 @@ Next datatype to test is VARCHAR(60)
       Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type VARCHAR(60)
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type VARCHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1186,7 +1278,9 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type VARCHAR(60)
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type VARCHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1195,10 +1289,14 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(60)
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type VARCHAR(60)
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is LONG VARCHAR
   Testing updateShort on SQL type LONG VARCHAR
     Using column position as first parameter to updateShort
@@ -1240,7 +1338,9 @@ Next datatype to test is LONG VARCHAR
       Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type LONG VARCHAR
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type LONG VARCHAR
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1252,7 +1352,9 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type LONG VARCHAR
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type LONG VARCHAR
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1261,10 +1363,14 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type LONG VARCHAR
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is CHAR(2) FOR BIT DATA
   Testing updateShort on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1324,7 +1430,9 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CHAR () FOR BIT DATA'.
@@ -1342,7 +1450,9 @@ Next datatype to test is CHAR(2) FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CHAR () FOR BIT DATA'.
   Testing updateBlob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CHAR () FOR BIT DATA'.
@@ -1353,10 +1463,14 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is VARCHAR(2) FOR BIT DATA
   Testing updateShort on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1416,7 +1530,9 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'VARCHAR () FOR BIT DATA'.
@@ -1434,7 +1550,9 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARCHAR () FOR BIT DATA'.
   Testing updateBlob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'VARCHAR () FOR BIT DATA'.
@@ -1445,10 +1563,14 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is LONG VARCHAR FOR BIT DATA
   Testing updateShort on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1508,7 +1630,9 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
@@ -1526,7 +1650,9 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
   Testing updateBlob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
@@ -1537,10 +1663,14 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is CLOB(1k)
   Testing updateShort on SQL type CLOB(1k)
     Using column position as first parameter to updateShort
@@ -1616,7 +1746,9 @@ Next datatype to test is CLOB(1k)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CLOB'.
   Testing updateBlob on SQL type CLOB(1k)
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'CLOB' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'CLOB' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type CLOB(1k)
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CLOB'.
@@ -1627,10 +1759,14 @@ Next datatype to test is CLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CLOB(1k)
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type CLOB(1k)
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is DATE
   Testing updateShort on SQL type DATE
     Using column position as first parameter to updateShort
@@ -1694,7 +1830,9 @@ Next datatype to test is DATE
       Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type DATE
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type DATE
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1708,7 +1846,9 @@ Next datatype to test is DATE
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type DATE
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type DATE
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'DATE'.
@@ -1719,10 +1859,14 @@ Next datatype to test is DATE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DATE
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type DATE
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is TIME
   Testing updateShort on SQL type TIME
     Using column position as first parameter to updateShort
@@ -1786,7 +1930,9 @@ Next datatype to test is TIME
       Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type TIME
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type TIME
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'TIME'.
@@ -1800,7 +1946,9 @@ Next datatype to test is TIME
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIME
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type TIME
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIME'.
@@ -1811,10 +1959,14 @@ Next datatype to test is TIME
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIME
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type TIME
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is TIMESTAMP
   Testing updateShort on SQL type TIMESTAMP
     Using column position as first parameter to updateShort
@@ -1878,7 +2030,9 @@ Next datatype to test is TIMESTAMP
       Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.io.InputStream'.
   Testing updateClob on SQL type TIMESTAMP
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type TIMESTAMP
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1890,7 +2044,9 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIMESTAMP
     Using column position as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Blob'.
     Using column name as first parameter to updateBlob
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Blob'.
   Testing updateBoolean on SQL type TIMESTAMP
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIMESTAMP'.
@@ -1901,10 +2057,14 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIMESTAMP
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type TIMESTAMP
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Next datatype to test is BLOB(1k)
   Testing updateShort on SQL type BLOB(1k)
     Using column position as first parameter to updateShort
@@ -1964,7 +2124,9 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type BLOB(1k)
     Using column position as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.sql.Clob'.
     Using column name as first parameter to updateClob
+      Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.sql.Clob'.
   Testing updateDate on SQL type BLOB(1k)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BLOB'.
@@ -1993,10 +2155,14 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BLOB(1k)
     Using column position as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateArray
+      Got expected exception : Feature not implemented: no details.
   Testing updateRef on SQL type BLOB(1k)
     Using column position as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
     Using column name as first parameter to updateRef
+      Got expected exception : Feature not implemented: no details.
 Positive Test22 - Test updateObject method
 Next datatype to test is SMALLINT
   updateObject with column position & Short object as parameters
@@ -2017,6 +2183,10 @@ Next datatype to test is SMALLINT
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'SMALLINT'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'SMALLINT'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'SMALLINT'.
   updateObject with column name & Date object as parameters
@@ -2029,6 +2199,10 @@ Next datatype to test is SMALLINT
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'SMALLINT'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'SMALLINT'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2052,6 +2226,10 @@ Next datatype to test is INTEGER
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'INTEGER'.
   updateObject with column name & Date object as parameters
@@ -2064,6 +2242,10 @@ Next datatype to test is INTEGER
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'INTEGER'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'INTEGER'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2087,6 +2269,10 @@ Next datatype to test is BIGINT
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'BIGINT'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'BIGINT'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BIGINT'.
   updateObject with column name & Date object as parameters
@@ -2099,6 +2285,10 @@ Next datatype to test is BIGINT
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BIGINT'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BIGINT'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2122,6 +2312,10 @@ Next datatype to test is DECIMAL(10,5)
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DECIMAL'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DECIMAL'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DECIMAL'.
   updateObject with column name & Date object as parameters
@@ -2134,6 +2328,10 @@ Next datatype to test is DECIMAL(10,5)
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DECIMAL'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DECIMAL'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2157,6 +2355,10 @@ Next datatype to test is REAL
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'REAL'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'REAL'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'REAL'.
   updateObject with column name & Date object as parameters
@@ -2169,6 +2371,10 @@ Next datatype to test is REAL
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'REAL'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'REAL'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2192,6 +2398,10 @@ Next datatype to test is DOUBLE
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DOUBLE'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DOUBLE'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DOUBLE'.
   updateObject with column name & Date object as parameters
@@ -2204,6 +2414,10 @@ Next datatype to test is DOUBLE
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DOUBLE'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DOUBLE'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2225,12 +2439,20 @@ Next datatype to test is CHAR(60)
   updateObject with column name & String object as parameters
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2252,12 +2474,20 @@ Next datatype to test is VARCHAR(60)
   updateObject with column name & String object as parameters
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2279,12 +2509,20 @@ Next datatype to test is LONG VARCHAR
   updateObject with column name & String object as parameters
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2320,6 +2558,10 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'CHAR () FOR BIT DATA'.
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CHAR () FOR BIT DATA'.
   updateObject with column name & Date object as parameters
@@ -2332,6 +2574,10 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CHAR () FOR BIT DATA'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CHAR () FOR BIT DATA'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CHAR () FOR BIT DATA'.
   updateObject with column name & Boolean object as parameters
@@ -2369,6 +2615,10 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'.
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'VARCHAR () FOR BIT DATA'.
   updateObject with column name & Date object as parameters
@@ -2381,6 +2631,10 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARCHAR () FOR BIT DATA'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'VARCHAR () FOR BIT DATA'.
   updateObject with column name & Boolean object as parameters
@@ -2418,6 +2672,10 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
   updateObject with column name & Date object as parameters
@@ -2430,6 +2688,10 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
   updateObject with column name & Boolean object as parameters
@@ -2467,6 +2729,8 @@ Next datatype to test is CLOB(1k)
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'CLOB'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'CLOB'.
+  updateObject with column position & Clob object as parameters
+  updateObject with column name & Clob object as parameters
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CLOB'.
   updateObject with column name & Date object as parameters
@@ -2479,6 +2743,10 @@ Next datatype to test is CLOB(1k)
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CLOB'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CLOB'.
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CLOB' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'CLOB' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CLOB'.
   updateObject with column name & Boolean object as parameters
@@ -2518,6 +2786,10 @@ Next datatype to test is DATE
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DATE'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DATE'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
@@ -2526,6 +2798,10 @@ Next datatype to test is DATE
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'DATE'.
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'DATE'.
   updateObject with column name & Boolean object as parameters
@@ -2565,6 +2841,10 @@ Next datatype to test is TIME
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIME'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIME'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'TIME'.
   updateObject with column name & Date object as parameters
@@ -2573,6 +2853,10 @@ Next datatype to test is TIME
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIME'.
   updateObject with column name & Boolean object as parameters
@@ -2612,12 +2896,20 @@ Next datatype to test is TIMESTAMP
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIMESTAMP'.
   updateObject with column name & bytes[] array as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIMESTAMP'.
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
+  updateObject with column position & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Blob'.
+  updateObject with column name & Blob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.sql.Blob'.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIMESTAMP'.
   updateObject with column name & Boolean object as parameters
@@ -2655,6 +2947,10 @@ Next datatype to test is BLOB(1k)
     Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'BLOB'.
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
+  updateObject with column position & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.sql.Clob'.
+  updateObject with column name & Clob object as parameters
+    Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.sql.Clob'.
   updateObject with column position & Date object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BLOB'.
   updateObject with column name & Date object as parameters
@@ -2667,6 +2963,8 @@ Next datatype to test is BLOB(1k)
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BLOB'.
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BLOB'.
+  updateObject with column position & Blob object as parameters
+  updateObject with column name & Blob object as parameters
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'BLOB'.
   updateObject with column name & Boolean object as parameters
@@ -2689,6 +2987,8 @@ Positive Test23 - Test cancelRowUpdates after updateXXX methods on all the suppo
   updateDate and then cancelRowUpdates
   updateTime and then cancelRowUpdates
   updateTimestamp and then cancelRowUpdates
+  updateClob and then cancelRowUpdates
+  updateBlob and then cancelRowUpdates
 Positive Test24a - after updateXXX, try cancelRowUpdates and then deleteRow
 column 1 on this row before updateInt is 1
 column 1 on this row after updateInt is 234
@@ -2772,7 +3072,7 @@ Positive Test32 - call updateXXX methods on column that is not in for update col
 	{2,bb                  }
 	{3,cc                  }
 SQL State : 42X31
-Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR528'.
+Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR539'.
   Make sure the contents of table are unchanged
 	 C1,C2
 	 -- --

@@ -123,6 +123,47 @@ public class VirtualColumnNode extends ValueNode
 	}
 
 	/**
+	 * Get the name of the table the ResultColumn is in, if any.  This will be null
+	 * if the user did not supply a name (for example, select a from t).
+	 * The method will return B for this example, select b.a from t as b
+	 * The method will return T for this example, select t.a from t
+	 *
+	 * @return	A String containing the name of the table the Column
+	 *		is in. If the column is not in a table (i.e. is a
+	 * 		derived column), it returns NULL.
+	 */
+	public String getTableName()
+	{
+		return ( ( sourceColumn != null) ? sourceColumn.getTableName() : null );
+	}
+
+	/**
+	 * Get the name of the schema the ResultColumn's table is in, if any.
+	 * The return value will be null if the user did not supply a schema name
+	 * (for example, select t.a from t).
+	 * Another example for null return value (for example, select b.a from t as b).
+	 * But for following query select app.t.a from t, this will return APP
+	 *
+	 * @return	A String containing the name of the schema for the Column's table.
+	 *		If the column is not in a schema (i.e. derived column), it returns NULL.
+	 */
+	public String getSchemaName() throws StandardException
+	{
+		return ( ( sourceColumn != null) ? sourceColumn.getSchemaName() : null );
+	}
+
+	/**
+	 * Return whether or not the ResultColumn is wirtable by a positioned update.
+	 *
+	 * @return TRUE, if the column is a base column of a table and is 
+	 * writable by a positioned update.
+	 */
+	public boolean updatableByCursor()
+	{
+		return ((sourceColumn != null) ? sourceColumn.updatableByCursor() : false);
+	}
+
+	/**
 	 * Return the ResultColumn that is the source of this VirtualColumnNode.
 	 *
 	 * @return ResultSetNode	

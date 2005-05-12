@@ -51,6 +51,8 @@ SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
+Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
+Will see the warnings in embedded mode only
 Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
 SQL State : XJ083
@@ -64,6 +66,8 @@ Now attempt a deleteRow without first doing next on the resultset.
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Now attempt a updateRow without first doing next on the resultset.
+In embedded mode, updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
+In Network Server mode, if no updateXXX were issued before updateRow, then updateRow is a no-op and doesn't check if it is on a row or not
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
@@ -122,7 +126,8 @@ got CONCUR_UPDATABLE? true
 JDBC 2.0 updatable resultset apis on this ResultSet object will pass because this is an updatable resultset
 column 1 on this row before deleteRow is 1
 column 2 on this row before deleteRow is aa                  
-Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
+Since after deleteRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail
+In Network Server mode, the ResultSet stays on the deleted row after deleteRow and hence no error for getXXX
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
@@ -135,7 +140,8 @@ column 1 on this row before updateInt is 1
 column 1 on this row after updateInt is 234
 column 2 on this row before updateString is aa                  
 now updateRow on the row
-Since after updateRow(), ResultSet is positioned before the next row, getXXX will fail
+Since after updateRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail
+In Network Server mode, the ResultSet stays on the updated row after updateRow and hence no error for getXXX
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling updateRow again w/o first positioning the ResultSet on the next row will fail
@@ -269,7 +275,27 @@ Table t1 after updateRow has following rows
 Positive Test9c - try to updateXXX on a readonly column. Should get error
 SQL State : 42X31
 Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR15'.
+attempt to get an updatable resultset using correlation name for an readonly column. It should work
+The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
 Table t1 after updateRow has following rows
+	 C1,C2
+	 -- --
+	{11,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+Positive Test9c - try to updateXXX on a readonly column. Should get error
+SQL State : 42X31
+Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR17'.
+Table t1 has following rows
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+Positive Test9d - try to updateXXX on a readonly column with correlation name. Should get error
+SQL State : 42X31
+Got expected exception Column 'COL2' is not in FOR UPDATE list of cursor 'SQLCUR18'.
+Table t1 has following rows
 	 C1,C2
 	 -- --
 	{1,aa                  }
@@ -279,7 +305,7 @@ Positive Test10 - 2 updatable resultsets going against the same table, will they
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
 SQL State : XCL08
-Got expected exception Cursor 'SQLCUR17' is not on a row.
+Got expected exception Cursor 'SQLCUR20' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
@@ -3046,7 +3072,7 @@ Positive Test32 - call updateXXX methods on column that is not in for update col
 	{2,bb                  }
 	{3,cc                  }
 SQL State : 42X31
-Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR536'.
+Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR539'.
   Make sure the contents of table are unchanged
 	 C1,C2
 	 -- --

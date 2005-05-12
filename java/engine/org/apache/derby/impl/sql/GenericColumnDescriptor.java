@@ -66,6 +66,7 @@ public final class GenericColumnDescriptor
 	private int					columnPos;
 	private DataTypeDescriptor	type;
 	private boolean 			isAutoincrement;
+	private boolean 			updatableByCursor;
 
 	/**
 	 * Niladic constructor for Formatable
@@ -92,10 +93,11 @@ public final class GenericColumnDescriptor
 	{
 		name = rcd.getName();
 		tableName = rcd.getSourceTableName();
-		schemaName = rcd.getSchemaName();
+ 		schemaName = rcd.getSourceSchemaName();
 		columnPos = rcd.getColumnPosition();
 		type = rcd.getType();
 		isAutoincrement = rcd.isAutoincrement();
+		updatableByCursor = rcd.updatableByCursor();
 	}
 
 	/**
@@ -121,23 +123,29 @@ public final class GenericColumnDescriptor
 	}
 
 	/**
-	 * Get the name of the schema the Column is in, if any.
+	 * Get the name of the schema for the Column's base table, if any.
+	 * Following example queries will all return APP (assuming user is in schema APP)
+	 * select t.a from t
+	 * select b.a from t as b
+	 * select app.t.a from t
 	 *
-	 * @return	A String containing the name of the schema the Column
-	 *		is in.  If the column is not in a schema (i.e. is a
-	 * 		derived column), it returns NULL.
+	 * @return	A String containing the name of the schema of the Column's table.
+	 *		If the column is not in a schema (i.e. is a derived column), it returns NULL.
 	 */
-	public String	getSchemaName()
+	public String	getSourceSchemaName()
 	{
 		return schemaName;
 	}
 
 	/**
-	 * Get the name of the table the Column is in, if any.
+	 * Get the name of the underlying(base) table this column comes from, if any.
+	 * Following example queries will all return T
+	 * select a from t
+	 * select b.a from t as b
+	 * select t.a from t
 	 *
-	 * @return	A String containing the name of the table the Column
-	 *		is in. If the column is not in a table (i.e. is a
-	 * 		derived column), it returns NULL.
+	 * @return	A String containing the name of the Column's base table.
+	 *		If the column is not in a table (i.e. is a derived column), it returns NULL.
 	 */
 	public String	getSourceTableName()
 	{
@@ -161,6 +169,11 @@ public final class GenericColumnDescriptor
 		return isAutoincrement;
 	}
 
+	public boolean updatableByCursor()
+	{
+		return updatableByCursor;
+	}
+
 	//////////////////////////////////////////////
 	//
 	// FORMATABLE
@@ -182,6 +195,7 @@ public final class GenericColumnDescriptor
 		fh.putInt("columnPos", columnPos);
 		fh.put("type", type);
 		fh.putBoolean("isAutoincrement", isAutoincrement);
+		fh.putBoolean("updatableByCursor", updatableByCursor);
 		out.writeObject(fh);
 		return;
 	}	
@@ -205,6 +219,7 @@ public final class GenericColumnDescriptor
 		columnPos = fh.getInt("columnPos");
 		type = (DataTypeDescriptor)fh.get("type");
 		isAutoincrement = fh.getBoolean("isAutoincrement");
+		updatableByCursor = fh.getBoolean("updatableByCursor");
 	}
 	
 	/**

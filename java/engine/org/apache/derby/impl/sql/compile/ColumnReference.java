@@ -489,6 +489,8 @@ public class ColumnReference extends ValueNode
 	/**
 	 * Get the user-supplied table name of this column.  This will be null
 	 * if the user did not supply a name (for example, select a from t).
+	 * The method will return B for this example, select b.a from t as b
+	 * The method will return T for this example, select t.a from t
 	 *
 	 * @return	The user-supplied name of this column.  Null if no user-
 	 * 		supplied name.
@@ -500,16 +502,45 @@ public class ColumnReference extends ValueNode
 	}
 
 	/**
-	 * Get the name of the table this column comes from.
+	 * Get the name of the underlying(base) table this column comes from, if any.
+	 * Following example queries will all return T
+	 * select a from t
+	 * select b.a from t as b
+	 * select t.a from t
 	 *
-	 * @return	The name of the table that this column comes from.  
+	 * @return	The name of the base table that this column comes from.
 	 *			Null if not a ColumnReference.
 	 */
 
 	public String getSourceTableName()
 	{
-		return ( ( tableName != null) ? tableName.getTableName() : 
-					((source != null) ? source.getTableName() : null));
+		return ((source != null) ? source.getTableName() : null);
+	}
+
+	/**
+	 * Get the name of the schema for the Column's base table, if any.
+	 * Following example queries will all return APP (assuming user is in schema APP)
+	 * select t.a from t
+	 * select b.a from t as b
+	 * select app.t.a from t
+	 *
+	 * @return	The name of the schema for Column's base table. If the column
+	 *		is not in a schema (i.e. is a derived column), it returns NULL.
+	 */
+	public String getSourceSchemaName() throws StandardException
+	{
+		return ((source != null) ? source.getSchemaName() : null);
+	}
+
+	/**
+	 * Is the column wirtable by the cursor or not. (ie, is it in the list of FOR UPDATE columns list)
+	 *
+	 * @return TRUE, if the column is a base column of a table and is 
+	 * writable by cursor.
+	 */
+	public boolean updatableByCursor()
+	{
+		return ((source != null) ? source.updatableByCursor() : false);
 	}
 
 	/**
@@ -943,6 +974,9 @@ public class ColumnReference extends ValueNode
 	/**
 	 * Get the user-supplied schema name of this column.  This will be null
 	 * if the user did not supply a name (for example, select t.a from t).
+	 * Another example for null return value (for example, select b.a from t as b).
+	 * But for following query select app.t.a from t, this will return APP
+	 * Code generation of aggregate functions relies on this method
 	 *
 	 * @return	The user-supplied schema name of this column.  Null if no user-
 	 * 		supplied name.

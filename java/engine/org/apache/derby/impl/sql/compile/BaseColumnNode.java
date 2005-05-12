@@ -111,6 +111,8 @@ public class BaseColumnNode extends ValueNode
 	/**
 	 * Get the user-supplied table name of this column.  This will be null
 	 * if the user did not supply a name (for example, select a from t).
+	 * The method will return B for this example, select b.a from t as b
+	 * The method will return T for this example, select t.a from t
 	 *
 	 * @return	The user-supplied name of this column.  Null if no user-
 	 * 		supplied name.
@@ -119,6 +121,19 @@ public class BaseColumnNode extends ValueNode
 	public String getTableName()
 	{
 		return ( ( tableName != null) ? tableName.getTableName() : null );
+	}
+
+	/**
+	 * Get the user-supplied schema name for this column's table. This will be null
+	 * if the user did not supply a name (for example, select t.a from t).
+	 * Another example for null return value (for example, select b.a from t as b).
+	 * But for following query select app.t.a from t, this will return APP
+	 *
+	 * @return	The schema name for this column's table
+	 */
+	public String getSchemaName() throws StandardException
+	{
+		return ( ( tableName != null) ? tableName.getSchemaName() : null );
 	}
 
 	/**

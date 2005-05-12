@@ -10,7 +10,7 @@ getColumnDisplaySize(1): 11
 getColumnLabel(1): I
 getColumnName(1): I
 getTableName(1): T
-getSchemaName(1): 
+getSchemaName(1): APP
 getCatalogName(1): 
 getColumnType(1): 4
 getPrecision(1): 10
@@ -29,7 +29,7 @@ getColumnDisplaySize(2): 6
 getColumnLabel(2): S
 getColumnName(2): S
 getTableName(2): T
-getSchemaName(2): 
+getSchemaName(2): APP
 getCatalogName(2): 
 getColumnType(2): 5
 getPrecision(2): 5
@@ -48,7 +48,7 @@ getColumnDisplaySize(3): 13
 getColumnLabel(3): R
 getColumnName(3): R
 getTableName(3): T
-getSchemaName(3): 
+getSchemaName(3): APP
 getCatalogName(3): 
 getColumnType(3): 7
 getPrecision(3): 7
@@ -67,7 +67,7 @@ getColumnDisplaySize(4): 22
 getColumnLabel(4): D
 getColumnName(4): D
 getTableName(4): T
-getSchemaName(4): 
+getSchemaName(4): APP
 getCatalogName(4): 
 getColumnType(4): 8
 getPrecision(4): 15
@@ -86,7 +86,7 @@ getColumnDisplaySize(5): 10
 getColumnLabel(5): DT
 getColumnName(5): DT
 getTableName(5): T
-getSchemaName(5): 
+getSchemaName(5): APP
 getCatalogName(5): 
 getColumnType(5): 91
 getPrecision(5): 10
@@ -105,7 +105,7 @@ getColumnDisplaySize(6): 8
 getColumnLabel(6): T
 getColumnName(6): T
 getTableName(6): T
-getSchemaName(6): 
+getSchemaName(6): APP
 getCatalogName(6): 
 getColumnType(6): 92
 getPrecision(6): 0
@@ -124,7 +124,7 @@ getColumnDisplaySize(7): 26
 getColumnLabel(7): TS
 getColumnName(7): TS
 getTableName(7): T
-getSchemaName(7): 
+getSchemaName(7): APP
 getCatalogName(7): 
 getColumnType(7): 93
 getPrecision(7): 0
@@ -143,7 +143,7 @@ getColumnDisplaySize(8): 10
 getColumnLabel(8): C
 getColumnName(8): C
 getTableName(8): T
-getSchemaName(8): 
+getSchemaName(8): APP
 getCatalogName(8): 
 getColumnType(8): 1
 getPrecision(8): 10
@@ -162,7 +162,7 @@ getColumnDisplaySize(9): 40
 getColumnLabel(9): V
 getColumnName(9): V
 getTableName(9): T
-getSchemaName(9): 
+getSchemaName(9): APP
 getCatalogName(9): 
 getColumnType(9): 12
 getPrecision(9): 40
@@ -181,7 +181,7 @@ getColumnDisplaySize(10): 13
 getColumnLabel(10): DC
 getColumnName(10): DC
 getTableName(10): T
-getSchemaName(10): 
+getSchemaName(10): APP
 getCatalogName(10): 
 getColumnType(10): 3
 getPrecision(10): 10
@@ -200,7 +200,7 @@ getColumnDisplaySize(11): 20
 getColumnLabel(11): BI
 getColumnName(11): BI
 getTableName(11): T
-getSchemaName(11): 
+getSchemaName(11): APP
 getCatalogName(11): 
 getColumnType(11): -5
 getPrecision(11): 19
@@ -219,7 +219,7 @@ getColumnDisplaySize(12): 20
 getColumnLabel(12): CBD
 getColumnName(12): CBD
 getTableName(12): T
-getSchemaName(12): 
+getSchemaName(12): APP
 getCatalogName(12): 
 getColumnType(12): -2
 getPrecision(12): 10
@@ -238,7 +238,7 @@ getColumnDisplaySize(13): 20
 getColumnLabel(13): VBD
 getColumnName(13): VBD
 getTableName(13): T
-getSchemaName(13): 
+getSchemaName(13): APP
 getCatalogName(13): 
 getColumnType(13): -3
 getPrecision(13): 10
@@ -257,7 +257,7 @@ getColumnDisplaySize(14): 65400
 getColumnLabel(14): LVBD
 getColumnName(14): LVBD
 getTableName(14): T
-getSchemaName(14): 
+getSchemaName(14): APP
 getCatalogName(14): 
 getColumnType(14): -4
 getPrecision(14): 32700
@@ -276,7 +276,7 @@ getColumnDisplaySize(15): 2147483647
 getColumnLabel(15): CL
 getColumnName(15): CL
 getTableName(15): T
-getSchemaName(15): 
+getSchemaName(15): APP
 getCatalogName(15): 
 getColumnType(15): 2005
 getPrecision(15): 2147483647
@@ -295,7 +295,7 @@ getColumnDisplaySize(16): 2147483647
 getColumnLabel(16): BL
 getColumnName(16): BL
 getTableName(16): T
-getSchemaName(16): 
+getSchemaName(16): APP
 getCatalogName(16): 
 getColumnType(16): 2004
 getPrecision(16): 1073741824
@@ -1011,4 +1011,28 @@ OK EQUALITY OBJECT RETURNED column 4 existing 1
 OK EQUALITY OBJECT RETURNED column 5 existing 1
 OK EQUALITY OBJECT RETURNED column 6 existing 1
 COMPLETE testMutableValues
+Run select * from s ss (f, e, d, c, b, a) where f = 0 and then try getTableName and getSchemaName on columns
+getTableName(1): S
+getSchemaName(1): APP
+Run select * from (select * from s) a and then try getTableName and getSchemaName on columns
+getTableName(1): S
+getSchemaName(1): APP
+Run select * from s1.t1 as abc and then try getTableName and getSchemaName on columns
+Table name of first column is T1
+Schema name of first column is S1
+Table name of second column is T1
+Schema name of second column is S1
+Run select abc.c11 from s1.t1 as abc and then try getTableName and getSchemaName on columns
+Table name of first column is T1
+Schema name of first column is S1
+Run select bcd.a, abc.c11 from s1.t1 as abc, s as bcd and then try getTableName and getSchemaName on columns
+Table name of first column is S
+Schema name of first column is APP
+Table name of second column is T1
+Schema name of second column is S1
+Run select app1.t1.c11, app2.t1.c11 from app1.t1, app2.t1 and then try getTableName and getSchemaName on columns
+Table name of first column is T1
+Schema name of first column is APP1
+Table name of second column is T1
+Schema name of second column is APP2
 Test resultset finished

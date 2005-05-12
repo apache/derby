@@ -47,13 +47,88 @@ SQL State : null
 Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Now attempting to send a updateRow on a sql with no FOR UPDATE clause.
 SQL State : null
-Got expected exception Invalid operation: result set closed
+Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
+Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
+Will see the warnings in embedded mode only
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
 SQL State : null
 Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Now attempting to send a updateRow on a sql with FOR READ ONLY clause.
 SQL State : null
 Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row
+Make sure that we got CONCUR_UPDATABLE? true
+Now attempt a deleteRow without first doing next on the resultset.
+SQL State : XCL08
+Got expected exception Cursor 'SQL_CURLH000C8' is not on a row.
+Now attempt a updateRow without first doing next on the resultset.
+In embedded mode, updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
+In Network Server mode, if no updateXXX were issued before updateRow, then updateRow is a no-op and doesn't check if it is on a row or not
+PASS!!! In Network Server mode, this updateRow is a no-op because no updateXXX were issued before the updateRow
+ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
+SQL State : null
+Got expected exception Invalid operation: result set closed
+ResultSet is positioned after the last row. attempt to updateRow at this point should fail!
+SQL State : null
+Got expected exception Invalid operation: result set closed
+Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset
+Make sure that we got CONCUR_UPDATABLE? true
+SQL State : null
+Got expected exception Invalid operation: result set closed
+SQL State : null
+Got expected exception Invalid operation: result set closed
+Negative Test9 - try updatable resultset on system table
+SQL State : 42Y90
+Got expected exception FOR UPDATE is not permitted on this type of statement.
+Negative Test10 - try updatable resultset on a view
+SQL State : 42Y90
+Got expected exception FOR UPDATE is not permitted on this type of statement.
+Negative Test11 - attempt to open updatable resultset when there is join in the select query should fail
+SQL State : 42Y90
+Got expected exception FOR UPDATE is not permitted on this type of statement.
+Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it
+Opened an updatable resultset. Now trying to drop that table through another Statement
+SQL State : X0X95
+Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
+Since autocommit is on, the drop table exception resulted in a runtime rollback causing updatable resultset object to close
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
+Negative Test13 - foreign key constraint failure will cause deleteRow to fail
+SQL State : 23503
+Got expected exception DELETE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
+Jira entry Derby-160 : for Network Server because next should have failed
+FAIL!!! next should have failed because foreign key constraint failure resulted in a runtime rollback
+Negative Test14 - foreign key constraint failure will cause updateRow to fail
+SQL State : 23503
+Got expected exception UPDATE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
+Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
+Jira entry Derby-160 : for Network Server because next should have failed
+FAIL!!! next should have failed because foreign key constraint failure resulted in a runtime rollback
+Negative Test15 - Can't call updateXXX methods on columns that do not correspond to a column in the table
+SQL State : null
+Got expected exception Column not updatable
+Negative Test16 - Call updateXXX method on out of the range column
+There are only 2 columns in the select list and we are trying to send updateXXX on column position 3
+SQL State : null
+Got expected exception Invalid argument: parameter index 3 is out of range.
+Positive Test1a - request updatable resultset for forward only type resultset
+requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
+got TYPE_FORWARD_ONLY? true
+got CONCUR_UPDATABLE? true
+JDBC 2.0 updatable resultset apis on this ResultSet object will pass because this is an updatable resultset
+column 1 on this row before deleteRow is 1
+column 2 on this row before deleteRow is aa                  
+Since after deleteRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail
+In Network Server mode, the ResultSet stays on the deleted row after deleteRow and hence no error for getXXX
+column 1 on this deleted row is 0
+calling deleteRow again w/o first positioning the ResultSet on the next row will fail
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
+Position the ResultSet with next()
+Should be able to deletRow() on the current row now
 Finished testing updateable resultsets

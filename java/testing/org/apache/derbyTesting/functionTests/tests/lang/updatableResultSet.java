@@ -33,8 +33,8 @@ import java.sql.SQLWarning;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import java.math.BigDecimal;
 import java.sql.Array;
@@ -154,7 +154,7 @@ public class updatableResultSet {
 
 
 	//I have constructed following table based on if combination of datatype and updateXXX method would work or not.
-	public static final String[][]  updateXXXRulesTable = {
+	public static final String[][]  updateXXXRulesTableForEmbedded = {
 
   // Types.             u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u
 	//                    p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p
@@ -194,7 +194,50 @@ public class updatableResultSet {
 /* 15 TIMESTAMP    */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
 /* 16 BLOB         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "PASS", "ERROR", "ERROR" },
 
-	};                                                                         
+	};
+
+	//I have constructed following table for network server based on if combination of datatype and updateXXX method would work or not.
+	public static final String[][]  updateXXXRulesTableForNetworkServer = {
+
+  // Types.             u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u
+	//                    p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p
+	//                    d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d
+  //                    a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a
+  //                    t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t
+  //                    e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e
+  //                    S  I  L  B  F  D  S  A  C  B  B  B  C  D  T  T  B  B  N  A  R
+	//                    h  n  o  i  l  o  t  s  h  y  y  i  l  a  i  i  l  o  u  r  e
+	//                    o  t  n  g  o  u  r  c  a  t  t  n  o  t  m  m  o  o  l  r  f
+	//                    r     g  D  a  b  i  i  r  e  e  a  b  e  e  e  b  l  l  a
+	//                    t        e  t  l  n  i  c     s  r           s     e     y
+	//                             c     e  g  S  t        y           t     a
+	//                             i           t  e        S           a     n
+	//                             m           r  r        t           m
+	//                             a           e  S        r           p
+	//                             l           a  t        e
+	//                                         m  r        a
+	//                                            e        m
+	//                                            a
+	//                                            m
+/* 0 SMALLINT */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 1 INTEGER  */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 2 BIGINT   */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 3 DECIMAL  */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 4 REAL     */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 5 DOUBLE   */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 6 CHAR     */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "PASS", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 7 VARCHAR  */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "PASS", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 8 LONGVARCHAR */     { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "PASS", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
+/* 9 CHAR FOR BIT */    { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 10 VARCH. BIT   */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 11 LONGVAR. BIT */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 12 CLOB         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 13 DATE         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 14 TIME         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 15 TIMESTAMP    */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 16 BLOB         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+
+	};
 
 	public static void main(String[] args) {
 		System.out.println("Start testing delete and update using JDBC2.0 updateable resultset apis");
@@ -256,7 +299,7 @@ public class updatableResultSet {
 			}
 			conn.clearWarnings();
       System.out.println("requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported");
-			System.out.println("Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets"); 
+			System.out.println("Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets");
       System.out.println("Make sure that we got TYPE_SCROLL_INSENSITIVE? " +  (stmt.getResultSetType() == ResultSet.TYPE_SCROLL_INSENSITIVE));
       System.out.println("Make sure that we got CONCUR_READ_ONLY? " +  (stmt.getResultSetConcurrency() == ResultSet.CONCUR_READ_ONLY));
 			System.out.println("JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset");
@@ -334,6 +377,7 @@ public class updatableResultSet {
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
 
+
 			System.out.println("Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			rs = stmt.executeQuery("select * from t1");//notice that we forgot to give mandatory FOR UPDATE clause for updatable resultset
@@ -357,8 +401,6 @@ public class updatableResultSet {
 				System.out.println("SQL State : " + e.getSQLState());
 				System.out.println("Got expected exception " + e.getMessage());
 			}
-			//have to close the resultset because by default, resultsets are held open over commit
-			rs.close();
       System.out.println("Now attempting to send a updateRow on a sql with no FOR UPDATE clause.");
 			try {
 				rs.updateRow();
@@ -369,10 +411,15 @@ public class updatableResultSet {
 				System.out.println("Got expected exception " + e.getMessage());
 			}
 
+			//have to close the resultset because by default, resultsets are held open over commit
+			rs.close();
+
 			System.out.println("Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			rs = stmt.executeQuery("select * from t1 FOR READ ONLY");
 			System.out.println("Make sure that we got CONCUR_READ_ONLY? " + (rs.getConcurrency() == ResultSet.CONCUR_READ_ONLY));
+			System.out.println("Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode");
+			System.out.println("Will see the warnings in embedded mode only");
 			warnings = rs.getWarnings();
 			while (warnings != null)
 			{
@@ -402,10 +449,9 @@ public class updatableResultSet {
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
 
-			if (TestUtil.isEmbeddedFramework()) {
 			System.out.println("Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT 1, 2 FROM t1 FOR UPDATE");
+      rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
 			System.out.println("Make sure that we got CONCUR_UPDATABLE? " + (rs.getConcurrency() == ResultSet.CONCUR_UPDATABLE));
       System.out.println("Now attempt a deleteRow without first doing next on the resultset.");
 			try {
@@ -417,9 +463,14 @@ public class updatableResultSet {
 				System.out.println("Got expected exception " + e.getMessage());
 			}
       System.out.println("Now attempt a updateRow without first doing next on the resultset.");
+			System.out.println("In embedded mode, updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX");
+			System.out.println("In Network Server mode, if no updateXXX were issued before updateRow, then updateRow is a no-op and doesn't check if it is on a row or not");
 			try {
 				rs.updateRow();
-				System.out.println("FAIL!!! updateRow should have failed because resultset is not on a row");
+				if (TestUtil.isEmbeddedFramework()) 
+					System.out.println("FAIL!!! In embedded mode, this updateRow should have failed because resultset is not on a row");
+				else
+					System.out.println("PASS!!! In Network Server mode, this updateRow is a no-op because no updateXXX were issued before the updateRow");
 			}
 			catch (SQLException e) {
 				System.out.println("SQL State : " + e.getSQLState());
@@ -448,7 +499,7 @@ public class updatableResultSet {
 
 			System.out.println("Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT 1, 2 FROM t1 FOR UPDATE");
+      rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
 			System.out.println("Make sure that we got CONCUR_UPDATABLE? " + (rs.getConcurrency() == ResultSet.CONCUR_UPDATABLE));
 			rs.next();
 			rs.close();
@@ -503,8 +554,9 @@ public class updatableResultSet {
 
 			System.out.println("Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT 1, 2 FROM t1 FOR UPDATE");
+      rs = stmt.executeQuery("SELECT c1 FROM t1 FOR UPDATE");
 			rs.next();
+			rs.updateInt(1,123);
 			System.out.println("Opened an updatable resultset. Now trying to drop that table through another Statement");
 			stmt1 = conn.createStatement();
 			try {
@@ -535,7 +587,7 @@ public class updatableResultSet {
 
 			System.out.println("Negative Test13 - foreign key constraint failure will cause deleteRow to fail");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT 1, 2 FROM tableWithPrimaryKey FOR UPDATE");
+      rs = stmt.executeQuery("SELECT * FROM tableWithPrimaryKey FOR UPDATE");
 			rs.next();
 			try {
 				rs.deleteRow();
@@ -548,6 +600,8 @@ public class updatableResultSet {
 			System.out.println("Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close");
 			try {
 				rs.next();
+				if (TestUtil.isNetFramework())
+					System.out.println("Jira entry Derby-160 : for Network Server because next should have failed");
 				System.out.println("FAIL!!! next should have failed because foreign key constraint failure resulted in a runtime rollback");
 			}
 			catch (SQLException e) {
@@ -572,6 +626,8 @@ public class updatableResultSet {
 			System.out.println("Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close");
 			try {
 				rs.next();
+				if (TestUtil.isNetFramework())
+					System.out.println("Jira entry Derby-160 : for Network Server because next should have failed");
 				System.out.println("FAIL!!! next should have failed because foreign key constraint failure resulted in a runtime rollback");
 			}
 			catch (SQLException e) {
@@ -581,7 +637,7 @@ public class updatableResultSet {
 
 			System.out.println("Negative Test15 - Can't call updateXXX methods on columns that do not correspond to a column in the table");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			rs = stmt.executeQuery("SELECT 1, 2 FROM tableWithPrimaryKey FOR UPDATE");
+			rs = stmt.executeQuery("SELECT 1, 2 FROM t1 FOR UPDATE");
 			rs.next();
 			try {
 				rs.updateInt(1,22);
@@ -623,13 +679,17 @@ public class updatableResultSet {
       System.out.println("column 1 on this row before deleteRow is " + rs.getInt(1));
       System.out.println("column 2 on this row before deleteRow is " + rs.getString(2));
 			rs.deleteRow();
-      System.out.println("Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail");
+      System.out.println("Since after deleteRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail");
+      System.out.println("In Network Server mode, the ResultSet stays on the deleted row after deleteRow and hence no error for getXXX");
 			try {
 				System.out.println("column 1 on this deleted row is " + rs.getInt(1));
 			}
 			catch (SQLException e) {
-				System.out.println("SQL State : " + e.getSQLState());
-				System.out.println("Got expected exception " + e.getMessage());
+				if (TestUtil.isEmbeddedFramework()) {
+					System.out.println("SQL State : " + e.getSQLState());
+					System.out.println("Got expected exception " + e.getMessage());
+				} else
+					System.out.println("Got unexpected exception " + e.getMessage());
 			}
       System.out.println("calling deleteRow again w/o first positioning the ResultSet on the next row will fail");
 			try {
@@ -647,6 +707,7 @@ public class updatableResultSet {
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
 
+			if (TestUtil.isEmbeddedFramework()) {
 			System.out.println("Positive Test1b - request updatable resultset for forward only type resultset");
 			reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
@@ -664,7 +725,8 @@ public class updatableResultSet {
 			System.out.println("column 2 on this row before updateString is " + rs.getString(2));
 			System.out.println("now updateRow on the row");
 			rs.updateRow();
-			System.out.println("Since after updateRow(), ResultSet is positioned before the next row, getXXX will fail");
+			System.out.println("Since after updateRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail");
+      System.out.println("In Network Server mode, the ResultSet stays on the updated row after updateRow and hence no error for getXXX");
 			try {
 				System.out.println("column 1 on this updateRow row is " + rs.getInt(1));
 			}
@@ -975,17 +1037,54 @@ public class updatableResultSet {
 			reloadData();
 			rs = stmt.executeQuery("SELECT c1, c2 FROM t1 abcde FOR UPDATE of c1");
 			rs.next();
-			rs.updateString(2,"bbbb");
 			try {
-				rs.updateRow();
-				System.out.println("FAIL!!! updateRow should have failed");
+				rs.updateString(2,"bbbb");
+				System.out.println("FAIL!!! updateString on readonly column should have failed");
+			}
+			catch (SQLException e) {
+				System.out.println("SQL State : " + e.getSQLState());
+				System.out.println("Got expected exception " + e.getMessage());
+			}
+			System.out.println("attempt to get an updatable resultset using correlation name for an readonly column. It should work");
+			System.out.println("The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
+			rs = stmt.executeQuery("SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
+			rs.next();
+			rs.updateInt(1,11);
+			rs.updateRow();
+			rs.close();
+			System.out.println("Table t1 after updateRow has following rows");
+			dumpRS(stmt.executeQuery("select * from t1"));
+
+			System.out.println("Positive Test9c - try to updateXXX on a readonly column. Should get error");
+			reloadData();
+			rs = stmt.executeQuery("SELECT c1, c2 FROM t1 abcde FOR UPDATE of c1");
+			rs.next();
+			try {
+				rs.updateString(2,"bbbb");
+				System.out.println("FAIL!!! updateString on readonly column should have failed");
 			}
 			catch (SQLException e) {
 				System.out.println("SQL State : " + e.getSQLState());
 				System.out.println("Got expected exception " + e.getMessage());
 			}
 			rs.close();
-			System.out.println("Table t1 after updateRow has following rows");
+			System.out.println("Table t1 has following rows");
+			dumpRS(stmt.executeQuery("select * from t1"));
+
+			System.out.println("Positive Test9d - try to updateXXX on a readonly column with correlation name. Should get error");
+			reloadData();
+			rs = stmt.executeQuery("SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1");
+			rs.next();
+			try {
+				rs.updateString(2,"bbbb");
+				System.out.println("FAIL!!! updateString on readonly column should have failed");
+			}
+			catch (SQLException e) {
+				System.out.println("SQL State : " + e.getSQLState());
+				System.out.println("Got expected exception " + e.getMessage());
+			}
+			rs.close();
+			System.out.println("Table t1 has following rows");
 			dumpRS(stmt.executeQuery("select * from t1"));
 
 			System.out.println("Positive Test10 - 2 updatable resultsets going against the same table, will they conflict?");
@@ -1543,7 +1642,7 @@ public class updatableResultSet {
 									rs.updateRef(ColumnNames[sqlType-1], null);
               }
 							rs.updateRow();
-							if (updateXXXRulesTable[sqlType-1][updateXXXName-1].equals("ERROR")) {
+							if (updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR")) {
 								System.out.println("FAILURE : We shouldn't reach here. The test should have failed earlier on updateXXX or updateRow call");
 								return;
 							}
@@ -1553,7 +1652,7 @@ public class updatableResultSet {
 								return;
 							}
 						} catch (Throwable e) {
-							if (updateXXXRulesTable[sqlType-1][updateXXXName-1].equals("ERROR"))
+							if (updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR"))
 								System.out.println("      Got expected exception : " + e.getMessage());
 							else {
 								if ((sqlType == 14 || sqlType == 15 || sqlType == 16) && //we are dealing with DATE/TIME/TIMESTAMP column types
@@ -1696,7 +1795,7 @@ public class updatableResultSet {
 									continue;
 
 								rs.updateRow();
-								if (updateXXXRulesTable[sqlType-1][updateXXXName-1].equals("ERROR")) {
+								if (updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR")) {
 									System.out.println("FAILURE : We shouldn't reach here. The test should have failed earlier on updateXXX or updateRow call");
 									return;
 								}
@@ -1706,7 +1805,7 @@ public class updatableResultSet {
 									return;
 								}
 						} catch (Throwable e) {
-								if (updateXXXRulesTable[sqlType-1][updateXXXName-1].equals("ERROR"))
+								if (updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR"))
 									System.out.println("    Got expected exception : " + e.getMessage());
 								else {
 									if ((sqlType == 14 || sqlType == 15 || sqlType == 16) && //we are dealing with DATE/TIME/TIMESTAMP column types
@@ -2065,10 +2164,9 @@ public class updatableResultSet {
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			rs = stmt.executeQuery("SELECT c1, c2 FROM t1 FOR UPDATE of c1");
 			rs.next();
-			rs.updateInt(2,22);
 			try {
-				rs.updateRow();
-				System.out.println("FAIL!!! updateRow should have failed because c12 is not the FOR UPDATE columns list.");
+				rs.updateInt(2,22);
+				System.out.println("FAIL!!! updateInt should have failed because c12 is not the FOR UPDATE columns list.");
 			}
 			catch (SQLException e) {
 				System.out.println("SQL State : " + e.getSQLState());

@@ -3459,6 +3459,12 @@ public class FromBaseTable extends FromTable
 		{
 			/* Build a ResultColumn/BaseColumnNode pair for the column */
 			colDesc = (ColumnDescriptor) cdl.elementAt(index);
+			//A ColumnDescriptor instantiated through SYSCOLUMNSRowFactory only has 
+			//the uuid set on it and no table descriptor set on it. Since we know here
+			//that this columnDescriptor is tied to tableDescriptor, set it so using
+			//setTableDescriptor method. ColumnDescriptor's table descriptor is used
+			//to get ResultSetMetaData.getTableName & ResultSetMetaData.getSchemaName
+			colDesc.setTableDescriptor(tableDescriptor);
 
 			valueNode = (ValueNode) getNodeFactory().getNode(
 											C_NodeTypes.BASE_COLUMN_NODE,

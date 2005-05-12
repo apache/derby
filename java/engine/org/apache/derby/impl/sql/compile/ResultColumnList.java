@@ -2422,7 +2422,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Mark all the columns in this list as updatable by a positioned update
+	 * Mark all the (base) columns in this list as updatable by a positioned update
 	 * statement.  This is necessary
 	 * for positioned update statements, because we expand the column list
 	 * to include all the columns in the base table, and we need to be able
@@ -2438,7 +2438,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			((ResultColumn) elementAt(index)).markUpdatableByCursor();
+			//determine if the column is a base column and not a derived column
+			if (((ResultColumn) elementAt(index)).getSourceTableName() != null)
+				((ResultColumn) elementAt(index)).markUpdatableByCursor();
 		}
 	}
 
@@ -2615,17 +2617,33 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Mark as updatable all the columns in this result column list
-	 * that match the columns in the given update column list
+	 * Mark all the columns in the select sql that this result column list represents
+	 * as updatable if they match the columns in the given update column list.
 	 *
 	 * @param updateColumns		A Vector representing the columns
 	 *							to be updated.
 	 */
-	void markUpdatableByCursor(Vector updateColumns)
+	void markColumnsInSelectListUpdatableByCursor(Vector updateColumns)
+	{
+		commonCodeForUpdatableByCursor(updateColumns, true);
+	}
+
+	/**
+	 * dealingWithSelectResultColumnList true means we are dealing with
+	 * ResultColumnList for a select sql. When dealing with ResultColumnList for
+	 * select sql, it is possible that not all the updatable columns are
+	 * projected in the select column list and hence it is possible that we may
+	 * not find the column to be updated in the ResultColumnList and that is why
+	 * special handling is required when dealingWithSelectResultColumnList is true.
+	 * eg select c11, c13 from t1 for update of c11, c12
+	 * In the eg above, we will find updatable column c11 in the select column
+	 * list but we will not find updatable column c12 in the select column list
+	 */
+	private void commonCodeForUpdatableByCursor(Vector updateColumns, boolean dealingWithSelectResultColumnList)
 	{
 		/*
-		** If there is no update column list, or the list is empty,
-		** it means all the columns are updatable.
+		** If there is no update column list, or the list is empty, then it means that
+		** all the columns which have a base table associated with them are updatable.
 		*/
 		if ( (updateColumns == null) || (updateColumns.size() == 0) )
 		{
@@ -2639,23 +2657,36 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			for (int index = 0; index < ucSize; index++)
 			{
-				columnName = (String) updateColumns.elementAt(index); 
+				columnName = (String) updateColumns.elementAt(index);
 
 				resultColumn = getResultColumn(columnName);
-
 				if (SanityManager.DEBUG)
 				{
-					if (resultColumn == null)
+					if (resultColumn == null && !dealingWithSelectResultColumnList)
 					{
-						SanityManager.THROWASSERT(
-							"No result column found with name " +
+						SanityManager.THROWASSERT("No result column found with name " +
 							columnName);
 					}
 				}
-
+				//Following if means the column specified in FOR UPDATE clause is not
+				//part of the select list
+				if (resultColumn == null && dealingWithSelectResultColumnList)
+					continue;
 				resultColumn.markUpdatableByCursor();
 			}
 		}
+	}
+
+	/**
+	 * Mark as updatable all the columns in this result column list
+	 * that match the columns in the given update column list
+	 *
+	 * @param updateColumns		A Vector representing the columns
+	 *							to be updated.
+	 */
+	void markUpdatableByCursor(Vector updateColumns)
+	{
+		commonCodeForUpdatableByCursor(updateColumns, false);
 	}
 
 	/**

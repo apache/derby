@@ -47,22 +47,39 @@ public interface ResultColumnDescriptor
 	String	getName();
 
 	/**
-	 * Get the name of the schema the Column is in, if any.
+	 * Get the name of the schema for the Column's base table, if any.
+	 * Following example queries will all return APP (assuming user is in schema APP)
+	 * select t.a from t
+	 * select b.a from t as b
+	 * select app.t.a from t
 	 *
-	 * @return	A String containing the name of the schema the Column
-	 *		is in.  If the column is not in a schema (i.e. is a
-	 * 		derived column), it returns NULL.
+	 * @return	The name of the schema of the Column's base table. If the column
+	 *		is not in a schema (i.e. is a derived column), it returns NULL.
 	 */
-	String	getSchemaName();
+	String	getSourceSchemaName();
 
 	/**
-	 * Get the name of the table the Column is in, if any.
+	 * Get the name of the underlying(base) table this column comes from, if any.
+	 * Following example queries will all return T
+	 * select a from t
+	 * select b.a from t as b
+	 * select t.a from t
 	 *
-	 * @return	A String containing the name of the table the Column
+	 * @return	A String containing the name of the base table of the Column
 	 *		is in. If the column is not in a table (i.e. is a
 	 * 		derived column), it returns NULL.
+	 * @return	The name of the Column's base table. If the column
+	 *		is not in a schema (i.e. is a derived column), it returns NULL.
 	 */
 	String	getSourceTableName();
+
+	/**
+	 * Return true if the column is wirtable by a positioned update.
+	 *
+	 * @return TRUE, if the column is a base column of a table and is 
+	 * writable by a positioned update.
+	 */
+	boolean updatableByCursor();
 
 	/**
 	 * Get the position of the Column.

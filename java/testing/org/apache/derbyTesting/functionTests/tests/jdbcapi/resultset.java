@@ -88,7 +88,7 @@ public class resultset {
 
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 									   ResultSet.CONCUR_UPDATABLE);
-			
+
 			// REMIND: might want a usertype case as well...
 			stmt.execute("create table t (i int, s smallint, r real, "+
 				"d double precision, dt date, t time, ts timestamp, "+
@@ -132,7 +132,7 @@ public class resultset {
 				System.out.println("isReadOnly("+i+"): "+met.isReadOnly(i));
 				boolean writable = met.isWritable(i);
 				// JCC Supports updatable resultsets so isWritable is true
-				if ((isDerbyNet && writable == true) || 
+				if ((isDerbyNet && writable == true) ||
 					(!isDerbyNet && writable == false))
 					System.out.println("isWritable("+i+"): Expected isWritable value");
 				System.out.println("isDefinitelyWritable("+i+"): "+met.isDefinitelyWritable(i));
@@ -525,6 +525,7 @@ public class resultset {
 			stmt.close();
 
 			testMutableValues(con);
+			testCorrelationNamesAndMetaDataCalls(con);
 			con.close();
 
 		}
@@ -540,6 +541,64 @@ public class resultset {
 		System.out.println("Test resultset finished");
     }
 
+
+	static private void testCorrelationNamesAndMetaDataCalls(Connection conn) throws Exception
+	{
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate("create table s (a int, b int, c int, d int, e int, f int)");
+		stmt.executeUpdate("insert into s values (0,1,2,3,4,5)");
+		stmt.executeUpdate("insert into s values (10,11,12,13,14,15)");
+		System.out.println("Run select * from s ss (f, e, d, c, b, a) where f = 0 and then try getTableName and getSchemaName on columns");
+		ResultSet rs = stmt.executeQuery("select * from s ss (f, e, d, c, b, a) where f = 0");
+    rs.next();
+    ResultSetMetaData met = rs.getMetaData();
+		System.out.println("getTableName(1): "+met.getTableName(1));
+		System.out.println("getSchemaName(1): "+met.getSchemaName(1));
+
+		System.out.println("Run select * from (select * from s) a and then try getTableName and getSchemaName on columns");
+		rs = stmt.executeQuery("select * from (select * from s) a");
+    rs.next();
+    met = rs.getMetaData();
+		System.out.println("getTableName(1): "+met.getTableName(1));
+		System.out.println("getSchemaName(1): "+met.getSchemaName(1));
+
+		stmt.executeUpdate("create schema s1");
+		stmt.executeUpdate("create table s1.t1 (c11 int, c12 int)");
+		stmt.executeUpdate("insert into s1.t1 values (11, 12), (21, 22)");
+		System.out.println("Run select * from s1.t1 as abc and then try getTableName and getSchemaName on columns");
+		rs = stmt.executeQuery("select * from s1.t1 as abc");
+		met = rs.getMetaData();
+		System.out.println("Table name of first column is " + met.getTableName(1));
+		System.out.println("Schema name of first column is " + met.getSchemaName(1));
+		System.out.println("Table name of second column is " + met.getTableName(2));
+		System.out.println("Schema name of second column is " + met.getSchemaName(2));
+		System.out.println("Run select abc.c11 from s1.t1 as abc and then try getTableName and getSchemaName on columns");
+		rs = stmt.executeQuery("select abc.c11 from s1.t1 as abc");
+		met = rs.getMetaData();
+		System.out.println("Table name of first column is " + met.getTableName(1));
+		System.out.println("Schema name of first column is " + met.getSchemaName(1));
+		System.out.println("Run select bcd.a, abc.c11 from s1.t1 as abc, s as bcd and then try getTableName and getSchemaName on columns");
+		rs = stmt.executeQuery("select bcd.a, abc.c11 from s1.t1 as abc, s as bcd");
+		met = rs.getMetaData();
+		System.out.println("Table name of first column is " + met.getTableName(1));
+		System.out.println("Schema name of first column is " + met.getSchemaName(1));
+		System.out.println("Table name of second column is " + met.getTableName(2));
+		System.out.println("Schema name of second column is " + met.getSchemaName(2));
+
+		stmt.executeUpdate("create schema app1");
+		stmt.executeUpdate("create table app1.t1 (c11 int, c12 int)");
+		stmt.executeUpdate("insert into app1.t1 values (11, 12), (21, 22)");
+		stmt.executeUpdate("create schema app2");
+		stmt.executeUpdate("create table app2.t1 (c11 int, c12 int)");
+		stmt.executeUpdate("insert into app2.t1 values (11, 12), (21, 22)");
+		System.out.println("Run select app1.t1.c11, app2.t1.c11 from app1.t1, app2.t1 and then try getTableName and getSchemaName on columns");
+		rs = stmt.executeQuery("select app1.t1.c11, app2.t1.c11 from app1.t1, app2.t1");
+		met = rs.getMetaData();
+		System.out.println("Table name of first column is " + met.getTableName(1));
+		System.out.println("Schema name of first column is " + met.getSchemaName(1));
+		System.out.println("Table name of second column is " + met.getTableName(2));
+		System.out.println("Schema name of second column is " + met.getSchemaName(2));
+	}
 
 	static private void doTheTests() throws Exception
 	{

@@ -85,6 +85,8 @@ public class ResultColumn extends ValueNode
 	String			exposedName;
 	String			tableName;
 	String			sourceTableName;
+	//Used by metadata api ResultSetMetaData.getSchemaName to get a column's table's schema.
+	String			sourceSchemaName;
 	ValueNode		expression;
 	ColumnDescriptor	columnDescriptor;
 	boolean			isGenerated;
@@ -215,12 +217,12 @@ public class ResultColumn extends ValueNode
 		return exposedName;
 	}
 
-	public String getSchemaName()
+	public String getSchemaName() throws StandardException
 	{
-		if ((columnDescriptor!=null) && 
-			(columnDescriptor.getTableDescriptor() != null)) 
+		if ((columnDescriptor!=null) &&
+			(columnDescriptor.getTableDescriptor() != null))
 			return columnDescriptor.getTableDescriptor().getSchemaName();
-		else 
+		else
 		{
 			if (expression != null)
 			// REMIND: could look in reference, if set.
@@ -236,8 +238,8 @@ public class ResultColumn extends ValueNode
 		{
 			return tableName;
 		}
-		if ((columnDescriptor!=null) && 
-			(columnDescriptor.getTableDescriptor() != null)) 
+		if ((columnDescriptor!=null) &&
+			(columnDescriptor.getTableDescriptor() != null))
 		{
 			return columnDescriptor.getTableDescriptor().getName();
 		}
@@ -253,6 +255,14 @@ public class ResultColumn extends ValueNode
 	public String getSourceTableName()
 	{
 		return sourceTableName;
+	}
+
+	/**
+	 * @see ResultColumnDescriptor#getSourceSchemaName
+	 */
+	public String getSourceSchemaName()
+	{
+		return sourceSchemaName;
 	}
 
 	/**
@@ -274,14 +284,14 @@ public class ResultColumn extends ValueNode
 
 	public DataTypeDescriptor getExpressionType()
 	{
-		return (expression == null) ? 
+		return (expression == null) ?
 			dataTypeServices :
 			expression.getTypeServices();
 	}
 
 	public int getColumnPosition()
 	{
-		if (columnDescriptor!=null) 
+		if (columnDescriptor!=null)
 			return columnDescriptor.getPosition();
 		else
 			return virtualColumnId;
@@ -785,6 +795,7 @@ public class ResultColumn extends ValueNode
 			ColumnReference cr = (ColumnReference) expression;
 			tableName = cr.getTableName();
 			sourceTableName = cr.getSourceTableName();
+			sourceSchemaName = cr.getSourceSchemaName();
 		}
 	}
 
@@ -1335,11 +1346,11 @@ public class ResultColumn extends ValueNode
 	}
 
 	/**
-	 * Tell whether this column is updatable bay a positioned update.
+	 * Tell whether this column is updatable by a positioned update.
 	 *
 	 * @return	true means this column is updatable
 	 */
-	boolean updatableByCursor()
+	public boolean updatableByCursor()
 	{
 		return updatableByCursor;
 	}

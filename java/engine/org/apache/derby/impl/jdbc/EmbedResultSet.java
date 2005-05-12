@@ -2043,11 +2043,19 @@ public abstract class EmbedResultSet extends ConnectionChild
       //1)Make sure for updateXXX methods, the column position is not out of range
       ResultDescription rd = theResults.getResultDescription();
       if (columnIndex < 1 || columnIndex > rd.getColumnCount())
-        throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION, new Integer(columnIndex), String.valueOf(rd.getColumnCount()));
+        throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION,
+					new Integer(columnIndex), String.valueOf(rd.getColumnCount()));
 
       //2)Make sure the column corresponds to a column in the base table and it is not a derived column
       if (rd.getColumnDescriptor(columnIndex).getSourceTableName() == null)
-        throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE, methodName);
+        throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE,
+					methodName);
+
+      //3)If column not updatable then throw an exception
+      if (!getMetaData().isWritable(columnIndex))
+        throw Util.generateCsSQLException(SQLState.LANG_COLUMN_NOT_UPDATABLE_IN_CURSOR,
+					theResults.getResultDescription().getColumnDescriptor(columnIndex).getName(),
+					getCursorName());
 	}
 
 	//do following few checks before accepting updatable resultset api
@@ -3153,6 +3161,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             boolean foundOneColumnAlready = false;
             StringBuffer updateWhereCurrentOfSQL = new StringBuffer("UPDATE ");
             CursorActivation activation = getEmbedConnection().getLanguageConnection().lookupCursorActivation(getCursorName());
+
+
             ExecCursorTableReference targetTable = activation.getPreparedStatement().getTargetTable();
             updateWhereCurrentOfSQL.append(getFullBaseTableName(targetTable));//got the underlying (schema.)table name
             updateWhereCurrentOfSQL.append(" SET ");
