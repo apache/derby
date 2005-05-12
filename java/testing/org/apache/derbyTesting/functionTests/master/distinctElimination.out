@@ -19,6 +19,13 @@ ij> create table four(c1 int, c2 int, c3 int, c4 int, c5 int);
 0 rows inserted/updated/deleted
 ij> create unique index four_c1c3 on four(c1, c3);
 0 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."IDEPT" ("DISCRIM_DEPT" VARCHAR(32), "NO1" INTEGER NOT NULL, 
+"NAME" VARCHAR(50), "AUDITOR_NO" INTEGER, "REPORTTO_NO" INTEGER, "HARDWAREASSET"
+ VARCHAR(15), "SOFTWAREASSET" VARCHAR(15));
+0 rows inserted/updated/deleted
+ij> -- primary/unique
+ALTER TABLE "APP"."IDEPT" ADD CONSTRAINT "PK_IDEPT" PRIMARY KEY ("NO1");
+0 rows inserted/updated/deleted
 ij> insert into one values (1, 1, 1, 1, 1);
 1 row inserted/updated/deleted
 ij> insert into one values (2, 1, 1, 1, 1);
@@ -87,6 +94,16 @@ ij> insert into four values (3, 1, 2, 1, 1);
 1 row inserted/updated/deleted
 ij> insert into four values (3, 1, 3, 1, 1);
 1 row inserted/updated/deleted
+ij> insert into idept values ('Dept', 1, 'Department1', null, null, null, null);
+1 row inserted/updated/deleted
+ij> insert into idept values ('HardwareDept', 2, 'Department2', 25, 1, 'hardwareaset2', null);
+1 row inserted/updated/deleted
+ij> insert into idept values ('HardwareDept', 3, 'Department3', 25, 2, 'hardwareaset3', null);
+1 row inserted/updated/deleted
+ij> insert into idept values ('SoftwareDept', 4, 'Department4', 25, 1, null, 'softwareasset4');
+1 row inserted/updated/deleted
+ij> insert into idept values ('SoftwareDept', 5, 'Department5', 30, 4, null, 'softwareasset5');
+1 row inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
 ij> maximumdisplaywidth 20000;
@@ -143,6 +160,31 @@ scan information:
 None
 	next qualifiers:
 None
+ij> --Derby251 Distinct should not get eliminated for following query
+--because there is no equality condition on unique column of table
+--in the outside query
+select  distinct  q1."NO1",  q1."NAME",  q1."AUDITOR_NO",  
+q1."REPORTTO_NO",  q1."DISCRIM_DEPT",  q1."SOFTWAREASSET" from 
+IDEPT q1, IDEPT q2 where  ( q2."DISCRIM_DEPT" = 'HardwareDept') 
+ and  ( q1."DISCRIM_DEPT" = 'SoftwareDept')  and  ( q1."NO1" 
+<> ALL  ( select  q3."NO1" from IDEPT q3 where  ( ( 
+q3."DISCRIM_DEPT" = 'Dept')  or  ( q3."DISCRIM_DEPT" = 
+'HardwareDept')  or  ( q3."DISCRIM_DEPT" = 'SoftwareDept') )  
+and  ( q3."REPORTTO_NO" =  q2."NO1") ) )  ;
+NO1        |NAME                                              |AUDITOR_NO |REPORTTO_NO|DISCRIM_DEPT                    |SOFTWAREASSET  
+---------------------------------------------------------------------------------------------------------------------------------------
+4          |Department4                                       |25         |1          |SoftwareDept                    |softwareasset4 
+5          |Department5                                       |30         |4          |SoftwareDept                    |softwareasset5 
+ij> --
+--Another test case of Derby251 where the exists table column is embedded in an expression.
+select  distinct  q1."NO1" from IDEPT q1, IDEPT q2
+where  ( q2."DISCRIM_DEPT" = 'HardwareDept')
+and  ( q1."DISCRIM_DEPT" = 'SoftwareDept')  and  ( q1."NO1" <> ALL
+(select  q3."NO1" from IDEPT q3 where  ( ABS(q3."REPORTTO_NO") =  q2."NO1")));
+NO1        
+-----------
+4          
+5          
 ij> -- result ordering is not guaranteed, but order by clause will change how
 -- distinct is executed.  So test by retrieving data into a temp table and
 -- return results ordered after making sure the query was executed as expected.
@@ -2318,5 +2360,7 @@ ij> drop table two;
 ij> drop table three;
 0 rows inserted/updated/deleted
 ij> drop table four;
+0 rows inserted/updated/deleted
+ij> drop table idept;
 0 rows inserted/updated/deleted
 ij> 

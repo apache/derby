@@ -1040,7 +1040,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	}
 
 	/**
-	 * Decrement (query block) level (0-based) for 
+	 * Decrement (query block) level (0-based) for
 	 * all of the tables in this from list.
 	 * This is useful when flattening a subquery.
 	 *
@@ -1069,7 +1069,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		}
 	}
 
-	
+
 	/**
 	 * This method is used for both subquery flattening and distinct
 	 * elimination based on a uniqueness condition.  For subquery
@@ -1079,7 +1079,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * any duplicates.
 	 * This is true if every table in the from list is
 	 * (a base table and the set of columns from the table that
-	 * are in equality comparisons with expressions that do not include columns 
+	 * are in equality comparisons with expressions that do not include columns
 	 * from the same table is a superset of any unique index
 	 * on the table) or an EXISTS FBT.  In addition, at least 1 of the tables
 	 * in the list has a set of columns in equality comparisons with expressions
@@ -1105,28 +1105,28 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *		create an array of columns from the table(eqOuterCol)
 	 *		(this is used to determine that only one row will be returned
 	 *		from a join)
-	 *			
+	 *
 	 *		if the current table is the table for the result columns
 	 *			set the result columns in the eqOuterCol and tableColMap
 	 *			(if these columns are a superset of a unique index and
 	 *			all joining tables result in only one row, the
 	 *			results will be distinct)
 	 *		go through all the predicates and update tableColMap  and
-	 *		eqOuterCol with join columns and correlation variables, 
+	 *		eqOuterCol with join columns and correlation variables,
 	 *		parameters and constants
 	 *		since setting constants, correlation variables and parameters,
-	 * 		reduces the number of columns required for uniqueness in a 
+	 * 		reduces the number of columns required for uniqueness in a
 	 *		multi-column index, they are set for all the tables (if the
 	 *		table is not the result table, in this case only the column of the
      *		result table is set)
 	 *		join columns are just updated for the column in the row of the
 	 *		joining table.
-	 *		
-	 *		check if the marked columns in tableColMap are a superset of a unique 
-	 *			index		
+	 *
+	 *		check if the marked columns in tableColMap are a superset of a unique
+	 *			index
 	 *			(This means that the join will only produce 1 row when joined
 	 *			with 1 row of another table)
-	 *		check that there is a least one table for which the columns in 
+	 *		check that there is a least one table for which the columns in
 	 *			eqOuterCol(i.e. constant values) are a superset of a unique index
 	 *			(This quarantees that there will be only one row selected
 	 *			from this table).
@@ -1134,7 +1134,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *	Once all tables have been evaluated, check that all the tables can be
 	 * 	joined by unique index or will have only one row
 	 *
-	 *	
+	 *
 	 *
 	 * @param rcl				If non-null, the RCL from the query block.
 	 *							If non-null for subqueries, then entry can
@@ -1150,8 +1150,8 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean returnsAtMostSingleRow(ResultColumnList rcl, 
-								   ValueNode whereClause, 
+	boolean returnsAtMostSingleRow(ResultColumnList rcl,
+								   ValueNode whereClause,
 								   PredicateList wherePredicates,
 								   DataDictionary dd)
 		throws StandardException
@@ -1159,6 +1159,13 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		boolean			satisfiesOuter = false;
 		int[]			tableNumbers;
 		ColumnReference	additionalCR = null;
+
+		PredicateList predicatesTemp;
+		predicatesTemp = (PredicateList) getNodeFactory().getNode(
+			C_NodeTypes.PREDICATE_LIST,	getContextManager());
+		int wherePredicatesSize = wherePredicates.size();
+		for (int index = 0; index < wherePredicatesSize; index++)
+			predicatesTemp.addPredicate((Predicate)wherePredicates.elementAt(index));
 
 		/* When considering subquery flattening, we are interested
 		 * in the 1st (and only) entry in the RCL.  (The RCL will be
@@ -1192,6 +1199,77 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 			if (! (prn.getChildResult() instanceof FromBaseTable))
 			{
 				return false;
+			}
+			FromBaseTable fbt = (FromBaseTable) prn.getChildResult();
+			//Following for loop code is to take care of Derby-251 (DISTINCT returns
+			//duplicate rows).
+			//Derby-251 returned duplicate rows because we were looking at predicates
+			//that belong to existsTable to determine DISTINCT elimination
+			//
+			//(Check method level comments to understand DISTINCT elimination rules.)
+			//
+			//For one specific example, consider the query below
+			//select  distinct  q1."NO1" from IDEPT q1, IDEPT q2
+			//where  ( q2."DISCRIM_DEPT" = 'HardwareDept')
+			//and  ( q1."DISCRIM_DEPT" = 'SoftwareDept')  and  ( q1."NO1" <> ALL
+			//(select  q3."NO1" from IDEPT q3 where  (q3."REPORTTO_NO" =  q2."NO1")))
+			//(select  q3."NO1" from IDEPT q3 where  ( ABS(q3."REPORTTO_NO") =  q2."NO1")))
+			//
+			//Table IDEPT in the query above has a primary key defined on column "NO1"
+			//This query gets converted to following during optimization
+			//
+			//select  distinct  q1."NO1" from IDEPT q1, IDEPT q2
+			//where  ( q2."DISCRIM_DEPT" = 'HardwareDept')
+			//and  ( q1."DISCRIM_DEPT" = 'SoftwareDept')  and  not exists (
+			//(select  q3."NO1" from IDEPT q3 where
+			//(  ( ABS(q3."REPORTTO_NO") =  q2."NO1")  and q3."NO1" = q1."NO1") ) )  ;
+			//
+			//For the optimized query above, Derby generates following predicates.
+			//ABS(q3.reportto_no) = q2.no1
+			//q2.discrim_dept = 'HardwareDept'
+			//q1.descrim_dept = 'SoftwareDept'
+			//q1.no1 = q3.no1
+			//The predicate ABS(q3."NO1") = q1."NO1" should not be considered when trying
+			//to determine if q1 in the outer query has equality comparisons. 
+			//Similarly, the predicate q3.reportto_no = q2.no1 should not be
+			//considered when trying to determine if q2 in the outer query has
+			//equality comparisons. To achieve this, predicates based on exists base
+			//table q3 (the first and the last predicate) should be removed while
+			//evaluating outer query for uniqueness.
+			//
+			if (fbt.getExistsBaseTable())
+			{
+				int existsTableNumber = fbt.getTableNumber();
+				int predicatesTempSize = predicatesTemp.size();
+				for (int predicatesTempIndex = predicatesTempSize-1;
+					predicatesTempIndex >= 0; predicatesTempIndex--)
+				{
+					AndNode topAndNode = (AndNode)
+						((Predicate) predicatesTemp.elementAt(predicatesTempIndex)).getAndNode();
+
+					for (ValueNode whereWalker = topAndNode; whereWalker instanceof AndNode;
+						whereWalker = ((AndNode) whereWalker).getRightOperand())
+					{
+						// See if this is a candidate =
+						AndNode and = (AndNode) whereWalker;
+
+						//we only need to worry about equality predicates because only those
+						//predicates are considered during DISTINCT elimination.
+						if (!and.getLeftOperand().isRelationalOperator() ||
+							!(((RelationalOperator)(and.getLeftOperand())).getOperator() ==
+							RelationalOperator.EQUALS_RELOP))
+						{
+							continue;
+						}
+
+						JBitSet referencedTables = and.getLeftOperand().getTablesReferenced();
+						if (referencedTables.get(existsTableNumber))
+						{
+							predicatesTemp.removeElementAt(predicatesTempIndex);
+							break;
+						}
+					}
+				}
 			}
 		}
 
@@ -1245,7 +1323,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 			/* Now see if there are any equality conditions
 			 * of interest in the where predicates.
 			 */
-			wherePredicates.checkTopPredicatesForEqualsConditions(
+			predicatesTemp.checkTopPredicatesForEqualsConditions(
 								tableNumber, eqOuterCols, tableNumbers,
 								tableColMap[index], resultColTable);
 
@@ -1298,7 +1376,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 							/* unique key join - exists tables already marked as 
 							 * 1 row - so don't need to look at them
 							 */
-							if (!oneRow[i] && tableColMap[i][index].get(0))	
+							if (!oneRow[i] && tableColMap[i][index].get(0))
 							{
 								oneRow[i] = true;
 								foundOneRow = true;

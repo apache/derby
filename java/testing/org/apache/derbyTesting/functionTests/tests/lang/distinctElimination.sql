@@ -12,6 +12,11 @@ create table three(c1 int, c2 int, c3 int, c4 int, c5 int);
 create unique index three_c1 on three(c1);
 create table four(c1 int, c2 int, c3 int, c4 int, c5 int);
 create unique index four_c1c3 on four(c1, c3);
+CREATE TABLE "APP"."IDEPT" ("DISCRIM_DEPT" VARCHAR(32), "NO1" INTEGER NOT NULL, 
+"NAME" VARCHAR(50), "AUDITOR_NO" INTEGER, "REPORTTO_NO" INTEGER, "HARDWAREASSET"
+ VARCHAR(15), "SOFTWAREASSET" VARCHAR(15));
+-- primary/unique
+ALTER TABLE "APP"."IDEPT" ADD CONSTRAINT "PK_IDEPT" PRIMARY KEY ("NO1");
 
 insert into one values (1, 1, 1, 1, 1);
 insert into one values (2, 1, 1, 1, 1);
@@ -51,6 +56,12 @@ insert into four values (3, 1, 1, 1, 1);
 insert into four values (3, 1, 2, 1, 1);
 insert into four values (3, 1, 3, 1, 1);
 
+insert into idept values ('Dept', 1, 'Department1', null, null, null, null);
+insert into idept values ('HardwareDept', 2, 'Department2', 25, 1, 'hardwareaset2', null);
+insert into idept values ('HardwareDept', 3, 'Department3', 25, 2, 'hardwareaset3', null);
+insert into idept values ('SoftwareDept', 4, 'Department4', 25, 1, null, 'softwareasset4');
+insert into idept values ('SoftwareDept', 5, 'Department5', 30, 4, null, 'softwareasset5');
+
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 maximumdisplaywidth 20000;
 
@@ -60,6 +71,24 @@ maximumdisplaywidth 20000;
 select distinct c2 from one;
 -- Following runtime statistics output should have Distinct Scan in it
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+--Derby251 Distinct should not get eliminated for following query
+--because there is no equality condition on unique column of table
+--in the outside query
+select  distinct  q1."NO1",  q1."NAME",  q1."AUDITOR_NO",  
+q1."REPORTTO_NO",  q1."DISCRIM_DEPT",  q1."SOFTWAREASSET" from 
+IDEPT q1, IDEPT q2 where  ( q2."DISCRIM_DEPT" = 'HardwareDept') 
+ and  ( q1."DISCRIM_DEPT" = 'SoftwareDept')  and  ( q1."NO1" 
+<> ALL  ( select  q3."NO1" from IDEPT q3 where  ( ( 
+q3."DISCRIM_DEPT" = 'Dept')  or  ( q3."DISCRIM_DEPT" = 
+'HardwareDept')  or  ( q3."DISCRIM_DEPT" = 'SoftwareDept') )  
+and  ( q3."REPORTTO_NO" =  q2."NO1") ) )  ;
+--
+--Another test case of Derby251 where the exists table column is embedded in an expression.
+select  distinct  q1."NO1" from IDEPT q1, IDEPT q2
+where  ( q2."DISCRIM_DEPT" = 'HardwareDept')
+and  ( q1."DISCRIM_DEPT" = 'SoftwareDept')  and  ( q1."NO1" <> ALL
+(select  q3."NO1" from IDEPT q3 where  ( ABS(q3."REPORTTO_NO") =  q2."NO1")));
 
 -- result ordering is not guaranteed, but order by clause will change how
 -- distinct is executed.  So test by retrieving data into a temp table and
@@ -170,3 +199,4 @@ drop table one;
 drop table two;
 drop table three;
 drop table four;
+drop table idept;
