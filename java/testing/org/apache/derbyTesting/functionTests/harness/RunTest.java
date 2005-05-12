@@ -2021,13 +2021,24 @@ clp.list(System.out);
             jvm.setFlags(jvmflags);
         }
         
-        jvm.setD(jvmProps);
         
         if (testType.equals("multi"))
         {
             if ( (jvmflags != null) && (jvmflags.indexOf("mx") == -1) )
                 jvm.setMx(64*1024*1024); // -mx64m
+            
+            // MultiTest is special case, so pass on properties
+            // related to encryption to MultiTest
+            jvmProps.addElement("encryption="+encryption);
+            Properties props = new Properties();
+            // parse and get only the special properties that are needed for the url 
+            SpecialFlags.parse(testSpecialProps, props, new Properties());
+            String encryptionAlgorithm = props.getProperty("testEncryptionAlgorithm");
+            if(encryptionAlgorithm != null)
+                jvmProps.addElement("encryptionAlgorithm=\""+ Attribute.CRYPTO_ALGORITHM 
+                        +"="+encryptionAlgorithm+"\"");
         }
+        jvm.setD(jvmProps);
             
         Vector v = jvm.getCommandLine();
         if ( ij.startsWith("ij") )

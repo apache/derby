@@ -142,20 +142,40 @@ public class mtTestCase
 			String framework = p.getProperty("framework");
 			
 			if (framework != null)
-				{
-					String newURLPrefix = null;
-					framework = framework.toUpperCase(java.util.Locale.ENGLISH);
-					if (framework.equals("DB2JNET") || framework.equals("DERBYNET"))
-						newURLPrefix= "jdbc:derby:net://localhost:1527/";
-					else if (framework.equals("DERBYNETCLIENT"))
-						newURLPrefix= "jdbc:derby://localhost:1527/";
-					if (newURLPrefix != null)
-					{
-						updateURLProperties(p,newURLPrefix);
-						p.setProperty("ij.user","APP");
-						p.setProperty("ij.password","PWD");
-					}
+            {
+                String newURLPrefix = null;
+                framework = framework.toUpperCase(java.util.Locale.ENGLISH);
+                if (framework.equals("DB2JNET") || framework.equals("DERBYNET"))
+                    newURLPrefix= "jdbc:derby:net://localhost:1527/";
+                else if (framework.equals("DERBYNETCLIENT"))
+                    newURLPrefix= "jdbc:derby://localhost:1527/";
+                if (newURLPrefix != null)
+                {
+                    updateURLProperties(p,newURLPrefix);
+                    p.setProperty("ij.user","APP");
+                    p.setProperty("ij.password","PWD");
+                }
 			}
+            // this is a special case for the MultiTest.
+            // check and alter url if there are any encryption related 
+            // properties that need to be set on the url 
+            if (("true").equalsIgnoreCase(p.getProperty("encryption"))) 
+            {
+               String encryptUrl = "dataEncryption=true;bootPassword=Thursday";
+               String dbUrl = p.getProperty("database");
+               String encryptionAlgorithm = p.getProperty("encryptionAlgorithm");
+               if (encryptionAlgorithm != null)
+               {
+                   p.setProperty(
+                       "database",
+                       dbUrl + ";" + encryptUrl + ";" + encryptionAlgorithm);
+               }
+               else
+               {
+                   p.setProperty("database",dbUrl + ";"+encryptUrl);
+               }
+            }
+            
 			System.setProperties(p);
 		}
 		// set input stream

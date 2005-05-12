@@ -175,27 +175,6 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
 			String dataEncryption = properties.getProperty(Attribute.DATA_ENCRYPTION);
 			databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
 
-
-			if (SanityManager.DEBUG)
-			{
-				if (!databaseEncrypted)
-				{
-					// check for system property if running under sanity - this
-					// gives more test coverage for those that that hard code
-					// connection URL in the test or somehow go thru the test
-					// harness in a strange way.
-					String testEncryption =
-						PropertyUtil.getSystemProperty("testDataEncryption");
-
-					if (testEncryption != null)
-					{
-						properties.put(Attribute.DATA_ENCRYPTION, "true");
-						properties.put(Attribute.BOOT_PASSWORD, testEncryption);
-						databaseEncrypted = true;
-                    }
-				}
-			}
-
 			if (databaseEncrypted)
 			{
 					cipherFactory =
