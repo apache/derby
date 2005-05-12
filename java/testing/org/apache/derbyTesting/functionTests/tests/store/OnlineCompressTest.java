@@ -519,6 +519,7 @@ public class OnlineCompressTest extends BaseTest
         // lock timeout.
 
 
+        ret_before = getSpaceInfo(conn, "APP", table_name, false);
         callCompress(conn, "APP", table_name, false, false, true, false);
         ret_after  = getSpaceInfo(conn, "APP", table_name, false);
 
@@ -526,19 +527,20 @@ public class OnlineCompressTest extends BaseTest
         if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
         {
             log_wrong_count(
-                "Expected no alloc page change(3).", 
+                "Expected no alloc page change(4).", 
                 table_name, num_rows, 
                 ret_before[SPACE_INFO_NUM_ALLOC], 
                 ret_after[SPACE_INFO_NUM_ALLOC],
                 ret_before, ret_after);
         }
 
-        // expect no change in the number of free pages, if there are there
-        // is a problem with purge locking recognizing committed deleted rows.
-        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
+        // The only space that truncate only pass can free are free pages 
+        // located at end of file, so after free space can be anywhere from 
+        // what it was before to 0 pages.
+        if (ret_after[SPACE_INFO_NUM_FREE] > ret_before[SPACE_INFO_NUM_FREE])
         {
             log_wrong_count(
-                "Expected no free page change(3).", 
+                "Expected no increase in free pages(4).", 
                 table_name, num_rows, 
                 ret_before[SPACE_INFO_NUM_FREE], 
                 ret_after[SPACE_INFO_NUM_FREE],
