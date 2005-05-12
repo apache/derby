@@ -30,6 +30,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
+import org.apache.derby.iapi.util.ReuseFactory;
+
 /**
  * An OrderByColumn is a column in the ORDER BY clause.  An OrderByColumn
  * can be ordered ascending or descending.
@@ -44,9 +46,15 @@ public class OrderByColumn extends OrderedColumn {
 	private ResultColumn	resultCol;
 	private boolean			ascending = true;
 	private ValueNode expression;
+    /**
+     * If this sort key is added to the result column list then it is at result column position
+     * 1 + resultColumnList.size() - resultColumnList.getOrderBySelect() + addedColumnOffset
+     * If the sort key is already in the result column list then addedColumnOffset < 0.
+     */
+    private int addedColumnOffset = -1;
 
 
-    	/**
+   	/**
 	 * Initializer.
 	 *
 	 * @param expression            Expression of this column
@@ -161,30 +169,22 @@ public class OrderByColumn extends OrderedColumn {
 			}
 
 		}else{
-			ResultColumnList targetCols = target.getResultColumns();
-			ResultColumn col = null;
-			int i = 1;
-			
-			for(i = 1;
-			    i <= targetCols.size();
-			    i  ++){
-				
-				col = targetCols.getOrderByColumn(i);
-				if(col != null && 
-				   col.getExpression() == expression){
-					
-					break;
-				}
-			}
-			
-			resultCol = col;
-			columnPosition = i;
-		    
+            if( SanityManager.DEBUG)
+                SanityManager.ASSERT( addedColumnOffset >= 0,
+                                      "Order by expression was not pulled into the result column list");
+            resolveAddedColumn(target);
 		}
 
 		// Verify that the column is orderable
 		resultCol.verifyOrderable();
 	}
+
+    private void resolveAddedColumn(ResultSetNode target)
+    {
+        ResultColumnList targetCols = target.getResultColumns();
+        columnPosition = targetCols.size() - targetCols.getOrderBySelect() + addedColumnOffset + 1;
+        resultCol = targetCols.getResultColumn( columnPosition);
+    }
 
 	/**
 	 * Pull up this orderby column if it doesn't appear in the resultset
@@ -195,15 +195,42 @@ public class OrderByColumn extends OrderedColumn {
 	public void pullUpOrderByColumn(ResultSetNode target)
 				throws StandardException 
 	{
-		if(expression instanceof ColumnReference){
+        ResultColumnList targetCols = target.getResultColumns();
+
+        // If the target is generated for a select node then we must also pull the order by column
+        // into the select list of the subquery.
+        if((target instanceof SelectNode) && ((SelectNode) target).getGeneratedForGroupbyClause())
+        {
+            if( SanityManager.DEBUG)
+                SanityManager.ASSERT( target.getFromList().size() == 1
+                                      && (target.getFromList().elementAt(0) instanceof FromSubquery)
+                                      && targetCols.size() == 1
+                                      && targetCols.getResultColumn(1) instanceof AllResultColumn,
+                                      "Unexpected structure of selectNode generated for a group by clause");
+
+            ResultSetNode subquery = ((FromSubquery) target.getFromList().elementAt(0)).getSubquery();
+            pullUpOrderByColumn( subquery);
+            if( resultCol == null) // The order by column is referenced by number
+                return;
+
+            // ResultCol is in the subquery's ResultColumnList. We have to transform this OrderByColumn
+            // so that it refers to the column added to the subquery. We assume that the select list
+            // in the top level target is a (generated) AllResultColumn node, so the this order by expression
+            // does not have to be pulled into the the top level ResultColumnList.  Just change this
+            // OrderByColumn to be a reference to the added column. We cannot use an integer column
+            // number because the subquery can have a '*' in its select list, causing the column
+            // number to change when the '*' is expanded.
+            resultCol = null;
+            targetCols.copyOrderBySelect( subquery.getResultColumns());
+            return;
+        }
+
+        if(expression instanceof ColumnReference){
 
 			ColumnReference cr = (ColumnReference) expression;
 
-			ResultColumnList targetCols = target.getResultColumns();
 			resultCol = targetCols.getOrderByColumn(cr.getColumnName(),
-								cr.tableName != null ? 
-								cr.tableName.getFullTableName():
-								null);
+                                                    cr.getTableNameNode());
 
 			if(resultCol == null){
 				resultCol = (ResultColumn) getNodeFactory().getNode(C_NodeTypes.RESULT_COLUMN,
@@ -211,16 +238,17 @@ public class OrderByColumn extends OrderedColumn {
 										    cr,
 										    getContextManager());
 				targetCols.addResultColumn(resultCol);
+                addedColumnOffset = targetCols.getOrderBySelect();
 				targetCols.incOrderBySelect();
 			}
 			
 		}else if(!isReferedColByNum(expression)){
-			ResultColumnList	targetCols = target.getResultColumns();
 			resultCol = (ResultColumn) getNodeFactory().getNode(C_NodeTypes.RESULT_COLUMN,
 									    null,
 									    expression,
 									    getContextManager());
 			targetCols.addResultColumn(resultCol);
+            addedColumnOffset = targetCols.getOrderBySelect();
 			targetCols.incOrderBySelect();
 		}
 	}
@@ -284,7 +312,7 @@ public class OrderByColumn extends OrderedColumn {
 	}
 
 	
-	private static ResultColumn resolveColumnReference(ResultSetNode target,
+	private ResultColumn resolveColumnReference(ResultSetNode target,
 							   ColumnReference cr)
 	throws StandardException{
 		
@@ -336,8 +364,15 @@ public class OrderByColumn extends OrderedColumn {
 		ResultColumnList	targetCols = target.getResultColumns();
 
 		resultCol = targetCols.getOrderByColumn(cr.getColumnName(),
-							cr.getTableName(),
+							cr.getTableNameNode(),
 							sourceTableNumber);
+        /* Search targetCols before using addedColumnOffset because select list wildcards, '*',
+         * are expanded after pullUpOrderByColumn is called. A simple column reference in the
+         * order by clause may be found in the user specified select list now even though it was
+         * not found when pullUpOrderByColumn was called.
+         */
+        if( resultCol == null && addedColumnOffset >= 0)
+            resolveAddedColumn(target);
 							
 		if (resultCol == null || resultCol.isNameGenerated()){
 			String errString = cr.columnName;

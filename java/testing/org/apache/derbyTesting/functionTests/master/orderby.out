@@ -759,6 +759,30 @@ C1         |2
 -----------------------
 1          |2          
 3          |6          
+ij> select bug2769.c1 as x, sum(bug2769.c1) as y from bug2769 group by bug2769.c1 order by bug2769.c1;
+X          |Y          
+-----------------------
+1          |2          
+3          |6          
+ij> select bug2769.c1 as x, sum(bug2769.c1) as y from bug2769 group by bug2769.c1 order by x;
+X          |Y          
+-----------------------
+1          |2          
+3          |6          
+ij> select c1 as x, c2 as y from bug2769 group by bug2769.c1, bug2769.c2 order by c1 + c2;
+X          |Y          
+-----------------------
+1          |1          
+1          |2          
+3          |2          
+3          |3          
+ij> select c1 as x, c2 as y from bug2769 group by bug2769.c1, bug2769.c2 order by -(c1 + c2);
+X          |Y          
+-----------------------
+3          |3          
+3          |2          
+1          |2          
+1          |1          
 ij> rollback;
 ij> -- reset autocommit
 autocommit on;

@@ -206,6 +206,9 @@ public class TableName extends QueryTreeNode
 	 */
 	public boolean equals(TableName otherTableName)
 	{
+        if( otherTableName == null)
+            return false;
+        
 		String fullTableName = getFullTableName();
 		if (fullTableName == null)
 		{

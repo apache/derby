@@ -354,14 +354,14 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * columnName and ensure that there is only one match.
 	 *
 	 * @param columnName	The ResultColumn to get from the list
-	 * @param exposedName	The correlation name on the OrderByColumn, if any
+	 * @param tableName	The table name on the OrderByColumn, if any
 	 * @param tableNumber	The tableNumber corresponding to the FromTable with the
-	 *						exposed name of exposedName, if exposedName != null.
+	 *						exposed name of tableName, if tableName != null.
 	 *
 	 * @return	the column that matches that name.
 	 * @exception StandardException thrown on duplicate
 	 */
-	public ResultColumn getOrderByColumn(String columnName, String exposedName, int tableNumber)
+	public ResultColumn getOrderByColumn(String columnName, TableName tableName, int tableNumber)
 		throws StandardException
 	{
 		int				size = size();
@@ -378,26 +378,15 @@ public class ResultColumnList extends QueryTreeNodeVector
 			 *	o  The RC is not qualified, but its expression is a ColumnReference
 			 *	   from the same table (as determined by the tableNumbers).
 			 */
-			if (exposedName != null)
+			if (tableName != null)
 			{
-				String rcTableName = resultColumn.getTableName();
+                ValueNode rcExpr = resultColumn.getExpression();
+                if (! (rcExpr instanceof ColumnReference))
+						continue;
 
-				if (rcTableName == null)
-				{
-					ValueNode rcExpr = resultColumn.getExpression();
-					if (! (rcExpr instanceof ColumnReference))
-					{
-						continue;
-					}
-					else if (tableNumber != ((ColumnReference) rcExpr).getTableNumber())
-					{
-						continue;
-					}
-				}
-				else if (! exposedName.equals(resultColumn.getTableName()))
-				{
-					continue;
-				}
+                ColumnReference cr = (ColumnReference) rcExpr;
+                if( (! tableName.equals( cr.getTableNameNode())) && tableNumber != cr.getTableNumber())
+                    continue;
 			}
 
 			/* We finally got past the qualifiers, now see if the column
@@ -430,12 +419,12 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * columnName and ensure that there is only one match before the bind process.
 	 *
 	 * @param columnName	The ResultColumn to get from the list
-	 * @param exposedName	The correlation name on the OrderByColumn, if any
+	 * @param tableName	The table name on the OrderByColumn, if any
 	 *
 	 * @return	the column that matches that name.
 	 * @exception StandardException thrown on duplicate
 	 */
-	public ResultColumn getOrderByColumn(String columnName, String exposedName)
+	public ResultColumn getOrderByColumn(String columnName, TableName tableName)
 		throws StandardException
 	{
 		int				size = size();
@@ -449,20 +438,16 @@ public class ResultColumnList extends QueryTreeNodeVector
 			// exposedName will not be null and "*" will not have an expression
 			// or tablename.
 			// We may be checking on "ORDER BY T.A" against "SELECT T.B, T.A".
-			if (exposedName != null)
+			if (tableName != null)
 			{
 				ValueNode rcExpr = resultColumn.getExpression();
-				if (rcExpr == null || resultColumn.getTableName() == null)
-				{
-					continue;
-				}
-				else
-				{
-					if (! (rcExpr instanceof ColumnReference) || ! exposedName.equals(resultColumn.getTableName()))
-					{
-						continue;
-					}
-				}
+				if (rcExpr == null || ! (rcExpr instanceof ColumnReference))
+                {
+                    continue;
+                }
+				ColumnReference cr = (ColumnReference) rcExpr;
+                if( ! tableName.equals( cr.getTableNameNode()))
+                    continue;
 			}
 
 			/* We finally got past the qualifiers, now see if the column
@@ -3925,4 +3910,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 	{
 		return orderBySelect;
 	}
+
+    public void copyOrderBySelect( ResultColumnList src)
+    {
+        orderBySelect = src.orderBySelect;
+    }
 }

@@ -7305,6 +7305,12 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 			 *
 			 * RESOLVE - someday we should try to find matching aggregates
 			 * instead of just adding them.
+             *
+             * NOTE: This rewriting of the query tree makes the handling of an ORDER BY
+             * clause difficult. See OrderByColumn.pullUpOrderByColumn. It makes specific
+             * assumptions about the structure of the generated query tree. Do not make
+             * any changes to this transformation without carefully considering the
+             * OrderByColumn pullUpOrderByColumn and bindOrderByColumn methods.
 			 */
 			if (havingClause != null)
 			{

@@ -320,6 +320,10 @@ rollback;
 create table bug2769(c1 int, c2 int);
 insert into bug2769 values (1, 1), (1, 2), (3, 2), (3, 3);
 select a.c1, sum(a.c1) from bug2769 a group by a.c1 order by a.c1;
+select bug2769.c1 as x, sum(bug2769.c1) as y from bug2769 group by bug2769.c1 order by bug2769.c1;
+select bug2769.c1 as x, sum(bug2769.c1) as y from bug2769 group by bug2769.c1 order by x;
+select c1 as x, c2 as y from bug2769 group by bug2769.c1, bug2769.c2 order by c1 + c2;
+select c1 as x, c2 as y from bug2769 group by bug2769.c1, bug2769.c2 order by -(c1 + c2);
 rollback;
 
 -- reset autocommit
