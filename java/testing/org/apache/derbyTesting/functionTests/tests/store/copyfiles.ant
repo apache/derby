@@ -125,3 +125,9 @@ xab2354.sql
 xab2354_sed.properties
 OnlineCompressTest_app.properties
 OnlineCompressTest_derby.properties
+LogChecksumSetup_app.properties
+LogChecksumSetup_derby.properties
+LogChecksumRecovery_app.properties
+LogChecksumRecovery_derby.properties
+LogChecksumRecovery1_app.properties
+LogChecksumRecovery1_derby.properties
