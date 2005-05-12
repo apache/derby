@@ -71,14 +71,14 @@ public interface Loggable extends Formatable {
 
 	/**
 		The log operations are responsible to create the ByteArray, and the log
-		operations should write out any optional data for the change to the ByteArray.
+		operations should write out any optional data for the change to the 
+        ByteArray.
 		The ByteArray can be prepared when the log operation is constructed,
 		or it can be prepared when getPreparedLog() is called.
 
 		Called by the log manager to allow the log operation to pass the buffer
-		which contains optional data that will be available in to doMe() methods.
-
-		@param out Where and how to write to optional data.
+		which contains optional data that will be available in to doMe() 
+        methods.
 
 		@exception StandardException Standard Cloudscape policy.
 	

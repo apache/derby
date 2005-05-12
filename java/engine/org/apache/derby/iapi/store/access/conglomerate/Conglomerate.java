@@ -349,7 +349,6 @@ public interface Conglomerate extends Storable, DataValueDescriptor
      *
 	 * @return The GroupFetchScanController to be used to fetch the rows.
      *
-	 * @param conglomId             see openScan()
      * @param hold                  see openScan()
      * @param open_mode             see openScan()
      * @param lock_level            see openScan()

@@ -105,7 +105,7 @@ public interface Transaction {
 
 		@param mode A constant of the form LockingPolicy.MODE_*
 		@param isolation A constant of the form LockingPolicy.ISOLATION_*
-		@param stricterOK True if a stricter level of locking is acceptable, 
+		@param stricterOk True if a stricter level of locking is acceptable, 
         false if an exact match is required.
 
 		@return A object that can be used in an openContainer call, 
@@ -322,8 +322,8 @@ public interface Transaction {
         requested with no wait time, and if lock is not granted a 
         SQLState.LOCK_TIMEOUT exception will be thrown.
 
-		@param policy The lock policy to use, if null then then a no locking 
-        policy will be used.
+		@param locking The lock policy to use, if null then then a no locking 
+                       policy will be used.
 
 		@return a valid ContainerHandle or null if the container does not exist.
 
@@ -331,8 +331,10 @@ public interface Transaction {
 
 	*/
 
-	public ContainerHandle openContainer(ContainerKey containerId,
-										 LockingPolicy locking, int mode) 
+	public ContainerHandle openContainer(
+    ContainerKey    containerId,
+    LockingPolicy   locking, 
+    int             mode) 
 		throws StandardException;
 
 
@@ -540,7 +542,6 @@ public interface Transaction {
      * can be delivered on a non-1.2 vm system and not require the javax classes
      * in the path.  
      *
-     * @param cm        The context manager for the current context.
      * @param format_id the format id part of the Xid - ie. Xid.getFormatId().
      * @param global_id the global transaction identifier part of XID - ie.
      *                  Xid.getGlobalTransactionId().

@@ -413,7 +413,7 @@ public interface RawStoreFactory extends Corruptable {
         @param format_id  the format id part of the Xid - ie. Xid.getFormatId().
         @param global_id  the global transaction identifier part of XID - ie.
                           Xid.getGlobalTransactionId().
-        @param branch_id  The branch qualifier of the Xid - ie. 
+        @param local_id   The branch qualifier of the Xid - ie. 
                           Xid.getBranchQaulifier()
 
 		@exception StandardException Standard Cloudscape error policy
@@ -435,9 +435,10 @@ public interface RawStoreFactory extends Corruptable {
 		current context manager.  If a user transaction does not already exist,
 		then create one @see #startTransaction
 
-		@param context is the context manager to use.  An exception will be
-		thrown if context is not the current context.
-        @param transName  If a new transaction is started, it will be given this name.
+		@param contextMgr the context manager to use.  An exception will be 
+                          thrown if context is not the current context.
+        @param transName  If a new transaction is started, it will be given 
+                          this name.
         The name is displayed in the transactiontable VTI.
 
 		@exception StandardException Standard Cloudscape error policy
@@ -602,7 +603,6 @@ public interface RawStoreFactory extends Corruptable {
 		context is popped off the stack.
 		</UL>
 
-		@param compatibilitySpace compatibility space to use for locks.
 		@param contextMgr is the context manager to use.  An exception will be
 		thrown if context is not the current context.
         @param transName is the name of the transaction. This name will be 

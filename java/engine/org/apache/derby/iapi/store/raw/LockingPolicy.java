@@ -159,7 +159,7 @@ public interface LockingPolicy {
 
         @param t                        Transaction to associate lock with.
         @param record                   Record to lock.
-        @param lockForInsertPreviouskey Lock is for a previous key of a insert.
+        @param lockForPreviousKey       Lock is for a previous key of a insert.
         @param waitForLock              Should lock request wait until granted?
 
 		@return true if the lock was obtained, false if it wasn't. 

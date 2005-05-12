@@ -421,12 +421,13 @@ public interface Page
      * <BR>
      * A page latch on the new page will be requested and released.
      *
+     * @param slot           Slot of row to move.
+     * @param row            A template to read the current row into as part
+     *                       of moving it.
      * @param old_handle     An array to be filled in by the call with the 
      *                       old handles of all rows moved.
      * @param new_handle     An array to be filled in by the call with the 
      *                       new handles of all rows moved.
-     * @param new_pageno     An array to be filled in by the call with the 
-     *                       new page number of all rows moved.
      *
      * @return the number of rows processed.
      *
@@ -451,7 +452,7 @@ public interface Page
      * <BR>
      * MT - latched
      *
-     * @param record Handle to deleted or non-deleted record
+     * @param handle    record handle to deleted or non-deleted record
      *
      * @return the number of fields in the record
      *
@@ -622,7 +623,7 @@ public interface Page
 		
 	*/
     /**
-     * Values for insertFlag:
+     * Values for insertFlag.
      * <p>
      *
      * INSERT_INITIAL			- flag initializer
@@ -671,7 +672,7 @@ public interface Page
 
 
     /**
-     * Fetch a record located in the passed in slot
+     * Fetch a record located in the passed in slot.
      * <p>
      * Fetch a record located in the passed in slot and fill-in the passed in 
      * StorebleRow and the Object columns contained within. If row
@@ -764,7 +765,8 @@ public interface Page
 		<P>
 		<B>Locking Policy</B>
 		<BR>
-			No locks are obtained. It is up to the caller to obtain the correct locks.
+			No locks are obtained. 
+            It is up to the caller to obtain the correct locks.
 		<BR>
 
 		It is guaranteed that the page latch is not released by this method
@@ -772,7 +774,6 @@ public interface Page
 		@param slot is the slot number
 		@param fieldId is the column id
 		@param column is to be filled in with information from the record.
-		@param forUpdate true if the intention is to update this record, false otherwise.
 
 		@return the Handle to the record that is locked
 
@@ -784,8 +785,8 @@ public interface Page
 		@see LockingPolicy
 	 */
 	public RecordHandle fetchFieldFromSlot(
-    int                 slot, 
-    int                 fieldId, 
+    int    slot, 
+    int    fieldId, 
     Object column)
 		throws StandardException;
 
@@ -967,31 +968,34 @@ public interface Page
      *
      * <BR>
 	 *<B>NOTE : Data Logging for Purges</B><BR>
-	 * @param needDataLogged is used to specify whether data is required to be
+	 * needDataLogged is used to specify whether data is required to be
 	 * logged for purge operatios. Data Logging is required 
 	 * Only if the row can be reused or required for key search if a purge is
 	 * rolled back;(rollback can occur if the system crashes in the middle of
 	 * purges or some unexpected error condiditions  rolled back.
 	 * For example: 
-	 * 1)Btree expects the data to be there if a purge is rolled back;needDataLogged=true
+	 * 1)Btree expects the data to be there if a purge is rolled back;
+     *   needDataLogged=true
 	 * 2)Heaps does not care if data exist because only operation that can occur
 	 * on a row whose purge rolled back is purging again.(needDataLogged=false)
 	 * 
      * MT - latched
      *
      *
-     * @param slot	    the starting slot number
-     * @param numpurges	number of slots to purge. 
-     *                  If <= 0, just returns as a no-op.
-	 * @param needDataLogged  if set to true data is logged for purges else only headers.
+     * @param slot	            the starting slot number
+     * @param numpurges	        number of slots to purge.  If <= 0, 
+     *                          just returns as a no-op.
+	 * @param needDataLogged    if set to true data is logged for purges else 
+     *                          only headers.
 	 *
      * @exception StandardException	Standard Cloudscape error policy
      * @see LockingPolicy
      **/
 	public void purgeAtSlot(
-    int slot, 
-    int n,
-	boolean needDataLogged) throws StandardException;
+    int     slot, 
+    int     numpurges,
+	boolean needDataLogged) 
+        throws StandardException;
 
 
     /**
