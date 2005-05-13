@@ -2647,7 +2647,6 @@ currentOfClause() throws StandardException :
 	String cursorName = null;
 }
 {
-	//cursor names are limited to 18 characters
 	<CURRENT> <OF> cursorName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{ 
 		return (FromTable) nodeFactory.getNode(
@@ -3239,7 +3238,6 @@ columnDefinition(TableElementList tableElementList) throws StandardException :
 	*/
 
 	/* identifier() used to be columnName() */
-	//unqualified column names are limited to 30 characters
 	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 		( typeDescriptor = dataTypeDDL() 
 		)
@@ -4517,7 +4515,6 @@ asClause() throws StandardException :
 }
 {
 	/* identifier() used to be columnName() */
-	//unqualified column names are limited to 30 characters
 	[ <AS> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		return columnName;
@@ -6496,7 +6493,6 @@ columnReference() throws StandardException :
 			columnName = thirdName;
 		}
 
-		//column name and schema name can not be longer than 30 characters and table name can not be longer than 128 characters
 		checkIdentifierLengthLimit(columnName, Limits.MAX_IDENTIFIER_LENGTH);
 		if (schemaName != null)
 			checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
@@ -6675,7 +6671,6 @@ forUpdateColumn(Vector columnList) throws StandardException :
 }
 {
 	/* identifier() used to be columnName() */
-	//unqualified column names are limited to 30 characters
 	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		columnList.addElement(columnName);
@@ -7730,7 +7725,6 @@ columnNameItem(ResultColumnList columnList) throws StandardException :
 }
 {
 	/* identifier() used to be columnName() */
-	//unqualified column names are limited to 30 characters
 	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		/*
