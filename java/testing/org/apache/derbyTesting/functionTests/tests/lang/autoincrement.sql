@@ -691,3 +691,35 @@ select * from t3;
 drop table t1;
 drop table t2;
 drop table t3;
+
+-- test IDENTITY_VAL_LOCAL function with 2 different connections
+-- connection one
+connect 'wombat' as conn1;
+create table t1 (c11 int generated always as identity (start with 101, increment by 3), c12 int);
+create table t2 (c21 int generated always as identity (start with 201, increment by 5), c22 int);
+-- IDENTITY_VAL_LOCAL() will return NULL because no single row insert into table with identity column yet on this connection conn1
+values IDENTITY_VAL_LOCAL();
+commit;
+-- connection two
+connect 'wombat' as conn2;
+-- IDENTITY_VAL_LOCAL() will return NULL because no single row insert into table with identity column yet on this connection conn2
+values IDENTITY_VAL_LOCAL();
+insert into t2 (c22) values (1);
+-- IDENTITY_VAL_LOCAL() will return 201 because there was single row insert into table t2 with identity column on this connection conn2
+values IDENTITY_VAL_LOCAL();
+set connection conn1;
+-- IDENTITY_VAL_LOCAL() will continue to return NULL because no single row insert into table with identity column yet on this connection conn1
+values IDENTITY_VAL_LOCAL();
+insert into t1 (c12) values (1);
+-- IDENTITY_VAL_LOCAL() will return 101 because there was single row insert into table t1 with identity column on this connection conn1
+values IDENTITY_VAL_LOCAL();
+set connection conn2;
+-- IDENTITY_VAL_LOCAL() on conn2 not impacted by single row insert into table with identity column on conn1
+values IDENTITY_VAL_LOCAL();
+-- notice that committing the transaction does not affect IDENTITY_VAL_LOCAL()
+commit;
+values IDENTITY_VAL_LOCAL();
+drop table t1;
+drop table t2;
+
+

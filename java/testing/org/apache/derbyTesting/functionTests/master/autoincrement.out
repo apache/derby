@@ -1379,4 +1379,60 @@ ij> drop table t2;
 0 rows inserted/updated/deleted
 ij> drop table t3;
 0 rows inserted/updated/deleted
-ij> 
+ij> -- test IDENTITY_VAL_LOCAL function with 2 different connections
+-- connection one
+connect 'wombat' as conn1;
+ij(CONN1)> create table t1 (c11 int generated always as identity (start with 101, increment by 3), c12 int);
+0 rows inserted/updated/deleted
+ij(CONN1)> create table t2 (c21 int generated always as identity (start with 201, increment by 5), c22 int);
+0 rows inserted/updated/deleted
+ij(CONN1)> -- IDENTITY_VAL_LOCAL() will return NULL because no single row insert into table with identity column yet on this connection conn1
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+NULL                           
+ij(CONN1)> commit;
+ij(CONN1)> -- connection two
+connect 'wombat' as conn2;
+ij(CONN2)> -- IDENTITY_VAL_LOCAL() will return NULL because no single row insert into table with identity column yet on this connection conn2
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+NULL                           
+ij(CONN2)> insert into t2 (c22) values (1);
+1 row inserted/updated/deleted
+ij(CONN2)> -- IDENTITY_VAL_LOCAL() will return 201 because there was single row insert into table t2 with identity column on this connection conn2
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+201                            
+ij(CONN2)> set connection conn1;
+ij(CONN1)> -- IDENTITY_VAL_LOCAL() will continue to return NULL because no single row insert into table with identity column yet on this connection conn1
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+NULL                           
+ij(CONN1)> insert into t1 (c12) values (1);
+1 row inserted/updated/deleted
+ij(CONN1)> -- IDENTITY_VAL_LOCAL() will return 101 because there was single row insert into table t1 with identity column on this connection conn1
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+101                            
+ij(CONN1)> set connection conn2;
+ij(CONN2)> -- IDENTITY_VAL_LOCAL() on conn2 not impacted by single row insert into table with identity column on conn1
+values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+201                            
+ij(CONN2)> -- notice that committing the transaction does not affect IDENTITY_VAL_LOCAL()
+commit;
+ij(CONN2)> values IDENTITY_VAL_LOCAL();
+1                              
+-------------------------------
+201                            
+ij(CONN2)> drop table t1;
+0 rows inserted/updated/deleted
+ij(CONN2)> drop table t2;
+0 rows inserted/updated/deleted
+ij(CONN2)> 
