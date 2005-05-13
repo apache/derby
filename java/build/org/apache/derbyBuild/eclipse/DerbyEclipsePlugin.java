@@ -86,7 +86,10 @@ public class DerbyEclipsePlugin{
       				      "\t\t <library name=\"derby.jar\"> \n" +
          			      "\t\t\t <export name=\"*\"/> \n" +
       				      "\t\t </library> \n" +
-      				      "\t\t <library name=\"derbytools.jar\"> \n"+
+                                      "\t\t <library name=\"derbyclient.jar\"> \n" +
+                                      "\t\t\t <export name=\"*\"/> \n" +
+                                      "\t\t </library> \n" +
+      				      "\t\t <library name=\"derbytools.jar\"> \n" +
          			      "\t\t\t <export name=\"*\"/> \n"+
       				      "\t\t </library> \n"+
       				      "\t\t <library name=\"derbynet.jar\"> \n"+
