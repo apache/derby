@@ -36,7 +36,7 @@ import java.sql.Types;
 import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**
@@ -306,7 +306,7 @@ public class StatementDuration extends VTITemplate
 				}
 				}
 
-				output = StringUtil.truncate(output, DB2Limit.DB2_VARCHAR_MAXWIDTH);
+				output = StringUtil.truncate(output, Limits.DB2_VARCHAR_MAXWIDTH);
 
 
 				return output;
@@ -334,7 +334,7 @@ public class StatementDuration extends VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("THREADID",  Types.VARCHAR, false, 80),
 		EmbedResultSetMetaData.getResultColumnDescriptor("XID",       Types.VARCHAR, false, 15),
 		EmbedResultSetMetaData.getResultColumnDescriptor("LCCID",     Types.VARCHAR, false, 10),
-		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",   Types.VARCHAR, true, DB2Limit.DB2_VARCHAR_MAXWIDTH),
+		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",   Types.VARCHAR, true, Limits.DB2_VARCHAR_MAXWIDTH),
 		EmbedResultSetMetaData.getResultColumnDescriptor("DURATION",  Types.VARCHAR, false, 10),
 	};
 	

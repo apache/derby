@@ -35,7 +35,7 @@ import org.apache.derby.vti.VTIEnvironment;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.sql.ResultSetMetaData;
@@ -175,7 +175,7 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 		case 7:
 
 			str = info.getStatementTextString();
-			str = StringUtil.truncate(str, DB2Limit.DB2_VARCHAR_MAXWIDTH);
+			str = StringUtil.truncate(str, Limits.DB2_VARCHAR_MAXWIDTH);
 			break;
 
 		default:
@@ -235,7 +235,7 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 		EmbedResultSetMetaData.getResultColumnDescriptor("TYPE",          Types.VARCHAR, false, 30),
 		EmbedResultSetMetaData.getResultColumnDescriptor("STATUS",        Types.VARCHAR, false, 8),
 		EmbedResultSetMetaData.getResultColumnDescriptor("FIRST_INSTANT", Types.VARCHAR, true,  20),
-		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_TEXT",      Types.VARCHAR, true,  DB2Limit.DB2_VARCHAR_MAXWIDTH),
+		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_TEXT",      Types.VARCHAR, true,  Limits.DB2_VARCHAR_MAXWIDTH),
 	};
 	
 	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);

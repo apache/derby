@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.DB2Limit
+   Derby - Class org.apache.derby.iapi.reference.Limits
 
    Copyright 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -20,11 +20,11 @@
 
 package org.apache.derby.iapi.reference;
 
-public interface DB2Limit
+public interface Limits
 {
 	/**
-     * Various fixed numbers related to DB2 limits.
-     */
+        * Various fixed Limits. DB2 related limits are prefixed with "DB2_".
+        */
 
 	public static final int DB2_MAX_TRIGGER_RECURSION = 16; /* Maximum nesting level for triggers */
 
@@ -53,13 +53,11 @@ public interface DB2Limit
 	// SQLCAMESSAGE procedure. See org.apache.derby.impl.sql.catalog.
 	public static final int DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH = 2400;
 
-	/* Some identifiers like Constraint name, Cursor name, Function name, Index name, Trigger name
-	* are limited to 18 character in DB2*/
-	public static final int DB2_MAX_IDENTIFIER_LENGTH18 = 18;
-	/* Some identifiers like Column name, Schema name are limited to 30 characters in DB2*/
-	public static final int DB2_MAX_IDENTIFIER_LENGTH30 = 30;
-	/* Some identifiers like Savepoint names, Table names, view names etc are limited to 128 characters in DB2*/
-	public static final int DB2_MAX_IDENTIFIER_LENGTH128 = 128;
+        /* Identifiers (Constraint, Cursor, Function/Procedure, Index,
+         * Trigger, Column, Schema, Savepoint, Table and View names)
+         * are limited to 128 */ 
+        public static final int MAX_IDENTIFIER_LENGTH = 128;
+
 	public static final int	DB2_CHAR_MAXWIDTH = 254;
 	public static final int	DB2_VARCHAR_MAXWIDTH = 32672;
 	public static final int DB2_LOB_MAXWIDTH = 2147483647;
@@ -69,9 +67,9 @@ public interface DB2Limit
 	public static final int DB2_MAX_CHARACTER_LITERAL_LENGTH = 32672;
 	public static final int DB2_MAX_HEX_LITERAL_LENGTH = 16336;
 
-	public static final int MIN_COL_LENGTH_FOR_CURRENT_USER = 8;
-	public static final int MIN_COL_LENGTH_FOR_CURRENT_SCHEMA = 128;     
-	public static final int MAX_USERID_LENGTH = 30;
+	public static final int DB2_MIN_COL_LENGTH_FOR_CURRENT_USER = 8;
+	public static final int DB2_MIN_COL_LENGTH_FOR_CURRENT_SCHEMA = 128;     
+	public static final int DB2_MAX_USERID_LENGTH = 30;
 
     /**
      * DB2 TABLESPACE page size limits
@@ -83,9 +81,9 @@ public interface DB2Limit
      * DECIMAL type limits
      */
 
-	public static final int MAX_DECIMAL_PRECISION_SCALE = 31;
-	public static final int DEFAULT_DECIMAL_PRECISION   = 5;
-	public static final int DEFAULT_DECIMAL_SCALE       = 0;
+	public static final int DB2_MAX_DECIMAL_PRECISION_SCALE = 31;
+	public static final int DB2_DEFAULT_DECIMAL_PRECISION   = 5;
+	public static final int DB2_DEFAULT_DECIMAL_SCALE       = 0;
 
     /**
      * REAL/DOUBLE range limits

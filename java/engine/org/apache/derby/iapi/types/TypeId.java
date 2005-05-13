@@ -31,7 +31,7 @@ import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.DecimalTypeIdImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -94,21 +94,21 @@ public final class TypeId implements Formatable
         public static final int REAL_SCALE                              = 0;
         public static final int REAL_MAXWIDTH                   = 4;
 
-        public static final int DECIMAL_PRECISION                       = DB2Limit.MAX_DECIMAL_PRECISION_SCALE;
-        public static final int DECIMAL_SCALE                           = DB2Limit.MAX_DECIMAL_PRECISION_SCALE;
-        public static final int DECIMAL_MAXWIDTH                        = DB2Limit.MAX_DECIMAL_PRECISION_SCALE;
+        public static final int DECIMAL_PRECISION                       = Limits.DB2_MAX_DECIMAL_PRECISION_SCALE;
+        public static final int DECIMAL_SCALE                           = Limits.DB2_MAX_DECIMAL_PRECISION_SCALE;
+        public static final int DECIMAL_MAXWIDTH                        = Limits.DB2_MAX_DECIMAL_PRECISION_SCALE;
 
         public static final int BOOLEAN_MAXWIDTH                        = 1;
 
-        public static final int CHAR_MAXWIDTH           = DB2Limit.DB2_CHAR_MAXWIDTH;
-        public static final int VARCHAR_MAXWIDTH        = DB2Limit.DB2_VARCHAR_MAXWIDTH;
-        public static final int LONGVARCHAR_MAXWIDTH = DB2Limit.DB2_LONGVARCHAR_MAXWIDTH;
+        public static final int CHAR_MAXWIDTH           = Limits.DB2_CHAR_MAXWIDTH;
+        public static final int VARCHAR_MAXWIDTH        = Limits.DB2_VARCHAR_MAXWIDTH;
+        public static final int LONGVARCHAR_MAXWIDTH = Limits.DB2_LONGVARCHAR_MAXWIDTH;
         public static final int NATIONAL_CHAR_MAXWIDTH  = Integer.MAX_VALUE;
         public static final int NATIONAL_VARCHAR_MAXWIDTH       = Integer.MAX_VALUE;
-        public static final int NATIONAL_LONGVARCHAR_MAXWIDTH = DB2Limit.DB2_LONGVARCHAR_MAXWIDTH;
-        public static final int BIT_MAXWIDTH            = DB2Limit.DB2_CHAR_MAXWIDTH;
-        public static final int VARBIT_MAXWIDTH         = DB2Limit.DB2_VARCHAR_MAXWIDTH;
-        public static final int LONGVARBIT_MAXWIDTH = DB2Limit.DB2_LONGVARCHAR_MAXWIDTH;
+        public static final int NATIONAL_LONGVARCHAR_MAXWIDTH = Limits.DB2_LONGVARCHAR_MAXWIDTH;
+        public static final int BIT_MAXWIDTH            = Limits.DB2_CHAR_MAXWIDTH;
+        public static final int VARBIT_MAXWIDTH         = Limits.DB2_VARCHAR_MAXWIDTH;
+        public static final int LONGVARBIT_MAXWIDTH = Limits.DB2_LONGVARCHAR_MAXWIDTH;
 
         // not supposed to be limited! 4096G should be ok(?), if Cloudscape can handle...
         public static final int BLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long

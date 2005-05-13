@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.catalog;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
@@ -8180,7 +8180,7 @@ public	class	DataDictionaryImpl
 
 
         // void SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(
-        //     varchar(128), varchar(DB2Limit.DB2_VARCHAR_MAXWIDTH))
+        //     varchar(128), varchar(Limits.DB2_VARCHAR_MAXWIDTH))
         {
 
             // procedure argument names
@@ -8193,7 +8193,7 @@ public	class	DataDictionaryImpl
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.VARCHAR, 128),
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, DB2Limit.DB2_VARCHAR_MAXWIDTH)
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
 
             createSystemProcedureOrFunction(
@@ -8279,7 +8279,7 @@ public	class	DataDictionaryImpl
                 tc);
         }
 
-        // void SYSCS_UTIL.SYSCS_BACKUP_DATABASE(varchar DB2Limit.DB2_VARCHAR_MAXWIDTH)
+        // void SYSCS_UTIL.SYSCS_BACKUP_DATABASE(varchar Limits.DB2_VARCHAR_MAXWIDTH)
         {
             // procedure argument names
             String[] arg_names = {"BACKUPDIR"};
@@ -8287,7 +8287,7 @@ public	class	DataDictionaryImpl
             // procedure argument types
             TypeDescriptor[] arg_types = {
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, DB2Limit.DB2_VARCHAR_MAXWIDTH)
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
 
             createSystemProcedureOrFunction(
@@ -8303,7 +8303,7 @@ public	class	DataDictionaryImpl
         }
 
         // void SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
-        //     varchar DB2Limit.DB2_VARCHAR_MAXWIDTH, smallint)
+        //     varchar Limits.DB2_VARCHAR_MAXWIDTH, smallint)
         {
             // procedure argument names
             String[] arg_names = {"BACKUPDIR", "DELETE_ARCHIVED_LOG_FILES"};
@@ -8311,7 +8311,7 @@ public	class	DataDictionaryImpl
             // procedure argument types
             TypeDescriptor[] arg_types = {
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, DB2Limit.DB2_VARCHAR_MAXWIDTH),
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.SMALLINT)
             };
@@ -8404,7 +8404,7 @@ public	class	DataDictionaryImpl
         // the following need to be functions when that is supported.
         // until then calling them will not work.
 
-        // VARCHAR(DB2Limit.DB2_VARCHAR_MAXWIDTH) 
+        // VARCHAR(Limits.DB2_VARCHAR_MAXWIDTH) 
         // SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY(varchar(128))
 
         {
@@ -8426,7 +8426,7 @@ public	class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, DB2Limit.DB2_VARCHAR_MAXWIDTH),
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
                 tc);
         }
 
@@ -8468,13 +8468,13 @@ public	class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, DB2Limit.DB2_VARCHAR_MAXWIDTH),
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
 
                 /*
                 TODO - mikem, wants to be a CLOB, but don't know how to do 
                 that yet.  Testing it with varchar for now.
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.CLOB, DB2Limit.DB2_LOB_MAXWIDTH),
+                    Types.CLOB, Limits.DB2_LOB_MAXWIDTH),
                 */
                 tc);
         }
@@ -8867,7 +8867,7 @@ public	class	DataDictionaryImpl
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-						Types.VARCHAR, DB2Limit.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH),
+						Types.VARCHAR, Limits.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 8),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),

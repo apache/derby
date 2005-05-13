@@ -47,7 +47,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.JBitSet;
@@ -142,7 +142,7 @@ public class OrderByList extends OrderedColumnList
 		int size = size();
 
 		/* Only 1012 columns allowed in ORDER BY clause */
-		if (size > DB2Limit.DB2_MAX_ELEMENTS_IN_ORDER_BY)
+		if (size > Limits.DB2_MAX_ELEMENTS_IN_ORDER_BY)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}

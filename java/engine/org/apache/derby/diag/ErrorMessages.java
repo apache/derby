@@ -35,7 +35,7 @@ import java.lang.Math;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.vti.VTITemplate;
@@ -113,7 +113,7 @@ public class ErrorMessages extends VTITemplate implements VTICosting, java.secur
 		if (retCode) {
 		  SQLState =StandardException.getSQLStateFromIdentifier(k);
 		  message = MessageService.getTextMessage(k);
-		  message = StringUtil.truncate(message, DB2Limit.DB2_VARCHAR_MAXWIDTH);
+		  message = StringUtil.truncate(message, Limits.DB2_VARCHAR_MAXWIDTH);
 		}
 		return retCode;
 	}
@@ -228,7 +228,7 @@ public class ErrorMessages extends VTITemplate implements VTICosting, java.secur
 	private static final ResultColumnDescriptor[] columnInfo = {
 
 		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_STATE",  Types.VARCHAR, true, 5),
-		EmbedResultSetMetaData.getResultColumnDescriptor("MESSAGE",    Types.VARCHAR, true, DB2Limit.DB2_VARCHAR_MAXWIDTH),
+		EmbedResultSetMetaData.getResultColumnDescriptor("MESSAGE",    Types.VARCHAR, true, Limits.DB2_VARCHAR_MAXWIDTH),
 		EmbedResultSetMetaData.getResultColumnDescriptor("SEVERITY",   Types.INTEGER, true),
 	};
 	

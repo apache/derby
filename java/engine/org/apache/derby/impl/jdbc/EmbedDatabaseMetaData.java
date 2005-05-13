@@ -34,7 +34,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.sql.execute.GenericConstantActionFactory;
 import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
@@ -1095,7 +1095,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max literal length
      */
 	public int getMaxColumnNameLength() {
-		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30;
+		return Limits.MAX_IDENTIFIER_LENGTH;
 	}
 
     /**
@@ -1160,7 +1160,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max cursor name length in bytes
      */
 	public int getMaxCursorNameLength() {
-		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18;
+		return Limits.MAX_IDENTIFIER_LENGTH;
 	}
 
     /**
@@ -1178,7 +1178,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length in bytes
      */
 	public int getMaxSchemaNameLength()  {
-		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30;
+		return Limits.MAX_IDENTIFIER_LENGTH;
 	}
 
     /**
@@ -1187,7 +1187,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length in bytes
      */
 	public int getMaxProcedureNameLength() {
-		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128;
+		return Limits.MAX_IDENTIFIER_LENGTH;
 	}
 
     /**
@@ -1243,7 +1243,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length in bytes
      */
 	public int getMaxTableNameLength() {
-		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128;
+		return Limits.MAX_IDENTIFIER_LENGTH;
 	}
 
     /**
@@ -1261,7 +1261,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length  in bytes
      */
 	public int getMaxUserNameLength() {
-		return DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30;
+		return Limits.DB2_MAX_USERID_LENGTH;
 	}
 
     //----------------------------------------------------------------------

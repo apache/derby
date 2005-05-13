@@ -22,7 +22,7 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.Property;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.impl.store.raw.data.BaseContainer;
@@ -1111,8 +1111,8 @@ public abstract class FileContainer
 		pageSize = 
 			PropertyUtil.getServiceInt(tc, createArgs,
 				Property.PAGE_SIZE_PARAMETER,  
-				DB2Limit.DB2_MIN_PAGE_SIZE, 
-				DB2Limit.DB2_MAX_PAGE_SIZE, 
+				Limits.DB2_MIN_PAGE_SIZE, 
+				Limits.DB2_MAX_PAGE_SIZE, 
 				RawStoreFactory.PAGE_SIZE_DEFAULT); 
 
         // rather than throw error, just automatically set page size to 

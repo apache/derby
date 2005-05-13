@@ -22,7 +22,7 @@ package org.apache.derby.impl.drda;
 import java.sql.Types;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import java.sql.SQLException;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 class FdocaConstants
 {
@@ -240,8 +240,8 @@ class FdocaConstants
 	// their toString() method and their limit is 64K as well.
 	// BUT, that said, we ultimately have to match DB2's limit,
 	// so just use that...
-	protected static int LONGVARCHAR_MAX_LEN = DB2Limit.DB2_LONGVARCHAR_MAXWIDTH;
-	protected static int LONGVARBINARY_MAX_LEN = DB2Limit.DB2_LONGVARCHAR_MAXWIDTH;
+	protected static int LONGVARCHAR_MAX_LEN = Limits.DB2_LONGVARCHAR_MAXWIDTH;
+	protected static int LONGVARBINARY_MAX_LEN = Limits.DB2_LONGVARCHAR_MAXWIDTH;
 	protected static int LONGVARCHAR_LEN_NUMBYTES = 2;
 
 	// JCC  only supports a max precision of 31 like DB2

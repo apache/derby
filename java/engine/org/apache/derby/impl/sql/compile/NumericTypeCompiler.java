@@ -41,7 +41,7 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -447,9 +447,9 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			val = this.getScale(operator, leftType, rightType) +
 					Math.max(lprec - lscale, rprec - rscale) + 1;
 
-			if (val > DB2Limit.MAX_DECIMAL_PRECISION_SCALE)
+			if (val > Limits.DB2_MAX_DECIMAL_PRECISION_SCALE)
 			// then, like DB2, just set it to the max possible.
-				val = DB2Limit.MAX_DECIMAL_PRECISION_SCALE;
+				val = Limits.DB2_MAX_DECIMAL_PRECISION_SCALE;
 		}
 
 		if (val > Integer.MAX_VALUE)

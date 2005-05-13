@@ -31,6 +31,8 @@ import org.apache.derby.iapi.sql.StatementType;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
+import org.apache.derby.iapi.reference.Limits;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.Activation;
@@ -109,7 +111,7 @@ class SetSchemaConstantAction extends GenericConstantAction
 			DataValueDescriptor dvs = pvs.getParameter(0);
 			thisSchemaName = dvs.getString();
 			//null parameter is not allowed
-			if (thisSchemaName == null || thisSchemaName.length() > 128)
+			if (thisSchemaName == null || thisSchemaName.length() > Limits.MAX_IDENTIFIER_LENGTH)
 				throw StandardException.newException(SQLState.LANG_DB2_REPLACEMENT_ERROR, "CURRENT SCHEMA");
 		}
 		else if (type == StatementType.SET_SCHEMA_USER)

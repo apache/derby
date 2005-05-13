@@ -47,7 +47,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;

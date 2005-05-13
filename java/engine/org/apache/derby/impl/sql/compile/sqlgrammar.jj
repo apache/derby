@@ -125,7 +125,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
@@ -326,13 +326,13 @@ public class SQLParser
 	switch (type) {
 		case Types.BINARY:
 		case Types.CHAR:
-			if (length  > DB2Limit.DB2_CHAR_MAXWIDTH)
+			if (length  > Limits.DB2_CHAR_MAXWIDTH)
 				valid = false;
 			break;
 			
 		case Types.VARBINARY:
 		case Types.VARCHAR:
-			if (length  > DB2Limit.DB2_VARCHAR_MAXWIDTH)
+			if (length  > Limits.DB2_VARCHAR_MAXWIDTH)
 				valid = false;
 
 			break;
@@ -2582,7 +2582,7 @@ deleteBody() throws StandardException :
 		return getDeleteNode(fromTable, tableName, whereClause);
 	}
 |
-	<FROM> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	<FROM> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	    [targetProperties = propertyList() ] 
 		[ 
 			whereToken = <WHERE>
@@ -2648,7 +2648,7 @@ currentOfClause() throws StandardException :
 }
 {
 	//cursor names are limited to 18 characters
-	<CURRENT> <OF> cursorName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18, true)
+	<CURRENT> <OF> cursorName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{ 
 		return (FromTable) nodeFactory.getNode(
 								C_NodeTypes.CURRENT_OF_NODE,
@@ -2759,7 +2759,7 @@ targetTable() throws StandardException :
 								getContextManager()); 
 	}
 |
-	tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		return (QueryTreeNode) tableName;
 	}
@@ -2830,7 +2830,7 @@ updateBody() throws StandardException :
 		return getUpdateNode(fromTable, tableName, columnList, whereClause);
 	}
 |
-		tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+		tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		[targetProperties = propertyList() ] 
 		<SET> columnList = setClauseList()
 		[ 
@@ -3019,18 +3019,18 @@ savepointStatement() throws StandardException :
 }
 {
 	(
-	<SAVEPOINT> savepointName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true) (savepointStatementClause(savepointStatementClauses))+
+	<SAVEPOINT> savepointName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) (savepointStatementClause(savepointStatementClauses))+
 	{
 		//ON ROLLBACK RETAIN CURSORS is mandatory
 		if (savepointStatementClauses[2] == null)
 				throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "MISSING ON ROLLBACK RETAIN CURSORS");
 		savepointStatementType = 1;
 	}
-|	<ROLLBACK> [ <WORK> ] <TO> <SAVEPOINT> [ savepointName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true) ]
+|	<ROLLBACK> [ <WORK> ] <TO> <SAVEPOINT> [ savepointName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) ]
 	{
 		savepointStatementType = 2;
 	}
-|	<RELEASE> [ <TO> ] <SAVEPOINT> savepointName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+|	<RELEASE> [ <TO> ] <SAVEPOINT> savepointName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		savepointStatementType = 3;
 	}
@@ -3104,7 +3104,7 @@ globalTemporaryTableDeclaration() throws StandardException :
 	Object[] declareTableClauses = new Object[3];
 }
 { 
-	<DECLARE> <GLOBAL> <TEMPORARY> <TABLE> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+	<DECLARE> <GLOBAL> <TEMPORARY> <TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		tableElementList = tableElementList()
 		( declareTableClause(declareTableClauses) ) +
 	{
@@ -3240,7 +3240,7 @@ columnDefinition(TableElementList tableElementList) throws StandardException :
 
 	/* identifier() used to be columnName() */
 	//unqualified column names are limited to 30 characters
-	columnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true) 
+	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 		( typeDescriptor = dataTypeDDL() 
 		)
 	[ defaultNode = defaultAndConstraints(typeDescriptor, tableElementList, columnName, autoIncrementInfo) ]
@@ -3880,7 +3880,7 @@ lengthAndModifier() throws StandardException :
 			
 			// match DB2 limits of 1 to 2147483647
 			if ((specifiedLength > 0L) && 
-                (specifiedLength <= DB2Limit.DB2_LOB_MAXWIDTH))
+                (specifiedLength <= Limits.DB2_LOB_MAXWIDTH))
             {
 				return (int)specifiedLength;
             }
@@ -3888,7 +3888,7 @@ lengthAndModifier() throws StandardException :
 			// DB2 allows 2G or 2048M or 2097152k that calculate out to 
             // 2147483648, but sets the length to be one less.
 			if (mul != 1 && specifiedLength == 2147483648L)
-				return DB2Limit.DB2_LOB_MAXWIDTH;
+				return Limits.DB2_LOB_MAXWIDTH;
 				
 		}
 		catch (NumberFormatException nfe)
@@ -4090,7 +4090,7 @@ qualifiedName( int nodeType, int id_length_limit) throws StandardException :
 	String	secondName = null;
 }
 {
-	firstName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
+	firstName = identifier(Limits.MAX_IDENTIFIER_LENGTH, false)
 				[
 					// This LOOKAHEAD is necessary because a selectSublist()
 					// can be a qualifiedName.*. Make sure that the token after
@@ -4098,7 +4098,7 @@ qualifiedName( int nodeType, int id_length_limit) throws StandardException :
 					// optional element.
 					LOOKAHEAD( {getToken(1).kind == PERIOD &&
 								getToken(2).kind != ASTERISK} )
-					<PERIOD> secondName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
+					<PERIOD> secondName = identifier(Limits.MAX_IDENTIFIER_LENGTH, false)
 				]
 	{
 		if (secondName == null)
@@ -4114,7 +4114,7 @@ qualifiedName( int nodeType, int id_length_limit) throws StandardException :
 		//limit the qualifiedId to the id length limit passed to this method
 		checkIdentifierLengthLimit(qualifiedId, id_length_limit);
 		if (schemaName != null)
-			checkIdentifierLengthLimit(schemaName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30);
+			checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
 
 		return (TableName) nodeFactory.getNode(
 								nodeType,
@@ -4457,7 +4457,7 @@ selectSublist(ResultColumnList resultColumns) throws StandardException :
 			)
 		}
 	)
-	tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) <PERIOD> <ASTERISK>
+	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <PERIOD> <ASTERISK>
 	{
 		allResultColumn = (ResultColumn) nodeFactory.getNode(
 										C_NodeTypes.ALL_RESULT_COLUMN,
@@ -4518,7 +4518,7 @@ asClause() throws StandardException :
 {
 	/* identifier() used to be columnName() */
 	//unqualified column names are limited to 30 characters
-	[ <AS> ] columnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true)
+	[ <AS> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		return columnName;
 	}
@@ -6287,7 +6287,7 @@ routineInvocation() throws StandardException :
 	MethodCallNode	methodNode;
 }
 {
-	routineName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+	routineName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		methodCallParameterList(parameterList)
 	{
 
@@ -6360,7 +6360,7 @@ columnNameForInvocation() throws StandardException :
 	ValueNode	retval;
 }
 {
-	firstName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	firstName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	[
 		// This LOOKAHEAD is required because we have the following cases:
 		// schema.table.column.method()
@@ -6374,7 +6374,7 @@ columnNameForInvocation() throws StandardException :
 					getToken(1).kind == PERIOD &&
 					getToken(3).kind == PERIOD
 				} )
-		<PERIOD> secondName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+		<PERIOD> secondName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[
 			// See above: we don't want to mistake the method name for a
 			// column name.
@@ -6382,7 +6382,7 @@ columnNameForInvocation() throws StandardException :
 						getToken(1).kind == PERIOD &&
 						getToken(3).kind == PERIOD
 					} )
-			<PERIOD> thirdName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+			<PERIOD> thirdName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		]
 	]
 	{
@@ -6451,7 +6451,7 @@ columnReference() throws StandardException :
 	TableName	tabName = null;
 }
 {
-	firstName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
+	firstName = identifier(Limits.MAX_IDENTIFIER_LENGTH, false)
 	[
 		// This LOOKAHEAD is needed to ensure that, if the identifier
 		// after the PERIOD is a method name , we
@@ -6460,7 +6460,7 @@ columnReference() throws StandardException :
 					getToken(1).kind == PERIOD &&
 					getToken(3).kind != LEFT_PAREN
 				} )
-		<PERIOD> secondName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
+		<PERIOD> secondName = identifier(Limits.MAX_IDENTIFIER_LENGTH, false)
 		[
 			// This LOOKAHEAD is needed to ensure that, if the identifier
 			// after the PERIOD is a method name , we
@@ -6469,7 +6469,7 @@ columnReference() throws StandardException :
 						getToken(1).kind == PERIOD &&
 						getToken(3).kind != LEFT_PAREN
 					} )
-			<PERIOD> thirdName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, false)
+			<PERIOD> thirdName = identifier(Limits.MAX_IDENTIFIER_LENGTH, false)
 		]
 	]
 	{
@@ -6497,11 +6497,11 @@ columnReference() throws StandardException :
 		}
 
 		//column name and schema name can not be longer than 30 characters and table name can not be longer than 128 characters
-		checkIdentifierLengthLimit(columnName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30);
+		checkIdentifierLengthLimit(columnName, Limits.MAX_IDENTIFIER_LENGTH);
 		if (schemaName != null)
-			checkIdentifierLengthLimit(schemaName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30);
+			checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
 		if (tableName != null)
-			checkIdentifierLengthLimit(tableName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128);
+			checkIdentifierLengthLimit(tableName, Limits.MAX_IDENTIFIER_LENGTH);
 
 		if (tableName != null)
 		{
@@ -6676,7 +6676,7 @@ forUpdateColumn(Vector columnList) throws StandardException :
 {
 	/* identifier() used to be columnName() */
 	//unqualified column names are limited to 30 characters
-	columnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true)
+	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		columnList.addElement(columnName);
 	}
@@ -7485,7 +7485,7 @@ optionalTableClauses() throws StandardException :
 	}
 |
 	[ [ <AS> ] 
-		correlationName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+		correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ] 
 	    [tableProperties = propertyList() ] ]
 	{
@@ -7535,7 +7535,7 @@ tableReference(boolean nestedInParens) throws StandardException :
 	 */
 	/* identifier() used to be correlationName() */
 	LOOKAHEAD( { newInvocationFollows(1) } )
-	javaToSQLNode = newInvocation() [ <AS> ] correlationName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	javaToSQLNode = newInvocation() [ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ]
 		[ optionalTableClauses = optionalTableProperties() ]
 		(LOOKAHEAD( { joinedTableExpressionFollows() } )
@@ -7575,7 +7575,7 @@ tableReference(boolean nestedInParens) throws StandardException :
 	}
 |
 	/* identifier() used to be correlationName() */
-	tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		optionalTableClauses = optionalTableClauses()
 		(LOOKAHEAD( { joinedTableExpressionFollows() } )
 		 joinTable = joinedTableExpression(
@@ -7631,7 +7631,7 @@ tableReference(boolean nestedInParens) throws StandardException :
 					getToken(2).kind == VALUES
 				)
 			} )
-	derivedTable = derivedTable() [ <AS> ] correlationName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	derivedTable = derivedTable() [ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ]
 		[ optionalTableClauses = optionalTableProperties() ]
 		( LOOKAHEAD( { joinedTableExpressionFollows() } )
@@ -7731,7 +7731,7 @@ columnNameItem(ResultColumnList columnList) throws StandardException :
 {
 	/* identifier() used to be columnName() */
 	//unqualified column names are limited to 30 characters
-	columnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true)
+	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		/*
 		** Store the column names for the result columns in the
@@ -7768,7 +7768,7 @@ indexColumnItem(Vector columnList) throws StandardException :
 }
 {
 	/* identifier never ends with a space; appending a space meaning desc */
-	columnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true) [<ASC> | <DESC> {columnName = columnName + ' ';}]
+	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) [<ASC> | <DESC> {columnName = columnName + ' ';}]
 	{
 		/*
 		** Store the column names for the index columns in the
@@ -8143,7 +8143,7 @@ generalAggregate() throws StandardException :
 	** a user aggregate here; otherwise, we have to generate
 	** a staticMethodNode and fix it up later.
 	*/
-	methodAliasString = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	methodAliasString = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	<LEFT_PAREN> setQuantifier() value = additiveExpression(null, 0, false) <RIGHT_PAREN>
 	{
 		return (ValueNode) nodeFactory.getNode(
@@ -8359,7 +8359,7 @@ schemaDefinition() throws StandardException :
 	** We are not currently handling character set
 	** specifications for schema, or schema bodies.
 	*/
-	<SCHEMA> schemaName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true)
+	<SCHEMA> schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 
 		if (schemaName.startsWith("SYS"))
@@ -8386,7 +8386,7 @@ tableDefinition() throws StandardException :
 	TableElementList	tableElementList;
 }
 {
-	<TABLE> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	tableElementList = tableElementList()
 	[ properties = propertyList()]
 	{
@@ -8510,7 +8510,7 @@ indexDefinition() throws StandardException :
 	** production to get the grammar to work...
 	*/
 	[ unique = unique() ] <INDEX>
-		indexName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18) <ON> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+		indexName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <ON> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 				<LEFT_PAREN> indexColumnList(indexColumnList) <RIGHT_PAREN>
 		[ properties = propertyList()]
 	{
@@ -8591,7 +8591,7 @@ procedureDefinition() throws StandardException :
 	Object[] procedureElements = new Object[9];
 }
 {
-		<PROCEDURE> procedureName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+		<PROCEDURE> procedureName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		procedureElements[0] = procedureParameterList()
 		( routineElement(true, procedureElements) ) +
 		{
@@ -8616,7 +8616,7 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 }
 {
 	(
-		<SPECIFIC> clauseValue = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+		<SPECIFIC> clauseValue = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 			{ clausePosition = 1; throw StandardException.newException(SQLState.NOT_IMPLEMENTED, "SPECIFIC identifier");}
 	|
 		[ <DYNAMIC> ] <RESULT> <SETS> drs = uint_value()
@@ -8712,7 +8712,7 @@ procedureParameterDefinition(Vector[] list) throws StandardException :
 }
 {
 	inout = inoutParameter()
-	parameterName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true) 
+	parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 	typeDescriptor = dataTypeDDL() 
 	{
 		list[0].addElement(parameterName);
@@ -8758,7 +8758,7 @@ functionDefinition() throws StandardException :
 	Object[] functionElements = new Object[9];
 }
 {
-		<FUNCTION> functionName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+		<FUNCTION> functionName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		functionElements[0] = functionParameterList()
 		<RETURNS> functionElements[8] = dataTypeCommon() 
 		( routineElement(false, functionElements) ) +
@@ -8805,7 +8805,7 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 	Integer				inout;
 }
 {
-	parameterName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true) 
+	parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 	typeDescriptor = dataTypeDDL() 
 	{
 		list[0].addElement(parameterName);
@@ -8825,7 +8825,7 @@ viewDefinition(Token beginToken) throws StandardException :
 	Token				endToken;
 }
 {
-	<VIEW> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	<VIEW> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		[ <LEFT_PAREN> resultColumns = viewColumnList() <RIGHT_PAREN> ]
 		<AS> queryExpression = queryExpression(null, NO_SET_OP)
 	{
@@ -8888,10 +8888,10 @@ triggerDefinition() throws StandardException :
 	Vector				refClause = null;
 }
 {
-	<TRIGGER> triggerName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+	<TRIGGER> triggerName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	isBefore = beforeOrAfter()
 		triggerEvent = triggerEvent(triggerColumns)		// { INSERT | DELETE | UPDATE [ colList	] }
-		<ON> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128)
+		<ON> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		[ refClause = triggerReferencingClause() ]		// REFERENCING OLD/NEW AS 	
 		<FOR> <EACH> isRow = rowOrStatement()
 		<MODE> <DB2SQL>
@@ -9018,7 +9018,7 @@ triggerReferencingExpression(Vector vector) throws StandardException :
 	  <OLD_TABLE> { isNew = false; isRow = false;}
 	)
 
-	<AS> identifier = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	<AS> identifier = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		vector.addElement(new TriggerReferencingStruct(isRow, isNew, identifier));
 	}
@@ -9319,7 +9319,7 @@ numericLiteral(String sign) throws StandardException :
 			SanityManager.ASSERT(ePosn != -1, "no E or e in approximate numeric");
 
 		// there is a limit on the length of a floatingpoint literal in DB2
-		if (doubleString.length() > DB2Limit.DB2_MAX_FLOATINGPOINT_LITERAL_LENGTH)
+		if (doubleString.length() > Limits.DB2_MAX_FLOATINGPOINT_LITERAL_LENGTH)
 			throw StandardException.newException(SQLState.LANG_DB2_TOO_LONG_FLOATING_POINT_LITERAL, doubleString, TypeId.DOUBLE_NAME);
 		// if there is no '.' before the e, put one in
 		dotPosn = doubleString.substring(0,ePosn).indexOf('.');
@@ -9492,7 +9492,7 @@ stringLiteral() throws StandardException :
 	tok = <STRING>
 	{
 		//there is a maximum limit on the length of the string
-		if (tok.image.length()-2 > DB2Limit.DB2_MAX_CHARACTER_LITERAL_LENGTH)//-2 is for the beginning and ending quote
+		if (tok.image.length()-2 > Limits.DB2_MAX_CHARACTER_LITERAL_LENGTH)//-2 is for the beginning and ending quote
 			throw StandardException.newException(SQLState.LANG_DB2_STRING_CONSTANT_TOO_LONG, StringUtil.formatForPrint(tok.image));
 		string = compressQuotes(tok.image.substring(1, tok.image.length() - 1), SINGLEQUOTES);
 		/* Trim quotes from string. */
@@ -9517,7 +9517,7 @@ hexLiteral() throws StandardException :
 		String hexLiteral = tok.image;
 
 		//there is a maximum limit on the length of the hex constant
-		if (hexLiteral.length()-3 > DB2Limit.DB2_MAX_HEX_LITERAL_LENGTH)//-3 is for X' at the beginning and ' at the end
+		if (hexLiteral.length()-3 > Limits.DB2_MAX_HEX_LITERAL_LENGTH)//-3 is for X' at the beginning and ' at the end
 			throw StandardException.newException(SQLState.LANG_DB2_STRING_CONSTANT_TOO_LONG, StringUtil.formatForPrint(hexLiteral));
 		if ((hexLiteral.length()-3)%2 == 1)
 			throw StandardException.newException(SQLState.LANG_DB2_INVALID_HEXADECIMAL_CONSTANT, StringUtil.formatForPrint(hexLiteral));
@@ -9538,7 +9538,7 @@ constraintNameDefinition() throws StandardException :
 }
 {
 	/* changed constraintName() to qualifiedName() for compaction */
-	<CONSTRAINT> constraintName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+	<CONSTRAINT> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return constraintName;
 	}
@@ -9623,7 +9623,7 @@ renameTableStatement() throws StandardException :
 	String newTableName;
 }
 {
-	<TABLE> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) <TO> newTableName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <TO> newTableName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.RENAME_NODE,
@@ -9646,7 +9646,7 @@ renameIndexStatement() throws StandardException :
 	String newIndexName;
 }
 {
-	<INDEX> oldIndexName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18, true) <TO> newIndexName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18, true)
+	<INDEX> oldIndexName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <TO> newIndexName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		QueryTreeNode qtn = nodeFactory.getNode(
 								C_NodeTypes.RENAME_NODE,
@@ -9670,7 +9670,7 @@ lockStatement() throws StandardException :
 	TableName					tableName;
 }
 {
-	<LOCK> <TABLE> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) <IN> exclusiveMode = lockMode() <MODE>
+	<LOCK> <TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <IN> exclusiveMode = lockMode() <MODE>
 	{
 		return nodeFactory.getNode(
 								C_NodeTypes.LOCK_TABLE_NODE,
@@ -9702,7 +9702,7 @@ execStatement() throws StandardException :
 	TableName	stmtName;
 }
 {
-	<EXECUTE> <STATEMENT> stmtName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	<EXECUTE> <STATEMENT> stmtName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.EXEC_SPS_NODE,
@@ -9886,9 +9886,9 @@ setSchemaStatement() throws StandardException :
 		if (parameterList != null && parameterList.size() > 0)
 		{
 			setUpAndLinkParameters();
-			// set the type of parameter node, it should be a varchar max DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128 - non nullable
+			// set the type of parameter node, it should be a varchar max Limits.MAX_IDENTIFIER_LENGTH - non nullable
 			ParameterNode p = (ParameterNode)parameterList.elementAt(0);
-			p.setDescriptor(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), false, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128));
+			p.setDescriptor(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), false, Limits.MAX_IDENTIFIER_LENGTH));
 		}
 		return setSchema;
 	}
@@ -9910,7 +9910,7 @@ setSchemaValues() throws StandardException :
 	String schemaName;
 }
 {
-	schemaName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true)
+	schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.SET_SCHEMA_NODE,
@@ -9937,8 +9937,8 @@ setSchemaValues() throws StandardException :
 	}
 |	schemaName = string()
 	{
-		/* Max length for schema name is DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128 */
-		checkIdentifierLengthLimit(schemaName, DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30);
+		/* Max length for schema name is Limits.MAX_IDENTIFIER_LENGTH */
+		checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.SET_SCHEMA_NODE,
 								schemaName,
@@ -10283,7 +10283,7 @@ referencedTableAndColumns(ResultColumnList rcl) throws StandardException :
 	TableName	tableName = null;
 }
 {
-	tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) [ <LEFT_PAREN> columnNameList(rcl) <RIGHT_PAREN> ]
+	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) [ <LEFT_PAREN> columnNameList(rcl) <RIGHT_PAREN> ]
 	{
 		return tableName;
 	}
@@ -10477,7 +10477,7 @@ dropSchemaStatement() throws StandardException :
 	String schemaName;
 }
 {
-	<SCHEMA> schemaName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true) <RESTRICT>
+	<SCHEMA> schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <RESTRICT>
 	{
 		QueryTreeNode stmt =  nodeFactory.getNode(
 							C_NodeTypes.DROP_SCHEMA_NODE,
@@ -10496,7 +10496,7 @@ alterTableStatement() throws StandardException :
 	TableName			tableName;
 }
 {
-	<TABLE> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) node = alterTableBody(tableName)
+	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) node = alterTableBody(tableName)
 	{
 		return node;
 	}
@@ -10553,7 +10553,7 @@ alterTableRenameTableStatement(TableName tableName) throws StandardException :
 	String newTableName;
 }
 {
-	<TO> newTableName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	<TO> newTableName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 							C_NodeTypes.RENAME_NODE,
@@ -10578,7 +10578,7 @@ alterTableRenameColumnStatement(TableName tableName) throws StandardException :
 	String newColumnName;
 }
 {
-	oldColumnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true) <TO> newColumnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true)
+	oldColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <TO> newColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 							C_NodeTypes.RENAME_NODE,
@@ -10621,7 +10621,7 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 		return lockGranularity;
 	}
 |
-	<ALTER> [ <COLUMN> ] columnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true) <SET>
+	<ALTER> [ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <SET>
 		typeDescriptor = DB2AlterColumn(autoIncrementInfo)
 	{
 		changeType[0] = CreateStatementNode.MODIFY_TYPE;
@@ -10681,7 +10681,7 @@ columnAlter() throws StandardException :
 	TableElementNode tn;
 }
 {
-	columnName = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH30, true) tn = columnAlterClause(columnName)
+	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) tn = columnAlterClause(columnName)
 	{
 		return tn;
 	}
@@ -10784,7 +10784,7 @@ dropTableConstraintDefinition() throws StandardException :
 {
 	LOOKAHEAD( {getToken(2).kind == CONSTRAINT} )
 	/* changed constraintName() to qualifiedName() for compaction */
-	<DROP> <CONSTRAINT> constraintName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+	<DROP> <CONSTRAINT> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -10816,7 +10816,7 @@ dropTableConstraintDefinition() throws StandardException :
 	}
 |
 	LOOKAHEAD( {getToken(2).kind == FOREIGN} )
-        <DROP> <FOREIGN> <KEY> constraintName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+        <DROP> <FOREIGN> <KEY> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -10833,7 +10833,7 @@ dropTableConstraintDefinition() throws StandardException :
 	}
 |
 	LOOKAHEAD( {getToken(2).kind == UNIQUE} )
-        <DROP> <UNIQUE> constraintName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+        <DROP> <UNIQUE> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -10849,7 +10849,7 @@ dropTableConstraintDefinition() throws StandardException :
 						);
 	}
 |
-        <DROP> <CHECK> constraintName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+        <DROP> <CHECK> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -10875,7 +10875,7 @@ dropTableStatement() throws StandardException :
 	TableName tableName;
 }
 {
-	<TABLE> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		// DB2 does not support a drop behaviour
 		return (QueryTreeNode) nodeFactory.getNode(
@@ -10895,7 +10895,7 @@ dropIndexStatement() throws StandardException :
 	TableName indexName;
 }
 {
-	<INDEX> indexName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18)
+	<INDEX> indexName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.DROP_INDEX_NODE,
@@ -10913,11 +10913,11 @@ dropAliasStatement() throws StandardException :
 	Object aliasName;
 }
 {
-  	<PROCEDURE> aliasName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+  	<PROCEDURE> aliasName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR);
 	}  
-|  	<FUNCTION> aliasName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+|  	<FUNCTION> aliasName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR);
 	}  
@@ -10929,7 +10929,7 @@ dropViewStatement() throws StandardException :
 	TableName viewName;
 }
 {
-	<VIEW> viewName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	<VIEW> viewName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.DROP_VIEW_NODE,
@@ -10944,7 +10944,7 @@ dropTriggerStatement() throws StandardException :
 	TableName triggerName;
 }
 {
-	<TRIGGER> triggerName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH18) 
+	<TRIGGER> triggerName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.DROP_TRIGGER_NODE,
@@ -10960,7 +10960,7 @@ truncateTableStatement() throws StandardException :
 	TableName tableName;
 }
 {
-	<TRUNCATE> <TABLE> tableName = qualifiedName(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128) 
+	<TRUNCATE> <TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 							C_NodeTypes.ALTER_TABLE_NODE,
@@ -11463,7 +11463,7 @@ caseInsensitiveIdentifierPlusReservedWords() throws StandardException :
 	String str;
 }
 {
-	str = identifier(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128, true)
+	str = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
 		return str;
 	}

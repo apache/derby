@@ -28,7 +28,7 @@ import org.apache.derby.iapi.types.Orderable;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.types.*;
 
@@ -476,9 +476,9 @@ public abstract class NumberDataType extends DataType
     public static float normalizeREAL(float v) throws StandardException
 	{
         if ( (Float.isNaN(v) || Float.isInfinite(v)) ||
-             ((v < DB2Limit.DB2_SMALLEST_REAL) || (v > DB2Limit.DB2_LARGEST_REAL)) ||
-             ((v > 0) && (v < DB2Limit.DB2_SMALLEST_POSITIVE_REAL)) ||
-             ((v < 0) && (v > DB2Limit.DB2_LARGEST_NEGATIVE_REAL)) )
+             ((v < Limits.DB2_SMALLEST_REAL) || (v > Limits.DB2_LARGEST_REAL)) ||
+             ((v > 0) && (v < Limits.DB2_SMALLEST_POSITIVE_REAL)) ||
+             ((v < 0) && (v > Limits.DB2_LARGEST_NEGATIVE_REAL)) )
         {
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
         }
@@ -502,9 +502,9 @@ public abstract class NumberDataType extends DataType
     {
         // can't just cast it to float and call normalizeFloat(float) since casting can round down to 0.0
         if ( (Double.isNaN(v) || Double.isInfinite(v)) ||
-             ((v < DB2Limit.DB2_SMALLEST_REAL) || (v > DB2Limit.DB2_LARGEST_REAL)) ||
-             ((v > 0) && (v < DB2Limit.DB2_SMALLEST_POSITIVE_REAL)) ||
-             ((v < 0) && (v > DB2Limit.DB2_LARGEST_NEGATIVE_REAL)) )
+             ((v < Limits.DB2_SMALLEST_REAL) || (v > Limits.DB2_LARGEST_REAL)) ||
+             ((v > 0) && (v < Limits.DB2_SMALLEST_POSITIVE_REAL)) ||
+             ((v < 0) && (v > Limits.DB2_LARGEST_NEGATIVE_REAL)) )
         {
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
         }
@@ -522,9 +522,9 @@ public abstract class NumberDataType extends DataType
     public static double normalizeDOUBLE(double v) throws StandardException
 	{
         if ( (Double.isNaN(v) || Double.isInfinite(v)) ||
-             ((v < DB2Limit.DB2_SMALLEST_DOUBLE) || (v > DB2Limit.DB2_LARGEST_DOUBLE)) ||
-             ((v > 0) && (v < DB2Limit.DB2_SMALLEST_POSITIVE_DOUBLE)) ||
-             ((v < 0) && (v > DB2Limit.DB2_LARGEST_NEGATIVE_DOUBLE)) )
+             ((v < Limits.DB2_SMALLEST_DOUBLE) || (v > Limits.DB2_LARGEST_DOUBLE)) ||
+             ((v > 0) && (v < Limits.DB2_SMALLEST_POSITIVE_DOUBLE)) ||
+             ((v < 0) && (v > Limits.DB2_LARGEST_NEGATIVE_DOUBLE)) )
         {
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.DOUBLE_NAME);
         }

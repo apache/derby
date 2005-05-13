@@ -31,7 +31,7 @@ import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 /**
  * This interface defines methods associated with a TypeId that are used
@@ -61,9 +61,9 @@ public interface TypeCompiler
 	// Need to leave space for '-' and decimal point
 	public static final int REAL_MAXWIDTH_AS_CHAR	= 25;
 
-	public static final int DEFAULT_DECIMAL_PRECISION	= DB2Limit.DEFAULT_DECIMAL_PRECISION;
-	public static final int DEFAULT_DECIMAL_SCALE 		= DB2Limit.DEFAULT_DECIMAL_SCALE;
-	public static final int MAX_DECIMAL_PRECISION_SCALE = DB2Limit.MAX_DECIMAL_PRECISION_SCALE;
+	public static final int DEFAULT_DECIMAL_PRECISION	= Limits.DB2_DEFAULT_DECIMAL_PRECISION;
+	public static final int DEFAULT_DECIMAL_SCALE 		= Limits.DB2_DEFAULT_DECIMAL_SCALE;
+	public static final int MAX_DECIMAL_PRECISION_SCALE = Limits.DB2_MAX_DECIMAL_PRECISION_SCALE;
 
 	public static final int BOOLEAN_MAXWIDTH_AS_CHAR	= 5;
 

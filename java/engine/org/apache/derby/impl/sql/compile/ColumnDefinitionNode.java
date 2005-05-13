@@ -24,7 +24,7 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -576,7 +576,7 @@ public class ColumnDefinitionNode extends TableElementNode
 		ValueNode defaultNode, String defaultText)
 	{
 
-		if (defaultText.length() > DB2Limit.DB2_CHAR_MAXWIDTH)
+		if (defaultText.length() > Limits.DB2_CHAR_MAXWIDTH)
 		// DB2 spec says this isn't allowed.
 			return false;
 
@@ -622,12 +622,12 @@ public class ColumnDefinitionNode extends TableElementNode
 				// DB2 enforces min length of 8.
 				// Note also: any size under 30 gives a warning in DB2.
 					return (charCol && (columnDesc.getMaximumWidth() >=
-						DB2Limit.MIN_COL_LENGTH_FOR_CURRENT_USER));
+						Limits.DB2_MIN_COL_LENGTH_FOR_CURRENT_USER));
 
 				case C_NodeTypes.CURRENT_SCHEMA_NODE:
 				// DB2 enforces min length of 128.
 					return (charCol && (columnDesc.getMaximumWidth() >=
-						DB2Limit.MIN_COL_LENGTH_FOR_CURRENT_SCHEMA));
+						Limits.DB2_MIN_COL_LENGTH_FOR_CURRENT_SCHEMA));
 				default:
 					// else, function not allowed.
 					return false;

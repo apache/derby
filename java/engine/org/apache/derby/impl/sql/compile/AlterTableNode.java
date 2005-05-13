@@ -21,7 +21,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -236,12 +236,12 @@ public class AlterTableNode extends DDLStatementNode
 			tableElementList.validate(this, dd, baseTable);
 
 			/* Only 1012 columns allowed per table */
-			if ((tableElementList.countNumberOfColumns() + baseTable.getNumberOfColumns()) > DB2Limit.DB2_MAX_COLUMNS_IN_TABLE)
+			if ((tableElementList.countNumberOfColumns() + baseTable.getNumberOfColumns()) > Limits.DB2_MAX_COLUMNS_IN_TABLE)
 			{
 				throw StandardException.newException(SQLState.LANG_TOO_MANY_COLUMNS_IN_TABLE_OR_VIEW,
 					String.valueOf(tableElementList.countNumberOfColumns() + baseTable.getNumberOfColumns()),
 					getRelativeName(),
-					String.valueOf(DB2Limit.DB2_MAX_COLUMNS_IN_TABLE));
+					String.valueOf(Limits.DB2_MAX_COLUMNS_IN_TABLE));
 			}
 			/* Number of backing indexes in the alter table statment */
 			numBackingIndexes = tableElementList.countConstraints(DataDictionary.PRIMARYKEY_CONSTRAINT) +
@@ -254,12 +254,12 @@ public class AlterTableNode extends DDLStatementNode
 
 		//If the sum of backing indexes for constraints in alter table statement and total number of indexes on the table
 		//so far is more than 32767, then we need to throw an exception 
-		if ((numBackingIndexes + baseTable.getTotalNumberOfIndexes()) > DB2Limit.DB2_MAX_INDEXES_ON_TABLE)
+		if ((numBackingIndexes + baseTable.getTotalNumberOfIndexes()) > Limits.DB2_MAX_INDEXES_ON_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEXES_ON_TABLE, 
 				String.valueOf(numBackingIndexes + baseTable.getTotalNumberOfIndexes()),
 				getRelativeName(),
-				String.valueOf(DB2Limit.DB2_MAX_INDEXES_ON_TABLE));
+				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
 		}
 
 		if (numCheckConstraints > 0)

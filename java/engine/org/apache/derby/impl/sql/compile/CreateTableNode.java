@@ -22,7 +22,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -212,12 +212,12 @@ public class CreateTableNode extends CreateStatementNode
 		tableElementList.validate(this, dataDictionary, (TableDescriptor) null);
 
 		/* Only 1012 columns allowed per table */
-		if (tableElementList.countNumberOfColumns() > DB2Limit.DB2_MAX_COLUMNS_IN_TABLE)
+		if (tableElementList.countNumberOfColumns() > Limits.DB2_MAX_COLUMNS_IN_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_COLUMNS_IN_TABLE_OR_VIEW,
 				String.valueOf(tableElementList.countNumberOfColumns()),
 				getRelativeName(),
-				String.valueOf(DB2Limit.DB2_MAX_COLUMNS_IN_TABLE));
+				String.valueOf(Limits.DB2_MAX_COLUMNS_IN_TABLE));
 		}
 
 		numPrimaryKeys = tableElementList.countConstraints(
@@ -246,12 +246,12 @@ public class CreateTableNode extends CreateStatementNode
 
 		//each of these constraints have a backing index in the back. We need to make sure that a table never has more
 		//more than 32767 indexes on it and that is why this check.
-		if ((numPrimaryKeys + numReferenceConstraints + numUniqueConstraints) > DB2Limit.DB2_MAX_INDEXES_ON_TABLE)
+		if ((numPrimaryKeys + numReferenceConstraints + numUniqueConstraints) > Limits.DB2_MAX_INDEXES_ON_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEXES_ON_TABLE, 
 				String.valueOf(numPrimaryKeys + numReferenceConstraints + numUniqueConstraints),
 				getRelativeName(),
-				String.valueOf(DB2Limit.DB2_MAX_INDEXES_ON_TABLE));
+				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
 		}
 
 		if (numCheckConstraints > 0)

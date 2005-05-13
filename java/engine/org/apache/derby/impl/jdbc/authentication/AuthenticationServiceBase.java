@@ -24,7 +24,7 @@ import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -188,7 +188,7 @@ public abstract class AuthenticationServiceBase
 			return false;
 
 		String userName = userInfo.getProperty(Attribute.USERNAME_ATTR);
-		if ((userName != null) && userName.length() > DB2Limit.MAX_USERID_LENGTH) {
+		if ((userName != null) && userName.length() > Limits.DB2_MAX_USERID_LENGTH) {
 		// DB2 has limits on length of the user id, so we enforce the same.
 		// This used to be error 28000 "Invalid authorization ID", but with v82,
 		// DB2 changed the behavior to return a normal "authorization failure

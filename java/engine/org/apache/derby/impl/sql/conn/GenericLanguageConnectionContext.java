@@ -59,7 +59,7 @@ import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
@@ -2084,7 +2084,7 @@ public class GenericLanguageConnectionContext
 		}
 
 		/* Maximum 16 nesting levels allowed */
-		if (triggerExecutionContexts.size() >= DB2Limit.DB2_MAX_TRIGGER_RECURSION)
+		if (triggerExecutionContexts.size() >= Limits.DB2_MAX_TRIGGER_RECURSION)
 		{
 			throw StandardException.newException(SQLState.LANG_TRIGGER_RECURSION_EXCEEDED);
 		}

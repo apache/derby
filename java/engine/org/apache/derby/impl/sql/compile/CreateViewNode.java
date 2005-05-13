@@ -45,7 +45,7 @@ import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
@@ -221,12 +221,12 @@ public class CreateViewNode extends CreateStatementNode
 
 
 		/* Only 5000 columns allowed per view */
-		if (queryExpression.getResultColumns().size() > DB2Limit.DB2_MAX_COLUMNS_IN_VIEW)
+		if (queryExpression.getResultColumns().size() > Limits.DB2_MAX_COLUMNS_IN_VIEW)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_COLUMNS_IN_TABLE_OR_VIEW,
 				String.valueOf(queryExpression.getResultColumns().size()),
 				getRelativeName(),
-				String.valueOf(DB2Limit.DB2_MAX_COLUMNS_IN_VIEW));
+				String.valueOf(Limits.DB2_MAX_COLUMNS_IN_VIEW));
 		}
 
 		// for each column, stuff system.column

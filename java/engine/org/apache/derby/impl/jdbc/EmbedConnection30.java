@@ -28,7 +28,7 @@ import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
 
@@ -138,8 +138,8 @@ public class EmbedConnection30 extends EmbedConnection
 				if (userSuppliedSavepointName && (name == null))//make sure that if it is a named savepoint then supplied name is not null
 					throw newSQLException(SQLState.NULL_NAME_FOR_SAVEPOINT);
 				//make sure that if it is a named savepoint then supplied name length is not > 128
-				if (userSuppliedSavepointName && (name.length() > DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128))
-					throw newSQLException(SQLState.LANG_IDENTIFIER_TOO_LONG, name, String.valueOf(DB2Limit.DB2_MAX_IDENTIFIER_LENGTH128));
+				if (userSuppliedSavepointName && (name.length() > Limits.MAX_IDENTIFIER_LENGTH))
+					throw newSQLException(SQLState.LANG_IDENTIFIER_TOO_LONG, name, String.valueOf(Limits.MAX_IDENTIFIER_LENGTH));
 				if (userSuppliedSavepointName && name.startsWith("SYS")) //to enforce DB2 restriction which is savepoint name can't start with SYS
 					throw newSQLException(SQLState.INVALID_SCHEMA_SYS, "SYS");
 				Savepoint savePt = new EmbedSavepoint30(this, name);

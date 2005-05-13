@@ -29,7 +29,7 @@ import org.apache.derby.impl.sql.GenericStatement;
 
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.sql.Types;
@@ -147,7 +147,7 @@ public final class StatementCache extends VTITemplate {
 			return ((GenericStatement) currentPs.statement).getCompilationSchema();
 		case 3:
 			String sql = currentPs.getSource();
-			sql = StringUtil.truncate(sql, DB2Limit.DB2_VARCHAR_MAXWIDTH);
+			sql = StringUtil.truncate(sql, Limits.DB2_VARCHAR_MAXWIDTH);
 			return sql;
 		default:
 			return null;
@@ -184,7 +184,7 @@ public final class StatementCache extends VTITemplate {
 
 		EmbedResultSetMetaData.getResultColumnDescriptor("ID",		  Types.CHAR, false, 36),
 		EmbedResultSetMetaData.getResultColumnDescriptor("SCHEMANAME",    Types.VARCHAR, true, 128),
-		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_TEXT",  Types.VARCHAR, false, DB2Limit.DB2_VARCHAR_MAXWIDTH),
+		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_TEXT",  Types.VARCHAR, false, Limits.DB2_VARCHAR_MAXWIDTH),
 		EmbedResultSetMetaData.getResultColumnDescriptor("UNICODE",   Types.BIT, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("VALID",  Types.BIT, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("COMPILED_AT",  Types.TIMESTAMP, true),

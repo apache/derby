@@ -35,7 +35,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -182,12 +182,12 @@ public class CreateIndexNode extends CreateStatementNode
 		}
 
 		//If total number of indexes on the table so far is more than 32767, then we need to throw an exception
-		if (td.getTotalNumberOfIndexes() > DB2Limit.DB2_MAX_INDEXES_ON_TABLE)
+		if (td.getTotalNumberOfIndexes() > Limits.DB2_MAX_INDEXES_ON_TABLE)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEXES_ON_TABLE,
 				String.valueOf(td.getTotalNumberOfIndexes()),
 				tableName,
-				String.valueOf(DB2Limit.DB2_MAX_INDEXES_ON_TABLE));
+				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
 		}
 
 		/* Validate the column name list */

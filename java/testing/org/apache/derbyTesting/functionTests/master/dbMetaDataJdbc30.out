@@ -14,9 +14,9 @@ getResultSetHoldability() : 1
 getDatabaseMajorVersion() : 10
 getDatabaseMinorVersion() : 1
 supportsStatementPooling() : false
-getMaxColumnNameLength() = 30
-getMaxCursorNameLength() = 18
-getMaxSchemaNameLength() = 30
+getMaxColumnNameLength() = 128
+getMaxCursorNameLength() = 128
+getMaxSchemaNameLength() = 128
 getMaxProcedureNameLength() = 128
 getMaxTableNameLength() = 128
 getMaxUserNameLength() = 30

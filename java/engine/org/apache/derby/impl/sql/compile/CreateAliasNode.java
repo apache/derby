@@ -28,7 +28,7 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -139,9 +139,9 @@ public class CreateAliasNode extends CreateStatementNode
 				TypeDescriptor[] types = null;
 				int[] modes = null;
 				
-				if (paramCount > DB2Limit.DB2_MAX_PARAMS_IN_STORED_PROCEDURE)
+				if (paramCount > Limits.DB2_MAX_PARAMS_IN_STORED_PROCEDURE)
 					throw StandardException.newException(SQLState.LANG_TOO_MANY_PARAMETERS_FOR_STORED_PROC,
-							String.valueOf(DB2Limit.DB2_MAX_PARAMS_IN_STORED_PROCEDURE), aliasName, String.valueOf(paramCount));
+							String.valueOf(Limits.DB2_MAX_PARAMS_IN_STORED_PROCEDURE), aliasName, String.valueOf(paramCount));
 
 				if (paramCount != 0) {
 

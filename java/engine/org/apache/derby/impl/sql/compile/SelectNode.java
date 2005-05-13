@@ -32,7 +32,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -661,7 +661,7 @@ public class SelectNode extends ResultSetNode
 		super.bindResultColumns(fromListParam);
 
 		/* Only 1012 elements allowed in select list */
-		if (resultColumns.size() > DB2Limit.DB2_MAX_ELEMENTS_IN_SELECT_LIST)
+		if (resultColumns.size() > Limits.DB2_MAX_ELEMENTS_IN_SELECT_LIST)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}

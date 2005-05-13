@@ -40,7 +40,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 
@@ -374,7 +374,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 			{
 				case Types.CHAR:
 				case Types.BINARY:
-					if (resultLength > DB2Limit.DB2_CHAR_MAXWIDTH) {
+					if (resultLength > Limits.DB2_CHAR_MAXWIDTH) {
 						if (rightTypeId.getJDBCTypeId() == Types.CHAR)
 								//operands CHAR(A) CHAR(B) and A+B>254 then result is VARCHAR(A+B)
 								higherType = TypeId.VARCHAR_NAME;
@@ -386,7 +386,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 
 				case Types.VARCHAR:
 				case Types.VARBINARY:
-					if (resultLength > DB2Limit.DB2_CONCAT_VARCHAR_LENGTH) {
+					if (resultLength > Limits.DB2_CONCAT_VARCHAR_LENGTH) {
 						if (rightTypeId.getJDBCTypeId() == Types.VARCHAR)
 								//operands CHAR(A) VARCHAR(B) and A+B>4000 then result is LONG VARCHAR
 								higherType = TypeId.LONGVARCHAR_NAME;
@@ -408,7 +408,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 			{
 				case Types.CHAR: //operands CHAR(A) VARCHAR(B) and A+B>4000 then result is LONG VARCHAR
 				case Types.VARCHAR: //operands VARCHAR(A) VARCHAR(B) and A+B>4000 then result is LONG VARCHAR
-					if (resultLength > DB2Limit.DB2_CONCAT_VARCHAR_LENGTH)
+					if (resultLength > Limits.DB2_CONCAT_VARCHAR_LENGTH)
 						higherType = TypeId.LONGVARCHAR_NAME;
 					break;
 
@@ -422,7 +422,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 			{
 				case Types.BINARY: //operands CHAR FOR BIT DATA(A) VARCHAR FOR BIT DATA(B) and A+B>4000 then result is LONG VARCHAR FOR BIT DATA
 				case Types.VARBINARY://operands VARCHAR FOR BIT DATA(A) VARCHAR FOR BIT DATA(B) and A+B>4000 then result is LONG VARCHAR FOR BIT DATA
-					if (resultLength > DB2Limit.DB2_CONCAT_VARCHAR_LENGTH)
+					if (resultLength > Limits.DB2_CONCAT_VARCHAR_LENGTH)
 						higherType = TypeId.LONGVARBIT_NAME;
 					break;
 

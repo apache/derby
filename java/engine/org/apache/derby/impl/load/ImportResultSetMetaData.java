@@ -23,7 +23,7 @@ package org.apache.derby.impl.load;
 import java.sql.SQLException;
 import org.apache.derby.vti.VTIMetaDataTemplate;
 
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 class ImportResultSetMetaData extends VTIMetaDataTemplate {
 
@@ -55,7 +55,7 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
   }
 	public int getColumnDisplaySize(int column) {
     if (columnWidths == null)
-       return DB2Limit.DB2_VARCHAR_MAXWIDTH;
+       return Limits.DB2_VARCHAR_MAXWIDTH;
     else
        return columnWidths[column-1];
   }

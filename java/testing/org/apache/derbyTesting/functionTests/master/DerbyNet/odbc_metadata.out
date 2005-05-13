@@ -42,7 +42,7 @@ dc / 2 = 5.55500000000000000000000
 JDBC Driver 'IBM DB2 JDBC Universal Driver Architecture', version (EXPECTED VERSION)
 The URL is: jdbc:derby:net://localhost:1527/wombat;create=true
 allTablesAreSelectable(): true
-maxColumnNameLength(): 30
+maxColumnNameLength(): 128
 getSchemas():
 TABLE_SCHEM[VARCHAR]
 APP
@@ -161,9 +161,9 @@ getMaxColumnsInOrderBy(): 0
 getMaxColumnsInSelect(): 0
 getMaxColumnsInTable(): 0
 getMaxConnections(): 0
-getMaxCursorNameLength(): 18
+getMaxCursorNameLength(): 128
 getMaxIndexLength(): 0
-getMaxSchemaNameLength(): 30
+getMaxSchemaNameLength(): 128
 getMaxProcedureNameLength(): 128
 getMaxCatalogNameLength(): 0
 getMaxRowSize(): 0

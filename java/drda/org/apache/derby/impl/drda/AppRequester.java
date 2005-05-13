@@ -20,7 +20,7 @@
 
 package org.apache.derby.impl.drda;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 /**
 	AppRequester stores information about the application requester.
@@ -232,12 +232,12 @@ class AppRequester
 
 			case JCC_CLIENT:
 			case DNC_CLIENT:
-				return DB2Limit.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH;
+				return Limits.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH;
 			default:
 			// Default is the max for C clients, since that is more
 			// restricted than for JCC clients.  Note, though, that
 			// JCC clients are the only ones supported right now.
-				return DB2Limit.DB2_CCC_MAX_EXCEPTION_PARAM_LENGTH;
+				return Limits.DB2_CCC_MAX_EXCEPTION_PARAM_LENGTH;
 
 		}
 

@@ -32,7 +32,7 @@ import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import java.io.*;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -167,8 +167,8 @@ public class streamingColumn {
 					System.out.println("No truncation and hence no error");
 				}
 				catch (SQLException e) {
-					if (fileLength[i] > DB2Limit.DB2_LONGVARCHAR_MAXWIDTH && e.getSQLState().equals("22001")) //was getting data longer than maxValueAllowed
-						System.out.println("expected exception for data > " + DB2Limit.DB2_LONGVARCHAR_MAXWIDTH + " in length");
+					if (fileLength[i] > Limits.DB2_LONGVARCHAR_MAXWIDTH && e.getSQLState().equals("22001")) //was getting data longer than maxValueAllowed
+						System.out.println("expected exception for data > " + Limits.DB2_LONGVARCHAR_MAXWIDTH + " in length");
 					else
 						dumpSQLExceptions(e);
 				}
@@ -941,8 +941,8 @@ public class streamingColumn {
 					System.out.println("No truncation and hence no error");
 				}
 				catch (SQLException e) {
-					if (fileLength[i] > DB2Limit.DB2_LONGVARCHAR_MAXWIDTH && e.getSQLState().equals("22001")) //was getting data longer than maxValueAllowed
-						System.out.println("expected exception for data > " + DB2Limit.DB2_LONGVARCHAR_MAXWIDTH + " in length");
+					if (fileLength[i] > Limits.DB2_LONGVARCHAR_MAXWIDTH && e.getSQLState().equals("22001")) //was getting data longer than maxValueAllowed
+						System.out.println("expected exception for data > " + Limits.DB2_LONGVARCHAR_MAXWIDTH + " in length");
 					else
 						dumpSQLExceptions(e);
 				}
@@ -1067,24 +1067,24 @@ public class streamingColumn {
 
 			// prepare an InputStream from the file which has 3 trailing blanks in the end, so after blank truncation, there won't be any overflow
 			// try this using setAsciiStream, setCharacterStream, setString and setObject
-			insertDataUsingAsciiStream(ps, 1, fileName1, DB2Limit.DB2_VARCHAR_MAXWIDTH);
-			insertDataUsingCharacterStream(ps, 2, fileName1, DB2Limit.DB2_VARCHAR_MAXWIDTH);
-			insertDataUsingStringOrObject(ps, 3, DB2Limit.DB2_VARCHAR_MAXWIDTH, true, true);
-			insertDataUsingStringOrObject(ps, 4, DB2Limit.DB2_VARCHAR_MAXWIDTH, true, false);
+			insertDataUsingAsciiStream(ps, 1, fileName1, Limits.DB2_VARCHAR_MAXWIDTH);
+			insertDataUsingCharacterStream(ps, 2, fileName1, Limits.DB2_VARCHAR_MAXWIDTH);
+			insertDataUsingStringOrObject(ps, 3, Limits.DB2_VARCHAR_MAXWIDTH, true, true);
+			insertDataUsingStringOrObject(ps, 4, Limits.DB2_VARCHAR_MAXWIDTH, true, false);
 			System.out.println("===> testing trailing blanks using concatenation");
-			insertDataUsingConcat(stmt, 5, DB2Limit.DB2_VARCHAR_MAXWIDTH, true, false);
+			insertDataUsingConcat(stmt, 5, Limits.DB2_VARCHAR_MAXWIDTH, true, false);
 
 			// prepare an InputStream from the file which has 3 trailing non-blanks in the end, and hence there would be overflow exception
 			// try this using setAsciiStream, setCharacterStream, setString and setObject
-			insertDataUsingAsciiStream(ps, 6, fileName2, DB2Limit.DB2_VARCHAR_MAXWIDTH);
-			insertDataUsingCharacterStream(ps, 7, fileName2, DB2Limit.DB2_VARCHAR_MAXWIDTH);
-			insertDataUsingStringOrObject(ps, 8, DB2Limit.DB2_VARCHAR_MAXWIDTH, false, true);
-			insertDataUsingStringOrObject(ps, 9, DB2Limit.DB2_VARCHAR_MAXWIDTH, false, false);
+			insertDataUsingAsciiStream(ps, 6, fileName2, Limits.DB2_VARCHAR_MAXWIDTH);
+			insertDataUsingCharacterStream(ps, 7, fileName2, Limits.DB2_VARCHAR_MAXWIDTH);
+			insertDataUsingStringOrObject(ps, 8, Limits.DB2_VARCHAR_MAXWIDTH, false, true);
+			insertDataUsingStringOrObject(ps, 9, Limits.DB2_VARCHAR_MAXWIDTH, false, false);
 			System.out.println("===> testing trailing non-blank characters using concatenation");
-			insertDataUsingConcat(stmt, 10, DB2Limit.DB2_VARCHAR_MAXWIDTH, false, false);
+			insertDataUsingConcat(stmt, 10, Limits.DB2_VARCHAR_MAXWIDTH, false, false);
 
 			rs = stmt.executeQuery("select a, b from testVarChar");
-			streamTestDataVerification(rs, DB2Limit.DB2_VARCHAR_MAXWIDTH);
+			streamTestDataVerification(rs, Limits.DB2_VARCHAR_MAXWIDTH);
     }
 		catch (SQLException e) {
 			dumpSQLExceptions(e);
@@ -1114,26 +1114,26 @@ public class streamingColumn {
 
 			// prepare an InputStream from the file which has 3 trailing blanks in the end. For long varchar, this would throw a truncation error
 			// try this using setAsciiStream, setCharacterStream, setString and setObject
-			insertDataUsingAsciiStream(ps, 1, fileName1, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH);
-			insertDataUsingCharacterStream(ps, 2, fileName1, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH);
-			insertDataUsingStringOrObject(ps, 3, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH, true, true);
-			insertDataUsingStringOrObject(ps, 4, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH, true, false);
+			insertDataUsingAsciiStream(ps, 1, fileName1, Limits.DB2_LONGVARCHAR_MAXWIDTH);
+			insertDataUsingCharacterStream(ps, 2, fileName1, Limits.DB2_LONGVARCHAR_MAXWIDTH);
+			insertDataUsingStringOrObject(ps, 3, Limits.DB2_LONGVARCHAR_MAXWIDTH, true, true);
+			insertDataUsingStringOrObject(ps, 4, Limits.DB2_LONGVARCHAR_MAXWIDTH, true, false);
 			//bug 5600- Can't test data overflow in longvarchar using concatenation because longvarchar concatenated string can't be longer than 32700
 			//System.out.println("===> testing trailing blanks using concatenation");
-			//insertDataUsingConcat(stmt, 5, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH, true, true);
+			//insertDataUsingConcat(stmt, 5, Limits.DB2_LONGVARCHAR_MAXWIDTH, true, true);
 
 			// prepare an InputStream from the file which has 3 trailing non-blanks in the end, and hence there would be overflow exception
 			// try this using setAsciiStream, setCharacterStream, setString and setObject
-			insertDataUsingAsciiStream(ps, 6, fileName2, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH);
-			insertDataUsingCharacterStream(ps, 7, fileName2, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH);
-			insertDataUsingStringOrObject(ps, 7, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH, false, true);
-			insertDataUsingStringOrObject(ps, 9, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH, false, false);
+			insertDataUsingAsciiStream(ps, 6, fileName2, Limits.DB2_LONGVARCHAR_MAXWIDTH);
+			insertDataUsingCharacterStream(ps, 7, fileName2, Limits.DB2_LONGVARCHAR_MAXWIDTH);
+			insertDataUsingStringOrObject(ps, 7, Limits.DB2_LONGVARCHAR_MAXWIDTH, false, true);
+			insertDataUsingStringOrObject(ps, 9, Limits.DB2_LONGVARCHAR_MAXWIDTH, false, false);
 			//bug 5600 - Can't test data overflow in longvarchar using concatenation because longvarchar concatenated string can't be longer than 32700
 			//System.out.println("===> testing trailing non-blank characters using concatenation");
-			//insertDataUsingConcat(stmt, 10, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH, false, true);
+			//insertDataUsingConcat(stmt, 10, Limits.DB2_LONGVARCHAR_MAXWIDTH, false, true);
 
 			rs = stmt.executeQuery("select a, b from testLongVarChars");
-			streamTestDataVerification(rs, DB2Limit.DB2_LONGVARCHAR_MAXWIDTH);
+			streamTestDataVerification(rs, Limits.DB2_LONGVARCHAR_MAXWIDTH);
 		}
 		catch (SQLException e) {
 			dumpSQLExceptions(e);

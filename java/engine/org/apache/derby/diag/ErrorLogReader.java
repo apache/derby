@@ -33,7 +33,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import org.apache.derby.vti.VTITemplate;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
@@ -294,7 +294,7 @@ public class ErrorLogReader extends VTITemplate
 				}
 				}
 
-				output = StringUtil.truncate(output, DB2Limit.DB2_VARCHAR_MAXWIDTH);
+				output = StringUtil.truncate(output, Limits.DB2_VARCHAR_MAXWIDTH);
 
 				return output;
 
@@ -329,7 +329,7 @@ public class ErrorLogReader extends VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("LCCID", Types.VARCHAR, false, 15),
 		EmbedResultSetMetaData.getResultColumnDescriptor("DATABASE", Types.VARCHAR, false, 128),
 		EmbedResultSetMetaData.getResultColumnDescriptor("DRDAID", Types.VARCHAR, true, 50),
-		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",Types.VARCHAR, false, DB2Limit.DB2_VARCHAR_MAXWIDTH)
+		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",Types.VARCHAR, false, Limits.DB2_VARCHAR_MAXWIDTH)
 	};
 	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);
 

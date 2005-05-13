@@ -29,7 +29,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.DB2Limit;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
@@ -130,7 +130,7 @@ public class GroupByList extends OrderedColumnList
 		int				 size = size();
 
 		/* Only 32677 columns allowed in GROUP BY clause */
-		if (size > DB2Limit.DB2_MAX_ELEMENTS_IN_GROUP_BY)
+		if (size > Limits.DB2_MAX_ELEMENTS_IN_GROUP_BY)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}
