@@ -1,8 +1,6 @@
-1. create database with derby.system.durability=test mode
-num successful inserts = 500
+1. With derby.system.durability=test,Test to see if syncs are not happening 
 Is warning message about derby.system.durability=test present in derby.log =true
 log.ctrl file has durability testMode no sync marker value = true
 2. shutdown database and reboot database without derby.system.durability=test and test for marker in log.ctrl file
-expected exception for shutdown.Derby system shutdown.
 log.ctrl file has durability testMode no sync marker value = true
 Is warning message about derby.system.durability=test present in derby.log =true
