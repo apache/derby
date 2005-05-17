@@ -1,3 +1,5 @@
 store/LogChecksumSetup.java
 store/LogChecksumRecovery.java
 store/LogChecksumRecovery1.java
+store/MaxLogNumber.java
+store/MaxLogNumberRecovery.java

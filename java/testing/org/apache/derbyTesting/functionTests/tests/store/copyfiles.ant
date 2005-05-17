@@ -131,3 +131,8 @@ LogChecksumRecovery_app.properties
 LogChecksumRecovery_derby.properties
 LogChecksumRecovery1_app.properties
 LogChecksumRecovery1_derby.properties
+MaxLogNumber_app.properties
+MaxLogNumber_derby.properties
+MaxLogNumberRecovery_app.properties
+MaxLogNumberRecovery_derby.properties
+

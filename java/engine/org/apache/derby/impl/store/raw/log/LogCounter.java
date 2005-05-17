@@ -62,13 +62,16 @@ public class LogCounter implements LogInstant {
 	public static final long INVALID_LOG_INSTANT = 0;
 
 
-	// reserve top 10 bits in log file number for future use
-	public static final long MAX_LOGFILE_NUMBER	=	(long)0x003FFFFFL;	// 4194303
-	private static final long FILE_NUMBER_SHIFT	= 32;
+	// max possible log file number is 2^33 -1 (8589934591)
+	public static final long MAX_LOGFILE_NUMBER	= (long)0x1FFFFFFFFL; 
 
-	// reserve top 4 bits in log file size for future use
-	public static final long MAX_LOGFILE_SIZE	= 		(long)0x0FFFFFFFL; // 268435455
-	private static final long FILE_POSITION_MASK	= 	(long)0x7FFFFFFFL;
+	// lower end of 30 bits in long type are used to store the log file position
+	private static final long FILE_NUMBER_SHIFT	= 30;
+
+	// reserve top 2 bits in log file size for future use
+	public static final long MAX_LOGFILE_SIZE	    = (long)0x0FFFFFFFL; // 268435455
+	// 30 bits are used to store the log file postion
+	private static final long FILE_POSITION_MASK	= (long)0x3FFFFFFFL;
 
 	private long fileNumber;
 	private long filePosition;

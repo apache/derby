@@ -649,7 +649,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 						if (beginLogFileNumber != null)
                         {
 							logFileNumber = 
-                                Integer.valueOf(beginLogFileNumber).intValue();
+                                Long.valueOf(beginLogFileNumber).longValue();
                         }
 						else
                         {
@@ -2975,6 +2975,19 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 				{
 					firstLogFileNumber = 1;
 					logFileNumber = 1;
+					if (SanityManager.DEBUG)
+					{
+						if (SanityManager.DEBUG_ON(TEST_MAX_LOGFILE_NUMBER))
+						{
+							// set the value to be two less than max possible
+							// log number, test case will perform some ops to 
+							// hit the max number case.
+							firstLogFileNumber = 
+                                LogCounter.MAX_LOGFILE_NUMBER -2;
+
+							logFileNumber = LogCounter.MAX_LOGFILE_NUMBER -2;
+						}
+					}
 					logFile = getLogFileName(logFileNumber);
 
                     if (privExists(logFile))
@@ -2982,7 +2995,8 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 						// this log file maybe there because the system may have
 						// crashed right after a log switch but did not write
                         // out any log record
-						Monitor.logTextMessage(MessageId.LOG_DELETE_OLD_FILE, logFile);
+						Monitor.logTextMessage(
+                            MessageId.LOG_DELETE_OLD_FILE, logFile);
 
                         if (!privDelete(logFile))
                         {
@@ -4278,22 +4292,33 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	/**
 	  Set to true if we want to simulate a log full condition
 	*/
-	public static final String TEST_LOG_FULL = SanityManager.DEBUG ? "TEST_LOG_FULL" : null;
+	public static final String TEST_LOG_FULL = 
+        SanityManager.DEBUG ? "TEST_LOG_FULL" : null;
 
 	/**
 	  Set to true if we want to simulate a log full condition while switching log
 	*/
-	public static final String TEST_SWITCH_LOG_FAIL1 = SanityManager.DEBUG ? "TEST_SWITCH_LOG_FAIL1" : null;
-	public static final String TEST_SWITCH_LOG_FAIL2 = SanityManager.DEBUG ? "TEST_SWITCH_LOG_FAIL2" : null;
+	public static final String TEST_SWITCH_LOG_FAIL1 = 
+        SanityManager.DEBUG ? "TEST_SWITCH_LOG_FAIL1" : null;
+	public static final String TEST_SWITCH_LOG_FAIL2 = 
+        SanityManager.DEBUG ? "TEST_SWITCH_LOG_FAIL2" : null;
 
 
 	/**
 	  Set to the number of log record we want to write before the log is
 	  simulated to be full.
 	*/
-	public static final String TEST_RECORD_TO_FILL_LOG = SanityManager.DEBUG ? "db2j.unittest.recordToFillLog" : null;
+	public static final String TEST_RECORD_TO_FILL_LOG = 
+        SanityManager.DEBUG ? "db2j.unittest.recordToFillLog" : null;
 
+	/**
+	 * Set to true if we want to simulate max possible log file number is 
+     * being used.
+	*/
+	public static final String TEST_MAX_LOGFILE_NUMBER = 
+        SanityManager.DEBUG ? "testMaxLogFileNumber" : null;
 
+	
 	//enable the log archive mode
 	public void enableLogArchiveMode() throws StandardException
 	{
@@ -4308,7 +4333,8 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			if (af != null)
 			{
 				TransactionController tc = null;
-				tc = af.getTransaction(ContextService.getFactory().getCurrentContextManager());
+				tc = af.getTransaction(
+                        ContextService.getFactory().getCurrentContextManager());
 				tc.setProperty(Property.LOG_ARCHIVE_MODE , "true", true);
 			}
 		}
