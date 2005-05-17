@@ -145,18 +145,18 @@ public class testSecMec extends dataSourcePermissions_net
 		// different security mechanisms.
 		// Network server supports SECMEC_USRIDPWD, SECMEC_USRIDONL,SECMEC_EUSRIDPWD
 		System.out.println("Checking security mechanism authentication with DriverManager");
-		getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true",null),"T1:");
-		getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=max"),"T2:");
-		getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;password=lee"),"T3:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;password=lee;securityMechanism="+SECMEC_USRIDPWD),"T4:");
+		getConnectionUsingDriverManager(getJDBCUrl("wombat",null),"T1:");
+		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=max"),"T2:");
+		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee"),"T3:");
                 // Disable because ibm142 doesnt support DiffieHelman prime of 32 bytes
                 // Also Sun JCE doesnt support it.
-		//getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;password=lee;securityMechanism="+SECMEC_EUSRIDPWD),"T5:");
-		getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;securityMechanism="+SECMEC_USRIDONL),"T6:");
+		//getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_EUSRIDPWD),"T5:");
+		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;securityMechanism="+SECMEC_USRIDONL),"T6:");
                 
                 // disable as ibm142 and sun jce doesnt support DH prime of 32 bytes
-		//getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;password=lee;securityMechanism="+SECMEC_USRENCPWD),"T7:");
-		getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;password=lee;securityMechanism="+SECMEC_USRIDONL),"T8:");
+		//getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_USRENCPWD),"T7:");
+		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_USRIDONL),"T8:");
 
 		getConnectionUsingDataSource();
 
