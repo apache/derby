@@ -283,6 +283,21 @@ to specify your environment and options:
 (2) Create a file called "ant.properties" in user home 
     directory and define the following variables in 
     "ant.properties":
+
+    NOTE TO WINDOWS USERS: *use forward slashes* ("/") in your
+    path specifications.  Backward-slashes ("\") confuse Ant.
+    Check your path specifications for correct use of slashes in 
+    ant.properties if you get errors during the build saying java.lang 
+    can not be found.
+
+    For example, you should have:
+
+      j13lib=c:/jdk1.3.1_15/lib
+
+    NOT
+ 
+      j13lib=c:\jdk1.3.1_15\lib
+
    
     - j14lib
 
@@ -458,7 +473,7 @@ following:
 
 (6) Derby also includes a suite of tests for more comprehensive verification.
     Information on how to run these tests can be found in the source tree,
-    in the file ${derby.source}/java/testing/readme.htm
+    in the file ${derby.source}/java/testing/README.htm
 
 ---------------------------------------------------------------
 4     Derby build miscellaneous information
@@ -480,7 +495,7 @@ Some of the main targets that can be called as
   demo: builds the simple demos in java/demo
 
   testing: builds the tests in java/testing. For additional information on
-           testing, please see java/testing/org/apache/derbyTesting/readme.htm
+           testing, please see java/testing/org/apache/derbyTesting/README.htm
 
   javadoc: to create javadoc for all source code.
 
