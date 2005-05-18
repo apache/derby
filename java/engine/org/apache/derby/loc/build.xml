@@ -70,7 +70,8 @@
           dir="${derby.locales.dir}"
           fork="yes"
           failonerror="true">
-      <arg line="${loc.dir} ${split.properties}"/>
+      <arg value="${loc.dir}"/> 
+      <arg value="${split.properties}"/>
     </java>
     <touch file="${split.donefile}"/>
   </target>
