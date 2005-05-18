@@ -719,6 +719,24 @@ values IDENTITY_VAL_LOCAL();
 -- notice that committing the transaction does not affect IDENTITY_VAL_LOCAL()
 commit;
 values IDENTITY_VAL_LOCAL();
+-- notice that rolling the transaction does not affect IDENTITY_VAL_LOCAL()
+values IDENTITY_VAL_LOCAL();
+drop table t1;
+drop table t2;
+
+-- A table with identity column has an insert trigger which inserts into another table 
+-- with identity column. IDENTITY_VAL_LOCAL will return the generated value for the 
+-- statement table and not for the table that got modified by the trigger
+create table t1 (c11 int generated always as identity (start with 101, increment by 3), c12 int);
+create table t2 (c21 int generated always as identity (start with 201, increment by 5), c22 int);
+create trigger t1tr1 after insert on t1 for each row mode db2sql insert into t2 (c22) values (1);
+values IDENTITY_VAL_LOCAL();
+insert into t1 (c12) values (1);
+-- IDENTITY_VAL_LOCAL will return 101 which got generated for table t1. 
+-- It will not return 201 which got generated for t2 as a result of the trigger fire.
+values IDENTITY_VAL_LOCAL();
+select * from t1;
+select * from t2;
 drop table t1;
 drop table t2;
 
