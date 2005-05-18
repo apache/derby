@@ -883,8 +883,10 @@ public class RunTest
                 {
                     if (System.getProperty("java.vm.name").equals("J9"))
                     {
-                        if (System.getProperty("com.ibm.oti.configuration").equals("foun"))
+                        if (System.getProperty("com.ibm.oti.configuration").equals("foun10"))
+                        {
                             jvmName = "j9_foundation";
+                        }
                         else
                         {
                             // for reporting; first extend javaVersion
