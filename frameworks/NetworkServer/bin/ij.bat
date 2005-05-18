@@ -28,7 +28,7 @@ set IJ_PASSWORD=APP
 @REM -- start ij
 @REM -- host, port, user and password may need to be changed
 @REM ---------------------------------------------------------
-java -Dij.driver=com.ibm.db2.jcc.DB2Driver -Dij.protocol=jdbc:derby:net://%IJ_HOST%:%IJ_PORT%/ -Dij.user=%IJ_USER% -Dij.password=%IJ_PASSWORD%  org.apache.derby.tools.ij
+java -Dij.driver=org.apache.derby.jdbc.ClientDriver -Dij.protocol=jdbc:derby://%IJ_HOST%:%IJ_PORT%/ -Dij.user=%IJ_USER% -Dij.password=%IJ_PASSWORD%  org.apache.derby.tools.ij
 
 @REM ---------------------------------------------------------
 @REM -- To use a different JVM with a different syntax, simply edit

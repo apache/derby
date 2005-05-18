@@ -11,4 +11,4 @@
 # ---------------------------------------------------------
 # DERBY_INSTALL=
 
-export CLASSPATH="${DERBY_INSTALL}/lib/derby.jar:${DERBY_INSTALL}/lib/derbytools.jar:${DERBY_INSTALL}/lib/db2jcc.jar:${DERBY_INSTALL}/lib/db2jcc_license_c.jar:${CLASSPATH}"
+export CLASSPATH="${DERBY_INSTALL}/lib/derby.jar:${DERBY_INSTALL}/lib/derbytools.jar:${DERBY_INSTALL}/lib/derbyclient.jar:${CLASSPATH}"
