@@ -876,7 +876,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setClob(null) getString=null was null true CLOUD EXT (OK)
   setBlob() IC JDBC MATCH (INVALID)
   setBlob(null) getString=null was null true CLOUD EXT (OK)
-  setUnicodeStream() getString=EncodedString: > 33347 51966 50 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 < was null false CLOUD EXT (OK)
+  setUnicodeStream() getString=??2                                                          was null false CLOUD EXT (OK)
   setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
   setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
   setObject(java.lang.String) getString=46                                                           was null false JDBC MATCH(OK)
@@ -986,7 +986,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setClob(null) getString=null was null true CLOUD EXT (OK)
   setBlob() IC JDBC MATCH (INVALID)
   setBlob(null) getString=null was null true CLOUD EXT (OK)
-  setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
+  setUnicodeStream() getString=??2 was null false CLOUD EXT (OK)
   setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
   setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
   setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
@@ -1096,7 +1096,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setClob(null) getString=null was null true CLOUD EXT (OK)
   setBlob() IC JDBC MATCH (INVALID)
   setBlob(null) getString=null was null true CLOUD EXT (OK)
-  setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
+  setUnicodeStream() getString=??2 was null false CLOUD EXT (OK)
   setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
   setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
   setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
