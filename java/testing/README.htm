@@ -117,6 +117,8 @@ Websphere Client Technology Micro Edition) <br>
   </tbody>
 </table>
 <ul>
+  <li>cd into a directory that does not have any colons or spaces in it.<br>
+  </li>
   <li>set $CLASSPATH to include the following jars:</li>
   <ul>
     <li><small>jakarta-oro-2.0.8.jar</small></li>
@@ -520,8 +522,15 @@ Total time: 10 minutes 3 seconds</small></td>
     </tr>
   </tbody>
 </table>
-<p>Once you have built the derbyTesting package built, you can make a
-derbyTesting.jar use the jar build target at the ${derby.source}level.
+<p>Building using the ant all target places all files, that is,
+classes, but also supporting files such as expected output (*.out), sql
+test files (*.sql), properties files and any data files used in
+individual tests into the classes directory so they can all be found
+using the CLASSPATH. <br>
+</p>
+<p>Once you have built the derbyTesting package, you can make a
+derbyTesting.jar using the jar build target at the
+${derby.source}level.
 </p>
 <p>
 This will look something like:
@@ -1100,7 +1109,6 @@ excludeJCC=at-or-before:2.4<br>
 To skip a test when running with any version of the IBM Universal
 Driver that is 2.0 or later:<br>
 excludeJCC=at-or-after:2.0<br>
-</>
 <p>You can also specify an (optional) jvm clause to further tune the
 exclusion criteria.&nbsp; This clause starts with the "<span
  style="font-weight: bold;">,when</span>" tag and is followed by a
@@ -1174,8 +1182,15 @@ org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
 TestSpecialFlags<br>
 &nbsp;&nbsp;&nbsp; sets additional properties.<br>
 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
--D=TestSpecialFlags=derby.infolog.append=true
+-DTestSpecialFlags=derby.infolog.append=true
 org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql <br>
+jvmflags<br>
+&nbsp;&nbsp;&nbsp; sets specific jvm properties for the jvm used in the test harness, for
+instance initial memory, and heap size, or properties normally passed on with a -D. For instance:
+<br>
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
+-Djvmflags=ms32M -mx128M
+org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java <br>
 excludeJCC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; See above section <a
  href="#skipping">4.10</a><br>
