@@ -56,14 +56,29 @@ public class testconnection
 		"ping", "-p", "9393"};
 
     private static  BufferedOutputStream bos = null;
-	/**
+    
+    /**
 	 * Execute the given command and dump the results to standard out
 	 *
 	 * @param args	command and arguments
 	 * @exception Exception
 	 */
+    private static void execCmdDumpResults (String[] args)
+        throws Exception
+    {
+        execCmdDumpResults(args, 0);
+    }
 
-	private static void execCmdDumpResults (String[] args) throws Exception
+	/**
+	 * Execute the given command and dump the results to standard out
+	 *
+	 * @param args	command and arguments
+     * @param expectedExitCode the exit code that we expect from running this
+	 * @exception Exception
+	 */
+
+	private static void execCmdDumpResults (String[] args, int expectedExitCode)
+        throws Exception
 	{
         // We need the process inputstream and errorstream
         ProcessStreamResult prout = null;
@@ -99,6 +114,13 @@ public class testconnection
 		// wait until all the results have been processed
 		prout.Wait();
 		prerr.Wait();
+        
+        // DERBY-214
+        if ( pr.exitValue() != expectedExitCode )
+        {
+            System.out.println("FAIL: expected exit code of " +
+                expectedExitCode + ", got exit code of " + pr.exitValue());
+        }
 
 	}
 
@@ -124,17 +146,17 @@ public class testconnection
 			//test connection - specifying host and port
 			execCmdDumpResults(TestConnectionCmd2);	
 			//test connection - specifying non-existant host and port
-			execCmdDumpResults(TestConnectionCmd3);	
+			execCmdDumpResults(TestConnectionCmd3, 1);	
 			//test connection - specifying non-existant host with '-' in the name
-			execCmdDumpResults(TestConnectionCmd3a);	
+			execCmdDumpResults(TestConnectionCmd3a, 1);	
 			//test connection - specifying host but no port
 			execCmdDumpResults(TestConnectionCmd4);	
 			//test connection - specifying host and invalid port
-			execCmdDumpResults(TestConnectionCmd5);	
+			execCmdDumpResults(TestConnectionCmd5, 1);	
 			//test connection - specifying no host and valid port
 			execCmdDumpResults(TestConnectionCmd6);	
 			//test connection - specifying no host and invalid port
-			execCmdDumpResults(TestConnectionCmd7);	
+			execCmdDumpResults(TestConnectionCmd7, 1);	
 
 			System.out.println("End test");
 			bos.close();

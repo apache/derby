@@ -133,7 +133,7 @@ public class NetworkServerControlImpl {
 	private final static String DRDA_PROP_DEBUG = "derby.drda.debug";
 	private final static String CLOUDSCAPE_DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
 
-	protected final static String UNEXPECTED_ERR = "Unexpected exception";
+	public final static String UNEXPECTED_ERR = "Unexpected exception";
 
 	private final static int MIN_MAXTHREADS = -1;
 	private final static int MIN_TIMESLICE = -1;
@@ -1719,36 +1719,6 @@ public class NetworkServerControlImpl {
 		return bos.toString();
 	}
 
-	/**
-	 * Execute the command given on the command line
-	 *
-	 * @param args	array of arguments indicating command to be executed
-	 *
-	 * @exception Exception	throws an exception if an error occurs
-	 * see class comments for more information
-	 */
-	public static void execute(String args[]) 
-	{
-		NetworkServerControlImpl server = null;
-		try {
-			server = new NetworkServerControlImpl();
-			server.executeWork(args);
-		} catch (Exception e){
-			//if there was an error, exit(1)
-			if ((e.getMessage() == null) ||
-				!e.getMessage().equals(NetworkServerControlImpl.UNEXPECTED_ERR))
-			{
-				if (server != null)
-					server.consoleExceptionPrint(e);
-				else
-					e.printStackTrace();  // default output stream is System.out
-			}
-			// else, we've already printed a trace, so just exit.
-			System.exit(1);
-		}
-		System.exit(0);
-	}
-
 
 	/**
 	 * Execute the command given on the command line
@@ -1758,7 +1728,7 @@ public class NetworkServerControlImpl {
 	 * @exception Exception	throws an exception if an error occurs
 	 * see class comments for more information
 	 */
-	protected void executeWork(String args[]) throws Exception
+	public void executeWork(String args[]) throws Exception
 	{
 		// For convenience just use NetworkServerControlImpls log writer for user messages
 		logWriter = makePrintWriter(System.out);

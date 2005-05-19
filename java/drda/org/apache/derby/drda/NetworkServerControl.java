@@ -231,7 +231,27 @@ public class NetworkServerControl{
 	 * See class comments for more information
 	 */
     public static void main(String args[]) {
-		NetworkServerControlImpl.execute(args);
+        NetworkServerControlImpl server = null;
+        try
+        {
+            server = new NetworkServerControlImpl();
+    		server.executeWork(args);
+        }
+        catch (Exception e)
+        {
+			//if there was an error, exit(1)
+			if ((e.getMessage() == null) ||
+				!e.getMessage().equals(NetworkServerControlImpl.UNEXPECTED_ERR))
+			{
+				if (server != null)
+					server.consoleExceptionPrint(e);
+				else
+					e.printStackTrace();  // default output stream is System.out
+			}
+			// else, we've already printed a trace, so just exit.
+			System.exit(1);
+		}
+		System.exit(0);
 		
 	}
 
