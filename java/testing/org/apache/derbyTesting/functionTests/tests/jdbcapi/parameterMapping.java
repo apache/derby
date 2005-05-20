@@ -323,7 +323,7 @@ public class parameterMapping {
 				 if (rsmd.getColumnType(1) != jdbcTypes[type]) {
 					 System.out.println("FAIL - mismatch column type " + rsmd.getColumnType(1) + " expected " + jdbcTypes[type]);
 				 }
-				 rs.close();
+				 rs.close();                                 				 			 
 
 				 // For this data type
 				 // Test inserting a NULL value and then performing all the getXXX() calls on it.
@@ -379,12 +379,37 @@ public class parameterMapping {
 								dumpSQLExceptions(sqle);
 
 						}
+						
+						/**
+						  * Adding this piece of code to test the support for batching of statements.
+						  * Some datatypes had problems when batching was turned on which was 
+						  * not there when batching was not on, this will test that behaviour
+						  * for all such datatypes
+						  */
+						s.execute("DELETE FROM PM.TYPE_AS");
+						try {
+							System.out.print("  setNull with batching support(" + TestUtil.sqlNameFromJdbc(sqlTypeNull) + ") ");
+							psi.setNull(1, sqlTypeNull);
+							psi.addBatch();
+							psi.executeBatch();
+
+							getValidValue(psq, jdbcTypes[type]); // yes type, not st
+
+							System.out.println("");
+
+						} catch (SQLException sqle) {							 
+							sqleResult = sqle;
+							if ("22005".equals(sqle.getSQLState()))
+								System.out.println("IC");
+							else
+								dumpSQLExceptions(sqle);													     
+						}						
 					}					 
 				 }
 
 				 System.out.println("setXXX() with all JDBC Types on " + SQLTypes[type]);
 				 System.out.println("For setXXX() methods that pass an object, a null and valid values are checked");
-				 setXXX(s, psi, psq, type);
+				 setXXX(s, psi, psq, type);				 
 
 				 psi.close();
 				 psq.close();

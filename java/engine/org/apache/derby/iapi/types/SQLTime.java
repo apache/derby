@@ -48,6 +48,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.sql.PreparedStatement;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -965,5 +966,14 @@ public final class SQLTime extends DataType
 		currentCal.setTime(value);
 		return computeEncodedTime(currentCal);
 	}
+
+     /** Adding this method to ensure that super class' setInto method doesn't get called
+      * that leads to the violation of JDBC spec( untyped nulls ) when batching is turned on.
+      */
+    public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
+
+		      ps.setTime(position, getTime((Calendar) null));
+   }
+
 }
 

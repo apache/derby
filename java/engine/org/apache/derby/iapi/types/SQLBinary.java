@@ -58,6 +58,7 @@ import java.io.InputStream;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 
 /**
  * SQLBinary satisfies the DataValueDescriptor
@@ -1080,4 +1081,12 @@ public abstract class SQLBinary
 		return 0;
 
 	}
+
+      /** Adding this method to ensure that super class' setInto method doesn't get called
+      * that leads to the violation of JDBC spec( untyped nulls ) when batching is turned on.
+      */
+     public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
+
+                  ps.setBytes(position, getBytes());
+     }
 }
