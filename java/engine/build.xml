@@ -61,7 +61,17 @@
      <ant dir="${derby.engine.dir}/database"/>
      <ant dir="${derby.engine.dir}/impl" target="compile_impl_169"/>
  </target>
-
+	
+	<!-- optional JSR169 classes - optional because it requires a 
+	J2ME/CDC/Foundation/JSR169 build jar files.
+	jsr169compile.classpath
+	-->
+	  <target name="engine_169_opt"  depends="engine_169"
+	          description="Build optional JSR169 elements of Derby engine">
+	 <ant dir="${derby.engine.dir}/impl/jdbc" target="compile_jsr169_opt"/>
+     <ant dir="${derby.engine.dir}/jdbc" target="compile_jsr169_opt"/>
+	 </target>
+	
 <!--             ============= End Targets ==============                -->
 
 <!--             ============= End Project ==============                -->

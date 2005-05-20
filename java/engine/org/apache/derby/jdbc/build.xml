@@ -37,11 +37,29 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/jdbc/InternalDriver.java"/>
-      <include name="${derby.dir}/jdbc/Driver169.java"/>
       <include name="${derby.dir}/jdbc/EmbeddedSimpleDataSource.java"/>
     </javac>
+ 
   </target>
-
+	  <target name="compile_jsr169_opt">
+	    <javac
+	      bootclasspath="${empty}"
+	      nowarn="on"
+	      debug="${debug}"
+	      depend="${depend}"
+	      deprecation="${deprecation}"
+	      optimize="${optimize}"
+	      proceed="${proceed}"
+	      verbose="${verbose}"
+	      srcdir="${derby.engine.src.dir}"
+	      destdir="${out.dir}">
+	      <classpath>
+	        <pathelement path="${jsr169compile.classpath}"/>
+	      </classpath>
+	      <include name="${derby.dir}/jdbc/Driver169.java"/>
+	    </javac>
+	  </target>
+	
   <target name="compile_jdbc2" depends="checkjikessource,compile_jdbc2_gump,compile_jdbc2_nosource"/>
 
   <target name="checkjikessource">
