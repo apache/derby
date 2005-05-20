@@ -1374,7 +1374,18 @@ clp.list(System.out);
 				System.out.println("console.encoding:" + conEnc + 
 								   " file.encoding:" + fileEnc +
 							   " derby.ui.codeset: " + ap.getProperty("derby.ui.codeset"));
-
+			
+			// If the initial connection is being specified as a DataSource
+			// on the command line using -Dij.dataSource=<dsclassname>
+			// then remove the ij.database property that comes from any
+			// default_app or other properties file. This is because the
+			// ij.database will override the ij.dataSource property.
+			if (System.getProperty("ij.dataSource") != null)
+			{
+				ap.remove("ij.database");
+				ap.remove("ij.protocol");
+			}
+		
 //System.out.println("appPropFile: " + appPropFile.getPath());
             bos = new BufferedOutputStream(new FileOutputStream(appPropFile));
             ap.save(bos, "App Properties");
