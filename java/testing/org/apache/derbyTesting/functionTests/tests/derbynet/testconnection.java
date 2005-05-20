@@ -115,6 +115,9 @@ public class testconnection
 		prout.Wait();
 		prerr.Wait();
         
+        // wait until the process exits
+        pr.waitFor();
+        
         // DERBY-214
         if ( pr.exitValue() != expectedExitCode )
         {
