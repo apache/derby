@@ -541,24 +541,20 @@ public class JDBCDisplayUtil {
 							0 : MINWIDTH), LocalizedResource.getInstance().getColumnDisplaySize(rsmd, i)));
 
 			if (s.length() < w) {
-				// build a string buffer to hold the whitespace
-				StringBuffer blanks = new StringBuffer(s);
-				blanks.ensureCapacity(w);
+				
+				buf.append(s);
 
 				// try to paste on big chunks of space at a time.
-				for (int k=blanks.length()+64; k<=w; k+=64)
-					blanks.append(
+				int k = w - s.length();
+				for (; k >= 64; k -= 64)
+					buf.append(
           "                                                                ");
-				for (int k=blanks.length()+16; k<=w; k+=16)
-					blanks.append("                ");
-				for (int k=blanks.length()+4; k<=w; k+=4)
-					blanks.append("    ");
-				for (int k=blanks.length(); k<w; k++)
-					blanks.append(' ');
-
-				buf.append(blanks);
-				// REMIND: could do more cleverness, like keep around
-				// past buffers to reuse...
+				for (; k >= 16; k -= 16)
+					buf.append("                ");
+				for (; k >= 4; k -= 4)
+					buf.append("    ");
+				for (; k > 0; k--)
+					buf.append(' ');
 			}
 			else if (s.length() > w)  {
 				if (w > 1) 
