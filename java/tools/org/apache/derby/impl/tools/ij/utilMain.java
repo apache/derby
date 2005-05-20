@@ -354,7 +354,7 @@ public class utilMain implements java.security.PrivilegedAction {
 			Driver d = null;
 			try {
 			    d = DriverManager.getDriver("jdbc:derby:");
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				d = null;
 			}
 			if (d!=null) { // do we have a driver running? shutdown on exit.

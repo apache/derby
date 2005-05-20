@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -408,18 +409,21 @@ public class util implements java.security.PrivilegedAction {
 	    if (driver == null) {
 		driver = "org.apache.derby.jdbc.EmbeddedDriver";
 	    }
+	    
+	    loadDriver(driver);
+		con = DriverManager.getConnection(databaseURL,connInfo);
+		return con;  
+	}
 
 	    // handle datasource property
 	    String dsName = System.getProperty("ij.dataSource");
-	    if (dsName == null) {
-		loadDriver(driver);
-		con = DriverManager.getConnection(databaseURL,connInfo);
-		return con;
+	    if (dsName == null)
+	    	return null;
 
-	    } else { // a datasource
 		// Get a new proxied connection through DataSource
 		Object ds = null; // really javax.sql.DataSource
 		try {
+			
 		    Class dc = Class.forName(dsName);
 		    ds = dc.newInstance();
 		    
@@ -427,19 +431,20 @@ public class util implements java.security.PrivilegedAction {
 		    setupDataSource(ds);
 
 		    // Java method call "by hand" {  con = ds.getConnection(); }
-		    {
 			java.lang.reflect.Method m = dc.getMethod("getConnection", null); 
-			con = (java.sql.Connection) m.invoke(ds, new Object[] {});
-		    }
-		} catch (Throwable error) {
-		    error.printStackTrace(System.out);
+			return (java.sql.Connection) m.invoke(ds, new Object[] {});
+		} catch (InvocationTargetException ite)
+		{
+			if (ite.getTargetException() instanceof SQLException)
+				throw (SQLException) ite.getTargetException();
+			ite.printStackTrace(System.out);
+		} catch (Exception e)
+		{
+			e.printStackTrace(System.out);
 		}
-		return con;
-	    } // datasource
-	}
-	// failed
-	return null;
-    }
+		
+		return null;
+   }
 
 
 	public static Properties updateConnInfo(String user, String password, Properties connInfo)
