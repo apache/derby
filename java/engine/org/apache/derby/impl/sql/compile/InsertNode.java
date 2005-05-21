@@ -325,10 +325,6 @@ public final class InsertNode extends DMLModStatementNode
 		/* Bind the columns of the result set to their expressions */
 		resultSet.bindResultColumns(fromList);
 
-		/* DB2 doesn't allow different number of target columns and result columns.
-		 * RESOLVE: Enforce the limit only in DB2 mode for now. Too many tests need to be
-		 * migrated to DB2 mode first.  Only now we would have expanded STAR (*) to all columns.
-		 */
 		int resCols = resultSet.getResultColumns().size();
 		DataDictionary dd = getDataDictionary();
 		if (targetColumnList != null)
