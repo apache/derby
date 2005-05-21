@@ -19,7 +19,7 @@
 */
 package org.apache.derby.client.net;
 
-import org.apache.derby.client.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.DatabaseMetaData;
 import org.apache.derby.client.am.DisconnectException;

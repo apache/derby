@@ -33,7 +33,7 @@ public class Configuration {
 
     public static int traceFileSuffixIndex__ = 0;
 
-    public static int traceLevel__ = org.apache.derby.client.ClientBaseDataSource.TRACE_ALL;
+    public static int traceLevel__ = org.apache.derby.jdbc.ClientBaseDataSource.TRACE_ALL;
 
     public static String traceFile__ = null;
 

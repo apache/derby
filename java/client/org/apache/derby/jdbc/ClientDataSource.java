@@ -24,7 +24,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
-import org.apache.derby.client.ClientBaseDataSource;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.net.NetConnection;
 import org.apache.derby.client.net.NetLogWriter;

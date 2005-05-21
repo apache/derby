@@ -43,7 +43,6 @@ import org.apache.derby.jdbc.ClientXADataSource;
  * @see ClientDataSource
  */
 public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
-    static final String className__ = "org.apache.derby.jdbc.ClientDataSourceFactory";
 
     public ClientDataSourceFactory() {
     }

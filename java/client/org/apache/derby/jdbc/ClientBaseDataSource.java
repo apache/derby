@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.client.ClientBaseDataSource
+   Derby - Class org.apache.derby.jdbc.ClientBaseDataSource
 
    Copyright (c) 2001, 2005 The Apache Software Foundation or its licensors, where applicable.
 
@@ -18,7 +18,7 @@
 
 */
 
-package org.apache.derby.client;
+package org.apache.derby.jdbc;
 
 import java.io.Serializable;
 import java.io.PrintWriter;
@@ -43,6 +43,7 @@ import org.apache.derby.client.am.SetAccessibleAction;
 import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetLogWriter;
+import org.apache.derby.client.ClientDataSourceFactory;
 
 /**
  * Base class for client-side DataSource implementations.
@@ -317,7 +318,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         // in the reference using the StringRefAddr class.
         // This is all the information needed to reconstruct a ClientBaseDataSource object.
 
-        Reference ref = new Reference(this.getClass().getName(), ClientDataSourceFactory.className__, null);
+        Reference ref = new Reference(this.getClass().getName(), ClientDataSourceFactory.class.getName(), null);
 
         Class clz = getClass();
         Field[] fields = clz.getFields();
