@@ -48,26 +48,47 @@ getXXX on : SMALLINT
   getObject=CORRECT :java.lang.Integer was null false
 setNull() with all JDBC Types on SMALLINT
   setNull(Types.TINYINT) getShort=0 was null true
+  setNull with batching support(Types.TINYINT) getShort=0 was null true
   setNull(SMALLINT) getShort=0 was null true
+  setNull with batching support(SMALLINT) getShort=0 was null true
   setNull(INTEGER) getShort=0 was null true
+  setNull with batching support(INTEGER) getShort=0 was null true
   setNull(BIGINT) getShort=0 was null true
+  setNull with batching support(BIGINT) getShort=0 was null true
   setNull(REAL) getShort=0 was null true
+  setNull with batching support(REAL) getShort=0 was null true
   setNull(Types.FLOAT) getShort=0 was null true
+  setNull with batching support(Types.FLOAT) getShort=0 was null true
   setNull(DOUBLE) getShort=0 was null true
+  setNull with batching support(DOUBLE) getShort=0 was null true
   setNull(DECIMAL) getShort=0 was null true
+  setNull with batching support(DECIMAL) getShort=0 was null true
   setNull(Types.NUMERIC) getShort=0 was null true
+  setNull with batching support(Types.NUMERIC) getShort=0 was null true
   setNull(Types.BIT) getShort=0 was null true
+  setNull with batching support(Types.BIT) getShort=0 was null true
   setNull(CHAR) getShort=0 was null true
+  setNull with batching support(CHAR) getShort=0 was null true
   setNull(VARCHAR) getShort=0 was null true
+  setNull with batching support(VARCHAR) getShort=0 was null true
   setNull(LONG VARCHAR) getShort=0 was null true
+  setNull with batching support(LONG VARCHAR) getShort=0 was null true
   setNull(VARCHAR () FOR BIT DATA) getShort=0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getShort=0 was null true
   setNull(DATE) getShort=0 was null true
+  setNull with batching support(DATE) getShort=0 was null true
   setNull(TIME) getShort=0 was null true
+  setNull with batching support(TIME) getShort=0 was null true
   setNull(TIMESTAMP) getShort=0 was null true
+  setNull with batching support(TIMESTAMP) getShort=0 was null true
   setNull(CLOB) getShort=0 was null true
+  setNull with batching support(CLOB) getShort=0 was null true
   setNull(BLOB) getShort=0 was null true
+  setNull with batching support(BLOB) getShort=0 was null true
   setNull(Types.NULL) getShort=0 was null true
+  setNull with batching support(Types.NULL) getShort=0 was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on SMALLINT
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getShort=98 was null false JDBC MATCH(OK)
@@ -158,26 +179,47 @@ getXXX on : INTEGER
   getObject=CORRECT :java.lang.Integer was null false
 setNull() with all JDBC Types on INTEGER
   setNull(Types.TINYINT) getInt=0 was null true
+  setNull with batching support(Types.TINYINT) getInt=0 was null true
   setNull(SMALLINT) getInt=0 was null true
+  setNull with batching support(SMALLINT) getInt=0 was null true
   setNull(INTEGER) getInt=0 was null true
+  setNull with batching support(INTEGER) getInt=0 was null true
   setNull(BIGINT) getInt=0 was null true
+  setNull with batching support(BIGINT) getInt=0 was null true
   setNull(REAL) getInt=0 was null true
+  setNull with batching support(REAL) getInt=0 was null true
   setNull(Types.FLOAT) getInt=0 was null true
+  setNull with batching support(Types.FLOAT) getInt=0 was null true
   setNull(DOUBLE) getInt=0 was null true
+  setNull with batching support(DOUBLE) getInt=0 was null true
   setNull(DECIMAL) getInt=0 was null true
+  setNull with batching support(DECIMAL) getInt=0 was null true
   setNull(Types.NUMERIC) getInt=0 was null true
+  setNull with batching support(Types.NUMERIC) getInt=0 was null true
   setNull(Types.BIT) getInt=0 was null true
+  setNull with batching support(Types.BIT) getInt=0 was null true
   setNull(CHAR) getInt=0 was null true
+  setNull with batching support(CHAR) getInt=0 was null true
   setNull(VARCHAR) getInt=0 was null true
+  setNull with batching support(VARCHAR) getInt=0 was null true
   setNull(LONG VARCHAR) getInt=0 was null true
+  setNull with batching support(LONG VARCHAR) getInt=0 was null true
   setNull(VARCHAR () FOR BIT DATA) getInt=0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getInt=0 was null true
   setNull(DATE) getInt=0 was null true
+  setNull with batching support(DATE) getInt=0 was null true
   setNull(TIME) getInt=0 was null true
+  setNull with batching support(TIME) getInt=0 was null true
   setNull(TIMESTAMP) getInt=0 was null true
+  setNull with batching support(TIMESTAMP) getInt=0 was null true
   setNull(CLOB) getInt=0 was null true
+  setNull with batching support(CLOB) getInt=0 was null true
   setNull(BLOB) getInt=0 was null true
+  setNull with batching support(BLOB) getInt=0 was null true
   setNull(Types.NULL) getInt=0 was null true
+  setNull with batching support(Types.NULL) getInt=0 was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on INTEGER
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getInt=98 was null false JDBC MATCH(OK)
@@ -268,26 +310,47 @@ getXXX on : BIGINT
   getObject=CORRECT :java.lang.Long was null false
 setNull() with all JDBC Types on BIGINT
   setNull(Types.TINYINT) getLong=0 was null true
+  setNull with batching support(Types.TINYINT) getLong=0 was null true
   setNull(SMALLINT) getLong=0 was null true
+  setNull with batching support(SMALLINT) getLong=0 was null true
   setNull(INTEGER) getLong=0 was null true
+  setNull with batching support(INTEGER) getLong=0 was null true
   setNull(BIGINT) getLong=0 was null true
+  setNull with batching support(BIGINT) getLong=0 was null true
   setNull(REAL) getLong=0 was null true
+  setNull with batching support(REAL) getLong=0 was null true
   setNull(Types.FLOAT) getLong=0 was null true
+  setNull with batching support(Types.FLOAT) getLong=0 was null true
   setNull(DOUBLE) getLong=0 was null true
+  setNull with batching support(DOUBLE) getLong=0 was null true
   setNull(DECIMAL) getLong=0 was null true
+  setNull with batching support(DECIMAL) getLong=0 was null true
   setNull(Types.NUMERIC) getLong=0 was null true
+  setNull with batching support(Types.NUMERIC) getLong=0 was null true
   setNull(Types.BIT) getLong=0 was null true
+  setNull with batching support(Types.BIT) getLong=0 was null true
   setNull(CHAR) getLong=0 was null true
+  setNull with batching support(CHAR) getLong=0 was null true
   setNull(VARCHAR) getLong=0 was null true
+  setNull with batching support(VARCHAR) getLong=0 was null true
   setNull(LONG VARCHAR) getLong=0 was null true
+  setNull with batching support(LONG VARCHAR) getLong=0 was null true
   setNull(VARCHAR () FOR BIT DATA) getLong=0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getLong=0 was null true
   setNull(DATE) getLong=0 was null true
+  setNull with batching support(DATE) getLong=0 was null true
   setNull(TIME) getLong=0 was null true
+  setNull with batching support(TIME) getLong=0 was null true
   setNull(TIMESTAMP) getLong=0 was null true
+  setNull with batching support(TIMESTAMP) getLong=0 was null true
   setNull(CLOB) getLong=0 was null true
+  setNull with batching support(CLOB) getLong=0 was null true
   setNull(BLOB) getLong=0 was null true
+  setNull with batching support(BLOB) getLong=0 was null true
   setNull(Types.NULL) getLong=0 was null true
+  setNull with batching support(Types.NULL) getLong=0 was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on BIGINT
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getLong=98 was null false JDBC MATCH(OK)
@@ -378,26 +441,47 @@ getXXX on : REAL
   getObject=CORRECT :java.lang.Float was null false
 setNull() with all JDBC Types on REAL
   setNull(Types.TINYINT) getFloat=0.0 was null true
+  setNull with batching support(Types.TINYINT) getFloat=0.0 was null true
   setNull(SMALLINT) getFloat=0.0 was null true
+  setNull with batching support(SMALLINT) getFloat=0.0 was null true
   setNull(INTEGER) getFloat=0.0 was null true
+  setNull with batching support(INTEGER) getFloat=0.0 was null true
   setNull(BIGINT) getFloat=0.0 was null true
+  setNull with batching support(BIGINT) getFloat=0.0 was null true
   setNull(REAL) getFloat=0.0 was null true
+  setNull with batching support(REAL) getFloat=0.0 was null true
   setNull(Types.FLOAT) getFloat=0.0 was null true
+  setNull with batching support(Types.FLOAT) getFloat=0.0 was null true
   setNull(DOUBLE) getFloat=0.0 was null true
+  setNull with batching support(DOUBLE) getFloat=0.0 was null true
   setNull(DECIMAL) getFloat=0.0 was null true
+  setNull with batching support(DECIMAL) getFloat=0.0 was null true
   setNull(Types.NUMERIC) getFloat=0.0 was null true
+  setNull with batching support(Types.NUMERIC) getFloat=0.0 was null true
   setNull(Types.BIT) getFloat=0.0 was null true
+  setNull with batching support(Types.BIT) getFloat=0.0 was null true
   setNull(CHAR) getFloat=0.0 was null true
+  setNull with batching support(CHAR) getFloat=0.0 was null true
   setNull(VARCHAR) getFloat=0.0 was null true
+  setNull with batching support(VARCHAR) getFloat=0.0 was null true
   setNull(LONG VARCHAR) getFloat=0.0 was null true
+  setNull with batching support(LONG VARCHAR) getFloat=0.0 was null true
   setNull(VARCHAR () FOR BIT DATA) getFloat=0.0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getFloat=0.0 was null true
   setNull(DATE) getFloat=0.0 was null true
+  setNull with batching support(DATE) getFloat=0.0 was null true
   setNull(TIME) getFloat=0.0 was null true
+  setNull with batching support(TIME) getFloat=0.0 was null true
   setNull(TIMESTAMP) getFloat=0.0 was null true
+  setNull with batching support(TIMESTAMP) getFloat=0.0 was null true
   setNull(CLOB) getFloat=0.0 was null true
+  setNull with batching support(CLOB) getFloat=0.0 was null true
   setNull(BLOB) getFloat=0.0 was null true
+  setNull with batching support(BLOB) getFloat=0.0 was null true
   setNull(Types.NULL) getFloat=0.0 was null true
+  setNull with batching support(Types.NULL) getFloat=0.0 was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on REAL
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getFloat=98.0 was null false JDBC MATCH(OK)
@@ -489,26 +573,47 @@ FAIL - mismatch column type 8 expected 6
   getObject=CORRECT :java.lang.Double was null false
 setNull() with all JDBC Types on FLOAT
   setNull(Types.TINYINT) getDouble=0.0 was null true
+  setNull with batching support(Types.TINYINT) getDouble=0.0 was null true
   setNull(SMALLINT) getDouble=0.0 was null true
+  setNull with batching support(SMALLINT) getDouble=0.0 was null true
   setNull(INTEGER) getDouble=0.0 was null true
+  setNull with batching support(INTEGER) getDouble=0.0 was null true
   setNull(BIGINT) getDouble=0.0 was null true
+  setNull with batching support(BIGINT) getDouble=0.0 was null true
   setNull(REAL) getDouble=0.0 was null true
+  setNull with batching support(REAL) getDouble=0.0 was null true
   setNull(Types.FLOAT) getDouble=0.0 was null true
+  setNull with batching support(Types.FLOAT) getDouble=0.0 was null true
   setNull(DOUBLE) getDouble=0.0 was null true
+  setNull with batching support(DOUBLE) getDouble=0.0 was null true
   setNull(DECIMAL) getDouble=0.0 was null true
+  setNull with batching support(DECIMAL) getDouble=0.0 was null true
   setNull(Types.NUMERIC) getDouble=0.0 was null true
+  setNull with batching support(Types.NUMERIC) getDouble=0.0 was null true
   setNull(Types.BIT) getDouble=0.0 was null true
+  setNull with batching support(Types.BIT) getDouble=0.0 was null true
   setNull(CHAR) getDouble=0.0 was null true
+  setNull with batching support(CHAR) getDouble=0.0 was null true
   setNull(VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR) getDouble=0.0 was null true
   setNull(LONG VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(LONG VARCHAR) getDouble=0.0 was null true
   setNull(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
   setNull(DATE) getDouble=0.0 was null true
+  setNull with batching support(DATE) getDouble=0.0 was null true
   setNull(TIME) getDouble=0.0 was null true
+  setNull with batching support(TIME) getDouble=0.0 was null true
   setNull(TIMESTAMP) getDouble=0.0 was null true
+  setNull with batching support(TIMESTAMP) getDouble=0.0 was null true
   setNull(CLOB) getDouble=0.0 was null true
+  setNull with batching support(CLOB) getDouble=0.0 was null true
   setNull(BLOB) getDouble=0.0 was null true
+  setNull with batching support(BLOB) getDouble=0.0 was null true
   setNull(Types.NULL) getDouble=0.0 was null true
+  setNull with batching support(Types.NULL) getDouble=0.0 was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on FLOAT
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getDouble=98.0 was null false JDBC MATCH(OK)
@@ -599,26 +704,47 @@ getXXX on : DOUBLE
   getObject=CORRECT :java.lang.Double was null false
 setNull() with all JDBC Types on DOUBLE
   setNull(Types.TINYINT) getDouble=0.0 was null true
+  setNull with batching support(Types.TINYINT) getDouble=0.0 was null true
   setNull(SMALLINT) getDouble=0.0 was null true
+  setNull with batching support(SMALLINT) getDouble=0.0 was null true
   setNull(INTEGER) getDouble=0.0 was null true
+  setNull with batching support(INTEGER) getDouble=0.0 was null true
   setNull(BIGINT) getDouble=0.0 was null true
+  setNull with batching support(BIGINT) getDouble=0.0 was null true
   setNull(REAL) getDouble=0.0 was null true
+  setNull with batching support(REAL) getDouble=0.0 was null true
   setNull(Types.FLOAT) getDouble=0.0 was null true
+  setNull with batching support(Types.FLOAT) getDouble=0.0 was null true
   setNull(DOUBLE) getDouble=0.0 was null true
+  setNull with batching support(DOUBLE) getDouble=0.0 was null true
   setNull(DECIMAL) getDouble=0.0 was null true
+  setNull with batching support(DECIMAL) getDouble=0.0 was null true
   setNull(Types.NUMERIC) getDouble=0.0 was null true
+  setNull with batching support(Types.NUMERIC) getDouble=0.0 was null true
   setNull(Types.BIT) getDouble=0.0 was null true
+  setNull with batching support(Types.BIT) getDouble=0.0 was null true
   setNull(CHAR) getDouble=0.0 was null true
+  setNull with batching support(CHAR) getDouble=0.0 was null true
   setNull(VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR) getDouble=0.0 was null true
   setNull(LONG VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(LONG VARCHAR) getDouble=0.0 was null true
   setNull(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
   setNull(DATE) getDouble=0.0 was null true
+  setNull with batching support(DATE) getDouble=0.0 was null true
   setNull(TIME) getDouble=0.0 was null true
+  setNull with batching support(TIME) getDouble=0.0 was null true
   setNull(TIMESTAMP) getDouble=0.0 was null true
+  setNull with batching support(TIMESTAMP) getDouble=0.0 was null true
   setNull(CLOB) getDouble=0.0 was null true
+  setNull with batching support(CLOB) getDouble=0.0 was null true
   setNull(BLOB) getDouble=0.0 was null true
+  setNull with batching support(BLOB) getDouble=0.0 was null true
   setNull(Types.NULL) getDouble=0.0 was null true
+  setNull with batching support(Types.NULL) getDouble=0.0 was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on DOUBLE
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getDouble=98.0 was null false JDBC MATCH(OK)
@@ -709,26 +835,47 @@ getXXX on : DECIMAL(10,5)
   getObject=CORRECT :java.math.BigDecimal was null false
 setNull() with all JDBC Types on DECIMAL(10,5)
   setNull(Types.TINYINT) getBigDecimal=null was null true
+  setNull with batching support(Types.TINYINT) getBigDecimal=null was null true
   setNull(SMALLINT) getBigDecimal=null was null true
+  setNull with batching support(SMALLINT) getBigDecimal=null was null true
   setNull(INTEGER) getBigDecimal=null was null true
+  setNull with batching support(INTEGER) getBigDecimal=null was null true
   setNull(BIGINT) getBigDecimal=null was null true
+  setNull with batching support(BIGINT) getBigDecimal=null was null true
   setNull(REAL) getBigDecimal=null was null true
+  setNull with batching support(REAL) getBigDecimal=null was null true
   setNull(Types.FLOAT) getBigDecimal=null was null true
+  setNull with batching support(Types.FLOAT) getBigDecimal=null was null true
   setNull(DOUBLE) getBigDecimal=null was null true
+  setNull with batching support(DOUBLE) getBigDecimal=null was null true
   setNull(DECIMAL) getBigDecimal=null was null true
+  setNull with batching support(DECIMAL) getBigDecimal=null was null true
   setNull(Types.NUMERIC) getBigDecimal=null was null true
+  setNull with batching support(Types.NUMERIC) getBigDecimal=null was null true
   setNull(Types.BIT) getBigDecimal=null was null true
+  setNull with batching support(Types.BIT) getBigDecimal=null was null true
   setNull(CHAR) getBigDecimal=null was null true
+  setNull with batching support(CHAR) getBigDecimal=null was null true
   setNull(VARCHAR) getBigDecimal=null was null true
+  setNull with batching support(VARCHAR) getBigDecimal=null was null true
   setNull(LONG VARCHAR) getBigDecimal=null was null true
+  setNull with batching support(LONG VARCHAR) getBigDecimal=null was null true
   setNull(VARCHAR () FOR BIT DATA) getBigDecimal=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getBigDecimal=null was null true
   setNull(DATE) getBigDecimal=null was null true
+  setNull with batching support(DATE) getBigDecimal=null was null true
   setNull(TIME) getBigDecimal=null was null true
+  setNull with batching support(TIME) getBigDecimal=null was null true
   setNull(TIMESTAMP) getBigDecimal=null was null true
+  setNull with batching support(TIMESTAMP) getBigDecimal=null was null true
   setNull(CLOB) getBigDecimal=null was null true
+  setNull with batching support(CLOB) getBigDecimal=null was null true
   setNull(BLOB) getBigDecimal=null was null true
+  setNull with batching support(BLOB) getBigDecimal=null was null true
   setNull(Types.NULL) getBigDecimal=null was null true
+  setNull with batching support(Types.NULL) getBigDecimal=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on DECIMAL(10,5)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
@@ -825,26 +972,47 @@ getXXX on : CHAR(60)
   getObject=CORRECT :java.lang.String was null false
 setNull() with all JDBC Types on CHAR(60)
   setNull(Types.TINYINT) getString=null was null true
+  setNull with batching support(Types.TINYINT) getString=null was null true
   setNull(SMALLINT) getString=null was null true
+  setNull with batching support(SMALLINT) getString=null was null true
   setNull(INTEGER) getString=null was null true
+  setNull with batching support(INTEGER) getString=null was null true
   setNull(BIGINT) getString=null was null true
+  setNull with batching support(BIGINT) getString=null was null true
   setNull(REAL) getString=null was null true
+  setNull with batching support(REAL) getString=null was null true
   setNull(Types.FLOAT) getString=null was null true
+  setNull with batching support(Types.FLOAT) getString=null was null true
   setNull(DOUBLE) getString=null was null true
+  setNull with batching support(DOUBLE) getString=null was null true
   setNull(DECIMAL) getString=null was null true
+  setNull with batching support(DECIMAL) getString=null was null true
   setNull(Types.NUMERIC) getString=null was null true
+  setNull with batching support(Types.NUMERIC) getString=null was null true
   setNull(Types.BIT) getString=null was null true
+  setNull with batching support(Types.BIT) getString=null was null true
   setNull(CHAR) getString=null was null true
+  setNull with batching support(CHAR) getString=null was null true
   setNull(VARCHAR) getString=null was null true
+  setNull with batching support(VARCHAR) getString=null was null true
   setNull(LONG VARCHAR) getString=null was null true
+  setNull with batching support(LONG VARCHAR) getString=null was null true
   setNull(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getString=null was null true
   setNull(DATE) getString=null was null true
+  setNull with batching support(DATE) getString=null was null true
   setNull(TIME) getString=null was null true
+  setNull with batching support(TIME) getString=null was null true
   setNull(TIMESTAMP) getString=null was null true
+  setNull with batching support(TIMESTAMP) getString=null was null true
   setNull(CLOB) getString=null was null true
+  setNull with batching support(CLOB) getString=null was null true
   setNull(BLOB) getString=null was null true
+  setNull with batching support(BLOB) getString=null was null true
   setNull(Types.NULL) getString=null was null true
+  setNull with batching support(Types.NULL) getString=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on CHAR(60)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getString=98                                                           was null false JDBC MATCH(OK)
@@ -935,26 +1103,47 @@ getXXX on : VARCHAR(60)
   getObject=CORRECT :java.lang.String was null false
 setNull() with all JDBC Types on VARCHAR(60)
   setNull(Types.TINYINT) getString=null was null true
+  setNull with batching support(Types.TINYINT) getString=null was null true
   setNull(SMALLINT) getString=null was null true
+  setNull with batching support(SMALLINT) getString=null was null true
   setNull(INTEGER) getString=null was null true
+  setNull with batching support(INTEGER) getString=null was null true
   setNull(BIGINT) getString=null was null true
+  setNull with batching support(BIGINT) getString=null was null true
   setNull(REAL) getString=null was null true
+  setNull with batching support(REAL) getString=null was null true
   setNull(Types.FLOAT) getString=null was null true
+  setNull with batching support(Types.FLOAT) getString=null was null true
   setNull(DOUBLE) getString=null was null true
+  setNull with batching support(DOUBLE) getString=null was null true
   setNull(DECIMAL) getString=null was null true
+  setNull with batching support(DECIMAL) getString=null was null true
   setNull(Types.NUMERIC) getString=null was null true
+  setNull with batching support(Types.NUMERIC) getString=null was null true
   setNull(Types.BIT) getString=null was null true
+  setNull with batching support(Types.BIT) getString=null was null true
   setNull(CHAR) getString=null was null true
+  setNull with batching support(CHAR) getString=null was null true
   setNull(VARCHAR) getString=null was null true
+  setNull with batching support(VARCHAR) getString=null was null true
   setNull(LONG VARCHAR) getString=null was null true
+  setNull with batching support(LONG VARCHAR) getString=null was null true
   setNull(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getString=null was null true
   setNull(DATE) getString=null was null true
+  setNull with batching support(DATE) getString=null was null true
   setNull(TIME) getString=null was null true
+  setNull with batching support(TIME) getString=null was null true
   setNull(TIMESTAMP) getString=null was null true
+  setNull with batching support(TIMESTAMP) getString=null was null true
   setNull(CLOB) getString=null was null true
+  setNull with batching support(CLOB) getString=null was null true
   setNull(BLOB) getString=null was null true
+  setNull with batching support(BLOB) getString=null was null true
   setNull(Types.NULL) getString=null was null true
+  setNull with batching support(Types.NULL) getString=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on VARCHAR(60)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getString=98 was null false JDBC MATCH(OK)
@@ -1045,26 +1234,47 @@ getXXX on : LONG VARCHAR
   getObject=CORRECT :java.lang.String was null false
 setNull() with all JDBC Types on LONG VARCHAR
   setNull(Types.TINYINT) getString=null was null true
+  setNull with batching support(Types.TINYINT) getString=null was null true
   setNull(SMALLINT) getString=null was null true
+  setNull with batching support(SMALLINT) getString=null was null true
   setNull(INTEGER) getString=null was null true
+  setNull with batching support(INTEGER) getString=null was null true
   setNull(BIGINT) getString=null was null true
+  setNull with batching support(BIGINT) getString=null was null true
   setNull(REAL) getString=null was null true
+  setNull with batching support(REAL) getString=null was null true
   setNull(Types.FLOAT) getString=null was null true
+  setNull with batching support(Types.FLOAT) getString=null was null true
   setNull(DOUBLE) getString=null was null true
+  setNull with batching support(DOUBLE) getString=null was null true
   setNull(DECIMAL) getString=null was null true
+  setNull with batching support(DECIMAL) getString=null was null true
   setNull(Types.NUMERIC) getString=null was null true
+  setNull with batching support(Types.NUMERIC) getString=null was null true
   setNull(Types.BIT) getString=null was null true
+  setNull with batching support(Types.BIT) getString=null was null true
   setNull(CHAR) getString=null was null true
+  setNull with batching support(CHAR) getString=null was null true
   setNull(VARCHAR) getString=null was null true
+  setNull with batching support(VARCHAR) getString=null was null true
   setNull(LONG VARCHAR) getString=null was null true
+  setNull with batching support(LONG VARCHAR) getString=null was null true
   setNull(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getString=null was null true
   setNull(DATE) getString=null was null true
+  setNull with batching support(DATE) getString=null was null true
   setNull(TIME) getString=null was null true
+  setNull with batching support(TIME) getString=null was null true
   setNull(TIMESTAMP) getString=null was null true
+  setNull with batching support(TIMESTAMP) getString=null was null true
   setNull(CLOB) getString=null was null true
+  setNull with batching support(CLOB) getString=null was null true
   setNull(BLOB) getString=null was null true
+  setNull with batching support(BLOB) getString=null was null true
   setNull(Types.NULL) getString=null was null true
+  setNull with batching support(Types.NULL) getString=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on LONG VARCHAR
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getString=98 was null false JDBC MATCH(OK)
@@ -1157,26 +1367,47 @@ getXXX on : VARCHAR(60) FOR BIT DATA
   getObject=CORRECT :[B was null false
 setNull() with all JDBC Types on VARCHAR(60) FOR BIT DATA
   setNull(Types.TINYINT) getBytes=null was null true
+  setNull with batching support(Types.TINYINT) getBytes=null was null true
   setNull(SMALLINT) getBytes=null was null true
+  setNull with batching support(SMALLINT) getBytes=null was null true
   setNull(INTEGER) getBytes=null was null true
+  setNull with batching support(INTEGER) getBytes=null was null true
   setNull(BIGINT) getBytes=null was null true
+  setNull with batching support(BIGINT) getBytes=null was null true
   setNull(REAL) getBytes=null was null true
+  setNull with batching support(REAL) getBytes=null was null true
   setNull(Types.FLOAT) getBytes=null was null true
+  setNull with batching support(Types.FLOAT) getBytes=null was null true
   setNull(DOUBLE) getBytes=null was null true
+  setNull with batching support(DOUBLE) getBytes=null was null true
   setNull(DECIMAL) getBytes=null was null true
+  setNull with batching support(DECIMAL) getBytes=null was null true
   setNull(Types.NUMERIC) getBytes=null was null true
+  setNull with batching support(Types.NUMERIC) getBytes=null was null true
   setNull(Types.BIT) getBytes=null was null true
+  setNull with batching support(Types.BIT) getBytes=null was null true
   setNull(CHAR) getBytes=null was null true
+  setNull with batching support(CHAR) getBytes=null was null true
   setNull(VARCHAR) getBytes=null was null true
+  setNull with batching support(VARCHAR) getBytes=null was null true
   setNull(LONG VARCHAR) getBytes=null was null true
+  setNull with batching support(LONG VARCHAR) getBytes=null was null true
   setNull(VARCHAR () FOR BIT DATA) getBytes=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getBytes=null was null true
   setNull(DATE) getBytes=null was null true
+  setNull with batching support(DATE) getBytes=null was null true
   setNull(TIME) getBytes=null was null true
+  setNull with batching support(TIME) getBytes=null was null true
   setNull(TIMESTAMP) getBytes=null was null true
+  setNull with batching support(TIMESTAMP) getBytes=null was null true
   setNull(CLOB) getBytes=null was null true
+  setNull with batching support(CLOB) getBytes=null was null true
   setNull(BLOB) getBytes=null was null true
+  setNull with batching support(BLOB) getBytes=null was null true
   setNull(Types.NULL) getBytes=null was null true
+  setNull with batching support(Types.NULL) getBytes=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on VARCHAR(60) FOR BIT DATA
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -1269,26 +1500,47 @@ getXXX on : DATE
   getObject=CORRECT :java.sql.Date was null false
 setNull() with all JDBC Types on DATE
   setNull(Types.TINYINT) getDate=null was null true
+  setNull with batching support(Types.TINYINT) getDate=null was null true
   setNull(SMALLINT) getDate=null was null true
+  setNull with batching support(SMALLINT) getDate=null was null true
   setNull(INTEGER) getDate=null was null true
+  setNull with batching support(INTEGER) getDate=null was null true
   setNull(BIGINT) getDate=null was null true
+  setNull with batching support(BIGINT) getDate=null was null true
   setNull(REAL) getDate=null was null true
+  setNull with batching support(REAL) getDate=null was null true
   setNull(Types.FLOAT) getDate=null was null true
+  setNull with batching support(Types.FLOAT) getDate=null was null true
   setNull(DOUBLE) getDate=null was null true
+  setNull with batching support(DOUBLE) getDate=null was null true
   setNull(DECIMAL) getDate=null was null true
+  setNull with batching support(DECIMAL) getDate=null was null true
   setNull(Types.NUMERIC) getDate=null was null true
+  setNull with batching support(Types.NUMERIC) getDate=null was null true
   setNull(Types.BIT) getDate=null was null true
+  setNull with batching support(Types.BIT) getDate=null was null true
   setNull(CHAR) getDate=null was null true
+  setNull with batching support(CHAR) getDate=null was null true
   setNull(VARCHAR) getDate=null was null true
+  setNull with batching support(VARCHAR) getDate=null was null true
   setNull(LONG VARCHAR) getDate=null was null true
+  setNull with batching support(LONG VARCHAR) getDate=null was null true
   setNull(VARCHAR () FOR BIT DATA) getDate=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getDate=null was null true
   setNull(DATE) getDate=null was null true
+  setNull with batching support(DATE) getDate=null was null true
   setNull(TIME) getDate=null was null true
+  setNull with batching support(TIME) getDate=null was null true
   setNull(TIMESTAMP) getDate=null was null true
+  setNull with batching support(TIMESTAMP) getDate=null was null true
   setNull(CLOB) getDate=null was null true
+  setNull with batching support(CLOB) getDate=null was null true
   setNull(BLOB) getDate=null was null true
+  setNull with batching support(BLOB) getDate=null was null true
   setNull(Types.NULL) getDate=null was null true
+  setNull with batching support(Types.NULL) getDate=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on DATE
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -1379,26 +1631,47 @@ getXXX on : TIME
   getObject=CORRECT :java.sql.Time was null false
 setNull() with all JDBC Types on TIME
   setNull(Types.TINYINT) getTime=null was null true
+  setNull with batching support(Types.TINYINT) getTime=null was null true
   setNull(SMALLINT) getTime=null was null true
+  setNull with batching support(SMALLINT) getTime=null was null true
   setNull(INTEGER) getTime=null was null true
+  setNull with batching support(INTEGER) getTime=null was null true
   setNull(BIGINT) getTime=null was null true
+  setNull with batching support(BIGINT) getTime=null was null true
   setNull(REAL) getTime=null was null true
+  setNull with batching support(REAL) getTime=null was null true
   setNull(Types.FLOAT) getTime=null was null true
+  setNull with batching support(Types.FLOAT) getTime=null was null true
   setNull(DOUBLE) getTime=null was null true
+  setNull with batching support(DOUBLE) getTime=null was null true
   setNull(DECIMAL) getTime=null was null true
+  setNull with batching support(DECIMAL) getTime=null was null true
   setNull(Types.NUMERIC) getTime=null was null true
+  setNull with batching support(Types.NUMERIC) getTime=null was null true
   setNull(Types.BIT) getTime=null was null true
+  setNull with batching support(Types.BIT) getTime=null was null true
   setNull(CHAR) getTime=null was null true
+  setNull with batching support(CHAR) getTime=null was null true
   setNull(VARCHAR) getTime=null was null true
+  setNull with batching support(VARCHAR) getTime=null was null true
   setNull(LONG VARCHAR) getTime=null was null true
+  setNull with batching support(LONG VARCHAR) getTime=null was null true
   setNull(VARCHAR () FOR BIT DATA) getTime=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getTime=null was null true
   setNull(DATE) getTime=null was null true
+  setNull with batching support(DATE) getTime=null was null true
   setNull(TIME) getTime=null was null true
+  setNull with batching support(TIME) getTime=null was null true
   setNull(TIMESTAMP) getTime=null was null true
+  setNull with batching support(TIMESTAMP) getTime=null was null true
   setNull(CLOB) getTime=null was null true
+  setNull with batching support(CLOB) getTime=null was null true
   setNull(BLOB) getTime=null was null true
+  setNull with batching support(BLOB) getTime=null was null true
   setNull(Types.NULL) getTime=null was null true
+  setNull with batching support(Types.NULL) getTime=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on TIME
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -1489,26 +1762,47 @@ getXXX on : TIMESTAMP
   getObject=CORRECT :java.sql.Timestamp was null false
 setNull() with all JDBC Types on TIMESTAMP
   setNull(Types.TINYINT) getTimestamp=null was null true
+  setNull with batching support(Types.TINYINT) getTimestamp=null was null true
   setNull(SMALLINT) getTimestamp=null was null true
+  setNull with batching support(SMALLINT) getTimestamp=null was null true
   setNull(INTEGER) getTimestamp=null was null true
+  setNull with batching support(INTEGER) getTimestamp=null was null true
   setNull(BIGINT) getTimestamp=null was null true
+  setNull with batching support(BIGINT) getTimestamp=null was null true
   setNull(REAL) getTimestamp=null was null true
+  setNull with batching support(REAL) getTimestamp=null was null true
   setNull(Types.FLOAT) getTimestamp=null was null true
+  setNull with batching support(Types.FLOAT) getTimestamp=null was null true
   setNull(DOUBLE) getTimestamp=null was null true
+  setNull with batching support(DOUBLE) getTimestamp=null was null true
   setNull(DECIMAL) getTimestamp=null was null true
+  setNull with batching support(DECIMAL) getTimestamp=null was null true
   setNull(Types.NUMERIC) getTimestamp=null was null true
+  setNull with batching support(Types.NUMERIC) getTimestamp=null was null true
   setNull(Types.BIT) getTimestamp=null was null true
+  setNull with batching support(Types.BIT) getTimestamp=null was null true
   setNull(CHAR) getTimestamp=null was null true
+  setNull with batching support(CHAR) getTimestamp=null was null true
   setNull(VARCHAR) getTimestamp=null was null true
+  setNull with batching support(VARCHAR) getTimestamp=null was null true
   setNull(LONG VARCHAR) getTimestamp=null was null true
+  setNull with batching support(LONG VARCHAR) getTimestamp=null was null true
   setNull(VARCHAR () FOR BIT DATA) getTimestamp=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getTimestamp=null was null true
   setNull(DATE) getTimestamp=null was null true
+  setNull with batching support(DATE) getTimestamp=null was null true
   setNull(TIME) getTimestamp=null was null true
+  setNull with batching support(TIME) getTimestamp=null was null true
   setNull(TIMESTAMP) getTimestamp=null was null true
+  setNull with batching support(TIMESTAMP) getTimestamp=null was null true
   setNull(CLOB) getTimestamp=null was null true
+  setNull with batching support(CLOB) getTimestamp=null was null true
   setNull(BLOB) getTimestamp=null was null true
+  setNull with batching support(BLOB) getTimestamp=null was null true
   setNull(Types.NULL) getTimestamp=null was null true
+  setNull with batching support(Types.NULL) getTimestamp=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on TIMESTAMP
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -1599,26 +1893,47 @@ getXXX on : CLOB(1k)
   getObject=CORRECT :java.sql.Clob was null false
 setNull() with all JDBC Types on CLOB(1k)
   setNull(Types.TINYINT) getClob=null was null true
+  setNull with batching support(Types.TINYINT) getClob=null was null true
   setNull(SMALLINT) getClob=null was null true
+  setNull with batching support(SMALLINT) getClob=null was null true
   setNull(INTEGER) getClob=null was null true
+  setNull with batching support(INTEGER) getClob=null was null true
   setNull(BIGINT) getClob=null was null true
+  setNull with batching support(BIGINT) getClob=null was null true
   setNull(REAL) getClob=null was null true
+  setNull with batching support(REAL) getClob=null was null true
   setNull(Types.FLOAT) getClob=null was null true
+  setNull with batching support(Types.FLOAT) getClob=null was null true
   setNull(DOUBLE) getClob=null was null true
+  setNull with batching support(DOUBLE) getClob=null was null true
   setNull(DECIMAL) getClob=null was null true
+  setNull with batching support(DECIMAL) getClob=null was null true
   setNull(Types.NUMERIC) getClob=null was null true
+  setNull with batching support(Types.NUMERIC) getClob=null was null true
   setNull(Types.BIT) getClob=null was null true
+  setNull with batching support(Types.BIT) getClob=null was null true
   setNull(CHAR) getClob=null was null true
+  setNull with batching support(CHAR) getClob=null was null true
   setNull(VARCHAR) getClob=null was null true
+  setNull with batching support(VARCHAR) getClob=null was null true
   setNull(LONG VARCHAR) getClob=null was null true
+  setNull with batching support(LONG VARCHAR) getClob=null was null true
   setNull(VARCHAR () FOR BIT DATA) getClob=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getClob=null was null true
   setNull(DATE) getClob=null was null true
+  setNull with batching support(DATE) getClob=null was null true
   setNull(TIME) getClob=null was null true
+  setNull with batching support(TIME) getClob=null was null true
   setNull(TIMESTAMP) getClob=null was null true
+  setNull with batching support(TIMESTAMP) getClob=null was null true
   setNull(CLOB) getClob=null was null true
+  setNull with batching support(CLOB) getClob=null was null true
   setNull(BLOB) getClob=null was null true
+  setNull with batching support(BLOB) getClob=null was null true
   setNull(Types.NULL) getClob=null was null true
+  setNull with batching support(Types.NULL) getClob=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on CLOB(1k)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -1709,26 +2024,47 @@ getXXX on : BLOB(1k)
   getObject=CORRECT :java.sql.Blob was null false
 setNull() with all JDBC Types on BLOB(1k)
   setNull(Types.TINYINT) getBlob=null was null true
+  setNull with batching support(Types.TINYINT) getBlob=null was null true
   setNull(SMALLINT) getBlob=null was null true
+  setNull with batching support(SMALLINT) getBlob=null was null true
   setNull(INTEGER) getBlob=null was null true
+  setNull with batching support(INTEGER) getBlob=null was null true
   setNull(BIGINT) getBlob=null was null true
+  setNull with batching support(BIGINT) getBlob=null was null true
   setNull(REAL) getBlob=null was null true
+  setNull with batching support(REAL) getBlob=null was null true
   setNull(Types.FLOAT) getBlob=null was null true
+  setNull with batching support(Types.FLOAT) getBlob=null was null true
   setNull(DOUBLE) getBlob=null was null true
+  setNull with batching support(DOUBLE) getBlob=null was null true
   setNull(DECIMAL) getBlob=null was null true
+  setNull with batching support(DECIMAL) getBlob=null was null true
   setNull(Types.NUMERIC) getBlob=null was null true
+  setNull with batching support(Types.NUMERIC) getBlob=null was null true
   setNull(Types.BIT) getBlob=null was null true
+  setNull with batching support(Types.BIT) getBlob=null was null true
   setNull(CHAR) getBlob=null was null true
+  setNull with batching support(CHAR) getBlob=null was null true
   setNull(VARCHAR) getBlob=null was null true
+  setNull with batching support(VARCHAR) getBlob=null was null true
   setNull(LONG VARCHAR) getBlob=null was null true
+  setNull with batching support(LONG VARCHAR) getBlob=null was null true
   setNull(VARCHAR () FOR BIT DATA) getBlob=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getBlob=null was null true
   setNull(DATE) getBlob=null was null true
+  setNull with batching support(DATE) getBlob=null was null true
   setNull(TIME) getBlob=null was null true
+  setNull with batching support(TIME) getBlob=null was null true
   setNull(TIMESTAMP) getBlob=null was null true
+  setNull with batching support(TIMESTAMP) getBlob=null was null true
   setNull(CLOB) getBlob=null was null true
+  setNull with batching support(CLOB) getBlob=null was null true
   setNull(BLOB) getBlob=null was null true
+  setNull with batching support(BLOB) getBlob=null was null true
   setNull(Types.NULL) getBlob=null was null true
+  setNull with batching support(Types.NULL) getBlob=null was null true
   setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
 setXXX() with all JDBC Types on BLOB(1k)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
