@@ -107,14 +107,9 @@ public class ColumnDescriptor extends TupleDescriptor
 
 		if (SanityManager.DEBUG)
 		{
-			if (autoinc)
-			{
-				SanityManager.ASSERT((autoincInc != 0), "increment is zero for  autoincrement column");
-			}
-			else
-			{
-				SanityManager.ASSERT((autoincInc == 0), "increment is non-zero for non-autoincrement column");
-			}
+			assertAutoinc(autoinc,
+				      autoincInc,
+				      columnDefaultInfo);
 		}
 
 		this.autoincStart = autoincStart;
@@ -160,29 +155,9 @@ public class ColumnDescriptor extends TupleDescriptor
 
 		if (SanityManager.DEBUG)
 		{
-			if (autoinc)
-			{
-				SanityManager.ASSERT(autoincInc != 0);
-			}
-			else
-			{
-				SanityManager.ASSERT(autoincInc == 0);
-			}
-		}
-		
-		this.autoincStart = autoincStart;
-		this.autoincInc = autoincInc;
-
-		if (SanityManager.DEBUG)
-		{
-			if (autoinc)
-			{
-				SanityManager.ASSERT((autoincInc != 0), "increment is 0 for autoincrement column");
-			}
-			else
-			{
-				SanityManager.ASSERT((autoincInc == 0), "increment is non-zero for non-autoincrement column");
-			}
+			assertAutoinc(autoinc,
+				      autoincInc,
+				      columnDefaultInfo);
 		}
 		
 		this.autoincStart = autoincStart;
@@ -342,6 +317,13 @@ public class ColumnDescriptor extends TupleDescriptor
 	}
 
 	/**
+	 * Is this column to have autoincremented value always ?
+	 */
+	public boolean isAutoincAlways(){
+		return (columnDefaultInfo == null) && isAutoincrement();
+	}
+
+	/**
 	 * Get the start value of an autoincrement column
 	 * 
 	 * @return Get the start value of an autoincrement column
@@ -410,4 +392,25 @@ public class ColumnDescriptor extends TupleDescriptor
 	{
 		return "Column";
 	}
+
+	
+	private static void assertAutoinc(boolean autoinc,
+					  long autoincInc,
+					  DefaultInfo defaultInfo){
+		if (autoinc){
+			SanityManager.ASSERT((autoincInc != 0), "increment is zero for  autoincrement column");
+			SanityManager.ASSERT((defaultInfo == null ||
+					      defaultInfo.isDefaultValueAutoinc()),
+					     "If column is autoinc and have defaultInfo, " + 
+					     "isDefaultValueAutoinc must be true.");
+		}
+		else{
+			SanityManager.ASSERT((autoincInc == 0), "increment is non-zero for non-autoincrement column");
+			SanityManager.ASSERT((defaultInfo == null ||
+					      ! defaultInfo.isDefaultValueAutoinc()),
+					     "If column is not autoinc and have defaultInfo, " + 
+					     "isDefaultValueAutoinc can not be true");
+		}
+	}
+
 }

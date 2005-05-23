@@ -3918,11 +3918,12 @@ public class ResultColumnList extends QueryTreeNodeVector
 					(sourceRC.isAutoincrementGenerated()))
 				{
 					sourceRC.setColumnDescriptor(cd.getTableDescriptor(), cd);
-					continue;
-				}
-				throw StandardException.newException(
-									SQLState.LANG_AI_CANNOT_MODIFY_AI,
+
+				}else{
+					if(cd.isAutoincAlways())
+						throw StandardException.newException(SQLState.LANG_AI_CANNOT_MODIFY_AI,
 									rc.getName());
+				}
 			}
 		}
 	}

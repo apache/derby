@@ -1139,8 +1139,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 
             // Check for defaults
             DefaultInfoImpl defaultInfo = (DefaultInfoImpl) colDesc.getDefaultInfo();
-
-            if (defaultInfo != null)
+	    
+	    //Column has constant default value , 
+	    //if it have defaultInfo and not be autoincrement.
+            if (defaultInfo != null && ! colDesc.isAutoincrement())
             {
                 //RESOLVEPARAMETER - skip the tree if we have the value
                 /*

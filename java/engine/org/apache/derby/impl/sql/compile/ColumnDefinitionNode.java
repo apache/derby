@@ -475,6 +475,15 @@ public class ColumnDefinitionNode extends TableElementNode
 		if (defaultNode == null)
 			return;
 
+		//Examin whether default value is autoincrement.
+		if (isAutoincrement){
+			defaultInfo = createDefaultInfoOfAutoInc();
+			return;
+		}
+		
+		
+		//Judged as default value is constant value.
+		
 		CompilerContext cc = getCompilerContext();
 
 		ValueNode defaultTree = defaultNode.getDefaultTree();
@@ -535,7 +544,9 @@ public class ColumnDefinitionNode extends TableElementNode
 
 			// Save off the default text
 			// RESOLVEDEFAULT - Convert to constant if possible
-			defaultInfo = new DefaultInfoImpl(defaultNode.getDefaultText(), defaultValue);
+			defaultInfo = new DefaultInfoImpl(false,
+							  defaultNode.getDefaultText(), 
+							  defaultValue);
 
 			if (SanityManager.DEBUG)
 			{
@@ -555,6 +566,14 @@ public class ColumnDefinitionNode extends TableElementNode
 			cc.setReliability(previousReliability);
 		}
 	}
+
+
+	private static DefaultInfoImpl createDefaultInfoOfAutoInc(){
+		return new DefaultInfoImpl(true,
+					   null, 
+					   null);
+	}
+	
 
 	/**
 	 * Check the validity of the default for this node

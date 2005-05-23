@@ -53,6 +53,9 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 
 	private DataValueDescriptor	defaultValue;
 	private String				defaultText;
+	private int                     type;
+
+	final private static int BITS_MASK_IS_DEFAULTVALUE_AUTOINC = 0x1 << 0;
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
@@ -65,10 +68,11 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	 *
 	 * @param defaultText	The text of the default.
 	 */
-	public DefaultInfoImpl(
+	public DefaultInfoImpl(boolean isDefaultValueAutoinc,
 		String defaultText,
 		DataValueDescriptor defaultValue)
 	{
+		this.type = calcType(isDefaultValueAutoinc);
 		this.defaultText = defaultText;
 		this.defaultValue = defaultValue;
 	}
@@ -101,7 +105,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	{
 		defaultText = (String) in.readObject();
 		defaultValue = (DataValueDescriptor) in.readObject();
-		in.readInt(); // old provider info count - always 0.
+		type = in.readInt();
 	}
 
 	/**
@@ -116,7 +120,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	{
 		out.writeObject( defaultText );
 		out.writeObject( defaultValue );
-		out.writeInt(0); // old provider info count - always 0.
+		out.writeInt(type);
 	}
  
 	/**
@@ -149,4 +153,26 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	{
 		this.defaultValue = defaultValue;
 	}
+	
+	/**
+	 * @see DefaultInfo#isDefaultValueAutoinc
+	 */
+	public boolean isDefaultValueAutoinc(){
+		return (type & BITS_MASK_IS_DEFAULTVALUE_AUTOINC ) != 0;
+	}
+	
+	/**
+	 * This function returns stored value for flags and so on.
+	 */
+	private static int calcType(boolean isDefaultValueAutoinc){
+
+		int value = 0;
+
+		if(isDefaultValueAutoinc){
+			value |= BITS_MASK_IS_DEFAULTVALUE_AUTOINC;
+		}
+
+		return value;
+	}
+	
 }
