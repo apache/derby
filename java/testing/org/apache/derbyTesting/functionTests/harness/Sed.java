@@ -101,8 +101,6 @@ public class Sed
         deleteLines.addElement("^.*java/.*\\<init\\>\\(.*\\)V");
  	deleteLines.addElement("^.*org/apache/derby/.*\\(.*\\).*$");	
 	// next for j9 stack trace with jarfiles test run.
- 	deleteLines.addElement("^.*derby/.*\\<.*\\>\\(.*\\).*$");	
- 	deleteLines.addElement("^.*derby/.*\\(.*\\).*$");	
  	deleteLines.addElement("^.*java/.*\\(.*\\).*$");
 	deleteLines.addElement("^\\[.*db2jcc.jar\\] [0-9].[1-9] - .*$");	
 	deleteLines.addElement("^\\[.*db2jcc_license_c.jar\\] [1-9].[0-9] - .*$");	
