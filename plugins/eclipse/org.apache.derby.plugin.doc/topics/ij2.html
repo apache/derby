@@ -1,0 +1,95 @@
+<html>
+<head>
+<title>Using ij to run SQL scripts</title>
+</head>
+<body>
+<h2>Using ij to run SQL scripts</h2>
+<p>
+<b>ij</b> scripts, files that end in an .sql extension and contain SQL
+commands, can be run using the Derby plug-ins.
+This allows you to use SQL scripts containing multiple commands
+and run them in a single execution of <b>ij</b>.
+</p>
+<h3>Follow these steps to run an SQL script:</h3>
+<ul>
+<li>
+Create a script which contains SQL commands and save the file with a .sql
+extension.  Remember to make the database connection your first command 
+in the script - no default connection exists. 
+<br/><br/>
+</li>
+<li>
+Save the file in your current workspace, under your Java project, or import
+it into your workspace.
+<br/><br/>
+</li>
+<li>
+Run the script using the menu item <b>Apache Derby, Run SQL script using 'ij'</b>
+<br/><br/>
+</li>
+<li>
+The output appears in the <b>ij</b> console window.
+<br/><br/>
+</li>
+</ul>
+<h3>Example of creating and running an SQL script</h3>
+<p>
+We'll go through a complete example below with an sql file called
+<b>restaurants.sql</b>.  This script relies on a table we created in the
+help section, <a href="ij.html">Use ij to issue SQL commands.</a>  
+Run that SQL prior to completing these steps.
+</p>
+<p>
+From the main Eclipse menu select <b>File, New, File</b>.
+</p>
+<blockquote>
+<img src="images/create_file.GIF" alt="Creating a new file in Eclipse" width="841" height="574"></img>
+</blockquote>
+<p>
+Use the current Java project as the parent folder, for example, myJavaProject.
+Name the file <b>restaurants.sql</b>, and click <b>Finish</b>.
+</p>
+<p>
+Now the workspace will look like this.
+</p>
+<blockquote>
+<img src="images/create_restaurant.GIF" alt="Adding an sql file to the Java project" width="899" height="609"></img>
+</blockquote>
+<p>
+Type the following in the restaurants.sql editor window (you may need to
+double click the restaurants.sql file to create an editor window to type in.)
+</p>
+<pre>
+connect 'jdbc:derby://localhost:1527/myDB;create=true;user=me;password=mine;';
+insert into restaurants values (4, 'Grande Burrito', 'Oakland');
+update restaurants set city = 'Ukiah' where name = 'Irifunes';
+select * from restaurants;
+disconnect;
+exit;
+</pre>
+<p>
+Now save the restaurants.sql file so we can run the script.  Use <b>Ctrl + S</b>
+in the windows environment to save an open file.  Once the file has been saved
+the asterisk will disappear next to the name of the file in the editor.
+</p>
+<p>
+The last step is to run the SQL script.  Right-click the <b>restaurants.sql</b> 
+file in the <b>Package Explorer</b> view and select <b>Apache Derby, Run SQL 
+Script using 'ij'</b>.
+</p>
+<blockquote>
+<img src="images/restaurant_editor.GIF" alt="Run SQL Script using 'ij'" width="910" height="663"></img>
+</blockquote>
+<p>
+The <b>Console</b> view shows the SQL commands contained in the file
+and executing in <b>ij</b> along with the output of the commands.  
+</p>
+
+<blockquote>
+<img src="images/restaurant_script.GIF" alt="Console view of ij script output" width="910" height="663"></img>
+</blockquote>
+<p>
+</p>
+
+</body>
+</html>

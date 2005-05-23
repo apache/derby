@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.apache.derby.ui"
+   name="Apache Derby Ui Plug-in for Eclipse"
+   version="1.0.0"
+   provider-name="The Apache Software Foundation"
+   class="org.apache.derby.ui.DerbyPlugin">
+
+   <runtime>
+      <library name="ui.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.apache.derby.core"/>
+      <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.debug.core"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.ui.console"/>
+   </requires>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="org.apache.derby.ui.DerbyMenu">
+         <menu
+               label="Apache Derby"
+               path="additions"
+               id="org.apache.derby.ui.menu1">
+            <separator name="separator1"/>
+            <separator name="separator2"/>
+            <separator name="separator3"/>
+            <separator name="separator4"/>
+         </menu>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="org.apache.derby.ui.DerbyActions">
+         <visibility>
+            <not>
+               <objectState
+                     value="org.apache.derby.ui.derbyEngine"
+                     name="nature"/>
+            </not>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="Add Apache Derby nature"
+               icon="icons/add.gif"
+               class="org.apache.derby.ui.popup.actions.AddDerbyNature"
+               menubarPath="org.apache.derby.ui.menu1/separator1"
+               id="org.apache.derby.ui.action1"/>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="org.apache.derby.ui.DerbyProjects">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="Remove Apache Derby nature"
+               icon="icons/rem.gif"
+               class="org.apache.derby.ui.popup.actions.RemoveDerbyNature"
+               menubarPath="org.apache.derby.ui.menu1/separator1"
+               id="org.apache.derby.ui.action2"/>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="org.apache.derby.ui.StartStopActions">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               label="Stop Derby Network Server"
+               icon="icons/stop.gif"
+               class="org.apache.derby.ui.actions.StopAction"
+               menubarPath="org.apache.derby.ui.menu1/separator2"
+               enablesFor="1"
+               id="org.apache.derby.ui.StopAction">
+            <enablement>
+               <objectState
+                     value="org.apache.derby.ui.isrun"
+                     name="sessionProperty">
+               </objectState>
+            </enablement>
+         </action>
+         <action
+               label="Start Derby Network Server"
+               icon="icons/start.gif"
+               class="org.apache.derby.ui.actions.StartAction"
+               menubarPath="org.apache.derby.ui.menu1/separator2"
+               enablesFor="1"
+               id="org.apache.derby.ui.StartAction">
+            <enablement>
+               <not>
+                  <objectState
+                        value="org.apache.derby.ui.isrun"
+                        name="sessionProperty">
+                  </objectState>
+               </not>
+            </enablement>
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="org.apache.derby.ui.RunIJ">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="ij (Interactive SQL)"
+               class="org.apache.derby.ui.actions.IJAction"
+               icon="icons/ij.gif"
+               menubarPath="org.apache.derby.ui.menu1/separator3"
+               id="org.apache.derby.ui.ijAction1"/>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="org.apache.derby.ui.SysInfo">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="sysinfo (Derby System Information)"
+               icon="icons/sysinfo.gif"
+               class="org.apache.derby.ui.actions.SysInfoAction"
+               menubarPath="org.apache.derby.ui.menu1/separator4"
+               id="org.apache.derby.ui.sysInfo1"/>
+      </objectContribution>
+   </extension>
+   <extension
+         id="derbyEngine"
+         name="Apache Derby "
+         point="org.eclipse.core.resources.natures">
+      <requires-nature id="org.eclipse.jdt.core.javanature"/>
+      <runtime>
+         <run class="org.apache.derby.ui.nature.DerbyNature"/>
+      </runtime>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.sql"
+            id="org.apache.derby.ui.DerbyMenu">
+         <menu
+               label="Apache Derby"
+               id="org.apache.derby.ui.menu2">
+            <separator name="separator4"/>
+         </menu>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.sql"
+            id="org.apache.derby.ui.RunSQLScript">
+         <action
+               enablesFor="1"
+               label="Run SQL Script using &apos;ij&apos;"
+               class="org.apache.derby.ui.actions.IJAction"
+               icon="icons/ij.gif"
+               menubarPath="org.apache.derby.ui.menu2/separator4"
+               id="org.apache.derby.ui.SQLScript"/>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="org.apache.derby.ui.DerbyMenu">
+         <menu
+               label="Apache Derby"
+               path="additions"
+               id="org.apache.derby.ui.menu2">
+            <separator name="separator1"/>
+            <separator name="separator2"/>
+            <separator name="separator3"/>
+            <separator name="separator4"/>
+         </menu>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="org.apache.derby.ui.DerbyActions">
+         <visibility>
+            <not>
+               <objectState
+                     value="org.apache.derby.ui.derbyEngine"
+                     name="nature"/>
+            </not>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="Add Apache Derby nature"
+               icon="icons/add.gif"
+               class="org.apache.derby.ui.popup.actions.AddDerbyNature"
+               menubarPath="org.apache.derby.ui.menu2/separator1"
+               id="org.apache.derby.ui.action1"/>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="org.apache.derby.ui.DerbyProjects">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="Remove Apache Derby nature"
+               icon="icons/rem.gif"
+               class="org.apache.derby.ui.popup.actions.RemoveDerbyNature"
+               menubarPath="org.apache.derby.ui.menu2/separator1"
+               id="org.apache.derby.ui.action2"/>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="org.apache.derby.ui.StartStopActions">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="Stop Derby Network Server"
+               icon="icons/stop.gif"
+               class="org.apache.derby.ui.actions.StopAction"
+               menubarPath="org.apache.derby.ui.menu2/separator2"
+               id="org.apache.derby.ui.StopAction">
+            <enablement>
+               <objectState
+                     value="org.apache.derby.ui.isrun"
+                     name="sessionProperty"/>
+            </enablement>
+         </action>
+         <action
+               enablesFor="1"
+               label="Start Derby Network Server"
+               icon="icons/start.gif"
+               class="org.apache.derby.ui.actions.StartAction"
+               menubarPath="org.apache.derby.ui.menu2/separator2"
+               id="org.apache.derby.ui.StartAction">
+            <enablement>
+               <not>
+                  <objectState
+                        value="org.apache.derby.ui.isrun"
+                        name="sessionProperty"/>
+               </not>
+            </enablement>
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="org.apache.derby.ui.RunIJ">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               enablesFor="1"
+               label="ij (Interactive SQL)"
+               icon="icons/ij.gif"
+               class="org.apache.derby.ui.actions.IJAction"
+               menubarPath="org.apache.derby.ui.menu2/separator3"
+               id="org.apache.derby.ui.ijAction2"/>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="org.apache.derby.ui.Sysinfo">
+         <visibility>
+            <objectState
+                  value="org.apache.derby.ui.derbyEngine"
+                  name="nature"/>
+         </visibility>
+         <action
+               label="sysinfo (Derby System Information)"
+               icon="icons/sysinfo.gif"
+               class="org.apache.derby.ui.actions.SysInfoAction"
+               menubarPath="org.apache.derby.ui.menu2/separator4"
+               id="org.apache.derby.ui.sysInfo2"/>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            class="org.apache.derby.ui.properties.DerbyPropertiesPage"
+            name="Apache Derby"
+            id="org.apache.derby.ui.properties.DerbyServerProperty">
+         <filter
+               value="org.apache.derby.ui.derbyEngine"
+               name="nature"/>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            adaptable="true"
+            label="Derby Network Server Runnning"
+            class="org.apache.derby.ui.decorate.DerbyIsRunningDecorator"
+            state="true"
+            location="TOP_LEFT"
+            id="org.apache.derby.ui.DerbyIsRunningDecorator">
+         <description/>
+         <enablement>
+            <or>
+               <and>
+                  <objectClass name="org.eclipse.jdt.core.IJavaProject"/>
+                  <objectState
+                        value="org.apache.derby.ui.derbyEngine"
+                        name="nature"/>
+               </and>
+               <and>
+                  <objectClass name="org.eclipse.core.resources.IProject"/>
+                  <objectState
+                        value="org.apache.derby.ui.derbyEngine"
+                        name="nature"/>
+               </and>
+            </or>
+         </enablement>
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="org.apache.derby.ui.launch.StartDerbyServerLaunchConfigurationDelegate"
+            public="false"
+            name="Start Apache Derby Network Server"
+            id="org.apache.derby.ui.startDerbyServerLaunchConfigurationType"
+            modes="run, debug"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/start.gif"
+            configTypeID="org.apache.derby.ui.startDerbyServerLaunchConfigurationType"
+            id="org.apache.derby.ui.startDerbyServerLaunchConfigurationTypeImage"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="org.apache.derby.ui.launch.StopDerbyServerLaunchConfigurationDelegate"
+            public="false"
+            name="Stop Apache Derby Network Server"
+            id="org.apache.derby.ui.stopDerbyServerLaunchConfigurationType"
+            modes="run, debug"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/stop.gif"
+            configTypeID="org.apache.derby.ui.stopDerbyServerLaunchConfigurationType"
+            id="org.apache.derby.ui.stopDerbyServerLaunchConfigurationTypeImage"/>
+   </extension>
+      <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="org.apache.derby.ui.launch.IJDerbyLaunchConfigurationDelegate"
+            public="false"
+            name="IJ"
+            id="org.apache.derby.ui.ijDerbyLaunchConfigurationType"
+            modes="run, debug"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/ij.gif"
+            configTypeID="org.apache.derby.ui.ijDerbyLaunchConfigurationType"
+            id="org.apache.derby.ui.ijDerbyLaunchConfigurationTypeImage"/>
+   </extension>
+      <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="org.apache.derby.ui.launch.SysInfoDerbyLaunchConfigurationDelegate"
+            public="false"
+            name="SysInfo"
+            id="org.apache.derby.ui.sysinfoDerbyLaunchConfigurationType"
+            modes="run, debug"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/sysinfo.gif"
+            configTypeID="org.apache.derby.ui.sysinfoDerbyLaunchConfigurationType"
+            id="org.apache.derby.ui.sysinfoDerbyLaunchConfigurationTypeImage"/>
+   </extension>
+</plugin>

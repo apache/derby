@@ -1,0 +1,126 @@
+<html>
+<head>
+<title>Setting Derby properties for a project</title>
+</head>
+<body>
+<h2>Setting Derby properties for a project</h2>
+<p>
+Properties relating to Apache Derby can be specified for any project 
+which has had the Apache Derby nature added to it.  The two categories
+of properties available to change are the Network Server and Derby System
+properties.
+</p>
+<p>
+<b>Network Server Properties</b>
+</p>
+<p>
+By starting the Derby Network Server using the default values the 
+server runs on the localhost, which is the host running Eclipse, 
+on port 1527. 
+</p>
+<p>
+The value used for the Network Server host name impacts the ability of 
+remote hosts to connect to the Network Server.  If the Network Server 
+Host value in the Apache Derby Properties for the project is set to 
+<b>localhost</b>, only clients running on the host where Eclipse is 
+running can connect to the network server.  If an ip address or hostname 
+(other than the name 'localhost')
+is used, client applications running on other hosts can connect to the 
+Derby Network Server.  For additional information about starting the Derby 
+Network Server see the <i>Derby Server and Administration Guide</i>.  
+The section called <b>Starting the Network Server</b> explains the effect 
+of setting the value for the hostname differently.
+</p>
+<p>
+If connections from other hosts is allowed, it is recommended to run
+under the Java security manager and enable user authentication prior to
+starting the Derby Network Server.
+</p>
+<b>Network Server Settings</b>
+<p>
+<ul>
+<li>
+Network Server Port - default value of 1527<br/><br/>
+Valid values for this field are:
+<ul>
+<li>
+Any port number not currently used by another process to listen on
+<br/><br/>
+</li>
+</ul>
+</li>
+<li>
+Network Server Host - default value of localhost <br/><br/>
+Valid values for this field are:
+<ul>
+<li>
+localhost
+</li>
+<li>
+The ip address of the host running Eclipse
+</li>
+<li>
+The host name of the host running Eclipse
+</li>
+<li>
+The ip address of 0.0.0.0 (to listen on all interfaces)
+</li>
+</ul>
+</li>
+</ul>
+</p>
+
+
+<p>
+<b>Derby System Properties</b>
+</p>
+<p>
+<b>derby.system.home</b> refers to the file system directory where the
+Derby database system will look for databases when Derby is started. 
+Setting this property allows for ease of use when specifiying a JDBC 
+connection URL to a Derby database which is not in the current directory. 
+For additional information on <b>derby.system.home</b> refer to the <i>Tuning Derby</i> guide.
+</p>
+<p>
+<b>Derby System Property values</b>
+</p>
+<ul>
+<li>
+derby.system.home - default value of '.', the current project directory<br/><br/>
+Valid values for this field are:
+<ul>
+<li>A directory path on the local host. Either an existing directory or a new
+one which has not yet been created. 
+</li>
+</ul>
+</li>
+</ul>
+</p>
+<h3>Changing the default Apache Derby properties for a project</h3>
+<p>
+<ul>
+<li>
+With the Java project active in the <b>Package Explorer</b> or <b>Navigator</b>
+view, select the menu item <b>Project, Properties</b>.
+</li>
+</ul>
+</p>
+<blockquote>
+<img src="images/properties.gif" alt="Project Properties" width="736" height="619"></img>
+</blockquote>
+
+<ul>
+<li>
+The list of properties available to modify for the project appears.  Select
+the <b>Apache Derby</b> item in the list. <br/><br/>
+</li>
+<li>
+Make any of the desired changes to the Apache Derby settings.  
+</li>
+</ul>
+</p>
+<blockquote>
+<img src="images/property_sheet.GIF" alt="Apache Derby project properties" width="690" height="539"></img>
+</blockquote>
+<p>
+</p>

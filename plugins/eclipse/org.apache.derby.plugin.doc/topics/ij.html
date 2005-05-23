@@ -1,0 +1,91 @@
+<html>
+<head>
+<title>Using ij to issue SQL commands</title>
+</head>
+<body>
+<h2>Using ij to issue SQL commands</h2>
+<p>
+<b>ij</b>, the interactive SQL scripting tool provided with Derby, allows
+you to issue ad-hoc queries against a Derby database.  Running <b>ij</b> from
+within Eclipse speeds application development by testing and running SQL 
+statements prior to coding JDBC calls.
+</p>
+<h3>To launch <b>ij</b>:</h3>
+<ul>
+<li>
+Select the project and bring up the context menu. Select the menu item, <b>Apache Derby, ij (Interactive SQL)</b>.
+</li>
+</ul>
+<blockquote>
+<img src="images/start_ij.GIF" width="782" height="682" alt="ij menu item"></img>
+</blockquote>
+<ul>
+<li>
+The <b>Console</b> view will show the <b>ij</b> prompt.  
+For this example we assume the Derby Network Server has been started; if you 
+haven't started it, go ahead and start it up now.
+<br/><br/>
+</li>
+<li>
+The first step to using Derby is to connect to the database using a database
+JDBC connection URL.  <br/>
+The database connection URL we'll use for this example will connect to our
+Network Server using the Derby Network Client driver on the localhost.  We'll
+create a database called <b>myDB</b> as the user 'me' with a password of 'mine.'
+<br/>
+<br/>
+To connect to the database from <b>ij</b> we need to issue the <b>connect</b>
+command, so the entire command to connect to our database looks like this:
+<pre>
+connect 'jdbc:derby://localhost:1527/myDB;create=true;user=me;password=mine';
+</pre>
+</li>
+<li>
+Cut and paste the above connection URL into the <b>ij</b> console window.  
+It should create a database in the current workspace, under the current Java
+project, called <b>myDB</b>.
+<br/><br/>
+</li>
+<li>
+We'll also create a table in our myDB database, insert some rows and select
+all rows from the table.  Here is the SQL to do this:  
+<pre>
+create table restaurants(id integer, name varchar(20), city varchar(50));
+insert into restaurants values (1, 'Irifunes', 'San Mateo');
+insert into restaurants values (2, 'Estradas', 'Daly City');
+insert into restaurants values (3, 'Prime Rib House', 'San Francisco');
+select * from restaurants;
+</pre>
+</li>
+<li>
+Cut and paste this SQL (one line at a time) into the <b>ij</b> console window.
+</li>
+</ul>
+</p> 
+<blockquote>
+Sample output from our <b>ij</b> session which runs the sql commands listed above is shown below.
+</blockquote>
+
+<blockquote>
+<img src="images/ij_commands.GIF" width="926" height="603" alt="ij console output"></img>
+</blockquote>
+
+<p>
+The database connection URL shown above is used to connect to the Derby Network Server.  If you want to connect to the database using the Derby JDBC embedded 
+driver the connection URL would look like <b>jdbc:derby:myDB;create=true</b>
+and the ij command would be this:
+<pre>
+connect 'jdbc:derby:myDB;create=true';
+</pre>
+</p>
+<p>
+For detailed information on the proper syntax to use for the Connection URL 
+refer to the Derby <i>Tools &amp; Utility
+Guide</i>. The section called <b>Getting started with ij</b> provides the
+necessary information to start using ij.
+</p>
+<p>
+</p>
+
+</body>
+</html>

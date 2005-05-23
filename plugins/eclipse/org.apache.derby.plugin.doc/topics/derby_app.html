@@ -1,0 +1,264 @@
+<html>
+<head>
+<title>Creating a Java application to access a Derby database</title>
+</head>
+<body>
+<h2>Creating a Java application to access a Derby database</h2>
+<p>
+Once you've become familiar with starting the network server and running
+SQL queries, you'll want to use Derby from within a Java application.
+This section will demonstrate using Derby from a stand-alone Java
+application.
+</p>
+<p>
+This example will access the data in our sample database, <b>myDB</b>, 
+which contains the restaurants table.  By following the two <a href="ij_toc.html"><b>ij</b></a> sections in the help, this database and table will have already
+been created and ready to use.  If you have not created the database and the table return to the <a href="ij_toc.html"><b>ij</b></a> sections and create them now.
+</p>
+<h3>Steps to create a stand-alone Java application</h3>
+<ul>
+<li>
+From the <b>Java</b> perspective, select the project in the <b>Package Explorer</b> view. Right-click the project to bring up the context menu and select
+<b>New, Class</b>.
+</li>
+</ul>
+</p>
+<img src="images/new_class.GIF" alt="Creating a Java class in Eclipse" width="914" height="638"></img>
+<p>
+Give the Java class a package name, <b>myapp</b>, name the class 
+<b>Restaurants</b>, make it a public class, and include a main method 
+in the class since this will be a stand-alone application.  The image 
+below shows an example of this. 
+Click <b>Finish</b> to create the class.
+</p>
+<img src="images/create_class.GIF" alt="New Java class wizard" width="515" height="566"></img>
+
+<p>
+The Java class shown below, <b>Restaurants.java</b>, connects to the Derby Network Server, inserts a row into the restaurants table, and then displays a select
+from the restaurants table.  Copy the code below into the Java editor window
+for the <b>Restaurants.java</b> class you just created. 
+</p>
+
+<pre>
+package myapp;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.ResultSetMetaData;
+
+
+public class Restaurants
+{
+    private static String dbURL = "jdbc:derby://localhost:1527/myDB;create=true;user=me;password=mine";
+    private static String tableName = "restaurants";
+    // jdbc Connection
+    private static Connection conn = null;
+    private static Statement stmt = null;
+
+    public static void main(String[] args)
+    {
+        createConnection();
+        insertRestaurants(5, "LaVals", "Berkeley");
+        selectRestaurants();
+        shutdown();
+    }
+    
+    private static void createConnection()
+    {
+        try
+        {
+            Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
+            //Get a connection
+            conn = DriverManager.getConnection(dbURL); 
+        }
+        catch (Exception except)
+        {
+            except.printStackTrace();
+        }
+    }
+    
+    private static void insertRestaurants(int id, String restName, String cityName)
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            stmt.execute("insert into " + tableName + " values (" +
+                    id + ",'" + restName + "','" + cityName +"')");
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    private static void selectRestaurants()
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            ResultSet results = stmt.executeQuery("select * from " + tableName);
+            ResultSetMetaData rsmd = results.getMetaData();
+            int numberCols = rsmd.getColumnCount();
+            for (int i=1; i<=numberCols; i++)
+            {
+                //print Column Names
+                System.out.print(rsmd.getColumnLabel(i)+"\t\t");  
+            }
+
+            System.out.println("\n-------------------------------------------------");
+
+            while(results.next())
+            {
+                int id = results.getInt(1);
+                String restName = results.getString(2);
+                String cityName = results.getString(3);
+                System.out.println(id + "\t\t" + restName + "\t\t" + cityName);
+            }
+            results.close();
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    private static void shutdown()
+    {
+        try
+        {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+            if (conn != null)
+            {
+                DriverManager.getConnection(dbURL + ";shutdown=true");
+                conn.close();
+            }           
+        }
+        catch (SQLException sqlExcept)
+        {
+            
+        }
+
+    }
+}
+</pre>
+<p>
+Once Restaurants.java is compiled without errors, run the Java application by
+right-clicking it from the Package Explorer view and selecting <b>Run, Java Application</b>.  
+</p>
+
+<img src="images/run_javaapp.GIF" alt="Running a java application" width="914" height="713"></img>
+
+<p>
+The output from running <b>Restaurants.java</b> is shown below.  It shows the 
+successful insert of a row into our restaurants table and a select of all rows
+in the table.  If you encounter any errors when running the application make
+sure the Derby Network Server has been started on port 1527 and the myDB
+database exists in the current workspace and Java project.
+</p>
+<img src="images/completed_javaapp.GIF" alt="Output from a java application" width="904" height="688"></img>
+
+<h3>Changing the application to use the Derby Embedded Driver</h3>
+<p>
+<b>Restaurants.java</b> accessed the Derby database, <b>myDB</b> using
+the Derby Network Client Driver.  The values for loading the driver and the
+Database connection URL are shown below.
+</p>
+<ul>
+<li>
+<b>
+Driver name <br/>
+</b>
+org.apache.derby.jdbc.ClientDriver
+<br/><br/>
+</li>
+<li>
+<b>
+Database connection URL<br/>
+</b>
+jdbc:derby://localhost:1527/myDB;create=true;user=me;password=mine
+<br/><br/>
+</li>
+</ul>
+<p>
+To change the application to use the Derby Embedded Driver we need to change
+these values to:
+</p>
+<ul>
+<li>
+<b>
+Driver name <br/>
+</b>
+org.apache.derby.jdbc.EmbeddedDriver
+<br/><br/>
+</li>
+<li>
+<b>
+Database connection URL<br/>
+</b>
+jdbc:derby:myDB;create=true;user=me;password=mine
+<br/><br/>
+</li>
+</ul>
+
+<h3>About Schema Names</h3>
+<p>
+If a database is created in Derby using the embedded driver and no user
+name is specified, the default schema used becomes <b>APP</b>.  Therefore
+any tables created in the database have a schema name of <b>APP</b>.
+However, when creating a Derby database using the Network Server, the value
+for the schema becomes the value of the username used to connect with as
+part of the database URL.  In our example we first created the <b>myDB</b> 
+database using the user <b>me</b>.
+</p>
+<p>
+When we change the application to connect using the embedded driver, the 
+schema will default to <b>APP</b> unless we explicitly specify a schema, 
+or pass the username as part of the Database connection URL. To access the 
+table without passing the username as part of the embedded driver Database 
+URL we would refer to the table as <b>ME.restaurants</b>.
+</p>
+<p>
+Only two lines of code need to be changed in Restaurants.java to use the
+Derby Embedded Driver to access the myDB database and insert and select into
+the me.restaurants table.  The old values are listed below.
+</p>
+<pre>
+// variables
+private static String dbURL = "jdbc:derby://localhost:1527/myDB;create=true;user=me;password=mine";
+
+// from the createConnection method
+Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
+</pre>
+<p>
+The new values are shown below to use the Embedded Driver.
+</p>
+<pre>
+// variables
+private static String dbURL = "jdbc:derby:myDB;create=true;user=me;password=mine";
+
+// from the createConnection method
+Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+</pre>
+
+<p>
+Comment out the old values and replace them with the new ones shown above.
+Recompile the class and if your Derby Network Server is running stop it before
+running the Java application with the Embedded Driver.  
+</p>
+<p>
+Applications which use the Derby Embedded Driver may only access the database 
+from the same JVM.  Applications which use the Derby Network Server can 
+access the database from other JVM's.
+</p>
+<p>
+</p>
+
+</body>
+</html>

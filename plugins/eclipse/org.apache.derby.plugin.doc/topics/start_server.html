@@ -1,0 +1,86 @@
+<html>
+<head>
+<title>Starting the Derby Network Server</title>
+</head>
+<body>
+<h2>Starting the Derby Network Server</h2>
+<p>
+The Derby Network Server allows multiple applications running in different
+Java Virtual Machines to access a single Derby database.  
+Once the Network Server is started client applications from within Eclipse, 
+such as <b>ij</b> or other Java applications, can access a Derby database.  
+Additionally, the Network Server allows for client applications outside 
+of Eclipse on the localhost, or even on remote hosts to access the same 
+database.
+</p>
+<p>
+<h3>To start the Derby Network Server:</h3>
+</p>
+<p>
+<ul>
+<li>
+The Derby nature needs to be added to the project prior to starting the Network Server.<br/><br/>
+</li>
+<li>
+With the Java project selected, bring up the context menu and select 
+the menu item, <b>Apache Derby, Start Derby Network Server</b>.
+</li>
+</ul>
+<blockquote>
+<img src="images/start_server.GIF" alt="Start Derby Network Server" width="716" height="686"></img> 
+</blockquote>
+<ul>
+<li>
+The pop-up box will appear which states the Apache Derby Network Server is
+attempting to be started.
+</li>
+</ul>
+<ul>
+<li>
+If the network server startup is successful the <b>Console</b> view will
+display <b>Server is ready to accept connections on port xxxx.</b>
+  For each project that has a running Network Server associated with it 
+a green arrow appears next to the project name. 
+</li>
+</ul>
+<blockquote>
+<img src="images/start_server_console.gif" alt="Network Server started" width="746" height="577"></img> 
+</blockquote>
+<ul>
+<li>
+If other items that use the console as a display hide the Network Server
+console use the <b>Display Selected Console</b> drop down icon to the right 
+of the console menu bar to make the Network Server console visible.
+</li>
+</ul>
+</p> 
+
+<h3>Derby Network Server Host value</h3>
+<p>
+By starting the Derby Network Server using the default values the 
+server runs on the localhost, which is the host running Eclipse, 
+on port 1527.  To change the host name or the port number where the Derby 
+Network Server is running see <a href="properties.html"> Setting Derby properties for a project</a>.
+</p>
+<p>
+The value used for the Network Server host name impacts the ability of 
+remote hosts to connect to the Network Server.  If the Network Server Host value
+in the Project Properties is set to <b>localhost</b>, only clients running
+on the host where Eclipse is running can connect to the network server.
+If an ip address or hostname (other than the name 'localhost') is used, 
+client applications running on other hosts can connect to the Derby Network
+Server.  For additional information about starting the Derby Network Server
+see the Derby Server and Administration Guide.  The section
+called <b>Starting the Network Server</b> explains the effect of setting
+the value for the hostname differently.
+</p>
+<p>
+If connections from other hosts will be allowed, it is recommended to run
+under the Java security manager and enable user authentication prior to
+starting the Derby Network Server.
+</p>
+<p>
+</p>
+
+</body>
+</html>

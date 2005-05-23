@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin 
+   id="org.apache.derby.plugin.doc" 
+   name="Apache Derby Plug-in Documentation for Eclipse" 
+   version="1.0.0" 
+   provider-name="The Apache Software Foundation">
+
+  <runtime>
+  </runtime>
+  <requires>
+     <import plugin="org.eclipse.help"/>
+  </requires>
+
+  <extension point="org.eclipse.help.toc">
+    <toc file="toc.xml" primary="true">
+    </toc>
+  </extension>
+</plugin>

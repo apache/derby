@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="Derby Plug-ins User Guide"> 
+    <topic label="Getting Started" href="topics/start_toc.html">
+    <topic label="Creating a Java Project" href="topics/java_project.html" />
+    <topic label="The Derby Nature" href="topics/nature_toc.html" >
+        <topic label="Adding the Derby Nature to a Java project" href="topics/nature.html"/>
+        <topic label="Removing the Derby Nature from a Java project" href="topics/remove_nature.html"/>
+    </topic>
+    <topic label="Starting and Stopping the Derby Network Server" href="topics/server_toc.html">
+        <topic label="Starting the Derby Network Server" href="topics/start_server.html"/>
+        <topic label="Stopping the Derby Network Server" href="topics/stop_server.html"/>
+    </topic>
+    <topic label="Setting Derby properties for a project" href="topics/properties.html"/>
+    <topic label="Using ij" href="topics/ij_toc.html">
+      <topic label="Using ij to issue SQL Commands" href="topics/ij.html" />
+      <topic label="Using ij to run SQL scripts" href="topics/ij2.html" />
+    </topic>
+    <topic label="Creating a Java Application" href="topics/derby_app.html" />
+    <topic label="Running sysinfo for environment information" href="topics/sysinfo.html"/>
+    <topic label="Derby Documentation" href="topics/resources.html" />
+   </topic>
+</toc>
