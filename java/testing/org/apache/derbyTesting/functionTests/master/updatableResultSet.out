@@ -13,6 +13,8 @@ Got expected exception 'deleteRow' not allowed because the ResultSet is not an u
 SQL State : XJ083
 Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
+WARNING 01J02: Scroll sensitive cursors are not currently implemented.
+WARNING 01J03: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
 Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
@@ -42,7 +44,7 @@ Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause
 Make sure that we got CONCUR_READ_ONLY? true
 Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
 Will see the warnings in embedded mode only
-Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
+WARNING 01J06: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with no FOR UPDATE clause.
 SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
@@ -53,7 +55,7 @@ Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
 Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
 Will see the warnings in embedded mode only
-Expected warnings on resultset = java.sql.SQLWarning: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
+WARNING 01J06: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
 SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
@@ -66,8 +68,7 @@ Now attempt a deleteRow without first doing next on the resultset.
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 Now attempt a updateRow without first doing next on the resultset.
-In embedded mode, updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
-In Network Server mode, if no updateXXX were issued before updateRow, then updateRow is a no-op and doesn't check if it is on a row or not
+updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
@@ -126,8 +127,7 @@ got CONCUR_UPDATABLE? true
 JDBC 2.0 updatable resultset apis on this ResultSet object will pass because this is an updatable resultset
 column 1 on this row before deleteRow is 1
 column 2 on this row before deleteRow is aa                  
-Since after deleteRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail
-In Network Server mode, the ResultSet stays on the deleted row after deleteRow and hence no error for getXXX
+Since after deleteRow(), in embedded mode and Network Server mode using Derby Net Client, ResultSet is positioned before the next row, getXXX will fail
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
@@ -140,8 +140,7 @@ column 1 on this row before updateInt is 1
 column 1 on this row after updateInt is 234
 column 2 on this row before updateString is aa                  
 now updateRow on the row
-Since after updateRow(), in embedded mode, ResultSet is positioned before the next row, getXXX will fail
-In Network Server mode, the ResultSet stays on the updated row after updateRow and hence no error for getXXX
+Since after updateRow(), in embedded mode and Network Server mode using Derby Net Client, ResultSet is positioned before the next row, getXXX will fail
 SQL State : 24000
 Got expected exception Invalid cursor state - no current row.
 calling updateRow again w/o first positioning the ResultSet on the next row will fail
@@ -150,11 +149,14 @@ Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to updateRow() on the current row now
 Positive Test2 - even if no columns from table specified in the column list, we should be able to get updatable resultset
+Will work in embedded mode because target table is not derived from the columns in the select list
+Will not work in network server mode because it derives the target table from the columns in the select list
 total number of rows in T1 
 	 1
 	 -
 	{3}
 column 1 on this row is 1
+PASS!!! passed in embedded mode
 total number of rows in T1 after one deleteRow is 
 	 1
 	 -
@@ -244,16 +246,24 @@ As expected, updated rows in temp table after updateRow
 	 --- ---
 	{123,1}
 	{123,1}
-Positive Test8a - change the name of the resultset and see if deleteRow still works
+Positive Test8a - change the name of the statement when the resultset is open and see if deleteRow still works
+This test works in embedded mode since Derby can handle the change in the name of the statement with an open resultset
+But it fails under Network Server mode because JCC and Derby Net Client do not allow statement name change when there an open resultset against it
 change the cursor name(case sensitive name) with setCursorName and then try to deleteRow
 change the cursor name one more time with setCursorName and then try to deleteRow
-Positive Test8b - change the name of the resultset and see if updateRow still works
+PASS!!! passed in embedded mode
+Positive Test8b - change the name of the statement when the resultset is open and see if updateRow still works
+This test works in embedded mode since Derby can handle the change in the name of the statement with an open resultset
+But it fails under Network Server mode because JCC and Derby Net Client do not allow statement name change when there an open resultset against it
 change the cursor name one more time with setCursorName and then try to updateRow
 change the cursor name(case sensitive name) with setCursorName and then try to updateRow
-Positive Test9a - using correlation name for the table in the select sql is not a problem
+PASS!!! passed in embedded mode
+Positive Test9a - using correlation name for the table in the select sql works in embedded mode and Network Server using Derby Net Client driver
+Correlation name for table does not work in Network Server mode (using JCC) because the drivers construct the delete sql with the correlation name rather than the base table name
 column 1 on this row is 1
 now try to deleteRow
-Positive Test9b - using correlation name for updatable column name is not allowed
+PASS!!! passed in embedded mode
+Positive Test9b - using correlation name for updatable columns is not allowed.
 Table t1 has following rows
 	 C1,C2
 	 -- --
@@ -283,18 +293,9 @@ Table t1 after updateRow has following rows
 	{11,aa                  }
 	{2,bb                  }
 	{3,cc                  }
-Positive Test9c - try to updateXXX on a readonly column. Should get error
-SQL State : 42X31
-Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR17'.
-Table t1 has following rows
-	 C1,C2
-	 -- --
-	{1,aa                  }
-	{2,bb                  }
-	{3,cc                  }
 Positive Test9d - try to updateXXX on a readonly column with correlation name. Should get error
 SQL State : 42X31
-Got expected exception Column 'COL2' is not in FOR UPDATE list of cursor 'SQLCUR18'.
+Got expected exception Column 'COL2' is not in FOR UPDATE list of cursor 'SQLCUR17'.
 Table t1 has following rows
 	 C1,C2
 	 -- --
@@ -305,7 +306,7 @@ Positive Test10 - 2 updatable resultsets going against the same table, will they
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
 SQL State : XCL08
-Got expected exception Cursor 'SQLCUR20' is not on a row.
+Got expected exception Cursor 'SQLCUR19' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
@@ -314,7 +315,7 @@ Notice the Fetch Size in run time statistics output.
 Statement Name: 
 	null
 Statement Text: 
-	SELECT 1, 2 FROM t1 FOR UPDATE of c1
+	SELECT * FROM t1 FOR UPDATE of c1
 Parse Time: 0
 Bind Time: 0
 Optimize Time: 0
@@ -326,51 +327,25 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (3):
+Table Scan ResultSet for T1 at read committed isolation level using exclusive row locking chosen by the optimizer
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
-restriction = false
-projection = true
+Fetch Size = 1
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-	restriction time (milliseconds) = 0
-	projection time (milliseconds) = 0
-Source result set:
-	Project-Restrict ResultSet (2):
-	Number of opens = 1
-	Rows seen = 0
-	Rows filtered = 0
-	restriction = false
-	projection = true
-		constructor time (milliseconds) = 0
-		open time (milliseconds) = 0
-		next time (milliseconds) = 0
-		close time (milliseconds) = 0
-		restriction time (milliseconds) = 0
-		projection time (milliseconds) = 0
-	Source result set:
-		Table Scan ResultSet for T1 at read committed isolation level using exclusive row locking chosen by the optimizer
-		Number of opens = 1
-		Rows seen = 0
-		Rows filtered = 0
-		Fetch Size = 1
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-		scan information: 
-			Bit set of columns fetched=All
-			Number of columns fetched=2
-			Number of pages visited=0
-			Number of rows qualified=0
-			Number of rows visited=0
-			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=2
+	Number of pages visited=0
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
 None
 statement's fetch size is 200
 Positive Test12a - make sure delete trigger gets fired when deleteRow is issued
@@ -2798,7 +2773,8 @@ Positive Test32 - call updateXXX methods on column that is not in for update col
 	{2,bb                  }
 	{3,cc                  }
 SQL State : 42X31
-Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR531'.
+Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR37'.
+updateRow passed
   Make sure the contents of table are unchanged
 	 C1,C2
 	 -- --

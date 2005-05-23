@@ -2368,43 +2368,75 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateRow");
             }
-            updateRowX();
+            //If updateXXX were issued on the row before updateRow, then
+            //position the ResultSet to right before the next row after updateRow
+            if (updateRowX())
+                isValidCursorPosition_ = false;
         }
     }
 
-    private void updateRowX() throws java.sql.SQLException {
+    //if no updateXXX were issued before this updateRow, then return false
+    private boolean updateRowX() throws java.sql.SQLException {
         checkForClosedResultSet();
         if (isOnInsertRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
             throw new SqlException(agent_.logWriter_, "This method cannot be invoked while the cursor is on the insert " +
                     "row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.");
         }
 
-        // No-op if none of the columns were updated and updateRow() is called, just return.
+        //if not on a valid row, then do not accept updateXXX calls
+        if (!isValidCursorPosition_)
+            throw new SqlException(agent_.logWriter_, "Invalid operation to " +
+                    "update at current cursor position");
+
+        // If no updateXXX has been called on this ResultSet object, then
+        // updatedColumns_ will be null and hence no action required
         if (updatedColumns_ == null) {
-            return;
+            return false;
         }
 
-        if (preparedStatementForUpdate_ == null) {
-            getPreparedStatementForUpdate();
+        // updateXXX has been called on this ResultSet object, but check if it
+        // has been called on the current row. If no column got updated on this
+        // current row, then just return.
+        boolean didAnyColumnGetUpdated = false;
+        for (int i=0; i < updatedColumns_.length; i++) {
+            if (columnUpdated_[i]) {
+                didAnyColumnGetUpdated = true;
+                break;
+            }
         }
+        if (didAnyColumnGetUpdated == false)
+            return false;
+
+        // User might not be updating all the updatable columns selected in the
+        // select sql and hence every updateRow on the same ResultSet can be
+        // potentially different than the previous one. Because of that, we
+        // should get a new prepared statement to do updates every time
+        getPreparedStatementForUpdate();
 
         // build the inputs array for the prepared statement for update
+        int paramNumber = 0;
         for (int i = 0; i < updatedColumns_.length; i++) {
             if (resultSetMetaData_.sqlxUpdatable_[i] == 1) {
+                // Since user may choose not to update all the columns in the
+                // select list, check first if the column has been updated
+                if (columnUpdated_[i] == false)
+                    continue;
+                paramNumber++;
+
                 // column is updated either if the updatedColumns_ entry is not null,
                 // or if the updatedColumns_ entry is null, but columnUpdated_ boolean is
                 // set to true, which means columns is updated to a null.
                 if (updatedColumns_[i] != null ||
                         (updatedColumns_[i] == null && columnUpdated_[i])) {
-                    preparedStatementForUpdate_.setInput(i + 1, updatedColumns_[i]);
+                    preparedStatementForUpdate_.setInput(paramNumber, updatedColumns_[i]);
                 } else {
                     // Check if the original column is null.  Calling CrossConverters.setObject on a null
                     // column causes "Data Conversion" Exception.
                     Object originalObj = getObject(i + 1);
                     if (originalObj == null) {
-                        preparedStatementForUpdate_.setInput(i + 1, null);
+                        preparedStatementForUpdate_.setInput(paramNumber, null);
                     } else {
-                        preparedStatementForUpdate_.setInput(i + 1, agent_.crossConverters_.setObject(resultSetMetaData_.types_[i], originalObj));
+                        preparedStatementForUpdate_.setInput(paramNumber, agent_.crossConverters_.setObject(resultSetMetaData_.types_[i], originalObj));
                     }
                 }
             }
@@ -2423,6 +2455,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             cancelRowUpdates();
             throw e;
         }
+        return true;
     }
 
     public void deleteRow() throws java.sql.SQLException {
@@ -2431,6 +2464,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "deleteRow");
             }
             deleteRowX();
+            //the cursor is not positioned on the deleted row after deleteRow.
+            //User needs to issue ResultSet.next to reposition the ResultSet
+            //on a valid row
+            isValidCursorPosition_ = false;
         }
     }
 
@@ -2501,6 +2538,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 throw new SqlException(agent_.logWriter_, "This method cannot be invoked while the cursor is on the insert " +
                         "row or if this ResultSet object has a concurrency of CONCUR_READ_ONLY.");
             }
+
+            // if not on a valid row, then do not accept cancelRowUpdates call
+            if (!isValidCursorPosition_)
+                throw new SqlException(agent_.logWriter_, "Invalid operation " +
+                        "at current cursor position.");
 
             // if updateRow() has already been called, then cancelRowUpdates should have
             // no effect.  updateRowCalled_ is reset to false as soon as the cursor moves to a new row.
@@ -3041,8 +3083,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         boolean foundOneUpdatedColumnAlready = false;
         String updateString = "UPDATE " + getTableName() + " SET ";
 
-        // The update tablename ... where current of cursorname for Cloudscape has
-        // to provide columns as columnname1 = ?, columnname2 = ?
         for (column = 1; column <= resultSetMetaData_.columns_; column++) {
             if (columnUpdated_[column - 1]) {
                 if (foundOneUpdatedColumnAlready) {
@@ -3069,8 +3109,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private String buildDeleteString() throws SqlException {
         String deleteString = "DELETE FROM ";
 
-        // build the update string using the server's cursor name
-        deleteString += (getTableName() + " WHERE CURRENT OF " + getServerCursorName());
+        // build the delete string using the server's cursor name
+        deleteString += (getTableName() + " WHERE CURRENT OF \"" + getServerCursorName() + "\"");
 
         if (isRowsetCursor_) {
             deleteString += " FOR ROW ? OF ROWSET";
@@ -3079,17 +3119,41 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return deleteString;
     }
 
-    private String getTableName() {
+    //Go through all the columns in the select list to see if we can find a
+    //base table column and use that column's metadata to get the table name
+    //But, it is possible to have a sql of the form
+    //select 1,2 from t1 for update
+    //This sql will not be a good candidate for updateXXX calls(both in embedded
+    //and Network Server mode) since there is no updatable column in the select
+    //list. But a user can use a sql like that to issue deleteRow. In Network
+    //Server mode though, this sql will fail for deleteRow because none of the
+    //columns are from base table and w/o a base table column, there is no way
+    //to find the table name for delete
+    private String getTableName() throws SqlException {
         String tableName = "";
-        if (resultSetMetaData_.sqlxRdbnam_[0] != null &&
-                !resultSetMetaData_.sqlxRdbnam_[0].equals(""))      // catalog
+        int baseTableColumn = 0;
+        int totalColumns = resultSetMetaData_.getColumnCount();
+        for (; baseTableColumn < totalColumns; baseTableColumn++) {
+            if (resultSetMetaData_.sqlxSchema_[baseTableColumn] != null)
+                break;
+        }
+
+        //if following true, then there are no base table columns in select list
+        if (baseTableColumn == totalColumns)
+            baseTableColumn = 0;
+
+        if (resultSetMetaData_.sqlxRdbnam_[baseTableColumn] != null &&
+                !resultSetMetaData_.sqlxRdbnam_[baseTableColumn].equals(""))      // catalog
         {
-            tableName += resultSetMetaData_.sqlxRdbnam_[0].trim() + ".";
+            tableName += "\"" + resultSetMetaData_.sqlxRdbnam_[baseTableColumn] + "\".";
         }
-        if (!resultSetMetaData_.sqlxSchema_[0].equals("")) {
-            tableName += resultSetMetaData_.sqlxSchema_[0].trim() + ".";
+        //dervied column like select 2 from t1, has null schema and table name
+        if (resultSetMetaData_.sqlxSchema_[baseTableColumn] != null && !resultSetMetaData_.sqlxSchema_[baseTableColumn].equals("")) {
+            tableName += "\"" + resultSetMetaData_.sqlxSchema_[baseTableColumn] + "\".";
         }
-        tableName += resultSetMetaData_.sqlxBasename_[0].trim();
+        if (resultSetMetaData_.sqlxBasename_[baseTableColumn] != null) {
+            tableName += "\"" + resultSetMetaData_.sqlxBasename_[baseTableColumn] + "\"";
+        }
         return tableName;
     }
 
@@ -3157,6 +3221,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (resultSetMetaData_.sqlxUpdatable_ == null || resultSetMetaData_.sqlxUpdatable_[column - 1] != 1) {
             throw new SqlException(agent_.logWriter_, "Column not updatable");
         }
+
+        //if not on a valid row, then do not accept updateXXX calls
+        if (!isValidCursorPosition_)
+            throw new SqlException(agent_.logWriter_, "Invalid operation to " +
+                    "update at current cursor position");
     }
 
     final void checkForValidColumnIndex(int column) throws SqlException {
