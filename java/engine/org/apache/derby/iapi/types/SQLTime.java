@@ -975,5 +975,59 @@ public final class SQLTime extends DataType
 		      ps.setTime(position, getTime((Calendar) null));
    }
 
+
+    /**
+     * Add a number of intervals to a datetime value. Implements the JDBC escape TIMESTAMPADD function.
+     *
+     * @param intervalType One of FRAC_SECOND_INTERVAL, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL,
+     *                     DAY_INTERVAL, WEEK_INTERVAL, MONTH_INTERVAL, QUARTER_INTERVAL, or YEAR_INTERVAL
+     * @param intervalCount The number of intervals to add
+     * @param currentDate Used to convert time to timestamp
+     * @param resultHolder If non-null a DateTimeDataValue that can be used to hold the result. If null then
+     *                     generate a new holder
+     *
+     * @return startTime + intervalCount intervals, as a timestamp
+     *
+     * @exception StandardException
+     */
+    public DateTimeDataValue timestampAdd( int intervalType,
+                                           NumberDataValue intervalCount,
+                                           java.sql.Date currentDate,
+                                           DateTimeDataValue resultHolder)
+        throws StandardException
+    {
+        return toTimestamp( currentDate).timestampAdd( intervalType, intervalCount, currentDate, resultHolder);
+    }
+
+    private SQLTimestamp toTimestamp(java.sql.Date currentDate) throws StandardException
+    {
+        return new SQLTimestamp( SQLDate.computeEncodedDate( currentDate, (Calendar) null),
+                                 getEncodedTime(),
+                                 0 /* nanoseconds */);
+    }
+    
+    /**
+     * Finds the difference between two datetime values as a number of intervals. Implements the JDBC
+     * TIMESTAMPDIFF escape function.
+     *
+     * @param intervalType One of FRAC_SECOND_INTERVAL, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL,
+     *                     DAY_INTERVAL, WEEK_INTERVAL, MONTH_INTERVAL, QUARTER_INTERVAL, or YEAR_INTERVAL
+     * @param time1
+     * @param currentDate Used to convert time to timestamp
+     * @param resultHolder If non-null a NumberDataValue that can be used to hold the result. If null then
+     *                     generate a new holder
+     *
+     * @return the number of intervals by which this datetime is greater than time1
+     *
+     * @exception StandardException
+     */
+    public NumberDataValue timestampDiff( int intervalType,
+                                          DateTimeDataValue time1,
+                                          java.sql.Date currentDate,
+                                          NumberDataValue resultHolder)
+        throws StandardException
+    {
+        return toTimestamp( currentDate ).timestampDiff( intervalType, time1, currentDate, resultHolder);
+    }
 }
 

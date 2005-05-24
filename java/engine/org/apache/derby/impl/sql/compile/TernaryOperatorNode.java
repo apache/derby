@@ -44,6 +44,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.lang.reflect.Modifier;
 
@@ -78,17 +79,23 @@ public class TernaryOperatorNode extends ValueNode
 	public static final int LOCATE = 1;
 	public static final int SUBSTRING = 2;
 	public static final int LIKE = 3;
-	static final String[] TernaryOperators = {"trim", "LOCATE", "substring", "like"};
-	static final String[] TernaryMethodNames = {"trim", "locate", "substring", "like"};
+	public static final int TIMESTAMPADD = 4;
+	public static final int TIMESTAMPDIFF = 5;
+	static final String[] TernaryOperators = {"trim", "LOCATE", "substring", "like", "TIMESTAMPADD", "TIMESTAMPDIFF"};
+	static final String[] TernaryMethodNames = {"trim", "locate", "substring", "like", "timestampAdd", "timestampDiff"};
 	static final String[] TernaryResultType = {ClassName.StringDataValue, 
 			ClassName.NumberDataValue,
 			ClassName.ConcatableDataValue,
-			ClassName.BooleanDataValue};
+			ClassName.BooleanDataValue,
+            ClassName.DateTimeDataValue, 
+			ClassName.NumberDataValue};
 	static final String[][] TernaryArgType = {
 	{ClassName.StringDataValue, ClassName.StringDataValue, "java.lang.Integer"},
 	{ClassName.StringDataValue, ClassName.StringDataValue, ClassName.NumberDataValue},
 	{ClassName.ConcatableDataValue, ClassName.NumberDataValue, ClassName.NumberDataValue},
-	{ClassName.DataValueDescriptor, ClassName.DataValueDescriptor, ClassName.DataValueDescriptor}
+	{ClassName.DataValueDescriptor, ClassName.DataValueDescriptor, ClassName.DataValueDescriptor},
+    {ClassName.DateTimeDataValue, "java.lang.Integer", ClassName.NumberDataValue}, // time.timestampadd( interval, count)
+    {ClassName.DateTimeDataValue, "java.lang.Integer", ClassName.DateTimeDataValue}// time2.timestampDiff( interval, time1)
 	};
 
 	/**
@@ -233,6 +240,10 @@ public class TernaryOperatorNode extends ValueNode
 			locateBind();
 		else if (operatorType == SUBSTRING)
 			substrBind();
+		else if (operatorType == TIMESTAMPADD)
+            timestampAddBind();
+		else if (operatorType == TIMESTAMPDIFF)
+            timestampDiffBind();
 
 		return this;
 	}
@@ -330,6 +341,21 @@ public class TernaryOperatorNode extends ValueNode
 			nargs = 4;
 			receiverType = receiverInterfaceType;
 		}
+		else if (operatorType == TIMESTAMPADD || operatorType == TIMESTAMPDIFF)
+        {
+            Object intervalType = leftOperand.getConstantValueAsObject();
+            if( SanityManager.DEBUG)
+                SanityManager.ASSERT( intervalType != null && intervalType instanceof Integer,
+                                      "Invalid interval type used for " + operator);
+            mb.push( ((Integer) intervalType).intValue());
+            rightOperand.generateExpression( acb, mb);
+            mb.upCast( TernaryArgType[ operatorType][2]);
+            acb.getCurrentDateExpression( mb);
+			mb.getField(field);
+			nargs = 4;
+			receiverType = receiverInterfaceType;
+        }
+            
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultInterfaceType, nargs);
 
 		/*
@@ -780,6 +806,72 @@ public class TernaryOperatorNode extends ValueNode
 
 		return this;
 	}
+
+
+	/**
+	 * Bind TIMESTAMPADD expression.  
+	 *
+	 * @return	The new top of the expression tree.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+
+ 	private ValueNode timestampAddBind() 
+			throws StandardException
+	{
+        if( ! bindParameter( rightOperand, Types.INTEGER))
+        {
+            int jdbcType = rightOperand.getTypeId().getJDBCTypeId();
+            if( jdbcType != Types.TINYINT && jdbcType != Types.SMALLINT &&
+                jdbcType != Types.INTEGER && jdbcType != Types.BIGINT)
+                throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARG_TYPE,
+                                                     rightOperand.getTypeId().getSQLTypeName(),
+                                                     ReuseFactory.getInteger( 2),
+                                                     operator);
+        }
+        bindDateTimeArg( receiver, 3);
+        setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIMESTAMP));
+        return this;
+    } // end of timestampAddBind
+
+	/**
+	 * Bind TIMESTAMPDIFF expression.  
+	 *
+	 * @return	The new top of the expression tree.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+
+ 	private ValueNode timestampDiffBind() 
+			throws StandardException
+	{
+        bindDateTimeArg( rightOperand, 2);
+        bindDateTimeArg( receiver, 3);
+        setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.INTEGER));
+        return this;
+    } // End of timestampDiffBind
+
+    private void bindDateTimeArg( ValueNode arg, int argNumber) throws StandardException
+    {
+        if( ! bindParameter( arg, Types.TIMESTAMP))
+        {
+            if( ! arg.getTypeId().isDateTimeTimeStampTypeId())
+                throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARG_TYPE,
+                                                     arg.getTypeId().getSQLTypeName(),
+                                                     ReuseFactory.getInteger( argNumber),
+                                                     operator);
+        }
+    } // end of bindDateTimeArg
+
+    private boolean bindParameter( ValueNode arg, int jdbcType) throws StandardException
+    {
+        if( arg.isParameterNode() && arg.getTypeId() == null)
+        {
+            ((ParameterNode) arg).setDescriptor( new DataTypeDescriptor(TypeId.getBuiltInTypeId( jdbcType), true));
+            return true;
+        }
+        return false;
+    } // end of bindParameter
 
 	public ValueNode getReceiver()
 	{

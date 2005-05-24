@@ -1547,6 +1547,12 @@ public class SQLParser
 		throw StandardException.newException(SQLState.LANG_IDENTIFIER_TOO_LONG, identifier, String.valueOf(identifier_length_limit));
     }
 
+    private ValueNode getJdbcIntervalNode( int intervalType) throws StandardException
+    {
+        return (ValueNode) nodeFactory.getNode( C_NodeTypes.INT_CONSTANT_NODE,
+                                                ReuseFactory.getInteger( intervalType),
+                                                getContextManager());
+    }
 }
 
 PARSER_END(SQLParser)
@@ -1851,11 +1857,22 @@ TOKEN [IGNORE_CASE] :
 |	<SAVEPOINT: "savepoint">
 |	<SCALE: "scale">
 |	<SERIALIZABLE: "serializable">
+|	<SQL_TSI_FRAC_SECOND: "sql_tsi_frac_second">
+|	<SQL_TSI_SECOND: "sql_tsi_second">
+|	<SQL_TSI_MINUTE: "sql_tsi_minute">
+|	<SQL_TSI_HOUR: "sql_tsi_hour">
+|	<SQL_TSI_DAY: "sql_tsi_day">
+|	<SQL_TSI_WEEK: "sql_tsi_week">
+|	<SQL_TSI_MONTH: "sql_tsi_month">
+|	<SQL_TSI_QUARTER: "sql_tsi_quarter">
+|	<SQL_TSI_YEAR: "sql_tsi_year">
 |	<START: "start">
 |	<STATEMENT: "statement">
 |	<THEN: "then">
 |	<TIME: "time">
 |	<TIMESTAMP: "timestamp">
+|	<TIMESTAMPADD: "timestampadd">
+|	<TIMESTAMPDIFF: "timestampdiff">
 |	<TRUNCATE: "truncate">
 |	<TYPE: "type">
 |	<UNCOMMITTED: "uncommitted">
@@ -5473,7 +5490,103 @@ escapedValueFunction() throws StandardException :
 	{
 		return value;
 	}
+|
+    value = timestampArithmeticFuncion()
+    {
+        return value;
+    }
+}
 
+/*
+ * <A NAME="timestampArithmeticFuncion">timestampArithmeticFuncion</A>
+ */
+ValueNode
+timestampArithmeticFuncion() throws StandardException :
+{
+    ValueNode intervalType;
+    ValueNode tstamp1;
+    ValueNode tstamp2;
+    ValueNode count;
+}
+{
+    <TIMESTAMPADD> <LEFT_PAREN> intervalType = jdbcIntervalType() <COMMA>
+       count = additiveExpression(null,0,false) <COMMA>
+       tstamp1 = additiveExpression(null,0,false) <RIGHT_PAREN>
+    {
+        return (ValueNode) nodeFactory.getNode( C_NodeTypes.TIMESTAMP_ADD_FN_NODE,
+                                                tstamp1,
+                                                intervalType,
+                                                count,
+                                                ReuseFactory.getInteger( TernaryOperatorNode.TIMESTAMPADD),
+                                                null,
+                                                getContextManager());
+    }
+|
+    <TIMESTAMPDIFF> <LEFT_PAREN> intervalType = jdbcIntervalType() <COMMA>
+       tstamp1 = additiveExpression(null,0,false) <COMMA>
+       tstamp2 = additiveExpression(null,0,false) <RIGHT_PAREN>
+    {
+        return (ValueNode) nodeFactory.getNode( C_NodeTypes.TIMESTAMP_DIFF_FN_NODE,
+                                                tstamp2,
+                                                intervalType,
+                                                tstamp1,
+                                                ReuseFactory.getInteger( TernaryOperatorNode.TIMESTAMPDIFF),
+                                                null,
+                                                getContextManager());
+    }
+}       
+
+/*
+ * <A NAME="jdbcIntervalType">jdbcIntervalType</A>
+ */
+ValueNode jdbcIntervalType() throws StandardException :
+{
+}
+{
+    <SQL_TSI_FRAC_SECOND>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.FRAC_SECOND_INTERVAL);
+    }
+|
+    <SQL_TSI_SECOND>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.SECOND_INTERVAL);
+    }
+|
+    <SQL_TSI_MINUTE>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.MINUTE_INTERVAL);
+    }
+|
+    <SQL_TSI_HOUR>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.HOUR_INTERVAL);
+    }
+|
+    <SQL_TSI_DAY>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.DAY_INTERVAL);
+    }
+|
+    <SQL_TSI_WEEK>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.WEEK_INTERVAL);
+    }
+|
+    <SQL_TSI_MONTH>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.MONTH_INTERVAL);
+    }
+|
+    <SQL_TSI_QUARTER>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.QUARTER_INTERVAL);
+    }
+|
+    <SQL_TSI_YEAR>
+    {
+        return getJdbcIntervalNode( DateTimeDataValue.YEAR_INTERVAL);
+    }
 }
 
 /*
@@ -11411,6 +11524,15 @@ nonReservedKeyword()  :
 	|	tok = <SHARE>
 	|   tok = <SPECIFIC>
 	|	tok = <SQLID>
+	|	tok = <SQL_TSI_FRAC_SECOND>
+	|	tok = <SQL_TSI_SECOND>
+	|	tok = <SQL_TSI_MINUTE>
+	|	tok = <SQL_TSI_HOUR>
+	|	tok = <SQL_TSI_DAY>
+	|	tok = <SQL_TSI_WEEK>
+	|	tok = <SQL_TSI_MONTH>
+	|	tok = <SQL_TSI_QUARTER>
+	|	tok = <SQL_TSI_YEAR>
     |   tok = <SQRT>
     |       tok = <STABILITY>
 	|	tok = <START>
@@ -11420,6 +11542,8 @@ nonReservedKeyword()  :
 	|	tok = <THEN>
 	|	tok = <TIME>
 	|	tok = <TIMESTAMP>
+	|	tok = <TIMESTAMPADD>
+	|	tok = <TIMESTAMPDIFF>
     |   tok = <TRIGGER>
 	|	tok = <TRUNCATE>
 	|	tok = <TS>

@@ -752,7 +752,7 @@ public interface SQLState {
 	String LANG_NOT_STORABLE                                           = "42821";
 	String LANG_NULL_RESULT_SET_META_DATA                              = "42X43";
 	String LANG_INVALID_COLUMN_LENGTH                                  = "42X44";
-	// = "42X45";
+	String LANG_INVALID_FUNCTION_ARG_TYPE                              = "42X45";
 	// = "42X46";
 	// = "42X47";
 	String LANG_INVALID_PRECISION                                      = "42X48";

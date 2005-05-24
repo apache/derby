@@ -41,11 +41,10 @@ import org.apache.derby.iapi.types.DataType;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.iapi.types.SQLDouble;
 import org.apache.derby.iapi.types.SQLTime;
-
-
 
 import java.sql.Date;
 import java.sql.Time;
@@ -87,6 +86,8 @@ public final class SQLTimestamp extends DataType
 
     static final int MAX_FRACTION_DIGITS = 6; // Only microsecond resolution on conversion to/from strings
     static final int FRACTION_TO_NANO = 1000; // 10**(9 - MAX_FRACTION_DIGITS)
+
+    static final int ONE_BILLION = 1000000000;
     
 	private int	encodedDate;
 	private int	encodedTime;
@@ -439,7 +440,7 @@ public final class SQLTimestamp extends DataType
 		setValue(value, (Calendar) null);
 	}
 
-	private SQLTimestamp(int encodedDate, int encodedTime, int nanos) {
+	SQLTimestamp(int encodedDate, int encodedTime, int nanos) {
 
 		this.encodedDate = encodedDate;
 		this.encodedTime = encodedTime;
@@ -909,18 +910,24 @@ public final class SQLTimestamp extends DataType
     {
         if( currentCal == null)
             currentCal = new GregorianCalendar();
-		currentCal.set(Calendar.YEAR, SQLDate.getYear(encodedDate));
-		/* Note calendar month is zero based so we subtract 1*/
-		currentCal.set(Calendar.MONTH, (SQLDate.getMonth(encodedDate)-1));
-		currentCal.set(Calendar.DATE, SQLDate.getDay(encodedDate));
-		currentCal.set(Calendar.HOUR_OF_DAY, SQLTime.getHour(encodedTime));
-		currentCal.set(Calendar.MINUTE, SQLTime.getMinute(encodedTime));
-		currentCal.set(Calendar.SECOND, SQLTime.getSecond(encodedTime));
-		currentCal.set(Calendar.MILLISECOND, 0);
+        setCalendar( currentCal);
 		Timestamp t = new Timestamp(currentCal.getTime().getTime());
 		t.setNanos(nanos);
 		return t;
 	}
+
+    private void setCalendar( Calendar cal)
+    {
+		cal.set(Calendar.YEAR, SQLDate.getYear(encodedDate));
+		/* Note calendar month is zero based so we subtract 1*/
+		cal.set(Calendar.MONTH, (SQLDate.getMonth(encodedDate)-1));
+		cal.set(Calendar.DATE, SQLDate.getDay(encodedDate));
+		cal.set(Calendar.HOUR_OF_DAY, SQLTime.getHour(encodedTime));
+		cal.set(Calendar.MINUTE, SQLTime.getMinute(encodedTime));
+		cal.set(Calendar.SECOND, SQLTime.getSecond(encodedTime));
+		cal.set(Calendar.MILLISECOND, 0);
+    } // end of setCalendar
+        
 	/**
 	 * Set the encoded values for the timestamp
 	 *
@@ -1052,4 +1059,308 @@ public final class SQLTimestamp extends DataType
         }
         return retVal;
     } // end of parseDateTimeInteger
+
+    /**
+     * Add a number of intervals to a datetime value. Implements the JDBC escape TIMESTAMPADD function.
+     *
+     * @param intervalType One of FRAC_SECOND_INTERVAL, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL,
+     *                     DAY_INTERVAL, WEEK_INTERVAL, MONTH_INTERVAL, QUARTER_INTERVAL, or YEAR_INTERVAL
+     * @param intervalCount The number of intervals to add
+     * @param currentDate Used to convert time to timestamp
+     * @param resultHolder If non-null a DateTimeDataValue that can be used to hold the result. If null then
+     *                     generate a new holder
+     *
+     * @return startTime + intervalCount intervals, as a timestamp
+     *
+     * @exception StandardException
+     */
+    public DateTimeDataValue timestampAdd( int intervalType,
+                                           NumberDataValue count,
+                                           java.sql.Date currentDate,
+                                           DateTimeDataValue resultHolder)
+        throws StandardException
+    {
+        if( resultHolder == null)
+            resultHolder = new SQLTimestamp();
+        SQLTimestamp tsResult = (SQLTimestamp) resultHolder;
+        if( isNull() || count.isNull())
+        {
+            tsResult.restoreToNull();
+            return resultHolder;
+        }
+        tsResult.setFrom( this);
+        int intervalCount = count.getInt();
+        
+        switch( intervalType)
+        {
+        case FRAC_SECOND_INTERVAL:
+            // The interval is nanoseconds. Do the computation in long to avoid overflow.
+            long nanos = this.nanos + intervalCount;
+            if( nanos >= 0 && nanos < ONE_BILLION)
+                tsResult.nanos = (int) nanos;
+            else
+            {
+                int secondsInc = (int)(nanos/ONE_BILLION);
+                if( nanos >= 0)
+                    tsResult.nanos = (int) (nanos % ONE_BILLION);
+                else
+                {
+                    secondsInc--;
+                    nanos -= secondsInc * (long)ONE_BILLION; // 0 <= nanos < ONE_BILLION
+                    tsResult.nanos = (int) nanos;
+                }
+                addInternal( Calendar.SECOND, secondsInc, tsResult);
+            }
+            break;
+
+        case SECOND_INTERVAL:
+            addInternal( Calendar.SECOND, intervalCount, tsResult);
+            break;
+
+        case MINUTE_INTERVAL:
+            addInternal( Calendar.MINUTE, intervalCount, tsResult);
+            break;
+
+        case HOUR_INTERVAL:
+            addInternal( Calendar.HOUR, intervalCount, tsResult);
+            break;
+
+        case DAY_INTERVAL:
+            addInternal( Calendar.DATE, intervalCount, tsResult);
+            break;
+
+        case WEEK_INTERVAL:
+            addInternal( Calendar.DATE, intervalCount*7, tsResult);
+            break;
+
+        case MONTH_INTERVAL:
+            addInternal( Calendar.MONTH, intervalCount, tsResult);
+            break;
+
+        case QUARTER_INTERVAL:
+            addInternal( Calendar.MONTH, intervalCount*3, tsResult);
+            break;
+
+        case YEAR_INTERVAL:
+            addInternal( Calendar.YEAR, intervalCount, tsResult);
+            break;
+
+        default:
+            throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
+                                                  ReuseFactory.getInteger( intervalType),
+                                                  "TIMESTAMPADD");
+        }
+        return tsResult;
+    } // end of timestampAdd
+
+    private void addInternal( int calIntervalType, int count, SQLTimestamp tsResult) throws StandardException
+    {
+        Calendar cal = new GregorianCalendar();
+        setCalendar( cal);
+        try
+        {
+            cal.add( calIntervalType, count);
+            tsResult.encodedTime = SQLTime.computeEncodedTime( cal);
+            tsResult.encodedDate = SQLDate.computeEncodedDate( cal);
+        }
+        catch( StandardException se)
+        {
+            String state = se.getSQLState();
+            if( state != null && state.length() > 0 && SQLState.LANG_DATE_RANGE_EXCEPTION.startsWith( state))
+            {
+                throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "TIMESTAMP");
+            }
+            throw se;
+        }
+    } // end of addInternal
+
+    /**
+     * Finds the difference between two datetime values as a number of intervals. Implements the JDBC
+     * TIMESTAMPDIFF escape function.
+     *
+     * @param intervalType One of FRAC_SECOND_INTERVAL, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL,
+     *                     DAY_INTERVAL, WEEK_INTERVAL, MONTH_INTERVAL, QUARTER_INTERVAL, or YEAR_INTERVAL
+     * @param time1
+     * @param currentDate Used to convert time to timestamp
+     * @param resultHolder If non-null a NumberDataValue that can be used to hold the result. If null then
+     *                     generate a new holder
+     *
+     * @return the number of intervals by which this datetime is greater than time1
+     *
+     * @exception StandardException
+     */
+    public NumberDataValue timestampDiff( int intervalType,
+                                          DateTimeDataValue time1,
+                                          java.sql.Date currentDate,
+                                          NumberDataValue resultHolder)
+        throws StandardException
+    {
+        if( resultHolder == null)
+            resultHolder = new SQLInteger();
+ 
+       if( isNull() || time1.isNull())
+        {
+            resultHolder.setToNull();
+            return resultHolder;
+        }
+        
+        SQLTimestamp ts1 = promote( time1, currentDate);
+
+        /* Years, months, and quarters are difficult because their lengths are not constant.
+         * The other intervals are relatively easy (because we ignore leap seconds).
+         */
+        Calendar cal = new GregorianCalendar();
+        setCalendar( cal);
+        long thisInSeconds = cal.getTime().getTime()/1000;
+        ts1.setCalendar( cal);
+        long ts1InSeconds = cal.getTime().getTime()/1000;
+        long secondsDiff = thisInSeconds - ts1InSeconds;
+        int nanosDiff = nanos - ts1.nanos;
+        // Normalize secondsDiff and nanosDiff so that they are both <= 0 or both >= 0.
+        if( nanosDiff < 0 && secondsDiff > 0)
+        {
+            secondsDiff--;
+            nanosDiff += ONE_BILLION;
+        }
+        else if( nanosDiff > 0 && secondsDiff < 0)
+        {
+            secondsDiff++;
+            nanosDiff -= ONE_BILLION;
+        }
+        long ldiff = 0;
+        
+        switch( intervalType)
+        {
+        case FRAC_SECOND_INTERVAL:
+            if( secondsDiff > Integer.MAX_VALUE/ONE_BILLION || secondsDiff < Integer.MIN_VALUE/ONE_BILLION)
+                throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
+            ldiff = secondsDiff*ONE_BILLION + nanosDiff;
+            break;
+            
+        case SECOND_INTERVAL:
+            ldiff = secondsDiff;
+            break;
+            
+        case MINUTE_INTERVAL:
+            ldiff = secondsDiff/60;
+            break;
+
+        case HOUR_INTERVAL:
+            ldiff = secondsDiff/(60*60);
+            break;
+            
+        case DAY_INTERVAL:
+            ldiff = secondsDiff/(24*60*60);
+            break;
+            
+        case WEEK_INTERVAL:
+            ldiff = secondsDiff/(7*24*60*60);
+            break;
+
+        case QUARTER_INTERVAL:
+        case MONTH_INTERVAL:
+            // Make a conservative guess and increment until we overshoot.
+            if( Math.abs( secondsDiff) > 366*24*60*60) // Certainly more than a year
+                ldiff = 12*(secondsDiff/(366*24*60*60));
+            else
+                ldiff = secondsDiff/(31*24*60*60);
+            if( secondsDiff >= 0)
+            {
+                if (ldiff >= Integer.MAX_VALUE)
+                    throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
+                // cal holds the time for time1
+                cal.add( Calendar.MONTH, (int) (ldiff + 1));
+                for(;;)
+                {
+                    if( cal.getTime().getTime()/1000 > thisInSeconds)
+                        break;
+                    cal.add( Calendar.MONTH, 1);
+                    ldiff++;
+                }
+            }
+            else
+            {
+                if (ldiff <= Integer.MIN_VALUE)
+                    throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
+                // cal holds the time for time1
+                cal.add( Calendar.MONTH, (int) (ldiff - 1));
+                for(;;)
+                {
+                    if( cal.getTime().getTime()/1000 < thisInSeconds)
+                        break;
+                    cal.add( Calendar.MONTH, -1);
+                    ldiff--;
+                }
+            }
+            if( intervalType == QUARTER_INTERVAL)
+                ldiff = ldiff/3;
+            break;
+
+        case YEAR_INTERVAL:
+            // Make a conservative guess and increment until we overshoot.
+            ldiff = secondsDiff/(366*24*60*60);
+            if( secondsDiff >= 0)
+            {
+                if (ldiff >= Integer.MAX_VALUE)
+                    throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
+                // cal holds the time for time1
+                cal.add( Calendar.YEAR, (int) (ldiff + 1));
+                for(;;)
+                {
+                    if( cal.getTime().getTime()/1000 > thisInSeconds)
+                        break;
+                    cal.add( Calendar.YEAR, 1);
+                    ldiff++;
+                }
+            }
+            else
+            {
+                if (ldiff <= Integer.MIN_VALUE)
+                    throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
+                // cal holds the time for time1
+                cal.add( Calendar.YEAR, (int) (ldiff - 1));
+                for(;;)
+                {
+                    if( cal.getTime().getTime()/1000 < thisInSeconds)
+                        break;
+                    cal.add( Calendar.YEAR, -1);
+                    ldiff--;
+                }
+            }
+            break;
+
+        default:
+            throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
+                                                  ReuseFactory.getInteger( intervalType),
+                                                  "TIMESTAMPDIFF");
+        }
+		if (ldiff > Integer.MAX_VALUE || ldiff < Integer.MIN_VALUE)
+			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
+        resultHolder.setValue( (int) ldiff);
+        return resultHolder;
+    } // end of timestampDiff
+
+    /**
+     * Promotes a DateTimeDataValue to a timestamp.
+     *
+     * @param datetime
+     *
+     * @return the corresponding timestamp, using the current date if datetime is a time,
+     *         or time 00:00:00 if datetime is a date.
+     *
+     * @exception StandardException
+     */
+    static SQLTimestamp promote( DateTimeDataValue dateTime, java.sql.Date currentDate) throws StandardException
+    {
+        if( dateTime instanceof SQLTimestamp)
+            return (SQLTimestamp) dateTime;
+        else if( dateTime instanceof SQLTime)
+            return new SQLTimestamp( SQLDate.computeEncodedDate( currentDate, (Calendar) null),
+                                    ((SQLTime) dateTime).getEncodedTime(),
+                                    0 /* nanoseconds */);
+        else if( dateTime instanceof SQLDate)
+            return new SQLTimestamp( ((SQLDate) dateTime).getEncodedDate(), 0, 0);
+        else
+            return new SQLTimestamp( dateTime.getTimestamp( new GregorianCalendar()));
+    } // end of promote
 }

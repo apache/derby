@@ -186,7 +186,9 @@ public interface C_NodeTypes
 	// UNUSED static final int BOOLEAN_NODE = 155;
 	static final int DROP_ALIAS_NODE = 156;
     static final int INTERSECT_OR_EXCEPT_NODE = 157;
-	// 158 - 185 available
+	// 158 - 183 available
+    static final int TIMESTAMP_ADD_FN_NODE = 184;
+    static final int TIMESTAMP_DIFF_FN_NODE = 185;
 	static final int MODIFY_COLUMN_TYPE_NODE = 186;
 	static final int MODIFY_COLUMN_CONSTRAINT_NODE = 187;
     static final int ABSOLUTE_OPERATOR_NODE = 188;

@@ -31,6 +31,17 @@ public interface DateTimeDataValue extends DataValueDescriptor
 	public static final int MINUTE_FIELD = 4;
 	public static final int SECOND_FIELD = 5;
 
+    // The JDBC interval types
+    public static final int FRAC_SECOND_INTERVAL = 0;
+    public static final int SECOND_INTERVAL = 1;
+    public static final int MINUTE_INTERVAL = 2;
+    public static final int HOUR_INTERVAL = 3;
+    public static final int DAY_INTERVAL = 4;
+    public static final int WEEK_INTERVAL = 5;
+    public static final int MONTH_INTERVAL = 6;
+    public static final int QUARTER_INTERVAL = 7;
+    public static final int YEAR_INTERVAL = 8;
+
 	/**
 	 * Get the year number out of a date.
 	 *
@@ -108,5 +119,46 @@ public interface DateTimeDataValue extends DataValueDescriptor
 	 */
 	NumberDataValue getSeconds(NumberDataValue result)
 							throws StandardException;
+
+    /**
+     * Add a number of intervals to a datetime value. Implements the JDBC escape TIMESTAMPADD function.
+     *
+     * @param intervalType One of FRAC_SECOND_INTERVAL, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL,
+     *                     DAY_INTERVAL, WEEK_INTERVAL, MONTH_INTERVAL, QUARTER_INTERVAL, or YEAR_INTERVAL
+     * @param intervalCount The number of intervals to add
+     * @param currentDate Used to convert time to timestamp
+     * @param resultHolder If non-null a DateTimeDataValue that can be used to hold the result. If null then
+     *                     generate a new holder
+     *
+     * @return startTime + intervalCount intervals, as a timestamp
+     *
+     * @exception StandardException
+     */
+    DateTimeDataValue timestampAdd( int intervalType,
+                                    NumberDataValue intervalCount,
+                                    java.sql.Date currentDate,
+                                    DateTimeDataValue resultHolder)
+        throws StandardException;
+
+    /**
+     * Finds the difference between two datetime values as a number of intervals. Implements the JDBC
+     * TIMESTAMPDIFF escape function.
+     *
+     * @param intervalType One of FRAC_SECOND_INTERVAL, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL,
+     *                     DAY_INTERVAL, WEEK_INTERVAL, MONTH_INTERVAL, QUARTER_INTERVAL, or YEAR_INTERVAL
+     * @param time1
+     * @param currentDate Used to convert time to timestamp
+     * @param resultHolder If non-null a DateTimeDataValue that can be used to hold the result. If null then
+     *                     generate a new holder
+     *
+     * @return the number of intervals by which this datetime is greater than time1
+     *
+     * @exception StandardException
+     */
+    NumberDataValue timestampDiff( int intervalType,
+                                   DateTimeDataValue time1,
+                                   java.sql.Date currentDate,
+                                   NumberDataValue resultHolder)
+        throws StandardException;
 }
 
