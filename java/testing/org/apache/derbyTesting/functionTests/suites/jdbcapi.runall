@@ -15,4 +15,5 @@ jdbcapi/parameterMapping.java
 jdbcapi/setTransactionIsolation.java
 jdbcapi/prepStmtNull.java
 jdbcapi/testRelative.java
+jdbcapi/rsgetXXXcolumnNames.java
 

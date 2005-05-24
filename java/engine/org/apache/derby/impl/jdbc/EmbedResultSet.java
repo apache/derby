@@ -3601,8 +3601,14 @@ public abstract class EmbedResultSet extends ConnectionChild
 		ResultDescription rd = resultDescription;
 
     	// 1 or 0 based? assume 1 (probably wrong)
-    	for (int i=rd.getColumnCount(); i>=1; i--) {
+        // Changing the order in which columns are found from 1 till column count.
+        // This is necessary in cases where the column names are the same but are in different cases.
+        // This is because in updateXXX and getXXX methods column names are case insensitive
+        // and in that case the first column should be returned.
+        
+        int columnCount = rd.getColumnCount();
 
+        for(int i = 1 ; i<= columnCount;i++) {
     		String name = rd.getColumnDescriptor(i).getName();
     		if (StringUtil.SQLEqualsIgnoreCase(columnName, name)) {
     			return i;

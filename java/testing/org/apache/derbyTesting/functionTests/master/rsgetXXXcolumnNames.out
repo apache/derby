@@ -1,0 +1,9 @@
+Test rsgetXXXcolumnNames starting
+Before updation...
+ResultSet is: 1
+ResultSet is: 346
+After update...
+Column Number 1: 900
+Column Number 2: 346
+Col COL1: 900
+Col col1: 900
