@@ -28,3 +28,4 @@ store/Beetle6038.java
 store/holdCursorJDBC30.sql
 store/holdCursorExternalSortJDBC30.sql
 store/TestDurabilityProperty.java
+store/OnlineCompressTest.java

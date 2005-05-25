@@ -327,6 +327,16 @@ public	class DD_Version implements	Formatable
 		}
 		
 		*/
+
+        if (fromMajorVersionNumber == DataDictionary.DD_VERSION_CS_10_0)
+        {
+            // This upgrade depends on the SYSUTIL schema, which only exists
+            // since 10.0.  Will not work to upgrade any db previous to 10.0,
+            // thus only checks for 10.0 rather than <= 10.0.
+            bootingDictionary.create_10_1_system_procedures(
+                tc, 
+                bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
+        }
 	}
 
 	/**

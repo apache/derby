@@ -8479,47 +8479,6 @@ public	class	DataDictionaryImpl
                 tc);
         }
 
-        // void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
-        //     IN SCHEMANAME        VARCHAR(128), 
-        //     IN TABLENAME         VARCHAR(128),
-        //     IN PURGE_ROWS        SMALLINT,
-        //     IN DEFRAGMENT_ROWS   SMALLINT,
-        //     IN TRUNCATE_END      SMALLINT
-        //     )
-        {
-            // procedure argument names
-            String[] arg_names = {
-                "SCHEMANAME", 
-                "TABLENAME", 
-                "PURGE_ROWS", 
-                "DEFRAGMENT_ROWS", 
-                "TRUNCATE_END"};
-
-            // procedure argument types
-            TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
-            };
-
-            createSystemProcedureOrFunction(
-                "SYSCS_INPLACE_COMPRESS_TABLE",
-                sysUtilUUID,
-                arg_names,
-                arg_types,
-				0,
-				0,
-                RoutineAliasInfo.MODIFIES_SQL_DATA,
-                (TypeDescriptor) null,
-                tc);
-        }
 
         /*
 		** SQLJ routine.
@@ -8812,7 +8771,8 @@ public	class	DataDictionaryImpl
                 tc);
         }
 
-
+        // add 10.1 specific system procedures
+        create_10_1_system_procedures(tc, sysUtilUUID);
     }
 
     /**
@@ -9282,7 +9242,69 @@ public	class	DataDictionaryImpl
                 (TypeDescriptor) null,
                 tc);
         }
+
 	}
+
+
+    /**
+     * Create system procedures added in version 10.1.
+     * <p>
+     * Create 10.1 system procedures, called by either code creating new
+     * database, or code doing hard upgrade from previous version.
+     * <p>
+     *
+     * @param sysUtilUUID   uuid of the SYSUTIL schema.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    void create_10_1_system_procedures(
+    TransactionController   tc,
+    UUID                    sysUtilUUID)
+		throws StandardException
+    {
+
+        // void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
+        //     IN SCHEMANAME        VARCHAR(128), 
+        //     IN TABLENAME         VARCHAR(128),
+        //     IN PURGE_ROWS        SMALLINT,
+        //     IN DEFRAGMENT_ROWS   SMALLINT,
+        //     IN TRUNCATE_END      SMALLINT
+        //     )
+        {
+            // procedure argument names
+            String[] arg_names = {
+                "SCHEMANAME", 
+                "TABLENAME", 
+                "PURGE_ROWS", 
+                "DEFRAGMENT_ROWS", 
+                "TRUNCATE_END"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT)
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_INPLACE_COMPRESS_TABLE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+        }
+    }
 
 
 	/*
