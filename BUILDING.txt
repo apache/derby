@@ -287,7 +287,12 @@ to specify your environment and options:
 
 (2) Create a file called "ant.properties" in user home 
     directory and define the following variables in 
-    "ant.properties". For MacOS X, see section 5.
+    "ant.properties". 
+
+    NOTE TO MAC OS X USERS: See section 5.
+ 
+    NOTE TO CYGWIN USERS: Put this in your *Windows* home directory,
+    not your Cygwin home directory.
 
     NOTE TO WINDOWS USERS: *use forward slashes* ("/") in your
     path specifications.  Backward-slashes ("\") confuse Ant.
