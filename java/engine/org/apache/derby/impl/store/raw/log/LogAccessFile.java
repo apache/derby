@@ -745,8 +745,6 @@ public class LogAccessFile
 	protected long reserveSpaceForChecksum(int length, long logFileNumber, long currentPosition )
 		throws StandardException, IOException 
 	{
-		if(!writeChecksum)
-			return 0;
 
 		int total_log_record_length = length + LOG_RECORD_FIXED_OVERHEAD_SIZE;
 		boolean reserveChecksumSpace = false;
@@ -771,7 +769,8 @@ public class LogAccessFile
 		 */
 		if(currentBuffer.position == checksumLogRecordSize)
 		{
-			reserveChecksumSpace = true;
+			// reserver space if log checksum feature is enabled.
+			reserveChecksumSpace = writeChecksum;
 		}
 		else{
 			if (total_log_record_length > currentBuffer.bytes_free)
@@ -780,7 +779,8 @@ public class LogAccessFile
 				// going to fit in the current buffer, switch the 
 				// log buffer to create buffer space for it. 
 				switchLogBuffer();
-				reserveChecksumSpace = true;
+				// reserve space if log checksum feature is enabled. 
+				reserveChecksumSpace = writeChecksum;
 			}
 		}
 		
