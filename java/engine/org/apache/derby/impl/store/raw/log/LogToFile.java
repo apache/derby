@@ -333,7 +333,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 								// must be synchronized with this to access
 								// or change.
 	
-
+	private long              maxLogFileNumber = LogCounter.MAX_LOGFILE_NUMBER;
 	private CheckpointOperation		 currentCheckpoint;
 								// last checkpoint successfully taken
 								// 
@@ -1831,11 +1831,11 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 			// used.
 			StorageFile newLogFile = getLogFileName(logFileNumber+1);
 
-			if (logFileNumber+1 >= LogCounter.MAX_LOGFILE_NUMBER)
+			if (logFileNumber+1 >= maxLogFileNumber)
             {
 				throw StandardException.newException(
                         SQLState.LOG_EXCEED_MAX_LOG_FILE_NUMBER, 
-                        new Long(LogCounter.MAX_LOGFILE_NUMBER)); 
+                        new Long(maxLogFileNumber)); 
             }
 
 			StorageRandomAccessFile newLog = null;	// the new log file
@@ -3059,6 +3059,21 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		{
 			throw Monitor.exceptionStartingModule(ioe);
 		}
+			
+		// Number of the log file that can be created in Derby is increased from 
+		// 2^22 -1 to 2^31 -1 in version 10.1. But if the database is running on
+		// engines 10.1 or above on a  softupgrade  from versions 10.0 or
+		// before, the max log file number  that can be created is  
+		// still limited to 2^22 -1, because users can revert back to older  versions 
+		// which does not have logic to handle a log file number greater than
+		// 2^22-1. 
+
+		// set max possible log file number to derby 10.0 limit, if the database is not 
+		// fully upgraded to or created in version 10.1 or above. 
+		if (!checkVersion(RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10, 
+						  RawStoreFactory.DERBY_STORE_MINOR_VERSION_1))
+			maxLogFileNumber = LogCounter.DERBY_10_0_MAX_LOGFILE_NUMBER;
+
 	} // end of boot
 
     private void getLogStorageFactory() throws StandardException
