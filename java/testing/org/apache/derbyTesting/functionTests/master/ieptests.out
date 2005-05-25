@@ -781,4 +781,4 @@ ij> drop table dest_always;
 0 rows inserted/updated/deleted
 ij> drop table dest_by_default;
 0 rows inserted/updated/deleted
-ij>
+ij> 
