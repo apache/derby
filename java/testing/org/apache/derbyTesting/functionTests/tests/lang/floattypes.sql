@@ -1199,4 +1199,20 @@ insert into tiger values (0.00000001234);
 select d from tiger order by 1;
 
 
-
+-- =====================================================
+-- some formatting tests
+values cast ('1e+0' as DECIMAL(6,2));
+values cast ('+-1e+1' as DECIMAL(6,2));
+values cast ('-1e+1' as DECIMAL(6,2));
+values cast ('-1e-1' as DECIMAL(6,2));
+values cast ('-1e-+1' as DECIMAL(6,2));
+values cast ('-1e--1' as DECIMAL(6,2));
+values cast ('1.0e' as DECIMAL(6,2));
+values cast ('1.0e+' as DECIMAL(6,2));
+values cast ('1.0e-' as DECIMAL(6,2));
+values cast ('1.0ee' as DECIMAL(6,2));
+values cast ('123.' as DECIMAL(6,2));
+values cast ('1e' as DECIMAL(6,2));
+values cast ('1e1.0' as DECIMAL(6,2));
+values cast ('.3' as DECIMAL(6,2));
+values cast ('' as DECIMAL(6,2));

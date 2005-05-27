@@ -2457,4 +2457,66 @@ D
 0.01234000000  
 0.12340000000  
 1.23400000000  
+ij> -- =====================================================
+-- some formatting tests
+values cast ('1e+0' as DECIMAL(6,2));
+1        
+---------
+1.00     
+ij> values cast ('+-1e+1' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('-1e+1' as DECIMAL(6,2));
+1        
+---------
+-10.00   
+ij> values cast ('-1e-1' as DECIMAL(6,2));
+1        
+---------
+-0.10    
+ij> values cast ('-1e-+1' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('-1e--1' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('1.0e' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('1.0e+' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('1.0e-' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('1.0ee' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('123.' as DECIMAL(6,2));
+1        
+---------
+123.00   
+ij> values cast ('1e' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('1e1.0' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('.3' as DECIMAL(6,2));
+1        
+---------
+0.30     
+ij> values cast ('' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
 ij> 
