@@ -848,12 +848,6 @@ public class BaseContainerHandle extends Observable
 	*/
 	public final RawTransaction getTransaction() 
     {
-
-		if (SanityManager.DEBUG) 
-        {
-			SanityManager.ASSERT(xact != null);
-		}
-
 		return xact;
 	}
 

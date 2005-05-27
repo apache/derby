@@ -113,8 +113,14 @@ final class EmbedClob extends ConnectionChild implements Clob
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(myStream instanceof Resetable);
 
-            ((Resetable)myStream).initStream();
-
+            try {
+                ((Resetable) myStream).initStream();
+            } catch (StandardException se) {
+                if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
+                    throw StandardException
+                            .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
+                }
+            }
         }
     }
 

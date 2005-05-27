@@ -717,5 +717,9 @@ After drop
 Expect to get an IOException, container has been closed
 10000 total bytes read
 clobTestSelfDestructive2 finished
+-----
+Expected Exception The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+-----
+Expected Exception The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
 FINISHED TEST blobclob :-)
 Test blobclob finished

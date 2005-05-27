@@ -21,6 +21,7 @@
 package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
@@ -138,6 +139,12 @@ implements Resetable
     */
     public void initStream() throws StandardException
     {
+        // it is possible that the transaction in which the stream was 
+        // created is committed and no longer valid
+        // dont want to get NPE but instead throw error that
+        // container was not opened
+        if (owner.getTransaction() == null)
+            throw StandardException.newException(SQLState.DATA_CONTAINER_CLOSED);
         /*
         We might want to use the mode and isolation level of the container.
         This would have the advantage that, if the isolation level

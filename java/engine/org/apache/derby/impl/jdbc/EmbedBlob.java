@@ -125,8 +125,16 @@ final class EmbedBlob extends ConnectionChild implements Blob
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(myStream instanceof Resetable);
 
-            ((Resetable)myStream).initStream();
-            // set up the buffer for trashing the bytes to set the position of the
+            try {
+                ((Resetable) myStream).initStream();
+            } catch (StandardException se) {
+                if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
+                    throw StandardException
+                            .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
+                }
+            }
+            // set up the buffer for trashing the bytes to set the position of
+            // the
             // stream, only need a buffer when we have a long column
             buf = new byte[BLOB_BUF_SIZE];
         }

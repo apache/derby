@@ -167,6 +167,8 @@ public class blobclob4BLOB {
             clobTestSelfDestructive2(conn);
 
             conn.commit();
+            clobNegativeTest_Derby265(conn);
+            blobNegativeTest_Derby265(conn);
             conn.close();
             System.out.println("FINISHED TEST blobclob :-)");
 
@@ -3785,6 +3787,144 @@ public class blobclob4BLOB {
 		}
     }
 
+    
+    
+    /**
+     * Test fix for derby-265.
+     * Test that if getBlob is called after the transaction 
+     * in which it was created is committed, a proper user error
+     * is thrown instead of an NPE. 
+     * Basically per the spec, getBlob is valid only for the duration of 
+     * the transaction in it was created in
+     * @param conn
+     * @throws SQLException
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    private static void blobNegativeTest_Derby265(Connection conn)
+            throws SQLException, FileNotFoundException,IOException {
+        // basically setup the tables for clob and blob
+        Statement s = conn.createStatement();
+        s.execute("create table \"MAPS_BLOB\"(MAP_ID int, MAP_NAME varchar(20),REGION varchar(20),AREA varchar(20), PHOTO_FORMAT varchar(20),PICTURE blob(2G))");
+        conn.setAutoCommit(false);
+        PreparedStatement ps = conn.prepareStatement("insert into \"MAPS_BLOB\" values(?,?,?,?,?,?)");
+        
+        for (int i = 0; i < 3; i++) {
+            FileInputStream fis = new FileInputStream(fileName[4]);
+            ps.setInt(1, i);
+            ps.setString(2, "x" + i);
+            ps.setString(3, "abc");
+            ps.setString(4, "abc");
+            ps.setString(5, "abc");
+            ps.setBinaryStream(6, new java.io.BufferedInputStream(fis), 300000);
+            ps.executeUpdate();
+            fis.close();
+        }
+        conn.commit();
+
+        conn.setAutoCommit(true);
+        System.out.println("-----------------------------");
+
+        s = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
+        s.execute("SELECT \"MAP_ID\", \"MAP_NAME\", \"REGION\", \"AREA\", \"PHOTO_FORMAT\", \"PICTURE\" FROM \"MAPS_BLOB\"");
+        ResultSet rs1 = s.getResultSet();
+        Statement s2 = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
+        s2.executeQuery("SELECT \"MAP_ID\", \"MAP_NAME\", \"REGION\", \"AREA\", \"PHOTO_FORMAT\", \"PICTURE\" FROM \"MAPS_BLOB\"");
+        ResultSet rs2 = s2.getResultSet();
+        rs2.next();
+
+        Blob b2 = rs2.getBlob(6);
+        rs1.next();
+        Blob b1 = rs1.getBlob(6);
+        try {
+            rs1.close();
+            rs2.next();
+            rs2.getBlob(6);
+        } catch (SQLException sqle) {
+            if ("XJ073".equals(sqle.getSQLState()))
+                System.out.println("Expected Exception " + sqle.getMessage());
+            else
+                System.out.println("FAIL -- unexpected exception:"
+                        + sqle.toString());
+        }
+        finally {
+            rs2.close();
+            s2.close();
+            s.close();
+            ps.close();
+        }
+
+    }
+
+    /**
+     * Test fix for derby-265.
+     * Test that if getClob is called after the transaction 
+     * in which it was created is committed, a proper user error
+     * is thrown instead of an NPE. 
+     * Basically per the spec, getClob is valid only for the duration of 
+     * the transaction in it was created in
+     * @param conn
+     * @throws SQLException
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    private static void clobNegativeTest_Derby265(Connection conn)
+            throws SQLException, FileNotFoundException,IOException {
+
+        // basically setup the tables for clob 
+        Statement s = conn.createStatement();
+        s.execute("create table \"MAPS\"(MAP_ID int, MAP_NAME varchar(20),REGION varchar(20),AREA varchar(20), PHOTO_FORMAT varchar(20),PICTURE clob(2G))");
+        conn.setAutoCommit(false);
+        PreparedStatement ps = conn.prepareStatement("insert into \"MAPS\" values(?,?,?,?,?,?)");
+        for (int i = 0; i < 3; i++) {
+            FileReader fr = new FileReader(fileName[4]);
+            ps.setInt(1, i);
+            ps.setString(2, "x" + i);
+            ps.setString(3, "abc");
+            ps.setString(4, "abc");
+            ps.setString(5, "abc");
+            ps.setCharacterStream(6, new java.io.BufferedReader(fr),300000);
+            ps.executeUpdate();
+            fr.close();
+        }
+        conn.commit();
+
+        conn.setAutoCommit(true);
+        System.out.println("-----------------------------");
+        s = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
+        s.execute("SELECT \"MAP_ID\", \"MAP_NAME\", \"REGION\", \"AREA\", \"PHOTO_FORMAT\", \"PICTURE\" FROM \"MAPS\"");
+        ResultSet rs1 = s.getResultSet();
+        Statement s2 = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
+        s2.executeQuery("SELECT \"MAP_ID\", \"MAP_NAME\", \"REGION\", \"AREA\", \"PHOTO_FORMAT\", \"PICTURE\" FROM \"MAPS\"");
+        ResultSet rs2 = s2.getResultSet();
+        rs2.next();
+
+        Clob b2 = rs2.getClob(6); // should be fine
+        rs1.next();
+        Clob b1 = rs1.getClob(6);
+        try {
+            rs1.close(); // this commits the transaction
+            rs2.next();
+            rs2.getClob(6); // no longer valid
+        } catch (SQLException sqle) {
+            if ("XJ073".equals(sqle.getSQLState()))
+                System.out.println("Expected Exception " + sqle.getMessage());
+            else
+                System.out.println("FAIL -- unexpected exception:"
+                        + sqle.toString());
+        }
+        finally {
+            rs2.close();
+            s2.close();
+            s.close();
+            ps.close();
+        }
+
+    }
     static void printInterval(Clob clob, long pos, int length,
         int testNum, int iteration, int clobLength)
     {

@@ -784,5 +784,9 @@ length of clob chosen is 10000
 After drop
 Expect to get an IOException, container has been closed
 EXPECTED IO Exception:ERROR 40XD0: Container has been closed
+-----------------------------
+Expected Exception The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+-----------------------------
+Expected Exception The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
 FINISHED TEST blobclob :-)
 Test blobclob finished
