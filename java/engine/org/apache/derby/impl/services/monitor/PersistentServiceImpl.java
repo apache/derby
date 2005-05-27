@@ -736,6 +736,7 @@ public class PersistentServiceImpl implements PersistentService
 	} // end of removeServiceRoot
 
 	public String getCanonicalServiceName(String name)
+		throws StandardException
     {
 		String protocolLeadIn = getType() + ":";
         int colon = name.indexOf( ':');
@@ -769,15 +770,8 @@ public class PersistentServiceImpl implements PersistentService
         }
 		catch (PrivilegedActionException pae)
         {
-            if( SanityManager.DEBUG)
-            {
-                Exception ex = pae.getException();
-                SanityManager.THROWASSERT( ex.getClass().getName()
-                                           + " thrown while getting the canonical name: "
-                                           + ex.getMessage());
-            }
-            return null;
-        }
+			throw Monitor.exceptionStartingModule(pae.getException());
+		}
 	} // end of getCanonicalServiceName
 
 	public String getUserServiceName(String serviceName)
@@ -800,8 +794,13 @@ public class PersistentServiceImpl implements PersistentService
     {
 		if (SanityManager.DEBUG)
         {
+			try {
             SanityManager.ASSERT(serviceName1.equals(getCanonicalServiceName(serviceName1)), serviceName1);
 			SanityManager.ASSERT(serviceName2.equals(getCanonicalServiceName(serviceName2)), serviceName2);
+			} catch (StandardException se)
+			{
+				return false;
+			}
 		}
 		return serviceName1.equals(serviceName2);
 	} // end of isSameService

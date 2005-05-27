@@ -159,8 +159,11 @@ public interface PersistentService {
 	/**
 		Convert a service name into its canonical form. Returns null if the name
 		cannot be converted into a canonical form.
+		
+		@exception No canonical name, name probably invalid
 	*/
-	public String getCanonicalServiceName(String name);
+	public String getCanonicalServiceName(String name)
+		throws StandardException;
 
 	/**
 		Return the user form of a service name. This name is only valid within

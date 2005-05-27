@@ -137,7 +137,13 @@ class TopService {
 		if (serviceType == null)
 			otherCanonicalName = otherKey.getIdentifier();
 		else {
-			otherCanonicalName = serviceType.getCanonicalServiceName(otherKey.getIdentifier());
+			try
+			{
+				otherCanonicalName = serviceType.getCanonicalServiceName(otherKey.getIdentifier());
+			} catch (StandardException se)
+			{
+				return false;
+			}
 
 			// if the service name cannot be converted into a canonical name then it is not a service.
 			if (otherCanonicalName == null)
