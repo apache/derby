@@ -245,7 +245,7 @@ UPDATE COUNT 0
 Testing too many result sets
 ... too many result sets
 selectRows - 2 arg - 2 rs
-WARNING 0100E: XX Attepmt to return too many result sets
+WARNING 0100E: XX Attempt to return too many result sets.
 I          |B              
 ---------------------------
 2          |int            

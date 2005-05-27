@@ -294,7 +294,7 @@ ij> -- PASS:0625 If 1 row is inserted?
 ij> -- PASS:0625 If 1 row is inserted?
    SELECT COUNT(*) 
      FROM CHANGG WHERE DIVORCES IS NULL;
-ERROR 42X04: Column 'DIVORCES' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'DIVORCES' is not a column in the target table.
+ERROR 42X04: Column 'DIVORCES' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DIVORCES' is not a column in the target table.
 ij> -- PASS:0625 If ERROR, column does not exist?
    COMMIT WORK;
 ij> ALTER TABLE CHANGG ADD NUMBRR CHAR(11);
@@ -307,7 +307,7 @@ ij> SELECT MAX(AGE) FROM CHANGGVIEW;
 106        
 ij> -- PASS:0625 If value is 106?
    SELECT MAX(NUMBRR) FROM CHANGGVIEW;
-ERROR 42X04: Column 'NUMBRR' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'NUMBRR' is not a column in the target table.
+ERROR 42X04: Column 'NUMBRR' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NUMBRR' is not a column in the target table.
 ij> -- PASS:0625 If ERROR, column does not exist ?
    COMMIT WORK;
 ij> --O   DROP VIEW CHANGGVIEW CASCADE;
