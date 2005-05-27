@@ -104,7 +104,7 @@ ij> --0   GRANT ALL PRIVILEGES ON "SULLIVAN.SELECT" TO SCHANZLE
    --   UNIQUE (C1,C2), UNIQUE (C3), UNIQUE (C2,C1))
    CREATE TABLE T0512 (C1 INT NOT NULL, C2 INT NOT NULL, C3 INT NOT NULL,
    UNIQUE (C1,C2), UNIQUE (C3), UNIQUE (C2,C1));
-ERROR 42Z93: Constraints 'xxxxGENERATED-IDxxxx' and 'xxxxGENERATED-IDxxxx' have the same set of columns, which is not allowed. 
+ERROR 42Z93: Constraints 'xxxxGENERATED-IDxxxx' and 'xxxxGENERATED-IDxxxx' have same set of columns, which is not allowed.
 ij> --0 PASS: if there was an error for a duplicate unique constraint
    -- Check for erratum which allowed recursive view definitions.
    -- Reference ISO/IEC JTC1/SC21 N6789 section 11.19 <view definition> SR4

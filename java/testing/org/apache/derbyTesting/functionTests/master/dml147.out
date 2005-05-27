@@ -37,7 +37,7 @@ ij> -- PASS:0840 If column is added?
    ROLLBACK WORK;
 ij> SELECT COUNT (*)
   FROM USIG WHERE NUL IS NULL;
-ERROR 42X04: Column 'NUL' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NUL' is not a column in the target table.
+ERROR 42X04: Column 'NUL' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'NUL' is not a column in the target table.
 ij> -- PASS:0840 If ERROR, syntax error/access violation, 0 rows selected?
    ROLLBACK WORK;
 ij> --O   DROP TABLE USIG CASCADE;
