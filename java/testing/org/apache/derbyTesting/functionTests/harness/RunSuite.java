@@ -94,7 +94,7 @@ public class RunSuite
 		}
 		String j9config = System.getProperty("com.ibm.oti.configuration");
 		if (j9config != null) 
-			if (j9config.equals("foun")) 
+			if (j9config.equals("foun10")) 
 				jvmName="j9_foundation";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";
@@ -286,8 +286,15 @@ public class RunSuite
 		    }
 		    else
 		        javaVersion = jvmName;
+
+            // for j9, we cannot just use java.version.
+            String javavmVersion;
+            if (System.getProperty("java.vm.name").equals("J9"))
+                javavmVersion = (System.getProperty("java.vm.version"));
+            else
+                javavmVersion = javaVersion;
     		    
-		    JavaVersionHolder jvh = new JavaVersionHolder(javaVersion);
+		    JavaVersionHolder jvh = new JavaVersionHolder(javavmVersion);
 		    String majorVersion = jvh.getMajorVersion();
 		    String minorVersion = jvh.getMinorVersion();
             int iminor = jvh.getMinorNumber();

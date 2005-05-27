@@ -633,7 +633,7 @@ public class RunList
 		jvmName = suiteProperties.getProperty("jvm");
 		String j9config = System.getProperty("com.ibm.oti.configuration");	
 		if (j9config != null)
-			if (j9config.equals("foun")) 
+			if (j9config.equals("foun10")) 
 				jvmName="j9_foundation";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";

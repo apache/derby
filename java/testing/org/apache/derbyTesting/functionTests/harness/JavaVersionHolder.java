@@ -95,7 +95,7 @@ public class JavaVersionHolder
             }
             else
             {
-                System.out.println("NumberFormatException thrown trying to parse the version.");
+                System.out.println("NumberFormatException thrown trying to parse the version. " + javaVersion);
                 System.out.println("The test harness only handles the HP special case.");
             }
                 
