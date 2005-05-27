@@ -32,7 +32,7 @@ import java.sql.SQLException;
  * <p>
  * If an application requires its own authentication scheme, then it can
  * implement this interface and register as the authentication scheme
- * that Cloudscape should call upon connection requests to the system.
+ * that Derby should call upon connection requests to the system.
    See the dcoumentation for the property <I>derby.authentication.provider</I>
  * <p>
  * A typical example would be to implement user authentication using

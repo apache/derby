@@ -43,7 +43,7 @@ import javax.sql.XAConnection;
 
 /**
 
-	EmbeddedXADataSource is Cloudscape's XADataSource implementation.
+	EmbeddedXADataSource is Derby's XADataSource implementation.
 	
 
 	<P>An XADataSource is a factory for XAConnection objects.  It represents a

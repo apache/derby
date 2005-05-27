@@ -54,8 +54,8 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	</LI>
 
 	<LI>sysinfo [-h &lt;host>] [-p &lt;portnumber>]:  This prints 
-	classpath and version  information about the Network Server, 
-	the JVM and the Cloudscape server. 
+	classpath and version information about the Network Server, 
+	the JVM and the Derby engine. 
 
 	<LI>runtimeinfo [-h &lt;host] [-p &lt;portnumber]: This prints
 	extensive debbugging information about sessions, threads, 
@@ -330,7 +330,7 @@ public class NetworkServerControl{
 	 * Turn tracing on or off for all connections on the Network Server.
 	 *
 	 * @param connNum connection number. Note: Connection numbers will print
-	 *                in the Cloudscape error log if logConnections is on
+	 *                in the Derby error log if logConnections is on
 	 * @param on true to turn tracing on, false to turn tracing off.
 	 *
 	 * @exception Exception	throws an exception if an error occurs
@@ -343,7 +343,7 @@ public class NetworkServerControl{
 
 	/**
 	 * Turn logging connections on or off. When logging is turned on a message is
-	 * written to the Cloudscape error log each time a connection 
+	 * written to the Derby error log each time a connection 
 	 * connects or disconnects.
 	 *
 	 * @param on			true to turn on, false to turn  off

@@ -36,7 +36,7 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 
 
 /**
-	The embedded JDBC driver (Type 4) for Cloudscape.
+	The embedded JDBC driver (Type 4) for Derby.
 	<P>
 	The driver automatically supports the correct JDBC specification version
 	for the Java Virtual Machine's environment.
@@ -49,7 +49,7 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 	Loading this JDBC driver boots the database engine
 	within the same Java virtual machine.
 	<P>
-	The correct code to load a Cloudscape engine using this driver is
+	The correct code to load the Derby engine using this driver is
 	(with approriate try/catch blocks):
 	 <PRE>
 	 Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
@@ -60,22 +60,22 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 
     
 	</PRE>
-	 When loaded in this way, the class boots the actual JDBC driver indirectly.
+	When loaded in this way, the class boots the actual JDBC driver indirectly.
 	The JDBC specification recommends the Class.ForName method without the .newInstance()
 	method call, but adding the newInstance() guarantees
-	that Cloudscape will be booted on any Java Virtual Machine.
+	that Derby will be booted on any Java Virtual Machine.
 
 	<P>
 	Any initial error messages are placed in the PrintStream
 	supplied by the DriverManager. If the PrintStream is null error messages are
-	sent to System.err. Once the Cloudscape engine has set up an error
+	sent to System.err. Once the Derby engine has set up an error
 	logging facility (by default to derby.log) all subsequent messages are sent to it.
 	<P>
 	By convention, the class used in the Class.forName() method to
 	boot a JDBC driver implements java.sql.Driver.
 
 	This class is not the actual JDBC driver that gets registered with
-	the Driver Manager. It proxies requests to the registered Cloudscape JDBC driver.
+	the Driver Manager. It proxies requests to the registered Derby JDBC driver.
 
 	@see java.sql.DriverManager
 	@see java.sql.DriverManager#getLogStream
@@ -91,7 +91,7 @@ public class EmbeddedDriver implements Driver {
 	}
 
 	// Boot from the constructor as well to ensure that
-	// Class.forName(...).newInstance() reboots Cloudscape
+	// Class.forName(...).newInstance() reboots Derby 
 	// after a shutdown inside the same JVM.
 	public EmbeddedDriver() {
 		EmbeddedDriver.boot();

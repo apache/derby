@@ -37,12 +37,12 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.reference.Property;
 
 /**
-	This servlet can be used to start Cloudscape Network Server from a remote location.
+	This servlet can be used to start Derby Network Server from a remote location.
 	<P>
 	These servlet configuration parameters are understood by this servlet.
 	<UL>
 	<LI><PRE>portNumber</PRE> - Port number to use. The default is 1527.
-	<LI><PRE>startNetworkServerOnInit</PRE> - Starts the Cloudscape Network Server at servlet 
+	<LI><PRE>startNetworkServerOnInit</PRE> - Starts the Derby Network Server at servlet 
 			initialization if 'true'.
 	<LI><PRE>tracingDirectory</PRE> - Directory for trace files
 	</UL>
@@ -867,7 +867,7 @@ public class NetServlet extends HttpServlet {
 		return retval;
 	}
 	/**
-	 * Print Cloudscape Network Server banner
+	 * Print Derby Network Server banner
 	 */
 	private void printBanner(LocalizedResource localUtil)
 	{

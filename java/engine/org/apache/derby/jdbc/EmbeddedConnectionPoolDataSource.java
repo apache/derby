@@ -27,7 +27,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 /** 
-	EmbeddedConnectionPoolDataSource is Cloudscape's ConnectionPoolDataSource implementation.
+	EmbeddedConnectionPoolDataSource is Derby's ConnectionPoolDataSource implementation.
 	
 
 	<P>A ConnectionPoolDataSource is a factory for PooledConnection

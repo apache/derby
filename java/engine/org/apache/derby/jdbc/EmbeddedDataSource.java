@@ -43,7 +43,7 @@ import org.apache.derby.impl.jdbc.Util;
 /** 
 	
 
-	EmbeddedDataSource is Cloudscape's DataSource implementation.
+	EmbeddedDataSource is Derby's DataSource implementation.
 	
 
 	<P>A DataSource  is a factory for Connection objects. An object that
@@ -57,7 +57,7 @@ import org.apache.derby.impl.jdbc.Util;
 	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
 	</UL>
 
-	<P>The following is a list of properties that can be set on a Cloudscape
+	<P>The following is a list of properties that can be set on a Derby
 	DataSource object:
 	<P><B>Standard DataSource properties</B> (from JDBC 3.0 specification).
 
@@ -86,7 +86,7 @@ import org.apache.derby.impl.jdbc.Util;
 	and <code>XADataSource.getXAConnection()</code> methods.
 	</UL>
 
-	<BR><B>Cloudscape specific DataSource properties.</B>
+	<BR><B>Derby specific DataSource properties.</B>
 
   <UL>
 
@@ -103,13 +103,13 @@ import org.apache.derby.impl.jdbc.Util;
 	can include the user's password and an encrypted database's boot password.</LI>
 
   <LI><B><code>connectionAttributes</code></B> (String): <I>Optional</I>
-  <BR>Defines a set of Cloudscape connection attributes for use in all connection requests.
-  The format of the String matches the format of the connection attributes in a Cloudscape JDBC URL.
+  <BR>Defines a set of Derby connection attributes for use in all connection requests.
+  The format of the String matches the format of the connection attributes in a Derby JDBC URL.
   That is a list of attributes in the form <code><I>attribute</I>=<I>value</I></code>, each separated by semi-colon (';').
   E.g. <code>setConnectionAttributes("bootPassword=erd3234dggd3kazkj3000");</code>.
   <BR>The database name must be set by the DataSource property <code>databaseName</code> and not by setting the <code>databaseName</code>
   connection attribute in the <code>connectionAttributes</code> property.
-  <BR>Please see Cloudscape's documentation for a complete list of connection attributes. </LI>
+  <BR>Please see the Derby documentation for a complete list of connection attributes. </LI>
 
   <LI><B><code>createDatabase</code></B> (String): <I>Optional</I>
 	<BR>If set to the string "create", this will
@@ -128,7 +128,7 @@ import org.apache.derby.impl.jdbc.Util;
 
 	<P><B>Examples.</B>
 
-	<P>This is an example of setting a property directly using Cloudscape's
+	<P>This is an example of setting a property directly using Derby's
 	EmbeddedDataSource object.  This code is typically written by a system integrator :
 	<PRE> 
 	*
@@ -224,7 +224,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	private String shutdownDatabase;
 
 	/**
-	 * Cloudscape specific connection attributes.
+	 * Derby specific connection attributes.
 	 * @serial
 	 */
 	private String connectionAttributes;
@@ -239,7 +239,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	transient private int loginTimeout;
 
 	// Unlike a DataSource, LocalDriver is shared by all
-	// Cloudscape databases in the same jvm.
+	// Derby databases in the same jvm.
 	transient protected InternalDriver driver;
 
 	transient private String jdbcurl;
@@ -356,22 +356,22 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	}
 
 	/**
- 		Set this property to pass in more Cloudscape specific
+ 		Set this property to pass in more Derby specific
 		connection URL attributes.
 
-		@param prop set to the list of Cloudscape connection
+		@param prop set to the list of Derby connection
 		attributes separated by semi-colons.   E.g., to specify an encryption
 		bootPassword of "x8hhk2adf", and set upgrade to true, do the following: 
 		<PRE>
 			ds.setConnectionAttributes("bootPassword=x8hhk2adf;upgrade=true");
 		</PRE>
-		See Cloudscape's documentation for complete list.
+		See the Derby documentation for complete list.
 	 */
 	public final void setConnectionAttributes(String prop) {
 		 connectionAttributes = prop;
 		 update();
 	}
-	/** @return Cloudscape specific connection URL attributes */
+	/** @return Derby specific connection URL attributes */
 	public final String getConnectionAttributes() {
 		return connectionAttributes;
 	}
