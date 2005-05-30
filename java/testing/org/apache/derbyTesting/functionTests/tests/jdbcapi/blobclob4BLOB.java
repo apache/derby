@@ -20,25 +20,33 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.functionTests.util.Formatters;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSetMetaData;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.sql.Clob;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.sql.Blob;
-
-import org.apache.derby.tools.ij;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
-
-import java.io.*;
+import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.Properties;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+
+import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.Formatters;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * Test of JDBC blob and clob
@@ -59,6 +67,7 @@ public class blobclob4BLOB {
 
 	static boolean isDerbyNet = false;
 	static boolean debug = true;
+	private static final String START = "\nSTART: ";
 
 	static
 	{
@@ -135,7 +144,8 @@ public class blobclob4BLOB {
             clobTest93(conn);
             clobTest94(conn);
             clobTest95(conn);
-            // restart the connection
+  
+           // restart the connection
             conn = ij.startJBMS();
             conn.setAutoCommit(false);
             clobTest96(conn);
@@ -158,6 +168,7 @@ public class blobclob4BLOB {
             blobTest93(conn);
             blobTest94(conn);
             blobTest95(conn);
+     
             // restart the connection
             conn = ij.startJBMS();
             conn.setAutoCommit(false);
@@ -184,7 +195,7 @@ public class blobclob4BLOB {
 //            e.fillInStackTrace();
             if (debug) e.printStackTrace();
 		}
-		System.out.println("Test blobclob finished");
+		System.out.println("Test blobclob finished\n");
     }
 
 
@@ -224,7 +235,7 @@ public class blobclob4BLOB {
     */
     private static void prepareCLOBMAIN(Connection conn)
     {
-        //System.out.println("prepareCLOBMAIN started");
+        System.out.println(START +"prepareCLOBMAIN");
 		ResultSet rs;
 		Statement stmt;
 
@@ -306,7 +317,7 @@ public class blobclob4BLOB {
     */
     private static void prepareSearchClobTable(Connection conn)
     {
-        //System.out.println("prepareSearchClobTable started");
+        System.out.println(START + "prepareSearchClobTable");
 		ResultSet rs;
 		Statement stmt;
 
@@ -367,7 +378,7 @@ public class blobclob4BLOB {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
 			if (debug) e.printStackTrace();
 		}
-        //System.out.println("prepareSearchClobTable finished");
+        System.out.println("prepareSearchClobTable finished");
     }
 
 
@@ -383,7 +394,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		 System.out.println(START + "prepareUnicodeTable");
 		try {
 			stmt = conn.createStatement();
 			// creating table small then add large column - that way forcing table to have default small page size, but have large rows.
@@ -441,7 +452,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		 System.out.println(START + "setCharacterStreamTest");
 		try
         {
 			stmt = conn.createStatement();
@@ -517,6 +528,7 @@ public class blobclob4BLOB {
      */
     private static void prepareUnicodeFile(Connection conn)
     {
+    	 System.out.println(START + "prepareUnicodeFile");
 		try
         {
             File file = new File(unicodeFileName);
@@ -569,6 +581,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		 System.out.println(START + "clobTest0");
         try
         {
 			stmt = conn.createStatement();
@@ -626,7 +639,7 @@ public class blobclob4BLOB {
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
-
+		 System.out.println(START + "clobTest1");
 		try {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b from testCLOB_MAIN");
@@ -679,7 +692,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "clobTest12");
 		try
         {
 			stmt = conn.createStatement();
@@ -751,7 +764,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "clobTest2");
 		try
         {
 			stmt = conn.createStatement();
@@ -812,7 +825,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "clobTest22");
 		try
         {
 			stmt = conn.createStatement();
@@ -863,7 +876,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		 System.out.println(START + "clobTest3");
 		try
         {
 			stmt = conn.createStatement();
@@ -912,7 +925,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "clobTest32");
 		try
         {
 			stmt = conn.createStatement();
@@ -967,7 +980,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs, rs2;
 		Statement stmt, stmt2;
-
+		System.out.println(START + "clobTest4");
 		try
         {
 			stmt = conn.createStatement();
@@ -1034,7 +1047,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		 System.out.println(START + "clobTest42");
 		try
         {
 			stmt = conn.createStatement();
@@ -1116,7 +1129,7 @@ public class blobclob4BLOB {
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "clobTest51");
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("create table testCLOB10 (a CLOB(10))");
@@ -1183,6 +1196,7 @@ public class blobclob4BLOB {
 		Statement stmt;
 
 		try {
+			System.out.println(START + "clobTest52");
 			stmt = conn.createStatement();
 			System.out.println("create table testInteger (a integer)");
 			stmt.execute("create table testInteger (a integer)");
@@ -1228,7 +1242,7 @@ public class blobclob4BLOB {
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "clobTest53"); 
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("create table testClobColumn (a clob(1K))");
@@ -1253,9 +1267,9 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt1, stmt2;
+		System.out.println(START + "clobTest54");
         try
         {
-			System.out.println("start clobTest54");
 			stmt1 = conn.createStatement();
 			stmt1.execute("create table testClob2 (a integer, b integer)");
             PreparedStatement ps = conn.prepareStatement(
@@ -1300,6 +1314,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "clobTest6");
 		try
         {
 			stmt = conn.createStatement();
@@ -1410,8 +1425,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs, rs2;
 		Statement stmt1, stmt2;
-
-		System.out.println("start clobTest7");
+		System.out.println(START + "clobTest7");
         try
         {
 			stmt1 = conn.createStatement();
@@ -1471,7 +1485,7 @@ public class blobclob4BLOB {
 	*/
   	private static void clobTest8(Connection conn)
     {
-		System.out.println("start clobTest8");
+  		System.out.println(START + "clobTest8");
 		try {
 			Statement s = conn.createStatement();
 
@@ -1629,6 +1643,7 @@ public class blobclob4BLOB {
 	}
 
 	private static void checkClob8(Statement s, String pstr) throws SQLException {
+		
 		ResultSet rs = s.executeQuery("SELECT ID, DD, POS, L FROM C8.T8POS ORDER BY 1");
 
 		while (rs.next()) {
@@ -1756,6 +1771,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "clobTest91");
 		try {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b from testCLOB_MAIN");
@@ -1808,12 +1824,13 @@ public class blobclob4BLOB {
 
     /*
         test locking
-        need to run prepareCLOBMAIN first
+        need to run prepareCLOBMAIN fverirst
     */
 	private static void clobTest92(Connection conn)
     {
 		ResultSet rs;
 		Statement stmt,stmt2;
+		System.out.println(START + "clobTest92");
         try
         {
 			stmt = conn.createStatement();
@@ -1867,6 +1884,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt, stmt2;
+		System.out.println(START + "clobTest93");
         try
         {
 			stmt = conn.createStatement();
@@ -1929,6 +1947,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "clobTest94");
         try
         {
 			stmt = conn.createStatement();
@@ -1936,8 +1955,10 @@ public class blobclob4BLOB {
 			// fetch row back, get the column as a clob.
             Clob clob = null, shortClob = null;
             int clobLength;
+            int i = 0;
 			while (rs.next())
             {
+				//System.out.println("ACCESSING ROW:" + i++);
                 clobLength = rs.getInt(2);
                 if (clobLength == 10000)
                     clob = rs.getClob(1);
@@ -2011,6 +2032,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "clobTest95");
         try
         {
 			stmt = conn.createStatement();
@@ -2124,6 +2146,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "clobTest96");
 		try {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b from testCLOB_MAIN");
@@ -2180,6 +2203,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "bug2");
 		try {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b from testCLOB_MAIN");
@@ -2235,6 +2259,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt,stmt2;
+		System.out.println(START + "clobTestGroupFetch");
         try
         {
 			stmt = conn.createStatement();
@@ -2271,6 +2296,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt, stmt2;
+		System.out.println(START + "bug" );
         try
         {
 			stmt = conn.createStatement();
@@ -2348,7 +2374,7 @@ public class blobclob4BLOB {
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "clobTest9999");
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096')");
@@ -2403,6 +2429,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "clobTestSelfDestructive");
         try
         {
 			stmt = conn.createStatement();
@@ -2480,6 +2507,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "clobTestSelfDestructive2");
         try
         {
 			stmt = conn.createStatement();
@@ -2576,6 +2604,7 @@ public class blobclob4BLOB {
 
     private static void unicodeTest()
     {
+    	System.out.println(START + "unicodeTest");
         try
         {
             // String to Unicode bytes
@@ -2630,7 +2659,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "prepareBlobTable");
 		try {
 			stmt = conn.createStatement();
 			// creating table to fit within default 4k table size, then add large column
@@ -2700,7 +2729,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "prepareBinaryTable");
 		try
         {
 			stmt = conn.createStatement();
@@ -2743,7 +2772,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "prepareSearchBlobTable");
 		try {
 			stmt = conn.createStatement();
 			// creating table to fit within default 4k table size, then add large column
@@ -2804,6 +2833,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest0");
         try
         {
 			stmt = conn.createStatement();
@@ -2855,6 +2885,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest2");
 		try
         {
 			stmt = conn.createStatement();
@@ -2915,6 +2946,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest3");
 		try
         {
 			stmt = conn.createStatement();
@@ -2963,6 +2995,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs, rs2;
 		Statement stmt, stmt2;
+		System.out.println(START + "blobTest4");
 		try
         {
 			stmt = conn.createStatement();
@@ -3028,6 +3061,7 @@ public class blobclob4BLOB {
         int searchRowNum,
         Blob searchBlob)
     {
+    	
         try
         {
             long result = blob.position(searchBlob,position);
@@ -3058,7 +3092,7 @@ public class blobclob4BLOB {
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "blobTest51");
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("create table testVarbinary (a blob(13))");
@@ -3121,7 +3155,7 @@ public class blobclob4BLOB {
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "blobTest52");
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("create table testInteger2 (a integer)");
@@ -3155,7 +3189,7 @@ public class blobclob4BLOB {
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
-
+		System.out.println(START + "blobTest53");
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("create table testBlobColumn (a blob(1K))");
@@ -3179,7 +3213,8 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt1, stmt2;
-        try
+		System.out.println(START + "blobTest54");
+		try
         {
 			stmt1 = conn.createStatement();
 			stmt1.execute("create table testBlob2 (a integer, b integer)");
@@ -3223,6 +3258,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest6");
 		try
         {
 			stmt = conn.createStatement();
@@ -3332,6 +3368,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs, rs2;
 		Statement stmt1, stmt2;
+		System.out.println(START + "blobTest7");
         try
         {
 			stmt1 = conn.createStatement();
@@ -3394,6 +3431,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest91");
 		try {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b from testBlob");
@@ -3452,7 +3490,8 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt,stmt2;
-        try
+		System.out.println(START + "blobTest92");
+		try
         {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b from testBlob");
@@ -3473,16 +3512,32 @@ public class blobclob4BLOB {
             // turn off autocommit, otherwise blobs/clobs cannot hang around
             // until end of transaction
             conn2.setAutoCommit(false);
-            // update should go through since we don't get any locks on blobs
+            if (!TestUtil.isNetFramework())
+            {
+            // Note: Locks held until the end of transaction only for embedded.
+            // Network Server cannot differentiate a getBlob from a getBytes so 
+            // does not hold locks for blob calls (DERBY-255) 
+            // The LOB is materialized on the client so we do not need to hold locks.
+            // One ugly thing about this test is that these rows are used by other tests.
+            // If this tests fails and the rows get updated, other tests can get 
+            // NullPointer exceptions.	
+            
+            // Update should go through since we don't get any locks on blobs
             // that are not long columns
             stmt2 = conn2.createStatement();
             stmt2.executeUpdate("update testBlob set a = null where b = 26");
             if (shortBlob.length() != 26)
                 System.out.println("FAILED: blob length changed to " + shortBlob.length());
             // should timeout waiting for the lock to do this
-            stmt2 = conn2.createStatement();
-            stmt2.executeUpdate("update testBlob set b = b + 1 where b = 10000");
-
+            
+            	stmt2 = conn2.createStatement();
+            	stmt2.executeUpdate("update testBlob set b = b + 1 where b = 10000");
+            	throw new Exception("FAIL: Should have gotten lock timeout");
+            }
+            else
+            {
+            	System.out.println("Locks not held by Network Server for Blobs since they are materialized on client");
+            }
             conn.commit();
             conn2.commit();
             System.out.println("blobTest92 finished");
@@ -3504,6 +3559,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt, stmt2;
+		System.out.println(START + "blobTest93");
         try
         {
 			stmt = conn.createStatement();
@@ -3565,6 +3621,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest94");
         try
         {
 			stmt = conn.createStatement();
@@ -3584,6 +3641,7 @@ public class blobclob4BLOB {
             conn.commit();
 
             // no problem accessing this after commit since it is in memory
+            if (shortBlob != null)
             System.out.println("shortBlob length after commit is " + shortBlob.length());
             // these should all give blob/clob data unavailable exceptions
 
@@ -3648,6 +3706,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest95");
         try
         {
 			stmt = conn.createStatement();
@@ -3746,6 +3805,7 @@ public class blobclob4BLOB {
     {
 		ResultSet rs;
 		Statement stmt;
+		System.out.println(START + "blobTest96");
 		try {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b from testBlob");
@@ -3803,7 +3863,8 @@ public class blobclob4BLOB {
      */
     private static void blobNegativeTest_Derby265(Connection conn)
             throws SQLException, FileNotFoundException,IOException {
-        // basically setup the tables for clob and blob
+    	System.out.println(START + "blobTestNegativeTest_Derby265");
+    	// basically setup the tables for clob and blob
         Statement s = conn.createStatement();
         s.execute("create table \"MAPS_BLOB\"(MAP_ID int, MAP_NAME varchar(20),REGION varchar(20),AREA varchar(20), PHOTO_FORMAT varchar(20),PICTURE blob(2G))");
         conn.setAutoCommit(false);
@@ -3843,11 +3904,10 @@ public class blobclob4BLOB {
             rs2.next();
             rs2.getBlob(6);
         } catch (SQLException sqle) {
-            if ("XJ073".equals(sqle.getSQLState()))
-                System.out.println("Expected Exception " + sqle.getMessage());
-            else
-                System.out.println("FAIL -- unexpected exception:"
-                        + sqle.toString());
+        	String sqlstate = sqle.getSQLState();
+        	boolean expected = (sqlstate != null && 
+        				(sqlstate.equals("XJ073") || sqlstate.equals("XCL30")));
+            	TestUtil.dumpSQLExceptions(sqle,expected);            	
         }
         finally {
             rs2.close();
@@ -3873,7 +3933,8 @@ public class blobclob4BLOB {
     private static void clobNegativeTest_Derby265(Connection conn)
             throws SQLException, FileNotFoundException,IOException {
 
-        // basically setup the tables for clob 
+    	System.out.println(START + "clobNegativeTest_Derby265");
+    	// basically setup the tables for clob 
         Statement s = conn.createStatement();
         s.execute("create table \"MAPS\"(MAP_ID int, MAP_NAME varchar(20),REGION varchar(20),AREA varchar(20), PHOTO_FORMAT varchar(20),PICTURE clob(2G))");
         conn.setAutoCommit(false);
@@ -3911,12 +3972,11 @@ public class blobclob4BLOB {
             rs2.next();
             rs2.getClob(6); // no longer valid
         } catch (SQLException sqle) {
-            if ("XJ073".equals(sqle.getSQLState()))
-                System.out.println("Expected Exception " + sqle.getMessage());
-            else
-                System.out.println("FAIL -- unexpected exception:"
-                        + sqle.toString());
-        }
+        	String sqlstate = sqle.getSQLState();
+        	boolean expected = (sqlstate != null && 
+        				(sqlstate.equals("XJ073") || sqlstate.equals("XCL30")));
+            	TestUtil.dumpSQLExceptions(sqle,expected);
+        }	
         finally {
             rs2.close();
             s2.close();
@@ -3959,16 +4019,28 @@ public class blobclob4BLOB {
 
 
 			if (pos < 1 || pos > clobLength)
-				expected = isOutOfBoundException(e);
-			TestUtil.dumpSQLExceptions(e, expected);
-			if (!expected) e.printStackTrace();
+			{
+				if (isOutOfBoundException(e))
+					expected = true;
+			} 
+			else
+			{
+				System.out.println("FAIL -- unexpected exception:" + e.toString());
+			}
+			TestUtil.dumpSQLExceptions(e,expected);
 		}
+		
 		catch (Exception e)
 		{
+			// Known bug.  JCC 5914.  
 			if ((pos > clobLength) && isDerbyNet && (e.getMessage() != null &&
 													e.getMessage().indexOf("String index out of range") >= 0))
-				System.out.println("Known JCC Bug 5914 - " + e.getMessage());
-			else System.out.println("Known JCC Bug 5914");
+				System.out.println("EXPECTED Out of bounds exception");
+			else
+			{
+				System.out.println("FAIL -- unexpected exception:" + e.toString());
+	            if (debug) e.printStackTrace();
+			}
 		}
     }
 

@@ -1,26 +1,35 @@
 Test blobclob starting
+START: prepareCLOBMAIN
 ===> inserting extin/short.txt length = 56
 ===> inserting extin/littleclob.txt length = 10000
 ===> inserting extin/empty.txt length = 0
 ===> inserting extin/searchclob.txt length = 5000
 ===> inserting extin/aclob.txt length = 300000
+START: prepareSearchClobTable
 ===> inserting extin/short.txt length = 56
 ===> inserting extin/littleclob.txt length = 10000
 ===> inserting extin/empty.txt length = 0
 ===> inserting extin/searchclob.txt length = 5000
 ===> inserting extin/aclob.txt length = 300000
+prepareSearchClobTable finished
+START: prepareUnicodeTable
+START: prepareUnicodeFile
 unicode string 0 correct
 unicode string 1 correct
 unicode string 2 correct
 Finished prepareUnicodeFile
+START: setCharacterStreamTest
 Length of clob is 5009
 unicode string 0 matched
 unicode string 1 matched
 unicode string 2 matched
 EOF matched
 setCharacterStreamTest finished
+START: clobTest0
 clobTest0 finished
+START: clobTest1
 clobTest11 finished
+START: clobTest12
 Succeeded to match, row 1
 PASSED, row 1, length was 3
 Succeeded to match, row 2
@@ -34,6 +43,7 @@ PASSED, row 5, length was 5016
 Succeeded to match, row 6
 PASSED, row 6, length was 5016
 clobTest12 finished
+START: clobTest2
 CLOB getSubString 9905 > 0
 EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
 CLOB getSubString 5910 > 0
@@ -147,6 +157,7 @@ wwwwwwwwwwwwwwwww
 9(7) 
 wwHere-I-am-at-position-299003-near-the-end-of-the-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 clobTest2 finished
+START: clobTest22
 Row 1 : Succeeded
 Row 2 : Succeeded
 Row 3 : Succeeded
@@ -157,6 +168,7 @@ Second time Succeeded
 Row 6 : Succeeded
 Second time Succeeded
 clobTest22 finished
+START: clobTest3
 Found horse in row 1 starting from position 1 at position  NOTFOUND 
 Found ouch in row 1 starting from position 1 at position  NOTFOUND 
 Found 
@@ -262,6 +274,7 @@ Found I-am-hiding-here-at-position-5910 in row 8 starting from position 5910 at 
 Found I-am-hiding-here-at-position-5910 in row 8 starting from position 5911 at position  NOTFOUND 
 Found Position-9907 in row 8 starting from position 1 at position  NOTFOUND 
 clobTest3 finished
+START: clobTest32
 Succeeded: Found unicode string 0 at position 1,row 1
 Succeeded: Found unicode string 0 at position -1,row 1
 Succeeded: Found unicode string 1 at position 1,row 2
@@ -275,6 +288,7 @@ Succeeded: Found unicode string 1 at position 5004,row 5
 Succeeded: Found unicode string 2 at position 1,row 6
 Succeeded: Found unicode string 2 at position 5004,row 6
 clobTest32 finished
+START: clobTest4
 position(clob) NOT FOUND 1 searchStr horse
 position(clob) NOT FOUND 1 searchStr ouch
 position(clob) NOT FOUND 1 searchStr 
@@ -386,11 +400,14 @@ Found clob (row 12)  in row 8 at position 1
 searchClob row 13 skipped (too large)
 testCLOB_MAIN row 9 skipped (too large)
 clobTest4 finished
+START: clobTest42
 Succeeded: Found clob at position 1,row 0
 Succeeded: Found clob at position 1,row 1
 Succeeded: Found clob at position 1,row 2
 clobTest42 finished
+START: clobTest51
 clobTest51 finished
+START: clobTest52
 create table testInteger (a integer)
 insert into testInteger values('158')
 select a from testInteger
@@ -398,10 +415,12 @@ getClob(1)
 52: SQLException
 FAIL -- unexpected exception ****************
 SQLSTATE(22005): An attempt was made to get a data value of type 'java.sql.Clob' from a data value of type 'INTEGER'.
+START: clobTest53
 clobTest53 finished
-start clobTest54
+START: clobTest54
 EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Clob'.
 end clobTest54
+START: clobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ071): Zero or negative length argument '0' passed in a Blob or Clob method.
@@ -410,9 +429,9 @@ EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob 
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-42' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob position method.
 clobTest6 finished
-start clobTest7
+START: clobTest7
 clobTest7 finished
-start clobTest8
+START: clobTest8
 small string pattern
 @1  position MATCH(129)
 @2  position MATCH(2074)
@@ -480,6 +499,7 @@ long java.sql.Clob pattern
 @9  position MATCH(-1)
 @10  position MATCH(-1)
 complete clobTest8
+START: clobTest91
 done row 0, length was 0
 done row 1, length was 65
 done row 2, length was 26
@@ -491,9 +511,12 @@ done row 7, length was 5000
 done row 8, length was 300000
 row 9 is null, skipped
 clobTest91 finished
+START: clobTest92
 FAIL -- unexpected exception ****************
 SQLSTATE(40XL1): A lock could not be obtained within the time requested
+START: clobTest93
 clobTest92 finished
+START: clobTest94
 shortClob length after commit is 26
 FAIL -- unexpected exception ****************
 SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
@@ -506,6 +529,7 @@ SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible 
 FAIL -- unexpected exception ****************
 SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
 clobTest94 finished
+START: clobTest95
 shortClob length after closing connection is 26
 FAIL -- unexpected exception ****************
 SQLSTATE(08003): No current connection.
@@ -518,18 +542,23 @@ SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible 
 FAIL -- unexpected exception ****************
 SQLSTATE(08003): No current connection.
 clobTest95 finished
+START: clobTest96
 clobTest96 finished
+START: prepareBlobTable
 ===> inserting extin/short.txt length = 56
 ===> inserting extin/littleclob.txt length = 10000
 ===> inserting extin/empty.txt length = 0
 ===> inserting extin/searchclob.txt length = 5000
 ===> inserting extin/aclob.txt length = 300000
+START: prepareSearchBlobTable
 ===> inserting extin/short.txt length = 56
 ===> inserting extin/littleclob.txt length = 10000
 ===> inserting extin/empty.txt length = 0
 ===> inserting extin/searchclob.txt length = 5000
 ===> inserting extin/aclob.txt length = 300000
+START: blobTest0
 blobTest0 finished
+START: blobTest2
 testing Blob.getBytes() with pos 9905 > 0
 EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
 testing Blob.getBytes() with pos 5910 > 0
@@ -643,6 +672,7 @@ wwwwwwwwwwwwwwwww
 9(7) 
 wwHere-I-am-at-position-299003-near-the-end-of-the-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 blobTest2 finished
+START: blobTest3
 Found horse in row 2 starting from position 1 at position 16
 Found ouch in row 3 starting from position 1 at position 23
 Found 
@@ -660,6 +690,7 @@ Found Position-9907 in row 6 starting from position 1 at position 9907
 Found 
  in row 8 starting from position 1 at position 100
 blobTest3 finished
+START: blobTest4
 FAIL -- unexpected exception ****************
 SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
 FAIL -- unexpected exception ****************
@@ -721,12 +752,17 @@ Found blob (row 12)  in row 8 at position 1
 searchBlob row 13 skipped (too large)
 testBlob row 9 skipped (too large)
 blobTest4 finished
+START: blobTest51
 blobTest51 finished
+START: blobTest52
 FAIL -- unexpected exception ****************
 SQLSTATE(22005): An attempt was made to get a data value of type 'java.sql.Blob' from a data value of type 'INTEGER'.
+START: blobTest53
 blobTest53 finished
+START: blobTest54
 FAIL -- unexpected exception ****************
 SQLSTATE(22005): An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
+START: blobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ071): Zero or negative length argument '0' passed in a Blob or Clob method.
@@ -735,7 +771,9 @@ EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob 
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-42' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob position method.
 blobTest6 finished
+START: blobTest7
 blobTest7 finished
+START: blobTest91
 done row 0, length was 0
 done row 1, length was 65
 done row 2, length was 26
@@ -747,9 +785,12 @@ done row 7, length was 5000
 done row 8, length was 300000
 row 9 is null, skipped
 blobTest91 finished
+START: blobTest92
 FAIL -- unexpected exception ****************
 SQLSTATE(40XL1): A lock could not be obtained within the time requested
+START: blobTest93
 blobTest93 finished
+START: blobTest94
 shortBlob length after commit is 26
 FAIL -- unexpected exception ****************
 SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
@@ -762,6 +803,7 @@ SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible 
 FAIL -- unexpected exception ****************
 SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
 blobTest94 finished
+START: blobTest95
 shortBlob length after closing the connection is 26
 FAIL -- unexpected exception ****************
 SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
@@ -774,19 +816,24 @@ SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible 
 FAIL -- unexpected exception ****************
 SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
 blobTest95 finished
+START: blobTest96
 blobTest96 finished
+START: clobTestSelfDestructive
 length of clob chosen is 10000
 After update
 Row 1 value.substring(0,50) is jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
 10000 total bytes read
 clobTestSelfDestructive finished
+START: clobTestSelfDestructive2
 length of clob chosen is 10000
 After drop
 Expect to get an IOException, container has been closed
 EXPECTED IO Exception:ERROR 40XD0: Container has been closed
+START: clobNegativeTest_Derby265
 -----------------------------
-Expected Exception The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+EXPECTED SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+START: blobTestNegativeTest_Derby265
 -----------------------------
-Expected Exception The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+EXPECTED SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
 FINISHED TEST blobclob :-)
 Test blobclob finished

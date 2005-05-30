@@ -5910,11 +5910,10 @@ public class DRDAConnThread extends Thread {
 					switch (ndrdaType)
 					{
 						case FdocaConstants.DRDA_TYPE_NLOBBYTES:
-							writeFdocaVal(i,rs.getBlob(i),drdaType,
-										  precision,scale,rs.wasNull(),stmt);
-							break;
 						case  FdocaConstants.DRDA_TYPE_NLOBCMIXED:
-							writeFdocaVal(i,rs.getClob(i),drdaType,
+							EXTDTAInputStream extdtaStream=  
+								EXTDTAInputStream.getEXTDTAStream(rs, i, drdaType);
+							writeFdocaVal(i,extdtaStream, drdaType,
 										  precision,scale,rs.wasNull(),stmt);
 							break;
 						case FdocaConstants.DRDA_TYPE_NINTEGER:
@@ -6550,18 +6549,12 @@ public class DRDAConnThread extends Thread {
 					writer.writeLDString(val.toString(), index);
 					break;
 				case FdocaConstants.DRDA_TYPE_NLOBBYTES:
+				case FdocaConstants.DRDA_TYPE_NLOBCMIXED:
 					// do not send EXTDTA for lob of length 0, beetle 5967
-					valLength = ((Blob) val).length();
+					valLength = ((EXTDTAInputStream) val).length();
 					if (valLength > 0)
 						stmt.addExtDtaObject(val, index);
 					writer.writeExtendedLength (valLength);
-					break;
-				case FdocaConstants.DRDA_TYPE_NLOBCMIXED:
-					valLength = ((Clob) val).length();
-					// do not send EXTDTA for lob of length 0, beetle 5967
-					if (valLength > 0) 
-						stmt.addExtDtaObject(val,index);
-					writer.writeExtendedLength(valLength);
 					break;
 				case  FdocaConstants.DRDA_TYPE_NFIXBYTE:
 					writer.writeBytes((byte[]) val);
@@ -7125,29 +7118,24 @@ public class DRDAConnThread extends Thread {
 				writeNullByte = true;
 		
 		Object o  = extdtaValues.get(i);
-        if (o instanceof Blob) {
-			Blob b = (Blob) o;
-			long blobLength = b.length();
+        if (o instanceof EXTDTAInputStream) {
+			EXTDTAInputStream stream = (EXTDTAInputStream) o;
+			long lobLength = stream.length();
 			writer.writeScalarStream (chainedWithSameCorrelator,
 									  CodePoint.EXTDTA,
-									  (int) Math.min(blobLength,
+									  (int) Math.min(lobLength,
 													 Integer.MAX_VALUE),
-									  b.getBinaryStream (),
+									  stream,
 									  writeNullByte);
 			
-		}
-		else if (o instanceof  Clob) {
-			Clob c = (Clob) o;
-			long[] outlen = {-1};
-			ByteArrayInputStream  unicodeStream =
-				convertClobToUnicodeStream(c, outlen);
-			writer.writeScalarStream (chainedWithSameCorrelator,
-									  CodePoint.EXTDTA,
-									  (int) Math.min(outlen[0],
-													 Integer.MAX_VALUE),		 
-									  unicodeStream,
-									  writeNullByte);
-		}
+			try {
+				// close the stream when done
+				if (stream != null)
+					stream.close();
+			} catch (IOException e) {
+				Util.javaException(e);
+			}
+        }
 		else if (o instanceof  byte[]) {
 			byte[] b = (byte []) o;
 			writer.writeScalarStream (chainedWithSameCorrelator,
@@ -7162,43 +7150,6 @@ public class DRDAConnThread extends Thread {
 
   }
 
-
-
-	private  java.io.ByteArrayInputStream  
-		convertClobToUnicodeStream (
-								Clob c,
-								long outlen[]) throws SQLException
-	{
-		java.io.Reader characterStream = c.getCharacterStream();
-		// Extract all the characters and write into a StringWriter.
-		java.io.StringWriter sw = new java.io.StringWriter ();
-		try {
-			int read = characterStream.read();
-			while (read != -1) {
-				sw.write(read);
-				read = characterStream.read();
-			}
-    }
-		catch (java.io.IOException e) {
-			throw new SQLException (e.getMessage());
-		}
-
-		// Extract the String from the StringWriter and extract the UTF-8 bytes.
-		String string = sw.toString();
-
-		byte[] utf8Bytes = null;
-		try {
-			utf8Bytes = string.getBytes("UTF-8");
-		}
-		catch (java.io.UnsupportedEncodingException e) {
-			throw new SQLException (e.getMessage());
-    }
-
-		// Create a new ByteArrayInputStream based on the bytes.
-
-		outlen[0]= utf8Bytes.length;
-		return new java.io.ByteArrayInputStream (utf8Bytes);
-		}
 
 	/**
 	 * Check SQLWarning and write SQLCARD as needed.

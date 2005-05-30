@@ -637,6 +637,11 @@ class DDMWriter
 	}
 
 
+	// TODO: Rewrite writeScalarStream to avoid passing a length.
+	// The length is never written and not required by the DRDA spec.
+	// Also looks like on IOException we just pad out the stream instead
+	// of actually sending an exception.  Similar code is in client, so 
+	// should be fixed in both places.
 	protected int  writeScalarStream (boolean chainedWithSameCorrelator,
 									  int codePoint,
 									  int length,
@@ -681,7 +686,6 @@ class DDMWriter
 
 			bytesToRead = flushScalarStreamSegment (leftToRead, bytesToRead);
 		} while (leftToRead > 0);
-		
 		// check to make sure that the specified length wasn't too small
 		try {
 			if (in.read() != -1) {
