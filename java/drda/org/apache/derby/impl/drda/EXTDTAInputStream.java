@@ -117,8 +117,11 @@ public class EXTDTAInputStream extends InputStream {
 		}
 		else
 		{
+			if (SanityManager.DEBUG)
+			{
 			SanityManager.THROWASSERT("DRDAType: " + drdaType +
 						" not valid EXTDTA object type");
+			}
 		}
 		
 		if (bytes != null)
