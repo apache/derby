@@ -436,6 +436,23 @@ public class RunList
         }
         else if (otherSpecialProps.length()>0)
             jvmProps.addElement("testSpecialProps=" + otherSpecialProps);
+        
+        // Ensure any properties that define the default connection
+        // for the tests to use a DataSource are passed from the
+        // command line onto the RunTest invoked. These properties are
+        //
+        // ij.dataSource=<classname of datasource>
+        //
+        // any number of
+        // ij.dataSource.<datasource property>=<value>
+
+        Properties sysProps = System.getProperties();
+        for (Enumeration e = sysProps.keys(); e.hasMoreElements(); )
+        {
+        	String key = (String) e.nextElement();
+        	if (key.startsWith("ij.dataSource"))
+        		jvmProps.addElement(key + "=" +  sysProps.getProperty(key)); 		
+        }
 
         jvmProps.addElement("suitename=" + suite);
 
