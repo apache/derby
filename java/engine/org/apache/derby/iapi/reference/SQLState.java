@@ -984,7 +984,7 @@ public interface SQLState {
 	String LANG_TOO_MANY_PARAMETERS_FOR_STORED_PROC                    = "54023";
 
 	//following 1 does not match the DB2 sql state, it is a Cloudscape specific behavior which is not compatible with DB2
-	String LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES = "XCL478.S";
+	String LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES = "XCL51.S";
 
 	// org.apache.derby.impl.sql.execute.rts
 	String RTS_ATTACHED_TO											   = "43X00.U";
