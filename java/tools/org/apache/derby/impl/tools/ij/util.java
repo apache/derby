@@ -52,7 +52,8 @@ import java.util.Locale;
 	@author ames
  */
 public class util implements java.security.PrivilegedAction {
-
+	
+	private static final Class[] DS_GET_CONN_TYPES = {"".getClass(), "".getClass()};
 	private util() {}
 
 	//-----------------------------------------------------------------
@@ -383,6 +384,9 @@ public class util implements java.security.PrivilegedAction {
 	String jdbcProtocol = util.getSystemProperty("ij.protocol");
 	if (jdbcProtocol != null)
 	    util.loadDriverIfKnown(jdbcProtocol);
+	
+    String user = util.getSystemProperty("ij.user");
+    String password = util.getSystemProperty("ij.password");
 
 	// deprecate the non-ij prefix name
 	databaseURL = util.getSystemProperty("database");
@@ -396,16 +400,13 @@ public class util implements java.security.PrivilegedAction {
 	    if (!databaseURL.startsWith("jdbc:") && jdbcProtocol != null)
 		databaseURL = jdbcProtocol+databaseURL;
 
-	    String user = util.getSystemProperty("ij.user");
-	    String password = util.getSystemProperty("ij.password");
-
 	    // Update connInfo for ij system properties and
 	    // framework network server
 
 	    connInfo = updateConnInfo(user, password,connInfo);
 
 	    // JDBC driver
-	    String driver = System.getProperty("driver");
+	    String driver = util.getSystemProperty("driver");
 	    if (driver == null) {
 		driver = "org.apache.derby.jdbc.EmbeddedDriver";
 	    }
@@ -416,7 +417,7 @@ public class util implements java.security.PrivilegedAction {
 	}
 
 	    // handle datasource property
-	    String dsName = System.getProperty("ij.dataSource");
+	    String dsName = util.getSystemProperty("ij.dataSource");
 	    if (dsName == null)
 	    	return null;
 
@@ -428,11 +429,17 @@ public class util implements java.security.PrivilegedAction {
 		    ds = dc.newInstance();
 		    
 		    // set datasource properties
-		    setupDataSource(ds);
+		    setupDataSource(ds);	   
 
 		    // Java method call "by hand" {  con = ds.getConnection(); }
-			java.lang.reflect.Method m = dc.getMethod("getConnection", null); 
-			return (java.sql.Connection) m.invoke(ds, new Object[] {});
+		    // or con = ds.getConnection(user, password)
+		    	
+			java.lang.reflect.Method m = 
+				user == null ? dc.getMethod("getConnection", null) :
+					 dc.getMethod("getConnection", DS_GET_CONN_TYPES);
+				
+			return (java.sql.Connection) m.invoke(ds,
+					 user == null ? null : new String[] {user, password});
 		} catch (InvocationTargetException ite)
 		{
 			if (ite.getTargetException() instanceof SQLException)
