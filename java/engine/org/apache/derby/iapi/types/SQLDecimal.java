@@ -770,7 +770,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		int desiredScale = desiredType.getScale();
 		int desiredPrecision = desiredType.getPrecision();
 
-		setCoreValue(SQLDecimal.getBigDecimal(source));
+		setFrom(source);
 		setWidth(desiredPrecision, desiredScale, true);
 	}
 
@@ -781,7 +781,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 
 	/**
-	 * This method implements the + operator for "double + double".
+	 * This method implements the + operator for DECIMAL.
 	 *
 	 * @param addend1	One of the addends
 	 * @param addend2	The other addend
@@ -939,7 +939,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			throw  StandardException.newException(SQLState.LANG_DIVIDE_BY_ZERO);
 		}
 		BigDecimal dividendBigDecimal = SQLDecimal.getBigDecimal(dividend);
-
+		
 		/*
 		** Set the result scale to be either the passed in scale, whcih was
 		** calculated at bind time to be max(ls+rp-rs+1, 4), where ls,rp,rs
@@ -955,6 +955,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 											1), 
 										NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE),
 									BigDecimal.ROUND_DOWN));
+		
 		return result;
 	}
 

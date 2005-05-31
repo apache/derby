@@ -63,16 +63,16 @@ public abstract class NumberDataType extends DataType
      * @return this object's absolute value.  Null if object is null.
      * @exception StandardException thrown on error.
      */
-    public NumberDataValue absolute(NumberDataValue result) 
+    public final NumberDataValue absolute(NumberDataValue result) 
                         throws StandardException
-    {
+    {   		
         if(isNegative())
             return minus(result);
 
         if(result == null)
             result = (NumberDataType)getNewNull();
-
-        result.setValue(this.getObject());
+        
+        result.setValue(this);
         return result;
     }
 

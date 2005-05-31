@@ -26,13 +26,9 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.error.StandardException;
 
 /**
-/**
  * DataValueFactory implementation for J2ME/CDC/Foundation.
  * Cannot use SQLDecimal since that requires java.math.BigDecimal.
- * 
- * THIS IS A TEMPORARY IMPLEMENTATION THAT USES SQLDouble for DECIMAL
- * WHICH IS NOT PRECISE. IS IT A STEP IN THE WAY TO A COMPLETE IMPLEMENTAION
- * FOR J2ME.
+ * Uses BigIntegerDecimal for DECIMAL support.
  *
  * @see DataValueFactory
  */
@@ -62,7 +58,7 @@ public class CDCDataValueFactory extends DataValueFactoryImpl
 	public NumberDataValue getDecimalDataValue(Long value,
 			NumberDataValue previous) throws StandardException {
 		if (previous == null)
-			previous = new SQLDouble(); // CDCDecimal();
+			previous = new BigIntegerDecimal();
 
 		previous.setValue(value);
 		return previous;
@@ -70,7 +66,7 @@ public class CDCDataValueFactory extends DataValueFactoryImpl
 
 	public NumberDataValue getDecimalDataValue(String value)
 			throws StandardException {
-		NumberDataValue ndv = new SQLDouble(); // CDCDecimal();
+		NumberDataValue ndv = new BigIntegerDecimal();
 
 		ndv.setValue(value);
 		return ndv;
@@ -78,7 +74,7 @@ public class CDCDataValueFactory extends DataValueFactoryImpl
 
 	public NumberDataValue getNullDecimal(NumberDataValue dataValue) {
 		if (dataValue == null) {
-			return new SQLDouble(); // CDCDecimal();
+			return new BigIntegerDecimal();
 		} else {
 			dataValue.setToNull();
 			return dataValue;
