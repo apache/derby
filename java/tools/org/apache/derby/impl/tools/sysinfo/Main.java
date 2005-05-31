@@ -558,6 +558,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		tryMyClasspath("org.apache.derby.database.Database", Main.getTextMessage("SIF08.J","derby.jar" ), successes, failures);
 	}
 	private static void tryNetClasspath(StringBuffer successes, StringBuffer failures) {
+		tryMyClasspath("org.apache.derby.database.Database", Main.getTextMessage("SIF08.J","derby.jar" ), successes, failures);
 		tryMyClasspath("org.apache.derby.drda.NetworkServerControl", Main.getTextMessage("SIF08.I", "derbynet.jar"), successes, failures);
 	}
 	private static void tryClientClasspath(StringBuffer successes, StringBuffer failures) {
