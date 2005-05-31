@@ -14,4 +14,4 @@ rem set DERBY_INSTALL=
 
 FOR %%X in ("%DERBY_INSTALL%") DO SET DERBY_INSTALL=%%~sX
 
-set CLASSPATH=%DERBY_INSTALL%\lib\derby.jar;%DERBY_INSTALL%\lib\derbytools.jar;%DERBY_INSTALL%\lib\derbyclient.jar;%CLASSPATH%
+set CLASSPATH=%DERBY_INSTALL%\lib\derbyclient.jar;%DERBY_INSTALL%\lib\derbytools.jar;%CLASSPATH%
