@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeUtilities;
@@ -234,9 +235,13 @@ public final class NumericConstantNode extends ConstantNode
 			mb.push(value.getShort());
 			break;
 		case C_NodeTypes.DECIMAL_CONSTANT_NODE:
-			mb.pushNewStart("java.math.BigDecimal");
+			// No java.math.BigDecimal class in J2ME so the constant
+			// from the input SQL is handled directly as a String.
+			if (!JVMInfo.J2ME)
+				mb.pushNewStart("java.math.BigDecimal");
 			mb.push(value.getString());
-			mb.pushNewComplete(1);
+			if (!JVMInfo.J2ME)
+				mb.pushNewComplete(1);
 			break;
 		case C_NodeTypes.DOUBLE_CONSTANT_NODE:
 			mb.push(value.getDouble());

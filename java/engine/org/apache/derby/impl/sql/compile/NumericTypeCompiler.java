@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -540,9 +541,12 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	public void generateDataValue(MethodBuilder mb,
 										LocalField field)
 	{
-		if (getTypeId().isDecimalTypeId())
+		if (!JVMInfo.J2ME && getTypeId().isDecimalTypeId())
 		{
-			// cast the value to an object for method resolution
+			// cast the value to a Number (from BigDecimal) for method resolution
+			// For J2ME there is no implementation of Number for DECIMAL
+			// so values are handled as thier original type, which is just
+			// a String for DECIMAL constants from the parser.
 			mb.upCast("java.lang.Number");
 		}
 

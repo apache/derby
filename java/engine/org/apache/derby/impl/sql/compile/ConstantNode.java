@@ -240,15 +240,8 @@ abstract class ConstantNode extends ValueNode
 										// usually a literal like 'hello'
 
 			acb.generateDataValue(mb, getTypeCompiler(), (LocalField) null);
-
-			setConstantWidth(acb, mb);
 		}
 	}
-
-	// temp
-	void setConstantWidth(ExpressionClassBuilder acb, MethodBuilder mb) {
-	}
-
 
 	/**
 	 * This generates the proper constant.  It is implemented
