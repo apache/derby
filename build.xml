@@ -494,10 +494,20 @@
 <!--                           Javadoc targets                           -->
 <!-- =================================================================== -->
 
-  <target name="javadoc" depends="publishedapi,derbydocs,toolsdocs,grammardocs"/>
+  <target name="javadoc" depends="init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs"/>
 
   <target name="publishedapi">
-
+ 
+    <tstamp>
+      <format 
+          property="javadoc.ts" 
+          pattern="EEE yyyy-MM-dd HH:mm:ssZ" 
+          locale="en, us"/>
+    </tstamp>
+    <property 
+        name="javadoc.Footer" 
+        value="Built on ${javadoc.ts}, from revision ${changenumber}"/>
+  
     <delete dir="${out.javadoc.dir}/publishedapi"/>
     <delete dir="${out.javadoc.dir}/sourcedir"/>
     <mkdir dir="${out.javadoc.dir}/publishedapi"/>
@@ -530,6 +540,7 @@
              packagenames="org.apache.derby.authentication,org.apache.derby.drda,org.apache.derby.jdbc.io,org.apache.derby.jdbc,org.apache.derby.tools"
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
+             Footer="${javadoc.Footer}"
              bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2004 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"/>
 
     <delete dir="${out.javadoc.dir}/sourcedir"/>
@@ -551,6 +562,7 @@
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
         doctitle="Apache Derby V${major}.${minor} Engine Documentation"
+        Footer="${javadoc.Footer}"
         bottom="Apache Derby V${major}.${minor} Engine Documentation - &lt;i&gt;Copyright &amp;copy; 1997,2004 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"
         source="1.4">
         <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
