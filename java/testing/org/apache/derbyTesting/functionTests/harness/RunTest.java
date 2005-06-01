@@ -1321,7 +1321,7 @@ clp.list(System.out);
                 ap.load(isApDef);
         }
 
-        // If app props are still empty, check for any special testSpecialFlags
+        // If app props are still empty, check for any special testSpecialProps
         if ( ap.isEmpty() )
         {
             if ( !ijProps.isEmpty() )
@@ -1329,7 +1329,7 @@ clp.list(System.out);
         }
         else
         {
-            // merge any special properties from testSpecialFlags
+            // merge any special properties from testSpecialProps
             if ( !ijProps.isEmpty() )
             {
                 for (Enumeration e = ijProps.propertyNames(); e.hasMoreElements();)

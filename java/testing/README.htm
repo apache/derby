@@ -572,7 +572,7 @@ executed using a class called 'RunSuite'.<br>
 <p>See section 2.1 for the basic steps to run 1 test.
 </p>
 <p>To pass on system level properties to the test harness, use the test
-harness property -DtestSpecialFlags. For example, to ensure extra
+harness property -DtestSpecialProps. For example, to ensure extra
 information is appended to the log:&nbsp;<br>
 </p>
 <table
@@ -582,7 +582,7 @@ information is appended to the log:&nbsp;<br>
     <tr>
       <td style="vertical-align: top;"> <small>java
 -Dframework=DerbyNetClient
--DtestSpecialFlags=derby.infolo.append=true&nbsp;
+-DtestSpecialProps=derby.infolog.append=true&nbsp;
 org.apache.derbyTesting.functionTests.harness.RunTest
 lang/supersimple.sql</small></td>
     </tr>
@@ -1179,10 +1179,12 @@ keepfiles<br>
 passed.<br>
 &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; java -Dkeepfiles=true
 org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
-TestSpecialFlags<br>
-&nbsp;&nbsp;&nbsp; sets additional properties.<br>
+testSpecialProps<br>
+&nbsp;&nbsp;&nbsp; sets additional properties. Several can be set
+using '^' as separator: <br>
+&nbsp;&nbsp;&nbsp; -DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^ ... ^&lt;prop-n&gt;=&lt;value-n&gt;<br>
 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
--DTestSpecialFlags=derby.infolog.append=true
+-DTestSpecialProps=derby.infolog.append=true
 org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql <br>
 jvmflags<br>
 &nbsp;&nbsp;&nbsp; sets specific jvm properties for the jvm used in the test harness, for
@@ -1194,6 +1196,15 @@ org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java <br>
 excludeJCC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; See above section <a
  href="#skipping">4.10</a><br>
+useprocess<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (default=true) Controls whether RunTest
+runs the test in a separate VM or in a  <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; thread in harness VM. It is potentially
+useful for debugging tests. Unit tests are <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; not (yet) runnable with 
+"useprocess=false", though. 
+
       </td>
     </tr>
   </tbody>
