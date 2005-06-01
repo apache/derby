@@ -423,6 +423,17 @@ public class AllocExtent implements Externalizable
 		setExtentFreePageStatus(true);
 	}
 
+    /**
+     * Compress free pages at end of this extent.
+     * <p>
+     * Search backward from end of extent and prepare data structures
+     * to return pages at end of extent to the OS. Returns the lowest
+     * page that can be returned to the OS.
+     * <p>
+     *
+	 * @return Return bit of page where page and all those that follow can
+     *         be returned to the OS.
+     **/
     protected long compressPages()
     {
         int compress_bitnum = -1;
@@ -432,6 +443,8 @@ public class AllocExtent implements Externalizable
             if (freePages.isSet(i))
             {
                 freePages.clear(i);
+                unFilledPages.clear(i);
+
                 compress_bitnum = i;
             }
             else
@@ -449,7 +462,6 @@ public class AllocExtent implements Externalizable
         {
             return(-1);
         }
-
     }
 
 	protected long getExtentEnd()

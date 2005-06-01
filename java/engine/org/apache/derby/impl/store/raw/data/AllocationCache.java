@@ -228,12 +228,19 @@ class AllocationCache
                 currAllocPages = extents[i].getAllocatedPageCount();
 				numAllocatedPages += currAllocPages;
                 numUnfilledPages += extents[i].getUnfilledPageCount();
-                numFreePages += (extents[i].getTotalPageCount() - currAllocPages);
+                numFreePages += 
+                    (extents[i].getTotalPageCount() - currAllocPages);
             }
 
             if (SanityManager.DEBUG)
+            {
                 SanityManager.ASSERT(numUnfilledPages <= numAllocatedPages,
-                    "more unfilled pages than allocated pages on extent ");
+                    "more unfilled pages than allocated pages on extent[" + i +
+                    "], " +
+                    "numUnfilledPages = "    + numUnfilledPages + 
+                    ", numAllocatedPages = " + numAllocatedPages +
+                    ", numFreePages = "      + numFreePages);
+            }
 		}
         return new SpaceInformation(
             numAllocatedPages,

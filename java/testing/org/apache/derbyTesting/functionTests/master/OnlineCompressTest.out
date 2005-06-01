@@ -40,3 +40,35 @@ Executing test: end deleteAllRows,4000 row test.
 Executing test: begin checkPurgePhase4000 row test, create = false.
 Executing test: end checkPurgePhase4000 row test.
 Ending test: test1
+Beginning test: test3
+Executing test: begin deleteAllRows,1 row test, create = true.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end deleteAllRows,1 row test.
+Executing test: begin deleteAllRows,1 row test, create = false.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end deleteAllRows,1 row test.
+Executing test: begin checkPurgePhase1 row test, create = false.
+Executing test: end checkPurgePhase1 row test.
+Executing test: begin deleteAllRows,2 row test, create = true.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end deleteAllRows,2 row test.
+Executing test: begin deleteAllRows,2 row test, create = false.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end deleteAllRows,2 row test.
+Executing test: begin checkPurgePhase2 row test, create = false.
+Executing test: end checkPurgePhase2 row test.
+Executing test: begin deleteAllRows,50 row test, create = true.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end deleteAllRows,50 row test.
+Executing test: begin deleteAllRows,50 row test, create = false.
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end deleteAllRows,50 row test.
+Executing test: begin checkPurgePhase50 row test, create = false.
+Executing test: end checkPurgePhase50 row test.
+Ending test: test3

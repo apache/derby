@@ -164,7 +164,6 @@ public class OnlineCompressTest extends BaseTest
      * This schema fits 25 rows per page
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
      *
      * @param conn          Connection to use for sql execution.
      * @param create_table  If true, create new table - otherwise load into
@@ -241,6 +240,140 @@ public class OnlineCompressTest extends BaseTest
         conn.commit();
     }
 
+    /**
+     * Create and load a table with long columns and long rows.
+     * <p>
+     * If create_table is set creates a test data table with indexes.
+     * Loads num_rows into the table.  This table defaults to 32k page size.
+     * <p>
+     * schema of table:
+     *     keycol   int, 
+     *     longcol1 clob(200k),
+     *     longrow1 varchar(10000),
+     *     longrow2 varchar(10000),
+     *     longrow3 varchar(10000),
+     *     longrow4 varchar(10000),
+     *     indcol1  int, 
+     *     indcol2  int, 
+     *     indcol3  int, 
+     *     data1    varchar(2000), 
+     *     data2    varchar(2000)
+     *     longrow5 varchar(10000),
+     *     longrow6 varchar(10000),
+     *     longrow7 varchar(10000),
+     *     longrow8 varchar(10000),
+     *     longcol2 clob(200k),
+     *
+     *
+     * @param conn          Connection to use for sql execution.
+     * @param create_table  If true, create new table - otherwise load into
+     *                      existing table.
+     * @param tblname       table to use.
+     * @param num_rows      number of rows to add to the table.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    private void createAndLoadLongTable(
+    Connection  conn,
+    boolean     create_table,
+    String      tblname,
+    int         num_rows)
+        throws SQLException
+    {
+        if (create_table)
+        {
+            Statement s = conn.createStatement();
+
+            s.execute(
+                "create table " + tblname + 
+                " (keycol   int, longcol1 clob(200k), longrow1 varchar(10000), longrow2 varchar(10000), longrow3 varchar(10000), longrow4 varchar(10000), indcol1  int, indcol2  int, indcol3  int, data1    varchar(2000), data2    varchar(2000), longrow5 varchar(10000), longrow6 varchar(10000), longrow7 varchar(10000), longrow8 varchar(10000), longcol2 clob(200k))");
+            s.close();
+        }
+
+        PreparedStatement insert_stmt = 
+            conn.prepareStatement(
+                "insert into " + tblname + " values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        char[]  data1_data = new char[500];
+        char[]  data2_data = new char[500];
+
+        for (int i = 0; i < data1_data.length; i++)
+        {
+            data1_data[i] = 'a';
+            data2_data[i] = 'b';
+        }
+        String  data1_str = new String(data1_data);
+        String  data2_str = new String(data2_data);
+
+        // some data to force row to be bigger than a page, ie. long row
+        char[] data3_data = new char[10000];
+        char[] data4_data = new char[10000];
+
+        for (int i = 0; i < data3_data.length; i++)
+        {
+            data3_data[i] = 'c';
+            data4_data[i] = 'd';
+        }
+        String  data3_str = new String(data3_data);
+        String  data4_str = new String(data4_data);
+
+        // some data for the long columns
+        char[] data5_data = new char[200000];
+        char[] data6_data = new char[200000];
+
+        for (int i = 0; i < data5_data.length; i++)
+        {
+            data5_data[i] = 'e';
+            data6_data[i] = 'f';
+        }
+
+        String  data5_str = new String(data5_data);
+        String  data6_str = new String(data6_data);
+
+        for (int i = 0; i < num_rows; i++)
+        {
+            insert_stmt.setInt(1, i);               // keycol
+            insert_stmt.setString(2, data5_str);    // longcol1
+            insert_stmt.setString(3, data3_str);    // longrow1
+            insert_stmt.setString(4, data3_str);    // longrow2
+            insert_stmt.setString(5, data3_str);    // longrow3
+            insert_stmt.setString(6, data3_str);    // longrow4
+            insert_stmt.setInt(7, i * 10);          // indcol1
+            insert_stmt.setInt(8, i * 100);         // indcol2
+            insert_stmt.setInt(9, -i);              // indcol3
+            insert_stmt.setString(10, data1_str);   // data1_data
+            insert_stmt.setString(11, data2_str);   // data2_data
+            insert_stmt.setString(12, data4_str);   // longrow5
+            insert_stmt.setString(13, data4_str);   // longrow6
+            insert_stmt.setString(14, data4_str);   // longrow7
+            insert_stmt.setString(15, data4_str);   // longrow8
+            insert_stmt.setString(16, data5_str);   // longcol2
+
+            insert_stmt.execute();
+        }
+
+        if (create_table)
+        {
+            Statement s = conn.createStatement();
+
+            s.execute(
+                "create index " + tblname + "_idx_keycol on " + tblname +
+                    "(keycol)");
+            s.execute(
+                "create index " + tblname + "_idx_indcol1 on " + tblname +
+                    "(indcol1)");
+            s.execute(
+                "create index " + tblname + "_idx_indcol2 on " + tblname +
+                    "(indcol2)");
+            s.execute(
+                "create unique index " + tblname + "_idx_indcol3 on " + tblname +
+                    "(indcol3)");
+            s.close();
+        }
+
+        conn.commit();
+    }
+
     private void executeQuery(
     Connection  conn,
     String      stmt_str,
@@ -285,6 +418,7 @@ public class OnlineCompressTest extends BaseTest
     private void deleteAllRows(
     Connection  conn,
     boolean     create_table,
+    boolean     long_table,
     String      schemaName,
     String      table_name,
     int         num_rows) 
@@ -295,7 +429,10 @@ public class OnlineCompressTest extends BaseTest
                 create_table + ".");
 
 
-        createAndLoadTable(conn, create_table, table_name, num_rows);
+        if (long_table)
+            createAndLoadLongTable(conn, create_table, table_name, num_rows);
+        else
+            createAndLoadTable(conn, create_table, table_name, num_rows);
 
         if (verbose)
             testProgress("Calling compress.");
@@ -374,6 +511,7 @@ public class OnlineCompressTest extends BaseTest
     private void checkPurgePhase(
     Connection  conn,
     boolean     create_table,
+    boolean     long_table,
     String      schemaName,
     String      table_name,
     int         num_rows) 
@@ -383,7 +521,10 @@ public class OnlineCompressTest extends BaseTest
             "begin checkPurgePhase" + num_rows + " row test, create = " + 
                 create_table + ".");
 
-        createAndLoadTable(conn, create_table, table_name, num_rows);
+        if (long_table)
+            createAndLoadLongTable(conn, create_table, table_name, num_rows);
+        else
+            createAndLoadTable(conn, create_table, table_name, num_rows);
 
         // dump_table(conn, schemaName, table_name, false);
 
@@ -501,7 +642,10 @@ public class OnlineCompressTest extends BaseTest
         // will abort transaction.
         executeQuery(conn, "delete from " + table_name, true);
         callCompress(conn, "APP", table_name, true, true, true, true);
-        createAndLoadTable(conn, create_table, table_name, num_rows);
+        if (long_table)
+            createAndLoadLongTable(conn, create_table, table_name, num_rows);
+        else
+            createAndLoadTable(conn, create_table, table_name, num_rows);
         conn.commit();
         executeQuery(conn, "delete from " + table_name, false);
 
@@ -594,7 +738,7 @@ public class OnlineCompressTest extends BaseTest
     }
 
     /**
-     * Test 1 alloc page test cases.
+     * Test 1 - various # page tests, regular row/columns
      * <p>
      * perform a number of insert/delete/compress operations on a variety
      * of sized tables, use space allocation information to verify that
@@ -628,15 +772,15 @@ public class OnlineCompressTest extends BaseTest
         {
             // first create new table and run the tests.
             deleteAllRows(
-                conn, true, "APP", table_name, test_cases[i]);
+                conn, true, false, "APP", table_name, test_cases[i]);
 
             // now rerun tests on existing table, which had all rows deleted
             // and truncated.
             deleteAllRows(
-                conn, false, "APP", table_name, test_cases[i]);
+                conn, false, false, "APP", table_name, test_cases[i]);
 
             checkPurgePhase(
-                conn, false, "APP", table_name, test_cases[i]);
+                conn, false, false, "APP", table_name, test_cases[i]);
 
             executeQuery(conn, "drop table " + table_name, true);
         }
@@ -645,81 +789,72 @@ public class OnlineCompressTest extends BaseTest
     }
 
     /**
-     * Purge of uncommitted deletes should not do anything.
+     * Test 2 - check transaction roll backs
      * <p>
-     * In the same transaction insert a number of rows, delete them all
-     * and then run the purge operation.  The purge operation should find
-     * the rows deleted but not do anything with them as the transaction
-     * has not committed.
+     *
      **/
     private void test2(
     Connection  conn,
     String      test_name,
-    String      table_name,
-    int         num_rows)
+    String      table_name)
+        throws SQLException 
+    {
+    }
+
+
+
+    /**
+     * Test 3 - various # page tests, long row and long columns
+     * <p>
+     * perform a number of insert/delete/compress operations on a variety
+     * of sized tables, use space allocation information to verify that
+     * compression is happening and use consistency checker to verify that
+     * tables and indexes are all valid following the operations.
+     * <p>
+     * loop through testing interesting row count cases.  The cases are
+     * 0    rows  - basic edge case
+     * 1    row   - another edge case
+     * 100  rows  - ~50 meg table
+     * 4000 rows  - ~2 gig table
+     *
+     * note that row numbers greater than 4000 may lead to lock escalation
+     * issues, if queries like "delete from x" are used to delete all the 
+     * rows.
+     *
+     * <p>
+     *
+     **/
+    private void test3(
+    Connection  conn,
+    String      test_name,
+    String      table_name)
         throws SQLException 
     {
         beginTest(conn, test_name);
 
-        createAndLoadTable(conn, true, table_name, num_rows);
+        // note that 500 rows took 30 minutes on a ~1.5 ghz laptop
+        int[] test_cases = {1, 2, 50};
 
-        // Purge pass on non-committed deleted rows should do nothing.  
-
-        int[] ret_before = getSpaceInfo(conn, "APP", table_name, false);
-
-        // Calling compress with just the "purge" pass option, no commit called.
-        callCompress(conn, "APP", table_name, true, false, false, false);
-        int[] ret_after  = getSpaceInfo(conn, "APP", table_name, false);
-
-        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        for (int i = 0; i < test_cases.length; i++)
         {
-            log_wrong_count(
-                "Expected no alloc page change.", 
-                table_name, num_rows, 
-                ret_before[SPACE_INFO_NUM_ALLOC], 
-                ret_after[SPACE_INFO_NUM_ALLOC],
-                ret_before, ret_after);
-        }
-        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
-        {
-            log_wrong_count(
-                "Expected no alloc page change.", 
-                table_name, num_rows, 
-                ret_before[SPACE_INFO_NUM_ALLOC], 
-                ret_after[SPACE_INFO_NUM_ALLOC],
-                ret_before, ret_after);
-        }
+            // first create new table and run the tests.
+            deleteAllRows(
+                conn, true, true, "APP", table_name, test_cases[i]);
 
-        // since table was just loaded there a defragment pass also should
-        // not find anything to do.
-        
-        // Calling compress with just the "defragment" option, no commit called.
-        callCompress(conn, "APP", table_name, false, true, false, false);
-        ret_after  = getSpaceInfo(conn, "APP", table_name, false);
+            // now rerun tests on existing table, which had all rows deleted
+            // and truncated.
+            deleteAllRows(
+                conn, false, true, "APP", table_name, test_cases[i]);
 
-        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
-        {
-            log_wrong_count(
-                "Expected no alloc page change.", 
-                table_name, num_rows, 
-                ret_before[SPACE_INFO_NUM_ALLOC], 
-                ret_after[SPACE_INFO_NUM_ALLOC],
-                ret_before, ret_after);
-        }
-        if (ret_after[SPACE_INFO_NUM_FREE] != ret_before[SPACE_INFO_NUM_FREE])
-        {
-            log_wrong_count(
-                "Expected no alloc page change.", 
-                table_name, num_rows, 
-                ret_before[SPACE_INFO_NUM_ALLOC], 
-                ret_after[SPACE_INFO_NUM_ALLOC],
-                ret_before, ret_after);
-        }
+            checkPurgePhase(
+                conn, false, true, "APP", table_name, test_cases[i]);
 
-        executeQuery(conn, "drop table " + table_name, true);
+            executeQuery(conn, "drop table " + table_name, true);
+        }
 
         endTest(conn, test_name);
     }
+
 
 
     public void testList(Connection conn)
@@ -727,6 +862,7 @@ public class OnlineCompressTest extends BaseTest
     {
         test1(conn, "test1", "TEST1");
         // test2(conn, "test2", "TEST2", 10000);
+        test3(conn, "test3", "TEST3");
     }
 
     public static void main(String[] argv) 
