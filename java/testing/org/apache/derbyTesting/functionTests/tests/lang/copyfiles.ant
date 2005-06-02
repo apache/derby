@@ -204,6 +204,7 @@ unlimited.sql
 unlimited2.sql
 update.sql
 updateCursor_derby.properties
+updatableResultSet_sed.properties
 valuesclause.sql
 views.sql
 wisconsin.sql

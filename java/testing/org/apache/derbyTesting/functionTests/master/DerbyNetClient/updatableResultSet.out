@@ -64,7 +64,7 @@ Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when th
 Make sure that we got CONCUR_UPDATABLE? true
 Now attempt a deleteRow without first doing next on the resultset.
 SQL State : XCL08
-Got expected exception Cursor 'SQL_CURLH000C8' is not on a row.
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Now attempt a updateRow without first doing next on the resultset.
 updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
 SQL State : null
@@ -307,14 +307,14 @@ Positive Test10 - 2 updatable resultsets going against the same table, will they
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
 SQL State : XCL08
-Got expected exception Cursor 'SQL_CURLH000C52' is not on a row.
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 -----
 Statement Name: 
-	SQL_CURLH000C55
+	<xxx-cursor-name-xxx>
 Statement Text: 
 	SELECT * FROM t1 FOR UPDATE of c1
 Parse Time: 0
