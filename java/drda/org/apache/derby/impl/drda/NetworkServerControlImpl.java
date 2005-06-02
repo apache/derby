@@ -121,14 +121,6 @@ public class NetworkServerControlImpl {
 	private final static int SQLERROR = 3;
 	private final static int SQLWARNING = 4;
 
-	private final static String
-		NETWORKSERVER_PROP_STREAM_ERROR_FIELD="derby.stream.error.field";
-
-	private final static String
-		NETWORKSERVER_PROP_STREAM_ERROR_METHOD="derby.stream.error.method";
-	private final static String
-		NETWORKSERVER_PROP_STREAM_ERROR_FILE="derby.stream.error.file";
-
 	private final static String DRDA_PROP_MESSAGES = "org.apache.derby.loc.drda.messages";
 	private final static String DRDA_PROP_DEBUG = "derby.drda.debug";
 	private final static String CLOUDSCAPE_DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
@@ -252,8 +244,6 @@ public class NetworkServerControlImpl {
 	protected boolean debugOutput = false;
 	private boolean cleanupOnStart = false;	// Should we clean up when starting the server?
 	private boolean restartFlag = false;
-
-	private String errorLogLocation = null;
 
 	//
 	// variables for a client command session
@@ -2506,28 +2496,6 @@ public class NetworkServerControlImpl {
 		if (propval != null  && StringUtil.SQLEqualsIgnoreCase(propval, "true"))
 			debugOutput = true;
 
-		//RESOLVE: Need to clean this up. There should be just a
-		// server API call to get the log location
-		// Determine errror log location
-		propval = PropertyUtil.getSystemProperty(
-                      NetworkServerControlImpl.NETWORKSERVER_PROP_STREAM_ERROR_FIELD);
-		if (propval == null)
-			propval = PropertyUtil.getSystemProperty( 
-                          NetworkServerControlImpl.NETWORKSERVER_PROP_STREAM_ERROR_METHOD);
-		if (propval == null)
-		{
-			propval = PropertyUtil.getSystemProperty( 
-                          NetworkServerControlImpl.NETWORKSERVER_PROP_STREAM_ERROR_FILE);
-			if (propval == null)
-				propval = "derby.log";
-		}
-		File errorFile = new File(propval);
-		if (errorFile.isAbsolute())
-			errorLogLocation = errorFile.getPath();
-		else
-			errorLogLocation = (new File
-				(directory,propval)).getPath();
-		
 	}
 
 	/**
@@ -3269,11 +3237,6 @@ public class NetworkServerControlImpl {
 			}
 		}
 		return retval;
-	}
-
-	public String getErrorLogLocation ()
-	{
-		return errorLogLocation;
 	}
 
 

@@ -42,28 +42,44 @@ class BasicHeaderPrintWriter
 
 	private final PrintWriterGetHeader headerGetter;
 	private final boolean canClose;
+	private final String name;
 
 	// constructors
 
 	/**
 	 * the constructor sets up the HeaderPrintWriter. 
 	 * <p>
-	 * @param writeTo		Where to write to.
+	 * @param writeTo       Where to write to.
 	 * @param headerGetter	Object to get headers for output lines.
+	 * @param canClose      If true, {@link #complete} will also close writeTo
+	 * @param streamName    Name of writeTo, e.g. a file name
 	 *
 	 * @see	PrintWriterGetHeader
 	 */
 	BasicHeaderPrintWriter(OutputStream writeTo,
-			PrintWriterGetHeader headerGetter,  boolean canClose){
+			PrintWriterGetHeader headerGetter,  boolean canClose, String streamName){
 		super(writeTo, true);
 		this.headerGetter = headerGetter;
 		this.canClose = canClose;
+		this.name = streamName;
 	}
+
+	/**
+	 * the constructor sets up the HeaderPrintWriter. 
+	 * <p>
+	 * @param writeTo       Where to write to.
+	 * @param headerGetter	Object to get headers for output lines.
+	 * @param canClose      If true, {@link #complete} will also close writeTo
+	 * @param writerName    Name of writeTo, e.g. a file name
+	 *
+	 * @see	PrintWriterGetHeader
+	 */
 	BasicHeaderPrintWriter(Writer writeTo,
-			PrintWriterGetHeader headerGetter, boolean canClose){
+			PrintWriterGetHeader headerGetter, boolean canClose, String writerName){
 		super(writeTo, true);
 		this.headerGetter = headerGetter;
 		this.canClose = canClose;
+		this.name = writerName;
 	}
 
 	/*
@@ -84,6 +100,15 @@ class BasicHeaderPrintWriter
 	public PrintWriter getPrintWriter(){
 		return this;
 	}
+
+	public String getName(){
+		return name;
+	}
+
+	/**
+	 * Flushes stream, and optionally also closes it if constructed
+	 * with canClose equal to true.
+	 */
 
 	void complete() {
 		flush();

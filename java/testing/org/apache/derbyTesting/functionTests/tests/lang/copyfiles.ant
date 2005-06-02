@@ -76,6 +76,7 @@ emptyStatistics_derby.properties
 emptyStatistics.sql
 errorCode.sql
 errorCode_app.properties
+errorStream_sed.properties
 fk_nonSPS.sql
 fk_nonSPS_derby.properties
 floattypes.sql

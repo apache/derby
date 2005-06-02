@@ -58,6 +58,11 @@ public interface HeaderPrintWriter
 	 */
 	public PrintWriter getPrintWriter();
 
+	/**
+	 * Gets the name of the wrapped writer or stream
+	 */
+	public String getName ();
+
 	/*
 	 * The routines that mimic java.io.PrintWriter...
 	 */

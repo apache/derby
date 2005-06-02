@@ -121,17 +121,9 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 	 */
 	private HeaderPrintWriter makeStream() {
 
-		StringBuffer propName = new StringBuffer("derby.stream.error.");
-
-		int prefixLength = propName.length();
-
 		// get the header
 		PrintWriterGetHeader header = makeHeader();
-
-		// get the stream
-		propName.setLength(prefixLength);
-		
-		HeaderPrintWriter hpw = makeHPW(propName, header);
+		HeaderPrintWriter hpw = makeHPW(header);
 
 		// If hpw == null then no properties were specified for the stream
 		// so use/create the default stream.
@@ -152,31 +144,23 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 		create a HeaderPrintWriter based on the header.
 		Will still need to determine the target type.
 	 */
-	private HeaderPrintWriter makeHPW(StringBuffer propPrefix,
-		PrintWriterGetHeader header) {
+	private HeaderPrintWriter makeHPW(PrintWriterGetHeader header) {
 
 		// the type of target is based on which property is used
 		// to set it. choices are file, method, field, stream
 
-		int prefixLength = propPrefix.length();
-
-		// looking for derby.stream.<name>.file=<path to file>
-		propPrefix.append("file");
-		String target = PropertyUtil.getSystemProperty(propPrefix.toString());
+		String target = PropertyUtil.
+                   getSystemProperty(Property.ERRORLOG_FILE_PROPERTY);
 		if (target!=null)
 			return makeFileHPW(target, header);
 
-		// looking for derby.stream.<name>.method=<className>.<methodName>
-		propPrefix.setLength(prefixLength);
-		propPrefix.append("method");
-		target = PropertyUtil.getSystemProperty(propPrefix.toString());
+		target = PropertyUtil.
+                   getSystemProperty(Property.ERRORLOG_METHOD_PROPERTY);
 		if (target!=null) 
 			return makeMethodHPW(target, header);
 
-		// looking for derby.stream.<name>.field=<className>.<fieldName>
-		propPrefix.setLength(prefixLength);
-		propPrefix.append("field");
-		target = PropertyUtil.getSystemProperty(propPrefix.toString());
+		target = PropertyUtil.
+                   getSystemProperty(Property.ERRORLOG_FIELD_PROPERTY);
 		if (target!=null) 
 			return makeFieldHPW(target, header);
 
@@ -217,7 +201,8 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 			return useDefaultStream(header, se);
 		}
 
-		return new BasicHeaderPrintWriter(new BufferedOutputStream(fos), header, true);
+		return new BasicHeaderPrintWriter(new BufferedOutputStream(fos), header,
+			true, streamFile.getPath());
 	}
 
 	private HeaderPrintWriter makeMethodHPW(String methodInvocation,
@@ -241,7 +226,8 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 				}
 
 				try {
-					return makeValueHPW(theMethod, theMethod.invoke((Object) null, new Object[0]), header);
+					return makeValueHPW(theMethod, theMethod.invoke((Object) null, 
+						new Object[0]), header, methodInvocation);
 				} catch (IllegalAccessException iae) {
 					t = iae;
 				} catch (IllegalArgumentException iarge) {
@@ -286,7 +272,8 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 				}
 
 				try {
-					return makeValueHPW(theField, theField.get((Object) null), header);
+					return makeValueHPW(theField, theField.get((Object) null), 
+						header, fieldAccess);
 				} catch (IllegalAccessException iae) {
 					t = iae;
 				} catch (IllegalArgumentException iarge) {
@@ -317,12 +304,12 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 	}
 
 	private HeaderPrintWriter makeValueHPW(Member whereFrom, Object value,
-		PrintWriterGetHeader header) {
+		PrintWriterGetHeader header, String name) {
 
 		if (value instanceof OutputStream)
-			 return new BasicHeaderPrintWriter((OutputStream) value, header, false);
+			 return new BasicHeaderPrintWriter((OutputStream) value, header, false, name);
 		else if (value instanceof Writer)
-			 return new BasicHeaderPrintWriter((Writer) value, header, false);
+			 return new BasicHeaderPrintWriter((Writer) value, header, false, name);
 		
 		HeaderPrintWriter hpw = useDefaultStream(header);
 
@@ -347,7 +334,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 	*/
 	private HeaderPrintWriter useDefaultStream(PrintWriterGetHeader header) {
 
-		return new BasicHeaderPrintWriter(System.err, header, false);
+		return new BasicHeaderPrintWriter(System.err, header, false, "System.err");
 	}
 
 	private HeaderPrintWriter useDefaultStream(PrintWriterGetHeader header, Throwable t) {

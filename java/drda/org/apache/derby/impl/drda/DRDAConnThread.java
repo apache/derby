@@ -5173,7 +5173,7 @@ public class DRDAConnThread extends Thread {
 				if (severeExceptionInfo != null)
 				{
 					severeExceptionInfo += "(" + "server log:" +
-						server.getErrorLogLocation() + ")" ;
+                                           Monitor.getStream().getName() + ")" ;
 					sqlerrmc += separator + severeExceptionInfo;
 				}
 			}

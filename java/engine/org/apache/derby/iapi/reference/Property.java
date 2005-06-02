@@ -74,6 +74,29 @@ public interface Property {
 	*/
 	String LOG_SEVERITY_LEVEL = "derby.stream.error.logSeverityLevel";
 
+        /**
+		derby.stream.error.file=<absolute or relative error log filename>
+		Takes precendence over derby.stream.error.method.
+		Takes precendence over derby.stream.error.field
+	*/
+	
+	String ERRORLOG_FILE_PROPERTY = "derby.stream.error.file";
+
+        /**
+		derby.stream.error.method=
+			<className>.<methodName> returning an OutputStream or Writer object
+		Takes precendence over derby.stream.error.field
+	*/
+	
+	String ERRORLOG_METHOD_PROPERTY = "derby.stream.error.method";
+
+        /**
+		derby.stream.error.field=
+			<className>.<fieldName> returning an OutputStream or Writer object>
+	*/
+	
+	String ERRORLOG_FIELD_PROPERTY = "derby.stream.error.field";
+
 	/** 
 	derby.infolog.append={true,false}
 	<BR>

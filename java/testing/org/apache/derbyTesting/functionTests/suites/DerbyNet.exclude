@@ -1,4 +1,5 @@
 # excluding resultsetStream.java because this test uses java.io.FileInputStream throughout the test
+# excluding TestErrorStreamTarget.java since it's not relevant for clients
 # excluding scrollCursors2.java because updatable resultsets & scroll sensitive cursors are not supported
 # excluding batchUpdate.java for it hits a problem in networkserver ('beetle' 5561)
 # excluding statementJdbc20.java because this tests fetch_reverse throughout the test
@@ -6,6 +7,7 @@
 # excluding lang/updatableResultSet.java because changes are required in JCC Driver for this test to run correctly
 # excluding jdbcapi/rsgetXXXcolumnNames.java as it fails incorrectly, according to JDBC spec. Forwarding test case to JCC team.
 jdbcapi/resultsetStream.java
+lang/errorStream.java
 lang/scrollCursors2.java
 jdbcapi/batchUpdate.java
 jdbcapi/statementJdbc20.java
