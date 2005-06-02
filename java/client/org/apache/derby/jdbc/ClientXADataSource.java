@@ -36,7 +36,6 @@ public class ClientXADataSource extends ClientDataSource implements XADataSource
     private static final long serialVersionUID = 7057075094707674880L;
 
     public ClientXADataSource() {
-        this.setResultSetHoldability(CLOSE_CURSORS_AT_COMMIT);
     }
 
     public XAConnection getXAConnection() throws SQLException {
