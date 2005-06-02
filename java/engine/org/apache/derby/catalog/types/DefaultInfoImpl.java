@@ -87,6 +87,9 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 
 	public String	toString()
 	{
+		if(isDefaultValueAutoinc()){
+			return "GENERATED_BY_DEFAULT";
+		}
 		return defaultText;
 	}
 
