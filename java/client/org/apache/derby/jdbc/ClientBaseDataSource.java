@@ -162,21 +162,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return parseString(userString, propertyDefault_user);
     }
 
-    /**
-     * To Derby, the default is HOLD_CURSORS_OVER_COMMIT
-     */
-    protected int resultSetHoldability = propertyNotSet_resultSetHoldability; // 0 means not set.
     public final static int HOLD_CURSORS_OVER_COMMIT = 1; // this matches jdbc 3 ResultSet.HOLD_CURSORS_OVER_COMMIT
     public final static int CLOSE_CURSORS_AT_COMMIT = 2;  // this matches jdbc 3 ResultSet.CLOSE_CURSORS_AT_COMMIT
-    public final static int propertyNotSet_resultSetHoldability = 0;
-
-    synchronized public void setResultSetHoldability(int resultSetHoldability) {
-        this.resultSetHoldability = resultSetHoldability;
-    }
-
-    public int getResultSetHoldability() {
-        return this.resultSetHoldability;
-    }
 
     public final static int NOT_SET = 0; // 0 means not set.
     public final static int YES = 1; // ="yes" as property string
