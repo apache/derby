@@ -1105,7 +1105,7 @@ public class Reply {
         case 4:
             ensureBLayerDataInBuffer(4);
             ddmScalarLen_ =
-                    ((buffer_[pos_++] & 0xff) << 32) +
+                    ((buffer_[pos_++] & 0xff) << 24) +
                     ((buffer_[pos_++] & 0xff) << 16) +
                     ((buffer_[pos_++] & 0xff) << 8) +
                     ((buffer_[pos_++] & 0xff) << 0);
@@ -1199,7 +1199,7 @@ public class Reply {
             // correctly in parseLengthAndMatchCodePoint(). (since the adjustLengths() method will
             // subtract the length from ddmScalarLen_)
             peekedLength_ =
-                    ((buffer_[pos_ + 4] & 0xff) << 32) +
+                    ((buffer_[pos_ + 4] & 0xff) << 24) +
                     ((buffer_[pos_ + 5] & 0xff) << 16) +
                     ((buffer_[pos_ + 6] & 0xff) << 8) +
                     ((buffer_[pos_ + 7] & 0xff) << 0);

@@ -158,14 +158,21 @@ public class NetServer
 		if ( (clPath != null) && (clPath.length()>0) )
 		    jvm.setClasspath(clPath);
 
-        if ( (jvmflags != null) && (jvmflags.length()>0) )
+        boolean setJvmFlags = false;
+        if ( (jvmflags != null) && (jvmflags.length()>0) ) {
             jvm.setFlags(jvmflags);
+            setJvmFlags = true;
+        }
 
 
         if (!jvmName.equals("jview"))
         {
-            jvm.setMs(16*1024*1024); // -ms16m
-            jvm.setMx(32*1024*1024); // -mx32m
+            if (setJvmFlags && (jvmflags.indexOf("-ms") == -1))
+            // only setMs if no starting memory was given
+                jvm.setMs(16*1024*1024); // -ms16m
+            if (setJvmFlags && (jvmflags.indexOf("-mx") == -1))
+            // only setMx if no max memory was given
+                jvm.setMx(32*1024*1024); // -mx32m
             jvm.setNoasyncgc(true); // -noasyncgc
         }
 

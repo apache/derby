@@ -1,0 +1,2 @@
+Testing server read of lob length > 2^24 bytes.
+PASS.

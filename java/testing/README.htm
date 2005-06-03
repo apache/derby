@@ -452,7 +452,25 @@ in errors. </li>
     </li>
   </ul>
   <ul>
-    <li>tested on a variety of hardware takes from 3.00 - 6.00 hours </li>
+    <li>tested on a variety of hardware takes from 3.00 - 6.00 hours</li>
+  </ul>
+  <li>largeData<br>
+  </li>
+  <ul>
+    <li>Contains tests that deal with large amounts of data and thus
+require more machine resources.&nbsp; This suite is NOT run as part of
+'derbyall' because the tests it contains require either 1) more machine
+resources than what the typical Derby developer might have, and/or 2) a
+significant amount of time to run, and thus shouldn't be run every
+night.<br>
+    </li>
+  </ul>
+  <ul>
+    <li>As tests are added to this quite, it could require more and
+more
+time to run (several minutes to several hours to several days), which
+is why it is NOT included as part of the derbyall suite.<br>
+    </li>
   </ul>
   <li><a href="#Note2:"><small>See Note2</small></a><br>
   </li>
@@ -1187,12 +1205,15 @@ using '^' as separator: <br>
 -DTestSpecialProps=derby.infolog.append=true
 org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql <br>
 jvmflags<br>
-&nbsp;&nbsp;&nbsp; sets specific jvm properties for the jvm used in the test harness, for
-instance initial memory, and heap size, or properties normally passed on with a -D. For instance:
-<br>
+&nbsp;&nbsp;&nbsp; sets specific jvm properties for the jvm used in the
+test harness, for
+instance initial memory, and heap size, or properties normally passed
+on with a -D. For instance:
+      <br>
 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
 -Djvmflags=ms32M -mx128M
-org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java <br>
+org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java
+      <br>
 excludeJCC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; See above section <a
  href="#skipping">4.10</a><br>
