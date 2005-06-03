@@ -104,14 +104,13 @@ public class NetAgent extends Agent {
         port_ = port;
         netConnection_ = netConnection;
         if (server_ == null) {
-            throw new SqlException(logWriter_, "Required property \"serverName\" not set");
+            throw new DisconnectException(this, "Required property \"serverName\" not set");
         }
 
         try {
             socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port));
         } catch (java.security.PrivilegedActionException e) {
-            throw new SqlException(logWriter_,
-                    e.getException(),
+            throw new DisconnectException(this,
                     e.getClass().getName() + " : Error opening socket to server " + server + " on port " + port + " with message : " + e.getMessage());
         }
 
@@ -127,7 +126,7 @@ public class NetAgent extends Agent {
                 socket_.close();
             } catch (java.io.IOException doNothing) {
             }
-            exceptionOpeningSocket_ = new SqlException(logWriter_, e,
+            exceptionOpeningSocket_ = new DisconnectException(this,
                     "SocketException '" + e.getMessage() + "'");
         }
 
@@ -141,7 +140,7 @@ public class NetAgent extends Agent {
                 socket_.close();
             } catch (java.io.IOException doNothing) {
             }
-            exceptionOpeningSocket_ = new SqlException(logWriter_, e, "unable to open stream on socket");
+            exceptionOpeningSocket_ = new DisconnectException(this, "unable to open stream on socket '"+e.getMessage() + "'");
         }
 
         sourceCcsidManager_ = new EbcdicCcsidManager(); // delete these
