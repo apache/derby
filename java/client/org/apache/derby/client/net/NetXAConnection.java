@@ -87,7 +87,8 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
         // this is a XA connection
         int xaState = getXAState();
         xares_.exceptionsOnXA = null;
-
+        //TODO: Looks like this can go and also the whole client indoubtTransaction code.
+        /*
         if (xaState == XA_RECOVER) { // in recover, clean up and go to open-idle
             if (indoubtTransactions_ != null) {
                 indoubtTransactions_.clear();
@@ -95,7 +96,8 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
                 setXAState(XA_OPEN_IDLE);
                 xaState = XA_OPEN_IDLE;
             }
-        }
+            
+        }*/
         // For derby we don't need to write transaction start for a local
         //transaction.  If autocommit is off we are good to go.
         return;
@@ -130,11 +132,9 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
         // this logic must be in sync with willAutoCommitGenerateFlow() logic
         if (isXAConnection_) { // XA Connection
             int xaState = getXAState();
-            if ((xaState == XA_OPEN_IDLE) ||
-                    (xaState == XA_LOCAL) ||
-                    (xaState == XA_LOCAL_START_SENT)) {
+            if (xaState == XA_LOCAL){
                 xares_.callInfoArray_[xares_.conn_.currXACallInfoOffset_].xid_ =
-                        xares_.nullXid;
+                        NetXAResource.nullXid;
                 writeLocalXACommit_();
             }
         } else { // not XA connection
@@ -147,11 +147,10 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
             int xaState = getXAState();
             NetXACallInfo callInfo = xares_.callInfoArray_[currXACallInfoOffset_];
             callInfo.xaRetVal_ = NetXAResource.XARETVAL_XAOK; // initialize XARETVAL
-            if ((xaState == XA_OPEN_IDLE) ||
-                    (xaState == XA_LOCAL) ||
-                    (xaState == XA_LOCAL_START_SENT)) {
+            if (xaState == XA_LOCAL) {
                 readLocalXACommit_();
-                setXAState(XA_OPEN_IDLE);
+                //TODO: Remove
+                //setXAState(XA_LOCAL);
             }
             if (callInfo.xaRetVal_ != NetXAResource.XARETVAL_XAOK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = NetXAResource.XAFUNC_COMMIT;
@@ -191,7 +190,8 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
 
 
             // for all XA connectiions
-            setXAState(XA_OPEN_IDLE);
+            // TODO:KATHEY - Do we need this?
+            setXAState(XA_LOCAL);
         } else {
             readLocalRollback_(); // non-XA connections
         }

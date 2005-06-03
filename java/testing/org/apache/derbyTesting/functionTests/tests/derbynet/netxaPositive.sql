@@ -80,5 +80,28 @@ xa_prepare 3;
 
 -- should fail with XA_NOTA because we prepared a read only transaction 
 xa_commit xa_1Phase 3;
+
+
+-- DERBY-246 xa_end after connection close should be ok.  
+-- Also to reuse xaconnection in the same global transaction
+xa_getconnection;
+xa_start xa_noflags 4;
+create table APP.derby246  (i int);
+insert into APP.derby246 values(1);
 disconnect;
+xa_getconnection;
+insert into APP.derby246 values(2);
+disconnect;
+xa_end xa_success 4;
+xa_prepare 4;
+xa_commit xa_2phase 4;
+
+-- now connect with a local connection to make sure locks are released 
+-- and our values are there. Should see two rows
+connect 'wombat';
+select * from APP.derby246;
+
+disconnect;
+
+
 

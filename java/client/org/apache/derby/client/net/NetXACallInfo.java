@@ -44,7 +44,6 @@ import org.apache.derby.client.am.Connection;
 public class NetXACallInfo {
     Xid xid_;                         // current xid
     int xaFlags_;                     // current xaFlags
-    int xaState_;                     // used as a save area when switching connection
     // may not be needed!!!~~~
     int xaFunction_;                  // queued XA function being performed
     int xaRetVal_;                    // xaretval from server
@@ -74,7 +73,6 @@ public class NetXACallInfo {
     public NetXACallInfo() {
         xid_ = null;
         xaFlags_ = XAResource.TMNOFLAGS;
-        xaState_ = Connection.XA_OPEN_IDLE;
         xaInProgress_ = false;
         currConnection_ = false;
         freeEntry_ = true;
@@ -86,11 +84,9 @@ public class NetXACallInfo {
         xaWasSuspended = false;
     }
 
-    public NetXACallInfo(Xid xid, int flags, int state,
-                         NetXAResource xares, NetXAConnection actualConn) {
+    public NetXACallInfo(Xid xid, int flags, NetXAResource xares, NetXAConnection actualConn) {
         xid_ = xid;
         xaFlags_ = flags;
-        xaState_ = state;
         xaInProgress_ = false;
         currConnection_ = false;
         freeEntry_ = true;

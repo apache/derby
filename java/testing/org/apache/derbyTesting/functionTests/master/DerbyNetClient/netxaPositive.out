@@ -110,5 +110,29 @@ ij(XA)> xa_prepare 3;
 ij(XA)> -- should fail with XA_NOTA because we prepared a read only transaction 
 xa_commit xa_1Phase 3;
 IJ ERROR: XAER_NOTA 
+ij(XA)> -- DERBY-246 xa_end after connection close should be ok.  
+----- Also to reuse xaconnection in the same global transaction
+xa_getconnection;
+ij(XA)> xa_start xa_noflags 4;
+ij(XA)> create table APP.derby246  (i int);
+0 rows inserted/updated/deleted
+ij(XA)> insert into APP.derby246 values(1);
+1 row inserted/updated/deleted
 ij(XA)> disconnect;
+ij> xa_getconnection;
+ij(XA)> insert into APP.derby246 values(2);
+1 row inserted/updated/deleted
+ij(XA)> disconnect;
+ij> xa_end xa_success 4;
+ij> xa_prepare 4;
+ij> xa_commit xa_2phase 4;
+ij> -- now connect with a local connection to make sure locks are released 
+----- and our values are there. Should see two rows
+connect 'wombat';
+ij(CONNECTION1)> select * from APP.derby246;
+I          
+-----
+1          
+2          
+ij(CONNECTION1)> disconnect;
 ij> 

@@ -85,28 +85,13 @@ public abstract class Connection implements java.sql.Connection,
     protected boolean isXAConnection_ = false; // Indicates an XA connection
 
     // XA States
-    public static final int XA_OPEN_IDLE = 0;
-    public static final int XA_LOCAL = 1; // local transaction started by DNC
-    public static final int XA_LOCAL_CCC = 2; // local transaction started by CCC
-    public static final int XA_ACTIVE = 3;
-    public static final int XA_ENDED = 4;
-    public static final int XA_HEUR_COMP = 5;
-    public static final int XA_SUSPENDED = 6;
-    public static final int XA_PREPARED = 7;
-    public static final int XA_ROLLBACK = 8;
-    public static final int XA_LOCAL_START_SENT = 9;
-    public static final int XA_UNKNOWN = 10;
-    public static final int XA_GLOBAL_START_SENT = 11;
-    public static final int XA_PENDING_END = 12;
-    public static final int XA_RBATHER = 13;
-    public static final int XA_RECOVER = 14;
-    public static final int XA_EMPTY_TRANSACTION = 15;
-    public static final int XA_RBROLLBACK = 16;
-    public static final int XA_PENDING_START = 17;
-    public static final int XA_EMPTY_SUSPENDED = 18;
+    public static final int XA_LOCAL = 0;   //  No global transaction in process
+    public static final int XA_GLOBAL = 1;  // Global transaction in process
+    //TODO: Remove entirely once indoubtlist is gone.  
+    //public static final int XA_RECOVER = 14;
 
 
-    protected int xaState_ = XA_OPEN_IDLE;
+    protected int xaState_ = XA_LOCAL;
 
     // XA Host Type
     public int xaHostVersion_ = 0;
@@ -231,10 +216,7 @@ public abstract class Connection implements java.sql.Connection,
             dataSource_ = ds;
         }
 
-        // property isXAConnection_
-        // leave set to current value.  this will impact which connect reset flows are used.
-
-        xaState_ = XA_OPEN_IDLE;
+        
         if (recomputeFromDataSource) {
             this.agent_.resetAgent(this, logWriter, loginTimeout_, serverNameIP_, portNumber_);
         }
@@ -264,11 +246,6 @@ public abstract class Connection implements java.sql.Connection,
         isolation_ = Configuration.defaultIsolation;
         autoCommit_ = true;
         inUnitOfWork_ = false;
-
-        // property isXAConnection_
-        // leave set to current value.  this will impact which connect reset flows are used.
-
-        xaState_ = XA_OPEN_IDLE;
 
         this.agent_.resetAgent(this, logWriter, loginTimeout_, serverNameIP_, portNumber_);
 
@@ -431,7 +408,7 @@ public abstract class Connection implements java.sql.Connection,
 
     // Driver-specific determination if local COMMIT/ROLLBACK is allowed;
     // primary usage is distinction between local and global trans. envs.;
-    protected abstract boolean disallowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException;
+    protected abstract boolean allowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException;
 
     synchronized public void setAutoCommit(boolean autoCommit) throws SqlException {
         if (agent_.loggingEnabled()) {
@@ -439,7 +416,7 @@ public abstract class Connection implements java.sql.Connection,
         }
         checkForClosedConnection();
 
-        if (disallowLocalCommitRollback_()) {
+        if (! allowLocalCommitRollback_()) {
             if (autoCommit) { // can't toggle to autocommit mode when between xars.start() and xars.end()
                 throw new SqlException(agent_.logWriter_,
                         "setAutoCommit(true) invalid during global transaction",
@@ -462,7 +439,7 @@ public abstract class Connection implements java.sql.Connection,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getAutoCommit", autoCommit_);
         }
-        if (disallowLocalCommitRollback_()) { // autoCommit is always false between xars.start() and xars.end()
+        if (! allowLocalCommitRollback_()) { // autoCommit is always false between xars.start() and xars.end()
             return false;
         }
         return autoCommit_;
@@ -484,7 +461,7 @@ public abstract class Connection implements java.sql.Connection,
     }
 
     private void checkForInvalidXAStateOnCommitOrRollback() throws SqlException {
-        if (disallowLocalCommitRollback_()) {
+        if (! allowLocalCommitRollback_()) {
             throw new SqlException(agent_.logWriter_,
                     "COMMIT or ROLLBACK invalid for application execution environment",
                     SqlState._2D521, // Spec'ed by PROTOCOL
@@ -532,7 +509,7 @@ public abstract class Connection implements java.sql.Connection,
         if (!autoCommit_) {
             return false;
         }
-        if (disallowLocalCommitRollback_()) {
+        if (! allowLocalCommitRollback_()) {
             return false;
         }
         return true;
@@ -547,8 +524,7 @@ public abstract class Connection implements java.sql.Connection,
 
     public void writeCommit() throws SqlException {
         if (isXAConnection_) {
-            if ((xaState_ == XA_LOCAL) ||
-                    (xaState_ == XA_LOCAL_START_SENT)) {
+            if ((xaState_ == XA_LOCAL) ) {
                 writeLocalXACommit_();
             }
         } else {
@@ -565,10 +541,8 @@ public abstract class Connection implements java.sql.Connection,
 
     public void readCommit() throws SqlException {
         if (isXAConnection_) {
-            if ((xaState_ == XA_LOCAL) ||
-                    (xaState_ == XA_LOCAL_START_SENT)) {
-                readLocalXACommit_();
-                setXAState(XA_OPEN_IDLE);
+            if ((xaState_ == XA_LOCAL) ) {
+                readLocalXACommit_();               
             }
         } else {
             readLocalCommit_();
@@ -627,7 +601,6 @@ public abstract class Connection implements java.sql.Connection,
     public void readRollback() throws SqlException {
         if (isXAConnection_) {
             readLocalXARollback_();
-            setXAState(XA_OPEN_IDLE);
         } else {
             readLocalRollback_();
         }
@@ -700,7 +673,6 @@ public abstract class Connection implements java.sql.Connection,
         if (!open_) {
             return;
         }
-        checkForTransactionInProgress();
         resetConnectionAtFirstSql_ = false; // unset indicator of deferred reset
         SqlException accumulatedExceptions = null;
         try {
@@ -772,7 +744,16 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
+   /**
+    * 	Return true if the physical connection is still open.
+    * 	Might be logically closed but available for reuse.
+    *   @return true if physical connection still open
+    */
+    public boolean isPhysicallyClosed() {
+    return !open_ && !availableForReuse_; 
+   }
 
+   
     public boolean isClosed() {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "isClosed", !open_);
@@ -780,6 +761,7 @@ public abstract class Connection implements java.sql.Connection,
         return !open_;
     }
 
+   
     public boolean isClosedX() {
         return !open_;
     }
@@ -1037,11 +1019,7 @@ public abstract class Connection implements java.sql.Connection,
         if (autoCommit_) // Throw exception if auto-commit is on
         {
             throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
-        } else if (xaState_ == XA_PENDING_START ||
-                xaState_ == XA_ACTIVE) // Throw exception if in distributed transaction
-        {
-            throw new SqlException(agent_.logWriter_, "Cannot set savepoint during distributed transaction.");
-        }
+        } 
         // create an un-named savepoint.
         if ((++dncGeneratedSavepointId_) < 0) {
             dncGeneratedSavepointId_ = 1; // restart from 1 when overflow.
@@ -1061,10 +1039,6 @@ public abstract class Connection implements java.sql.Connection,
         } else if (autoCommit_) // Throw exception if auto-commit is on
         {
             throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
-        } else if (xaState_ == XA_PENDING_START ||
-                xaState_ == XA_ACTIVE) // Throw exception if in distributed transaction
-        {
-            throw new SqlException(agent_.logWriter_, "Cannot set savepoint during distributed transaction.");
         }
         // create a named savepoint.
         Object s = setSavepointX(new Savepoint(agent_, name));
@@ -1112,11 +1086,7 @@ public abstract class Connection implements java.sql.Connection,
         } else if (autoCommit_) // Throw exception if auto-commit is on
         {
             throw new SqlException(agent_.logWriter_, "Cannot rollback to a savepoint when in auto-commit mode.");
-        } else if (xaState_ == XA_PENDING_START ||
-                xaState_ == XA_ACTIVE) // Throw exception if in distributed transaction
-        {
-            throw new SqlException(agent_.logWriter_, "Cannot rollback to a savepoint during distributed transaction.");
-        }
+        } 
         // Only allow to rollback to a savepoint from the connection that create the savepoint.
         try {
             if (this != ((Savepoint) savepoint).agent_.connection_) {
@@ -1167,11 +1137,7 @@ public abstract class Connection implements java.sql.Connection,
         } else if (autoCommit_) // Throw exception if auto-commit is on
         {
             throw new SqlException(agent_.logWriter_, "Cannot release a savepoint when in auto-commit mode.");
-        } else if (xaState_ == XA_PENDING_START ||
-                xaState_ == XA_ACTIVE) // Throw exception if in distributed transaction
-        {
-            throw new SqlException(agent_.logWriter_, "Cannot release a savepoint during distributed transaction.");
-        }
+        } 
         // Only allow to release a savepoint from the connection that create the savepoint.
         try {
             if (this != ((Savepoint) savepoint).agent_.connection_) {

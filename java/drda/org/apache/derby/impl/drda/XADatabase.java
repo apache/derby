@@ -74,10 +74,21 @@ class XADatabase extends Database {
 		appendAttrString(p);
 		if (attrString != null)
 			xaDataSource.setConnectionAttributes(attrString);
-		xaConnection = xaDataSource.getXAConnection(userId,password);
-		xaResource = xaConnection.getXAResource();
-
-		Connection conn = xaConnection.getConnection();
+		
+		Connection conn = getConnection();
+		// If we have no existing connection. this is a brand new XAConnection.
+		if (conn == null)
+		{
+			xaConnection = xaDataSource.getXAConnection(userId,password);
+			xaResource = xaConnection.getXAResource();
+		}
+		else // this is just a connection reset. Close the logical connection.
+		{
+			conn.close();
+		}
+		
+		// Get a new logical connection.
+		conn = xaConnection.getConnection();
 		setConnection(conn);
 		return conn;
 		

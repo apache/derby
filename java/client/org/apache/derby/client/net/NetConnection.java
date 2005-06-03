@@ -1364,12 +1364,10 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     // Driver-specific determination if local COMMIT/ROLLBACK is allowed;
-    // allow if local trans, disallow if global trans
-    protected boolean disallowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException {
-        if (!((xaState_ == XA_OPEN_IDLE) ||
-                (xaState_ == XA_RECOVER) ||
-                (xaState_ == XA_LOCAL_START_SENT) ||
-                (xaState_ == XA_LOCAL))) {
+    // Allow local COMMIT/ROLLBACK only if we are not in an XA transaction
+    protected boolean allowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException {
+       
+    	if (xaState_ == XA_LOCAL) {
             return true;
         }
         return false;
@@ -1472,9 +1470,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         boolean doCommit = false;
         int xaState = getXAState();
 
-        if ((xaState == XA_OPEN_IDLE) ||
-                (xaState == XA_LOCAL) ||
-                (xaState == XA_LOCAL_START_SENT)) {
+        
+        if (xaState == XA_LOCAL) {
             doCommit = true;
         }
 
