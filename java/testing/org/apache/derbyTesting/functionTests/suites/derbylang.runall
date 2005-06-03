@@ -3,6 +3,7 @@ jdbcapi/metadataMultiConn.java
 jdbcapi/odbc_metadata.java
 lang/AIjdbc.java
 lang/CharUTF8.java
+lang/ConcurrentImplicitCreateSchema.java
 lang/DB2IsolationLevels.sql
 lang/LOB.sql
 lang/LOBDB2compatibility.sql

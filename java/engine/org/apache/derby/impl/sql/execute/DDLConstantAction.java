@@ -136,9 +136,21 @@ public abstract class DDLConstantAction extends GenericConstantAction
 		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);
 
 		if (sd == null || sd.getUUID() == null) {
-			ConstantAction csca = new CreateSchemaConstantAction(schemaName, (String) null);
-			csca.executeConstantAction(activation);
+            ConstantAction csca 
+                = new CreateSchemaConstantAction(schemaName, (String) null);
 
+            try {
+                csca.executeConstantAction(activation);
+            } catch (StandardException se) {
+                if (se.getMessageId()
+                    .equals(SQLState.LANG_OBJECT_ALREADY_EXISTS)) {
+                    // Ignore "Schema already exists". Another thread has 
+                    // probably created it after we checked for it
+                } else {
+                    throw se;
+                }
+            }
+            
 			sd = dd.getSchemaDescriptor(schemaName, tc, true);
 		}
 
