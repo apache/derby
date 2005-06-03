@@ -146,11 +146,11 @@ public class DB_Table {
 				dblook.stripQuotes(colName))));
 			colDef.append(" ");
 			colDef.append(rs.getString(1));
-			if (rs.getString(2) != null) {
+			if (!reinstateAutoIncrement(colName, tableId, colDef) &&
+						 rs.getString(2) != null) {
 				colDef.append(" DEFAULT ");
 				colDef.append(rs.getString(2));
 			}
-			reinstateAutoIncrement(colName, tableId, colDef);
 		}
 
 		rs.close();
@@ -159,15 +159,15 @@ public class DB_Table {
 	}
 
 	/* ************************************************
-	 * Generate autoincrement DDL for a given column.
+	 * Generate autoincrement DDL for a given column and write it to
+	 * received StringBuffer
 	 * @param colName: Name of column that is autoincrement.
 	 * @param tableId: Id of table in which column exists.
 	 * @param colDef: StringBuffer to which DDL will be added.
-	 * @return The DDL for all autoincrement columns
-	 *  has been written to the received string buffer.
+	 * @return True if autoincrement DDL has been generated.
 	 ****/
 
-	public static void reinstateAutoIncrement(String colName,
+	public static boolean reinstateAutoIncrement(String colName,
 		String tableId, StringBuffer colDef) throws SQLException
 	{
 
@@ -186,10 +186,11 @@ public class DB_Table {
 				colDef.append(", INCREMENT BY ");
 				colDef.append(autoIncCols.getLong(2));
 				colDef.append(")");
+				return true;
 			}
 		}
 
-		return;
+		return false;
 
 	}
 

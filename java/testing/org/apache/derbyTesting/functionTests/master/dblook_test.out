@@ -316,7 +316,7 @@ T3_2
 ID
 3
 INTEGER NOT NULL
-null
+GENERATED_BY_DEFAULT
 <systemid>
 <autoincval>
 2
@@ -386,7 +386,7 @@ T4_2
 K
 3
 INTEGER NOT NULL
-null
+GENERATED_BY_DEFAULT
 <systemid>
 <autoincval>
 1
@@ -2192,7 +2192,7 @@ T3_2
 ID
 3
 INTEGER NOT NULL
-null
+GENERATED_BY_DEFAULT
 <systemid>
 <autoincval>
 2
@@ -2262,7 +2262,7 @@ T4_2
 K
 3
 INTEGER NOT NULL
-null
+GENERATED_BY_DEFAULT
 <systemid>
 <autoincval>
 1
@@ -3853,7 +3853,7 @@ T3_2
 ID
 3
 INTEGER NOT NULL
-null
+GENERATED_BY_DEFAULT
 <systemid>
 <autoincval>
 2
@@ -3923,7 +3923,7 @@ T4_2
 K
 3
 INTEGER NOT NULL
-null
+GENERATED_BY_DEFAULT
 <systemid>
 <autoincval>
 1
