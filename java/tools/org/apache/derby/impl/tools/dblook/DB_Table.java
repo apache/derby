@@ -68,7 +68,7 @@ public class DB_Table {
 
 		getAutoIncStmt = 
 			conn.prepareStatement("SELECT AUTOINCREMENTSTART, " +
-			"AUTOINCREMENTINC, COLUMNNAME, REFERENCEID FROM SYS.SYSCOLUMNS " +
+			"AUTOINCREMENTINC, COLUMNNAME, REFERENCEID, COLUMNDEFAULT FROM SYS.SYSCOLUMNS " +
 			"WHERE COLUMNNAME = ? AND REFERENCEID = ?");
 
 		// Walk through list of tables and generate the DDL for
@@ -178,7 +178,10 @@ public class DB_Table {
 
 			long start = autoIncCols.getLong(1);
 			if (!autoIncCols.wasNull()) {
-				colDef.append(" GENERATED ALWAYS AS IDENTITY (START WITH ");
+				colDef.append(" GENERATED ");
+				colDef.append(autoIncCols.getObject(5) == null ? 
+					      "ALWAYS ":"BY DEFAULT ");
+				colDef.append("AS IDENTITY (START WITH ");
 				colDef.append(autoIncCols.getLong(1));
 				colDef.append(", INCREMENT BY ");
 				colDef.append(autoIncCols.getLong(2));
