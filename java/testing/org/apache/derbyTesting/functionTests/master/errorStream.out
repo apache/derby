@@ -1,10 +1,10 @@
 Test errorStream starting
 shutdown ok: XJ015:Derby system shutdown.
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT Thread[main,5,main] java.io.FileNotFoundException: xxxFILTERED_PATHxxx/VombatusUrsinusHirsutus-file-2.log (No such file or directory)
+xxxxxxFILTERED-TIMESTAMPxxxxxGMT Thread[main,5,main] java.io.FileNotFoundException: xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-file-2.log
 ----------------------------------------------------------------
 xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
  Booting Derby: xxxFILTERED_VERSIONxxx
-on database directory xxxFILTERED_PATHxxx/VombatusUrsinusHirsutus-2 
+on database directory xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-2 
 Database Class Loader started - derby.database.classpath=''
 xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
 Shutting down instance xxxxFILTERED-UUIDxxxx
@@ -15,7 +15,7 @@ xxxxxxFILTERED-TIMESTAMPxxxxxGMT Thread[main,5,main] java.lang.NoSuchMethodExcep
 ----------------------------------------------------------------
 xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
  Booting Derby: xxxFILTERED_VERSIONxxx
-on database directory xxxFILTERED_PATHxxx/VombatusUrsinusHirsutus-4 
+on database directory xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-4 
 Database Class Loader started - derby.database.classpath=''
 xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
 Shutting down instance xxxxFILTERED-UUIDxxxx
@@ -26,7 +26,7 @@ xxxxxxFILTERED-TIMESTAMPxxxxxGMT Thread[main,5,main] java.lang.NoSuchFieldExcept
 ----------------------------------------------------------------
 xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
  Booting Derby: xxxFILTERED_VERSIONxxx
-on database directory xxxFILTERED_PATHxxx/VombatusUrsinusHirsutus-6 
+on database directory xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-6 
 Database Class Loader started - derby.database.classpath=''
 xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
 Shutting down instance xxxxFILTERED-UUIDxxxx
