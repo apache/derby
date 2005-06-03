@@ -803,14 +803,14 @@ ERROR 42Y33: Aggregate MAX contains one or more aggregates.
 ij> -- TEMPORARY RESTRICTION, aggregates in the select list
 -- of a subquery on an aggregated result set
 select max(c1), (select max(c1) from t2) from t1;
-ERROR 42Y29: The SELECT list of a non-grouped query contains at least 1 invalid expression.  When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ERROR 42Y29: The SELECT list of a non-grouped query contains at least one invalid expression. When the SELECT list contains at least one aggregate then all entries must be valid aggregate expressions.
 ij> select max(c1), (select max(t1.c1) from t2) from t1;
-ERROR 42Y29: The SELECT list of a non-grouped query contains at least 1 invalid expression.  When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ERROR 42Y29: The SELECT list of a non-grouped query contains at least one invalid expression. When the SELECT list contains at least one aggregate then all entries must be valid aggregate expressions.
 ij> select max(c1), max(c1), (select max(c1) from t1) from t1;
-ERROR 42Y29: The SELECT list of a non-grouped query contains at least 1 invalid expression.  When the SELECT list contains at least 1 aggregate then all entries must be valid aggregate expressions.
+ERROR 42Y29: The SELECT list of a non-grouped query contains at least one invalid expression. When the SELECT list contains at least one aggregate then all entries must be valid aggregate expressions.
 ij> -- cursor with aggregate is not updatable
 get cursor c1 as 'select max(i) from t group by i for update';
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- max over a join on a column with an index -- Beetle 4423
 create table t3(a int);
 0 rows inserted/updated/deleted

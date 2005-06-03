@@ -97,12 +97,12 @@ ij> create table t1 (i int, j int);
 0 rows inserted/updated/deleted
 ij> -- Negative test cases - column references in values clause
 insert into t1 values(1, c1);
-ERROR 42X04: Column 'C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C1' is not a column in the target table.
+ERROR 42X04: Column 'C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C1' is not a column in the target table.
 ij> insert into t1 values("asdf asdf", 2);
-ERROR 42X04: Column 'asdf asdf' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'asdf asdf' is not a column in the target table.
+ERROR 42X04: Column 'asdf asdf' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'asdf asdf' is not a column in the target table.
 ij> -- Negative test case - syntax error
 insert into t1 values;
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> -- Too many values in values clause
 insert into t1 values(1,1,1);
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
@@ -111,7 +111,7 @@ insert into t1 select 1, 2, 3 from t2;
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> -- multiple instances of same column in colum list
 insert into t1 (i, i) values(2,2);
-ERROR 42X13: Column name 'I' appears more than once times in the column list of an insert statement.
+ERROR 42X13: Column name 'I' appears more than once times in the column list of an INSERT statement. 
 ij> -- target column list size != source size
 insert into t1 (i, j) values(1);
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.

@@ -905,7 +905,7 @@ A          |B
 4          |4          
 ij> -- read every row and value in the table, including overflow pages.
 insert into xena values (select a + 4, b - 4, c, d from xena);
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> insert into xena values (select (a + 4, b - 4, c, d from xena);
 ERROR 42X01: Syntax error: Encountered "," at line 1, column 39.
 ij> select 

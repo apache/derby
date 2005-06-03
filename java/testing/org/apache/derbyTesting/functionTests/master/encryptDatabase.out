@@ -9,7 +9,7 @@ ij> -- test for bug 3668
 -- try the old password, should fail
 connect 'jdbc:derby:wombat;bootPassword=Thursday';
 ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
-ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=Wednesday';
 ij> -- switch back to old password
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Wednesday, Thursday');
@@ -32,13 +32,13 @@ ij> -- change the secret key
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', null);
 ERROR XBCX5: Cannot change boot password to null.
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'wrongkey, ');
-ERROR XBCX2: Initializing cipher with a boot password that is too short, must be at least 8 characters long
+ERROR XBCX2: Initializing cipher with a boot password that is too short. The password must be at least 8 characters long.    
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday');
 ERROR XBCX7: Wrong format for changing boot password.  Format must be : old_boot_password, new_boot_password.
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday , ');
-ERROR XBCX2: Initializing cipher with a boot password that is too short, must be at least 8 characters long
+ERROR XBCX2: Initializing cipher with a boot password that is too short. The password must be at least 8 characters long.    
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursday , short');
-ERROR XBCX2: Initializing cipher with a boot password that is too short, must be at least 8 characters long
+ERROR XBCX2: Initializing cipher with a boot password that is too short. The password must be at least 8 characters long.    
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursdya , derbypwd');
 ERROR XBCXA: Wrong boot password.
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('bootPassword', 'Thursdayx , derbypwd');
@@ -70,13 +70,13 @@ ij> connect 'jdbc:derby:;shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij> connect 'jdbc:derby:wombat';
 ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
-ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=Thursday';
 ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
-ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=Saturday';
 ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
-ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=derbypwd';
 ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('bootPassword');
 1                                                                                                                               
@@ -104,7 +104,7 @@ ij> connect 'jdbc:derby:;shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij> connect 'jdbc:derby:wombat;bootPassword=derbypwd';
 ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
-ERROR XBM06: Startup failed, an encrypted database cannot be accessed without the correct boot password.
+ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=derbypwdxx';
 ij> select * from t1;
 A                   

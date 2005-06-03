@@ -90,7 +90,7 @@ ij> -- old and new cannot be used once they have been redefined
 create trigger t1 NO CASCADE before update on x referencing old_table as oldtable for each statement mode db2sql select * from old;
 ERROR 42Y92: BEFORE triggers may only reference row transition variables/tables.
 ij> create trigger t1 NO CASCADE before update on x referencing old as oldtable for each row mode db2sql values old.x;
-ERROR 42X04: Column 'OLD.X' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLD.X' is not a column in the target table.
+ERROR 42X04: Column 'OLD.X' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OLD.X' is not a column in the target table.
 ij> -- try some other likely uses
 create table y (x int);
 0 rows inserted/updated/deleted

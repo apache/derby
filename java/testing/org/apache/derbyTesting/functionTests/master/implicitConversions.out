@@ -2574,7 +2574,7 @@ ERROR 42X61: Types 'CHAR' and 'INTEGER' are not UNION compatible.
 ij> values 1, '1.1';
 ERROR 42X61: Types 'INTEGER' and 'CHAR' are not UNION compatible.
 ij> values '1.1', a;
-ERROR 42X04: Column 'A' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'A' is not a column in the target table.
+ERROR 42X04: Column 'A' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'A' is not a column in the target table.
 ij> values cast(1 as bigint), 'a';
 ERROR 42X61: Types 'BIGINT' and 'CHAR' are not UNION compatible.
 ij> values 'a', cast(1 as bigint);

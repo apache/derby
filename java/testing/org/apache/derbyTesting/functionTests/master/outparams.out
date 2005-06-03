@@ -1,7 +1,7 @@
 ==============================================
 TESTING BOUNDARY CONDITIONS
 ==============================================
-Expected exception SQL Exception: Parameter 2 cannot be be registered as an OUT parameter because it is an IN parameter.
+Expected exception SQL Exception: Parameter 2 cannot be registered as an OUT parameter because it is an IN parameter. 
 Expected exception SQL Exception: The parameter position '9' is out of range.  The number of parameters for this prepared  statement is '2'.
 Expected exception SQL Exception: The parameter position '0' is out of range.  The number of parameters for this prepared  statement is '2'.
 Expected exception SQL Exception: Return output parameters cannot be set.

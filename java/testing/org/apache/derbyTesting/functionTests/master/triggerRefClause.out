@@ -39,13 +39,13 @@ ij> create trigger t1 after delete on x referencing new_table as new for each st
 ERROR 42Y92: DELETE triggers may only reference old transition variables/tables.
 ij> -- cannot reference columns that don't exist, not bound as normal stmts
 create trigger t1 after delete on x referencing old as old for each row mode db2sql values old.badcol;
-ERROR 42X04: Column 'OLD.BADCOL' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLD.BADCOL' is not a column in the target table.
+ERROR 42X04: Column 'OLD.BADCOL' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OLD.BADCOL' is not a column in the target table.
 ij> create trigger t1 after delete on x referencing old as old for each row mode db2sql values old;
-ERROR 42X04: Column 'OLD' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLD' is not a column in the target table.
+ERROR 42X04: Column 'OLD' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OLD' is not a column in the target table.
 ij> create trigger t1 after delete on x referencing old as oldrow for each row mode db2sql values oldrow.badcol;
-ERROR 42X04: Column 'OLDROW.BADCOL' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLDROW.BADCOL' is not a column in the target table.
+ERROR 42X04: Column 'OLDROW.BADCOL' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OLDROW.BADCOL' is not a column in the target table.
 ij> create trigger t1 after delete on x referencing old as oldrow for each row mode db2sql values oldrow;
-ERROR 42X04: Column 'OLDROW' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OLDROW' is not a column in the target table.
+ERROR 42X04: Column 'OLDROW' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OLDROW' is not a column in the target table.
 ij> -- lets try some basics with old/new table
 create table y (x int);
 0 rows inserted/updated/deleted

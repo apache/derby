@@ -65,7 +65,7 @@ select * from s where exists (select i, s from t);
 ERROR 42X39: Subquery is only allowed to return a single column.
 ij> -- invalid column reference in select list
 select * from s where exists (select nosuchcolumn from t);
-ERROR 42X04: Column 'NOSUCHCOLUMN' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'NOSUCHCOLUMN' is not a column in the target table.
+ERROR 42X04: Column 'NOSUCHCOLUMN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NOSUCHCOLUMN' is not a column in the target table.
 ij> -- multiple matches at subquery level
 select * from s where exists (select i from s, t);
 ERROR 42X03: Column name 'I' is in more than one table in the FROM list.
@@ -520,23 +520,23 @@ select * from s, t where exists (select i from tt);
 ERROR 42X03: Column name 'I' is in more than one table in the FROM list.
 ij> -- match is against base table, but not derived column list
 select * from s ss (c1, c2, c3, c4, c5) where exists (select i from tt);
-ERROR 42X04: Column 'I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'I' is not a column in the target table.
+ERROR 42X04: Column 'I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'I' is not a column in the target table.
 ij> select * from s ss (c1, c2, c3, c4, c5) where exists (select ss.i from tt);
-ERROR 42X04: Column 'SS.I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SS.I' is not a column in the target table.
+ERROR 42X04: Column 'SS.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SS.I' is not a column in the target table.
 ij> -- correlation name exists at both levels, but only column match is at
 -- parent level
 select * from s where exists (select s.i from tt s);
-ERROR 42X04: Column 'S.I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.I' is not a column in the target table.
+ERROR 42X04: Column 'S.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S.I' is not a column in the target table.
 ij> -- only match is at peer level
 select * from s where exists (select * from tt) and exists (select ii from t);
-ERROR 42X04: Column 'II' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'II' is not a column in the target table.
+ERROR 42X04: Column 'II' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'II' is not a column in the target table.
 ij> select * from s where exists (select * from tt) and exists (select tt.ii from t);
-ERROR 42X04: Column 'TT.II' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'TT.II' is not a column in the target table.
+ERROR 42X04: Column 'TT.II' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'TT.II' is not a column in the target table.
 ij> -- correlated column in a derived table
 select * from s, (select * from tt where i = ii) a;
-ERROR 42X04: Column 'I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'I' is not a column in the target table.
+ERROR 42X04: Column 'I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'I' is not a column in the target table.
 ij> select * from s, (select * from tt where s.i = ii) a;
-ERROR 42X04: Column 'S.I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.I' is not a column in the target table.
+ERROR 42X04: Column 'S.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S.I' is not a column in the target table.
 ij> -- positive tests
 -- simple correlated subqueries
 select (select i from tt where ii = i and ii <> 1) from s;

@@ -1301,7 +1301,7 @@ ij> execute q6 using 'values 4321';
 1 row inserted/updated/deleted
 ij> -- bug 5421 - support db2 udb compatible built-in functions
 execute q7 using 'values REAL(4321.01234)';
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> execute q8 using 'values SMALLINT(12321)';
 1 row inserted/updated/deleted
 ij> execute q10 using 'values 123456.78';

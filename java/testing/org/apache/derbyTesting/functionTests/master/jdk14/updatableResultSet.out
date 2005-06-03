@@ -80,39 +80,39 @@ Got expected exception Invalid cursor state - no current row.
 Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset
 Make sure that we got CONCUR_UPDATABLE? true
 SQL State : XCL16
-Got expected exception ResultSet not open, operation 'deleteRow' not permitted. Verify that autocommit is OFF.
+Got expected exception ResultSet not open. Operation 'deleteRow' not permitted. Verify that autocommit is OFF.
 SQL State : XCL16
-Got expected exception ResultSet not open, operation 'updateRow' not permitted. Verify that autocommit is OFF.
+Got expected exception ResultSet not open. Operation 'updateRow' not permitted. Verify that autocommit is OFF.
 Negative Test9 - try updatable resultset on system table
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted on this type of statement.
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test10 - try updatable resultset on a view
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted on this type of statement.
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test11 - attempt to open updatable resultset when there is join in the select query should fail
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted on this type of statement.
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it
 Opened an updatable resultset. Now trying to drop that table through another Statement
 SQL State : X0X95
 Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
 Since autocommit is on, the drop table exception resulted in a runtime rollback causing updatable resultset object to close
 SQL State : XCL16
-Got expected exception ResultSet not open, operation 'updateRow' not permitted. Verify that autocommit is OFF.
+Got expected exception ResultSet not open. Operation 'updateRow' not permitted. Verify that autocommit is OFF.
 SQL State : XCL16
-Got expected exception ResultSet not open, operation 'deleteRow' not permitted. Verify that autocommit is OFF.
+Got expected exception ResultSet not open. Operation 'deleteRow' not permitted. Verify that autocommit is OFF.
 Negative Test13 - foreign key constraint failure will cause deleteRow to fail
 SQL State : 23503
 Got expected exception DELETE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
 Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
 SQL State : XCL16
-Got expected exception ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Got expected exception ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Negative Test14 - foreign key constraint failure will cause updateRow to fail
 SQL State : 23503
 Got expected exception UPDATE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
 Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
 SQL State : XCL16
-Got expected exception ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Got expected exception ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Negative Test15 - Can't call updateXXX methods on columns that do not correspond to a column in the table
 SQL State : XJ084
 Got expected exception Column does not correspond to a column in the base table. Cant issue {0} on this column.
@@ -284,7 +284,7 @@ Table t1 after updateRow has following rows
 	{3,cc                  }
 Positive Test9c - try to updateXXX on a readonly column. Should get error
 SQL State : 42X31
-Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR15'.
+Got expected exception Column 'C2' is not in the FOR UPDATE list of cursor 'SQLCUR15'.
 attempt to get an updatable resultset using correlation name for an readonly column. It should work
 The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
 Table t1 after updateRow has following rows
@@ -295,7 +295,7 @@ Table t1 after updateRow has following rows
 	{3,cc                  }
 Positive Test9d - try to updateXXX on a readonly column with correlation name. Should get error
 SQL State : 42X31
-Got expected exception Column 'COL2' is not in FOR UPDATE list of cursor 'SQLCUR17'.
+Got expected exception Column 'COL2' is not in the FOR UPDATE list of cursor 'SQLCUR17'.
 Table t1 has following rows
 	 C1,C2
 	 -- --
@@ -3047,7 +3047,7 @@ Positive Test32 - call updateXXX methods on column that is not in for update col
 	{2,bb                  }
 	{3,cc                  }
 SQL State : 42X31
-Got expected exception Column 'C2' is not in FOR UPDATE list of cursor 'SQLCUR37'.
+Got expected exception Column 'C2' is not in the FOR UPDATE list of cursor 'SQLCUR37'.
 updateRow passed
   Make sure the contents of table are unchanged
 	 C1,C2

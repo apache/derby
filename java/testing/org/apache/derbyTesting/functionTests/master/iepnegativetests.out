@@ -9,7 +9,7 @@ ij> --export error cases
 --export can not create file
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'nodir/t1.dat' , 
                                  null, null, null) ;
-ERROR XIE0I: Got IOException while writing data to the file
+ERROR XIE0I: An IOException occurred while writing data to the file.
 ij> --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
@@ -28,7 +28,7 @@ ERROR 42X01: Syntax error: Encountered "from" at line 1, column 8.
 ij> --export codeset is invalid
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1', 
                                     'extinout/t1.dat' , null, null, 'NOSUCHCODESET') ;
-ERROR XIE0I: Got IOException while writing data to the file
+ERROR XIE0I: An IOException occurred while writing data to the file.
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 't1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
 ERROR 38000: The exception 'SQL Exception: Schema 'XXXX' does not exist' was thrown while evaluating an expression.
@@ -98,11 +98,11 @@ ERROR XIE04: Data file not found: nodir/t1.dat
 ij> --import table not found
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: Table 'IEP.NOTABLE' does not exist.
+ERROR XIE0M: Table 'IEP.NOTABLE' does not exist.  
 ij> --import schema is not valid
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 't1' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: Table 'XXXX.T1' does not exist.
+ERROR XIE0M: Table 'XXXX.T1' does not exist.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
                                  null, null, 'INCORRECTCODESET', 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
@@ -180,7 +180,7 @@ declare global temporary table session.temp2(c1 int) not logged;
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('session', 'temp2' , 'extinout/temp1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: Table 'SESSION.TEMP2' does not exist.
+ERROR XIE0M: Table 'SESSION.TEMP2' does not exist.  
 ij> select * from session.temp2 ;
 ERROR 42X05: Table 'SESSION.TEMP2' does not exist.
 ij> commit ;
@@ -218,11 +218,11 @@ ij> --import data column names are incorrect
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3, x4', null,
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE08: There is no column by name: x1
+ERROR XIE08: There is no column named: x1.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE08: There is no column by name: x1
+ERROR XIE08: There is no column named: x1.  
 ij> --import data insert column names count < column indexes does not match
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'c1, c2, c3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
@@ -237,8 +237,8 @@ ERROR 42802: The number of values assigned is not the same as the number of spec
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , null, '11,22,12,24', 
                                  'extinout/t3.dat' , 
 				 null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: Column 'COLUMN11' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'COLUMN11' is not a column in the target table.' was thrown while evaluating an expression.
-ERROR 42X04: Column 'COLUMN11' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'COLUMN11' is not a column in the target table.
+ERROR 38000: The exception 'SQL Exception: Column 'COLUMN11' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN11' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 42X04: Column 'COLUMN11' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN11' is not a column in the target table.
 ij> --repeat the above type cases with empty file and minor variation to paramters
 delete from t3 ;
 12 rows inserted/updated/deleted
@@ -249,11 +249,11 @@ ij> --import data column names are incorrect
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3, x4', null, 
                                  'extinout/t3.dat' , 
                                  ';', '^', 'utf-16', 1) ;
-ERROR XIE08: There is no column by name: x1
+ERROR XIE08: There is no column named: x1.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
 				    ';', '^', 'utf-16', 1) ;
-ERROR XIE08: There is no column by name: x1
+ERROR XIE08: There is no column named: x1.  
 ij> --import data insert column names count < column indexes does not match
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'c1, c2, c3', null, 
                                  'extinout/t3.dat' , 
@@ -282,18 +282,18 @@ ij> create table ntype1(bt BLOB(1024) , a int);
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 'ntype' , 'extinout/ntype.dat' , 
                                  null, null, null) ;
-ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by import/export.
+ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by the import/export feature.   
 ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.ntype1',
 				   'extinout/ntype.dat' , 
                                    null, null, null) ;
-ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by import/export.
+ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by the import/export feature.   
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 'ntype' , 'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by import/export.
+ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by the import/export feature.   
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 'ntype1' , null , null, 
                                  'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by import/export.
+ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by the import/export feature.   
 ij> --import should aquire a lock on the table
 create table parent(a int not null primary key);
 0 rows inserted/updated/deleted

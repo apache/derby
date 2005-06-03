@@ -370,15 +370,15 @@ ij> -- negative testing
 select * from s where 1;
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
 ij> select * from s where 1 and (1=1);
-ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ERROR 42Y94: An AND or OR has a non-boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.  
 ij> select * from s where (1=1) and 1;
-ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ERROR 42Y94: An AND or OR has a non-boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.  
 ij> select * from s where 1 or (1=1);
-ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ERROR 42Y94: An AND or OR has a non-boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.  
 ij> select * from s where (1=1) or 1;
-ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ERROR 42Y94: An AND or OR has a non-boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.  
 ij> select * from s where not 1;
-ERROR 42X40: A NOT has a non-Boolean operand. The operand of NOT must evaluate to TRUE, FALSE, or UNKNOWN.
+ERROR 42X40: A NOT statement has an operand that is not boolean . The operand of NOT must evaluate to TRUE, FALSE, or UNKNOWN. 
 ij> -- Clean up
 drop table t;
 0 rows inserted/updated/deleted

@@ -307,7 +307,7 @@ ij> insert into t1 values(4) ;
 ij> --table not found error should issue a implicit rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'notable' , 'extinout/t1.del' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: Table 'NOTABLE' does not exist.
+ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
 ij> select * from t1 ;
 A          
@@ -364,7 +364,7 @@ ij> insert into t1 values(4) ;
 ij> --table not found error should issue a implicit rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'notable' , 'extinout/t1.del' , 
                                  null, null, null, 1) ;
-ERROR XIE0M: Table 'NOTABLE' does not exist.
+ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
 ij> ---check IMPORT_DATA calls commit/rollback
 select * from t1 ;
@@ -417,7 +417,7 @@ ij> insert into t1 values(4) ;
 ij> --table not found error should issue a implicit rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'notable' , 'a' , '1', 'extinout/t1.del' , 
                                  null, null, null, 1) ;
-ERROR XIE0M: Table 'NOTABLE' does not exist.
+ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
 ij> select * from t1 ;
 A          

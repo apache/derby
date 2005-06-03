@@ -75,7 +75,7 @@ drop view notexists;
 ERROR X0X05: Table 'NOTEXISTS' does not exist.
 ij> -- duplicate column name in view's column list
 create view shouldntwork (c1, c2, c1) as select i, s, f from t1;
-ERROR 42Y13: Column name 'C1' appears more than once in the create view statement.
+ERROR 42Y13: Column name 'C1' appears more than once in the CREATE VIEW statement.
 ij> -- # of columns in view's column list does not match that in view definition
 create view shouldntwork (c1, c2, c3) as select i, s from t1;
 ERROR 42X56: The number of columns in the view column list does not match the number of columns in the underlying query expression in the view definition for 'SHOULDNTWORK'.
@@ -121,13 +121,13 @@ ij> close c1;
 ij> -- view updateability
 -- (No views are currently updateable)
 insert into sv1 values 1;
-ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updateable.)
+ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updatable.) 
 ij> delete from sv1;
-ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updateable.)
+ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updatable.) 
 ij> update sv1 set s_was_i = 0;
-ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updateable.)
+ERROR 42Y24: View 'SV1' is not updatable. (Views are currently not updatable.) 
 ij> get cursor c2 as 'select * from sv1 for update of s_was_i';
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- create index on a view
 create index i1 on sv2(i);
 ERROR 42Y62: 'CREATE INDEX' is not allowed on 'APP.SV2' because it is a view.

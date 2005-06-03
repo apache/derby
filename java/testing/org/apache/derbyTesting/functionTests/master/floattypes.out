@@ -1619,7 +1619,7 @@ ERROR 42821: Columns of type 'REAL' cannot hold values of type 'CHAR'.
 ij> insert into t(r) values '1.0';
 ERROR 42821: Columns of type 'REAL' cannot hold values of type 'CHAR'. 
 ij> update t set r = NaN;
-ERROR 42X04: Column 'NAN' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'NAN' is not a column in the target table.
+ERROR 42X04: Column 'NAN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NAN' is not a column in the target table.
 ij> update t set r = +3.4021E+38;
 0 rows inserted/updated/deleted
 ij> update t set r = -3.4021E+38;

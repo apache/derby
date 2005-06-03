@@ -10,16 +10,16 @@ create table t1("       " int);
 0 rows inserted/updated/deleted
 ij> -- duplicate identifiers
 create table t1 (c1 int, C1 int);
-ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ERROR 42X12: Column name 'C1' appears more than once in the CREATE TABLE statement.  
 ij> -- duplicate identifier/delimited identifier
 create table t1 (c1 int, "C1" int);
-ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ERROR 42X12: Column name 'C1' appears more than once in the CREATE TABLE statement.  
 ij> -- duplicate delimited identifier/identifier
 create table t1 ("C1" int, C1 int);
-ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ERROR 42X12: Column name 'C1' appears more than once in the CREATE TABLE statement.  
 ij> -- duplicate delimited identifiers
 create table t1 ("C1" int, "C1" int);
-ERROR 42X12: Column name 'C1' appears more than once in the create table statement.
+ERROR 42X12: Column name 'C1' appears more than once in the CREATE TABLE statement.  
 ij> -- verify preservation of spaces
 create table success1 (c1 int, " C1" int, "  C1  " int);
 0 rows inserted/updated/deleted
@@ -46,7 +46,7 @@ ERROR 42X14: 'c1 ' is not a column in table or VTI 'APP.SUCCESS1'.
 ij> -- C1 appears twice in the column list - C1 and "C1"
 insert into success1 (C1, "C1", " C1", " C1 ", "  C1  ") 
 values (16, 17, 18, 19, 20);
-ERROR 42X13: Column name 'C1' appears more than once times in the column list of an insert statement.
+ERROR 42X13: Column name 'C1' appears more than once times in the column list of an INSERT statement. 
 ij> -- verify correct handling in a select
 select C1, " C1", " C1", "  C1  " from success1;
 C1         | C1        | C1        |  C1       
@@ -55,11 +55,11 @@ C1         | C1        | C1        |  C1
 6          |7          |7          |8          
 ij> -- following should fail for "C1 "
 select c1, "C1 ", " C1", " C1 ", "  C1  " from success1;
-ERROR 42X04: Column 'C1 ' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C1 ' is not a column in the target table.
+ERROR 42X04: Column 'C1 ' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C1 ' is not a column in the target table.
 ij> -- negative testing for an insert
 -- "c1 " should not match
 select c1, "c1 ", " C1", " C1 ", "  C1  "  from success1;
-ERROR 42X04: Column 'c1 ' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'c1 ' is not a column in the target table.
+ERROR 42X04: Column 'c1 ' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'c1 ' is not a column in the target table.
 ij> -- negative test for max identifier width
 -- NOTE: no negative test for max identifier length of function, savepoint and cursor
 -- tables needed for index, trigger and view test

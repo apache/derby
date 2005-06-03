@@ -180,7 +180,7 @@ ERROR 42X09: The table or alias name 'APP.S1.T1' is used more than once in the F
 ij> select "S1.T1".d1 from "S1.T1", APP."S1.T1";
 ERROR 42X09: The table or alias name 'APP.S1.T1' is used more than once in the FROM list.
 ij> select SYS."S1.T1".d1 from "S1.T1";
-ERROR 42X04: Column 'SYS.S1.T1.D1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SYS.S1.T1.D1' is not a column in the target table.
+ERROR 42X04: Column 'SYS.S1.T1.D1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SYS.S1.T1.D1' is not a column in the target table.
 ij> select SYS."S1.T1".d1 from "S1.T1" t1;
-ERROR 42X04: Column 'SYS.S1.T1.D1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SYS.S1.T1.D1' is not a column in the target table.
+ERROR 42X04: Column 'SYS.S1.T1.D1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SYS.S1.T1.D1' is not a column in the target table.
 ij> 

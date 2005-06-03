@@ -1,8 +1,8 @@
 TestA - some syntax testing for Coalesce/Value function
 TestAla - select coalesce from tA will give error because no arguments were supplied to the function
-expected exception Column 'COALESCE' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'COALESCE' is not a column in the target table.
+expected exception Column 'COALESCE' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COALESCE' is not a column in the target table.
 TestAlb - select value from tA will give error because no arguments were supplied to the function
-expected exception Column 'VALUE' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'VALUE' is not a column in the target table.
+expected exception Column 'VALUE' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'VALUE' is not a column in the target table.
 TestA2a - select coalesce from tA will give error because no arguments were supplied inside the parentheses
 expected exception Syntax error: Encountered ")" at line 1, column 17.
 TestA2b - select value from tA will give error because no arguments were supplied inside the parentheses
@@ -12,9 +12,9 @@ expected exception The number of arguments for function 'COALESCE' is incorrect.
 TestA3b - select value from tA with only one argument will give error
 expected exception The number of arguments for function 'VALUE' is incorrect.
 TestA4a - select coalesce from tA with incorrect column name will give error
-expected exception Column 'C111' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C111' is not a column in the target table.
+expected exception Column 'C111' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C111' is not a column in the target table.
 TestA4b - select value from tA with incorrect column name will give error
-expected exception Column 'C111' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C111' is not a column in the target table.
+expected exception Column 'C111' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C111' is not a column in the target table.
 TestA5a - create table with table name as coalesce and column name as coalesce will pass because coalesce is not a reserved-word
 	 COL1(datatype : INTEGER, precision : 10, scale : 0)
 	 ---------------------------------------------------
@@ -26,9 +26,9 @@ TestA5b - create table with table name as value and column name as value will pa
 	{null}
 	{1}
 TestA6a - All arguments to coalesce function passed as parameters is an error
-expected exception All the arguments to the COALESC/VALUE function can not be parameters. Need to have at least one non-parameter argument.
+expected exception All the arguments to the COALESCE/VALUE function cannot be parameters. The function needs at least one argument that is not a parameter.
 TestA6b - All arguments to value function passed as parameters is an error
-expected exception All the arguments to the COALESC/VALUE function can not be parameters. Need to have at least one non-parameter argument.
+expected exception All the arguments to the COALESCE/VALUE function cannot be parameters. The function needs at least one argument that is not a parameter.
 Set up by creating table for testing all datatypes combinations
 create table AllDataTypesTable (SMALLINTCOL SMALLINT,INTEGERCOL INTEGER,BIGINTCOL BIGINT,DECIMALCOL DECIMAL(10,5),REALCOL REAL,DOUBLECOL DOUBLE,CHARCOL CHAR(60),VARCHARCOL VARCHAR(60),LONGVARCHARCOL LONG VARCHAR,CHARFORBITCOL CHAR(60) FOR BIT DATA,VARCHARFORBITCOL VARCHAR(60) FOR BIT DATA,LVARCHARFORBITCOL LONG VARCHAR FOR BIT DATA,CLOBCOL CLOB(1k),DATECOL DATE,TIMECOL TIME,TIMESTAMPCOL TIMESTAMP,BLOBCOL BLOB(1k))
 insert into AllDataTypesTable values(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)

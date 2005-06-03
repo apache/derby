@@ -64,7 +64,7 @@ INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL
 6          |5     |varchar_50_col                |char_30_col                                       
 ij> -- Negative test - column in SET clause twice
 update t1 set int_col = 1, int_col = 2;
-ERROR 42X16: Column name 'INT_COL' appears multiple times in the SET clause of an update statement.
+ERROR 42X16: Column name 'INT_COL' appears multiple times in the SET clause of an UPDATE statement.
 ij> -- Negative test - non-existent column in SET clause
 update t1 set notacolumn = int_col + 1;
 ERROR 42X14: 'NOTACOLUMN' is not a column in table or VTI 'APP.T1'.

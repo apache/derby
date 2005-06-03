@@ -22,7 +22,7 @@ ij> create table neg1(c1 int check(c1+c1));
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
 ij> -- All column references are to target table
 create table neg1(c1 int check((c2 = 1)));
-ERROR 42X04: Column 'C2' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C2' is not a column in the target table.
+ERROR 42X04: Column 'C2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C2' is not a column in the target table.
 ij> -- verify that a check constraint can't be used as an optimizer override
 create table t1(c1 int constraint asdf check(c1 = 1));
 0 rows inserted/updated/deleted

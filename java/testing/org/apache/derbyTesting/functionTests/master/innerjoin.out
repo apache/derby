@@ -45,7 +45,7 @@ select * from t1, t2 join t3 on t1.c1 = t2.c1;
 ERROR 42972: An ON clause associated with a JOIN operator is not valid.
 ij> -- should match db2's behavior by raising an error
 select * from t2 b inner join t3 c on a.c1 = b.c1 and b.c1 = c.c1;
-ERROR 42X04: Column 'A.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'A.C1' is not a column in the target table.
+ERROR 42X04: Column 'A.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'A.C1' is not a column in the target table.
 ij> select * from t3 b where exists (select * from t1 a inner join t2 on b.c1 = t2.c1);
 ERROR 42972: An ON clause associated with a JOIN operator is not valid.
 ij> select * from t3 where exists (select * from t1 inner join t2 on t3.c1 = t2.c1);

@@ -339,7 +339,7 @@ ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- we shouldn't be able to add an fk on p1 now
 alter table f add constraint fk foreign key (x) references p1;
-ERROR X0Y41: Constraint 'FK' is invalid: referenced table APP.P1 has no primary key.  Either add a primary key to APP.P1 or explicity specify the columns of a unique constraint that this foreign key references.
+ERROR X0Y41: Constraint 'FK' is invalid because the referenced table APP.P1 has no primary key.  Either add a primary key to APP.P1 or explicitly specify the columns of a unique constraint that this foreign key references. 
 ij> -- add the constraint and try again
 alter table p1 add constraint pk1 primary key (x);
 0 rows inserted/updated/deleted

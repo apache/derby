@@ -45,66 +45,66 @@ PASSED, row 6, length was 5016
 clobTest12 finished
 START: clobTest2
 CLOB getSubString 9905 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 9905 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 2(5) (len 50) you can lead a horse to water but you can't form i
 2(6) (len 1) y
 CLOB getSubString 9905 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 3(5) (len 50) a stitch in time says ouch
 3(6) (len 1) a
 CLOB getSubString 9905 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 4(5) (len 50) here is a string with a return 
  character
 4(6) (len 1) h
 CLOB getSubString 9905 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 5(5) (len 50) test data: a string column inserted as an Ascii st
 5(6) (len 1) t
 6(0) (len 50) wwPosition-9907-behold-the-end-of-the-clob-is-nigh
@@ -119,25 +119,25 @@ ine-we-are-now-on
 6(7) 
 wwwwwwPosition-9907-behold-the-end-of-the-clob-is-nighwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 CLOB getSubString 9905 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 9905 > 5000
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 5000
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 5000
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 8(3) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 8(4) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 wwwwwwwwwwwwwwwww
@@ -422,12 +422,12 @@ EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'INTEG
 end clobTest54
 START: clobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ071): Zero or negative length argument '0' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ071): Zero or negative length argument '0' passed in a BLOB or CLOB method.
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-4,000' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob position method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-42' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob position method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
 clobTest6 finished
 START: clobTest7
 clobTest7 finished
@@ -519,15 +519,15 @@ clobTest92 finished
 START: clobTest94
 shortClob length after commit is 26
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 clobTest94 finished
 START: clobTest95
 shortClob length after closing connection is 26
@@ -538,7 +538,7 @@ SQLSTATE(08003): No current connection.
 FAIL -- unexpected exception ****************
 SQLSTATE(08003): No current connection.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
 SQLSTATE(08003): No current connection.
 clobTest95 finished
@@ -560,66 +560,66 @@ START: blobTest0
 blobTest0 finished
 START: blobTest2
 testing Blob.getBytes() with pos 9905 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 9905 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 65
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 2(5) you can lead a horse to water but you can't form i
 2(6) y
 testing Blob.getBytes() with pos 9905 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 26
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 3(5) a stitch in time says ouch
 3(6) a
 testing Blob.getBytes() with pos 9905 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 42
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 4(5) here is a string with a return 
  character
 4(6) h
 testing Blob.getBytes() with pos 9905 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 56
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 5(5) test data: a string column inserted as an Ascii st
 5(6) t
 6(0) wwPosition-9907-behold-the-end-of-the-clob-is-nigh
@@ -634,25 +634,25 @@ ine-we-are-now-on
 6(7) 
 wwwwwwPosition-9907-behold-the-end-of-the-clob-is-nighwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 testing Blob.getBytes() with pos 9905 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 1 > 0
-EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '1' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 9905 > 5000
-EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 5000
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 5000
-EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the Blob/Clob.
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 8(3) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 8(4) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 wwwwwwwwwwwwwwwww
@@ -692,62 +692,62 @@ Found
 blobTest3 finished
 START: blobTest4
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 searchBlob row 13 skipped (too large)
 Found horse in row 2 at position 16
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 searchBlob row 13 skipped (too large)
 Found ouch in row 3 at position 23
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 searchBlob row 13 skipped (too large)
 Found 
  in row 4 at position 32
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 searchBlob row 13 skipped (too large)
 Found 
  in row 5 at position 56
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 Found test data: a string column inserted as an Ascii stream
  in row 5 at position 1
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 searchBlob row 13 skipped (too large)
 Found 
  in row 6 at position 100
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 Found Beginning in row 6 at position 1
 Found position-69 in row 6 at position 69
 Found I-am-hiding-here-at-position-5910 in row 6 at position 5910
 Found Position-9907 in row 6 at position 9907
 Found blob (row 10)  in row 6 at position 1
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 Found blob (row 12)  in row 6 at position 301
 searchBlob row 13 skipped (too large)
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 searchBlob row 13 skipped (too large)
 Found 
  in row 8 at position 100
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the Blob/Clob pattern using getBytes/getSubString.
+SQLSTATE(XJ077): Got an exception when trying to read the first byte/character of the BLOB/CLOB pattern using getBytes/getSubString.
 Found blob (row 12)  in row 8 at position 1
 searchBlob row 13 skipped (too large)
 testBlob row 9 skipped (too large)
@@ -764,12 +764,12 @@ FAIL -- unexpected exception ****************
 SQLSTATE(22005): An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
 START: blobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ071): Zero or negative length argument '0' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ071): Zero or negative length argument '0' passed in a BLOB or CLOB method.
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-4,000' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob position method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-42' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a Blob or Clob position method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
 blobTest6 finished
 START: blobTest7
 blobTest7 finished
@@ -793,28 +793,28 @@ blobTest93 finished
 START: blobTest94
 shortBlob length after commit is 26
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 blobTest94 finished
 START: blobTest95
 shortBlob length after closing the connection is 26
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 blobTest95 finished
 START: blobTest96
 blobTest96 finished
@@ -831,9 +831,9 @@ Expect to get an IOException, container has been closed
 EXPECTED IO Exception:ERROR 40XD0: Container has been closed
 START: clobNegativeTest_Derby265
 -----------------------------
-EXPECTED SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+EXPECTED SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 START: blobTestNegativeTest_Derby265
 -----------------------------
-EXPECTED SQLSTATE(XJ073): The data in this Blob or Clob is no longer available. Possible reasons are that its transaction committed, or its connection closed.
+EXPECTED SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FINISHED TEST blobclob :-)
 Test blobclob finished

@@ -20,25 +20,25 @@ ERROR 42Z16: Only columns of type VARCHAR may have their length altered.
 ij> alter table alltypes alter n set data type numeric (12,8);
 ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
 ij> alter table alltypes alter c set data type varchar(10);
-ERROR 42Z15: Invalid Type specified for column 'C'. The type of a column may not be changed.
+ERROR 42Z15: Invalid type specified for column 'C'. The type of a column may not be changed.  
 ij> alter table alltypes alter b set data type varchar(2) for bit data;
-ERROR 42Z15: Invalid Type specified for column 'B'. The type of a column may not be changed.
+ERROR 42Z15: Invalid type specified for column 'B'. The type of a column may not be changed.  
 ij> alter table alltypes alter dc set data type numeric(8,2);
-ERROR 42Z15: Invalid Type specified for column 'DC'. The type of a column may not be changed.
+ERROR 42Z15: Invalid type specified for column 'DC'. The type of a column may not be changed.  
 ij> alter table alltypes alter tn set data type int;
 ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
 ij> alter table alltypes alter v set data type varchar(1);
-ERROR 42Z17: Invalid Length specified for Column 'V'. Length must be greater than the current column length
+ERROR 42Z17: Invalid length specified for column 'V'. Length must be greater than the current column length.
 ij> alter table alltypes alter v set data type varchar(49);
-ERROR 42Z17: Invalid Length specified for Column 'V'. Length must be greater than the current column length
+ERROR 42Z17: Invalid length specified for column 'V'. Length must be greater than the current column length.
 ij> alter table alltypes alter bv set data type varchar(1) for bit data;
-ERROR 42Z17: Invalid Length specified for Column 'BV'. Length must be greater than the current column length
+ERROR 42Z17: Invalid length specified for column 'BV'. Length must be greater than the current column length.
 ij> alter table alltypes alter bv set data type varchar(2) for bit data;
 0 rows inserted/updated/deleted
 ij> alter table alltypes alter nvc set data type varchar(0);
 ERROR 42X44: Invalid length '0' in column specification.
 ij> alter table alltypes alter nvc set data type varchar(9);
-ERROR 42Z17: Invalid Length specified for Column 'NVC'. Length must be greater than the current column length
+ERROR 42Z17: Invalid length specified for column 'NVC'. Length must be greater than the current column length.
 ij> drop table alltypes;
 0 rows inserted/updated/deleted
 ij> create table t0 (i int not null, v varchar(1) not null, constraint pk primary key(v,i));
@@ -50,10 +50,10 @@ alter table t0 alter v set data type varchar(2);
 ij> create table t1 (i int, v varchar(2), constraint fk foreign key  (v,i) references t0(v,i));
 0 rows inserted/updated/deleted
 ij> alter table t0 alter v set data type varchar(3);
-ERROR 42Z19: Column 'V' is being referenced by atleast one foreign key constraint 'FK'. To alter the length of this column, you should drop referencing constraints, perform the ALTER TABLE and then recreate the constraints.
+ERROR 42Z19: Column 'V' is being referenced by at least one foreign key constraint 'FK'. To alter the length of this column, you should drop referencing constraints, perform the ALTER TABLE and then recreate the constraints. 
 ij> -- should fail; can't muck around with fkey constraints.
 alter table t1 alter v set data type varchar(3);
-ERROR 42Z18: Column 'V' is part of a foreign key constraint 'FK'. To alter the length of this column, you should drop the constraint first, perform the ALTER TABLE and then recreate the constraint.
+ERROR 42Z18: Column 'V' is part of a foreign key constraint 'FK'. To alter the length of this column, you should drop the constraint first, perform the ALTER TABLE, and then recreate the constraint.
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> drop table t0;
@@ -69,7 +69,7 @@ ij> create table t1 (i int, v varchar(2), constraint fk foreign key  (v,i) refer
 0 rows inserted/updated/deleted
 ij> -- this should fail-- someone is referencing me.
 alter table t0 alter v set data type varchar(3);
-ERROR 42Z19: Column 'V' is being referenced by atleast one foreign key constraint 'FK'. To alter the length of this column, you should drop referencing constraints, perform the ALTER TABLE and then recreate the constraints.
+ERROR 42Z19: Column 'V' is being referenced by at least one foreign key constraint 'FK'. To alter the length of this column, you should drop referencing constraints, perform the ALTER TABLE and then recreate the constraints. 
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> drop table t0;

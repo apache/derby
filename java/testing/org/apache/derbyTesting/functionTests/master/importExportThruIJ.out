@@ -22,8 +22,8 @@ ij> create index T1_IndexLname on T1 (Lname, Account);
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/EndOfFile.txt' , 
                                     null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: Read endOfFile at unexpected place on line 2' was thrown while evaluating an expression.
-ERROR XIE0E: Read endOfFile at unexpected place on line 2
+ERROR 38000: The exception 'SQL Exception: Read endOfFile at unexpected place on line 2.' was thrown while evaluating an expression.
+ERROR XIE0E: Read endOfFile at unexpected place on line 2.
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/Tutor1.asc' , 
                                     null, null, null, 0) ;
 0 rows inserted/updated/deleted
@@ -56,8 +56,8 @@ ij> commit;
 ij> --this one should fail becuase this is not the right command to handle fixed formats
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T2' , 'extin/Tutor2.asc' , 
                                     null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: Column 'COLUMN2' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'COLUMN2' is not a column in the target table.' was thrown while evaluating an expression.
-ERROR 42X04: Column 'COLUMN2' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'COLUMN2' is not a column in the target table.
+ERROR 38000: The exception 'SQL Exception: Column 'COLUMN2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN2' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 42X04: Column 'COLUMN2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN2' is not a column in the target table.
 ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T2'));
 1          
 -----------
@@ -82,8 +82,8 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T3' ,
                                   null , '3, 2, 1, 4, 9, 200' ,
 				  'extin/Tutor3.asc' , 
 				  null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: Column 'COLUMN200' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'COLUMN200' is not a column in the target table.' was thrown while evaluating an expression.
-ERROR 42X04: Column 'COLUMN200' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'COLUMN200' is not a column in the target table.
+ERROR 38000: The exception 'SQL Exception: Column 'COLUMN200' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN200' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 42X04: Column 'COLUMN200' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN200' is not a column in the target table.
 ij> rollback;
 ij> -- table should not be there
 select count(*) from T3;

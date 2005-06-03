@@ -26,7 +26,7 @@ ERROR 42Y25: 'SYS.SYSTABLES' is a system table.  Users are not allowed to modify
 ij> insert into sys.systables select * from sys.systables;
 ERROR 42Y25: 'SYS.SYSTABLES' is a system table.  Users are not allowed to modify the contents of this table.
 ij> get cursor c as 'select tablename from sys.systables for update of tablename';
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- users not allowed to do ddl in sys schema
 create table sys.usertable(c1 int);
 ERROR 42X62: 'CREATE TABLE' is not allowed in the 'SYS' schema.

@@ -143,7 +143,7 @@ ij> -----------------------------------
 -- 1.5.1 -ve cases:  AES - unsupported feedback mode
 connect 'jdbc:derby:encdb_abc;create=true;dataEncryption=true;encryptionAlgorithm=AES/ABC/NoPadding;bootPassword=Thursday';
 ERROR XJ041: Failed to create database 'encdb_abc', see the next exception for details.
-ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
 ERROR XBCXI: The feedback mode 'ABC' is not supported. Supported feedback modes are CBC, CFB, OFB and ECB.
 ij> autocommit off;
 IJ ERROR: Unable to establish connection
@@ -155,7 +155,7 @@ ij> -----------------------------------
 -- 2.1 -ve cases:  AES - unsupported padding mode
 connect 'jdbc:derby:encdb_pkcs5;create=true;dataEncryption=true;encryptionAlgorithm=AES/ECB/PKCS5Padding;bootPassword=Thursday';
 ERROR XJ041: Failed to create database 'encdb_pkcs5', see the next exception for details.
-ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
 ERROR XBCXB: Bad encryption padding 'PKCS5Padding' or padding not specified. 'NoPadding' must be used.
 ij> autocommit off;
 IJ ERROR: Unable to establish connection
@@ -202,7 +202,7 @@ ij> --------------------------
 -- 3.4 unsupported key length
 connect 'jdbc:derby:encdbcbc_512;create=true;dataEncryption=true;encryptionKeyLength=512;encryptionAlgorithm=AES/CBC/NoPadding;bootPassword=Thursday';
 ERROR XJ041: Failed to create database 'encdbcbc_512', see the next exception for details.
-ERROR XBM01: Startup failed due to an exception, see next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
 ERROR XJ001: Java exception: 'Wrong keysize: must be equal to 128, 192 or 256: java.security.InvalidParameterException'.
 ij> autocommit off;
 IJ ERROR: Unable to establish connection

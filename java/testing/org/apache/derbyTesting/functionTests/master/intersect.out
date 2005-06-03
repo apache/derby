@@ -163,9 +163,9 @@ ij> insert into t4 values
   (1, cast( 'aa' as clob(64)), cast(X'01' as blob(1M)));
 1 row inserted/updated/deleted
 ij> select cl from t3 intersect select cl from t4 order by 1;
-ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> select bl from t3 intersect select bl from t4 order by 1;
-ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> -- invalid conversion
 select tm from t1 intersect select dt from t2;
 ERROR 42X61: Types 'TIME' and 'DATE' are not INTERSECT compatible.
@@ -331,9 +331,9 @@ ij> delete from r;
 3 rows inserted/updated/deleted
 ij> -- test LOB
 select cl from t3 except select cl from t4 order by 1;
-ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'CLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> select bl from t3 except select bl from t4 order by 1;
-ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT, because comparisons are not supported for that type.
+ERROR X0X67: Columns of type 'BLOB' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> -- invalid conversion
 select tm from t1 except select dt from t2;
 ERROR 42X61: Types 'TIME' and 'DATE' are not EXCEPT compatible.

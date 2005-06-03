@@ -760,13 +760,13 @@ ij> insert into testconst2( col1, col2, col3) values( 'z', 'b', 1);
 ij> insert into testconst2( col1, col2, col3) values( 'a', 'a', 1);
 1 row inserted/updated/deleted
 ij> ALTER TABLE testconst2 DROP FOREIGN KEY noSuchConstraint;
-ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'. 
 ij> ALTER TABLE testconst2 DROP CHECK noSuchConstraint;
-ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'. 
 ij> ALTER TABLE testconst2 DROP UNIQUE noSuchConstraint;
-ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'. 
 ij> ALTER TABLE testconst1 DROP PRIMARY KEY;
-ERROR 42X86: ALTER table failed. There is no constraint 'PRIMARY KEY' on table 'APP.TESTCONST1'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'PRIMARY KEY' on table 'APP.TESTCONST1'. 
 ij> -- clean up
 DROP TABLE testconst1;
 0 rows inserted/updated/deleted
@@ -1276,9 +1276,9 @@ ij> select match_me from likeable where match_me like e;
 ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
 ij> -- SQLSTATE=22019
 select match_me from likeable where match_me like 'fooZ%bar3' escape esc;
-ERROR 22019: Invalid escape sequence, 'ESC'. The escape string must be exactly one character. It can not be a null or more than one character.
+ERROR 22019: Invalid escape sequence, 'ESC'. The escape string must be exactly one character. It cannot be a null or more than one character.
 ij> select match_me from likeable where match_me like 'fooZ%bar3' escape e;
-ERROR 22019: Invalid escape sequence, 'E'. The escape string must be exactly one character. It can not be a null or more than one character.
+ERROR 22019: Invalid escape sequence, 'E'. The escape string must be exactly one character. It cannot be a null or more than one character.
 ij> -- SQLSTATE=42884
 select match_me from likeable where match_me like 'fooZ%bar3' escape 1;
 ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
@@ -1365,7 +1365,7 @@ ERROR 42Y03: 'OCTET_LENGTH' is not recognized as a function or procedure.
 ij> values TRIM('x' FROM 'xasdf x');
 ERROR 42X01: Syntax error: Encountered "FROM" at line 1, column 17.
 ij> values SUBSTRING('12345' FROM 3 FOR 2);
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> -- Tests for explicit nulls. Not allowed in DB2, defect 5589 
 -- Should fail.
 create table t1 ( i int null);
@@ -1678,9 +1678,9 @@ C1         |C2
 2          |2          
 ij> -- Prevent Cloudscape from using generated column names for ordering
 select i+1 from t1 order by "SQLCol1";
-ERROR 42X04: Column 'SQLCol1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SQLCol1' is not a column in the target table.
+ERROR 42X04: Column 'SQLCol1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SQLCol1' is not a column in the target table.
 ij> select i+1 from t1 order by SQLCol1;
-ERROR 42X04: Column 'SQLCOL1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SQLCOL1' is not a column in the target table.
+ERROR 42X04: Column 'SQLCOL1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SQLCOL1' is not a column in the target table.
 ij> values (1,2,3),(4,5,6),(7,8,9) order by "SQLCol1";
 ERROR 42X78: Column 'SQLCol1' is not in the result of the query expression.
 ij> -- Column names for a CREATE VIEW should be specified when result table has unnamed columns. 

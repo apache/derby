@@ -83,13 +83,13 @@ SQL State : null
 Got expected exception Invalid operation: result set closed
 Negative Test9 - try updatable resultset on system table
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted on this type of statement.
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test10 - try updatable resultset on a view
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted on this type of statement.
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test11 - attempt to open updatable resultset when there is join in the select query should fail
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted on this type of statement.
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it
 Opened an updatable resultset. Now trying to drop that table through another Statement
 SQL State : X0X95

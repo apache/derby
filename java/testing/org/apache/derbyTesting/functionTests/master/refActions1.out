@@ -371,7 +371,7 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 15         |SAM2      |ROGER     |K52 
 7          |TRUONG    |HAMID     |K55 
 ij> delete from db2test.vemp;
-ERROR 42Y24: View 'DB2TEST.VEMP' is not updatable. (Views are currently not updateable.)
+ERROR 42Y24: View 'DB2TEST.VEMP' is not updatable. (Views are currently not updatable.) 
 ij> select * from db2test.emp order by name, mgrname, dno;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -2773,7 +2773,7 @@ ij> select * from db2test.emp e
                   where e.mgrname = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where db2test.emp.mgrname = 'JOHN'))))) order by 2,3,4;
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
 ij> delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -2783,7 +2783,7 @@ ij> delete from db2test.emp
                   where e.mgrname = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -2941,7 +2941,7 @@ ij> select * from db2test.emp e
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2, 3, 4;
-ERROR 42X04: Column 'E.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'E.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
 ij> delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -2951,7 +2951,7 @@ ij> delete from db2test.emp
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where db2test.emp.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -3109,7 +3109,7 @@ ij> select * from db2test.emp e
                   where e4.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2, 3, 4;
-ERROR 42X04: Column 'E.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'E.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
 ij> -- select should get -119;
 delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
@@ -3120,7 +3120,7 @@ delete from db2test.emp
                   where e4.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                   where db2test.emp.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -3278,7 +3278,7 @@ ij> select * from db2test.emp e
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2, 3, 4;
-ERROR 42X04: Column 'E.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'E.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
 ij> delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -3288,7 +3288,7 @@ ij> delete from db2test.emp
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -4453,7 +4453,7 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 15         |SAM2      |ROGER     |K52 
 7          |TRUONG    |HAMID     |K55 
 ij> delete from db2test.vemp;
-ERROR 42Y24: View 'DB2TEST.VEMP' is not updatable. (Views are currently not updateable.)
+ERROR 42Y24: View 'DB2TEST.VEMP' is not updatable. (Views are currently not updatable.) 
 ij> select * from db2test.emp order by name, mgrname, dno;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7575,7 +7575,7 @@ ij> select * from db2test.emp e
                   e2.dno in (select dno from db2test.emp e1
                   where e1.name = e.mgrname and e1.mgrname = 'JOHN')))))
    order by 2,3,4;
-ERROR 42X04: Column 'E5.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'E5.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E5.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E5.NAME' is not a column in the target table.
 ij> delete from db2test.emp e
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -7743,7 +7743,7 @@ ij> select * from db2test.emp e
                   where e.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2,3,4;
-ERROR 42X04: Column 'E.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'E.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
 ij> delete from db2test.emp e
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -7911,7 +7911,7 @@ ij> select * from db2test.emp e
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2,3,4;
-ERROR 42X04: Column 'E.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'E.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
 ij> delete from db2test.emp
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -7921,7 +7921,7 @@ ij> delete from db2test.emp
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where db2test.emp.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------

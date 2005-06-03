@@ -85,10 +85,10 @@ Expected Exception is A SAVEPOINT with the passed name already exists in the cur
 Test 45 reuse savepoint name after rollback - should not work
 Expected Exception is A SAVEPOINT with the passed name already exists in the current transaction.
 Test 46 Cursors declared before and within the savepoint unit will be closed when rolling back the savepoint
-Expected Exception is ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
-Expected Exception is ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
-Expected Exception is ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
-Expected Exception is ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Expected Exception is ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Expected Exception is ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Expected Exception is ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Expected Exception is ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Test 47 multiple tests for getSavepointId()
 8
 9

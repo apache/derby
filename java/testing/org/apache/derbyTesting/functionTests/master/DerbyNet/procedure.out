@@ -1,8 +1,8 @@
 testNegative
 create procedure asdf() language java external name 'asdfasdf' parameter style java
-EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf' because it is not a dot separated list. The expected format is <full java path>.<method name> .
+EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf' because it is not a list separated by periods. The expected format is <full java path>.<method name>.
 create procedure asdf() language java external name 'asdfasdf.' parameter style java
-EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf.' because it is not a dot separated list. The expected format is <full java path>.<method name> .
+EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf.' because it is not a list separated by periods. The expected format is <full java path>.<method name>.
 create procedure a23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789() language java external name 'asdf.asdf' parameter style java
 EXPECTED SQL Exception: (42622) The name 'A23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' is too long. The maximum length is '128'.
 create procedure asdf language java external name java.lang.Thread.currentThread parameter style java
@@ -55,11 +55,11 @@ testDelayedClassChecking
 call noclass()
 EXPECTED SQL Exception: (42X51) The class 'asdf' does not exist or is inaccessible. This can happen if the class is not public. SQLSTATE: XJ001: Java exception: 'asdf: java.lang.ClassNotFoundException'.
 call nomethod()
-EXPECTED SQL Exception: (42X50) No method was found to be able to match method call java.lang.Integer.asdf(), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call java.lang.Integer.asdf(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 call notstatic()
-EXPECTED SQL Exception: (42X50) No method was found to be able to match method call java.lang.Integer.equals(), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call java.lang.Integer.equals(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 call notvoid()
-EXPECTED SQL Exception: (42X50) No method was found to be able to match method call void java.lang.Runtime.getRuntime(), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call void java.lang.Runtime.getRuntime(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 testDuplicates
 create procedure PROCDUP() language java external name 'failAPP.fail0' parameter style java
 EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists.
@@ -82,7 +82,7 @@ ambigiousMethods
 call AMBIGIOUS01(?, ?)
 EXPECTED SQL Exception: (42X73) Method resolution for signature org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious1(int, java.lang.String, [Ljava.sql.ResultSet;) was ambiguous. (No single maximally specific method.)
 call AMBIGIOUS02(?, ?)
-EXPECTED SQL Exception: (42X50) No method was found to be able to match method call org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(int, int, java.sql.ResultSet[]), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(int, int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 No ResultSet or update count returned
 No ResultSet or update count returned
 zeroArgProcedures
@@ -182,9 +182,9 @@ I |B
 6 |'012345678     
 7 |int            
 CALL IRDRS(?)
-EXPECTED SQL Exception: (42X50) No method was found to be able to match method call org.apache.derbyTesting.functionTests.util.ProcedureTest.missingDynamicParameter(int, java.sql.ResultSet[]), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.missingDynamicParameter(int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 CALL rsi(?)
-EXPECTED SQL Exception: (42X50) No method was found to be able to match method call org.apache.derbyTesting.functionTests.util.ProcedureTest.badDynamicParameter(int, java.sql.ResultSet[]), even tried all combinations of object and primitive types and any possible type conversion for any parameters the method call may have.  It may be that the method exists, but it is not public and/or static, or that the parameter types are not method invocation convertible.
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.badDynamicParameter(int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 no dynamic result sets
 No ResultSet or update count returned
 Testing too many result sets

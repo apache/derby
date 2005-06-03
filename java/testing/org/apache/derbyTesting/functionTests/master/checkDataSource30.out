@@ -756,8 +756,8 @@ STATEMENT(this one was created with default holdability after the global transac
 PREPAREDSTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
 CALLABLESTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
 X@3 id 3
-Expected SQLException ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
-Expected SQLException ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Expected SQLException ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Expected SQLException ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Set connection to hold 
 CONNECTION(held) HOLDABILITY true
 CONNECTION(xa) HOLDABILITY false

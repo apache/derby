@@ -1024,7 +1024,7 @@ connect 'wombat' as conn2;
 ij(CONN2)> call app.notifyDMLDone();
 ...nested thread running using expired tec
 ...trying to loop through stale result set
-Got expected exception: SQL Exception: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+Got expected exception: SQL Exception: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Got expected exception: java.sql.SQLException: Statement closed.
 Got expected exception: java.sql.SQLException: Statement closed.
 0 rows inserted/updated/deleted

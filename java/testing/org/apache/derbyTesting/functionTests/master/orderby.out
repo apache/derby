@@ -335,7 +335,7 @@ ij> select by from obt;
 ERROR 42X01: Syntax error: Encountered "by" at line 1, column 8.
 ij> -- . order by on column not in query (error)
 select i from obt order by c;
-ERROR 42X04: Column 'C' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C' is not a column in the target table.
+ERROR 42X04: Column 'C' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C' is not a column in the target table.
 ij> -- . order by on column not in select, in table (error)
 select i from obt order by v;
 I          
@@ -356,10 +356,10 @@ I
 NULL       
 ij> -- . order by on qualified column name, incorrect correlation name (not allowed)
 select i from obt t order by obt.i;
-ERROR 42X04: Column 'OBT.I' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OBT.I' is not a column in the target table.
+ERROR 42X04: Column 'OBT.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OBT.I' is not a column in the target table.
 ij> -- . order by on qualified column name, incorrect column name (not allowed)
 select i from obt t order by obt.notexists;
-ERROR 42X04: Column 'OBT.NOTEXISTS' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'OBT.NOTEXISTS' is not a column in the target table.
+ERROR 42X04: Column 'OBT.NOTEXISTS' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OBT.NOTEXISTS' is not a column in the target table.
 ij> -- . order by on qualified column name
 create table t1(c1 int);
 0 rows inserted/updated/deleted
@@ -466,19 +466,19 @@ ERROR 42877: A qualified column name 'T3.C3' is not allowed in the ORDER BY clau
 ij> select c1 from t1 union select c3 from t3 order by asdf.c3;
 ERROR 42877: A qualified column name 'ASDF.C3' is not allowed in the ORDER BY clause.
 ij> select c1 from t1 order by sys.t1.c1;
-ERROR 42X04: Column 'SYS.T1.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SYS.T1.C1' is not a column in the target table.
+ERROR 42X04: Column 'SYS.T1.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SYS.T1.C1' is not a column in the target table.
 ij> select c1 from app.t1 order by sys.t1.c1;
-ERROR 42X04: Column 'SYS.T1.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'SYS.T1.C1' is not a column in the target table.
+ERROR 42X04: Column 'SYS.T1.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SYS.T1.C1' is not a column in the target table.
 ij> select c1 from t1 c order by app.c.c1;
 ERROR 42X10: 'APP.C' is not an exposed table name in the scope in which it appears.
 ij> select c1 from app.t1 c order by app.t1.c1;
-ERROR 42X04: Column 'APP.T1.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'APP.T1.C1' is not a column in the target table.
+ERROR 42X04: Column 'APP.T1.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'APP.T1.C1' is not a column in the target table.
 ij> -- a is not a column in t1
 select 1 as a from t1 order by t1.a;
-ERROR 42X04: Column 'T1.A' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T1.A' is not a column in the target table.
+ERROR 42X04: Column 'T1.A' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.A' is not a column in the target table.
 ij> -- t3.c1 does not exist
 select * from t1, t3 order by t3.c1;
-ERROR 42X04: Column 'T3.C1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T3.C1' is not a column in the target table.
+ERROR 42X04: Column 'T3.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T3.C1' is not a column in the target table.
 ij> -- rollback should release the prepared statements
 rollback ;
 ij> -- . order by on join
@@ -688,7 +688,7 @@ ij> -- rollback should release the prepared statements
 rollback ;
 ij> -- . order by and explicit for update (no, some cols)
 get cursor c1 as 'select i from obt order by i for update of v';
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- . order by and explicit read only (ok)
 get cursor c1 as 'select i from obt order by i for read only';
 ij> next c1;
@@ -1241,35 +1241,35 @@ ij> drop table test_number2;
 0 rows inserted/updated/deleted
 ij> -- error case
 select * from t order by d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select t.* from t order by d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select t.* from t order by t.d;
-ERROR 42X04: Column 'T.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T.D' is not a column in the target table.
+ERROR 42X04: Column 'T.D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T.D' is not a column in the target table.
 ij> select s.* from t s order by s.d;
-ERROR 42X04: Column 'S.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.D' is not a column in the target table.
+ERROR 42X04: Column 'S.D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S.D' is not a column in the target table.
 ij> select *, d from t order by d;
 ERROR 42X01: Syntax error: Encountered "," at line 1, column 9.
 ij> select t.*, d from t order by d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select t.*, d from t order by t.d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select t.*, d from t order by app.t.d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select s.*, d from t s order by s.d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select t.*, t.d from t order by t.d;
-ERROR 42X04: Column 'T.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T.D' is not a column in the target table.
+ERROR 42X04: Column 'T.D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T.D' is not a column in the target table.
 ij> select s.*, s.d from t s order by s.d;
-ERROR 42X04: Column 'S.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.D' is not a column in the target table.
+ERROR 42X04: Column 'S.D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S.D' is not a column in the target table.
 ij> select a, b, c from t order by d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select a from t order by d;
-ERROR 42X04: Column 'D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'D' is not a column in the target table.
+ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select t.a from t order by t.d;
-ERROR 42X04: Column 'T.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T.D' is not a column in the target table.
+ERROR 42X04: Column 'T.D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T.D' is not a column in the target table.
 ij> select s.a from t s order by s.d;
-ERROR 42X04: Column 'S.D' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'S.D' is not a column in the target table.
+ERROR 42X04: Column 'S.D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S.D' is not a column in the target table.
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- test fof using table correlation names 

@@ -31,7 +31,7 @@ from s aa (aa, bb, cc, dd, ee, ff), s bb (aa, bb, cc, dd, ee, ff);
 ERROR 42X03: Column name 'AA' is in more than one table in the FROM list.
 ij> -- verify using "exposed" names
 select a from s ss (aa, bb, cc, dd, ee, ff);
-ERROR 42X04: Column 'A' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'A' is not a column in the target table.
+ERROR 42X04: Column 'A' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'A' is not a column in the target table.
 ij> -- positive tests
 -- rename the columns
 select * from s ss (f, e, d, c, b, a) where f = 0;
@@ -97,7 +97,7 @@ from (select * from s) aa (aa, bb, cc, dd, ee, ff),
 ERROR 42X03: Column name 'AA' is in more than one table in the FROM list.
 ij> -- verify using "exposed" names
 select a from (select * from s) ss (aa, bb, cc, dd, ee, ff);
-ERROR 42X04: Column 'A' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'A' is not a column in the target table.
+ERROR 42X04: Column 'A' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'A' is not a column in the target table.
 ij> -- ambiguous column reference
 select a from (select * from s a, s b) ss;
 ERROR 42Y34: Column name 'A' matches more than one result column in table 'SS'.

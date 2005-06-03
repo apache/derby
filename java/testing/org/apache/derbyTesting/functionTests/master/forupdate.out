@@ -83,44 +83,44 @@ I          |V
 ij> -- . for update col not in sel list or in table
 -- this gets a 'no such column' error
 select i, v from t1 for update of g;
-ERROR 42X04: Column 'G' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'G' is not a column in the target table.
+ERROR 42X04: Column 'G' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'G' is not a column in the target table.
 ij> -- . for update col in select not in table (generated col)
 -- this gets a 'no such column' error
 select i+10 as iPlus10, v from t1 for update of iPlus10;
-ERROR 42X04: Column 'IPLUS10' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'IPLUS10' is not a column in the target table.
+ERROR 42X04: Column 'IPLUS10' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'IPLUS10' is not a column in the target table.
 ij> -- . for update on read only spec, variety of reasons 
 -- these will get cursor not updatable errors:
 -- join is not updatable
 select i from t1, t2 for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- no subqueries are updatable
 select i from t1 where i=(select i from t1) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select i from t1 where i in (select i from t1) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select i from t1 where exists (select i from t1) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select i from t1 where exists (select s from t2) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select i from t1 where exists (select s from t2 where i=s) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- note subquery in select expr is not updatable
 select (select s from t2) from t1 where exists (select i from t1) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select (select s from t2 where i=s) from t1 where exists (select i from t1) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select * from (select i, d from t1) a for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select * from (select i+10, d from t1) a for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- constant table not updatable
 select * from (values (1, 2, 3)) a for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> values (1, 2, 3) for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- unions are not updatable
 select * from t1 union all select * from t1 for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- . table with/without correlation name
 -- the idea is that the delete is against the table name, not the correlation name
 -- we've already seen the without correlation name case in previous tests
@@ -158,7 +158,7 @@ I
 ij> -- . use column as named in as clause of select v. as named in base table
 -- the column name must be the table's column name, not the select list name
 select i as z from t1 for update of z;
-ERROR 42X04: Column 'Z' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'Z' is not a column in the target table.
+ERROR 42X04: Column 'Z' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'Z' is not a column in the target table.
 ij> -- . use column as named in as clause that matches underlying column name
 -- this uses the select list name which *is* an underlying column name
 -- note that the column updated is the underlying column, *not* the

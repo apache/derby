@@ -48,7 +48,7 @@ Row: 456,hi yourself
 Row: 180,rubber ducky                                      
 Row: 3,you are the one                                   
 Have 4 rows in table at start
-ERROR 42X31: Column 'C' is not in FOR UPDATE list of cursor 'SQLCUR1'.
+ERROR 42X31: Column 'C' is not in the FOR UPDATE list of cursor 'SQLCUR1'.
 PASS: update of non-existant column caught
 PASS: update of read-only cursor caught
 PASS: update of fetch-only cursor caught
@@ -57,7 +57,7 @@ PASS: update of join cursor caught
 PASS: update of derived table cursor caught
 PASS: update of values clause cursor caught
 PASS: update of subquery cursor caught
-ERROR 42X29: Update table 'S' is not target of cursor 'SQLCUR2'.
+ERROR 42X29: Update table 'S' is not the target of cursor 'SQLCUR2'.
 PASS: update table and cursor table mismatch caught
 ERROR XCL08: Cursor 'SQLCUR2' is not on a row.
 PASS: Attempt to update cursor before first row caught
@@ -90,7 +90,7 @@ Row: 1976,Gumby was here
 PASS: expected and got 1 rowon stmt: update: valid update
 PASS: expected and got true
 Row: 1986,Dan was here                                      
-ERROR 42X31: Column 'C' is not in FOR UPDATE list of cursor 'CS4395'.
+ERROR 42X31: Column 'C' is not in the FOR UPDATE list of cursor 'CS4395'.
 PASS: Attempt to update changed invalid cursor caught
 PASS: expected and got true
 Row: 1986,Dan was here                                      
@@ -100,7 +100,7 @@ Row: 1986,Dan was here
 PASS: expected and got 1 rowon stmt: update: valid update
 PASS: expected and got true
 Row: 1996,Dan was here                                      
-ERROR 42X31: Column 'C' is not in FOR UPDATE list of cursor 'SQLCUR3'.
+ERROR 42X31: Column 'C' is not in the FOR UPDATE list of cursor 'SQLCUR3'.
 PASS: Attempt to update changed invalid cursor caught
 PASS: expected and got true
 Row: 1996,Dan was here                                      

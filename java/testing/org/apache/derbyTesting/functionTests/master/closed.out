@@ -2,8 +2,8 @@ Test closed starting
 Test case for Derby-62 - serialization error with SQLException
 'DROP TABLE' cannot be performed on 'APP.DERBY62_DAIN_SUNDSTROM' because it does not exist.
 ERROR XJ012: 'Statement' already closed.
-ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
-ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 ERROR 08003: No current connection.
 ERROR 08003: No current connection.
 ERROR 08003: No current connection.

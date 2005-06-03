@@ -251,9 +251,9 @@ autocommit off;
 ij(C2)> insert into AUTH_TEST.t1 values 1,2;
 2 rows inserted/updated/deleted
 ij(C2)> readonly off;
-ERROR 25501: Unable to set the connection read only property in an active transaction.
+ERROR 25501: Unable to set the connection read-only property in an active transaction.
 ij(C2)> readonly on;
-ERROR 25501: Unable to set the connection read only property in an active transaction.
+ERROR 25501: Unable to set the connection read-only property in an active transaction.
 ij(C2)> rollback;
 ij(C2)> autocommit on;
 ij(C2)> --

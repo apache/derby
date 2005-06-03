@@ -126,7 +126,7 @@ ij> values (2, 3), (4, 5, 6);
 ERROR 42X59: The number of columns in each VALUES constructor must be the same.
 ij> -- empty element
 values 1, , 2;
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> -- all ? parameters in a column position
 prepare v1 as 'values (1, ?, 2), (3, ?, 4), (5, ?, 7)';
 ERROR 42Y10: A table constructor that is not in an INSERT statement has all ? parameters in one of its columns.  For each column, at least one of the rows must have a non-parameter.
@@ -491,13 +491,13 @@ ij> -- boolean expression EXISTS disallowed in values and select clause
 select exists (values 1) from t1;
 ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 8.
 ij> values exists (values 2);
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> -- boolean expression EXISTS diallowed in update set clause too
 update t1 set c11 = exists(values 1);
 ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 21.
 ij> -- ?: not supported anymore
 values not true ? false : true;
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select not true ? false : true from t1;
 ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.

@@ -4,14 +4,14 @@ ij> -- tests for primary/unique key
 -- negative tests
 -- duplicate primary keys
 create table neg (c1 int not null primary key, c2 int, c3 int not null constraint asdf primary key);
-ERROR 42X90: More than 1 primary key constraint specified for table 'NEG'.
+ERROR 42X90: More than one primary key constraint specified for table 'NEG'.
 ij> create table neg (c1 int not null primary key, c2 int, c3 int not null constraint asdf primary key);
-ERROR 42X90: More than 1 primary key constraint specified for table 'NEG'.
+ERROR 42X90: More than one primary key constraint specified for table 'NEG'.
 ij> create table neg (c1 int not null primary key, c2 int not null, primary key(c1, c2));
-ERROR 42X90: More than 1 primary key constraint specified for table 'NEG'.
+ERROR 42X90: More than one primary key constraint specified for table 'NEG'.
 ij> -- duplicate constraint names
 create table neg (c1 int not null constraint asdf primary key, c2 int, c3 int constraint asdf unique);
-ERROR 42X91: Constraint name 'ASDF' appears more than once in the create table statement.
+ERROR 42X91: Constraint name 'ASDF' appears more than once in the CREATE TABLE statement. 
 ij> -- duplicate column names in same constraint column list
 create table neg (c1 int not null, c2 int not null, primary key(c1, c2, c1));
 ERROR 42X92: Column name 'C1' appears more than once in a constraint's column list.

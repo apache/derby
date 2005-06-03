@@ -428,10 +428,10 @@ update t2 set s = s where current of c1;
 ERROR XCL08: Cursor 'C1' is not on a row.
 ij> -- .different table name
 update t1 set i = i where current of c1;
-ERROR 42X29: Update table 'T1' is not target of cursor 'C1'.
+ERROR 42X29: Update table 'T1' is not the target of cursor 'C1'.
 ij> -- .non-existant table
 update not_exists set i = i where current of c1;
-ERROR 42X29: Update table 'NOT_EXISTS' is not target of cursor 'C1'.
+ERROR 42X29: Update table 'NOT_EXISTS' is not the target of cursor 'C1'.
 ij> close c1;
 ij> -- .update base table, not exposed table name
 -- (this one should work, since base table)
@@ -441,7 +441,7 @@ ERROR XCL08: Cursor 'C2' is not on a row.
 ij> -- .match correlation name
 -- (this one should fail, since correlation name)
 update asdf set s = s where current of c2;
-ERROR 42X29: Update table 'ASDF' is not target of cursor 'C2'.
+ERROR 42X29: Update table 'ASDF' is not the target of cursor 'C2'.
 ij> close c2;
 ij> -- .non-updatable cursor
 -- NOTE - forupdate responsible for extensive tests
@@ -686,7 +686,7 @@ I          |V         |D                     |T
 1          |999       |1.1E12                |11:11:11
 ij> -- update column not in FOR UPDATE OF list (negative test)
 update t1 set i = 999 where current of c13;
-ERROR 42X31: Column 'I' is not in FOR UPDATE list of cursor 'C13'.
+ERROR 42X31: Column 'I' is not in the FOR UPDATE list of cursor 'C13'.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -826,7 +826,7 @@ C1
 -----------
 1          
 ij> execute u1;
-ERROR 42X29: Update table 'T3' is not target of cursor 'C1'.
+ERROR 42X29: Update table 'T3' is not the target of cursor 'C1'.
 ij> select * from t4;
 C1         |C2         
 -----------------------
@@ -848,7 +848,7 @@ I          |V         |D                     |T
 ------------------------------------------------------
 1          |1111111111|1.1E12                |11:11:11
 ij> execute u1;
-ERROR 42X29: Update table 'T3' is not target of cursor 'C1'.
+ERROR 42X29: Update table 'T3' is not the target of cursor 'C1'.
 ij> close c1;
 ij> -- now, reopen c1 on t3, but as a read only cursor
 select * from t3;

@@ -43,11 +43,11 @@ ij(CONNECTION1)> -- (-ve case) connect without the encryptionKey
 --  wrong length
 connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=616364656667686961626364656568';
 ERROR XJ040: Failed to start database 'encdbcbc_key', see the next exception for details.
-ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and re-try. 
+ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(CONNECTION1)> -- wrong key
 connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=68626364656667686961626364656568';
 ERROR XJ040: Failed to start database 'encdbcbc_key', see the next exception for details.
-ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and re-try. 
+ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(CONNECTION1)> select * from t1;
 ERROR 08003: No current connection.
 ij(CONNECTION1)> -- correct key
@@ -80,7 +80,7 @@ ERROR 08006: Database 'encdbcbc_key2' shutdown.
 ij(CONNECTION4)> -- create db from backup using wrong key
 connect 'jdbc:derby:encdbcbc_key3;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61226364656667686961626364656568';
 ERROR XJ040: Failed to start database 'encdbcbc_key3', see the next exception for details.
-ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and re-try. 
+ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(CONNECTION4)> select * from t1;
 ERROR 08003: No current connection.
 ij(CONNECTION4)> connect 'jdbc:derby:encdbcbc_key3;shutdown=true';

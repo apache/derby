@@ -839,21 +839,21 @@ ij> -- 0 increment
 -- pass in DB2 UDB
 -- fail in DB2 CS
 create table ni (x int, y int generated always as identity (increment by 0));
-ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y int generated always as identity (start with 0, increment by 0));
-ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y smallint generated always as identity (increment by 0));
-ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y smallint generated always as identity (start with 0, increment by 0));
-ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y int generated always as identity (increment by 0);
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 75.
 ij> create table ni (x int, y int generated always as identity (start with 0, increment by 0));
-ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y bigint generated always as identity (increment by 0));
-ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y bigint generated always as identity (start with 0, increment by 0));
-ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment must be non zero.
+ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> -- out of range start 
 -- actually the first few are valid
 create table ni (x int, y int generated always as identity (start with 127, increment by -1));
@@ -1100,11 +1100,11 @@ X
 6          
 ij> -- should fail because alter table add generated column is not supported
 alter table base add column y smallint generated always as identity (start with  10);
-ERROR 42601: ALTER TABLE statement can not add an IDENTITY column to a table. 
+ERROR 42601: ALTER TABLE statement cannot add an IDENTITY column to a table.
 ij> alter table base add column y int generated always as identity (start with  10);
-ERROR 42601: ALTER TABLE statement can not add an IDENTITY column to a table. 
+ERROR 42601: ALTER TABLE statement cannot add an IDENTITY column to a table.
 ij> alter table base add column y bigint generated always as identity (start with  10);
-ERROR 42601: ALTER TABLE statement can not add an IDENTITY column to a table. 
+ERROR 42601: ALTER TABLE statement cannot add an IDENTITY column to a table.
 ij> -- make sure alter table failures above rolled themselves back 
 select * from base;
 X          

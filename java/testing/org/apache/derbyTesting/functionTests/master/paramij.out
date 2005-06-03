@@ -90,7 +90,7 @@ ERROR 42X36: The 'not' operator is not allowed to take a ? parameter as an opera
 ij> prepare p1 as 'select * from t1 where lower(?)';
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'VARCHAR' expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where lower(?) and 1=1';
-ERROR 42Y94: An AND or OR has a non-Boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.
+ERROR 42Y94: An AND or OR has a non-boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.  
 ij> prepare p1 as 'select * from t1 where {fn length(?)}';
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where {fn locate(?,''a'',1)}';

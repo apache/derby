@@ -412,7 +412,7 @@ ERROR 42X14: 'c1' is not a column in table or VTI 'T4'.
 ij> alter table t4 add constraint t4fk foreign key ("c1") references t0;
 ERROR 42X14: 'c1' is not a column in table or VTI 'T4'.
 ij> alter table t4 add constraint t4ck check ("c1" <> 4);
-ERROR 42X04: Column 'c1' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'c1' is not a column in the target table.
+ERROR 42X04: Column 'c1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'c1' is not a column in the target table.
 ij> -- add primary key to non-empty table with duplicates
 alter table t4 add primary key(c1);
 ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T4'.
@@ -561,7 +561,7 @@ ij> drop table xxx;
 ij> create table xxx(c1 int);
 0 rows inserted/updated/deleted
 ij> execute p1;
-ERROR 42X04: Column 'C2' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'C2' is not a column in the target table.
+ERROR 42X04: Column 'C2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C2' is not a column in the target table.
 ij> alter table xxx add column c2 int;
 0 rows inserted/updated/deleted
 ij> execute p1;
@@ -586,15 +586,15 @@ ij> -- drop constraint
 -- negative tests
 -- drop non-existent constraint
 alter table t0 drop constraint notexists;
-ERROR 42X86: ALTER table failed. There is no constraint 'APP.NOTEXISTS' on table 'APP.T0'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOTEXISTS' on table 'APP.T0'. 
 ij> -- constraint/table mismatch
 alter table t1 drop constraint p1;
-ERROR 42X86: ALTER table failed. There is no constraint 'APP.P1' on table 'APP.T1'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P1' on table 'APP.T1'. 
 ij> -- In DB2 compatibility mode, we cann't add a nullable primary key
 alter table t0_1 add constraint p2 primary key(c1);
 ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
 ij> alter table t0_1 drop constraint p2;
-ERROR 42X86: ALTER table failed. There is no constraint 'APP.P2' on table 'APP.T0_1'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P2' on table 'APP.T0_1'. 
 ij> -- positive tests
 -- verify that we can add/drop/add/drop/... constraints
 alter table t0_1 add column c2 int not null constraint p2 primary key default 0;
@@ -758,7 +758,7 @@ alter table x drop constraint badschema.newcons;
 ERROR 42Y07: Schema 'BADSCHEMA' does not exist
 ij> -- fail
 alter table x drop constraint newschema.newcons;
-ERROR 42X86: ALTER table failed. There is no constraint 'NEWSCHEMA.NEWCONS' on table 'APP.X'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'NEWSCHEMA.NEWCONS' on table 'APP.X'. 
 ij> -- ok
 alter table x drop constraint app.newcons;
 0 rows inserted/updated/deleted
@@ -784,7 +784,7 @@ ij> set schema emptyschema;
 0 rows inserted/updated/deleted
 ij> -- fail, cannot find emptyschema.conn
 alter table app.x drop constraint emptyschema.con;
-ERROR 42X86: ALTER table failed. There is no constraint 'EMPTYSCHEMA.CON' on table 'APP.X'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'EMPTYSCHEMA.CON' on table 'APP.X'. 
 ij> select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1;
 SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -836,9 +836,9 @@ C1         |C2
 1          |1          
 1          |1          
 ij> alter table t1 drop primary key;
-ERROR 42X86: ALTER table failed. There is no constraint 'PRIMARY KEY' on table 'APP.T1'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'PRIMARY KEY' on table 'APP.T1'. 
 ij> alter table t1 drop constraint emptyschema.C1;
-ERROR 42X86: ALTER table failed. There is no constraint 'EMPTYSCHEMA.C1' on table 'APP.T1'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'EMPTYSCHEMA.C1' on table 'APP.T1'. 
 ij> alter table t1 drop constraint nosuchschema.C2;
 ERROR 42Y07: Schema 'NOSUCHSCHEMA' does not exist
 ij> alter table t1 add constraint emptyschema.C1_PLUS_C2 check ((c1 + c2) < 100);
@@ -849,7 +849,7 @@ ij> prepare alplus as 'alter table t1 drop constraint C1_PLUS_C2';
 ij> alter table APP.t1 drop constraint APP.C1_PLUS_C2;
 0 rows inserted/updated/deleted
 ij> execute alplus;
-ERROR 42X86: ALTER table failed. There is no constraint 'APP.C1_PLUS_C2' on table 'APP.T1'.
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C1_PLUS_C2' on table 'APP.T1'. 
 ij> remove alplus;
 ij> drop table t1;
 0 rows inserted/updated/deleted

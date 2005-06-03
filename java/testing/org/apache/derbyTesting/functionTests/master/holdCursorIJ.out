@@ -32,9 +32,9 @@ commit;
 ij> -- now try the fetch on cursors again after commit
 -- cursors jdk1 and jdk2 will give errors
 next jdk1;
-ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 ij> next jdk2;
-ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 ij> next jdk4;
 C11        |C12        
 -----------------------
@@ -72,11 +72,11 @@ rollback;
 ij> -- now try the fetch on cursors again after rollback
 -- all the cursors will give errors
 next jdk1;
-ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 ij> next jdk2;
-ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 ij> next jdk4;
-ERROR XCL16: ResultSet not open, operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 ij> -- clean up.
 close jdk1;
 ij> close jdk2;
