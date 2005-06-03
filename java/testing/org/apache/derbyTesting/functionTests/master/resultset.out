@@ -108,7 +108,7 @@ getTableName(6): T
 getSchemaName(6): APP
 getCatalogName(6): 
 getColumnType(6): 92
-getPrecision(6): 0
+getPrecision(6): 8
 getScale(6): 0
 getColumnTypeName(6): TIME
 isReadOnly(6): false
@@ -127,8 +127,8 @@ getTableName(7): T
 getSchemaName(7): APP
 getCatalogName(7): 
 getColumnType(7): 93
-getPrecision(7): 0
-getScale(7): 0
+getPrecision(7): 26
+getScale(7): 6
 getColumnTypeName(7): TIMESTAMP
 isReadOnly(7): false
 isWritable(7): Expected isWritable value

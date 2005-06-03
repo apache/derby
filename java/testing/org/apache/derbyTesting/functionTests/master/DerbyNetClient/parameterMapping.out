@@ -1680,7 +1680,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setLong() IC JDBC MATCH (INVALID)
   setFloat() IC JDBC MATCH (INVALID)
   setDouble() IC JDBC MATCH (INVALID)
-  setBigDecimal()  (?????):BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "99".. See attached Throwable. JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
   setBigDecimal(null) getTime=null was null true CLOUD EXT (OK)
   setBoolean() IC JDBC MATCH (INVALID)
   setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
@@ -1707,7 +1707,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setUnicodeStream(null) getTime=null was null true CLOUD EXT (OK)
   setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
-  setObject(java.math.BigDecimal)  (?????):BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "72".. See attached Throwable. JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
   setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
   setObject(java.lang.Long) IC JDBC MATCH (INVALID)
@@ -1811,7 +1811,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setLong() IC JDBC MATCH (INVALID)
   setFloat() IC JDBC MATCH (INVALID)
   setDouble() IC JDBC MATCH (INVALID)
-  setBigDecimal()  (?????):BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "99".. See attached Throwable. JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
   setBigDecimal(null) getTimestamp=null was null true CLOUD EXT (OK)
   setBoolean() IC JDBC MATCH (INVALID)
   setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
@@ -1838,7 +1838,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setUnicodeStream(null) getTimestamp=null was null true CLOUD EXT (OK)
   setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
-  setObject(java.math.BigDecimal)  (?????):BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "72".. See attached Throwable. JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
   setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
   setObject(java.lang.Long) IC JDBC MATCH (INVALID)

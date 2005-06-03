@@ -53,8 +53,6 @@ public abstract class DataTypeUtilities  {
 				return dtd.getMaximumWidth();
 			case Types.SMALLINT:
 				return 5;
-			case Types.DATE:
-				return 10;
 			case JDBC30Translation.SQL_TYPES_BOOLEAN:
 				return 1;
 		}

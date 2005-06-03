@@ -115,9 +115,22 @@ public final class TypeId implements Formatable
         public static final int CLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
         public static final int NCLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
 
-        public static final int DATE_MAXWIDTH           = 4;
-        public static final int TIME_MAXWIDTH           = 8;
-        public static final int TIMESTAMP_MAXWIDTH      = 12;
+        // Max width for datetime values is the length of the
+        // string returned from a call to "toString()" on the
+        // java.sql.Date, java.sql.Time, and java.sql.Timestamp
+        // classes (the result of toString() on those classes
+        // is defined by the JDBC API).  This value is also
+        // used as the "precision" for those types.
+        public static final int DATE_MAXWIDTH           = 10;	// yyyy-mm-dd
+        public static final int TIME_MAXWIDTH           = 8;	// hh:mm:ss
+        public static final int TIMESTAMP_MAXWIDTH      = 26;	// yyyy-mm-dd hh:mm:ss.ffffff
+
+        // Scale DOES exist for time values.  For a TIMESTAMP value,
+        // it's 6 ('ffffff'); for a TIME value, it's 0 (because there
+        // are no fractional seconds).  Note that date values do
+        // not have a scale.
+        public static final int TIME_SCALE           = 0;
+        public static final int TIMESTAMP_SCALE      = 6;
 
         /* These define all the type names for SQL92 and JDBC 
          * NOTE: boolean is SQL3
@@ -714,10 +727,8 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.DATE_TYPE_ID:
                                 typePrecedence = DATE_PRECEDENCE;
                                 javaTypeName = "java.sql.Date";
-                                /* this is used in ResultSetMetaData.getPrecision
-                                 * undefined for datetime types
-                                 */
-                                maxMaxWidth = -1;
+                                maxMaxWidth = TypeId.DATE_MAXWIDTH;
+                                maxPrecision = TypeId.DATE_MAXWIDTH;
                                 isDateTimeTimeStampTypeId = true;
                                 break;
 
@@ -830,20 +841,18 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.TIME_TYPE_ID:
                                 typePrecedence = TIME_PRECEDENCE;
                                 javaTypeName = "java.sql.Time";
-                                /* this is used in ResultSetMetaData.getPrecision
-                                 * undefined for datetime types
-                                 */
-                                maxMaxWidth = -1;
+                                maxScale = TypeId.TIME_SCALE;
+                                maxMaxWidth = TypeId.TIME_MAXWIDTH;
+                                maxPrecision = TypeId.TIME_MAXWIDTH;
                                 isDateTimeTimeStampTypeId = true;
                                 break;
 
                         case StoredFormatIds.TIMESTAMP_TYPE_ID:
                                 typePrecedence = TIMESTAMP_PRECEDENCE;
                                 javaTypeName = "java.sql.Timestamp";
-                                /* this is used in ResultSetMetaData.getPrecision
-                                 * undefined for datetime types
-                                 */
-                                maxMaxWidth = -1;
+                                maxScale = TypeId.TIMESTAMP_SCALE;
+                                maxMaxWidth = TypeId.TIMESTAMP_MAXWIDTH;
+                                maxPrecision = TypeId.TIMESTAMP_MAXWIDTH;
                                 isDateTimeTimeStampTypeId = true;
                                 break;
 

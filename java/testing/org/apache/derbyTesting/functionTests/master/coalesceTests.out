@@ -491,40 +491,40 @@ SELECT COALESCE(DATECOL,CHARCOL,VARCHARCOL,DATECOL) from AllDataTypesTable
 	 ------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(TIMECOL,CHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
 	{15:30:20}
 	{null}
 SELECT COALESCE(TIMECOL,CHARCOL,VARCHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
 	{15:30:20}
 	{15:30:20}
 SELECT COALESCE(TIMECOL,CHARCOL,VARCHARCOL,TIMECOL) from AllDataTypesTable
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
 	{15:30:20}
 	{15:30:20}
 SELECT COALESCE(TIMESTAMPCOL,CHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{null}
 SELECT COALESCE(TIMESTAMPCOL,CHARCOL,VARCHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(TIMESTAMPCOL,CHARCOL,VARCHARCOL,TIMESTAMPCOL) from AllDataTypesTable
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(BLOBCOL,BLOBCOL) from AllDataTypesTable
 	 COL1(datatype : BLOB, precision : 1024, scale : 0)
@@ -1642,23 +1642,23 @@ SELECT VALUE(CHARCOL,DATECOL) from AllDataTypesTable
 	{null}
 SELECT COALESCE(CHARCOL,TIMECOL) from AllDataTypesTable
  Coalesc/Value with operands CHAR(60) , TIME will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT VALUE(CHARCOL,TIMECOL) from AllDataTypesTable
  Coalesc/Value with operands CHAR(60) , TIME will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(CHARCOL,TIMESTAMPCOL) from AllDataTypesTable
  Coalesc/Value with operands CHAR(60) , TIMESTAMP will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT VALUE(CHARCOL,TIMESTAMPCOL) from AllDataTypesTable
  Coalesc/Value with operands CHAR(60) , TIMESTAMP will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(CHARCOL,BLOBCOL) from AllDataTypesTable
  Operands CHAR(60) , BLOB(1k) are incompatible for Coalesce/Value function
@@ -1796,23 +1796,23 @@ SELECT VALUE(VARCHARCOL,DATECOL) from AllDataTypesTable
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(VARCHARCOL,TIMECOL) from AllDataTypesTable
  Coalesc/Value with operands VARCHAR(60) , TIME will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT VALUE(VARCHARCOL,TIMECOL) from AllDataTypesTable
  Coalesc/Value with operands VARCHAR(60) , TIME will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(VARCHARCOL,TIMESTAMPCOL) from AllDataTypesTable
  Coalesc/Value with operands VARCHAR(60) , TIMESTAMP will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT VALUE(VARCHARCOL,TIMESTAMPCOL) from AllDataTypesTable
  Coalesc/Value with operands VARCHAR(60) , TIMESTAMP will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(VARCHARCOL,BLOBCOL) from AllDataTypesTable
  Operands VARCHAR(60) , BLOB(1k) are incompatible for Coalesce/Value function
@@ -2664,7 +2664,7 @@ SELECT VALUE(TIMECOL,DOUBLECOL) from AllDataTypesTable
 expected exception The data type, length or value of arguments 'TIME' and 'DOUBLE' is incompatible.
 SELECT COALESCE(TIMECOL,CHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIME , CHAR(60) will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
@@ -2672,7 +2672,7 @@ SELECT COALESCE(TIMECOL,CHARCOL) from AllDataTypesTable
 	{null}
 SELECT VALUE(TIMECOL,CHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIME , CHAR(60) will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
@@ -2680,7 +2680,7 @@ SELECT VALUE(TIMECOL,CHARCOL) from AllDataTypesTable
 	{null}
 SELECT COALESCE(TIMECOL,VARCHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIME , VARCHAR(60) will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
@@ -2688,7 +2688,7 @@ SELECT COALESCE(TIMECOL,VARCHARCOL) from AllDataTypesTable
 	{15:30:20}
 SELECT VALUE(TIMECOL,VARCHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIME , VARCHAR(60) will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
@@ -2732,7 +2732,7 @@ SELECT VALUE(TIMECOL,DATECOL) from AllDataTypesTable
 expected exception The data type, length or value of arguments 'TIME' and 'DATE' is incompatible.
 SELECT COALESCE(TIMECOL,TIMECOL) from AllDataTypesTable
  Coalesc/Value with operands TIME , TIME will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
@@ -2740,7 +2740,7 @@ SELECT COALESCE(TIMECOL,TIMECOL) from AllDataTypesTable
 	{null}
 SELECT VALUE(TIMECOL,TIMECOL) from AllDataTypesTable
  Coalesc/Value with operands TIME , TIME will have result data type of TIME
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{15:30:20}
@@ -2796,29 +2796,29 @@ SELECT VALUE(TIMESTAMPCOL,DOUBLECOL) from AllDataTypesTable
 expected exception The data type, length or value of arguments 'TIMESTAMP' and 'DOUBLE' is incompatible.
 SELECT COALESCE(TIMESTAMPCOL,CHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIMESTAMP , CHAR(60) will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{null}
 SELECT VALUE(TIMESTAMPCOL,CHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIMESTAMP , CHAR(60) will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{null}
 SELECT COALESCE(TIMESTAMPCOL,VARCHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIMESTAMP , VARCHAR(60) will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT VALUE(TIMESTAMPCOL,VARCHARCOL) from AllDataTypesTable
  Coalesc/Value with operands TIMESTAMP , VARCHAR(60) will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception because char value does not match a time/timestamp format The syntax of the string representation of a datetime value is incorrect.
 SELECT COALESCE(TIMESTAMPCOL,LONGVARCHARCOL) from AllDataTypesTable
  Operands TIMESTAMP , LONG VARCHAR are incompatible for Coalesce/Value function
@@ -2864,16 +2864,16 @@ SELECT VALUE(TIMESTAMPCOL,TIMECOL) from AllDataTypesTable
 expected exception The data type, length or value of arguments 'TIMESTAMP' and 'TIME' is incompatible.
 SELECT COALESCE(TIMESTAMPCOL,TIMESTAMPCOL) from AllDataTypesTable
  Coalesc/Value with operands TIMESTAMP , TIMESTAMP will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{null}
 SELECT VALUE(TIMESTAMPCOL,TIMESTAMPCOL) from AllDataTypesTable
  Coalesc/Value with operands TIMESTAMP , TIMESTAMP will have result data type of TIMESTAMP
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
@@ -3066,164 +3066,164 @@ TestF7b - value(varcharCol,dateCol) will fail because one row has invalid string
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestG - focus on time datatypes
 TestG1a - coalesce(timeCol,timeCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 TestG1b - value(timeCol,timeCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 TestG2a - coalesce(timeCol,charCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 TestG2b - value(timeCol,charCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 TestG3a - coalesce(charCol,timeCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:31}
 TestG3b - value(charCol,timeCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:31}
 TestG4a - coalesce(timeCol,varcharCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 TestG4b - value(timeCol,varcharCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 TestG5a - coalesce(varcharCol,timeCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:31}
 TestG5b - value(varcharCol,timeCol)
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:31}
 TestG - Try invalid string representation of time into chars and varchars and then use them in coalesce function with time datatype
 TestG6a - coalesce(charCol,timeCol) will fail because one row has invalid string representation of time in the char column
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestG6b - value(charCol,timeCol) will fail because one row has invalid string representation of time in the char column
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestG7a - coalesce(varcharCol,timeCol) will fail because one row has invalid string representation of time in the varchar column
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestG7b - value(varcharCol,timeCol) will fail because one row has invalid string representation of time in the varchar column
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestG - Following will work fine with invalid string representation of time because timeCol is not null and hence we don't look at invalid time string in char/varchar columns
 TestG8a - coalesce(timeCol,charCol) will pass because timeCol is non-null for all rows in table TG and hence we don't look at charCol's invalid time string
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 	{12:30:33}
 TestG8b - value(timeCol,charCol) will pass because timeCol is non-null for all rows in table TG and hence we don't look at charCol's invalid time string
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 	{12:30:33}
 TestG9a - coalesce(timeCol,varcharCol) will pass because timeCol is non-null for all rows in table TG and hence we don't look at varcharCol's invalid time string
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 	{12:30:33}
 TestG9b - value(timeCol,varcharCol) will pass because timeCol is non-null for all rows in table TG and hence we don't look at varcharCol's invalid time string
-	 COL1(datatype : TIME, precision : 0, scale : 0)
+	 COL1(datatype : TIME, precision : 8, scale : 0)
 	 -----------------------------------------------
 	{null}
 	{12:30:30}
 	{12:30:33}
 TestH - focus on timestamp datatypes
 TestH1a - coalesce(timestampCol,timestampCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH1b - value(timestampCol,timestampCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH2a - coalesce(timestampCol,charCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH2b - value(timestampCol,charCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH3a - coalesce(charCol,timestampCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH3b - value(charCol,timestampCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH4a - coalesce(timestampCol,varcharCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH4b - value(timestampCol,varcharCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH5a - coalesce(varcharCol,timestampCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH5b - value(varcharCol,timestampCol)
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 	{null}
 	{xxxxxxFILTERED-TIMESTAMPxxxxx}
 TestH - Try invalid string representation of timestamp into chars and varchars and then use them in coalesce function with timestamp datatype
 TestH6a - coalesce(charCol,timestampCol) will fail because one row has invalid string representation of timestamp in the char column
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestH6b - value(charCol,timestampCol) will fail because one row has invalid string representation of timestamp in the char column
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestH7a - coalesce(varcharCol,timestampCol) will fail because one row has invalid string representation of timestamp in the varchar column
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestH7b - value(varcharCol,timestampCol) will fail because one row has invalid string representation of timestamp in the varchar column
-	 COL1(datatype : TIMESTAMP, precision : 0, scale : 0)
-	 ----------------------------------------------------
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
 expected exception The syntax of the string representation of a datetime value is incorrect.
 TestE - focus on smallint datatypes
 TestE1 - coalesce(smallintCol,smallintCol)
