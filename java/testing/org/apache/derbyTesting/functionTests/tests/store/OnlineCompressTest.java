@@ -206,16 +206,26 @@ public class OnlineCompressTest extends BaseTest
         String  data1_str = new String(data1_data);
         String  data2_str = new String(data2_data);
 
-        for (int i = 0; i < num_rows; i++)
+        int row_count = 0;
+        try
         {
-            insert_stmt.setInt(1, i);               // keycol
-            insert_stmt.setInt(2, i * 10);          // indcol1
-            insert_stmt.setInt(3, i * 100);         // indcol2
-            insert_stmt.setInt(4, -i);              // indcol3
-            insert_stmt.setString(5, data1_str);   // data1_data
-            insert_stmt.setString(6, data2_str);   // data2_data
+            for (;row_count < num_rows; row_count++)
+            {
+                insert_stmt.setInt(1, row_count);               // keycol
+                insert_stmt.setInt(2, row_count * 10);          // indcol1
+                insert_stmt.setInt(3, row_count * 100);         // indcol2
+                insert_stmt.setInt(4, -row_count);              // indcol3
+                insert_stmt.setString(5, data1_str);            // data1_data
+                insert_stmt.setString(6, data2_str);            // data2_data
 
-            insert_stmt.execute();
+                insert_stmt.execute();
+            }
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println(
+                "Exception while trying to insert row number: " + row_count);
+            throw sqle;
         }
 
         if (create_table)
@@ -498,6 +508,73 @@ public class OnlineCompressTest extends BaseTest
         testProgress("end deleteAllRows," + num_rows + " row test.");
     }
 
+    private void simpleDeleteAllRows(
+    Connection  conn,
+    boolean     create_table,
+    boolean     long_table,
+    String      schemaName,
+    String      table_name,
+    int         num_rows) 
+        throws SQLException 
+    {
+        testProgress(
+            "begin simpleDeleteAllRows," + num_rows + " row test, create = " + 
+                create_table + ".");
+
+
+        if (long_table)
+            createAndLoadLongTable(conn, create_table, table_name, num_rows);
+        else
+            createAndLoadTable(conn, create_table, table_name, num_rows);
+
+        if (verbose)
+            testProgress("Calling compress.");
+
+        // compress with no deletes should not affect size
+        int[] ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        int[] ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change.", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        testProgress("no delete case complete.");
+
+        // delete all the rows.
+        ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        executeQuery(conn, "delete from " + table_name, true);
+
+        if (verbose)
+            testProgress("deleted all rows, now calling compress.");
+
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        // An empty table has 2 pages, one allocation page and the 1st page
+        // which will have a system row in it.  The space vti only reports
+        // a count of the user pages so the count is 1.
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != 1)
+        {
+            log_wrong_count(
+                "Expected all pages to be truncated.",
+                table_name, num_rows, 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        testProgress("delete all rows case succeeded.");
+
+        conn.commit();
+
+        testProgress("end simple deleteAllRows," + num_rows + " row test.");
+    }
+
     /**
      * Check/exercise purge pass phase.
      * <p>
@@ -640,13 +717,21 @@ public class OnlineCompressTest extends BaseTest
 
         // make sure table is back to all deleted row state.  lock timeout
         // will abort transaction.
+
+        // delete all rows and commit.
         executeQuery(conn, "delete from " + table_name, true);
+
+        // compress all space and commit.
         callCompress(conn, "APP", table_name, true, true, true, true);
+
+        // add back all rows and commit.
         if (long_table)
             createAndLoadLongTable(conn, create_table, table_name, num_rows);
         else
             createAndLoadTable(conn, create_table, table_name, num_rows);
         conn.commit();
+
+        // delete all rows, and NO commit.
         executeQuery(conn, "delete from " + table_name, false);
 
 
@@ -789,8 +874,11 @@ public class OnlineCompressTest extends BaseTest
     }
 
     /**
-     * Test 2 - check transaction roll backs
+     * Test 2 - check repeated delete tests.
      * <p>
+     * There was a timing error where test1 would usually pass, but 
+     * repeated execution of this test found a timing problem with
+     * allocation using an "unallocated" page and getting an I/O error.
      *
      **/
     private void test2(
@@ -799,6 +887,29 @@ public class OnlineCompressTest extends BaseTest
     String      table_name)
         throws SQLException 
     {
+        beginTest(conn, test_name);
+
+        int[] test_cases = {4000};
+
+        for (int i = 0; i < test_cases.length; i++)
+        {
+            // first create new table and run the tests.
+            simpleDeleteAllRows(
+                conn, true, false, "APP", table_name, test_cases[i]);
+
+            for (int j = 0; j < 100; j++)
+            {
+
+                // now rerun tests on existing table, which had all rows deleted
+                // and truncated.
+                deleteAllRows(
+                    conn, false, false, "APP", table_name, test_cases[i]);
+            }
+
+            executeQuery(conn, "drop table " + table_name, true);
+        }
+
+        endTest(conn, test_name);
     }
 
 
@@ -855,14 +966,55 @@ public class OnlineCompressTest extends BaseTest
         endTest(conn, test_name);
     }
 
+    /**
+     * Test 4 - check repeated delete tests.
+     * <p>
+     * There was a timing error where test1 would usually pass, but 
+     * repeated execution of this test found a timing problem with
+     * allocation using an "unallocated" page and getting an I/O error.
+     *
+     **/
+    private void test4(
+    Connection  conn,
+    String      test_name,
+    String      table_name)
+        throws SQLException 
+    {
+        beginTest(conn, test_name);
+
+        int[] test_cases = {4000};
+
+        for (int i = 0; i < test_cases.length; i++)
+        {
+
+            for (int j = 0; j < 100; j++)
+            {
+                // first create new table and run the tests.
+                simpleDeleteAllRows(
+                    conn, true, false, "APP", table_name, test_cases[i]);
+
+                // now rerun tests on existing table, which had all rows deleted
+                // and truncated.
+                deleteAllRows(
+                    conn, false, false, "APP", table_name, test_cases[i]);
+
+                executeQuery(conn, "drop table " + table_name, true);
+            }
+
+        }
+
+        endTest(conn, test_name);
+    }
+
 
 
     public void testList(Connection conn)
         throws SQLException
     {
         test1(conn, "test1", "TEST1");
-        // test2(conn, "test2", "TEST2", 10000);
+        // test2(conn, "test2", "TEST2");
         test3(conn, "test3", "TEST3");
+        // test4(conn, "test2", "TEST2");
     }
 
     public static void main(String[] argv) 

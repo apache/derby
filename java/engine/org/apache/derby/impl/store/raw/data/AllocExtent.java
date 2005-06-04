@@ -23,6 +23,7 @@ package org.apache.derby.impl.store.raw.data;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
+import org.apache.derby.iapi.store.raw.xact.RawTransaction; 
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
@@ -431,21 +432,24 @@ public class AllocExtent implements Externalizable
      * page that can be returned to the OS.
      * <p>
      *
-	 * @return Return bit of page where page and all those that follow can
+	 * @return Return bit of page where all pages that follow can
      *         be returned to the OS.
      **/
-    protected long compressPages()
+    protected int compress(
+    BaseContainerHandle owner,
+    RawTransaction      ntt,
+    AllocPage           alloc_page)
+        throws StandardException
     {
-        int compress_bitnum = -1;
+        int compress_bitnum      = -1;
+        int num_pages_compressed = 0;
 
-        for (int i = extentLength - 1; i >= 0; i--)
+        for (int i = (extentLength - 1); i >= 0; i--)
         {
             if (freePages.isSet(i))
             {
-                freePages.clear(i);
-                unFilledPages.clear(i);
-
                 compress_bitnum = i;
+                num_pages_compressed++;
             }
             else
             {
@@ -453,15 +457,134 @@ public class AllocExtent implements Externalizable
             }
         }
 
-        if (compress_bitnum >= 0)
+        // new_highest_page is the last page to remain in the file after 
+        // the truncate, the above loop set compress_bitnum to lowest 
+        // free page in the set of contiguous free pages at end of extent.
+        int new_highest_page = compress_bitnum - 1;
+
+        if (num_pages_compressed > 0)
         {
-            extentLength = compress_bitnum;
-            return(extentStart + extentLength - 1);
+            if (SanityManager.DEBUG)
+            {
+                for (int i = new_highest_page + 1; i < extentLength; i++)
+                {
+                    if (!freePages.isSet(i))
+                    {
+
+                        SanityManager.THROWASSERT(
+                            "compressPages with nonfree pg to truncate," +
+                            "new_highest_page = " + new_highest_page +
+                            "num_pages_truncated = " + num_pages_compressed +
+                            ";extentLength = " + extentLength +
+                            ";extentStart = " + extentStart +
+                            ";freePages.isSet(" + i + ") = " + 
+                                freePages.isSet(i) +
+                            "\nextent:\n" + toDebugString());
+                    }
+                }
+
+                SanityManager.ASSERT(
+                    (new_highest_page + num_pages_compressed + 1) == 
+                        extentLength,
+                    "truncate page count did not match: " +
+                    ";new_highest_page = " + new_highest_page +
+                    ";num_pages_truncated = " + num_pages_compressed +
+                    ";extentLength = " + extentLength);
+
+                // the following assert could be made invalid by a new type of
+                // access method, but currently page 1 of btree and heap contain
+                // control rows, so will never become free and thus should never
+                // be compressed.
+                if (extentStart == 1)
+                {
+                    SanityManager.ASSERT(new_highest_page >= 0);
+
+                    if (num_pages_compressed >= extentLength)
+                    {
+                        SanityManager.THROWASSERT(
+                            "new_highest_page = "     + new_highest_page +
+                            "num_pages_compressed = " + num_pages_compressed +
+                            "; extentLength = "       + extentLength +
+                            "extent:\n"               + toDebugString());
+                    }
+                }
+            }
+
+            /*
+            SanityManager.DEBUG_PRINT("AllocExtent", 
+                "calling actionCompressSpaceOperation:" +
+                ";new_highest_page = " + new_highest_page +
+                ";num_pages_compressed = " +  num_pages_compressed +
+                ";extentLength = " +  extentLength +
+                ";extent: \n" + toDebugString());
+            */
+
+
+            owner.getAllocationActionSet().actionCompressSpaceOperation(
+                ntt, alloc_page, new_highest_page, num_pages_compressed); 
+            return(compress_bitnum);
         }
         else
         {
             return(-1);
         }
+
+    }
+
+    protected void compressPages(
+    int        new_highest_page,
+    int        num_pages_truncated)
+    {
+        if (SanityManager.DEBUG)
+        {
+            if (new_highest_page >= 0)
+            {
+                for (int i = new_highest_page + 1; i < extentLength; i++)
+                {
+                    if (!freePages.isSet(i))
+                    {
+                        SanityManager.THROWASSERT(
+                            "compressPages with non free page to truncate," +
+                            "new_highest_page = " + new_highest_page +
+                            "num_pages_truncated = " + num_pages_truncated +
+                            ";extentLength = " + extentLength +
+                            ";extentStart = " + extentStart +
+                            ";freePages.isSet(" + i + ") = " + 
+                                freePages.isSet(i) +
+                            "\nextent:\n" + toDebugString());
+                    }
+                }
+            }
+
+            SanityManager.ASSERT(
+                (new_highest_page + num_pages_truncated + 1) == extentLength,
+                "truncate page count did not match: " +
+                ";new_highest_page = " + new_highest_page +
+                ";num_pages_truncated = " + num_pages_truncated +
+                ";extentLength = " + extentLength);
+
+            // the following assert could be made invalid by a new type of
+            // access method, but currently page 1 of btree and heap contain
+            // control rows, so will never become free and thus should never
+            // be compressed.
+            if (extentStart == 1)
+            {
+                SanityManager.ASSERT(new_highest_page >= 0);
+                SanityManager.ASSERT(num_pages_truncated < extentLength);
+            }
+        }
+
+        if (new_highest_page >= 0)
+        {
+            freePages.shrink(new_highest_page + 1);
+            unFilledPages.shrink(new_highest_page + 1);
+
+            // This routine assumes the caller
+            // will be doing the truncate, and just updates the data structures.
+            preAllocLength = extentLength = (new_highest_page + 1);
+        }
+
+        return;
     }
 
 	protected long getExtentEnd()
@@ -605,6 +728,20 @@ public class AllocExtent implements Externalizable
 	{
 		return extentStart+extentLength-1;
 	}
+
+    /**
+     * translate bit position in map to page number.
+     * <p>
+     *
+	 * @return The page number of this "bit" in the extent map.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    protected long getPagenum(int bit_pos)
+    {
+        return(extentStart + bit_pos);
+    }
+        
 
 
 	/*
@@ -813,10 +950,12 @@ public class AllocExtent implements Externalizable
 
 		if (SanityManager.DEBUG)
         {
-			SanityManager.ASSERT(
-                allocatedPageCount >= 0,
-                "number of allocated page < 0, val =" + allocatedPageCount +
-                "\nextent = " + toDebugString());
+            if (allocatedPageCount < 0)
+            {
+                SanityManager.THROWASSERT(
+                    "number of allocated page < 0, val =" + allocatedPageCount +
+                    "\nextent = " + toDebugString());
+            }
         }
 
 		return allocatedPageCount;

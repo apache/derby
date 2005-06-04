@@ -852,9 +852,9 @@ public final class Heap
                     rawtran,
                     false,
                     TransactionController.OPENMODE_FORUPDATE,
-                    TransactionController.MODE_RECORD,
+                    TransactionController.MODE_TABLE,
                     rawtran.newLockingPolicy(
-                        LockingPolicy.MODE_RECORD,
+                        LockingPolicy.MODE_CONTAINER,
                         TransactionController.ISOLATION_REPEATABLE_READ, true),
                     null) == null)
             {

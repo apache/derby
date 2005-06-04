@@ -1379,10 +1379,17 @@ public abstract class FileContainer
                         allocHandle.getAllocPage(nextAllocPageNumber);
                 }
 
-                alloc_page.compress(this);
-
+                // invalidate cache before compress changes cached information,
+                // while holding synchronization on cache and latch on 
+                // allocation page.  This should guarantee that only new info
+                // is seen after this operation completes.
 				allocCache.invalidate(); 
 
+                // reset, as pages may not exist after compress
+                lastUnfilledPage    = ContainerHandle.INVALID_PAGE_NUMBER;
+                lastAllocatedPage   = ContainerHandle.INVALID_PAGE_NUMBER;
+
+                alloc_page.compress(ntt, this);
             }
 
 		}
@@ -1464,7 +1471,7 @@ public abstract class FileContainer
 							   boolean isOverflow) 
 		 throws StandardException 
 	{
-		// NOTE: right now, we are single threaded thru this method, see MT comment
+		// NOTE: we are single threaded thru this method, see MT comment
 
 		boolean useNTT = (ntt != null);
 
@@ -1497,45 +1504,59 @@ public abstract class FileContainer
 				{
 					if (SanityManager.DEBUG)
 					{
-						SanityManager.ASSERT(ntt.getId().equals(allocHandle.getTransaction().getId()));
+						SanityManager.ASSERT(
+                            ntt.getId().equals(
+                                allocHandle.getTransaction().getId()));
+
 						if (useNTT)
-							SanityManager.ASSERT(!ntt.getId().equals(userHandle.getTransaction().getId()));
+							SanityManager.ASSERT(
+                                !ntt.getId().equals(
+                                    userHandle.getTransaction().getId()));
 					}
 
-					/* find an allocation page that can handle adding a new page
-					   allocPage is unlatched when the ntt commits
-					   The new page is initialized by the ntt but the latch is
-					   transfered to the user transaction before the allocPage is
-					   unlatched.  The allocPage latch prevents almost any other reader or
-					   writer from finding the new page until the ntt is committed and
-					   the new page latched by the user transaction.
-                       (If the page is being reused, it is possible for another xact
-                       which kept a handle on the reused page to find the page during the
-                       transfer UT -> NTT. If this unlikely even occurs and the transfer
-                       fails [see code relating to transfer below], we retry from
-                       the beginning.)
+                    /* find an allocation page that can handle adding a new 
+                     * page.
+                     *
+                     * allocPage is unlatched when the ntt commits. The new 
+                     * page is initialized by the ntt but the latch is 
+                     * transfered to the user transaction before the allocPage 
+                     * is unlatched.  The allocPage latch prevents almost any 
+                     * other reader or writer from finding the new page until 
+                     * the ntt is committed and the new page is latched by the
+                     * user transaction.
+                     *
+                     * (If the page is being reused, it is possible for another
+                     * xact which kept a handle on the reused page to find the 
+                     * page during the transfer UT -> NTT. If this unlikely 
+                     * even occurs and the transfer fails [see code relating 
+                     * to transfer below], we retry from the beginning.)
+                     *
+                     * After the NTT commits a reader (getNextPageNumber) may 
+                     * get the page number of the newly allocated page and it 
+                     * will wait for the new page and latch it when the user 
+                     * transaction commits, aborts or unlatches the new page. 
+                     * Whether the user transaction commits or aborts, the new 
+                     * page stay allocated.
+                     *
+                     * RESOLVE: before NTT rolls back (or commits) the latch is
+                     * released.  To repopulate the allocation cache, need to 
+                     * get either the container lock on add page, or get a per 
+                     * allocation page lock.
+                     *
+                     * This blocks all page read (getPage) from accessing this 
+                     * alloc page in this container until the alloc page is 
+                     * unlatched.  Those who already have a page handle into 
+                     * this container are unaffected.
+                     *
+                     * In other words, allocation blocks out reader (of any 
+                     * page that is managed by this alloc page) by the latch 
+                     * on the allocation page.
+                     *
+                     * Note that write page can proceed as usual.
+                     */
+					allocPage = 
+                        findAllocPageForAdd(allocHandle, ntt, startSearch);
 
-
-					   After the NTT commits a reader (getNextPageNumber) may get the page
-					   number of the newly allocated page and it will wait for the new page
-					   and latch it when the user transaction commits, aborts or unlatches
-					   the new page. Whether the user transaction commits or aborts,
-					   the new page stay allocated.
-
-					   RESOLVE: before NTT rolls back (or commits) the latch is released.
-					   To repopulate the allocation cache, need to get either the container
-					   lock on add page, or get a per allocation page lock.
-
-					   This blocks all page read (getPage) from accessing this alloc page in
-					   this this container until the alloc page is unlatched.  Those who
-					   already have a page handle into this container is unaffected.
-
-					   In other words, allocation blocks out reader (of any page that is
-					   managed by this alloc page) by the latch on the allocation page.
-
-					   Note that write page can proceed as usual.
-				    */
-					allocPage = findAllocPageForAdd(allocHandle, ntt, startSearch);
 					allocCache.invalidate(allocPage, allocPage.getPageNumber());
 				}
 
@@ -1545,7 +1566,7 @@ public abstract class FileContainer
 						allocCache.dumpAllocationCache();
 
 					SanityManager.ASSERT(allocPage != null,
-										 "findAllocPageForAdd returned a null alloc page");
+                         "findAllocPageForAdd returned a null alloc page");
 				}
 
 				//
@@ -1566,7 +1587,7 @@ public abstract class FileContainer
 				//
 				// first find out the current last initialized page and
 				// preallocated page before the new page is added
-				lastPage = allocPage.getLastPagenum();
+				lastPage         = allocPage.getLastPagenum();
 				lastPreallocPage = allocPage.getLastPreallocPagenum();
 
 				reuse = pageNumber <= lastPage;
@@ -1642,37 +1663,44 @@ public abstract class FileContainer
                     SanityManager.ASSERT(retry == false);
                 }
 
-			    // Now we have verified that the allocPage is latched and we can get
-			    // the zeroDuration deallocLock nowait.  This means the transaction
-			    // which freed the page has committed.  Had that transaction aborted,
-			    // we would have retried.
+			    // Now we have verified that the allocPage is latched and we 
+                // can get the zeroDuration deallocLock nowait.  This means the
+                // transaction which freed the page has committed.  Had that 
+                // transaction aborted, we would have retried.
 
 			    if (SanityManager.DEBUG)
 			    {
 				    // ASSERT lastPage <= lastPreallocPage
 				    if (lastPage > lastPreallocPage)
+                    {
 					    SanityManager.THROWASSERT("last page " +
-						    lastPage + " > lastPreallocPage " + lastPreallocPage);
+						    lastPage + " > lastPreallocPage " + 
+                            lastPreallocPage);
+                    }
 			    }
 
-			    // No I/O at all if this new page is requested as part of a create
-			    // and load statement or this new page is in a temporary container.
-			    // In the former case, BaseContainer will allow the MODE_UNLOGGED
-			    // bit to go thru to the nested top transaction alloc handle.
-			    // In the later case, there is no nested top transaction and the
-			    // alloc handle is the user handle, which is UNLOGGED.
-			    boolean noIO = (allocHandle.getMode() & ContainerHandle.MODE_UNLOGGED) ==
-				    ContainerHandle.MODE_UNLOGGED;
+			    // No I/O at all if this new page is requested as part of a 
+                // create and load statement or this new page is in a temporary
+                // container.
+                //
+			    // In the former case, BaseContainer will allow the 
+                // MODE_UNLOGGED bit to go thru to the nested top transaction 
+                // alloc handle.  In the later case, there is no nested top 
+                // transaction and the alloc handle is the user handle, which 
+                // is UNLOGGED.
+			    boolean noIO = 
+                    (allocHandle.getMode() & ContainerHandle.MODE_UNLOGGED) ==
+                        ContainerHandle.MODE_UNLOGGED;
 
 			    // If we do not need the I/O (either because we are in a
-			    // create_unlogged mode or we are dealing with a temp table), don't
-			    // do any preallocation.  Otherwise, see if we should be
+			    // create_unlogged mode or we are dealing with a temp table), 
+                // don't do any preallocation.  Otherwise, see if we should be
 			    // pre-Allocating page by now.  We don't call it before
 			    // nextFreePageNumber because finding a reusable page may be
-			    // expensive and we don't want to start preAllocation unless there
-			    // is no more reusable page.  Unless we are called explicitly to
-			    // bulk increase the container size in a preload or in a create
-			    // container.
+			    // expensive and we don't want to start preAllocation unless 
+                // there is no more reusable page.  Unless we are called 
+                // explicitly to bulk increase the container size in a preload 
+                // or in a create container.
 			    if (!noIO && (bulkIncreaseContainerSize ||
 						  (pageNumber > lastPreallocPage &&
 						   pageNumber > PreAllocThreshold)))
@@ -1681,15 +1709,15 @@ public abstract class FileContainer
 				    						  PreAllocSize);
 			    }
 
-			    // update last preAllocated Page, it may have been changed by the
-			    // preAllocatePage call.  We don't want to do the sync if it
+			    // update last preAllocated Page, it may have been changed by 
+                // the preAllocatePage call.  We don't want to do the sync if 
 			    // preAllocatePage already took care of it.
 			    lastPreallocPage = allocPage.getLastPreallocPagenum();
 			    boolean prealloced = pageNumber <= lastPreallocPage;
 
 			    // Argument to the create is an array of ints.
-			    // The array is only used for new page creation or for creating a
-			    // preallocated page, not for reuse.
+			    // The array is only used for new page creation or for creating
+                // a preallocated page, not for reuse.
 			    // 0'th element is the page format
 			    // 1'st element is whether or not to sync the page to disk
 			    // 2'nd element is pagesize
@@ -1697,7 +1725,8 @@ public abstract class FileContainer
 
 			    int[] createPageArgs = new int[STORED_PAGE_ARG_NUM];
 			    createPageArgs[0] = StoredPage.FORMAT_NUMBER;
-			    createPageArgs[1] = prealloced ? 0 : (noIO ? 0 : CachedPage.WRITE_SYNC);
+			    createPageArgs[1] = prealloced ? 
+                                        0 : (noIO ? 0 : CachedPage.WRITE_SYNC);
 			    createPageArgs[2] = pageSize;
 			    createPageArgs[3] = spareSpace;
 			    createPageArgs[4] = minimumRecordSize;
@@ -1711,12 +1740,31 @@ public abstract class FileContainer
 			    // allocation failed, it is rolled back with the NTT.
 			    // Later, we transfer the latch to the userHandle so it won't be
 			    // released when the ntt commits
+
+                try
+                {
 			    page = initPage(allocHandle, pkey, createPageArgs, pageOffset,
 				    			reuse, isOverflow);
+                }
+                catch (StandardException se)
+                {
+                    SanityManager.DEBUG_PRINT("FileContainer",
+                        "got exception from initPage:"  +
+                        "\nreuse = " + reuse +
+                        "\ncreatePageArgs[1] = " + createPageArgs[1] +
+                        "\nallocPage = " + allocPage
+                        );
+                    allocCache.dumpAllocationCache();
+
+                    throw se;
+                }
+
 			    if (SanityManager.DEBUG)
 			    {
-				    SanityManager.ASSERT(page != null, "initPage returns null page");
-				    SanityManager.ASSERT(page.isLatched(), "initPage returns unlatched page");
+				    SanityManager.ASSERT(
+                        page != null, "initPage returns null page");
+				    SanityManager.ASSERT(
+                        page.isLatched(), "initPage returns unlatched page");
 			    }
 
 			    // allocate the page in the allocation page bit map
@@ -1725,36 +1773,48 @@ public abstract class FileContainer
 			    if (useNTT)
 			    {
 				    // transfer the page latch from NTT to UT.
-				    // after the page is unlatched by NTT, it is still protected from being
-				    // found by almost everybody else because the alloc page is still latched and
-				    // the alloc cache is invalidated.
-                    // However (beetle 3942) it is possible for the page to be found by threads
-                    // who specifically ask for this pagenumber (e.g. HeapPostCommit).
-                    // We may find that such a thread has latched the page. We shouldn't wait
-                    // for it because we have the alloc page latch, and this could cause
-                    // deadlock (e.g. HeapPostCommit might call removePage and this would
-                    // wait on the alloc page).
-                    // We may instead find that we can latch the page, but that another thread
-                    // has managed to get hold of it during the transfer and either deallocate
-                    // it or otherwise change it (add rows, delete rows etc.)
-                    // Since this doesn't happen very often, we retry in these 2 cases
-                    // (we give up the alloc page and page and we start this method from scratch).
-
-                    // If the lock manager were changed to allow latches to be transferred between
-                    // transactions, wouldn't need to unlatch to do the transfer, and would avoid
-                    // having to retry in these cases (beetle 4011).
+                    //
+				    // after the page is unlatched by NTT, it is still 
+                    // protected from being found by almost everybody else 
+                    // because the alloc page is still latched and the alloc 
+                    // cache is invalidated.
+                    //
+                    // However (beetle 3942) it is possible for the page to be 
+                    // found by threads who specifically ask for this 
+                    // pagenumber (e.g. HeapPostCommit).
+                    // We may find that such a thread has latched the page. 
+                    // We shouldn't wait for it because we have the alloc page 
+                    // latch, and this could cause deadlock (e.g. 
+                    // HeapPostCommit might call removePage and this would wait
+                    // on the alloc page).
+                    //
+                    // We may instead find that we can latch the page, but that
+                    // another thread has managed to get hold of it during the 
+                    // transfer and either deallocate it or otherwise change it
+                    // (add rows, delete rows etc.)
+                    //
+                    // Since this doesn't happen very often, we retry in these 
+                    // 2 cases (we give up the alloc page and page and we start
+                    // this method from scratch).
+                    //
+                    // If the lock manager were changed to allow latches to be 
+                    // transferred between transactions, wouldn't need to 
+                    // unlatch to do the transfer, and would avoid having to 
+                    // retry in these cases (beetle 4011).
 
 				    page.unlatch();
 				    page = null;
 
-				    // need to find it in the cache again since unlatch also unkept the
-				    // page from the cache
+				    // need to find it in the cache again since unlatch also 
+                    // unkept the page from the cache
 				    page = (BasePage)pageCache.find(pkey);
-				    page = latchPage(userHandle, page, false /* don't wait, it might deadlock */);
+				    page = latchPage(
+                                userHandle, page, 
+                                false /* don't wait, it might deadlock */);
 
                     if (page == null ||
-                        // recordCount will only return true if there are no rows
-                        // (including deleted rows)
+                        // recordCount will only return true if there are no 
+                        // rows (including deleted rows)
                         page.recordCount() != 0 ||
                         page.getPageStatus() != BasePage.VALID_PAGE)
                     {
@@ -1825,9 +1885,11 @@ public abstract class FileContainer
 		if (!this.identity.equals(page.getPageId().getContainerId())) {
 
 			if (SanityManager.DEBUG) {
-				SanityManager.THROWASSERT("just created a new page from a different container"
+				SanityManager.THROWASSERT(
+                    "just created a new page from a different container"
 					+ "\n this.identity = " + this.identity
-					+ "\n page.getPageId().getContainerId() = " + page.getPageId().getContainerId()
+					+ "\n page.getPageId().getContainerId() = " + 
+                        page.getPageId().getContainerId()
 					+ "\n userHandle is: " + userHandle
 					+ "\n allocHandle is: " + allocHandle
 					+ "\n this container is: " + this);

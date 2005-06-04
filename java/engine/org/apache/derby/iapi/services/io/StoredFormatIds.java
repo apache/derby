@@ -1686,6 +1686,10 @@ public interface StoredFormatIds {
         public static final int LOGOP_CHECKSUM =
                 (MIN_ID_2 + 453);
 
+		/* org.apache.derby.impl.store.raw.data.CompressSpacePageOperation */
+        public static final int LOGOP_COMPRESS_SPACE =
+                (MIN_ID_2 + 454);
+
 
         /*******************************************************************
         **
@@ -1806,7 +1810,7 @@ public interface StoredFormatIds {
          * Make sure this is updated when a new module is added
          */
         public static final int MAX_ID_2 =
-                (MIN_ID_2 + 453);
+                (MIN_ID_2 + 454);
 
         // DO NOT USE 4 BYTE IDS ANYMORE
         static public final int MAX_ID_4 =

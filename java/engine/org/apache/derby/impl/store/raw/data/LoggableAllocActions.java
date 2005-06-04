@@ -86,4 +86,43 @@ public class LoggableAllocActions implements AllocationActions {
 		t.logAndDo(lop);
 	}
 
+    /**
+     * Compress free pages.
+     * <p>
+     * Compress the free pages at the end of the range maintained by
+     * this allocation page.  All pages being compressed should be FREE.
+     * Only pages in the last allocation page can be compressed.
+     * <p>
+     *
+     * @param t				        The transaction
+     * @param allocPage		        the allocation page to do compress on.
+     * @param new_highest_page      The new highest page on this allocation 
+     *                              page.  The number is the offset of the page
+     *                              in the array of pages maintained by this 
+     *                              allocation page, for instance a value of 0 
+     *                              indicates all page except the first one are
+     *                              to be truncated.  If all pages are 
+     *                              truncated then the offset is set to -1.
+     * @param num_pages_truncated   The number of allocated pages in this 
+     *                              allocation page prior to the truncate.  
+     *                              Note that all pages from NewHighestPage+1 
+     *                              through newHighestPage+num_pages_truncated 
+     *                              should be FREE.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public void actionCompressSpaceOperation(
+	RawTransaction  t,
+    BasePage        allocPage, 
+    int             new_highest_page, 
+    int             num_pages_truncated)
+        throws StandardException
+    {
+		Loggable lop = 
+            new CompressSpacePageOperation(
+                (AllocPage)allocPage, new_highest_page, num_pages_truncated);
+        allocPage.preDirty();
+
+        t.logAndDo(lop);
+    }
 }

@@ -514,6 +514,7 @@ String[] TwoByte = {
  
         /* 451 */   "org.apache.derby.catalog.types.RoutineAliasInfo",
 		/* 452 */   null,
-		/* 453 */   "org.apache.derby.impl.store.raw.log.ChecksumOperation"
+		/* 453 */   "org.apache.derby.impl.store.raw.log.ChecksumOperation",
+		/* 454 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation"
 };
 }

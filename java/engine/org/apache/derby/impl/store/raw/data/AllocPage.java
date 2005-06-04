@@ -874,15 +874,69 @@ public class AllocPage extends StoredPage
 		nextAllocPageOffset = newAllocPageOffset;
 	}
 
+    /**
+     * Compress free pages.
+     * <p>
+     * Compress the free pages at the end of the range maintained by
+     * this allocation page.  All pages being compressed should be FREE.
+     * Only pages in the last allocation page can be compressed.
+     * <p>
+     *
+     * @param instant               log address for this operation.
+     * @param new_highest_page      The new highest page on this allocation 
+     *                              page.  The number is the offset of the page
+     *                              in the array of pages maintained by this 
+     *                              allocation page, for instance a value of 0 
+     *                              indicates all page except the first one are
+     *                              to be truncated.  If all pages are 
+     *                              truncated then the offset is set to -1.
+     * @param num_pages_truncated   The number of allocated pages in this 
+     *                              allocation page prior to the truncate.  
+     *                              Note that all pages from NewHighestPage+1 
+     *                              through newHighestPage+num_pages_truncated 
+     *                              should be FREE.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	protected void compressSpace(
+    LogInstant  instant,
+    int         new_highest_page,
+    int         num_pages_truncated)
+		 throws StandardException
+	{
+		if (SanityManager.DEBUG)
+        {
+			SanityManager.ASSERT(isLatched(), "page is not latched");
+            SanityManager.ASSERT(isLast(), "compress on non last alloc page.");
+            SanityManager.ASSERT(new_highest_page >= 0, "negative new high page.");
+        }
+
+		logAction(instant);
+
+        extent.compressPages(new_highest_page, num_pages_truncated);
+	}
+
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
 		{
-			String str = "*** Alloc page ***\n" + super.toString();
+			String str = 
+                "*** Alloc page ***\n"      + 
+                "nextAllocPageNumber = "    + nextAllocPageNumber   +
+                "\nnextAllocPageOffset = "  + nextAllocPageOffset   +
+                "\nreserved1 = "            + reserved1             +
+                "\nreserved2 = "            + reserved2             +
+                "\nreserved3 = "            + reserved3             +
+                "\nreserved4 = "            + reserved4             +
+	            "\nborrowedSpace = "        + borrowedSpace         +
+                "\nextent = "               + extent.toDebugString() + "\n" +
+                super.toString();
 			return str;
 		}
 		else
+        {
 			return null;
+        }
 	}
 
 
@@ -958,26 +1012,52 @@ public class AllocPage extends StoredPage
 
 	}
 
-	/**
-		compress
-
-		@param myContainer the container object
-	*/
+    /**
+     * compress out empty pages at end of container.
+     * <p>
+     * Call the extent to update the data structure make the bit map look
+     * like contiguous free pages at the end of the extent no longer exist.
+     * Similar to preallocate do the operation unlogged, need to force the
+     * change to the extent before actually removing the space from the
+     * file.
+     * <p>
+     * The sequence is:
+     *     1) update extent data structure
+     *     2) force extent changes to disk
+     *     3) truncate pages
+     *
+     * If the system crashes between 1 and 2 then no changes are on disk.
+     * If the system crashes between 2 and 3 then there are extra pages in
+     *     the file that extent does not know about, this is the same case
+     *     as preallocation which the code already handes.  It will handle
+     *     any set of pages from 0 to all of the intended pages being 
+     *     truncated.  The next allocate looks at actual size of file as
+     *     does the right thing.
+     *
+     * <p)
+     * MT - expect Container level X lock
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
 	protected boolean compress(
-    FileContainer myContainer)
+    RawTransaction  ntt,
+    FileContainer   myContainer)
         throws StandardException
 	{
         boolean all_pages_compressed = false;
 
 		if (SanityManager.DEBUG)
+        {
 			SanityManager.ASSERT(isLatched(), "page is not latched");
+        }
 
-        long last_valid_page = extent.compressPages();
+        int last_valid_page = extent.compress(owner, ntt, this);
+
         if (last_valid_page >= 0)
         {
             // a non-negative return means that pages can be returned to
             // the operating system.
-            myContainer.truncatePages(last_valid_page);
+            myContainer.truncatePages(extent.getPagenum(last_valid_page));
 
             if (last_valid_page == this.getPageNumber())
             {
