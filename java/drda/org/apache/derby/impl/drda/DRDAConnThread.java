@@ -5141,7 +5141,7 @@ public class DRDAConnThread extends Thread {
 					// arguments are variable part of a message
 					Object[] args = ce.getArguments();
 					for (int i = 0; args != null &&  i < args.length; i++)
-						sqlerrmc += args[i].toString() + separator;
+						sqlerrmc += args[i] + separator;
 					
 					// Severe exceptions need to be logged in the error log
 					// also log location and non-localized message will be
