@@ -561,7 +561,6 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	protected int typeCompare(DataValueDescriptor arg) throws StandardException
 	{
 		BigDecimal otherValue = SQLDecimal.getBigDecimal(arg);
-
 		return getBigDecimal().compareTo(otherValue);
 	}
 
@@ -1008,7 +1007,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		if (isNull())
 			return "NULL";
 		else
-			return getBigDecimal().toString();
+			return getString();
 	}
 
 	/*

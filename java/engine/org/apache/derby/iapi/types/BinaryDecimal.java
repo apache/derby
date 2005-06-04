@@ -662,8 +662,13 @@ return divide(dividend, divisor, result, -1);
 	public DataValueDescriptor getClone() {
 		BinaryDecimal dvd = (BinaryDecimal) getNewNull();
 		
-		dvd.data2c = this.data2c;
-		dvd.sqlScale = this.sqlScale;
+		if (this.data2c != null)
+		{
+			dvd.data2c = new byte[data2c.length];
+			System.arraycopy(data2c, 0, dvd.data2c, 0, data2c.length);
+			dvd.sqlScale = sqlScale;
+		}
+		
 		return dvd;
 	}
 
@@ -682,5 +687,18 @@ return divide(dividend, divisor, result, -1);
 	public int estimateMemoryUsage() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	public int hashCode()
+	{
+		if (isNull())
+			return 0;
+
+		try {
+			return (int) Double.doubleToLongBits(getDouble());
+		} catch (StandardException se)
+		{
+			return 0;
+		}
 	}
 }

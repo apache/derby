@@ -131,8 +131,32 @@ public final class BigIntegerDecimal extends BinaryDecimal
 				if (dot > ePosition)
 					throw invalidFormat();
 				
+				// Integer.parseInt does not handle a + sign in
+				// front of the number, while the format for the
+				// exponent allows it. Need to strip it off.
+				
+				int expOffset = ePosition + 1;
+
+				if (expOffset >= theValue.length())
+					throw invalidFormat();
+				
+				if (theValue.charAt(expOffset) == '+')
+				{
+					// strip the plus but must ensure the next character
+					// is not a - sign. Any other invalid sign will be handled
+					// by Integer.parseInt.
+					expOffset++;
+					if (expOffset >= theValue.length())
+						throw invalidFormat();
+					if (theValue.charAt(expOffset) == '-')
+						throw invalidFormat();
+				}
+				
+				String exponent = theValue.substring(expOffset);
+				
+				
 				//	TODO Need to handle a + sign in the exponent
-				scale = -1 * Integer.parseInt(theValue.substring(ePosition + 1));
+				scale = -1 * Integer.parseInt(exponent);
 				theValue = theValue.substring(0, ePosition);
 			}
 			
@@ -157,8 +181,6 @@ public final class BigIntegerDecimal extends BinaryDecimal
 			data2c = bi.toByteArray();
 			sqlScale = scale;
 			
-			//System.out.println("setValue unscaled " + bi + "scale " + sqlScale);
-
 		} catch (NumberFormatException nfe) 
 		{
 		    throw invalidFormat();
@@ -176,8 +198,7 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		
 		// TODO - correct impl
 		String unscaled = new BigInteger(data2c).toString();
-		//System.out.println("Scale" + sqlScale + " unv " + unscaled);
-		
+				
 		if (sqlScale == 0)
 			return unscaled;
 
@@ -217,13 +238,15 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		if (this.isNegative())
 			precision--;
 		
+		if (precision < sqlScale)
+			return sqlScale;
+		
 		return precision;
 	}
 	
 
 	/**
 	 * Compare two non-null NumberDataValues using DECIMAL arithmetic.
-	 * Uses add() to perform the calculation.
 	 */
 	protected int typeCompare(DataValueDescriptor arg) throws StandardException {
 		
@@ -232,7 +255,7 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		// need to align scales to perform comparisions
 		int tscale = getDecimalValueScale();
 		int oscale = obid.getDecimalValueScale();
-		
+	
 		BigInteger tbi = new BigInteger(data2c);
 		BigInteger obi = new BigInteger(obid.data2c);
 		
@@ -240,7 +263,7 @@ public final class BigIntegerDecimal extends BinaryDecimal
 			tbi = BigIntegerDecimal.rescale(tbi, oscale - tscale);
 		else if (oscale < tscale)
 			obi = BigIntegerDecimal.rescale(obi, tscale - oscale);
-		
+	
 		return tbi.compareTo(obi);
 	}
 
@@ -497,5 +520,15 @@ public final class BigIntegerDecimal extends BinaryDecimal
 				bi = bi.divide(BigIntegerDecimal.TEN);
 		}
 		return bi;
+	}
+	/*
+	 * String display of value
+	 */
+	public String toString()
+	{
+		if (isNull())
+			return "NULL";
+		else
+			return getString();
 	}
 }
