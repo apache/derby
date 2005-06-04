@@ -21,13 +21,11 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
 import org.apache.derby.tools.ij;
 
@@ -63,7 +61,13 @@ public class metadataJdbc20 {
 							   "." + met.getDriverMinorVersion() +
 							   " (" + met.getDriverVersion() + ")");
 
-			System.out.println("The URL is: " + met.getURL());
+
+			try {
+				System.out.println("The URL is: " + met.getURL());
+			} catch (NoSuchMethodError msme)
+			{
+				System.out.println("DatabaseMetaData.getURL not present - correct for JSR169");
+			}
 
 			System.out.println();
 			System.out.println("getUDTs() with user-named types null :");
@@ -112,7 +116,7 @@ public class metadataJdbc20 {
 			dumpSQLExceptions(e);
 		}
 		catch (Throwable e) {
-			System.out.println("FAIL -- unexpected exception:");
+			System.out.println("FAIL -- unexpected exception: " + e.getMessage());
 			e.printStackTrace(System.out);
 		}
 

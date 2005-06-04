@@ -10,6 +10,7 @@ dbMetaDataJdbc30_sed.properties
 default_app.properties
 default_derby.properties
 empty.txt
+getCurConnJdbc20_app.properties
 getCurConnJdbc20.sql
 littleclob.txt
 metadata_app.properties

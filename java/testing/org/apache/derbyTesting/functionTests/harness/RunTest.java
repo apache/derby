@@ -1464,8 +1464,16 @@ clp.list(System.out);
             }
 		
             // for now we want just want to have a single property
-            // for all j9 versions
-            String testJVM = (jvmName.startsWith("j9") ? "j9" : jvmName);
+            // for all j9 versions exception j9_foundation
+            // which we map to the generic name foundation.
+            String testJVM = jvmName;
+            if (jvmName.startsWith("j9"))
+            {
+            	if (jvmName.equals("j9_foundation"))
+            		testJVM = "foundation";
+            	else
+            		testJVM = "j9";
+            }
             runwithjvm = ap.getProperty("runwith" + testJVM);
             if  ((runwithjvm != null) && (runwithjvm.equalsIgnoreCase("false")))
             {

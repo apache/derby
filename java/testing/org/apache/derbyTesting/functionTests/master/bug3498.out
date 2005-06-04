@@ -1,5 +1,3 @@
-CONNECTION0* - 	jdbc:derby:wombat
-* = current connection
 ij> -- Track 3498
 --
 -- test case for a post commit queued during an nested user transaction.  This
@@ -304,6 +302,5 @@ ij> rollback;
 ij> select * from testabort;
 A          
 -----------
-0 rows selected
 ij> commit;
 ij> 

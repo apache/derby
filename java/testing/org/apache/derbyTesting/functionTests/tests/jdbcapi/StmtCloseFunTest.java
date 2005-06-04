@@ -21,14 +21,12 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derby.tools.ij;
-import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.lang.Float;
 import java.sql.Date;
 import java.sql.Types;
 import java.util.GregorianCalendar;
