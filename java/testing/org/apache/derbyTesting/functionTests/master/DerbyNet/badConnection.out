@@ -15,4 +15,4 @@ passed SQLException all the way to client, then thrown by client...
 SQLState is: XJ05B
 vendorCode is: -1
 nextException is: null
-reason is: DB2 SQL error: SQLCODE: -1, SQLSTATE: XJ05B, SQLERRMC: upgradenotValidValue{true |false}XJ05B.CJDBC attribute 'upgrade' has an invalid value 'notValidValue', valid values are '{true |false}'.((server log XXX)
+reason is: DB2 SQL error: SQLCODE: -1, SQLSTATE: XJ05B, SQLERRMC: JDBC attribute 'upgrade' has an invalid value 'notValidValue', valid values are '{true |false}'.

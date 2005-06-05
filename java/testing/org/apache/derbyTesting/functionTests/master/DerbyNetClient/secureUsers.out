@@ -77,13 +77,13 @@ ij(CONNECTION3)> --
 -----
 disconnect all;
 ij> connect 'wombat;user=system;password=manager;shutdown=true';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 ij> connect 'guestSchemeDB;user=system;password=manager;shutdown=true';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: guestSchemeDB08006.DDatabase 'guestSchemeDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'guestSchemeDB' shutdown.
 ij> connect 'derbySchemeDB;user=system;password=manager;shutdown=true';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij> connect 'simpleSchemeDB;user=system;password=manager;shutdown=true';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: simpleSchemeDB08006.DDatabase 'simpleSchemeDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'simpleSchemeDB' shutdown.
 ij> disconnect all;
 ij> -- shuting down the system causes IJ to loose the protocol, therefore
 ----- we'd be doomed :(
@@ -153,7 +153,7 @@ create table t1 (c1 int);
 ERROR 25503: DDL is not permitted for a read-only connection, user or database.
 ij(CONNECTION15)> -- Invalid ones:
 connect 'simpleSchemeDB;user=Jamie;password=theHooligan';
-ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: 04501.CDatabase connection refused.((server log XXX)
+ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: Database connection refused.
 ij(CONNECTION15)> connect 'simpleSchemeDB;user=dan;password=makeItFaster';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij(CONNECTION15)> connect 'simpleSchemeDB;user=francois;password=corsica';
@@ -186,13 +186,13 @@ ij> show connections;
 No connections available.
 ij> -- Database shutdown - check user - should succeed
 connect 'wombat;user=jeff;password=homeRun;shutdown=true';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 ij> connect 'guestSchemeDB;user=kreg;password=IwasBornReady;shutdown=true';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: guestSchemeDB08006.DDatabase 'guestSchemeDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'guestSchemeDB' shutdown.
 ij> connect 'derbySchemeDB;user=mamta;password=ieScape;shutdown=true';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: derbySchemeDB08006.DDatabase 'derbySchemeDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'derbySchemeDB' shutdown.
 ij> connect 'simpleSchemeDB;user=jeff;password=homeRun;shutdown=true';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: simpleSchemeDB08006.DDatabase 'simpleSchemeDB' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'simpleSchemeDB' shutdown.
 ij> show connections;
 No connections available.
 ij> -- Derby system shutdown - check user - should fail
@@ -201,5 +201,5 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij> disconnect all;
 ij> -- Derby system shutdown - check user - should succeed
 connect ';user=system;password=manager;shutdown=true';
-ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: XJ015.MDerby system shutdown.((server log XXX)
+ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: Derby system shutdown.
 ij> 

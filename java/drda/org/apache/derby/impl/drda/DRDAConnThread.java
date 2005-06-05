@@ -5086,7 +5086,6 @@ public class DRDAConnThread extends Thread {
 	{
 		String sqlerrmc;
 		String sqlState;
-		String severeExceptionInfo = null;
 		SQLException nextException = null;
 
 		if (rowCount < 0 && updateCount < 0)
@@ -5100,6 +5099,7 @@ public class DRDAConnThread extends Thread {
 			sqlState = "     "; // set to 5 blanks when no error
 		}
 		else {
+			
 			if (sqlcode < 0)
 			{
 				if (SanityManager.DEBUG && server.debugOutput) 
@@ -5114,80 +5114,10 @@ public class DRDAConnThread extends Thread {
 				}
 			}
 			sqlState = e.getSQLState();
-			if (e instanceof EmbedSQLException)
-			{
-				EmbedSQLException ce = (EmbedSQLException) e;
-				boolean severeException = (ce.getErrorCode() >=  ExceptionSeverity.SESSION_SEVERITY);
-				/* we need messageId to retrieve the localized message, just using
-				 * sqlstate may not be easy, because it is the messageId that we
-				 * used as key in the property file, for many sqlstates, they are
-				 * just the first 5 characters of the corresponding messageId.
-				 * We append messageId as the last element of sqlerrmc.  We can't
-				 * send messageId in the place of sqlstate because jcc expects only
-				 * 5 chars for sqlstate.
-				 */
-				sqlerrmc = "";
-				byte[] sep = {20};	// use it as separator of sqlerrmc tokens
-				byte[] errSep = {20, 20, 20};  // mark between exceptions
-				String separator = new String(sep);
-				String errSeparator = new String(errSep); 
-				String dbname = null;
-				if (database != null)
-					dbname = database.dbName;
-				
-				do {
-					String messageId = ce.getMessageId();
-					
-					// arguments are variable part of a message
-					Object[] args = ce.getArguments();
-					for (int i = 0; args != null &&  i < args.length; i++)
-						sqlerrmc += args[i] + separator;
-					
-					// Severe exceptions need to be logged in the error log
-					// also log location and non-localized message will be
-					// returned to client as appended arguments
-					if (severeException)	
-					{
-						if (severeExceptionInfo == null)
-							severeExceptionInfo = "";
-						severeExceptionInfo += ce.getMessage() + separator;
-						println2Log(dbname, session.drdaID, ce.getMessage());
-					}
-					sqlerrmc += messageId; 	//append MessageId
-				
-					e = ce.getNextException();
-					if (e != null) {
-						if (e instanceof EmbedSQLException) {
-							ce = (EmbedSQLException)e;
-							sqlerrmc += errSeparator + ce.getSQLState() + ":";
-						}
-						else {
-							sqlerrmc += errSeparator + e.getSQLState() + ":";
-							ce = null;
-						}
-					}
-					else
-						ce = null;
-				} while (ce != null);
-						
-				if (severeExceptionInfo != null)
-				{
-					severeExceptionInfo += "(" + "server log:" +
-                                           Monitor.getStream().getName() + ")" ;
-					sqlerrmc += separator + severeExceptionInfo;
-				}
-			}
-			else
-				sqlerrmc = e.getMessage();
+			sqlerrmc = buildSqlerrmc(e);
+			
 		}
-
-		// Truncate the sqlerrmc to a length that the client can support.
-		int maxlen = (sqlerrmc == null) ? -1 : Math.min(sqlerrmc.length(),
-				appRequester.supportedMessageParamLength());
-		if ((maxlen >= 0) && (sqlerrmc.length() > maxlen))
-		// have to truncate so the client can handle it.
-			sqlerrmc = sqlerrmc.substring(0, maxlen);
-
+		
 		//null indicator
 		writer.writeByte(0);
 
@@ -5203,6 +5133,119 @@ public class DRDAConnThread extends Thread {
 		// SQLCAXGRP
 		writeSQLCAXGRP(updateCount, rowCount, sqlerrmc, nextException);
 	}
+	
+	
+	// Delimiters for SQLERRMC values.
+	
+	/**
+	 * <code>SQLERRMC_TOKEN_DELIMITER</code> separates message argument tokens 
+	 */
+	private static String SQLERRMC_TOKEN_DELIMITER = new String(new byte[] {20});
+	
+	/**
+	 * <code>SQLERRMC_MESSAGE_DELIMITER</code> When message argument tokes are sent,
+	 * this value separates the tokens for mulitiple error messages 
+	 */
+	private static String SQLERRMC_MESSAGE_DELIMITER = new String(new byte[] {20,20,20});
+	
+	/**
+	 * <code>SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER</code>, When full message text is 
+	 * sent for severe errors. This value separates the messages. 
+	 */
+	private static String SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER = new String("::");
+	
+	/**
+	 * Create error message or message argements to return to client.  
+	 * The SQLERRMC will normally be passed back  to the server in a call 
+	 * to the SYSIBM.SQLCAMESSAGE but for severe exceptions the stored procedure 
+	 * call cannot be made. So for Severe messages we will just send the message text.
+	 * 
+	 * This method will also truncate the value according the client capacity.
+	 * CCC can only handle 70 characters.
+	 * 
+	 * @param se  SQLException to build SQLERRMC
+	 *  
+	 * @return  String which is either the message arguments to be passed to 
+	 *          SYSIBM.SQLCAMESSAGE or just message text for severe errors.  
+	 */
+	private String buildSqlerrmc (SQLException se) 
+	{
+		boolean severe = (se.getErrorCode() >=  ExceptionSeverity.SESSION_SEVERITY);	
+		String sqlerrmc = null;
+		if (se instanceof EmbedSQLException  && ! severe)
+			sqlerrmc = buildTokenizedSqlerrmc((EmbedSQLException) se);
+		else {
+			// If this is not an EmbedSQLException or is a severe excecption where
+			// we have no hope of succussfully calling the SYSIBM.SQLCAMESSAGE send
+			// preformatted message using the server locale
+			sqlerrmc = buildPreformattedSqlerrmc(se);
+			}
+			// Truncate the sqlerrmc to a length that the client can support.
+			int maxlen = (sqlerrmc == null) ? -1 : Math.min(sqlerrmc.length(),
+					appRequester.supportedMessageParamLength());
+			if ((maxlen >= 0) && (sqlerrmc.length() > maxlen))
+			// have to truncate so the client can handle it.
+			sqlerrmc = sqlerrmc.substring(0, maxlen);
+			return sqlerrmc;
+		}
+
+	
+	/**
+	 * Build preformatted SQLException text 
+	 * for severe exceptions or SQLExceptions that are not EmbedSQLExceptions.
+	 * Just send the message text localized to the server locale.
+	 * 
+	 * @param se  SQLException for which to build SQLERRMC
+	 * @return preformated message text 
+	 * 			with messages separted by SQLERRMC_PREFORMATED_MESSAGE_DELIMITER
+	 * 
+	 */
+	private String  buildPreformattedSqlerrmc(SQLException se) {
+		if (se == null)
+			return "";
+		
+		StringBuffer sb = new StringBuffer(); 
+		 // String buffer to build up message
+		do {
+			sb.append(se.getLocalizedMessage());
+			se = se.getNextException();
+			if (se != null)
+				sb.append(SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER + 
+						"SQLSTATE: " + se.getSQLState());
+		} while (se != null);			
+		return sb.toString();		
+	}
+
+	/**
+	 * Build Tokenized SQLERRMC to just send the tokenized arguments to the client.
+	 * for a Derby SQLException
+	 * Message argument tokens are separated by SQLERRMC_TOKEN_DELIMITER 
+	 * Multiple messages are separated by SQLERRMC_MESSAGE_DELIMITER
+	 * 
+	 *                 ...
+	 * @param se   SQLException to print
+	 * 
+	 */
+	private String buildTokenizedSqlerrmc(EmbedSQLException se) {
+		
+		String sqlerrmc = "";
+		do {
+			String messageId = se.getMessageId();
+			// arguments are variable part of a message
+			Object[] args = se.getArguments();
+			for (int i = 0; args != null &&  i < args.length; i++)
+				sqlerrmc += args[i] + SQLERRMC_TOKEN_DELIMITER;
+			sqlerrmc += messageId;
+			se = (EmbedSQLException) se.getNextException();
+			if (se != null)
+			{
+				sqlerrmc += SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";				
+			}
+		} while (se != null);
+		return sqlerrmc;
+	}
+
+	
 	/**
 	 * Write SQLCAXGRP
 	 *

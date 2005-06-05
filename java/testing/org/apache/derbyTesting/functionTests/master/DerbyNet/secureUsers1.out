@@ -28,7 +28,7 @@ ij(CONNECTION1)> --
 -----
 disconnect all;
 ij> connect 'ldapSchemeDB;user=system;password=manager;shutdown=true';
-ERROR 08006: ldapSchemeDB08006.DDatabase 'ldapSchemeDB' shutdown.((server log XXX)
+ERROR 08006: Database 'ldapSchemeDB' shutdown.
 ij> disconnect all;
 ij> connect 'ldapSchemeDB;user=mamta;password=yeeHaLdap';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
@@ -37,5 +37,5 @@ No connections available.
 ij> disconnect all;
 ij> -- Derby system shutdown - check user - should succeed
 connect ';user=system;password=manager;shutdown=true';
-ERROR XJ015: XJ015.MDerby system shutdown.((server log XXX)
+ERROR XJ015: Derby system shutdown.
 ij> 

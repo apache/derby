@@ -38,7 +38,7 @@ GXID |STATUS |READ& |USERNAME |TYPE
 ij(XA)> xa_end xa_success 0;
 ij(XA)> xa_commit xa_1phase 0;
 ij(XA)> xa_datasource 'wombat' shutdown;
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: wombat08006.DDatabase 'wombat' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 ij(XA)> ---------------------------------------------
 ----- two interleaving connections and prepare/commit prepare/rollback
 -----

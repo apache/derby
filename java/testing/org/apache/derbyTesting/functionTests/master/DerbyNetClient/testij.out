@@ -31,7 +31,7 @@ ij(CONNECTION2)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP' PASSWOR
 ij(CONNECTION3)> connect  'jdbc:derby://localhost:1527/my-db-name;create=true;user=usr;password=pwd';
 ij(CONNECTION4)> connect 'jdbc:derby://localhost:1527/my-db-name;upgrade=true;user=usr;password=pwd';
 ij(CONNECTION5)> connect 'jdbc:derby://localhost:1527/my-db-name;shutdown=true;user=usr;password=pwd';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: my-db-name08006.DDatabase 'my-db-name' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'my-db-name' shutdown.
 ij(CONNECTION5)> connect 'jdbc:derby://localhost:1527/./my-dbname;create=true;user=usr;password=pwd';
 ij(CONNECTION6)> connect 'jdbc:derby://localhost:1527/./my-dbname;create=true;user=usr;password=pwd';
 ij(CONNECTION7)> connect 'jdbc:derby://localhost:1527/toursDB' USER 'dbadmin' PASSWORD 'dbadbmin';
@@ -40,7 +40,7 @@ ij(CONNECTION7)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP' PASSWOR
 ij(CONNECTION8)> connect  'jdbc:derby://localhost:1527/my-db-name;create=true;user=usr;password=pwd';
 ij(CONNECTION9)> connect 'jdbc:derby://localhost:1527/my-db-name;upgrade=true;user=usr;password=pwd';
 ij(CONNECTION10)> connect 'jdbc:derby://localhost:1527/my-db-name;shutdown=true;user=usr;password=pwd';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: my-db-name08006.DDatabase 'my-db-name' shutdown.((server log XXX)
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'my-db-name' shutdown.
 ij(CONNECTION10)> -- Database names with /'s
 connect 'jdbc:derby://localhost:1527/./my-dbname;create=true;user=usr;password=pwd';
 ij(CONNECTION11)> connect 'jdbc:derby://localhost:1527/./my-dbname;create=true;user=usr;password=pwd';
