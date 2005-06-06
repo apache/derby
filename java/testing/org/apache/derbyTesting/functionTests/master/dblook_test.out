@@ -56,6 +56,36 @@ sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VA
 <systemname>
 ----
 <systemid>
+SYNONYM1
+APP
+null
+S
+S
+false
+"APP"."T1"
+<systemname>
+----
+<systemid>
+SYNONYM2
+BAR
+null
+S
+S
+false
+"BAR"."MULTI WORD NAME"
+<systemname>
+----
+<systemid>
+SYNONYM3
+BAR
+null
+S
+S
+false
+"APP"."T11"
+<systemname>
+----
+<systemid>
 procTwo
 APP
 org.apache.derbyTesting.functionTests.util.ProcedureTest
@@ -1584,6 +1614,24 @@ T
 APP
 R
 ----
+SYNONYM1
+SYNONYM1
+A
+APP
+R
+----
+SYNONYM2
+SYNONYM2
+A
+BAR
+R
+----
+SYNONYM3
+SYNONYM3
+A
+BAR
+R
+----
 T10
 T10
 T
@@ -1929,6 +1977,36 @@ P
 P
 false
 sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+<systemname>
+----
+<systemid>
+SYNONYM1
+APP
+null
+S
+S
+false
+"APP"."T1"
+<systemname>
+----
+<systemid>
+SYNONYM2
+BAR
+null
+S
+S
+false
+"BAR"."MULTI WORD NAME"
+<systemname>
+----
+<systemid>
+SYNONYM3
+BAR
+null
+S
+S
+false
+"APP"."T11"
 <systemname>
 ----
 <systemid>
@@ -3460,6 +3538,24 @@ T
 APP
 R
 ----
+SYNONYM1
+SYNONYM1
+A
+APP
+R
+----
+SYNONYM2
+SYNONYM2
+A
+BAR
+R
+----
+SYNONYM3
+SYNONYM3
+A
+BAR
+R
+----
 T10
 T10
 T
@@ -3766,6 +3862,26 @@ P
 P
 false
 inoutparams4(OUT A DECIMAL(4,2),IN B VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+<systemname>
+----
+<systemid>
+SYNONYM2
+BAR
+null
+S
+S
+false
+"BAR"."MULTI WORD NAME"
+<systemname>
+----
+<systemid>
+SYNONYM3
+BAR
+null
+S
+S
+false
+"APP"."T11"
 <systemname>
 ----
 ========== SYSCHECKS ==========
@@ -4235,6 +4351,18 @@ T
 BAR
 R
 ----
+SYNONYM2
+SYNONYM2
+A
+BAR
+R
+----
+SYNONYM3
+SYNONYM3
+A
+BAR
+R
+----
 T1
 T1
 T
@@ -4311,6 +4439,26 @@ Dumping system tables for 'wombat_new'
 System Tables for: wombat_new
 ----------------=================---------------
 ========== SYSALIASES ==========
+<systemid>
+SYNONYM2
+BAR
+null
+S
+S
+false
+"BAR"."MULTI WORD NAME"
+<systemname>
+----
+<systemid>
+SYNONYM3
+BAR
+null
+S
+S
+false
+"APP"."T11"
+<systemname>
+----
 ========== SYSCHECKS ==========
 <systemname>
 (i > 0)
@@ -4497,6 +4645,18 @@ T
 BAR
 R
 ----
+SYNONYM2
+SYNONYM2
+A
+BAR
+R
+----
+SYNONYM3
+SYNONYM3
+A
+BAR
+R
+----
 T3
 T3
 T
@@ -4527,6 +4687,36 @@ Dumping system tables for 'wombat_new'
 System Tables for: wombat_new
 ----------------=================---------------
 ========== SYSALIASES ==========
+<systemid>
+SYNONYM1
+APP
+null
+S
+S
+false
+"APP"."T1"
+<systemname>
+----
+<systemid>
+SYNONYM2
+BAR
+null
+S
+S
+false
+"BAR"."MULTI WORD NAME"
+<systemname>
+----
+<systemid>
+SYNONYM3
+BAR
+null
+S
+S
+false
+"APP"."T11"
+<systemname>
+----
 ========== SYSCHECKS ==========
 ========== SYSCOLUMNS ==========
 --- Columns for Tables ---
@@ -4713,6 +4903,24 @@ APP
 null
 ----
 ========== SYSTABLES ==========
+SYNONYM1
+SYNONYM1
+A
+APP
+R
+----
+SYNONYM2
+SYNONYM2
+A
+BAR
+R
+----
+SYNONYM3
+SYNONYM3
+A
+BAR
+R
+----
 T1
 T1
 T

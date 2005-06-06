@@ -528,6 +528,7 @@ public class dblook {
 
 			DB_Table.doTables(this.conn, tableIdToNameMap);
 			DB_Index.doIndexes(this.conn);
+			DB_StoredProcedure.doSynonyms(this.conn);
 			DB_Key.doKeys(this.conn);
 			DB_Check.doChecks(this.conn);
 

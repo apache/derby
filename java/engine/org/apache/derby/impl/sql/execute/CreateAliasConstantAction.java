@@ -26,7 +26,9 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -48,6 +50,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.types.SynonymAliasInfo;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -76,9 +79,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 	 *  @param aliasName		Name of alias.
 	 *  @param schemaName		Name of alias's schema.
 	 *  @param javaClassName	Name of java class.
-	 *  @param methodName		Name of method.
-	 *  @param targetClassName	Name of java class at Target database.
-	 *  @param targetMethodName	Name of method at Target database.
+	 *  @param aliasInfo		AliasInfo
 	 *  @param aliasType		The type of the alias
 	 */
 	CreateAliasConstantAction(
@@ -101,6 +102,10 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR;
+				break;
+
+			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+				nameSpace = AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR;
 				break;
 
 			default:
@@ -130,6 +135,10 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 				type = "CREATE FUNCTION ";
+				break;
+
+			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+				type = "CREATE SYNONYM ";
 				break;
 
 			default:
@@ -167,6 +176,7 @@ class CreateAliasConstantAction extends DDLConstantAction
           				(LanguageConnectionContext.CONTEXT_ID);
 		}
 		DataDictionary dd = lcc.getDataDictionary();
+		TransactionController tc = lcc.getTransactionExecute();
 
 		/* Verify the method alias:
 		**		Aggregates - just verify the class
@@ -176,7 +186,6 @@ class CreateAliasConstantAction extends DDLConstantAction
 		*/
 		String checkMethodName = null;
 
-			
 		String checkClassName = javaClassName;
 
 		if (aliasInfo != null)
@@ -188,7 +197,9 @@ class CreateAliasConstantAction extends DDLConstantAction
 		{
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
+		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 			break;
+
 		default:
 		{
 
@@ -271,7 +282,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 									 false,
 									 aliasInfo, null);
 
-		// perform duplicate rule checking for routine
+		// perform duplicate rule checking
 		switch (aliasType) {
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
@@ -296,6 +307,58 @@ class CreateAliasConstantAction extends DDLConstantAction
 			}
 		}
 		break;
+		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+			// If target table/view exists already, error.
+			TableDescriptor targetTD = dd.getTableDescriptor(aliasName, sd);
+			if (targetTD != null)
+			{
+				throw StandardException.newException(
+								SQLState.LANG_OBJECT_ALREADY_EXISTS,
+								targetTD.getDescriptorType(),
+								targetTD.getDescriptorName());
+			}
+
+			// Detect synonym cycles, if present.
+			String nextSynTable = ((SynonymAliasInfo)aliasInfo).getSynonymTable();
+			String nextSynSchema = ((SynonymAliasInfo)aliasInfo).getSynonymSchema();
+			SchemaDescriptor nextSD;
+			for (;;)
+			{
+				nextSD = dd.getSchemaDescriptor(nextSynSchema, tc, false);
+				if (nextSD == null)
+					break;
+				
+				AliasDescriptor nextAD = dd.getAliasDescriptor(nextSD.getUUID().toString(),
+						 nextSynTable, nameSpace);
+				if (nextAD == null)
+					break;
+
+				SynonymAliasInfo info = (SynonymAliasInfo) nextAD.getAliasInfo();
+				nextSynTable = info.getSynonymTable();
+				nextSynSchema = info.getSynonymSchema();
+
+				if (aliasName.equals(nextSynTable) && schemaName.equals(nextSynSchema))
+					throw StandardException.newException(SQLState.LANG_SYNONYM_CIRCULAR,
+							aliasName, ((SynonymAliasInfo)aliasInfo).getSynonymTable());
+			}
+
+			// If synonym final target is not present, raise a warning
+			if (nextSD != null)
+				targetTD = dd.getTableDescriptor(nextSynTable, nextSD);
+			if (nextSD == null || targetTD == null)
+				activation.addWarning(
+					StandardException.newWarning(SQLState.LANG_SYNONYM_UNDEFINED,
+								aliasName, nextSynSchema+"."+nextSynTable));
+
+			// To prevent any possible deadlocks with SYSTABLES, we insert a row into
+			// SYSTABLES also for synonyms. This also ensures tables/views/synonyms share
+			// same namespace
+			TableDescriptor td;
+			DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+			td = ddg.newTableDescriptor(aliasName, sd, TableDescriptor.SYNONYM_TYPE,
+						TableDescriptor.DEFAULT_LOCK_GRANULARITY);
+			dd.addDescriptor(td, sd, DataDictionary.SYSTABLES_CATALOG_NUM, false, tc);
+		
 		default:
 			break;
 		}
@@ -303,5 +366,4 @@ class CreateAliasConstantAction extends DDLConstantAction
 		dd.addDescriptor(ads, null, DataDictionary.SYSALIASES_CATALOG_NUM,
 						 false, lcc.getTransactionExecute());
 	}
-
 }

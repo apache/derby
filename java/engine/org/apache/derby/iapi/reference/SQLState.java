@@ -630,6 +630,7 @@ public interface SQLState {
 	String LANG_COL_NOT_NULL									   	   = "01503";
 	String LANG_INDEX_DUPLICATE									   	   = "01504";
 	String LANG_VALUE_TRUNCATED                                        = "01505";
+	String LANG_SYNONYM_UNDEFINED                                      = "01522";
 	String LANG_NULL_ELIMINATED_IN_SET_FUNCTION						   = "01003";
 
 	String LANG_NO_ROW_FOUND									   	   = "02000";
@@ -707,6 +708,7 @@ public interface SQLState {
 	String LANG_NO_AGGREGATES_IN_WHERE_CLAUSE                          = "42903";
 	String LANG_DB2_VIEW_REQUIRES_COLUMN_NAMES                         = "42908";
 	String LANG_DELETE_RULE_VIOLATION		   					       = "42915";
+	String LANG_SYNONYM_CIRCULAR   		   					           = "42916";
 	String LANG_DB2_ON_CLAUSE_INVALID		   					       = "42972";
 	String LANG_SYNTAX_ERROR                                           = "42X01";
 	String LANG_LEXICAL_ERROR                                          = "42X02";

@@ -590,7 +590,7 @@ public abstract class NodeFactory
 	public abstract QueryTreeNode
 	getCreateAliasNode(
 		Object aliasName,
-		String fullStaticMethodName,
+		Object targetName,
 		Object aliasSpecificInfo,
 		char aliasType,
 		Boolean delimitedIdentifier,

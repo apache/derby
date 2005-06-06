@@ -288,17 +288,23 @@ public final class AliasDescriptor
 	/** @see TupleDescriptor#getDescriptorType */
 	public String getDescriptorType()
 	{
-		switch (aliasType)
+		return getAliasType(aliasType);
+	}
+	
+	public static final String getAliasType(char nameSpace)
+	{
+		switch (nameSpace)
 		{
 			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 				return "PROCEDURE";
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 				return "FUNCTION";
-			default:
-				return  null;
+			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+				return "SYNONYM";
 		}
+		return  null;
 	}
-	
+
 	/** @see TupleDescriptor#getDescriptorName */
 	public String getDescriptorName()
 	{

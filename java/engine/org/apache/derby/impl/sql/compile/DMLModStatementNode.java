@@ -215,16 +215,23 @@ public abstract class DMLModStatementNode extends DMLStatementNode
 			/*
 			** Get the TableDescriptor for the table we are inserting into
 			*/
-			String sntc = targetTableName.getSchemaName();
-
-			SchemaDescriptor sdtc = getSchemaDescriptor(sntc);
+			SchemaDescriptor sdtc = getSchemaDescriptor(targetTableName.getSchemaName());
 
 			targetTableDescriptor = getTableDescriptor(
 							targetTableName.getTableName(), sdtc);
 
 			if (targetTableDescriptor == null)
 			{
-				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, targetTableName);
+				// Check if the reference is for a synonym.
+				TableName synonymTab = resolveTableToSynonym(targetTableName);
+				if (synonymTab == null)
+					throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, targetTableName);
+				targetTableName = synonymTab;
+				sdtc = getSchemaDescriptor(targetTableName.getSchemaName());
+
+				targetTableDescriptor = getTableDescriptor(synonymTab.getTableName(), sdtc);
+				if (targetTableDescriptor == null)
+					throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, targetTableName);
 			}
 
 			// Views are currently not updatable */

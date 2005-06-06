@@ -172,7 +172,7 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
 			tableName = descriptor.getName();
 
 			/* RESOLVE - Table Type should really be a char in the descriptor
-			 * T, S, V instead of 0, 1, 2
+			 * T, S, V, S instead of 0, 1, 2, 3
 			 */
 			tabIType = descriptor.getTableType();
 			switch (tabIType)
@@ -185,6 +185,10 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
 					break;
 			    case TableDescriptor.VIEW_TYPE:
 					tabSType = "V";
+					break;		
+
+			    case TableDescriptor.SYNONYM_TYPE:
+					tabSType = "A";
 					break;		
 
 			    default:
@@ -328,6 +332,9 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
 				break;
 			case 'V' :
 				tableTypeEnum = TableDescriptor.VIEW_TYPE;
+				break;
+			case 'A' :
+				tableTypeEnum = TableDescriptor.SYNONYM_TYPE;
 				break;
 			default:
 				if (SanityManager.DEBUG)

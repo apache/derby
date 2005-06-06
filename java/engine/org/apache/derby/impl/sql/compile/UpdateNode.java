@@ -201,6 +201,11 @@ public final class UpdateNode extends DMLModStatementNode
 
 		DataDictionary dataDictionary = getDataDictionary();
 
+		// check if targetTable is a synonym
+		TableName synonymTab = resolveTableToSynonym(this.targetTableName);
+		if (synonymTab != null)
+			this.targetTableName = synonymTab;
+
 		bindTables(dataDictionary);
 
 		// wait to bind named target table until the cursor

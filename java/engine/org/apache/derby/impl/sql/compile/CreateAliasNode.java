@@ -36,6 +36,8 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -48,6 +50,7 @@ import org.apache.derby.impl.sql.execute.BaseActivation;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.types.SynonymAliasInfo;
 
 import java.lang.reflect.Member;
 import java.util.Vector;
@@ -72,7 +75,7 @@ public class CreateAliasNode extends CreateStatementNode
 	 * Initializer for a CreateAliasNode
 	 *
 	 * @param aliasName				The name of the alias
-	 * @param javaClassName			The full class name
+	 * @param targetObject			Target name
 	 * @param methodName		    The method name
 	 * @param aliasType				The alias type
 	 * @param delimitedIdentifier	Whether or not to treat the class name
@@ -83,7 +86,7 @@ public class CreateAliasNode extends CreateStatementNode
 	 */
 	public void init(
 						Object aliasName,
-						Object javaClassName,
+						Object targetObject,
 						Object methodName,
 						Object aliasSpecificInfo,
 						Object aliasType,
@@ -91,21 +94,20 @@ public class CreateAliasNode extends CreateStatementNode
 		throws StandardException
 	{		
 		TableName qn = (TableName) aliasName;
+		this.aliasType = ((Character) aliasType).charValue();
 
 		initAndCheck(qn);
-			
-		this.javaClassName = (String) javaClassName;
-		this.methodName = (String) methodName;
-		this.aliasType = ((Character) aliasType).charValue();
-		this.delimitedIdentifier =
-								((Boolean) delimitedIdentifier).booleanValue();
-
 
 		switch (this.aliasType)
 		{
 			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 			{
+				this.javaClassName = (String) targetObject;
+				this.methodName = (String) methodName;
+				this.delimitedIdentifier =
+								((Boolean) delimitedIdentifier).booleanValue();
+
 				//routineElements contains the description of the procedure.
 				// 
 				// 0 - Object[] 3 element array for parameters
@@ -197,6 +199,14 @@ public class CreateAliasNode extends CreateStatementNode
 				}
 				break;
 
+			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+				String targetSchema;
+				TableName t = (TableName) targetObject;
+				if (t.getSchemaName() != null)
+					targetSchema = t.getSchemaName();
+				else targetSchema = getSchemaDescriptor().getSchemaName();
+				aliasInfo = new SynonymAliasInfo(targetSchema, t.getTableName());
+				break;
 
 			default:
 				if (SanityManager.DEBUG)
@@ -213,6 +223,8 @@ public class CreateAliasNode extends CreateStatementNode
 		{
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 			return "CREATE PROCEDURE";
+		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+			return "CREATE SYNONYM";
 		default:
 			return "CREATE FUNCTION";
 		}
@@ -233,7 +245,26 @@ public class CreateAliasNode extends CreateStatementNode
 
 	public QueryTreeNode bind() throws StandardException
 	{
-		// Procedures do not check class or method validity until runtime execution of the procedure.
+		// Procedures and functions do not check class or method validity until
+		// runtime execution. Synonyms do need some validity checks.
+		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
+			return this;
+
+		String targetSchema = ((SynonymAliasInfo)aliasInfo).getSynonymSchema();
+		String targetTable = ((SynonymAliasInfo)aliasInfo).getSynonymTable();
+		if (this.getObjectName().equals(targetSchema, targetTable))
+			throw StandardException.newException(SQLState.LANG_SYNONYM_CIRCULAR,
+						this.getFullName(),
+						targetSchema+"."+targetTable);
+
+		// Raise error if targetSchema doesn't exists
+		SchemaDescriptor targetSD = getSchemaDescriptor(targetSchema);
+
+		// Synonym can't be defined on temporary tables.
+		TableDescriptor targetTD = getTableDescriptor(targetTable, targetSD);
+		if (targetTD != null &&
+			targetTD.getTableType() == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
+			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
 		return this;
 	}
@@ -249,6 +280,9 @@ public class CreateAliasNode extends CreateStatementNode
 		switch (aliasType) {
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
+			schemaName = getSchemaDescriptor().getSchemaName();
+			break;
+		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 			schemaName = getSchemaDescriptor().getSchemaName();
 			break;
 		default:

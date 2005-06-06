@@ -34,7 +34,6 @@ public class DB_StoredProcedure {
 
 	// Prepared statements use throughout the DDL
 	// generation process.
-	private static PreparedStatement getSpecificInfoQuery;
 
 	/* ************************************************
 	 * Generate the DDL for all stored procedures in a given
@@ -46,17 +45,6 @@ public class DB_StoredProcedure {
 
 	public static void doStoredProcedures(Connection conn)
 		throws SQLException {
-
-		// Note: it is safe to cast the long varchar column "javaclassname"
-		// to varchar(128) because it is defined to correspond to the
-		// 'aliasid' column for a given stored procedure; since the aliasid
-		// column is varchar(128), javaclassname can't be any larger.  We
-		// have to do this cast because DB2 mode doesn't allow equality
-		// checks between long varchar columns.  Note also: the check for
-		// aliastype='S' must come first for this cast to be "safe".
-		getSpecificInfoQuery = conn.prepareStatement("SELECT ALIAS, " +
-			"SYSTEMALIAS FROM SYS.SYSALIASES WHERE ALIASTYPE='S' AND " +
-			"(CAST (JAVACLASSNAME AS VARCHAR(128))) = ?");
 
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT ALIAS, ALIASINFO, " +
@@ -95,7 +83,6 @@ public class DB_StoredProcedure {
 
 		rs.close();
 		stmt.close();
-		getSpecificInfoQuery.close();
 		return;
 
 	}
@@ -130,21 +117,53 @@ public class DB_StoredProcedure {
 		proc.append(params.substring(0, params.indexOf("(")));
 		proc.append("' ");
 
-		// Specific name (when implemented...)
-		getSpecificInfoQuery.setString(1, aProc.getString(3));
-		ResultSet specificRS = getSpecificInfoQuery.executeQuery();
-		if (specificRS.next()) {
-			if (!specificRS.getBoolean(2)) {
-			// only process it if it's not a system alias.
-				proc.append("SPECIFIC ");
-				proc.append(specificRS.getString(1));
-			}
-		}
-
-		specificRS.close();
-
 		return proc.toString();
 
 	}
 
+	/* ************************************************
+	 * Generate the DDL for all synonyms in a given
+	 * database. On successul return, the DDL for the stored procedures
+	 * has been written to output via Logs.java.
+	 * @param conn Connection to the source database.
+	 * @return 
+	 ****/
+	public static void doSynonyms(Connection conn) throws SQLException
+	{
+		Statement stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT ALIAS, SCHEMAID, " +
+			"ALIASINFO, SYSTEMALIAS FROM SYS.SYSALIASES A WHERE ALIASTYPE='S'");
+
+		boolean firstTime = true;
+		while (rs.next()) {
+			if (rs.getBoolean(4))
+			// it's a system alias, so we ignore it.
+				continue;
+
+			String aliasSchema = dblook.lookupSchemaId(rs.getString(2));
+			if (dblook.isIgnorableSchema(aliasSchema))
+				continue;
+
+			if (firstTime) {
+				Logs.reportString("----------------------------------------------");
+				Logs.reportMessage("DBLOOK_SynonymHeader");
+				Logs.reportString("----------------------------------------------\n");
+			}
+
+			String aliasName = rs.getString(1);
+			String aliasFullName = dblook.addQuotes(
+				dblook.expandDoubleQuotes(aliasName));
+			aliasFullName = aliasSchema + "." + aliasFullName;
+
+			Logs.writeToNewDDL("CREATE SYNONYM "+aliasFullName+" FOR "+rs.getString(3));
+			Logs.writeStmtEndToNewDDL();
+			Logs.writeNewlineToNewDDL();
+			firstTime = false;
+		}
+
+		rs.close();
+		stmt.close();
+		return;
+
+	}
 }

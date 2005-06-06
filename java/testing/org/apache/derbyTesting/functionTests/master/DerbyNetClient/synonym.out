@@ -1,0 +1,210 @@
+ij> -- tests for synonym support
+set schema APP;
+0 rows inserted/updated/deleted
+ij> -- negative tests
+----- Create a synonym to itself. Error.
+create synonym syn for syn;
+ERROR 42916: Synonym 'SYN' cannot be created for 'APP.SYN' as it would result in a circular synonym chain.
+ij> create synonym syn for APP.syn;
+ERROR 42916: Synonym 'SYN' cannot be created for 'APP.SYN' as it would result in a circular synonym chain.
+ij> create synonym APP.syn for syn;
+ERROR 42916: Synonym 'APP.SYN' cannot be created for 'APP.SYN' as it would result in a circular synonym chain.
+ij> create synonym APP.syn for APP.syn;
+ERROR 42916: Synonym 'APP.SYN' cannot be created for 'APP.SYN' as it would result in a circular synonym chain.
+ij> -- Create a simple synonym loop. Error.
+create synonym synonym1 for synonym;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'SYNONYM1' resolved to the object 'APP.SYNONYM' which is currently undefined. : 
+ij> create synonym synonym for synonym1;
+ERROR 42916: Synonym 'SYNONYM' cannot be created for 'SYNONYM1' as it would result in a circular synonym chain.
+ij> drop synonym synonym1;
+0 rows inserted/updated/deleted
+ij> -- Create a larger synonym loop.
+create synonym ts1 for ts;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'TS1' resolved to the object 'APP.TS' which is currently undefined. : 
+ij> create synonym ts2 for ts1;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'TS2' resolved to the object 'APP.TS' which is currently undefined. : 
+ij> create synonym ts3 for ts2;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'TS3' resolved to the object 'APP.TS' which is currently undefined. : 
+ij> create synonym ts4 for ts3;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'TS4' resolved to the object 'APP.TS' which is currently undefined. : 
+ij> create synonym ts5 for ts4;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'TS5' resolved to the object 'APP.TS' which is currently undefined. : 
+ij> create synonym ts6 for ts5;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'TS6' resolved to the object 'APP.TS' which is currently undefined. : 
+ij> create synonym ts for ts6;
+ERROR 42916: Synonym 'TS' cannot be created for 'TS6' as it would result in a circular synonym chain.
+ij> drop synonym App.ts1;
+0 rows inserted/updated/deleted
+ij> drop synonym "APP".ts2;
+0 rows inserted/updated/deleted
+ij> drop synonym TS3;
+0 rows inserted/updated/deleted
+ij> drop synonym ts4;
+0 rows inserted/updated/deleted
+ij> drop synonym ts5;
+0 rows inserted/updated/deleted
+ij> drop synonym app.ts6;
+0 rows inserted/updated/deleted
+ij> -- Synonyms and table/view share same namespace. Negative tests for this.
+create table table1 (i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into table1 values (1,1), (2,2);
+2 rows inserted/updated/deleted
+ij> create view view1 as select i, j from table1;
+0 rows inserted/updated/deleted
+ij> create synonym table1 for t1;
+ERROR X0Y68: Table/View 'TABLE1' already exists.
+ij> create synonym APP.Table1 for t1;
+ERROR X0Y68: Table/View 'TABLE1' already exists.
+ij> create synonym app.TABLE1 for "APP"."T";
+ERROR X0Y68: Table/View 'TABLE1' already exists.
+ij> create synonym APP.VIEW1 for v1;
+ERROR X0Y68: Table/View 'VIEW1' already exists.
+ij> create synonym "APP"."VIEW1" for app.v;
+ERROR X0Y68: Table/View 'VIEW1' already exists.
+ij> -- Synonyms can't be created on temporary tables
+declare global temporary table session.t1 (c1 int) not logged;
+0 rows inserted/updated/deleted
+ij> create synonym synForTemp for session.t1;
+ERROR XCL51: The requested function can not reference tables in SESSION schema.
+ij> create synonym synForTemp for session."T1";
+ERROR XCL51: The requested function can not reference tables in SESSION schema.
+ij> -- Creating a table or a view when a synonym of that name is present. Error.
+create synonym myTable for table1;
+0 rows inserted/updated/deleted
+ij> create table myTable(i int, j int);
+ERROR X0Y32: Table/View 'MYTABLE' already exists in Schema 'APP'.
+ij> create view myTable as select * from table1;
+ERROR X0Y32: Table/View 'MYTABLE' already exists in Schema 'APP'.
+ij> -- Positive test cases
+----- Using synonym in DML
+select * from myTable;
+ERROR X0Y79: Statement.executeUpdate() cannot be called with a statement that returns a ResultSet.
+ij> select * from table1;
+I |J          
+-----
+1 |1          
+2 |2          
+ij> insert into myTable values (3,3), (4,4);
+2 rows inserted/updated/deleted
+ij> select * from mytable;
+I |J          
+-----
+1 |1          
+2 |2          
+3 |3          
+4 |4          
+ij> update myTable set i=3 where j=4;
+1 row inserted/updated/deleted
+ij> select * from mytable;
+I |J          
+-----
+1 |1          
+2 |2          
+3 |3          
+3 |4          
+ij> select * from table1;
+I |J          
+-----
+1 |1          
+2 |2          
+3 |3          
+3 |4          
+ij> delete from myTable where i> 2;
+2 rows inserted/updated/deleted
+ij> select * from "APP"."MYTABLE";
+I |J          
+-----
+1 |1          
+2 |2          
+ij> select * from APP.table1;
+I |J          
+-----
+1 |1          
+2 |2          
+ij> -- Try some cursors
+get cursor c1 as 'select * from myTable';
+ij> next c1;
+I |J          
+-----
+1 |1          
+ij> next c1;
+I |J          
+-----
+2 |2          
+ij> close c1;
+ij> -- Try updatable cursors
+autocommit off;
+ij> get cursor c2 as 'select * from myTable for update';
+ij> next c2;
+I |J          
+-----
+1 |1          
+ij> update myTable set i=5 where current of c2;
+1 row inserted/updated/deleted
+ij> close c2;
+ij> autocommit on;
+ij> select * from table1;
+I |J          
+-----
+5 |1          
+2 |2          
+ij> -- Try updatable cursors, with synonym at the top, base table inside.
+autocommit off;
+ij> get cursor c2 as 'select * from app.table1 for update';
+ij> next c2;
+I |J          
+-----
+5 |1          
+ij> update myTable set i=6 where current of c2;
+1 row inserted/updated/deleted
+ij> close c2;
+ij> autocommit on;
+ij> select * from table1;
+I |J          
+-----
+6 |1          
+2 |2          
+ij> -- trigger tests
+create table table2 (i int, j int);
+0 rows inserted/updated/deleted
+ij> -- Should fail
+create trigger tins after insert on myTable referencing new_table as new for each statement mode db2sql insert into table2 select i,j from table1;
+ERROR 42Y55: 'CREATE TRIGGER' cannot be performed on 'MYTABLE' because it does not exist.
+ij> -- Should pass
+create trigger tins after insert on table1 referencing new_table as new for each statement mode db2sql insert into table2 select i,j from table1;
+0 rows inserted/updated/deleted
+ij> drop trigger tins;
+0 rows inserted/updated/deleted
+ij> create trigger triggerins after insert on table2 referencing new_table as new for each statement mode db2sql insert into myTable select i,j from new;
+0 rows inserted/updated/deleted
+ij> select * from myTable;
+I |J          
+-----
+6 |1          
+2 |2          
+ij> insert into table2 values (5, 5);
+1 row inserted/updated/deleted
+ij> select * from myTable;
+I |J          
+-----
+6 |1          
+2 |2          
+5 |5          
+ij> drop table table2;
+0 rows inserted/updated/deleted
+ij> -- TODO: Add more tests here
+----- drop and recreate schema test
+----- More negative tests once dependency checking is added
+drop view view1;
+0 rows inserted/updated/deleted
+ij> drop table table1;
+0 rows inserted/updated/deleted
+ij> 

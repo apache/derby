@@ -46,6 +46,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -60,6 +61,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.types.SynonymAliasInfo;
 import java.util.Properties;
 import java.util.Vector;
 import java.sql.Types;
@@ -1373,7 +1375,10 @@ public abstract class QueryTreeNode implements Visitable
 			return null;
 
 		//it is not a temporary table, so go through the data dictionary to find the physical persistent table
-		return getDataDictionary().getTableDescriptor(tableName, schema);
+		TableDescriptor td = getDataDictionary().getTableDescriptor(tableName, schema);
+		if (td == null || td.isSynonymDescriptor())
+			return null;
+		return td;
 	}
 
 	/**
@@ -1467,6 +1472,49 @@ public abstract class QueryTreeNode implements Visitable
 			}
 		}
 		return sdCatalog;
+	}
+
+	/**
+	 * Resolve table/view reference to a synonym. May have to follow a synonym chain.
+	 *
+	 * @param	tabName to match for a synonym
+	 *
+	 * @return	Synonym TableName if a match is found, NULL otherwise.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public TableName resolveTableToSynonym(TableName tabName) throws StandardException
+	{
+		DataDictionary dd = getDataDictionary();
+		String nextSynonymTable = tabName.getTableName();
+		String nextSynonymSchema = tabName.getSchemaName();
+		boolean found = false;
+
+		// Circular synonym references should have been detected at the DDL time, so
+		// the following loop shouldn't loop forever.
+		for (;;)
+		{
+			SchemaDescriptor nextSD = getSchemaDescriptor(nextSynonymSchema, false);
+			if (nextSD == null || nextSD.getUUID() == null)
+				break;
+	
+			AliasDescriptor nextAD = dd.getAliasDescriptor(nextSD.getUUID().toString(),
+						 nextSynonymTable, AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR);
+			if (nextAD == null)
+				break;
+
+			found = true;
+			SynonymAliasInfo info = ((SynonymAliasInfo)nextAD.getAliasInfo());
+			nextSynonymTable = info.getSynonymTable();
+			nextSynonymSchema = info.getSynonymSchema();
+		}
+
+		if (!found)
+			return null;
+
+		TableName tableName = new TableName();
+		tableName.init(nextSynonymSchema, nextSynonymTable);
+		return tableName;
 	}
 
 	/**

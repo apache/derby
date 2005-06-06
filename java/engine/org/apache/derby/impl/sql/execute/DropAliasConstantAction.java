@@ -24,6 +24,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -102,6 +103,7 @@ class DropAliasConstantAction extends DDLConstantAction
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
+		TransactionController tc = lcc.getTransactionExecute();
 		DependencyManager dm = dd.getDependencyManager();
 
 
@@ -129,7 +131,7 @@ class DropAliasConstantAction extends DDLConstantAction
 		// RESOLVE - fix error message
 		if (ad == null)
 		{
-			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "Method alias",  aliasName);
+			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, ad.getAliasType(nameSpace),  aliasName);
 		}
 
 		/* Prepare all dependents to invalidate.  (This is their chance
@@ -151,8 +153,16 @@ class DropAliasConstantAction extends DDLConstantAction
 
 		dm.invalidateFor(ad, invalidationType, lcc);
 
+		if (ad.getAliasType() == AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
+		{
+			DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+			TableDescriptor td = ddg.newTableDescriptor(aliasName, sd,
+				TableDescriptor.SYNONYM_TYPE, TableDescriptor.DEFAULT_LOCK_GRANULARITY);
+			dd.dropTableDescriptor(td, sd, tc);
+		}
+			
 		/* Drop the alias */
-		dd.dropAliasDescriptor(ad, lcc.getTransactionExecute());
+		dd.dropAliasDescriptor(ad, tc);
 
 	}
 }

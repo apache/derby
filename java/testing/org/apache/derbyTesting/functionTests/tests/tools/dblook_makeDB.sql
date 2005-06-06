@@ -103,6 +103,16 @@ create unique index ix4 on bar.t4 (k asc);
 create index """Quoted""Schema"""."Ix""5" on "tee""""Hee" (n desc);
 
 -- ----------------------------------------------
+-- Synonyms
+-- ----------------------------------------------
+create synonym synonym1 for t1;
+create synonym bar.synonym2 for bar."MULTI WORD NAME";
+
+set schema bar;
+create synonym synonym3 for app.t11;
+set schema app;
+
+-- ----------------------------------------------
 -- Views
 -- ----------------------------------------------
 

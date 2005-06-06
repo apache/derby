@@ -28,6 +28,7 @@ package org.apache.derby.catalog;
  * <ul>
  * <li>method alias
  * <li>class alias
+ * <li>synonym
  * <li>user-defined aggregate
  * </ul>
  *
@@ -39,18 +40,22 @@ public interface AliasInfo
 	 */
 	public static final char ALIAS_TYPE_PROCEDURE_AS_CHAR		= 'P';
 	public static final char ALIAS_TYPE_FUNCTION_AS_CHAR		= 'F';
+	public static final char ALIAS_TYPE_SYNONYM_AS_CHAR             = 'S';	
 
 	public static final String ALIAS_TYPE_PROCEDURE_AS_STRING		= "P";
 	public static final String ALIAS_TYPE_FUNCTION_AS_STRING		= "F";
+	public static final String ALIAS_TYPE_SYNONYM_AS_STRING  		= "S";
 
 	/**
 	 * Public statics for the various alias name spaces as both char and String.
 	 */
 	public static final char ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR	= 'P';
 	public static final char ALIAS_NAME_SPACE_FUNCTION_AS_CHAR	= 'F';
+	public static final char ALIAS_NAME_SPACE_SYNONYM_AS_CHAR       = 'S';
 
 	public static final String ALIAS_NAME_SPACE_PROCEDURE_AS_STRING	= "P";
 	public static final String ALIAS_NAME_SPACE_FUNCTION_AS_STRING	= "F";
+	public static final String ALIAS_NAME_SPACE_SYNONYM_AS_STRING   = "S";
 
 	/**
 	 * Get the name of the static method that the alias 

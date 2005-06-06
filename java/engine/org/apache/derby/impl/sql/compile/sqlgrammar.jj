@@ -1868,6 +1868,7 @@ TOKEN [IGNORE_CASE] :
 |	<SQL_TSI_YEAR: "sql_tsi_year">
 |	<START: "start">
 |	<STATEMENT: "statement">
+|	<SYNONYM: "synonym">
 |	<THEN: "then">
 |	<TIME: "time">
 |	<TIMESTAMP: "timestamp">
@@ -2413,7 +2414,8 @@ createStatements() throws StandardException :
 		(
             statementNode = schemaDefinition() |
             statementNode = viewDefinition(beginToken) |
-           statementNode = triggerDefinition()
+            statementNode = triggerDefinition() |
+            statementNode = synonymDefinition()
         )
         {
         }
@@ -9048,6 +9050,32 @@ triggerDefinition() throws StandardException :
 	}
 }
 
+QueryTreeNode
+synonymDefinition() throws StandardException :
+{
+	TableName synonymName;
+	TableName targetName;
+}
+{
+    <SYNONYM> synonymName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <FOR>
+		 targetName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	{
+		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1,
+			     "CREATE SYNONYM");
+
+		return  (StatementNode) getNodeFactory().getCreateAliasNode
+			(
+				synonymName,
+				targetName,
+				null,
+				AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR,
+				Boolean.FALSE,
+				getContextManager()
+			);
+	}
+}
+
+
 Boolean
 beforeOrAfter() :
 {}
@@ -11044,6 +11072,12 @@ dropAliasStatement() throws StandardException :
 	{
 		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR);
 	}  
+|	<SYNONYM> aliasName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	{
+		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "DROP SYNONYM");
+
+		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR);
+	}
 }
 
 QueryTreeNode
@@ -11537,6 +11571,7 @@ nonReservedKeyword()  :
     |       tok = <STABILITY>
 	|	tok = <START>
 	|	tok = <STATEMENT>
+	|	tok = <SYNONYM>
 	|	tok = <STYLE>
 	|	tok = <T>
 	|	tok = <THEN>

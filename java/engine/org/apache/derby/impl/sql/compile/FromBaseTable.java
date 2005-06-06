@@ -2369,7 +2369,16 @@ public class FromBaseTable extends FromTable
 		}
 		else
 		{
-			throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);
+			// Check if the reference is for a synonym.
+			TableName synonymTab = resolveTableToSynonym(tableName);
+			if (synonymTab == null)
+				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);
+			tableName = synonymTab;
+			sd = getSchemaDescriptor(tableName.getSchemaName());
+
+			tableDescriptor = getTableDescriptor(synonymTab.getTableName(), sd);
+			if (tableDescriptor == null)
+				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);
 		}
 
 		return	tableDescriptor;

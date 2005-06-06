@@ -75,6 +75,10 @@ public class DropAliasNode extends DropStatementNode
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR;
 				break;
 
+			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+				nameSpace = AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR;
+				break;
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -148,6 +152,9 @@ public class DropAliasNode extends DropStatementNode
 				break;
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 				typeName = "FUNCTION";
+				break;
+			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+				typeName = "SYNONYM";
 				break;
 		}
 		return typeName;

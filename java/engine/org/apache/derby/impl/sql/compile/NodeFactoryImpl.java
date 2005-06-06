@@ -596,7 +596,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	public	QueryTreeNode
 	getCreateAliasNode(
 		Object aliasName,
-		String fullStaticMethodName,
+		Object targetName,
 		Object aliasSpecificInfo,
 		char aliasType,
 		Boolean delimitedIdentifier,
@@ -605,37 +605,39 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	{
 		int nodeType;
 		String methodName = null;
-		String javaClassName = fullStaticMethodName;
 		String targetMethodName = null;
 		String targetClassName = null;
 
 		nodeType = C_NodeTypes.CREATE_ALIAS_NODE;
 
-        int lastPeriod;
-        int paren = fullStaticMethodName.indexOf('(');
-        if (paren == -1) {
-            // not a Java signature - split based on last period
-            lastPeriod = fullStaticMethodName.lastIndexOf('.');
-        } else {
-            // a Java signature - split on last period before the '('
-            lastPeriod = fullStaticMethodName.substring(0, paren).lastIndexOf('.');
-        }
-        if (lastPeriod == -1 || lastPeriod == fullStaticMethodName.length()-1) {
-            throw StandardException.newException(SQLState.LANG_INVALID_FULL_STATIC_METHOD_NAME, fullStaticMethodName);
-        }
-        javaClassName = fullStaticMethodName.substring(0, lastPeriod);
-        methodName = fullStaticMethodName.substring(lastPeriod + 1);
+		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
+		{
+        	int lastPeriod;
+        	String fullStaticMethodName = (String) targetName;
+        	int paren = fullStaticMethodName.indexOf('(');
+        	if (paren == -1) {
+            	// not a Java signature - split based on last period
+            	lastPeriod = fullStaticMethodName.lastIndexOf('.');
+        	} else {
+            	// a Java signature - split on last period before the '('
+            	lastPeriod = fullStaticMethodName.substring(0, paren).lastIndexOf('.');
+        	}
+        	if (lastPeriod == -1 || lastPeriod == fullStaticMethodName.length()-1) {
+            	throw StandardException.newException(SQLState.LANG_INVALID_FULL_STATIC_METHOD_NAME, fullStaticMethodName);
+        	}
+        	String javaClassName = fullStaticMethodName.substring(0, lastPeriod);
+        	methodName = fullStaticMethodName.substring(lastPeriod + 1);
+			targetName = javaClassName;
+		}
 
 		return getNode(
 			nodeType,
 			aliasName,
-			javaClassName,
+			targetName,
 			methodName,
 			aliasSpecificInfo,
 			new Character(aliasType),
 			delimitedIdentifier,
 			cm );
 	}
-
-
 }

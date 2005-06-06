@@ -912,7 +912,7 @@ public class dblook_test {
 					rowValues = null;
 					break;
 				}
-				else if (colName.equals("JAVACLASSNAME") &&
+				else if (colName.equals("JAVACLASSNAME") && (value != null) &&
 					(value.indexOf("org.apache.derby") != -1) &&
 					(value.indexOf(".util.") == -1)) {
 				// this is a -- hack -- to see if the alias is a

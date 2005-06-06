@@ -101,6 +101,7 @@ public class TableDescriptor extends TupleDescriptor
 	public static final int SYSTEM_TABLE_TYPE = 1;
 	public static final int VIEW_TYPE = 2;
 	public static final int GLOBAL_TEMPORARY_TABLE_TYPE = 3;
+	public static final int SYNONYM_TYPE = 4;
 
 	public static final char	ROW_LOCK_GRANULARITY = 'R';
 	public static final char	TABLE_LOCK_GRANULARITY = 'T';
@@ -556,6 +557,18 @@ public class TableDescriptor extends TupleDescriptor
 			return false;
 		else
 			return(super.isPersistent());
+	}
+
+	/**
+	 * Is this descriptor represents a synonym?
+	 *
+	 * @return boolean              Whether or not this represents a synonym
+	 */
+	public boolean isSynonymDescriptor()
+	{
+		if (tableType == TableDescriptor.SYNONYM_TYPE)
+			return true;
+		return false;
 	}
 
 	/**
@@ -1265,5 +1278,8 @@ public class TableDescriptor extends TupleDescriptor
 	public String getDescriptorName() { return tableName; }
 
 	/** @see TupleDescriptor#getDescriptorType */
-	public String getDescriptorType() { return "Table/View"; }
+	public String getDescriptorType() 
+	{
+		return (tableType == TableDescriptor.SYNONYM_TYPE) ? "Synonym" : "Table/View";
+	}
 }

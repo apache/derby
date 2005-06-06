@@ -187,6 +187,7 @@ subquery_derby.properties
 supersimple.sql
 supersimple_derby.properties
 syscat.sql
+synonym.sql
 tempRestrictions.sql
 triggerBeforeTrig.sql
 triggerGeneral.sql
