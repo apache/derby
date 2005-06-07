@@ -34,9 +34,11 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="engine" depends="engine_169"
+  <target name="engine" depends="engine_j2se,engine_169,engine_169_opt"
           description="Build Derby engine">
-
+	</target>
+    <target name="engine_j2se" depends="engine_169"
+            description="Build Derby engine">
     <ant dir="${derby.engine.dir}/iapi"/>
     <ant dir="${derby.engine.dir}/impl"/>
     <ant dir="${derby.engine.dir}/jdbc"/>
@@ -44,12 +46,11 @@
     <ant dir="${derby.engine.dir}/catalog"/>
     <ant dir="${derby.engine.dir}/diag"/>
     <ant dir="${derby.engine.dir}/vti"/>
-
-    <copy todir="${out.dir}/${derby.dir}">
-      <fileset dir="${derby.engine.dir}">
-        <include name="modules.properties"/>
-      </fileset>
-    </copy>
+      	<copy todir="${out.dir}/${derby.dir}">
+          <fileset dir="${derby.engine.dir}">
+            <include name="modules.properties"/>
+          </fileset>
+        </copy>
   </target>
   
   <target name="engine_169"
@@ -60,17 +61,38 @@
      <ant dir="${derby.engine.dir}/iapi" target="compile_iapi_error_jsr169"/>
      <ant dir="${derby.engine.dir}/database"/>
      <ant dir="${derby.engine.dir}/impl" target="compile_impl_169"/>
- </target>
+
+
+  </target>
 	
 	<!-- optional JSR169 classes - optional because it requires a 
 	J2ME/CDC/Foundation/JSR169 build jar files.
 	jsr169compile.classpath
 	-->
-	  <target name="engine_169_opt"  depends="engine_169"
-	          description="Build optional JSR169 elements of Derby engine">
+	  <target name="engine_169_opt"  depends="engine_j2se,J2ME_modules_edit"
+	          description="Build optional JSR169 elements of Derby engine"
+	  	      if="jsr169compile.classpath">
 	 <ant dir="${derby.engine.dir}/impl/jdbc" target="compile_jsr169_opt"/>
      <ant dir="${derby.engine.dir}/jdbc" target="compile_jsr169_opt"/>
+	 
 	 </target>
+	
+	<target name="J2ME_modules_edit"  depends="checkJ2MEmoduleprops"
+		unless="modulesJ2ME.uptodate" if="jsr169compile.classpath">
+
+		<replaceregexp file="${out.dir}/${derby.dir}/modules.properties"
+		              match="^#J2ME_optional_(.*)"
+		              replace="\1"
+		              byline="true" />
+	<touch file="${out.dir}/${derby.dir}/modulesJ2ME.done"/>
+
+	</target> 	
+	
+	<target name="checkJ2MEmoduleprops">
+	  <condition property="modulesJ2ME.uptodate">
+	    <available file="${out.dir}/${derby.dir}/modulesJ2ME.done"/>
+	  </condition>
+	</target> 
 	
 <!--             ============= End Targets ==============                -->
 

@@ -17,6 +17,7 @@ Contents
 2.2.4 Download extensions for Java Development Kit release 1.3.x
 2.2.5 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
 2.2.6 Download Jikes 1.14 (Optional)
+2.2.7 Download J2ME/CDC/FOundation 1.0 and JSR169 jars (Optional)
 
 3     Build instructions
 3.1   Set required environmental variables
@@ -240,6 +241,23 @@ Install Jikes 1.14 in any directory. This directory will be
 referred to as the ${jikes.dir} directory in the rest of this 
 document. 
 
+2.2.7 Download J2ME/CDC/Foundation and JSR 169 jars
+
+This is an optional section.
+
+Derby's embeded engine supports J2ME/CDC/Foundation 1.0 using the JDBC
+sub-set defined in JSR 169. In order to build Derby to
+support this platform, jars are needed for the Foundation 1.0
+profile and the JSR169 JDBC subset. There is no standard place
+for these jars yet, possible downloads are:
+
+java.sun.com/j2me
+IBM's WCTME 5.7
+
+Once you have obtained these jars and set the jsr169compile.classpath
+(see section 3.2) the regulat Derby builds will include the JSR169 code
+for the embedded engine. The resulting jar file (derby.jar) can be used
+on J2ME, or J2SE, write once run anywhere.
 
 
 ---------------------------------------------------------------
@@ -272,7 +290,6 @@ document.
      setenv JAVA_HOME ${jdk14.dir} -- On unix(csh).
      export JAVA_HOME=${jdk14.dir} -- On unix(ksh)
      set JAVA_HOME=${jdk14.dir}    -- On Windows
-
 
 
 3.2   Create property file
@@ -364,6 +381,17 @@ to specify your environment and options:
 
       Typically applications embedding Derby would use jar files 
       built with sane=false.
+
+    - Optional - jsr169compile.classpath
+
+      If you downloaded the J2ME jar files (section 2.2.7) then
+      setting this property will enable the optional JSR169 targets
+      for the top-level default, engine or all targets.
+      The compile classpath needs to include the Foundation 1.0
+      and JSR169 environments, see any documentation for your
+      source of J2ME libraries. Here is an example foe IBM's WCTME 5.7
+ 
+      jsr169compile.classpath=C:/wctme5.7/ive/lib/jclFoundation10/classes.zip;C:/wctme5.7/ive/lib/jdbc.jar
 
 3.3   Run Derby build
 
