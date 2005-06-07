@@ -105,12 +105,9 @@ public class ColumnDescriptor extends TupleDescriptor
 			this.uuid = table.getUUID();
 		}
 
-		if (SanityManager.DEBUG)
-		{
-			assertAutoinc(autoinc,
-				      autoincInc,
-				      columnDefaultInfo);
-		}
+		assertAutoinc(autoinc,
+			      autoincInc,
+			      columnDefaultInfo);
 
 		this.autoincStart = autoincStart;
 		this.autoincInc = autoincInc;
@@ -153,12 +150,9 @@ public class ColumnDescriptor extends TupleDescriptor
 		this.uuid = uuid;
 		this.defaultUUID = defaultUUID;
 
-		if (SanityManager.DEBUG)
-		{
-			assertAutoinc(autoinc,
-				      autoincInc,
-				      columnDefaultInfo);
-		}
+		assertAutoinc(autoinc,
+			      autoincInc,
+			      columnDefaultInfo);
 		
 		this.autoincStart = autoincStart;
 		this.autoincInc = autoincInc;
@@ -397,19 +391,24 @@ public class ColumnDescriptor extends TupleDescriptor
 	private static void assertAutoinc(boolean autoinc,
 					  long autoincInc,
 					  DefaultInfo defaultInfo){
-		if (autoinc){
-			SanityManager.ASSERT((autoincInc != 0), "increment is zero for  autoincrement column");
-			SanityManager.ASSERT((defaultInfo == null ||
+
+		if (SanityManager.DEBUG) {
+			if (autoinc){
+				SanityManager.ASSERT((autoincInc != 0),
+					"increment is zero for  autoincrement column");
+				SanityManager.ASSERT((defaultInfo == null ||
 					      defaultInfo.isDefaultValueAutoinc()),
 					     "If column is autoinc and have defaultInfo, " + 
 					     "isDefaultValueAutoinc must be true.");
-		}
-		else{
-			SanityManager.ASSERT((autoincInc == 0), "increment is non-zero for non-autoincrement column");
-			SanityManager.ASSERT((defaultInfo == null ||
+			}
+			else{
+				SanityManager.ASSERT((autoincInc == 0),
+					"increment is non-zero for non-autoincrement column");
+				SanityManager.ASSERT((defaultInfo == null ||
 					      ! defaultInfo.isDefaultValueAutoinc()),
 					     "If column is not autoinc and have defaultInfo, " + 
 					     "isDefaultValueAutoinc can not be true");
+			}
 		}
 	}
 

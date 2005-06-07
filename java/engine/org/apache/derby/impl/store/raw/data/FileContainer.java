@@ -1748,12 +1748,14 @@ public abstract class FileContainer
                 }
                 catch (StandardException se)
                 {
-                    SanityManager.DEBUG_PRINT("FileContainer",
-                        "got exception from initPage:"  +
-                        "\nreuse = " + reuse +
-                        "\ncreatePageArgs[1] = " + createPageArgs[1] +
-                        "\nallocPage = " + allocPage
-                        );
+                    if (SanityManager.DEBUG) {
+                        SanityManager.DEBUG_PRINT("FileContainer",
+                            "got exception from initPage:"  +
+                            "\nreuse = " + reuse +
+                            "\ncreatePageArgs[1] = " + createPageArgs[1] +
+                            "\nallocPage = " + allocPage
+                            );
+                    }
                     allocCache.dumpAllocationCache();
 
                     throw se;
