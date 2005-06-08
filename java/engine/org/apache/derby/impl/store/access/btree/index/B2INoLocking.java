@@ -44,7 +44,19 @@ import org.apache.derby.impl.store.access.btree.OpenBTree;
 import org.apache.derby.impl.store.access.btree.BTreeRowPosition;
 import org.apache.derby.impl.store.access.btree.WaitError;
 
+
 /**
+
+Secondary index locking policy that does no locking.
+<p>
+This is used when the caller knows that logical locks are already obtained 
+so need not be requested again.  For instance when inserting a row into
+an index, a X row lock has already been obtained when the row was inserted
+into the base table, so there is no need to get another lock in the 
+secondary index.
+<p>
+This class overrides all interfaces of BTreeLockingPolicy making them
+no-ops.
 
 **/
 

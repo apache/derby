@@ -22,6 +22,19 @@ package org.apache.derby.impl.store.access.btree.index;
 
 import org.apache.derby.impl.store.access.btree.D_BTreeController;
 
+/**
+
+Debugging class used to print debug information about a B2I.  
+
+Code here can be used in SANE development builds but the class is not necessary
+for a release so does not add footprint to a customer release.
+See the DiagnosticableGeneric interface for more information.
+
+Note that all the real work currently is inherited from 
+it's parent, but this class needs to exist as the diagnostic interface
+requires a class names D_XXX to provide information about XXX.
+
+**/
 
 public class D_B2IController extends D_BTreeController
 {

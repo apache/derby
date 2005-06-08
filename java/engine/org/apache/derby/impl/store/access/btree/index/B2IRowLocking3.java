@@ -51,8 +51,12 @@ import org.apache.derby.impl.store.access.btree.WaitError;
 
 /**
 
-**/
+Implements the jdbc serializable isolation level using row locks.
+<p>
+Holds read and write locks until end of transaction.
+Obtains previous key locks to protect from phantom reads.
 
+**/
 class B2IRowLocking3 implements BTreeLockingPolicy
 {
 

@@ -37,15 +37,21 @@ import org.apache.derby.impl.store.access.btree.BTreeCostController;
 
 
 /**
+ * Controller used to provide cost estimates to optimizer about secondary index
+ * data access.
+ *
  * Implements the StoreCostController interface for the B-Tree index
  * implementation.  The primary use of this interface is to provide costs
  * used by the query optimizer to use when choosing query plans. Provides
  * costs of things like fetch one row, how many rows in conglomerate, how
  * many rows between these 2 keys.
+ *
+ * Note most work of this class is inherited from the generic btree 
+ * implementation.  This class initializes the top level object and deals with 
+ * locking information specific to a secondary index implementation of a btree.
  */
 public class B2ICostController extends BTreeCostController
 {
-
 	/*
 	** Fields of B2IController.
 	*/

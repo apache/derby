@@ -1052,6 +1052,3 @@ public class B2I extends BTree
         localReadExternal(in);
     }
 }
-
-
-

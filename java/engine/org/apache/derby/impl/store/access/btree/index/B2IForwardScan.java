@@ -51,8 +51,20 @@ import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 
 /**
 
-  A B2I controller object is the concrete class which corresponds to an open
-  b-tree secondary index.
+The btree secondary index implementation of ScanManager which provides reading 
+and deleting of entries in the btree secondary index.  
+
+This supports setting up and
+iterating through a set of rows while providing a start key, stop key,
+and a set of AND and OR qualifiers to skip unwanted rows.  Currently
+derby only supports forward scans (but individual columns can have
+descending order).  This interface is also used to delete rows from
+the conglomerate.  Note that update is not supported, it must be
+implemented as a delete, followed by an insert.
+
+Note most work of this class is inherited from the generic btree implementation.
+This class initializes the top level object and deals with locking information
+specific to a secondary index implementation of a btree.
 
 **/
 

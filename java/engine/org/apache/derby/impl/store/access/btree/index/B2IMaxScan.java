@@ -48,9 +48,14 @@ import org.apache.derby.impl.store.access.btree.BTreeMaxScan;
 import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 
 /**
+Scan used to find maximum value in the secondary index.
 
-  A B2I controller object is the concrete class which corresponds to an open
-  b-tree secondary index.
+This class implements an optimized interface to find the maximum row,
+for a set of rows between an input start and stop key.
+
+Note most work of this class is inherited from the generic btree implementation.
+This class initializes the top level object and deals with locking information
+specific to a secondary index implementation of a btree.
 
 **/
 

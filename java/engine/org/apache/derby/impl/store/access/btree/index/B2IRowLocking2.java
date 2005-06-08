@@ -47,6 +47,13 @@ import org.apache.derby.impl.store.access.btree.WaitError;
 
 /**
 
+The btree locking policy which implements read committed isolation level.
+
+It inherits all functionality from B2IRowLockingRR (repeatable read) except 
+that it releases read locks after obtaining them.  It provides a single
+implementation of unlockScanRecordAfterRead() which releases a read lock
+after it has been locked and processed.
+
 **/
 
 class B2IRowLocking2 extends B2IRowLockingRR implements BTreeLockingPolicy
