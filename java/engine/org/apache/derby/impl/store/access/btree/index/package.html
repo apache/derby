@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>BTree Indexes with Locking</title>
+<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+</head>
+<body>
+<p>
+Implements classes used by the language layer to implement
+SQL secondary indexes. The classes here extend and use the classes in
+{@link org.apache.derby.impl.store.access.btree} to implement 
+a locked btree index.
+<p>
+The key to understanding the class layout is to understand the public
+store interfaces in
+{@link org.apache.derby.iapi.store.access.conglomerate}, which contains
+the shared interfaces that must be implemented by all access methods. 
+Currently Derby implements heap and btree index access methods. Users of 
+access methods use the same interface no matter what the underlying 
+type or particular implementation of the access method. Therefore, Derby 
+can support multiple types of btree index implementations, which if done 
+right should require no changes to actual users of the access methods.
+<p>
+In reality the interfaces would have to change in some ways to 
+support a radically different kind of access method, such as 
+<a href="http://gist.cs.berkeley.edu/gist1.html">GiST</a>. But 
+the implementor should enhance the interfaces in the conglomerate 
+package so that these can then be supported by all existing access 
+methods.
+<h2>Isolation Levels</h2>
+<p>Isolation level implementation in the B-Tree index is done with data
+only locking, i.e., locks on secondary index rows are actually locks on the
+data rows that they point to. The specifics of particular isolation levels
+are hidden in various implementations of the {@link org.apache.derby.impl.store.access.btree.BTreeLockingPolicy BTreeLockingPolicy} class.  
+The classes which do scans, deletes, and inserts do not have isolation 
+specific code, instead they make lock calls using BTreeLockingPolicy 
+interfaces, and then depending on the isolation level one of the implmentations
+does the actual locking.
+</p>
+</body>
+</html>

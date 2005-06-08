@@ -47,12 +47,12 @@ import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**
-
-  A B2I controller object is the concrete class which corresponds to an open
-  b-tree secondary index.
-
-**/
-
+ * Implements the ConglomerateController interface for the B-Tree index
+ * access method.  The primary use of this interface is to insert rows
+ * into the tree.
+ * <p>
+ * A B2I controller object corresponds to an open B-Tree secondary index.
+ */
 public class B2IController extends BTreeController
 {
 

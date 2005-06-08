@@ -70,13 +70,7 @@ import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.cache.ClassSize;
 
-/**
-
-  A B2I object corresponds to an instance of a b-tree secondary index conglomerate.
-
-**/
-
-/**
+/*
  * @format_id ACCESS_B2I_V1_ID
  *
  * @purpose   The tag that describes the on disk representation of the B2I
@@ -96,9 +90,9 @@ import org.apache.derby.iapi.services.cache.ClassSize;
  *     array_of_format_ids(byte[][])
  *     baseConglomerateId(long)
  *     rowLocationColumn(int)
- **/
+ */
 
-/**
+/*
  * @format_id ACCESS_B2I_V2_ID
  *
  * @purpose   The tag that describes the on disk representation of the B2I
@@ -126,8 +120,26 @@ import org.apache.derby.iapi.services.cache.ClassSize;
  *     array_of_format_ids(byte[][])
  *     baseConglomerateId(long)
  *     rowLocationColumn(int)
- **/
+ */
 
+/**
+ * Implements an instance of a B-Tree secondary index conglomerate.
+ * A B2I object has two roles.
+ * <ol>
+ * <li>
+ * The B2I object is stored on disk, and holds the store specific
+ * information needed to access/describe the conglomerate. This
+ * includes information such as the format ids of the columns, 
+ * the conglomerate id of the base table, the location of 
+ * row location column.
+ * </li>
+ * <li>
+ * Access to all the interfaces start by making a call off the
+ * Conglomerate interface. So for instance to get a scan on the
+ * conglomerate method {@link #openScan openScan} should be called.
+ * </li>
+ * </ol>
+ */
 public class B2I extends BTree
 {
     public    static final String PROPERTY_BASECONGLOMID = "baseConglomerateId";

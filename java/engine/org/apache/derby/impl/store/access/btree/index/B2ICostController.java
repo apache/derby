@@ -37,12 +37,12 @@ import org.apache.derby.impl.store.access.btree.BTreeCostController;
 
 
 /**
-
-  A B2I controller object is the concrete class which corresponds to an open
-  b-tree secondary index.
-
-**/
-
+ * Implements the StoreCostController interface for the B-Tree index
+ * implementation.  The primary use of this interface is to provide costs
+ * used by the query optimizer to use when choosing query plans. Provides
+ * costs of things like fetch one row, how many rows in conglomerate, how
+ * many rows between these 2 keys.
+ */
 public class B2ICostController extends BTreeCostController
 {
 
