@@ -23,6 +23,26 @@ inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA M
 <systemname>
 -----
 <systemid>
+GATP2
+FOO
+org.apache.derbyTesting.functionTests.util.TestPropertyInfo
+F
+F
+false
+getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA RETURNS NULL ON NULL INPUT
+<systemname>
+-----
+<systemid>
+GATP
+APP
+org.apache.derbyTesting.functionTests.util.TestPropertyInfo
+F
+F
+false
+getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT
+<systemname>
+-----
+<systemid>
 OP4
 BAR
 org.apache.derbyTesting.functionTests.util.ProcedureTest

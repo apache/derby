@@ -56,6 +56,14 @@ create procedure "procTwo" (INOUT a CHAR(10), IN b int) language java external n
 create procedure """proc ""In Quotes with spaces""" (INOUT a CHAR(10), IN b int) language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3' parameter style java dynamic result sets 2 modifies sql data;
 
 -- ----------------------------------------------
+-- Functions.
+-- ----------------------------------------------
+
+create function gatp(SCH VARCHAR(128), TBL VARCHAR(128)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties' LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL;
+
+create function foo.gatp2(SCH VARCHAR(128), TBL VARCHAR(128)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties' LANGUAGE JAVA PARAMETER STYLE JAVA RETURNS NULL ON NULL INPUT;
+
+-- ----------------------------------------------
 -- Tables
 -- ----------------------------------------------
 

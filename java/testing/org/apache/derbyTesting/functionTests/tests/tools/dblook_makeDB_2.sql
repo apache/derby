@@ -36,6 +36,12 @@ call sqlj.install_jar('file:dblook_test.jar', 'bar.barjar', 0);
 create procedure proc1 (INOUT a CHAR(10), IN b int) language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3' parameter style java dynamic result sets 4 contains sql;
 
 -- ----------------------------------------------
+-- Functions.
+-- ----------------------------------------------
+
+create function gatp(SCH VARCHAR(128), TBL VARCHAR(128)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties' LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL;
+
+-- ----------------------------------------------
 -- Tables
 -- ----------------------------------------------
 

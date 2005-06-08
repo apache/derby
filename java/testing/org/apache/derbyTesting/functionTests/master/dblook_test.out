@@ -16,6 +16,26 @@ inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA M
 <systemname>
 ----
 <systemid>
+GATP2
+FOO
+org.apache.derbyTesting.functionTests.util.TestPropertyInfo
+F
+F
+false
+getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA RETURNS NULL ON NULL INPUT
+<systemname>
+----
+<systemid>
+GATP
+APP
+org.apache.derbyTesting.functionTests.util.TestPropertyInfo
+F
+F
+false
+getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT
+<systemname>
+----
+<systemid>
 OP4
 BAR
 org.apache.derbyTesting.functionTests.util.ProcedureTest
@@ -1937,6 +1957,26 @@ P
 P
 false
 inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 2
+<systemname>
+----
+<systemid>
+GATP2
+FOO
+org.apache.derbyTesting.functionTests.util.TestPropertyInfo
+F
+F
+false
+getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA RETURNS NULL ON NULL INPUT
+<systemname>
+----
+<systemid>
+GATP
+APP
+org.apache.derbyTesting.functionTests.util.TestPropertyInfo
+F
+F
+false
+getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT
 <systemname>
 ----
 <systemid>
@@ -5178,6 +5218,10 @@ CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
 -- ----------------------------------------------
 CREATE PROCEDURE "APP"."PROC1" (INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3' 
 -- ----------------------------------------------
+-- DDL Statements for functions
+-- ----------------------------------------------
+CREATE FUNCTION "APP"."GATP" (SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties' 
+-- ----------------------------------------------
 -- DDL Statements for tables
 -- ----------------------------------------------
 CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "FKCHAR" CHAR(5))
@@ -5300,6 +5344,10 @@ CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
 -- DDL Statements for stored procedures
 -- ----------------------------------------------
 CREATE PROCEDURE "APP"."PROC1" (INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3'  #
+-- ----------------------------------------------
+-- DDL Statements for functions
+-- ----------------------------------------------
+CREATE FUNCTION "APP"."GATP" (SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties'  #
 -- ----------------------------------------------
 -- DDL Statements for tables
 -- ----------------------------------------------

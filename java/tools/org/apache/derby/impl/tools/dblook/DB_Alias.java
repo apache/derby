@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.tools.dblook.DB_StoredProcedure
+   Derby - Class org.apache.derby.impl.tools.dblook.DB_Alias
 
    Copyright 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -30,26 +30,52 @@ import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import org.apache.derby.tools.dblook;
 
-public class DB_StoredProcedure {
+public class DB_Alias {
 
 	// Prepared statements use throughout the DDL
 	// generation process.
 
 	/* ************************************************
-	 * Generate the DDL for all stored procedures in a given
-	 * database.
+	 * Generate the DDL for all stored procedures and
+	 * functions in a given database and write it to
+	 * output via Logs.java.
 	 * @param conn Connection to the source database.
-	 * @return The DDL for the stored procedures has been
-	 *  written to output via Logs.java.
 	 ****/
 
-	public static void doStoredProcedures(Connection conn)
+	public static void doProceduresAndFunctions(Connection conn)
 		throws SQLException {
 
+		// First do stored procedures.
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT ALIAS, ALIASINFO, " +
 			"ALIASID, SCHEMAID, JAVACLASSNAME, SYSTEMALIAS FROM SYS.SYSALIASES " +
 			"WHERE ALIASTYPE='P'");
+		generateDDL(rs, 'P');	// 'P' => for PROCEDURES
+
+		// Now do functions.
+		rs = stmt.executeQuery("SELECT ALIAS, ALIASINFO, " +
+			"ALIASID, SCHEMAID, JAVACLASSNAME, SYSTEMALIAS FROM SYS.SYSALIASES " +
+			"WHERE ALIASTYPE='F'");
+		generateDDL(rs, 'F');	// 'F' => for FUNCTIONS
+
+		rs.close();
+		stmt.close();
+		return;
+
+	}
+
+	/* ************************************************
+	 * Generate the DDL for either stored procedures or
+	 * functions in a given database, depending on the
+	 * the received aliasType.
+	 * @param rs Result set holding either stored procedures
+	 *  or functions.
+	 * @param aliasType Indication of whether we're generating
+	 *  stored procedures or functions.
+	 ****/
+	private static void generateDDL(ResultSet rs, char aliasType)
+		throws SQLException
+	{
 
 		boolean firstTime = true;
 		while (rs.next()) {
@@ -64,16 +90,19 @@ public class DB_StoredProcedure {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("DBLOOK_StoredProcHeader");
+				Logs.reportMessage((aliasType == 'P')
+					? "DBLOOK_StoredProcHeader"
+					: "DBLOOK_FunctionHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 
-			String procName = rs.getString(1);
-			String procFullName = dblook.addQuotes(
-				dblook.expandDoubleQuotes(procName));
-			procFullName = procSchema + "." + procFullName;
+			String aliasName = rs.getString(1);
+			String fullName = dblook.addQuotes(
+				dblook.expandDoubleQuotes(aliasName));
+			fullName = procSchema + "." + fullName;
 
-			String creationString = createProcString(procFullName, rs);
+			String creationString = createProcOrFuncString(
+				fullName, rs, aliasType);
 			Logs.writeToNewDDL(creationString);
 			Logs.writeStmtEndToNewDDL();
 			Logs.writeNewlineToNewDDL();
@@ -81,50 +110,53 @@ public class DB_StoredProcedure {
 
 		}
 
-		rs.close();
-		stmt.close();
-		return;
-
 	}
 
 	/* ************************************************
-	 * Generate DDL for a specific stored procedure.
-	 * @param procName Name of the current stored procedure.
-	 * @param aProc Info about the current stored procedure.
+	 * Generate DDL for a specific stored procedure or
+	 * function.
+	 * @param aliasName Name of the current procedure/function
+	 * @param aliasInfo Info about the current procedure/function
+	 * @param aliasType Indicator of whether we're generating
+	 *  a stored procedure or a function.
 	 * @return DDL for the current stored procedure is
 	 *   returned, as a String.
 	 ****/
 
-	private static String createProcString(String procName,
-		ResultSet aProc) throws SQLException
+	private static String createProcOrFuncString(String aliasName,
+		ResultSet aliasInfo, char aliasType) throws SQLException
 	{
 
-		StringBuffer proc = new StringBuffer("CREATE PROCEDURE ");
-		proc.append(procName);
-		proc.append(" ");
+		StringBuffer alias = new StringBuffer("CREATE ");
+		if (aliasType == 'P')
+			alias.append("PROCEDURE ");
+		else if (aliasType == 'F')
+			alias.append("FUNCTION ");
+		alias.append(aliasName);
+		alias.append(" ");
 
-		String params = aProc.getString(2);
+		String params = aliasInfo.getString(2);
 
 		// Just grab the parameter part; we'll get the method name later.
-		proc.append(params.substring(params.indexOf("("), params.length()));
-		proc.append(" ");
+		alias.append(params.substring(params.indexOf("("), params.length()));
+		alias.append(" ");
 
 		// Now add the external name.
-		proc.append("EXTERNAL NAME '");
-		proc.append(aProc.getString(5));
-		proc.append(".");
+		alias.append("EXTERNAL NAME '");
+		alias.append(aliasInfo.getString(5));
+		alias.append(".");
 		// Get method name from parameter string fetched above.
-		proc.append(params.substring(0, params.indexOf("(")));
-		proc.append("' ");
+		alias.append(params.substring(0, params.indexOf("(")));
+		alias.append("' ");
 
-		return proc.toString();
+		return alias.toString();
 
 	}
 
 	/* ************************************************
 	 * Generate the DDL for all synonyms in a given
-	 * database. On successul return, the DDL for the stored procedures
-	 * has been written to output via Logs.java.
+	 * database. On successul return, the DDL for the
+	 * synonyms has been written to output via Logs.java.
 	 * @param conn Connection to the source database.
 	 * @return 
 	 ****/

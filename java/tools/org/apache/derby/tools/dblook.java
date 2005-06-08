@@ -44,7 +44,7 @@ import org.apache.derby.impl.tools.dblook.DB_Jar;
 import org.apache.derby.impl.tools.dblook.DB_Key;
 import org.apache.derby.impl.tools.dblook.DB_Table;
 import org.apache.derby.impl.tools.dblook.DB_Schema;
-import org.apache.derby.impl.tools.dblook.DB_StoredProcedure;
+import org.apache.derby.impl.tools.dblook.DB_Alias;
 import org.apache.derby.impl.tools.dblook.DB_Trigger;
 import org.apache.derby.impl.tools.dblook.DB_View;
 import org.apache.derby.impl.tools.dblook.Logs;
@@ -523,12 +523,12 @@ public class dblook {
 			if (tableList == null) {
 			// Don't do these if user just wants table-related objects.
 				DB_Jar.doJars(sourceDBName, this.conn);
-				DB_StoredProcedure.doStoredProcedures(this.conn);
+				DB_Alias.doProceduresAndFunctions(this.conn);
 			}
 
 			DB_Table.doTables(this.conn, tableIdToNameMap);
 			DB_Index.doIndexes(this.conn);
-			DB_StoredProcedure.doSynonyms(this.conn);
+			DB_Alias.doSynonyms(this.conn);
 			DB_Key.doKeys(this.conn);
 			DB_Check.doChecks(this.conn);
 
