@@ -3134,7 +3134,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         int baseTableColumn = 0;
         int totalColumns = resultSetMetaData_.getColumnCount();
         for (; baseTableColumn < totalColumns; baseTableColumn++) {
-            if (resultSetMetaData_.sqlxSchema_[baseTableColumn] != null)
+            if (resultSetMetaData_.sqlxBasename_[baseTableColumn] != null)
                 break;
         }
 
