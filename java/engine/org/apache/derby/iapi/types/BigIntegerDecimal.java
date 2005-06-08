@@ -59,12 +59,14 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		
 		BigInteger bi = new BigInteger(data2c);
 		
+		// If at any time we see that the value to be scaled down
+		// is within the range for a long, then we are guaranteed
+		// that the scaled down value is within the range for long.
 		boolean rangeOk = false;
 		if ((bi.compareTo(BigIntegerDecimal.MAXLONG_PLUS_ONE) < 0)
 			&& (bi.compareTo(BigIntegerDecimal.MINLONG_MINUS_ONE) > 0))
 			rangeOk = true;
 			
-		
 		for (int i = 0; i < sqlScale; i++)
 		{
 			bi = bi.divide(BigIntegerDecimal.TEN);
@@ -87,16 +89,13 @@ public final class BigIntegerDecimal extends BinaryDecimal
     {
 		if (isNull())
 			return 0.0f;
-		return Float.parseFloat(getString());
-
-		// TODO - correct implementation
+		return NumberDataType.normalizeREAL(Float.parseFloat(getString()));
 	}
 	public double getDouble() throws StandardException
     {
 		if (isNull())
 			return 0.0;
-		return Double.parseDouble(getString());
-		// TODO - correct implementation
+		return NumberDataType.normalizeDOUBLE(Double.parseDouble(getString()));
 	}	
 	
 
@@ -154,8 +153,6 @@ public final class BigIntegerDecimal extends BinaryDecimal
 				
 				String exponent = theValue.substring(expOffset);
 				
-				
-				//	TODO Need to handle a + sign in the exponent
 				scale = -1 * Integer.parseInt(exponent);
 				theValue = theValue.substring(0, ePosition);
 			}
@@ -196,7 +193,6 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		if (isNull())
 			return null;
 		
-		// TODO - correct impl
 		String unscaled = new BigInteger(data2c).toString();
 				
 		if (sqlScale == 0)

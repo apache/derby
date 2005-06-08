@@ -695,7 +695,7 @@ return divide(dividend, divisor, result, -1);
 			return 0;
 
 		try {
-			return (int) Double.doubleToLongBits(getDouble());
+			return (int) getLong();
 		} catch (StandardException se)
 		{
 			return 0;

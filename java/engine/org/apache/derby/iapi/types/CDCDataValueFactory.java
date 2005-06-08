@@ -43,12 +43,6 @@ public class CDCDataValueFactory extends DataValueFactoryImpl
 	public CDCDataValueFactory() {
 	}
 	
-   	public void boot(boolean create, Properties properties) throws StandardException {
-   		System.out.println("WARNING - Experimental J2ME/CDC/Foundation/JSR 169 Derby implementation");
-   		System.out.println("WARNING - NOT FOR USE IN PRODUCTION");
-    	super.boot(create, properties);
-   	}
-	
 	/* (non-Javadoc)
 	 * @see org.apache.derby.iapi.services.monitor.ModuleSupportable#canSupport(java.util.Properties)
 	 */
