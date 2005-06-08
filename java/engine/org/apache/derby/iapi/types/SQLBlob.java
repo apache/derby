@@ -187,8 +187,16 @@ public class SQLBlob extends SQLBinary
 			return TypeId.BLOB_PRECEDENCE; // not really used
 		}
 
-    public void setInto(PreparedStatement ps, int position) throws SQLException, StandardException {
-        ps.setBlob(position,null);    
+    public void setInto(PreparedStatement ps, int position)
+		throws SQLException, StandardException
+	{
+		if (isNull()) {
+			ps.setBlob(position, null);    
+			return;
+		}
+
+		// This may cause problems for streaming blobs, by materializing the whole blob.
+		ps.setBytes(position, getBytes());
     }
 }
 
