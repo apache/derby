@@ -323,7 +323,10 @@ public class BackingStoreHashtable
 		// the only difference between getClone and cloneObject is cloneObject does
 		// not objectify a stream.  We use getClone here.  Beetle 4896.
         for (int i = 0; i < old_row.length; i++)
-            new_row[i] = ((DataValueDescriptor) old_row[i]).getClone();
+        {
+            if( old_row[i] != null)
+                new_row[i] = ((DataValueDescriptor) old_row[i]).getClone();
+        }
 
         return(new_row);
     }
