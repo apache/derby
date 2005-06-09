@@ -124,9 +124,105 @@ select * from myTable;
 
 drop table table2;
 
--- TODO: Add more tests here
+-- Try referential constraints. Synonyms should not be allowed there.
+
+create table primaryTab (i int not null primary key, j int, c char(10));
+
+create synonym synPrimary for primaryTab;
+
+-- Should fail
+create table foreignTab(i int, j int references synPrimary(i));
+
+create table foreignTab(i int, j int references primaryTab(i));
+
+drop table foreignTab;
+drop table primaryTab;
+drop synonym synPrimary;
+
+-- Positive test case with three levels of synonym chaining
+
+create schema synonymSchema;
+
+create synonym synonymSchema.mySynonym1 for APP.table1;
+create synonym APP.mySynonym2 for "SYNONYMSCHEMA"."MYSYNONYM1";
+create synonym mySynonym for mySynonym2;
+
+
+select * from table1;
+select * from mySynonym;
+
+insert into mySynonym values (6,6);
+insert into mySynonym select * from mySynonym where i<2;
+
+select * from mySynonym;
+
+update mySynonym set j=5;
+
+update mySynonym set j=4 where i=5;
+
+delete from mySynonym where j=6;
+
+select * from mySynonym;
+select * from table1;
+
+-- cursor on mySynonym
+get cursor c1 as 'select * from mySynonym';
+
+next c1;
+next c1;
+next c1;
+
+close c1;
+
+-- More negative tests to check dependencies
+select * from mySynonym;
+drop synonym mySynonym;
+
+-- Previously compiled cached statement should get invalidated
+select * from mySynonym;
+
+create synonym mySyn for table1;
+create view v1 as select * from mySyn;
+create view v2 as select * from v1;
+
+-- Drop synonym should fail since it is used in two views.
+drop synonym mySyn;
+
+drop view v2;
+
+-- fail still
+drop synonym mySyn;
+
+drop view v1;
+
+-- should pass
+drop synonym mySyn;
+
 -- drop and recreate schema test
--- More negative tests once dependency checking is added
+create schema testSchema;
+
+create synonym multiSchema for testSchema.testtab;
+
+select * from multiSchema;
+
+create table testSchema.testtab(i int, c char(10));
+insert into testSchema.testtab values (1, 'synonym');
+
+select * from multiSchema;
+
+drop table testSchema.testtab;
+drop schema testSchema restrict;
+
+create schema testSchema;
+
+create table testSchema.testtab(j int, c1 char(10), c2 char(20));
+insert into testSchema.testtab values (1, 'synonym', 'test');
+
+select * from multiSchema;
+
+drop synonym multiSchema;
+drop table testSchema.testtab;
 
 drop view view1;
 drop table table1;
+

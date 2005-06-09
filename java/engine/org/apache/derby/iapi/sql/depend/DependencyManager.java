@@ -309,6 +309,7 @@ public interface DependencyManager {
 	public static final int RENAME_INDEX = 41;
 
 	public static final int TRUNCATE_TABLE = 42;
+	public static final int DROP_SYNONYM = 43;
 
     /**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of

@@ -149,12 +149,17 @@ class DropAliasConstantAction extends DDLConstantAction
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 				invalidationType = DependencyManager.DROP_METHOD_ALIAS;
 				break;
+
+			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+				invalidationType = DependencyManager.DROP_SYNONYM;
+				break;
 		}
 
 		dm.invalidateFor(ad, invalidationType, lcc);
 
 		if (ad.getAliasType() == AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
 		{
+			// Drop the entry from SYSTABLES as well.
 			DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 			TableDescriptor td = ddg.newTableDescriptor(aliasName, sd,
 				TableDescriptor.SYNONYM_TYPE, TableDescriptor.DEFAULT_LOCK_GRANULARITY);

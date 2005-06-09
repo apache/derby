@@ -203,10 +203,157 @@ I          |J
 5          |5          
 ij> drop table table2;
 0 rows inserted/updated/deleted
-ij> -- TODO: Add more tests here
--- drop and recreate schema test
--- More negative tests once dependency checking is added
-drop view view1;
+ij> -- Try referential constraints. Synonyms should not be allowed there.
+create table primaryTab (i int not null primary key, j int, c char(10));
+0 rows inserted/updated/deleted
+ij> create synonym synPrimary for primaryTab;
+0 rows inserted/updated/deleted
+ij> -- Should fail
+create table foreignTab(i int, j int references synPrimary(i));
+ERROR X0Y46: Constraint 'xxxxGENERATED-IDxxxx' is invalid: referenced table SYNPRIMARY does not exist.
+ij> create table foreignTab(i int, j int references primaryTab(i));
+0 rows inserted/updated/deleted
+ij> drop table foreignTab;
+0 rows inserted/updated/deleted
+ij> drop table primaryTab;
+0 rows inserted/updated/deleted
+ij> drop synonym synPrimary;
+0 rows inserted/updated/deleted
+ij> -- Positive test case with three levels of synonym chaining
+create schema synonymSchema;
+0 rows inserted/updated/deleted
+ij> create synonym synonymSchema.mySynonym1 for APP.table1;
+0 rows inserted/updated/deleted
+ij> create synonym APP.mySynonym2 for "SYNONYMSCHEMA"."MYSYNONYM1";
+0 rows inserted/updated/deleted
+ij> create synonym mySynonym for mySynonym2;
+0 rows inserted/updated/deleted
+ij> select * from table1;
+I          |J          
+-----------------------
+6          |1          
+2          |2          
+5          |5          
+ij> select * from mySynonym;
+I          |J          
+-----------------------
+6          |1          
+2          |2          
+5          |5          
+ij> insert into mySynonym values (6,6);
+1 row inserted/updated/deleted
+ij> insert into mySynonym select * from mySynonym where i<2;
+0 rows inserted/updated/deleted
+ij> select * from mySynonym;
+I          |J          
+-----------------------
+6          |1          
+2          |2          
+5          |5          
+6          |6          
+ij> update mySynonym set j=5;
+4 rows inserted/updated/deleted
+ij> update mySynonym set j=4 where i=5;
+1 row inserted/updated/deleted
+ij> delete from mySynonym where j=6;
+0 rows inserted/updated/deleted
+ij> select * from mySynonym;
+I          |J          
+-----------------------
+6          |5          
+2          |5          
+5          |4          
+6          |5          
+ij> select * from table1;
+I          |J          
+-----------------------
+6          |5          
+2          |5          
+5          |4          
+6          |5          
+ij> -- cursor on mySynonym
+get cursor c1 as 'select * from mySynonym';
+ij> next c1;
+I          |J          
+-----------------------
+6          |5          
+ij> next c1;
+I          |J          
+-----------------------
+2          |5          
+ij> next c1;
+I          |J          
+-----------------------
+5          |4          
+ij> close c1;
+ij> -- More negative tests to check dependencies
+select * from mySynonym;
+I          |J          
+-----------------------
+6          |5          
+2          |5          
+5          |4          
+6          |5          
+ij> drop synonym mySynonym;
+0 rows inserted/updated/deleted
+ij> -- Previously compiled cached statement should get invalidated
+select * from mySynonym;
+ERROR 42X05: Table 'MYSYNONYM' does not exist.
+ij> create synonym mySyn for table1;
+0 rows inserted/updated/deleted
+ij> create view v1 as select * from mySyn;
+0 rows inserted/updated/deleted
+ij> create view v2 as select * from v1;
+0 rows inserted/updated/deleted
+ij> -- Drop synonym should fail since it is used in two views.
+drop synonym mySyn;
+ERROR X0Y23: Operation 'DROP SYNONYM' cannot be performed on object 'MYSYN' because VIEW 'V1' is dependent on that object.
+ERROR X0Y23: Operation 'DROP SYNONYM' cannot be performed on object 'MYSYN' because VIEW 'V2' is dependent on that object.
+ij> drop view v2;
+0 rows inserted/updated/deleted
+ij> -- fail still
+drop synonym mySyn;
+ERROR X0Y23: Operation 'DROP SYNONYM' cannot be performed on object 'MYSYN' because VIEW 'V1' is dependent on that object.
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> -- should pass
+drop synonym mySyn;
+0 rows inserted/updated/deleted
+ij> -- drop and recreate schema test
+create schema testSchema;
+0 rows inserted/updated/deleted
+ij> create synonym multiSchema for testSchema.testtab;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'MULTISCHEMA' resolved to the object 'TESTSCHEMA.TESTTAB' which is currently undefined.
+ij> select * from multiSchema;
+ERROR 42X05: Table 'TESTSCHEMA.TESTTAB' does not exist.
+ij> create table testSchema.testtab(i int, c char(10));
+0 rows inserted/updated/deleted
+ij> insert into testSchema.testtab values (1, 'synonym');
+1 row inserted/updated/deleted
+ij> select * from multiSchema;
+I          |C         
+----------------------
+1          |synonym   
+ij> drop table testSchema.testtab;
+0 rows inserted/updated/deleted
+ij> drop schema testSchema restrict;
+0 rows inserted/updated/deleted
+ij> create schema testSchema;
+0 rows inserted/updated/deleted
+ij> create table testSchema.testtab(j int, c1 char(10), c2 char(20));
+0 rows inserted/updated/deleted
+ij> insert into testSchema.testtab values (1, 'synonym', 'test');
+1 row inserted/updated/deleted
+ij> select * from multiSchema;
+J          |C1        |C2                  
+-------------------------------------------
+1          |synonym   |test                
+ij> drop synonym multiSchema;
+0 rows inserted/updated/deleted
+ij> drop table testSchema.testtab;
+0 rows inserted/updated/deleted
+ij> drop view view1;
 0 rows inserted/updated/deleted
 ij> drop table table1;
 0 rows inserted/updated/deleted

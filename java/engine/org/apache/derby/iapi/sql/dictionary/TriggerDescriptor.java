@@ -644,6 +644,7 @@ public class TriggerDescriptor extends TupleDescriptor
 			** dropped before our table is dropped).
 			*/
 		    case DependencyManager.DROP_TABLE:
+		    case DependencyManager.DROP_SYNONYM:
 		    case DependencyManager.DROP_SPS:
 		    case DependencyManager.RENAME:
 				DependencyManager dm = getDataDictionary().getDependencyManager();

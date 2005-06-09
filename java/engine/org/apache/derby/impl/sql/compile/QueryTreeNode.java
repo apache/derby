@@ -1489,6 +1489,7 @@ public abstract class QueryTreeNode implements Visitable
 		String nextSynonymTable = tabName.getTableName();
 		String nextSynonymSchema = tabName.getSchemaName();
 		boolean found = false;
+		CompilerContext cc = getCompilerContext();
 
 		// Circular synonym references should have been detected at the DDL time, so
 		// the following loop shouldn't loop forever.
@@ -1502,6 +1503,9 @@ public abstract class QueryTreeNode implements Visitable
 						 nextSynonymTable, AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR);
 			if (nextAD == null)
 				break;
+
+			/* Query is dependent on the AliasDescriptor */
+			cc.createDependency(nextAD);
 
 			found = true;
 			SynonymAliasInfo info = ((SynonymAliasInfo)nextAD.getAliasInfo());

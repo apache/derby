@@ -872,6 +872,7 @@ public class SPSDescriptor extends TupleDescriptor
 			case DependencyManager.DROP_TABLE:
 			case DependencyManager.DROP_VIEW: 
 			case DependencyManager.DROP_METHOD_ALIAS:
+			case DependencyManager.DROP_SYNONYM:
 			case DependencyManager.ALTER_TABLE:
 			case DependencyManager.RENAME:
 			case DependencyManager.RENAME_INDEX:
@@ -949,6 +950,7 @@ public class SPSDescriptor extends TupleDescriptor
 			case DependencyManager.DROP_INDEX:
 			case DependencyManager.DROP_VIEW: 
 			case DependencyManager.DROP_METHOD_ALIAS:
+			case DependencyManager.DROP_SYNONYM:
 			case DependencyManager.ALTER_TABLE:
 			case DependencyManager.RENAME:
 			case DependencyManager.RENAME_INDEX:

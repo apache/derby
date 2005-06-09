@@ -845,6 +845,9 @@ public class BasicDependencyManager implements DependencyManager {
 		    case TRUNCATE_TABLE:
 			    return "TRUNCATE TABLE";
 
+		    case DROP_SYNONYM:
+			    return "DROP SYNONYM";
+
 			default:
 				if (SanityManager.DEBUG)
 				{
