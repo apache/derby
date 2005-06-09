@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import java.util.Properties;
 
 import java.sql.Types;
@@ -65,6 +66,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
         static TypeCompiler blobTypeCompiler ;
         static TypeCompiler clobTypeCompiler ;
         static TypeCompiler nclobTypeCompiler ;
+        static TypeCompiler xmlTypeCompiler ;
 
         /**
          * Get a TypeCompiler corresponding to the given TypeId
@@ -256,6 +258,13 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                 btc.setTypeId(typeId);
                                 return btc;
                         }
+
+                  case StoredFormatIds.XML_TYPE_ID:
+                        return xmlTypeCompiler =
+                                getAnInstance(PACKAGE_NAME + "XMLTypeCompiler",
+                                                                xmlTypeCompiler,
+                                                                typeId);
+
                 }
 
                 if (SanityManager.DEBUG)

@@ -81,6 +81,10 @@ abstract class ReadCursorNode extends DMLStatementNode
 		// types for this node
 		resultSet.bindUntypedNullsToResultColumns(null);
 
+		// Reject any XML values in the select list; JDBC doesn't
+		// define how we bind these out, so we don't allow it.
+		resultSet.rejectXMLValues();
+
 		/* Verify that all underlying ResultSets reclaimed their FromList */
 		if (SanityManager.DEBUG)
 		{

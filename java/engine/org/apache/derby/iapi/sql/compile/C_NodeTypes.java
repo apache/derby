@@ -209,6 +209,12 @@ public interface C_NodeTypes
     // for SAVEPOINT sql
     static final int SAVEPOINT_NODE = 198;
 
+    // XML
+    static final int XML_CONSTANT_NODE = 199;
+    static final int XML_PARSE_OPERATOR_NODE = 200;
+    static final int XML_SERIALIZE_OPERATOR_NODE = 201;
+    static final int XML_EXISTS_OPERATOR_NODE = 202;
+
     /**
      * Extensions to this interface can use nodetypes > MAX_NODE_TYPE with out fear of collision
      * with C_NodeTypes

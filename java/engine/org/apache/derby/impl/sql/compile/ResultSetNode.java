@@ -991,6 +991,26 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
+	 * Check for (and reject) XML values directly under the ResultColumns.
+	 * This is done for SELECT/VALUES statements.  We reject values
+	 * in this case because JDBC does not define an XML type/binding
+	 * and thus there's no standard way to pass such a type back
+	 * to a JDBC application.
+	 *
+	 * @return	Nothing
+	 *
+	 * @exception StandardException		Thrown if an XML value found
+	 *									directly under a ResultColumn
+	 */
+	public void rejectXMLValues() throws StandardException
+	{
+		if (resultColumns != null)
+		{
+			resultColumns.rejectXMLValues();
+		}
+	}
+
+	/**
 	 * Rename generated result column names as '1', '2' etc... These will be the result
 	 * column names seen by JDBC clients.
 	 */

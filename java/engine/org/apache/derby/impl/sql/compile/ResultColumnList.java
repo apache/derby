@@ -120,6 +120,10 @@ public class ResultColumnList extends QueryTreeNodeVector
 	// Is a count mismatch allowed - see set/get methods for details.
 	private boolean countMismatchAllowed;
 
+	// Number of RCs in this RCL at "init" time, before additional
+	// ones were added internally.
+	private int initialListSize = 0;
+
 	public ResultColumnList()
 	{
 	}
@@ -1472,6 +1476,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 				{
 					insertElementAt(allExpansion.elementAt(inner), index + inner);
 				}
+
+				// If the rc was a "*", we need to set the initial list size
+				// to the number of columns that are actually returned to
+				// the user.
+				markInitialSize();
 			}
 			else
 			{
@@ -1949,6 +1958,71 @@ public class ResultColumnList extends QueryTreeNodeVector
 		{
 			ResultColumn rc = (ResultColumn) elementAt(index);
 			rc.rejectParameter();
+		}
+	}
+
+	/**
+	 * Check for (and reject) XML values directly under the ResultColumns.
+	 * This is done for SELECT/VALUES statements.  We reject values
+	 * in this case because JDBC does not define an XML type/binding
+	 * and thus there's no standard way to pass such a type back
+	 * to a JDBC application.
+	 *
+	 * Note that we DO allow an XML column in a top-level RCL
+	 * IF that column was added to the RCL by _us_ instead of
+	 * by the user.  For example, if we have a table:
+	 *
+	 * create table t1 (i int, x xml)
+	 *
+	 * and the user query is:
+	 *
+	 * select i from t1 order by x
+	 *
+	 * the "x" column will be added (internally) to the RCL
+	 * as part of ORDER BY processing--and so we need to
+	 * allow that XML column to be bound without throwing
+	 * an error.  If, as in this case, the XML column reference
+	 * is invalid (we can't use ORDER BY on an XML column because
+	 * XML values aren't ordered), a more appropriate error
+	 * message should be returned to the user in later processing.
+	 * If we didn't allow for this, the user would get an
+	 * error saying that XML columns are not valid as part
+	 * of the result set--but as far as s/he knows, there
+	 * isn't such a column: only "i" is supposed to be returned
+	 * (the RC for "x" was added to the RCL by _us_ as part of
+	 * ORDER BY processing).
+	 *
+	 * ASSUMPTION: Any RCs that are generated internally and
+	 * added to this RCL (before this RCL is bound) are added
+	 * at the _end_ of the list.  If that's true, then any
+	 * RC with an index greater than the size of the initial
+	 * (user-specified) list must have been added internally
+	 * and will not be returned to the user.
+	 *
+	 * @return	Nothing
+	 *
+	 * @exception StandardException		Thrown if an XML value found
+	 *									directly under a ResultColumn
+	 */
+	void rejectXMLValues() throws StandardException
+	{
+		int sz = size();
+		ResultColumn rc = null;
+		for (int i = 1; i <= sz; i++) {
+
+			if (i > initialListSize)
+			// this RC was generated internally and will not
+			// be returned to the user, so don't throw error.
+				continue;
+
+			rc = getResultColumn(i);
+			if ((rc != null) && (rc.getType() != null) &&
+				rc.getType().getTypeId().isXMLTypeId())
+			{ // Disallow it.
+				throw StandardException.newException(
+					SQLState.LANG_ATTEMPT_TO_SELECT_XML);
+			}
+
 		}
 	}
 
@@ -3947,4 +4021,15 @@ public class ResultColumnList extends QueryTreeNodeVector
     {
         orderBySelect = src.orderBySelect;
     }
+
+	/* ****
+	 * Take note of the size of this RCL _before_ we start
+	 * processing/binding it.  This is so that, at bind time,
+	 * we can tell if any columns in the RCL were added
+	 * internally by us (i.e. they were not specified by the
+	 * user and thus will not be returned to the user).
+	 */
+	protected void markInitialSize() {
+		initialListSize = size();
+	}
 }

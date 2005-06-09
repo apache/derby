@@ -1,0 +1,582 @@
+ij> create table t0 (si smallint, i int, bi bigint, vcb varchar (32) for bit data, nu numeric(10,2), f float, d double, vc varchar(20), da date, ti time, ts timestamp, cl clob, bl blob);
+0 rows inserted/updated/deleted
+ij> -- XML column declarations should work like other built-in types.
+create table t1 (i int, x xml);
+0 rows inserted/updated/deleted
+ij> create table t2 (i int, x xml not null);
+0 rows inserted/updated/deleted
+ij> create table t3 (i int, x xml default null);
+0 rows inserted/updated/deleted
+ij> create table t4 (vc varchar(100));
+0 rows inserted/updated/deleted
+ij> create table t5 (x2 xml not null);
+0 rows inserted/updated/deleted
+ij> alter table t5 add column x1 xml;
+0 rows inserted/updated/deleted
+ij> -- Check insertion of null XML values.
+----- Next four should work.
+insert into t1 values (1, null);
+1 row inserted/updated/deleted
+ij> insert into t1 values (2, cast (null as xml));
+1 row inserted/updated/deleted
+ij> insert into t1 (i) values (4);
+1 row inserted/updated/deleted
+ij> insert into t1 values (3, default);
+1 row inserted/updated/deleted
+ij> -- Next two should fail.
+insert into t2 values (1, null);
+ERROR 23502: Column 'X'  cannot accept a NULL value.
+ij> insert into t2 values (2, cast (null as xml));
+ERROR 23502: Column 'X'  cannot accept a NULL value.
+ij> -- XML cols can't hold non-XML types.
+insert into t1 values (3, 'hmm');
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'CHAR'. 
+ij> insert into t1 values (1, 2);
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'INTEGER'. 
+ij> insert into t1 values (1, 123.456);
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'DECIMAL'. 
+ij> insert into t1 values (1, x'01');
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+ij> insert into t1 values (1, x'ab');
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'CHAR () FOR BIT DATA'. 
+ij> insert into t1 values (1, current date);
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'DATE'. 
+ij> insert into t1 values (1, current time);
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'TIME'. 
+ij> insert into t1 values (1, current timestamp);
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'TIMESTAMP'. 
+ij> insert into t1 values (1, ('hmm' | | 'andstuff'));
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'CHAR'. 
+ij> -- XML can't be stored in non-XML cols.
+insert into t0 (si) values (cast (null as xml));
+ERROR 42821: Columns of type 'SMALLINT' cannot hold values of type 'XML'. 
+ij> insert into t0 (i) values (cast (null as xml));
+ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'XML'. 
+ij> insert into t0 (bi) values (cast (null as xml));
+ERROR 42821: Columns of type 'BIGINT' cannot hold values of type 'XML'. 
+ij> insert into t0 (vcb) values (cast (null as xml));
+ERROR 42821: Columns of type 'VARCHAR () FOR BIT DATA' cannot hold values of type 'XML'. 
+ij> insert into t0 (nu) values (cast (null as xml));
+ERROR 42821: Columns of type 'NUMERIC' cannot hold values of type 'XML'. 
+ij> insert into t0 (f) values (cast (null as xml));
+ERROR 42821: Columns of type 'DOUBLE' cannot hold values of type 'XML'. 
+ij> insert into t0 (d) values (cast (null as xml));
+ERROR 42821: Columns of type 'DOUBLE' cannot hold values of type 'XML'. 
+ij> insert into t0 (vc) values (cast (null as xml));
+ERROR 42821: Columns of type 'VARCHAR' cannot hold values of type 'XML'. 
+ij> insert into t0 (da) values (cast (null as xml));
+ERROR 42821: Columns of type 'DATE' cannot hold values of type 'XML'. 
+ij> insert into t0 (ti) values (cast (null as xml));
+ERROR 42821: Columns of type 'TIME' cannot hold values of type 'XML'. 
+ij> insert into t0 (ts) values (cast (null as xml));
+ERROR 42821: Columns of type 'TIMESTAMP' cannot hold values of type 'XML'. 
+ij> insert into t0 (cl) values (cast (null as xml));
+ERROR 42821: Columns of type 'CLOB' cannot hold values of type 'XML'. 
+ij> insert into t0 (bl) values (cast (null as xml));
+ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'XML'. 
+ij> -- No casting is allowed.
+insert into t1 values (1, cast ('hmm' as xml));
+ERROR 42846: Cannot convert types 'CHAR' to 'XML'.
+ij> insert into t1 values (1, cast (2 as xml));
+ERROR 42846: Cannot convert types 'INTEGER' to 'XML'.
+ij> insert into t1 values (1, cast (123.456 as xml));
+ERROR 42846: Cannot convert types 'DECIMAL' to 'XML'.
+ij> insert into t1 values (1, cast (x'01' as xml));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'XML'.
+ij> insert into t1 values (1, cast (x'ab' as xml));
+ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'XML'.
+ij> insert into t1 values (1, cast (current date as xml));
+ERROR 42846: Cannot convert types 'DATE' to 'XML'.
+ij> insert into t1 values (1, cast (current time as xml));
+ERROR 42846: Cannot convert types 'TIME' to 'XML'.
+ij> insert into t1 values (1, cast (current timestamp as xml));
+ERROR 42846: Cannot convert types 'TIMESTAMP' to 'XML'.
+ij> insert into t1 values (1, cast (('hmm' | | 'andstuff') as xml));
+ERROR 42846: Cannot convert types 'CHAR' to 'XML'.
+ij> -- XML can't be used in non-XML operations.
+select i + x from t1;
+ERROR 42Y95: The '+' operator with a left operand type of 'INTEGER' and a right operand type of 'XML' is not supported.
+ij> select i * x from t1;
+ERROR 42Y95: The '*' operator with a left operand type of 'INTEGER' and a right operand type of 'XML' is not supported.
+ij> select i / x from t1;
+ERROR 42Y95: The '/' operator with a left operand type of 'INTEGER' and a right operand type of 'XML' is not supported.
+ij> select i - x from t1;
+ERROR 42Y95: The '-' operator with a left operand type of 'INTEGER' and a right operand type of 'XML' is not supported.
+ij> select -x from t1;
+ERROR 42X37: The unary '-' operator is not allowed on the 'XML' type.
+ij> select 'hi' | | x from t1;
+ERROR 42846: Cannot convert types 'XML' to 'VARCHAR'.
+ij> select substr(x, 0) from t1;
+ERROR 42X25: The 'SUBSTR' function is not allowed on the 'XML' type.
+ij> select i from t1 where x like 'hmm';
+ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
+ij> select max(x) from t1;
+ERROR 42Y22: Aggregate MAX cannot operate on type XML.
+ij> select min(x) from t1;
+ERROR 42Y22: Aggregate MIN cannot operate on type XML.
+ij> select length(x) from t1;
+ERROR 42X25: The 'length' function is not allowed on the 'XML' type.
+ij> -- Comparsions against XML don't work.
+select i from t1 where x = 'hmm';
+ERROR 42818: Comparisons between 'XML' and 'CHAR' are not supported.
+ij> select i from t1 where x > 0;
+ERROR 42818: Comparisons between 'XML' and 'INTEGER' are not supported.
+ij> select i from t1 where x > x;
+ERROR 42818: Comparisons between 'XML' and 'XML' are not supported.
+ij> select i from t1 where x > 'some char';
+ERROR 42818: Comparisons between 'XML' and 'CHAR' are not supported.
+ij> -- Indexing/ordering on XML cols is not allowed.
+create index oops_ix on t1(x);
+ERROR X0X67: Columns of type 'XML' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
+ij> select i from t1 where x is null order by x;
+ERROR X0X67: Columns of type 'XML' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
+ij> -- XML cols can be used in a SET clause, if target value is XML.
+create trigger tr2 after insert on t1 for each row mode db2sql update t1 set x = 'hmm';
+ERROR 42821: Columns of type 'XML' cannot hold values of type 'CHAR'. 
+ij> create trigger tr1 after insert on t1 for each row mode db2sql update t1 set x = null;
+0 rows inserted/updated/deleted
+ij> drop trigger tr1;
+0 rows inserted/updated/deleted
+ij> -- Test XMLPARSE operator.
+----- These should fail.
+insert into t1 values (1, xmlparse(document '<hmm/>' strip whitespace));
+ERROR X0X18: XML feature not supported: 'STRIP WHITESPACE'.
+ij> insert into t1 values (1, xmlparse(document '<hmm/>'));
+ERROR X0X16: XML syntax error; missing keyword(s): 'PRESERVE WHITESPACE'.
+ij> insert into t1 values (1, xmlparse('<hmm/>' preserve whitespace));
+ERROR X0X16: XML syntax error; missing keyword(s): 'DOCUMENT'.
+ij> insert into t1 values (1, xmlparse(content '<hmm/>' preserve whitespace));
+ERROR X0X18: XML feature not supported: 'CONTENT'.
+ij> select xmlparse(document xmlparse(document '<hein/>' preserve whitespace) preserve whitespace) from t1;
+ERROR 42X25: The 'XMLParse' function is not allowed on the 'XML' type.
+ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace);
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'XML' expression.  It must be a BOOLEAN expression.
+ij> insert into t1 values (1, xmlparse(document '<oops>' preserve whitespace));
+ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details. SQLSTATE: XJ001: Java exception: 'XML document structures must start and end within the same entity.: org.xml.sax.SAXParseException'.
+ij> -- These should work.
+insert into t1 values (5, xmlparse(document '<hmm/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t1 values (6, xmlparse(document '<half> <masted> bass </masted> boosted. </half>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t2 values (1, xmlparse(document '<should> work as planned </should>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t5 (x1, x2) values (null, xmlparse(document '<notnull/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> update t1 set x = xmlparse(document '<update> document was inserted as part of an UPDATE </update>' preserve whitespace) where i = 1;
+1 row inserted/updated/deleted
+ij> update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by value x);
+1 row inserted/updated/deleted
+ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null;
+I          
+-----
+1          
+2          
+4          
+3          
+5          
+6          
+ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null order by i;
+I          
+-----
+1          
+2          
+3          
+4          
+5          
+6          
+ij> -- "is [not] null" should work with XML.
+select i from t1 where x is not null;
+I          
+-----
+1          
+5          
+6          
+ij> select i from t1 where x is null;
+I          
+-----
+2          
+4          
+3          
+ij> -- XML columns can't be returned in a top-level result set.
+select x from t1;
+ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> select * from t1;
+ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> select xmlparse(document vc preserve whitespace) from t4;
+ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> values xmlparse(document '<bye/>' preserve whitespace);
+ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> values xmlparse(document '<hel' | | 'lo/>' preserve whitespace);
+ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> -- Test XMLSERIALIZE operator.
+insert into t4 values ('<hmm/>');
+1 row inserted/updated/deleted
+ij> insert into t4 values 'no good';
+1 row inserted/updated/deleted
+ij> -- These should fail.
+select xmlserialize(x) from t1;
+ERROR X0X16: XML syntax error; missing keyword(s): 'AS <string-type>'.
+ij> select xmlserialize(x as) from t1;
+ERROR X0X16: XML syntax error; missing keyword(s): 'AS <string-type>'.
+ij> select xmlserialize(x as int) from t1;
+ERROR X0X17: Invalid target type for XMLSERIALIZE: 'INTEGER'.
+ij> select xmlserialize(x as varchar(20) for bit data) from t1;
+ERROR X0X17: Invalid target type for XMLSERIALIZE: 'VARCHAR () FOR BIT DATA'.
+ij> select xmlserialize(y as char(10)) from t1;
+ERROR 42X04: Column 'Y' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'Y' is not a column in the target table.
+ij> select xmlserialize(xmlserialize(x as clob) as clob) from t1;
+ERROR 42X25: The 'XMLSerialize' function is not allowed on the 'CLOB' type.
+ij> values xmlserialize('<okay> dokie </okay>' as clob);
+ERROR 42X25: The 'XMLSerialize' function is not allowed on the 'CHAR' type.
+ij> -- These should succeed.
+select xmlserialize(x as clob) from t1;
+1                                                                                                                               
+-----
+<update2> document was inserted as part of an UPDATE </update2>                                                                 
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+<hmm/>                                                                                                                          
+<half> <masted> bass </masted> boosted. </half>                                                                                 
+ij> select xmlserialize(x1 as clob), xmlserialize(x2 as clob) from t5;
+1 |2                                                                                                                               
+-----
+NULL |<notnull/>                                                                                                                      
+ij> select xmlserialize(x as char(100)) from t1;
+1                                                                                                   
+-----
+<update2> document was inserted as part of an UPDATE </update2>                                     
+NULL                                                                                                
+NULL                                                                                                
+NULL                                                                                                
+<hmm/>                                                                                              
+<half> <masted> bass </masted> boosted. </half>                                                     
+ij> select xmlserialize(x as varchar(300)) from t1;
+1                                                                                                                               
+-----
+<update2> document was inserted as part of an UPDATE </update2>                                                                 
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+<hmm/>                                                                                                                          
+<half> <masted> bass </masted> boosted. </half>                                                                                 
+ij> -- These should succeed at the XMLEXISTS level, but fail with
+----- parse/truncation errors.
+select xmlserialize(xmlparse(document vc preserve whitespace) as char(10)) from t4;
+1         
+-----
+ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details. SQLSTATE: XJ001: Java exception: 'Content is not allowed in prolog.: org.xml.sax.SAXParseException'.
+ij> select xmlserialize(x as char) from t1;
+1   
+-----
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
+ij> select xmlserialize(x as clob(10)) from t1;
+1         
+-----
+ERROR 22001: A truncation error was encountered trying to shrink CLOB '<update2> document was inserted as part of an UPDATE </updat&' to length 10.
+ij> select xmlserialize(x as char(1)) from t1;
+1   
+-----
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
+ij> select length(xmlserialize(x as char(1))) from t1;
+1          
+-----
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
+ij> select xmlserialize(x as varchar(1)) from t1;
+1   
+-----
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
+ij> select length(xmlserialize(x as varchar(1))) from t1;
+1          
+-----
+ERROR 22001: A truncation error was encountered trying to shrink VARCHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
+ij> -- These checks verify that the XMLSERIALIZE result is the correct
+----- type (the type is indicated as part of the error message).
+create table it (i int);
+0 rows inserted/updated/deleted
+ij> insert into it values (select xmlserialize(x as varchar(10)) from t1);
+ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'VARCHAR'. 
+ij> insert into it values (select xmlserialize(x as char(10)) from t1);
+ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+ij> insert into it values (select xmlserialize(x as clob(10)) from t1);
+ERROR 42821: Columns of type 'INTEGER' cannot hold values of type 'CLOB'. 
+ij> -- Test XMLPARSE/XMLSERIALIZE combinations.
+----- These should fail.
+select xmlserialize(xmlparse(document '<hmm>' preserve whitespace) as clob) from t2;
+1                                                                                                                               
+-----
+ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details. SQLSTATE: XJ001: Java exception: 'XML document structures must start and end within the same entity.: org.xml.sax.SAXParseException'.
+ij> select xmlserialize(xmlparse(document x preserve whitespace) as char(100)) from t1;
+ERROR 42X25: The 'XMLParse' function is not allowed on the 'XML' type.
+ij> -- These should succeed.
+select xmlserialize(xmlparse(document '<hmm/>' preserve whitespace) as clob) from t2;
+1                                                                                                                               
+-----
+<hmm/>                                                                                                                          
+ij> select xmlserialize(xmlparse(document xmlserialize(x as clob) preserve whitespace) as clob) from t1;
+1                                                                                                                               
+-----
+<update2> document was inserted as part of an UPDATE </update2>                                                                 
+NULL                                                                                                                            
+NULL                                                                                                                            
+NULL                                                                                                                            
+<hmm/>                                                                                                                          
+<half> <masted> bass </masted> boosted. </half>                                                                                 
+ij> values xmlserialize(xmlparse(document '<okay> dokie </okay>' preserve whitespace) as clob);
+1                                                                                                                               
+-----
+<okay> dokie </okay>                                                                                                            
+ij> select i from t1 where xmlparse(document xmlserialize(x as clob) preserve whitespace) is not null order by i;
+I          
+-----
+1          
+5          
+6          
+ij> -- Test XMLEXISTS operator.
+insert into t1 values (7, xmlparse(document '<lets> <try> this out </try> </lets>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> create table t7 (i int, x1 xml, x2 xml not null);
+0 rows inserted/updated/deleted
+ij> insert into t7 values (1, null, xmlparse(document '<ok/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> -- These should fail.
+select i from t1 where xmlexists(x);
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 35.
+ij> select i from t1 where xmlexists(i);
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 35.
+ij> select i from t1 where xmlexists('//*');
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 39.
+ij> select i from t1 where xmlexists('//*' x);
+ERROR 42X01: Syntax error: Encountered "x" at line 1, column 40.
+ij> select i from t1 where xmlexists('//*' passing x);
+ERROR 42X01: Syntax error: Encountered "x" at line 1, column 48.
+ij> select i from t1 where xmlexists('//*' passing by ref x);
+ERROR X0X18: XML feature not supported: 'BY REF'.
+ij> select i from t1 where xmlexists('//*' passing by value i);
+ERROR 42Y95: The 'XMLExists' operator with a left operand type of 'CHAR' and a right operand type of 'INTEGER' is not supported.
+ij> -- These should succeed.
+select i from t1 where xmlexists('//*' passing by value x);
+I          
+-----
+1          
+5          
+6          
+7          
+ij> select i from t1 where xmlexists('//person' passing by value x);
+I          
+-----
+ij> select i from t1 where xmlexists('//lets' passing by value x);
+I          
+-----
+7          
+ij> select xmlexists('//lets' passing by value x) from t1;
+1     
+-----
+0     
+NULL  
+NULL  
+NULL  
+0     
+0     
+1     
+ij> select xmlexists('//try[text()='' this out '']' passing by value x) from t1;
+1     
+-----
+0     
+NULL  
+NULL  
+NULL  
+0     
+0     
+1     
+ij> select xmlexists('//let' passing by value x) from t1;
+1     
+-----
+0     
+NULL  
+NULL  
+NULL  
+0     
+0     
+0     
+ij> select xmlexists('//try[text()='' this in '']' passing by value x) from t1;
+1     
+-----
+0     
+NULL  
+NULL  
+NULL  
+0     
+0     
+0     
+ij> select i, xmlexists('//let' passing by value x) from t1;
+I |2     
+-----
+1 |0     
+2 |NULL  
+4 |NULL  
+3 |NULL  
+5 |0     
+6 |0     
+7 |0     
+ij> select i, xmlexists('//lets' passing by value x) from t1;
+I |2     
+-----
+1 |0     
+2 |NULL  
+4 |NULL  
+3 |NULL  
+5 |0     
+6 |0     
+7 |1     
+ij> values xmlexists('//let' passing by value xmlparse(document '<lets> try this </lets>' preserve whitespace));
+1     
+-----
+0     
+ij> values xmlexists('//lets' passing by value xmlparse(document '<lets> try this </lets>' preserve whitespace));
+1     
+-----
+1     
+ij> select xmlserialize(x1 as clob) from t5 where xmlexists('//*' passing by value x1);
+1                                                                                                                               
+-----
+ij> select xmlserialize(x2 as clob) from t5 where xmlexists('//*' passing by value x2);
+1                                                                                                                               
+-----
+<notnull/>                                                                                                                      
+ij> select xmlserialize(x1 as clob), xmlexists('//*' passing by value xmlparse(document '<badboy/>' preserve whitespace)) from t5;
+1 |2     
+-----
+NULL |1     
+ij> select xmlserialize(x1 as clob), xmlexists('//goodboy' passing by value xmlparse(document '<badboy/>' preserve whitespace)) from t5;
+1 |2     
+-----
+NULL |0     
+ij> select i, xmlserialize(x1 as char(10)), xmlserialize (x2 as char(10)) from t7;
+I |2 |3         
+-----
+1 |NULL |<ok/>     
+ij> select i from t7 where xmlexists('/ok' passing by value x1) and xmlexists('/ok' passing by value x2);
+I          
+-----
+ij> select i from t7 where xmlexists('/ok' passing by value x1) or xmlexists('/ok' passing by value x2);
+I          
+-----
+1          
+ij> -- XMLEXISTS can be used wherever a boolean function is allowed,
+----- for ex, a check constraint...
+create table t6 (i int, x xml check (xmlexists('//should' passing by value x)));
+0 rows inserted/updated/deleted
+ij> insert into t6 values (1, xmlparse(document '<should/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t6 values (1, xmlparse(document '<shouldnt/>' preserve whitespace));
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T6'.
+ij> select xmlserialize(x as char(20)) from t6;
+1                   
+-----
+<should/>           
+ij> -- Do some namespace queries/examples.
+create table t8 (i int, x xml);
+0 rows inserted/updated/deleted
+ij> insert into t8 values (1, xmlparse(document '<a:hi xmlns:a="http://www.hi.there"/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t8 values (2, xmlparse(document '<b:hi xmlns:b="http://www.hi.there"/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t8 values (3, xmlparse(document '<a:bye xmlns:a="http://www.good.bye"/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t8 values (4, xmlparse(document '<b:bye xmlns:b="http://www.hi.there"/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> insert into t8 values (5, xmlparse(document '<hi/>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> select xmlexists('//child::*[name()="none"]' passing by value x) from t8;
+1     
+-----
+0     
+0     
+0     
+0     
+0     
+ij> select xmlexists('//child::*[name()=''hi'']' passing by value x) from t8;
+1     
+-----
+0     
+0     
+0     
+0     
+1     
+ij> select xmlexists('//child::*[local-name()=''hi'']' passing by value x) from t8;
+1     
+-----
+1     
+1     
+0     
+0     
+1     
+ij> select xmlexists('//child::*[local-name()=''bye'']' passing by value x) from t8;
+1     
+-----
+0     
+0     
+1     
+1     
+0     
+ij> select xmlexists('//*[namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
+1     
+-----
+1     
+1     
+0     
+1     
+0     
+ij> select xmlexists('//*[namespace::*[string()=''http://www.good.bye'']]' passing by value x) from t8;
+1     
+-----
+0     
+0     
+1     
+0     
+0     
+ij> select xmlexists('//child::*[local-name()=''hi'' and namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
+1     
+-----
+1     
+1     
+0     
+0     
+0     
+ij> select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.good.bye'']]' passing by value x) from t8;
+1     
+-----
+0     
+0     
+1     
+0     
+0     
+ij> select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
+1     
+-----
+0     
+0     
+0     
+1     
+0     
+ij> -- clean up.
+drop table t0;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t5;
+0 rows inserted/updated/deleted
+ij> drop table t6;
+0 rows inserted/updated/deleted
+ij> drop table t7;
+0 rows inserted/updated/deleted
+ij> drop table t8;
+0 rows inserted/updated/deleted
+ij> 

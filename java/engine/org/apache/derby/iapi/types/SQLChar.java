@@ -2732,4 +2732,46 @@ readingLoop:
 		this.intLength = intLength;
 		this.localeFinder = localeFinder;
 	}
+
+    /*
+     * Implementation of the XMLParse operator.
+     *
+     * NOTE: The XMLParse operator is implemented here (and
+     * defined on the StringDataValue interface) since it is
+     * called with a _String_ operand, not with an XML operand.
+     * That said, though, the bulk of the work is done by
+     * calling the "parseAndLoadXML" method that is defined on
+     * XMLDataValue.
+     * @param result The result of a previous call to this method,
+     *  null if not called yet.
+     * @return An XML value containing the result of XMLParse IF
+     *  the String data in this SQLChar constitutes valid XML.
+     *  Otherwise, an exception is thrown.
+     * @exception StandardException Thrown on error
+     */
+    public XMLDataValue XMLParse(XMLDataValue result, boolean preserveWS)
+        throws StandardException
+    {
+
+        if (result == null)
+        {
+            result = new XML();
+        }
+
+        if (this.isNull())
+        {
+            result.setToNull();
+            return result;
+        }
+
+        // First make sure that the string is valid, well-formed XML.
+        String str = getString();
+        result.parseAndLoadXML(str, preserveWS);
+
+        // If we get here, the character string is valid XML
+		// and was loaded, so we're done.
+        return result;
+
+    }
+
 }

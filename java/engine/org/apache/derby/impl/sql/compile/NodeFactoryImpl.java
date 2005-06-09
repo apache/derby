@@ -69,7 +69,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	/* Do join order optimization by default */
 	private Boolean joinOrderOptimization = Boolean.TRUE;
 
-	private final ClassInfo[]	nodeCi = new ClassInfo[200];
+	private final ClassInfo[]	nodeCi = new ClassInfo[205];
 
 	//////////////////////////////////////////////////////////////////////
 	//
@@ -188,7 +188,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		switch (nodeType)
 		{
 		  // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
-		  // THEM TO $WS/tools/release/config/dbms/cloudscapenodes.properties
+		  // THEM TO tools/jar/DBMSnode.properties
 			// xxxRESOLVE: why not make this a giant array and simply index into
 			// it? manish Thu Feb 22 14:49:41 PST 2001  
 		  case C_NodeTypes.CURRENT_ROW_LOCATION_NODE:
@@ -317,6 +317,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.VARCHAR_CONSTANT_NODE:
           case C_NodeTypes.CLOB_CONSTANT_NODE:
 			return C_NodeNames.CHAR_CONSTANT_NODE_NAME;
+
+          case C_NodeTypes.XML_CONSTANT_NODE:
+			return C_NodeNames.XML_CONSTANT_NODE_NAME;
 
 		  case C_NodeTypes.COLUMN_REFERENCE:
 		  	return C_NodeNames.COLUMN_REFERENCE_NAME;
@@ -564,6 +567,13 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 
 		  case C_NodeTypes.DB2_LENGTH_OPERATOR_NODE:
             return C_NodeNames.DB2_LENGTH_OPERATOR_NODE_NAME;
+
+          case C_NodeTypes.XML_PARSE_OPERATOR_NODE:
+          case C_NodeTypes.XML_SERIALIZE_OPERATOR_NODE:
+            return C_NodeNames.UNARY_OPERATOR_NODE_NAME;
+
+          case C_NodeTypes.XML_EXISTS_OPERATOR_NODE:
+            return C_NodeNames.BINARY_OPERATOR_NODE_NAME;
 
 		  // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
 		  // THEM TO tools/jar/DBMSnodes.properties

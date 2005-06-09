@@ -28,10 +28,15 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import java.lang.reflect.Modifier;
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
@@ -39,6 +44,7 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
+import java.sql.Types;
 import java.util.Vector;
 
 /**
@@ -50,10 +56,14 @@ import java.util.Vector;
  * @author Jeff Lichtman
  */
 
-public abstract class UnaryOperatorNode extends ValueNode
+public class UnaryOperatorNode extends ValueNode
 {
 	String	operator;
 	String	methodName;
+	int operatorType;
+
+	String		resultInterfaceType;
+	String		receiverInterfaceType;
 
 	/**
 	 * WARNING: operand may be NULL for COUNT(*).  
@@ -65,22 +75,87 @@ public abstract class UnaryOperatorNode extends ValueNode
 	public final static int NOT		= 3;
 	public final static int IS_NULL		= 4;
 
+	// At the time of adding XML support, it was decided that
+	// we should avoid creating new OperatorNodes where possible.
+	// So for the XML-related unary operators we just add the
+	// necessary code to _this_ class, similar to what is done in
+	// TernarnyOperatorNode. Subsequent unary operators (whether
+	// XML-related or not) should follow this example when
+	// possible.
+
+	public final static int XMLPARSE_OP = 0;
+	public final static int XMLSERIALIZE_OP = 1;
+
+	// NOTE: in the following 4 arrays, order
+	// IS important.
+
+	static final String[] UnaryOperators = {
+		"xmlparse",
+		"xmlserialize"
+	};
+
+	static final String[] UnaryMethodNames = {
+		"XMLParse",
+		"XMLSerialize"
+	};
+
+	static final String[] UnaryResultTypes = {
+		ClassName.XMLDataValue, 		// XMLParse
+		ClassName.StringDataValue		// XMLSerialize
+	};
+
+	static final String[] UnaryArgTypes = {
+		ClassName.StringDataValue,		// XMLParse
+		ClassName.XMLDataValue			// XMLSerialize
+	};
+
+	// Array to hold Objects that contain primitive
+	// args required by the operator method call.
+	private Object [] additionalArgs;
+
 	/**
 	 * Initializer for a UnaryOperatorNode
 	 *
 	 * @param operand	The operand of the node
-	 * @param operator	The name of the operator
-	 * @param methodName	The name of the method to call for this operator
+	 * @param operatorOrOpType	Either 1) the name of the operator,
+	 *  OR 2) an Integer holding the operatorType for this operator.
+	 * @param methodNameOrParams	Either 1) name of the method
+	 *  to call for this operator, or 2) an array of Objects
+	 *  from which primitive method parameters can be
+	 *  retrieved.
 	 */
 
 	public void init(
 					Object	operand,
-					Object		operator,
-					Object		methodName)
+					Object		operatorOrOpType,
+					Object		methodNameOrAddedArgs)
 	{
 		this.operand = (ValueNode) operand;
-		this.operator = (String) operator;
-		this.methodName = (String) methodName;
+		if (operatorOrOpType instanceof String) {
+		// then 2nd and 3rd params are operator and methodName,
+		// respectively.
+			this.operator = (String) operatorOrOpType;
+			this.methodName = (String) methodNameOrAddedArgs;
+			this.operatorType = -1;
+		}
+		else {
+		// 2nd and 3rd params are operatorType and additional args,
+		// respectively.
+			if (SanityManager.DEBUG) {
+				SanityManager.ASSERT(
+					((operatorOrOpType instanceof Integer) &&
+						((methodNameOrAddedArgs == null) ||
+						(methodNameOrAddedArgs instanceof Object[]))),
+					"Init params in UnaryOperator node have the " +
+					"wrong type.");
+			}
+			this.operatorType = ((Integer) operatorOrOpType).intValue();
+			this.operator = UnaryOperators[this.operatorType];
+			this.methodName = UnaryMethodNames[this.operatorType];
+			this.resultInterfaceType = UnaryResultTypes[this.operatorType];
+			this.receiverInterfaceType = UnaryArgTypes[this.operatorType];
+			this.additionalArgs = (Object[])methodNameOrAddedArgs;
+		}
 	}
 
 	/**
@@ -91,6 +166,7 @@ public abstract class UnaryOperatorNode extends ValueNode
 	public void init(Object	operand)
 	{
 		this.operand = (ValueNode) operand;
+		this.operatorType = -1;
 	}
 
 	/**
@@ -103,6 +179,7 @@ public abstract class UnaryOperatorNode extends ValueNode
 	void setOperator(String operator)
 	{
 		this.operator = operator;
+		this.operatorType = -1;
 	}
 
 	/**
@@ -125,6 +202,7 @@ public abstract class UnaryOperatorNode extends ValueNode
 	void setMethodName(String methodName)
 	{
 		this.methodName = methodName;
+		this.operatorType = -1;
 	}
 
 	/**
@@ -257,8 +335,102 @@ public abstract class UnaryOperatorNode extends ValueNode
 			operand = operand.genSQLJavaSQLTree();
 		}
 
+		if (operatorType == XMLPARSE_OP)
+			bindXMLParse();
+		else if (operatorType == XMLSERIALIZE_OP)
+			bindXMLSerialize();
+
 		return this;
 	}
+
+    /**
+     * Bind an XMLPARSE operator.  Makes sure the operand type
+     * is correct, and sets the result type.
+     *
+     * @exception StandardException Thrown on error
+     */
+    public void bindXMLParse() throws StandardException
+    {
+        // Check the type of the operand - this function is allowed only on
+        // string value (char) types.
+        TypeId operandType = operand.getTypeId();
+        if (operandType != null) {
+            switch (operandType.getJDBCTypeId())
+            {
+                case Types.CHAR:
+                case Types.VARCHAR:
+                case Types.LONGVARCHAR:
+                case Types.CLOB:
+                    break;
+                default:
+                {
+                    throw StandardException.newException(
+                        SQLState.LANG_UNARY_FUNCTION_BAD_TYPE, 
+                        methodName,
+                        operandType.getSQLTypeName());
+                }
+            }
+        }
+
+        // The result type of XMLParse() is always an XML type.
+        setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+            StoredFormatIds.XML_TYPE_ID));
+    }
+
+    /**
+     * Bind an XMLSERIALIZE operator.  Makes sure the operand type
+     * and target type are both correct, and sets the result type.
+     *
+     * @exception StandardException Thrown on error
+     */
+    public void bindXMLSerialize() throws StandardException
+    {
+        TypeId operandType;
+
+        // Check the type of the operand - this function is allowed only on
+        // the XML type.
+        operandType = operand.getTypeId();
+        if ((operandType != null) && !operandType.isXMLTypeId())
+        {
+            throw StandardException.newException(
+                SQLState.LANG_UNARY_FUNCTION_BAD_TYPE, 
+                methodName,
+                operandType.getSQLTypeName());
+        }
+
+        // Check the target type.  We only allow string types to be used as
+        // the target type.  The targetType is stored as the first Object
+        // in our list of additional parameters, so we have to retrieve
+        // it from there.
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(
+                ((additionalArgs != null) && (additionalArgs.length > 0)),
+                "Failed to locate target type for XMLSERIALIZE operator");
+        }
+
+        DataTypeDescriptor targetType =
+            (DataTypeDescriptor)additionalArgs[0];
+
+        TypeId targetTypeId = targetType.getTypeId();
+        switch (targetTypeId.getJDBCTypeId())
+        {
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+                break;
+            default:
+            {
+                throw StandardException.newException(
+                    SQLState.LANG_INVALID_XMLSERIALIZE_TYPE,
+                    targetTypeId.getSQLTypeName());
+            }
+        }
+
+        // The result type of XMLSerialize() is always a string; which
+        // kind of string is determined by the targetType field.
+        setType(targetType);
+    }
 
 	/**
 	 * Preprocess an expression tree.  We do a number of transformations
@@ -376,7 +548,22 @@ public abstract class UnaryOperatorNode extends ValueNode
 
 	void bindParameter() throws StandardException
 	{
-		if (operand.getTypeServices() == null)
+		if (operatorType == XMLPARSE_OP) {
+        // According to the SQL/XML standard, the XMLParse parameter
+        // takes a string operand.  RESOLVE: We use CLOB here because
+        // an XML string can be arbitrarily long...is this okay?
+        // The SQL/XML spec doesn't state what the type of the param
+        // should be; only that it "shall be a character type".
+	        ((ParameterNode) operand).setDescriptor(
+ 	           DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CLOB));
+		}
+		else if (operatorType == XMLSERIALIZE_OP) {
+        // For now, since JDBC has no type defined for XML, we
+        // don't allow binding to an XML parameter.
+	        throw StandardException.newException(
+ 	           SQLState.LANG_ATTEMPT_TO_BIND_XML);
+		}
+		else if (operand.getTypeServices() == null)
 		{
 			throw StandardException.newException(SQLState.LANG_UNARY_OPERAND_PARM, operator);
 		}
@@ -399,7 +586,11 @@ public abstract class UnaryOperatorNode extends ValueNode
 		if (operand == null)
 			return;
 
-		String resultTypeName = getTypeCompiler().interfaceName();
+		String resultTypeName = 
+			(operatorType == -1)
+				? getTypeCompiler().interfaceName()
+				: resultInterfaceType;
+			
 		// System.out.println("resultTypeName " + resultTypeName + " method " + methodName);
 		// System.out.println("isBooleanTypeId() " + getTypeId().isBooleanTypeId());
 
@@ -414,7 +605,8 @@ public abstract class UnaryOperatorNode extends ValueNode
 			/* Allocate an object for re-use to hold the result of the operator */
 			LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, resultTypeName);
 			mb.getField(field);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, resultTypeName, 1);
+			int numParams = 1 + addMethodParams(mb);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, resultTypeName, numParams);
 
 			/*
 			** Store the result of the method call in the field, so we can re-use
@@ -422,7 +614,8 @@ public abstract class UnaryOperatorNode extends ValueNode
 			*/
 			mb.putField(field);
 		} else {
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, resultTypeName, 0);
+			int numParams = addMethodParams(mb);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, resultTypeName, numParams);
 		}
 	}
 
@@ -442,6 +635,9 @@ public abstract class UnaryOperatorNode extends ValueNode
 								"cannot get interface without operand");
 		}
 
+		if (operatorType != -1)
+			return receiverInterfaceType;
+		
 		return operand.getTypeCompiler().interfaceName();
 	}
 
@@ -495,4 +691,35 @@ public abstract class UnaryOperatorNode extends ValueNode
 
 		return returnNode;
 	}
+
+    /**
+     * This method allows different operators to add
+     * primitive arguments to the generated method call,
+     * if needed.
+     * @param mb The MethodBuilder that will make the call.
+     * @return Number of parameters added.
+     */
+    protected int addMethodParams(MethodBuilder mb)
+    {
+        if (operatorType == XMLPARSE_OP) {
+        // We push whether or not we want to preserve whitespace.
+            mb.push(((Boolean)additionalArgs[0]).booleanValue());
+            return 1;
+        }
+
+        if (operatorType == XMLSERIALIZE_OP) {
+        // We push the target type's JDBC type id as well as
+        // the maximum width, since both are required when
+        // we actually perform the operation, and both are
+        // primitive types.
+            DataTypeDescriptor targetType =
+                (DataTypeDescriptor)additionalArgs[0];
+            mb.push(targetType.getJDBCTypeId());
+            mb.push(targetType.getMaximumWidth());
+            return 2;
+        }
+
+        // Default is to add zero params.
+        return 0;
+    }
 }

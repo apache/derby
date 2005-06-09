@@ -118,6 +118,7 @@ package org.apache.derby.iapi.reference;
 
 	<LI>Language
 	  <UL>
+		<LI> 2200J-2200R for SQL/XML errors (based on SQL/XML[2003]) </LI>
 		<LI> 42800-? for compatible DB2 errors
 		<LI> 42X00-42Zxx for compilation errors </LI>
 		<LI> 43X00-43Yxx  for org.apache.derby.impl.sql.execute.rts
@@ -571,6 +572,7 @@ public interface SQLState {
 	** to the appropriate group. Language errors are divided into 3 groups:
 	** A group for standard SQLExceptions.
 	**
+	** 2200J-00R - For SQL/XML errors (based on SQL/XML[2003]).
 	** 428?? - adding some DB2 compatible errors
 	** 42X00-42Zxx for compilation errors 
 	** 46000  for SQLJ errors (for now, leave this range empty)
@@ -670,6 +672,11 @@ public interface SQLState {
 	String LANG_DUPLICATE_KEY_CONSTRAINT                               = "23505";
 	String LANG_FK_VIOLATION                                           = "23503";
 	String LANG_CHECK_CONSTRAINT_VIOLATED                              = "23513";
+
+	// From SQL/XML[2003] spec; there are others, but
+	// these are the ones we actually use with our
+	// current XML support.
+	String LANG_NOT_AN_XML_DOCUMENT                                    = "2200L";
 
 	String LANG_INVALID_TRANSACTION_STATE                              = "25000";
 
@@ -1184,6 +1191,16 @@ public interface SQLState {
 	String LANG_COLUMN_NAME_NOT_FOUND                                  = "X0X0F.S";
 
 	String LANG_INDEX_NOT_FOUND_DURING_EXECUTION                       = "X0X99.S";
+
+	// For Derby-specific XML errors (not defined by
+	// SQL/XML standard).
+	String LANG_ATTEMPT_TO_BIND_XML                                    = "X0X14.S";
+	String LANG_ATTEMPT_TO_SELECT_XML                                  = "X0X15.S";
+	String LANG_XML_KEYWORD_MISSING                                    = "X0X16.S";
+	String LANG_INVALID_XMLSERIALIZE_TYPE                              = "X0X17.S";
+	String LANG_UNSUPPORTED_XML_FEATURE                                = "X0X18.S";
+	String LANG_UNEXPECTED_XML_EXCEPTION                               = "X0XML.S";
+
 	// X0Y01 used to be DUPLICATE_KEY_CONSTRAINT
 	String LANG_DROP_VIEW_ON_NON_VIEW                                  = "X0Y16.S";
 	// String LANG_DROP_SYSTEM_TABLE_ATTEMPTED_DURING_EXECUTION           = "X0Y17.S";

@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
@@ -379,6 +380,18 @@ public class ParameterNode extends ValueNode
 											MethodBuilder mb)
 									throws StandardException
 	{
+		DataTypeDescriptor dtd = getTypeServices();
+		if ((dtd != null) && dtd.getTypeId().isXMLTypeId()) {
+		// We're a parameter that corresponds to an XML column/target,
+		// which we don't allow.  We throw the error here instead of
+		// in "bindExpression" because at the time of bindExpression,
+		// we don't know yet what the type is going to be (only when
+		// the node that points to this parameter calls
+		// "setDescriptor" do we figure out the type).
+			throw StandardException.newException(
+				SQLState.LANG_ATTEMPT_TO_BIND_XML);
+		}
+
 		// PUSHCOMPILE
 		/* Reuse code if possible */
 		//if (genRetval != null)
@@ -402,7 +415,6 @@ public class ParameterNode extends ValueNode
 		// For some types perform host variable checking
 		// to match DB2/JCC where if a host variable is too
 		// big it is not accepted, regardless of any trailing padding.
-		DataTypeDescriptor dtd = getTypeServices();
 
 		switch (dtd.getJDBCTypeId()) {
 		case Types.BINARY:

@@ -19,6 +19,24 @@
 <!-- Targets -->
 
   <target name="compile_types">
+    <!-- We only compile XML against JDK 1.4 because it relies on    -->
+    <!-- several XML classes that are part of 1.4 but aren't in 1.3  -->
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/types/XML.java"/>
+    </javac>
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -36,6 +54,7 @@
       <include name="${derby.dir}/iapi/types/*.java"/>
       <exclude name="${derby.dir}/iapi/types/SQLDecimal.java"/>
       <exclude name="${derby.dir}/iapi/types/J2SEDataValueFactory.java"/>
+      <exclude name="${derby.dir}/iapi/types/XML.java"/>
     </javac>
     <javac
       bootclasspath="${empty}"
@@ -53,6 +72,7 @@
       </classpath>
       <include name="${derby.dir}/iapi/types/SQLDecimal.java"/>
       <include name="${derby.dir}/iapi/types/J2SEDataValueFactory.java"/>
+      <exclude name="${derby.dir}/iapi/types/XML.java"/>
     </javac>
   </target>
 

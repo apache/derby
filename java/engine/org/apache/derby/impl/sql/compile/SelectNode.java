@@ -132,6 +132,8 @@ public class SelectNode extends ResultSetNode
 		 * Consider adding selectAggregates and whereAggregates 
 		 */
 		resultColumns = (ResultColumnList) selectList;
+		if (resultColumns != null)
+			resultColumns.markInitialSize();
 		this.fromList = (FromList) fromList;
 		this.whereClause = (ValueNode) whereClause;
 		this.originalWhereClause = (ValueNode) whereClause;

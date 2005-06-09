@@ -415,6 +415,17 @@ public class BaseTypeIdImpl implements Formatable
                 JDBCTypeId = Types.TIMESTAMP;
                 wrapperTypeFormatId = StoredFormatIds.TIMESTAMP_TYPE_ID;
                 break;
+
+          case StoredFormatIds.XML_TYPE_ID_IMPL:
+                SQLTypeName = TypeId.XML_NAME;
+                // RESOLVE: There isn't a JDBC type for XML, so we
+                // just use our internal type.  Is it okay to do this,
+                // or should "JDBCTypeId" be renamed since it no longer
+                // just holds JDBC types?
+                JDBCTypeId = StoredFormatIds.XML_TYPE_ID;
+                wrapperTypeFormatId = StoredFormatIds.XML_TYPE_ID;
+                break;
+
           default:
                 if (SanityManager.DEBUG)
                 {

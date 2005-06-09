@@ -54,6 +54,7 @@ public interface ClassName
 	String RefDataValue = "org.apache.derby.iapi.types.RefDataValue";
 	String UserDataValue = "org.apache.derby.iapi.types.UserDataValue";
 	String ConcatableDataValue  = "org.apache.derby.iapi.types.ConcatableDataValue";
+	String XMLDataValue  = "org.apache.derby.iapi.types.XMLDataValue";
 
 	String FormatableBitSet = "org.apache.derby.iapi.services.io.FormatableBitSet";
 

@@ -80,6 +80,8 @@ public class RowResultSetNode extends FromTable
 	{
 		super.init(null, tableProperties);
 		resultColumns = (ResultColumnList) valuesClause;
+		if (resultColumns != null)
+			resultColumns.markInitialSize();
 	}
 
 	/**

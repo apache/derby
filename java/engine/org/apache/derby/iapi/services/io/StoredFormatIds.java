@@ -466,6 +466,12 @@ public interface StoredFormatIds {
                 (MIN_ID_2 + 441);
 
         /**
+                Instance of TypeId for XML data types.
+         */
+        static public final int XML_TYPE_ID =
+                (MIN_ID_2 + 456);
+        
+        /**
             class org.apache.derby.iapi.types.JSQLType
          */
         static public final int JSQLTYPEIMPL_ID =
@@ -765,7 +771,7 @@ public interface StoredFormatIds {
          */
         static public final int TIMESTAMP_TYPE_ID =
                 (MIN_ID_2 + 36);
-
+        
         /**
             class org.apache.derby.catalog.types.DecimalTypeIdImpl
          */
@@ -840,6 +846,12 @@ public interface StoredFormatIds {
         static public final int NCLOB_TYPE_ID_IMPL =
                 (MIN_ID_2 + 449);
         
+        /**
+            class org.apache.derby.iapi.types.XML (implementation of
+            org.apache.derby.iapi.types.XMLDataValue).
+         */
+        static public final int XML_TYPE_ID_IMPL =
+                (MIN_ID_2 + 457);
 
         /******************************************************************
         **
@@ -1507,6 +1519,10 @@ public interface StoredFormatIds {
         public static final int SQL_NCLOB_ID = 
                 (MIN_ID_2 + 450);
 
+        // Interface: org.apache.derby.iapi.types.XMLDataValue
+        public static final int XML_ID = 
+                (MIN_ID_2 + 458);
+
         /******************************************************************
         ** 
         ** Access ids.
@@ -1811,7 +1827,7 @@ public interface StoredFormatIds {
          * Make sure this is updated when a new module is added
          */
         public static final int MAX_ID_2 =
-                (MIN_ID_2 + 455);
+                (MIN_ID_2 + 458);
 
         // DO NOT USE 4 BYTE IDS ANYMORE
         static public final int MAX_ID_4 =

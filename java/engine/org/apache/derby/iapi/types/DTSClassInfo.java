@@ -57,6 +57,7 @@ public class DTSClassInfo extends FormatableInstanceGetter {
                 case StoredFormatIds.SQL_BLOB_ID: return new SQLBlob();
                 case StoredFormatIds.SQL_CLOB_ID: return new SQLClob();
                 case StoredFormatIds.SQL_NCLOB_ID: return new SQLNClob();
+                case StoredFormatIds.XML_ID: return new XML();
 
                 /* Type ids */
                 case StoredFormatIds.BIT_TYPE_ID: 
@@ -84,6 +85,7 @@ public class DTSClassInfo extends FormatableInstanceGetter {
                 case StoredFormatIds.BLOB_TYPE_ID:
                 case StoredFormatIds.CLOB_TYPE_ID:
                 case StoredFormatIds.NCLOB_TYPE_ID:
+                case StoredFormatIds.XML_TYPE_ID:
                         return new TypeId(fmtId);
                 default:
                         return null;

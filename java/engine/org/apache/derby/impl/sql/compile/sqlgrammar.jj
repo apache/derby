@@ -86,6 +86,7 @@ import org.apache.derby.impl.sql.compile.TransactionStatementNode;
 import org.apache.derby.impl.sql.compile.TriggerReferencingStruct;
 import org.apache.derby.impl.sql.compile.UnionNode;
 import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
+import org.apache.derby.impl.sql.compile.UnaryOperatorNode;
 import org.apache.derby.impl.sql.compile.UntypedNullConstantNode;
 import org.apache.derby.impl.sql.compile.UpdateNode;
 import org.apache.derby.impl.sql.compile.UserTypeConstantNode;
@@ -141,6 +142,7 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import org.apache.derby.iapi.services.io.FormatableProperties;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
@@ -683,6 +685,7 @@ public class SQLParser
 		  case CLOB:
 		  case NCLOB:
 		  case BINARY: // LARGE OBJECT
+		  case XML:
 			retval = true;
 			break;
 
@@ -1885,6 +1888,9 @@ TOKEN [IGNORE_CASE] :
 	The next lists should contain non-SQL92 keywords, and should
 	specify whether their keywords are reserved or non-reserved.
 	If they are non-reserved, they need to be added to the identifier() rule.
+
+	NOTE: XML, XMLPARSE, XMLSERIALIZE, and XMLEXISTS are considered reserved
+	words to comply with the SQL/XML (2003) standard, section 5.1.
  */
 
 /* NOTE - If you add a keyword, then you must add it to reservedKeyword()
@@ -1904,10 +1910,19 @@ TOKEN [IGNORE_CASE] :
 |	<LTRIM: "ltrim">
 |	<RTRIM: "rtrim">
 |	<SUBSTR:	"substr">
+|	<XML:	"xml">
+|	<XMLPARSE:	"xmlparse">
+|	<XMLSERIALIZE:	"xmlserialize">
+|	<XMLEXISTS:	"xmlexists">
 }
 
 /* NOTE - If you add a keyword, then you must add it to reservedKeyword()
  *	      or nonReservedKeyword() as well!
+ *
+ * NOTE: CONTENT, DOCUMENT, STRIP, WHITESPACE and PASSING are considered NON-
+ * reserved words to comply with the SQL/XML (2003) standard, section 5.1.
+ * PRESERVE is also listed as non-reserved in the SQL/XML spec, but
+ * since that word is already reserved, we leave it alone.
  */
 TOKEN [IGNORE_CASE] :
 {	/* Additional JSQL keywords -- non-SQL92 non-reserved Keywords */
@@ -1915,10 +1930,12 @@ TOKEN [IGNORE_CASE] :
 |	<BEFORE: "before">
 |	<CLASS: "class">
 |	<COMPRESS: "compress">
+|	<CONTENT: "content">
 |   <CS: "cs">
 |	<CURSORS: "cursors">
 |	<DB2SQL: "db2sql">
 |       <DIRTY: "dirty">
+|	<DOCUMENT: "document">
 |	<EACH: "each">
 |	<EXCLUSIVE: "exclusive">
 |	<FN: "fn">
@@ -1939,8 +1956,10 @@ TOKEN [IGNORE_CASE] :
 |   <OLD_TABLE: "old_table">
 |   <OUT: "out">
 |	<PARAMETER: "parameter">
+|	<PASSING: "passing">
 |	<PROPERTIES: "properties">
 |	<READS: "reads">
+|	<REF: "ref">
 |	<REFERENCING: "referencing">
 |	<RENAME: "rename">
 |       <RESET: "reset">
@@ -1955,10 +1974,12 @@ TOKEN [IGNORE_CASE] :
 |	<SPECIFIC: "specific">
 |   <SQRT: "sqrt">
 |       <STABILITY: "stability">
+|   <STRIP: "strip">
 |   <STYLE: "style">
 |	<TRIGGER: "trigger">
 |   <UCASE: "ucase">
 |   <UR: "ur">
+|   <WHITESPACE: "whitespace">
 }
 
 TOKEN :
@@ -3377,6 +3398,8 @@ dataTypeCommon() throws StandardException :
 	typeDescriptor = longType()
 |
 	typeDescriptor = LOBType()
+|
+	typeDescriptor = XMLType()
 	)
 	{
 		return typeDescriptor;
@@ -3786,6 +3809,55 @@ longSubType() throws StandardException :
 		// need to re-enable according to SQL standard
 		throw StandardException.newException(SQLState.NOT_IMPLEMENTED, TypeId.NATIONAL_LONGVARCHAR_NAME);
 		// return DataTypeDescriptor.getBuiltInDataTypeDescriptor(TypeId.NATIONAL_LONGVARCHAR_NAME);
+	}
+}
+
+/*
+ * <A NAME="XMLType">XMLType</A>
+ */
+DataTypeDescriptor
+XMLType() throws StandardException :
+{
+	DataTypeDescriptor value;
+}
+{
+	<XML>
+	{
+		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "XML");
+		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+			StoredFormatIds.XML_TYPE_ID);
+	}
+}
+
+/*
+ * <A NAME="xmlDocOrContent">xmlDocOrContent</A>
+ *
+ * Parse the XML keywords DOCUMENT and CONTENT.  We don't
+ * support CONTENT yet, so we throw an appropriate error
+ * if we see it.
+ *
+ */
+void
+xmlDocOrContent() throws StandardException :
+{
+}
+{
+	LOOKAHEAD({ (getToken(1).kind != DOCUMENT) &&
+		(getToken(1).kind != CONTENT) })
+	{
+		throw StandardException.newException(
+			SQLState.LANG_XML_KEYWORD_MISSING, "DOCUMENT");
+	}
+|
+	LOOKAHEAD({ getToken(1).kind == CONTENT }) <CONTENT>
+	{
+		throw StandardException.newException(
+			SQLState.LANG_UNSUPPORTED_XML_FEATURE, "CONTENT");
+	}
+|
+	LOOKAHEAD({ getToken(1).kind == DOCUMENT }) <DOCUMENT>
+	{
+		return;
 	}
 }
 
@@ -5995,7 +6067,10 @@ miscBuiltins() throws StandardException :
                 getToken(1).kind == MINUTE ||
                 getToken(1).kind == SECOND ||
                 getToken(1).kind == LENGTH ||
-                getToken(1).kind == LOCATE ) &&
+                getToken(1).kind == LOCATE ||
+                getToken(1).kind == XMLPARSE ||
+                getToken(1).kind == XMLSERIALIZE ||
+                getToken(1).kind == XMLEXISTS ) &&
               getToken(2).kind == LEFT_PAREN
               )
     } )
@@ -6094,6 +6169,11 @@ miscBuiltinsCore( boolean isJDBCEscape) throws StandardException :
                                                         value,
                                                         localCM);
 	}
+|
+	value = xmlFunction()
+	{
+		return value;
+	}
 }
 
 
@@ -6144,6 +6224,237 @@ ValueNode
 	}
 }
 	 
+/*
+ * <A NAME="xmlFunction">xmlFunction</A>
+ *
+ * This method parses the built-in functions used with
+ * the XML datatype.
+ *
+ */
+ValueNode
+	xmlFunction() throws StandardException :
+{
+	ValueNode value;
+	checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "XML");
+}
+{
+	<XMLPARSE> <LEFT_PAREN>
+		xmlDocOrContent() value = xmlParseValue() <RIGHT_PAREN>
+	{
+		return value;
+	}
+|
+	<XMLSERIALIZE> <LEFT_PAREN> value = xmlSerializeValue() <RIGHT_PAREN>
+	{
+		return value;
+	}
+|
+	<XMLEXISTS> <LEFT_PAREN> value = xmlExistsValue() <RIGHT_PAREN>
+	{
+		return value;
+	}
+}
+
+/*
+ * <A NAME="xmlParseValue">xmlParseValue</A>
+ *
+ * Syntax is as follows:
+ *
+ *     XMLPARSE( DOCUMENT <string-value-expression> PRESERVE WHITESPACE )
+ *
+ * The result of this operation will be an XML value, which can either
+ * be used transiently or else can be stored persistently in a table that
+ * has an XML column.  For example:
+ *
+ * ij> CREATE TABLE x_table (id INT, xdoc XML);
+ * 0 rows inserted/updated/deleted
+ * ij> INSERT INTO x_table VALUES (1, XMLPARSE(DOCUMENT '<simp> doc </simp>'
+ * PRESERVE WHITESPACE));
+ * 1 row inserted/updated/deleted
+ *
+ * We only allow XML documents (as opposed to XML content) to be
+ * parsed into XML values.  Note that we require the "PRESERVE WHITESPACE"
+ * keyword to be explicit; this is because the SQL/XML (2003) spec says that
+ * if no whitespace option is given, the default is "STRIP WHITESPACE", which
+ * we don't support (yet).
+ *
+ * By the time we get to this method, the "DOCUMENT" keyword has already
+ * been parsed.
+ *
+ */
+ValueNode
+	xmlParseValue() throws StandardException :
+{
+	ValueNode value;
+	boolean wsOption;
+}
+{
+	value = additiveExpression(null,0,false) wsOption = xmlPreserveWhitespace() {
+		return (ValueNode) nodeFactory.getNode(
+					C_NodeTypes.XML_PARSE_OPERATOR_NODE,
+					value,
+					ReuseFactory.getInteger(UnaryOperatorNode.XMLPARSE_OP),
+					new Object[] {(wsOption ? Boolean.TRUE : Boolean.FALSE)},
+					getContextManager());
+	}
+}
+
+/*
+ * <A NAME="xmlPreserveWhitespace">xmlPreserveWhitespace</A>
+ *
+ * For now, we only support the PRESERVE WHITESPACE option.
+ *
+ */
+boolean
+	xmlPreserveWhitespace() throws StandardException :
+{
+}
+{
+	LOOKAHEAD({ (getToken(1).kind != STRIP) &&
+		(getToken(1).kind != PRESERVE) })
+	{
+		throw StandardException.newException(
+			SQLState.LANG_XML_KEYWORD_MISSING, "PRESERVE WHITESPACE");
+	}
+|
+	<STRIP> <WHITESPACE>
+	{ // don't preserve whitespace.
+		throw StandardException.newException(
+			SQLState.LANG_UNSUPPORTED_XML_FEATURE, "STRIP WHITESPACE");
+	}
+|
+	<PRESERVE> <WHITESPACE>
+	{ // must preserve whitespace.
+		return true;
+	}
+}
+
+/*
+ * <A NAME="xmlSerializeValue">xmlSerializeValue</A>
+ *
+ * Syntax is as follows:
+ *
+ *   XMLSERIALIZE( <xml-value-expression> AS <string-data-type> )
+ *
+ * The result of this operation will be a string value with the type specified
+ * by the user.  For example:
+ *
+ * ij> SELECT id, XMLSERIALIZE(xdoc AS varchar(30)) FROM x_table;
+ * ID         |2
+ * ------------------------------------------
+ * 1          |<simp> doc </simp>
+ *
+ */
+ValueNode
+	xmlSerializeValue() throws StandardException :
+{
+	ValueNode value;
+	DataTypeDescriptor targetType;
+}
+{
+	value = additiveExpression(null,0,false)
+		targetType = xmlSerializeTargetType()
+	{
+		return (ValueNode) nodeFactory.getNode(
+					C_NodeTypes.XML_SERIALIZE_OPERATOR_NODE,
+					value,
+					ReuseFactory.getInteger(UnaryOperatorNode.XMLSERIALIZE_OP),
+					new Object[] {targetType},
+					getContextManager());
+	}
+}
+
+/*
+ * <A NAME="xmlSerializeTargetType">xmlSerializeTargetType</A>
+ *
+ * Parse the target type of an XMLSERIALIZE operation.
+ *
+ */
+DataTypeDescriptor xmlSerializeTargetType() throws StandardException :
+{
+	DataTypeDescriptor targetType;
+}
+{
+	LOOKAHEAD({ (getToken(1).kind != AS) || (getToken(2).kind == RIGHT_PAREN) })
+	{
+		throw StandardException.newException(
+			SQLState.LANG_XML_KEYWORD_MISSING, "AS <string-type>");
+	}
+|
+	<AS> targetType = dataTypeDDL()
+	{
+		return targetType;
+	}
+}
+
+/*
+ * <A NAME="xmlExistsValue">xmlExistsValue</A>
+ *
+ * Syntax is as follows:
+ *
+ *   XMLEXISTS( <xpath-expression> PASSING BY VALUE <xml-value-expression> )
+ *
+ * The result of this operation will be a boolean true/false/unknown value:
+ *   -- Unknown if either <xpath-expression> or <xml-value-expression> is null;
+ *   -- True if at least one node in the given xml-value matches the given
+ *      XPath expression;
+ *   -- False otherwise.
+ *
+ * For example:
+ *
+ * ij> SELECT id FROM x_table WHERE XMLEXISTS('/simple' PASSING BY VALUE xdoc);
+ * ID
+ * -----------
+ * 1
+ *
+ */
+ValueNode
+	xmlExistsValue() throws StandardException :
+{
+	ValueNode xpathExpr;
+	ValueNode xmlValue;
+}
+{
+	xpathExpr = additiveExpression(null,0,false)
+		xmlPassingMechanism() xmlValue = additiveExpression(null, 0, false)
+	{
+		return (ValueNode) nodeFactory.getNode(
+					C_NodeTypes.XML_EXISTS_OPERATOR_NODE,
+					xpathExpr,
+					xmlValue,
+					ReuseFactory.getInteger(BinaryOperatorNode.XMLEXISTS_OP),
+					getContextManager());
+	}
+}
+
+/*
+ * <A NAME="xmlPassingMechanism">xmlPassingMechanism</A>
+ *
+ * For now, we only support the BY VALUE option because,
+ * at query time, we take the XML string value from disk and
+ * pass it into Xalan, which creates a "copy" of the XML
+ * value internally (as DOM/DTM) and then executes against
+ * that.  Because Xalan creates this copy, this impl
+ * is BY VALUE.
+ *
+ */
+void
+	xmlPassingMechanism() throws StandardException :
+{
+}
+{
+	LOOKAHEAD( { getToken(3).kind == REF })
+	<PASSING> <BY> <REF>
+	{ // pass the XML value by reference
+		throw StandardException.newException(
+			SQLState.LANG_UNSUPPORTED_XML_FEATURE, "BY REF");
+	}
+|
+	<PASSING> <BY> <VALUE>
+	{ // pass a 'copy' of the XML value.
+		return;
+	}
+}
 
 /*
  * <A NAME="numericFunctionType">numericFunctionType</A>
@@ -11432,6 +11743,10 @@ reservedKeyword() :
 |	tok = <LTRIM>
 |	tok = <RTRIM>
 |	tok = <SUBSTR>
+|	tok = <XML>
+|	tok = <XMLPARSE>
+|	tok = <XMLSERIALIZE>
+|	tok = <XMLEXISTS>
 )
 	{
 		// Remember whether last token was a delimited identifier
@@ -11476,6 +11791,7 @@ nonReservedKeyword()  :
 	|	tok = <COMPRESS>
 	|	tok = <CONCAT>
 	|	tok = <CONTAINS>
+	|	tok = <CONTENT>
 	|   tok = <CS>
 	|	tok = <CURDATE>
 	|	tok = <CURTIME>
@@ -11487,6 +11803,7 @@ nonReservedKeyword()  :
 	|	tok = <DYNAMIC>
     |   tok = <DATABASE>
 	|	tok = <DB2SQL>
+	|	tok = <DOCUMENT>
 	|	tok = <EACH>
 	|	tok = <EXCLUSIVE>
 	|	tok = <FN>
@@ -11533,10 +11850,12 @@ nonReservedKeyword()  :
 	|	tok = <OLD_TABLE>
 	|	tok = <OJ>
 	|	tok = <PASCAL>
+	|	tok = <PASSING>
 	|	tok = <PLI>
 	|	tok = <PRECISION>
 	|	tok = <PROPERTIES>
 	|	tok = <READS>
+	|	tok = <REF>
 // SQL92 says it is reserved, but we want it to be non-reserved.
 	|	tok = <RELEASE>
 	|	tok = <RENAME>
@@ -11571,6 +11890,7 @@ nonReservedKeyword()  :
     |       tok = <STABILITY>
 	|	tok = <START>
 	|	tok = <STATEMENT>
+	|	tok = <STRIP>
 	|	tok = <SYNONYM>
 	|	tok = <STYLE>
 	|	tok = <T>
@@ -11592,6 +11912,7 @@ nonReservedKeyword()  :
 	|	tok = <VARBINARY>
 	|	tok = <PARAMETER>
 	|	tok = <WHEN>
+	|	tok = <WHITESPACE>
 	)
 	{
 		// Remember whether last token was a delimited identifier

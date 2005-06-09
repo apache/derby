@@ -82,6 +82,15 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 			throws StandardException
 	{
         ValueNode boundExpression = super.bindExpression( fromList, subqueryList, aggregateVector);
+
+        // This operator is not allowed on XML types.
+        TypeId operandType = operand.getTypeId();
+        if (operandType.isXMLTypeId()) {
+            throw StandardException.newException(SQLState.LANG_UNARY_FUNCTION_BAD_TYPE,
+                                    getOperatorString(),
+                                    operandType.getSQLTypeName());
+        }
+
         setType( new DataTypeDescriptor( TypeId.getBuiltInTypeId( Types.INTEGER),
                                          operand.getTypeServices().isNullable()));
         return boundExpression;

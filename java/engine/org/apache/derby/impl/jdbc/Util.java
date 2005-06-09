@@ -24,6 +24,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
@@ -274,6 +275,7 @@ public abstract class Util  {
 
 			case Types.OTHER		:  return "OTHER";
 			case Types.JAVA_OBJECT	:  return "Types.JAVA_OBJECT";
+			case StoredFormatIds.XML_TYPE_ID :  return TypeId.XML_NAME;
 			default : return String.valueOf(jdbcType);
 		}
 	}

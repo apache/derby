@@ -33,6 +33,7 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
@@ -42,6 +43,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
+import java.sql.Types;
 import java.util.Vector;
 
 /**
@@ -82,6 +84,37 @@ public class BinaryOperatorNode extends ValueNode
 
 	String		leftInterfaceType;
 	String		rightInterfaceType;
+	String		resultInterfaceType;
+	int			operatorType;
+
+	// At the time of adding XML support, it was decided that
+	// we should avoid creating new OperatorNodes where possible.
+	// So for the XML-related binary operators we just add the
+	// necessary code to _this_ class, similar to what is done in
+	// TernarnyOperatorNode. Subsequent binary operators (whether
+	// XML-related or not) should follow this example when
+	// possible.
+
+	public final static int XMLEXISTS_OP = 0;
+
+	// NOTE: in the following 4 arrays, order
+	// IS important.
+
+	static final String[] BinaryOperators = {
+		"xmlexists",
+	};
+
+	static final String[] BinaryMethodNames = {
+		"XMLExists",
+	};
+
+	static final String[] BinaryResultTypes = {
+		ClassName.BooleanDataValue		// XMLExists
+	};
+
+	static final String[][] BinaryArgTypes = {
+		{ClassName.StringDataValue, ClassName.XMLDataValue}		// XMLExists
+	};
 
 	/**
 	 * Initializer for a BinaryOperatorNode
@@ -109,6 +142,7 @@ public class BinaryOperatorNode extends ValueNode
 		this.methodName = (String) methodName;
 		this.leftInterfaceType = (String) leftInterfaceType;
 		this.rightInterfaceType = (String) rightInterfaceType;
+		this.operatorType = -1;
 	}
 
 	public void init(
@@ -121,6 +155,30 @@ public class BinaryOperatorNode extends ValueNode
 		this.rightOperand = (ValueNode) rightOperand;
 		this.leftInterfaceType = (String) leftInterfaceType;
 		this.rightInterfaceType = (String) rightInterfaceType;
+		this.operatorType = -1;
+	}
+
+	/**
+	 * Initializer for a BinaryOperatorNode
+	 *
+	 * @param leftOperand	The left operand of the node
+	 * @param rightOperand	The right operand of the node
+	 * @param opType  An Integer holding the operatorType
+	 *  for this operator.
+	 */
+	public void init(
+			Object leftOperand,
+			Object rightOperand,
+			Object opType)
+	{
+		this.leftOperand = (ValueNode)leftOperand;
+		this.rightOperand = (ValueNode)rightOperand;
+		this.operatorType = ((Integer)opType).intValue();
+		this.operator = BinaryOperators[this.operatorType];
+		this.methodName = BinaryMethodNames[this.operatorType];
+		this.leftInterfaceType = BinaryArgTypes[this.operatorType][0];
+		this.rightInterfaceType = BinaryArgTypes[this.operatorType][1];
+		this.resultInterfaceType = BinaryResultTypes[this.operatorType];
 	}
 
 	/**
@@ -154,6 +212,7 @@ public class BinaryOperatorNode extends ValueNode
 	void setOperator(String operator)
 	{
 		this.operator = operator;
+		this.operatorType = -1;
 	}
 
 	/**
@@ -166,6 +225,7 @@ public class BinaryOperatorNode extends ValueNode
 	void setMethodName(String methodName)
 	{
 		this.methodName = methodName;
+		this.operatorType = -1;
 	}
 
 	/**
@@ -179,6 +239,7 @@ public class BinaryOperatorNode extends ValueNode
 	{
 		leftInterfaceType = iType;
 		rightInterfaceType = iType;
+		this.operatorType = -1;
 	}
 
 	/**
@@ -248,6 +309,8 @@ public class BinaryOperatorNode extends ValueNode
 		rightOperand = rightOperand.bindExpression(fromList, subqueryList, 
 			aggregateVector);
 
+		if (operatorType == XMLEXISTS_OP)
+			return bindXMLExists();
 
 		/* Is there a ? parameter on the left? */
 		if (leftOperand.isParameterNode())
@@ -274,6 +337,75 @@ public class BinaryOperatorNode extends ValueNode
 
 		return genSQLJavaSQLTree();
 	}
+
+    /**
+     * Bind an XMLEXISTS operator.  Makes sure the operand type
+     * and target type are both correct, and sets the result type.
+     *
+     * @exception StandardException Thrown on error
+     */
+    public ValueNode bindXMLExists() throws StandardException
+    {
+        // Check operand types.
+        TypeId leftOperandType = leftOperand.getTypeId();
+        TypeId rightOperandType = rightOperand.getTypeId();
+
+        // Left operand is query expression, and must be a string.
+        if (leftOperandType != null) {
+            switch (leftOperandType.getJDBCTypeId())
+            {
+                case Types.CHAR:
+                case Types.VARCHAR:
+                case Types.LONGVARCHAR:
+                case Types.CLOB:
+                    break;
+                default:
+                {
+                    throw StandardException.newException(
+                        SQLState.LANG_BINARY_OPERATOR_NOT_SUPPORTED, 
+                        methodName,
+                        leftOperandType.getSQLTypeName(),
+                        rightOperandType.getSQLTypeName());
+                }
+            }
+        }
+
+        // Right operand is an XML data value.
+        if ((rightOperandType != null) &&
+            !rightOperandType.isXMLTypeId())
+        {
+            throw StandardException.newException(
+                SQLState.LANG_BINARY_OPERATOR_NOT_SUPPORTED, 
+                    methodName,
+                    leftOperandType.getSQLTypeName(),
+                    rightOperandType.getSQLTypeName());
+        }
+
+        // Is there a ? parameter on the left?
+        if (leftOperand.isParameterNode())
+        {
+            // Set the left operand to be a VARCHAR, which should be
+            // long enough to hold the XPath expression.
+            ((ParameterNode) leftOperand).setDescriptor(
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR));
+        }
+
+        // Is there a ? parameter on the right?
+        if (rightOperand.isParameterNode())
+        {
+            // For now, since JDBC has no type defined for XML, we
+            // don't allow binding to an XML parameter.
+            throw StandardException.newException(
+                SQLState.LANG_ATTEMPT_TO_BIND_XML);
+        }
+
+        // Set the result type of this XMLExists operator--it's always
+        // SQLBoolean.  The "true" in the next line says that the result
+        // can be nullable--which it can be if evaluation of the expression
+        // returns a null (this is per SQL/XML spec section 8.4).
+        setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, true));
+        return genSQLJavaSQLTree();
+    }
 
 	/** generate a SQL->Java->SQL conversion tree above the left and right
 	 * operand of this Binary Operator Node if needed. Subclasses can override
@@ -364,7 +496,9 @@ public class BinaryOperatorNode extends ValueNode
 			** a class, they can note that in the implementation
 			** of the node that uses the method.
 			*/
-		    receiverType = getReceiverInterfaceName();
+		    receiverType = (operatorType == -1)
+				? getReceiverInterfaceName()
+				: leftInterfaceType;
 
 			/*
 			** Generate (with <left expression> only being evaluated once)
@@ -394,7 +528,9 @@ public class BinaryOperatorNode extends ValueNode
 			** a class, they can note that in the implementation
 			** of the node that uses the method.
 			*/
-		    receiverType = getReceiverInterfaceName();
+		    receiverType = (operatorType == -1)
+				? getReceiverInterfaceName()
+				: rightInterfaceType;
 
 			/*
 			** Generate (with <right expression> only being evaluated once)
@@ -419,7 +555,9 @@ public class BinaryOperatorNode extends ValueNode
 		}
 
 		/* Figure out the result type name */
-		resultTypeName = getTypeCompiler().interfaceName();
+		resultTypeName = (operatorType == -1)
+			? getTypeCompiler().interfaceName()
+			: resultInterfaceType;
 
 		// Boolean return types don't need a result field
 		boolean needField = !getTypeId().isBooleanTypeId();

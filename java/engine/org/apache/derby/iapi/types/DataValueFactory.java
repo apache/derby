@@ -453,6 +453,14 @@ public interface DataValueFactory
         public DateTimeDataValue getTimestampValue( String timestampStr, boolean isJdbcEscape) throws StandardException;
 
         /**
+         * Get a null XML value. The second form re-uses the previous value,
+         * if non-null, as the data holder to return.
+         */
+        XMLDataValue getXMLDataValue();
+        XMLDataValue getXMLDataValue(XMLDataValue previous)
+			throws StandardException;
+
+        /**
          * Get a SQL int with a SQL null value. If the supplied value
          * is null then get a new value, otherwise set it to null and return 
          * that value.
@@ -655,4 +663,11 @@ public interface DataValueFactory
          * that value.
          */
         DateTimeDataValue       getNullTimestamp(DateTimeDataValue dataValue);
+
+        /**
+         * Get an XML with a SQL null value. If the supplied value is
+         * null then get a new value, otherwise set it to null and return 
+         * that value.
+         */
+        XMLDataValue            getNullXML(XMLDataValue dataValue);
 }

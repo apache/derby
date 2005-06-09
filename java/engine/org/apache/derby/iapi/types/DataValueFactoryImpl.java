@@ -1027,6 +1027,57 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     } // end of getTimestampValue( String timestampStr)
 
 
+    /**
+     * getXMLDataValue:
+     * Get a SQL null value with XML type.
+     * @return An XMLDataValue instance corresponding to a
+     *  a NULL value.
+     */
+    public XMLDataValue getXMLDataValue()
+    {
+        return new XML();
+    }
+
+    /**
+     * getXMLDataValue:
+     * Get a null XML  value.  If a non-null XMLDataValue is
+     * received then re-use that instance, otherwise create
+	 * a new one.
+     * @param previous An XMLDataValue instance to re-use.
+     * @return An XMLDataValue instance corresponding to a
+     *  NULL value.  If an XMLDataValue was received, the
+     *  returned XMLDataValue is the same instance as the one
+     *  received, but the actual data has been set to a
+     *  SQL null value.
+     * @exception StandardException Thrown on error
+     */
+    public XMLDataValue getXMLDataValue(XMLDataValue previous)
+		throws StandardException
+    {
+		return getNullXML(previous);
+    }
+
+    /**
+     * getNullXML:
+     * Get an XML with a SQL null value. If the supplied value is
+     * null then get a new value, otherwise set it to null and return 
+     * that value.
+     * @param dataValue An XMLDataValue instance to re-use.
+     * @return An XMLDataValue instance corresponding to a
+     *  NULL value.  If an XMLDataValue was received, the
+     *  returned XMLDataValue is the same instance as the one
+     *  received, but the actual data has been set to null.
+     */
+    public XMLDataValue getNullXML(XMLDataValue dataValue)
+    {
+        if (dataValue == null)
+            return getXMLDataValue();
+        else {
+            dataValue.setToNull();
+            return dataValue;
+        }
+    }
+
         // RESOLVE: This is here to find the LocaleFinder (i.e. the Database)
         // on first access. This is necessary because the Monitor can't find
         // the Database at boot time, because the Database is not done booting.

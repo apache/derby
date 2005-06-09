@@ -102,10 +102,10 @@ public final class CharTypeCompiler extends BaseTypeCompiler
 				return (getTypeId().isStringTypeId());
 
 			// can't CAST to CHAR and VARCHAR from REAL or DOUBLE
-			// or binary types
+			// or binary types or XML
 			// all other types are ok.
 			if (otherType.isFloatingPointTypeId() || otherType.isBitTypeId() ||
-				otherType.isBlobTypeId())
+				otherType.isBlobTypeId() || otherType.isXMLTypeId())
 				return false;
 						
 			return true;

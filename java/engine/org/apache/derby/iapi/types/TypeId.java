@@ -114,6 +114,7 @@ public final class TypeId implements Formatable
         public static final int BLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
         public static final int CLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
         public static final int NCLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
+        public static final int XML_MAXWIDTH = Integer.MAX_VALUE;
 
         // Max width for datetime values is the length of the
         // string returned from a call to "toString()" on the
@@ -168,12 +169,17 @@ public final class TypeId implements Formatable
         public static final String      BLOB_NAME = "BLOB";
         public static final String      CLOB_NAME = "CLOB";
         public static final String      NCLOB_NAME = "NCLOB";
+
+        // Following use of "XML" is per SQL/XML (2003) spec,
+        // section "10.2 Type name determination".
+        public static final String      XML_NAME = "XML";
         
         /**
          * The following constants define the type precedence hierarchy.
          */
         public static final int USER_PRECEDENCE  = 1000;
 
+        public static final int XML_PRECEDENCE       = 180;
         public static final int BLOB_PRECEDENCE = 170;
         public static final int LONGVARBIT_PRECEDENCE = 160;
         public static final int VARBIT_PRECEDENCE        = 150;
@@ -239,6 +245,7 @@ public final class TypeId implements Formatable
         private static TypeId                   BLOB_ID;
         private static TypeId                   CLOB_ID;
         private static TypeId                   NCLOB_ID;
+        private static TypeId                   XML_ID;
 
         /**
          * Implementation of DECIMAL datatype for generating holders through getNull.
@@ -397,6 +404,15 @@ public final class TypeId implements Formatable
                           ret = CLOB_ID = new TypeId(StoredFormatIds.CLOB_TYPE_ID,
                                                      new BaseTypeIdImpl(StoredFormatIds.CLOB_TYPE_ID_IMPL));
                       break;
+
+                  // XML is not a JDBC type, so we have to check for our
+                  // internal XML type.
+                  case StoredFormatIds.XML_TYPE_ID:
+                      ret = XML_ID;
+                      if (ret == null)
+                          ret = XML_ID = new TypeId(StoredFormatIds.XML_TYPE_ID,
+                                                     new BaseTypeIdImpl(StoredFormatIds.XML_TYPE_ID_IMPL));
+                      break;
                 }
                 return ret;
         }
@@ -484,6 +500,10 @@ public final class TypeId implements Formatable
                 {
                         return getBuiltInTypeId(JDBC20Translation.SQL_TYPES_CLOB);
                 }
+                else if (javaTypeName.equals("org.apache.derby.iapi.types.XML"))
+                {
+                        return getBuiltInTypeId(StoredFormatIds.XML_TYPE_ID);
+                }
                 else
                 {
                         /*
@@ -570,6 +590,9 @@ public final class TypeId implements Formatable
                 }
                 if (SQLTypeName.equals(TypeId.CLOB_NAME)) {
                         return getBuiltInTypeId(JDBC20Translation.SQL_TYPES_CLOB);
+                }
+                if (SQLTypeName.equals(TypeId.XML_NAME)) {
+                        return getBuiltInTypeId(StoredFormatIds.XML_TYPE_ID);
                 }
 
                 TypeId ret = null;
@@ -931,6 +954,12 @@ public final class TypeId implements Formatable
                               isLOBTypeId = true;
                               break;
 
+                      case StoredFormatIds.XML_TYPE_ID:
+                              typePrecedence = XML_PRECEDENCE;
+                              javaTypeName = "org.apache.derby.iapi.types.XML";
+                              maxMaxWidth = TypeId.XML_MAXWIDTH;
+                              break;
+
                 }
         }
         /**
@@ -1170,6 +1199,15 @@ public final class TypeId implements Formatable
                 }
         }
 
+        /** 
+         *Is this an XML doc?
+         * @return true if this is XML
+         */
+        public boolean isXMLTypeId()
+        {
+               return (formatId == StoredFormatIds.XML_TYPE_ID);
+        }
+
         /**
          * Tell whether this is a built-in type.
          * NOTE: There are 3 "classes" of types:
@@ -1206,6 +1244,7 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.NCLOB_TYPE_ID:
                         case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
+                        case StoredFormatIds.XML_TYPE_ID:
                                 return false;
 
                         case StoredFormatIds.USERDEFINED_TYPE_ID_V3:
@@ -1568,6 +1607,9 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                                 return new SQLVarchar();
 
+                        case StoredFormatIds.XML_TYPE_ID:
+                                return new XML();
+
                         default:
                                 if (SanityManager.DEBUG)
                                 {
@@ -1628,6 +1670,8 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.BLOB_TYPE_ID:
                         case StoredFormatIds.CLOB_TYPE_ID:
                         case StoredFormatIds.NCLOB_TYPE_ID:
+                        // RESOLVE: Should XML be here?  What's this value mean, anyway?
+                        case StoredFormatIds.XML_TYPE_ID:
                                 return 10240;
 
                         case StoredFormatIds.REF_TYPE_ID:
@@ -1772,6 +1816,12 @@ public final class TypeId implements Formatable
 // none of the LONG_VARCHAR types are true here...????
 //                        case StoredFormatIds.CLOB_TYPE_ID:
 //                        case StoredFormatIds.NCLOB_TYPE_ID:
+                        // RESOLVE: does "variableLength" here mean simply
+                        // that the length is variable, or that the user
+                        // can specify a length, such as "char(20)"?  The
+                        // answer to that determines where XML is supposed
+                        // to be...
+                        case StoredFormatIds.XML_TYPE_ID:
                                 return true;
 
                         default:

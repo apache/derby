@@ -33,6 +33,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
@@ -976,6 +977,13 @@ public abstract class QueryTreeNode implements Visitable
 		  case Types.BLOB:
 			constantNode = nf.getNode(
 										C_NodeTypes.BLOB_CONSTANT_NODE,
+										typeId,
+										cm);
+			break;
+
+		  case StoredFormatIds.XML_TYPE_ID:
+			constantNode = nf.getNode(
+										C_NodeTypes.XML_CONSTANT_NODE,
 										typeId,
 										cm);
 			break;

@@ -56,6 +56,8 @@ public interface C_NodeNames
 
 	static final String BINARY_ARITHMETIC_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.BinaryArithmeticOperatorNode";
 
+	static final String BINARY_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.BinaryOperatorNode";
+
 	static final String BINARY_RELATIONAL_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.BinaryRelationalOperatorNode";
 
 	static final String BIT_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.BitConstantNode";
@@ -253,6 +255,8 @@ public interface C_NodeNames
 	static final String UNARY_DATE_TIMESTAMP_OPERATOR_NODE_NAME
     = "org.apache.derby.impl.sql.compile.UnaryDateTimestampOperatorNode";
 
+	static final String UNARY_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.UnaryOperatorNode";
+
 	static final String UNION_NODE_NAME = "org.apache.derby.impl.sql.compile.UnionNode";
 
 	static final String INTERSECT_OR_EXCEPT_NODE_NAME = "org.apache.derby.impl.sql.compile.IntersectOrExceptNode";
@@ -271,9 +275,11 @@ public interface C_NodeNames
 
 	static final String SAVEPOINT_NODE_NAME = "org.apache.derby.impl.sql.compile.SavepointNode";
 
+	static final String XML_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.XMLConstantNode";
+
 	// The names are in alphabetic order.
 	//
     // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
-    // THEM TO $WS/tools/release/config/dbms/cloudscapenodes.properties
+    // THEM TO tools/jar/DBMSnodes.properties
 
 }
