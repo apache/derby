@@ -3142,11 +3142,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (baseTableColumn == totalColumns)
             baseTableColumn = 0;
 
-        if (resultSetMetaData_.sqlxRdbnam_[baseTableColumn] != null &&
-                !resultSetMetaData_.sqlxRdbnam_[baseTableColumn].equals(""))      // catalog
-        {
-            tableName += "\"" + resultSetMetaData_.sqlxRdbnam_[baseTableColumn] + "\".";
-        }
         //dervied column like select 2 from t1, has null schema and table name
         if (resultSetMetaData_.sqlxSchema_[baseTableColumn] != null && !resultSetMetaData_.sqlxSchema_[baseTableColumn].equals("")) {
             tableName += "\"" + resultSetMetaData_.sqlxSchema_[baseTableColumn] + "\".";
