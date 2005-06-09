@@ -1,36 +1,9 @@
 Test errorStream starting
 shutdown ok: XJ015:Derby system shutdown.
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT Thread[main,5,main] java.io.FileNotFoundException: xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-file-2.log
-----------------------------------------------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
- Booting Derby: xxxFILTERED_VERSIONxxx
-on database directory xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-2 
-Database Class Loader started - derby.database.classpath=''
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
-Shutting down instance xxxxFILTERED-UUIDxxxx
-----------------------------------------------------------------
 shutdown ok: XJ015:Derby system shutdown.
 shutdown ok: XJ015:Derby system shutdown.
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT Thread[main,5,main] java.lang.NoSuchMethodException: org.apache.derbyTesting.functionTests.tests.lang.errorStream.nonExistingGetStream()
-----------------------------------------------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
- Booting Derby: xxxFILTERED_VERSIONxxx
-on database directory xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-4 
-Database Class Loader started - derby.database.classpath=''
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
-Shutting down instance xxxxFILTERED-UUIDxxxx
-----------------------------------------------------------------
 shutdown ok: XJ015:Derby system shutdown.
 shutdown ok: XJ015:Derby system shutdown.
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT Thread[main,5,main] java.lang.NoSuchFieldException: nonExistingFieldStream
-----------------------------------------------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
- Booting Derby: xxxFILTERED_VERSIONxxx
-on database directory xxxFILTERED_PATHxxx VombatusUrsinusHirsutus-6 
-Database Class Loader started - derby.database.classpath=''
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT:
-Shutting down instance xxxxFILTERED-UUIDxxxx
-----------------------------------------------------------------
 shutdown ok: XJ015:Derby system shutdown.
 shutdown ok: XJ015:Derby system shutdown.
 shutdown ok: XJ015:Derby system shutdown.

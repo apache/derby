@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Properties;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -93,6 +94,15 @@ public class errorStream
    public static OutputStream fieldStream;
    private static File fieldStreamFile;
 
+   /*
+    * Field errStream used as redirection for System.err to be able
+    * to checks its (non-)use in the scenarios. We first tried to
+    * merge it with System.out and let the harness compare outputs,
+    * but this gave intermittent merging differences, so abandoned.
+    * Maps to file <database>-err-<runNo>.log
+    */
+   private static OutputStream errStream;
+   private static File errStreamFile;
 
    /*
     * Method getStream used by Derby when METHOD_PROP
@@ -123,6 +133,9 @@ public class errorStream
          fieldStreamFile = new File(derbyHome, makeStreamFilename("field"));
          fieldStream = new FileOutputStream(fieldStreamFile);
 
+	 errStreamFile = new File(derbyHome, makeStreamFilename("err"));
+	 errStream =new FileOutputStream(errStreamFile);
+	 System.setErr(new PrintStream(errStream));
       }
       catch (IOException e) {
          System.out.println("Could not open stream files");
@@ -135,6 +148,9 @@ public class errorStream
       try {
          methodStream.close();
          fieldStream.close();
+
+	 // reset until next scenario, no expected output
+	 System.setErr(System.out); 
       }
       catch (IOException e) {
          System.out.println("Could not close stream files");
@@ -190,8 +206,9 @@ public class errorStream
          conn.close();
       }
       catch (SQLException e) {
-         System.out.println("Derby boot failed: " + ":" + 
-                            attrs.getProperty("databaseName"));
+         System.out.println("Derby boot failed: " +
+			    attrs.getProperty("databaseName") + " : " +
+			    e.getSQLState() + ": " + e.getMessage());
          throw e;
       }
    }
@@ -230,6 +247,7 @@ public class errorStream
       assertNonEmpty(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertEmpty(errStreamFile);
    }
 
 
@@ -249,6 +267,7 @@ public class errorStream
       assertNonExisting(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertNonEmpty(errStreamFile);
    }
 
 
@@ -269,6 +288,7 @@ public class errorStream
       assertNonExisting(fileStreamFile);
       assertNonEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertEmpty(errStreamFile);
    }
 
 
@@ -289,6 +309,7 @@ public class errorStream
       assertNonExisting(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertNonEmpty(errStreamFile);
    }
 
 
@@ -309,6 +330,7 @@ public class errorStream
       assertNonExisting(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertNonEmpty(fieldStreamFile);
+      assertEmpty(errStreamFile);
    }
 
 
@@ -329,6 +351,7 @@ public class errorStream
       assertNonExisting(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertNonEmpty(errStreamFile);
    }
 
    
@@ -350,6 +373,7 @@ public class errorStream
       assertNonEmpty(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertEmpty(errStreamFile);
    }
 
 
@@ -371,6 +395,7 @@ public class errorStream
       assertNonEmpty(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertEmpty(errStreamFile);
    }
 
 
@@ -396,6 +421,7 @@ public class errorStream
       assertNonEmpty(fileStreamFile);
       assertEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertEmpty(errStreamFile);
    }
 
 
@@ -419,6 +445,7 @@ public class errorStream
       assertNonExisting(fileStreamFile);
       assertNonEmpty(methodStreamFile);
       assertEmpty(fieldStreamFile);
+      assertEmpty(errStreamFile);
    }
 
 
@@ -436,7 +463,7 @@ public class errorStream
 
          checkMethod();
          checkWrongMethod();
-
+	 
          checkField();
          checkWrongField();
 
