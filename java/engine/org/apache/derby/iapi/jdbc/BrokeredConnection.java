@@ -452,6 +452,36 @@ public class BrokeredConnection implements Connection
 	{
 		return control.getPrepareIsolation();
 	}
+            
+    /**
+     * Get the string representation for the underlying physical
+     * connection.
+     *
+     *  When a physical connection is created, it is assigned a unique id 
+     *  that is unchanged for the lifetime of the connection. When an 
+     *  application calls Connection.toString(), it gets the string 
+     *  representation of the underlying physical connection, regardless 
+     *  of whether the application has a reference to the physical connection 
+     *  itself or a reference to a proxy connection (aka brokered connection) 
+     *  that wraps the physical connection.
+     *
+     *  Since this BrokeredConnection is a proxy connection, we return the
+     *  string value of its underlying physical connection
+     * 
+     * @return unique string representation of the underlying
+     *   physical connection
+     */
+    public String toString() 
+    {
+        try
+        {
+            return getRealConnection().toString();
+        }
+        catch ( SQLException e )
+        {
+            return "<no connection>";
+        }
+    }
 
 	protected int getJDBCLevel() { return 2;}
 }

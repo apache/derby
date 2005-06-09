@@ -57,6 +57,15 @@ import javax.sql.ConnectionEvent;
 class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
 {
 
+    /** Static counter for connection ids */
+    private static int idCounter = 0;
+    
+    /** The id for this connection.  */
+    private int connectionId;
+    
+    /** String representation of id */
+    private String idString;
+    
 	private Vector eventListener; // who wants to know I am closed or error
 
 	protected EmbedConnection realConnection;
@@ -74,9 +83,16 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	private final boolean requestPassword;
 
 	private boolean isActive;
+    
+    private synchronized int nextId()
+    {
+        return idCounter++;
+    }
 
 	EmbedPooledConnection(ReferenceableDataSource ds, String u, String p, boolean requestPassword) throws SQLException
 	{
+        connectionId = nextId();
+
 		dataSource = ds;
 		username = u;
 		password = p;
@@ -427,5 +443,28 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	{
 		return realConnection.getPrepareIsolation();
 	}
+    
+    /** 
+     * Get the string representation of this pooled connection.
+     *
+     * A pooled connection is assigned a separate id from a physical 
+     * connection. When a container calls PooledConnection.toString(), 
+     * it gets the string representation of this id. This is useful for 
+     * developers implementing connection pools when they are trying to
+     * debug pooled connections. 
+     *
+     * @return a string representation of the uniquie id for this pooled
+     *    connection.
+     *
+     */
+    public String toString()
+    {
+        if ( idString == null )
+        {
+            idString = Integer.toString(connectionId);
+        }
+        
+        return idString;
+    }
 
 }

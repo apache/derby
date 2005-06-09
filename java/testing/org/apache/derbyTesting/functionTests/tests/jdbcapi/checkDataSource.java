@@ -48,16 +48,26 @@ import org.apache.derby.tools.ij;
 
 import java.io.*;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import javax.naming.*;
 import javax.naming.directory.*;
 
 public class checkDataSource
 { 
+    protected static Hashtable conns = new Hashtable();
 
 	public static void main(String[] args) throws Exception {
 
-		new checkDataSource().runTest(args);
+        try
+        {
+			new checkDataSource().runTest(args);
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+            throw e;
+        }
 		System.out.println("Completed checkDataSource");
 
 	}
@@ -81,10 +91,12 @@ public class checkDataSource
 		
 
 		checkConnection("DriverManager ", dmc);
+		checkJBMSToString();
 
 
 		EmbeddedDataSource dscs = new EmbeddedDataSource();
 		dscs.setDatabaseName("wombat");
+		checkToString(dscs);
 
 		DataSource ds = dscs;
 
@@ -99,6 +111,7 @@ public class checkDataSource
 		dscsp.setDatabaseName("wombat");
 		//dscsp.setConnectionAttributes("unicode=true");
 		ConnectionPoolDataSource dsp = dscsp;
+		checkToString(dsp);
 
 		PooledConnection pc = dsp.getPooledConnection();
 		pc.addConnectionEventListener(new EventCatcher(1));
@@ -157,6 +170,7 @@ public class checkDataSource
 		//dscsx.setConnectionAttributes("unicode=true");
 
 		XADataSource dsx = dscsx;
+		checkToString(dsx);
 
 		XAConnection xac = dsx.getXAConnection();
 		xac.addConnectionEventListener(new EventCatcher(3));
@@ -823,7 +837,195 @@ public class checkDataSource
 			System.out.println(dsName + " <closedstmt>.execute() " + sqle.getSQLState() + " - " + sqle.getMessage());
 		}
 	}
+        
+    /**
+     * Make sure this connection's string is unique (DERBY-243)
+     */
+    protected void checkToString(Connection conn) throws Exception
+    {
+        String str = conn.toString();
 
+        if ( conns.containsKey(str))
+        {
+            throw new Exception("ERROR: Connection toString() is not unique: " 
+              + str);
+        }
+        conns.put(str, conn);
+    }
+    
+    /**
+     * Clear out and close connections in the connections
+     * hashtable. 
+     */
+    protected void clearConnections() throws SQLException
+    {
+        java.util.Iterator it = conns.values().iterator();
+        while ( it.hasNext() )
+        {
+            Connection conn = (Connection)it.next();
+            conn.close();
+        }
+        conns.clear();
+    }
+    
+    /**
+     * Get connections  using ij.startJBMS() and make sure
+     * they're unique
+     */
+    protected void checkJBMSToString() throws Exception
+    {
+        clearConnections();
+        // Open ten connections rather than just two to
+        // try and catch any odd uniqueness bugs.  Still
+        // no guarantee but is better than just two.
+        int numConnections = 10;
+        for ( int i = 0 ; i < numConnections ; i++ )
+        {
+            Connection conn = ij.startJBMS();
+            checkToString(conn);
+        }
+        
+        // Now close the connections
+        clearConnections();
+    }
+    
+    /**
+     * Check uniqueness of connection strings coming from a
+     * DataSouce
+     */
+    protected void checkToString(DataSource ds) throws Exception
+    {
+        clearConnections();
+        
+        int numConnections = 10;
+        for ( int i = 0 ; i < numConnections ; i++ )
+        {
+            Connection conn = ds.getConnection();
+            checkToString(conn);
+        }
+        
+        clearConnections();
+    }
+    
+    /**
+     * Check uniqueness of strings with a pooled data source.
+     * We want to check the PooledConnection as well as the
+     * underlying physical connection. 
+     */
+    protected void checkToString(ConnectionPoolDataSource pds)
+        throws Exception
+    {
+        int numConnections = 10;
+        
+        //  First get a bunch of pooled connections
+        //  and make sure they're all unique
+        Hashtable pooledConns = new Hashtable();
+        for ( int i = 0 ; i < numConnections ; i++ )
+        {
+            PooledConnection pc = pds.getPooledConnection();
+            String str = pc.toString();
+            if ( pooledConns.get(str) != null )
+            {
+                throw new Exception("Pooled connection toString " +
+                  "value " + str + " is not unique");
+            }
+            pooledConns.put(str, pc);
+        }
+
+        // Now check that connections from each of these
+        // pooled connections have different string values
+        Iterator it = pooledConns.values().iterator();
+        clearConnections();
+        while ( it.hasNext() )
+        {
+            PooledConnection pc = (PooledConnection)it.next();
+            Connection conn = pc.getConnection();
+            checkToString(conn);
+        }
+        clearConnections();
+        
+        // Now clear out the pooled connections
+        it = pooledConns.values().iterator();
+        while ( it.hasNext() )
+        {
+            PooledConnection pc = (PooledConnection)it.next();
+            pc.close();
+        }
+        pooledConns.clear();
+        
+        // Now check that two connections from the same 
+        // PooledConnection have the same string value
+        PooledConnection pc = pds.getPooledConnection();
+        Connection conn = pc.getConnection();
+        String str = conn.toString();
+        conn = pc.getConnection();
+        if ( ! conn.toString().equals(str) )
+        {
+            throw new Exception("Two connections from the " +
+              "same pooled connection have different string " +
+              "values: " + str + ", " + conn.toString());
+        }
+        pc.close();
+    }
+    
+    /**
+     * Check uniqueness of strings for an XA data source
+     */
+    protected void checkToString(XADataSource xds) throws Exception
+    {
+        int numConnections = 10;
+        
+        //  First get a bunch of pooled connections
+        //  and make sure they're all unique
+        Hashtable xaConns = new Hashtable();
+        for ( int i = 0 ; i < numConnections ; i++ )
+        {
+            XAConnection xc = xds.getXAConnection();
+            String str = xc.toString();
+            if ( xaConns.get(str) != null )
+            {
+                throw new Exception("XA connection toString " +
+                  "value " + str + " is not unique");
+            }
+            xaConns.put(str, xc);
+        }
+
+        // Now check that connections from each of these
+        // pooled connections have different string values
+        Iterator it = xaConns.values().iterator();
+        clearConnections();
+        while ( it.hasNext() )
+        {
+            XAConnection xc = (XAConnection)it.next();
+            Connection conn = xc.getConnection();
+            checkToString(conn);
+        }
+        clearConnections();
+        
+        // Now clear out the pooled connections
+        it = xaConns.values().iterator();
+        while ( it.hasNext() )
+        {
+            XAConnection xc = (XAConnection)it.next();
+            xc.close();
+        }
+        xaConns.clear();
+        
+        // Now check that two connections from the same 
+        // XAConnection have the same string value
+        XAConnection xc = xds.getXAConnection();
+        Connection conn = xc.getConnection();
+        String str = conn.toString();
+        conn = xc.getConnection();
+        if ( ! conn.toString().equals(str) )
+        {
+            throw new Exception("Two connections from the " +
+              "same pooled connection have different string " +
+              "values: " + str + ", " + conn.toString());
+        }
+        xc.close();
+    }
+    
 	protected static void checkConnectionPreCloseS(String dsName, Connection conn) throws SQLException {
 		if (dsName.endsWith("DataSource")) {
 

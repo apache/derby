@@ -143,6 +143,9 @@ public class EmbedConnection implements java.sql.Connection
 		returned in order of their creation. Is maintained at the root connection.
 	*/
 	private int resultSetId;
+    
+    /** Cached string representation of the connection id */
+    private String idString;
 
 
 	//////////////////////////////////////////////////////////
@@ -1914,5 +1917,30 @@ public class EmbedConnection implements java.sql.Connection
 	//
 	/////////////////////////////////////////////////////////////////////////
 
-    public	String	toString() { return "EmbedConnection"; }
+    /**
+     * Get a String representation that uniquely identifies
+     * this connection
+     *
+     * In Derby the "physical" connection is a LanguageConnectionContext, 
+     * or LCC.
+     * The JDBC Connection is an JDBC-specific layer on top of this.  Rather
+     * than create a new id here, we simply use the id of the underlying LCC.
+     * Note that this is a big aid in debugging, because much of the
+     * engine trace and log code prints the LCC id. 
+     *
+     * @return a string representation of the unique id for the
+     *    underlying LanguageConnectionContext
+     */
+    public String toString()
+    {
+        if ( idString == null )
+        {
+            idString = 
+              Integer.toString(getLanguageConnection().getInstanceNumber());
+        }
+        
+        return idString;
+    }
+
+
 }
