@@ -20,27 +20,13 @@
 
 package org.apache.derby.impl.drda;
 
-import java.lang.reflect.*;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.ResultSetMetaData;
-import java.sql.Types;
 import java.sql.SQLException;
-
+import java.sql.Types;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
-import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.impl.jdbc.EmbedSQLException;
-import org.apache.derby.iapi.reference.SQLState;
 
 /**
 	DRDAResultSet holds result set information
@@ -51,7 +37,8 @@ class DRDAResultSet
 	// resultSet states are NOT_OPENED and SUSPENDED
 	protected static final int NOT_OPENED = 1;
 	protected static final int SUSPENDED = 2;
-
+	public static final int QRYCLSIMP_DEFAULT = CodePoint.QRYCLSIMP_NO;  
+	
 	boolean explicitlyClosed = false;
 
 	int state;
@@ -72,7 +59,7 @@ class DRDAResultSet
 	protected int blksize;				// Query block size
 	protected int maxblkext;			// Maximum number of extra blocks
 	protected int outovropt;			// Output Override option
-	protected int qryclsimp;            // Implicit Query Close Setting
+	private int qryclsimp; // Implicit Query Close Setting
 	protected boolean qryrelscr;		// Query relative scrolling
 	protected long qryrownbr;			// Query row number
 	protected boolean qryrfrtbl;		// Query refresh answer set table
@@ -495,6 +482,40 @@ class DRDAResultSet
 		}
 
 	}
-}
 	
-
+	/**
+	 * Method to decide weather the ResultSet should be closed implicitly.
+	 * When the protocol type is Limited Block Query Protocol we should not
+	 * close implicitly even if qryclsimp is set to YES.
+	 * 
+	 * @return close implicit boolean
+	 * @throws SQLException
+	 */
+	boolean isRSCloseImplicit() throws SQLException {
+		return qryclsimp == CodePoint.QRYCLSIMP_YES && 
+			getQryprctyp() != CodePoint.LMTBLKPRC;
+	}
+	
+	/**
+	 * Sets the OPNQRYOptions. For more information on the meaning of these
+	 * values consult the DRDA Technical Standard document. 
+	 * 
+	 * @param blksize Query block Size
+	 * @param qryblkctl Use to set the query protocol type
+	 * @param maxblkext Maximum number of extra blocks
+	 * @param outovropt Output override option
+	 * @param qryrowset Query row set
+	 * @param qryclsimpl Implicit query close setting
+	 */
+	protected void setOPNQRYOptions(int blksize, int qryblkctl,
+			int maxblkext, int outovropt,int qryrowset,int qryclsimpl)
+	{
+		this.blksize = blksize;
+		setQryprctyp(qryblkctl);
+		this.maxblkext = maxblkext;
+		this.outovropt = outovropt;
+		this.qryrowset = qryrowset;
+		this.qryclsimp = (qryclsimpl == CodePoint.QRYCLSIMP_SERVER_CHOICE)
+			? DRDAResultSet.QRYCLSIMP_DEFAULT : qryclsimpl;
+	}
+}

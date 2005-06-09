@@ -20,38 +20,28 @@
 
 package org.apache.derby.impl.drda;
 
-import java.lang.reflect.*;
-
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.CallableStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.Enumeration;
 
+import org.apache.derby.iapi.jdbc.BrokeredConnection;
+import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import  org.apache.derby.iapi.jdbc.BrokeredConnection;
-import  org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
-import org.apache.derby.impl.jdbc.EmbedResultSet;
-import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.util.StringUtil;
-
-import java.math.BigInteger;
-import java.io.UnsupportedEncodingException;
-import java.util.Hashtable;
+import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
+import org.apache.derby.impl.jdbc.Util;
 
 /**
 	DRDAStatement stores information about the statement being executed
@@ -112,7 +102,6 @@ class DRDAStatement
 	protected int blksize;				// Query block size
 	protected int maxblkext;			// Maximum number of extra blocks
 	protected int outovropt;			// Output Override option
-	protected int qryclsimp;            // Implicit Query Close Setting
 	protected boolean qryrfrtbl;		// Query refresh answer set table
 	private int qryprctyp = CodePoint.QRYBLKCTL_DEFAULT;   // Protocol type
 	
@@ -297,17 +286,15 @@ class DRDAStatement
 	
 
 	/**
-	 * Set query options sent on OPNQRY
+	 * Delegation method to call DRDAResultSet to set query 
+	 * options sent on OPNQRY.
+	 * @see DRDAResultSet#setOPNQRYOptions(int, int, int, int, int, int)
 	 */
 	protected void setOPNQRYOptions(int blksize, int qryblkctl,
 								  int maxblkext, int outovropt,int qryrowset,int qryclsimpl)
 	{
-		currentDrdaRs.blksize = blksize;
-		currentDrdaRs.setQryprctyp(qryblkctl);
-		currentDrdaRs.maxblkext = maxblkext;
-		currentDrdaRs.outovropt = outovropt;
-		currentDrdaRs.qryrowset = qryrowset;
-		currentDrdaRs.qryclsimp = qryclsimp;
+		currentDrdaRs.setOPNQRYOptions( blksize, qryblkctl, maxblkext, 
+				outovropt, qryrowset, qryclsimpl);
 	}
 
 	/*
@@ -390,16 +377,6 @@ class DRDAStatement
 	protected int  getQryscrorn()
 	{
 		return currentDrdaRs.qryscrorn;
-	}
-
-	protected void getQryclsimp(int value)
-	{
-		currentDrdaRs.qryclsimp = value;
-	}
-
-	protected int  getQryclsimp()
-	{
-		return currentDrdaRs.qryclsimp;
 	}
 
 	protected void setScrollType(int scrollType)
@@ -950,7 +927,6 @@ class DRDAStatement
 	 */
 	protected void close()  throws SQLException
 	{
-		
 		if (ps != null)
 			ps.close();
 		if (stmt != null)
@@ -1630,6 +1606,17 @@ class DRDAStatement
 			// occur from this code. Just in case we will throw it
 			throw Util.javaException(e);
 		
+	}
+	
+	/**
+	 * Delegation method to call DRDAResultSet.isRSCloseImplicit()
+	 * 
+	 * @see DRDAResultSet#isRSCloseImplicit()
+	 * @return implicit close boolean
+	 * @throws SQLException
+	 */
+	boolean isRSCloseImplicit() throws SQLException {
+		return currentDrdaRs.isRSCloseImplicit();
 	}
 }
 

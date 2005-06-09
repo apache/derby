@@ -741,9 +741,6 @@ class CodePoint
 	static final int MAXBLKEXT_NONE = 0;
 	static final int MAXBLKEXT_DEFAULT = MAXBLKEXT_NONE;
 
-	//-------------------Default for QRYCLSIMP
-	static final int QRYCLSIMP_DEFAULT = QRYCLSIMP_SERVER_CHOICE;
-
 	//-------------- QRYSCRORN - query scroll orientation values
 	static final int QRYSCRREL = 1;		// relative fetch
 	static final int QRYSCRABS = 2;		// absolute fetch
