@@ -74,6 +74,19 @@ public interface TypeDescriptor
 
 
 	/**
+	  Returns the maximum width of the type IN BYTES.  This is the
+	  maximum number of bytes that could be returned for this type
+	  if the corresponding getXXX() method is used.  For example,
+	  if we have a CHAR type, then we want the number of bytes
+	  that would be returned by a ResultSet.getString() call.
+
+	  @return	the maximum length of this Type IN BYTES;
+				-1 means "unknown/no max length"
+	  */
+	public	int			getMaximumWidthInBytes();
+
+
+	/**
 	  Returns the number of decimal digits for the type, if applicable.
 	 
 	  @return	The number of decimal digits for the type.  Returns

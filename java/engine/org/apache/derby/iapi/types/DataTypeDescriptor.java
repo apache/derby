@@ -706,6 +706,14 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
 
 	/**
+	 * @see TypeDescriptor#getMaximumWidthInBytes
+	 */
+	public int	getMaximumWidthInBytes()
+	{
+		return typeDescriptor.getMaximumWidthInBytes();
+	}
+
+	/**
 	 * Gets the TypeId for the datatype.
 	 *
 	 * @return	The TypeId for the datatype.

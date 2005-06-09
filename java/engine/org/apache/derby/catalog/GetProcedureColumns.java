@@ -102,7 +102,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
     // @exception SQLException  Thrown if there is a SQL error.
     //
     //
-    public GetProcedureColumns(AliasInfo aliasInfo, String aliasType) throws SQLException 
+    public GetProcedureColumns(AliasInfo aliasInfo, String aliasType) throws SQLException
     {
 		// compile time aliasInfo will be null.
 		if (aliasInfo != null) {
@@ -175,9 +175,9 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
                 // No corresponding SQL type
                 return 0;
 
-		case 6: // LENGTH:
+		case 6: // LENGTH (in bytes):
                 if (sqlType != null)
-                    return sqlType.getMaximumWidth();
+                    return sqlType.getMaximumWidthInBytes();
 
                 // No corresponding SQL type
                 return 0;

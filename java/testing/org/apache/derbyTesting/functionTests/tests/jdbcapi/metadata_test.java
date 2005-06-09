@@ -165,17 +165,24 @@ public abstract class metadata_test {
 							"bigintcol bigint, "+
 							"realcol real, "+
 							"doublepreccol double precision default 10, "+
+							"floatcol float default 8.8, "+
 							"decimalcol10p4s decimal(10,4), "+
 							"numericcol20p2s numeric(20,2), "+
 							"char8col___ char(8), "+
+							"char8forbitcol___ char(8) for bit data, "+
 							"varchar9col varchar(9), "+
+							"varchar9bitcol varchar(9) for bit data, "+
 							"longvarcharcol long varchar,"+
-							//"longvarbinarycol long bit varying,"+
+							"longvarbinarycol long varchar for bit data, "+
 							//"nchar10col nchar(10)"
 					  //+ ", nvarchar8col nvarchar(8)"
 					  //+ ", longnvarchar long nvarchar"
 					  //+ ", 
-						"blobcol blob(3K)"
+							"blobcol blob(3K), "+
+							"clobcol clob(3K), "+
+							"datecol date, "+
+							"timecol time, "+
+							"tscol timestamp"
 					  + ")" );
 			// test for beetle 4620
 			s.execute("CREATE TABLE INFLIGHT(FLT_NUM CHAR(20) NOT NULL," + 

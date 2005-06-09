@@ -155,6 +155,108 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	}
 
 	/**
+	 * Return the length of this type in bytes.  Note that
+	 * while the JDBC API _does_ define a need for
+	 * returning length in bytes of a type, it doesn't
+	 * state clearly what that means for the various
+	 * types.  We assume therefore that the values here
+	 * are meant to match those specified by the ODBC
+	 * specification (esp. since ODBC clients are more
+	 * likely to need this value than a Java client).
+	 * The ODBC spec that defines the values we use here
+	 * can be found at the following link:
+	 * 
+	 * http://msdn.microsoft.com/library/default.asp?url=/library/
+	 * en-us/odbc/htm/odbctransfer_octet_length.asp
+	 *
+	 * @see TypeDescriptor#getMaximumWidthInBytes
+	 */
+	public int	getMaximumWidthInBytes()
+	{
+		switch (typeId.getJDBCTypeId()) {
+
+			case Types.BIT:
+			case Types.TINYINT:
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			case Types.REAL:
+			case Types.DOUBLE:
+			case Types.FLOAT:
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+			case Types.BLOB:
+
+				// For all of these, just take the maximumWidth,
+				// since that already holds the length in bytes.
+				return maximumWidth;
+
+			// For BIGINT values, ODBC spec says to return
+			// 40 because max length of a C/C++ BIGINT in
+			// string form is 20 and we assume the client
+			// character set is Unicode (spec says to
+			// multiply by 2 for unicode).
+			case Types.BIGINT:
+				return 40;
+
+			// ODBC spec explicitly declares what the lengths
+			// should be for datetime values, based on the
+			// declared fields of SQL_DATE_STRUCT, SQL_TIME_STRUCT,
+			// and SQL_TIMESTAMP_STRUCT.  So we just use those
+			// values.
+			case Types.DATE:
+			case Types.TIME:
+				return 6;
+
+			case Types.TIMESTAMP:
+				return 16;
+
+			// ODBC spec says that for numeric/decimal values,
+			// we should use max number of digits plus 2
+			// (for sign and decimal point), since that's
+			// the length of a decimal value in string form.
+			// And since we assume client character set
+			// is unicode, we have to multiply by 2 to
+			// get the number of bytes.
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+				return 2 * (precision + 2);
+
+			// ODBC spec says to use length in chars
+			// for character types, times two if we
+			// assume client character set is unicode.
+			// If 2 * character length is greater than
+			// variable type (in this case, integer),
+			// then we return the max value for an
+			// integer.
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+				if ((maximumWidth > 0) && (2 * maximumWidth < 0))
+				// integer overflow; return max integer possible.
+					return Integer.MAX_VALUE;
+				else
+					return 2 * maximumWidth;
+
+			case Types.ARRAY:
+			case Types.DISTINCT:
+			case Types.NULL:
+			case Types.OTHER:
+			case Types.REF:
+			case Types.STRUCT:
+			case Types.JAVA_OBJECT:
+			default:
+
+				// For these we don't know, so return the "don't-know"
+				// indicator.
+				return -1;
+
+		}
+
+	}
+
+	/**
 	 * Get the jdbc type id for this type.  JDBC type can be
 	 * found in java.sql.Types. 
 	 *
