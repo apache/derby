@@ -36,23 +36,14 @@ import java.util.Vector;
  */
 class ijMultiResult extends ijResultImpl {
 
-	Vector results = new Vector();
-	Statement statement;
-	ResultSet rs;
+	private Statement statement;
+	private ResultSet rs;
 	boolean closeWhenDone;
 
 	ijMultiResult(Statement s, ResultSet rs, boolean c) {
 		statement = s;
 		this.rs = rs;
 		closeWhenDone = c;
-	}
-
-	public void addStatementResult(Statement s) throws SQLException {
-System.out.println("adding statement "+results.size()+1);
-		if (s.getUpdateCount() >=0)
-			results.addElement(new Integer(s.getUpdateCount()));
-		else
-			results.addElement(s.getResultSet());
 	}
 
 	public boolean isMulti() { return true; }

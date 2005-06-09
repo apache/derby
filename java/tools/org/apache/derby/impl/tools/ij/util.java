@@ -53,6 +53,19 @@ import java.util.Locale;
  */
 public class util implements java.security.PrivilegedAction {
 	
+	private static boolean HAVE_BIG_DECIMAL;
+	
+	{
+		boolean haveBigDecimal;
+		try {
+			Class.forName("java.math.BigDecimal");
+			haveBigDecimal = true;
+		} catch (Throwable t) {
+			haveBigDecimal = false;
+		}
+		HAVE_BIG_DECIMAL = haveBigDecimal;
+	}
+	
 	private static final Class[] DS_GET_CONN_TYPES = {"".getClass(), "".getClass()};
 	private util() {}
 
@@ -592,9 +605,49 @@ AppUI.out.println("SIZE="+l);
 			// We need to make sure we pass along the scale, because
 			// setObject assumes a scale of zero (beetle 4365)
 			for (int c=1; c<=numCols; c++) {
-				ps.setObject(c,rs.getObject(c),
-					 rsmd.getColumnType(c),
-					 rsmd.getScale(c));
+				int sqlType = rsmd.getColumnType(c);
+				
+				if (sqlType == Types.DECIMAL)
+				{
+					if (util.HAVE_BIG_DECIMAL)
+					{
+						ps.setObject(c,rs.getObject(c),
+								 sqlType,
+								 rsmd.getScale(c));							
+					}
+					else
+					{
+						// In J2ME there is no object that represents
+						// a DECIMAL value. By default use String to
+						// pass values around, but for integral types
+						// first convert to a integral type from the DECIMAL
+						// because strings like 3.4 are not convertible to
+						// an integral type.
+						switch (ps.getMetaData().getColumnType(c))
+						{
+						case Types.BIGINT:
+							ps.setLong(c, rs.getLong(c));
+						    break;
+						case Types.INTEGER:
+						case Types.SMALLINT:
+						case Types.TINYINT:
+							ps.setInt(c, rs.getInt(c));
+							break;
+						default:
+							ps.setString(c,rs.getString(c));
+						    break;
+						}								
+					}
+					
+				}
+				else
+				{
+					ps.setObject(c,rs.getObject(c),
+							 sqlType);					
+				}
+				
+				
+
 			}
 
 
