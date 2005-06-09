@@ -27,8 +27,8 @@ Project info
 
   * The Apache DB project will own the Derby subproject, and the subproject will
     follow the Apache DB PMC's direction. Significant contributors to this sub-
-    project (for example, after a significant interval of sustained contribution)
-    will be proposed for commit access to the codebase.
+    project (for example, after a significant interval of sustained
+    contribution) will be proposed for commit access to the codebase.
 
   * The Derby sub-project's modules will be available as distinct and discrete downloads.
 
@@ -62,307 +62,178 @@ Project Setup
 Identify the codebase
 
 date        item
-....-..-..  If applicable, make sure that any associated name does not already 
+2004-08-30  If applicable, make sure that any associated name does not already
             exist and check www.nameprotect.com to be sure that the name is not
             already trademarked for an existing software product.
+DONE        If request from an existing Apache project to adopt an external
+            package, then ask the Apache project for the cvs module and mail
+            address names.
+DONE        If request from outside Apache to enter an existing Apache project,
+            then post a message to that project for them to decide on 
+            acceptance.
+N/A         If request from anywhere to become a stand-alone PMC, then assess
+            the fit with the ASF, and create the lists and modules under the
+            incubator address/module names if accepted.
 
 Copyright
 
-date 	    item
-2004-08-26  Check and make sure that the papers that transfer rights to the ASF 
-            been received. It is only necessary to transfer rights for the 
+date        item
+2004-08-26  Check and make sure that the papers that transfer rights to the ASF
+            been received. It is only necessary to transfer rights for the
             package, the core code, and any new code produced by the project.
-2004-11-04  Check and make sure that the files that have been donated have been 
+2005-01-10  Check and make sure that the files that have been donated have been
             updated to reflect the new ASF copyright.
 
 Verify distribution rights
-date 	    item
+
+date        item
 2004-10-12  Check that all active committers have a signed CLA on record.
 2004-10-12  Remind active committers that they are responsible for ensuring that
-            a Corporate CLA is recorded if such is is required to authorize 
+            a Corporate CLA is recorded if such is is required to authorize
             their contributions under their individual CLA.
-2004-10-12  Check and make sure that for all items included with the distribution
-            that is not under the Apache license, we have the right to combine 
-            with Apache-licensed code and redistribute.
-2004-10-12  Check and make sure that all items depended upon by the project is 
-            covered by one or more of the following approved licenses: Apache, 
-            BSD, Artistic, MIT/X, MIT/W3C, MPL 1.1, or something with essentially
-            the same terms.
+2004-10-12  Check and make sure that for all items included with the
+            distribution that is not under the Apache license, we have the right
+            to combine with Apache-licensed code and redistribute.
+2004-10-12  Check and make sure that all items depended upon by the project is
+            covered by one or more of the following approved licenses: Apache,
+            BSD, Artistic, MIT/X, MIT/W3C, MPL 1.1, or something with
+            essentially the same terms.
 
-Generally, the result of checking off these items will be a Software Grant, CLA, and Corporate CLA for ASF licensed code, which must have no dependencies upon items whose licenses that are incompatible with the Apache License.
+Establish a list of active committers !
+
+status  item
+DONE    Check that all active committers have submitted a contributors
+        agreement.
+DONE    Add all active committers in the STATUS file.
+DONE    Ask root for the creation of committers' accounts on cvs.apache.org.
+
+Infrastructure !
+
+status	item
+DONE	Ask infrastructure to create source repository modules and grant the
+        committers karma.
+DONE    Ask infrastructure to set up and archive Mailing lists.
+DONE    Decide about and then ask infrastructure to setup an issuetracking
+        system (Bugzilla, Scarab, Jira).
+DONE    Migrate the project to our infrastructure.
+
+Generally, the result of checking off these items will be a Software Grant, CLA,
+and Corporate CLA for ASF licensed code, which must have no dependencies upon
+items whose licenses that are incompatible with the Apache License.
+
+Licensing awareness
+
+DONE - Are all licensing, trademark, credit issues being taken care of and
+       acknowleged by all committers?
+
+Project Goals during Incubation
+ 
+Build independent development community
+* 221 subscribers to dev list (12.68 posts/day)
+* 282 subscribers to user list (5.67 posts/day)
+* Added one committer during incubation (jboynes)
+* PPMC has adopted a plan to actively build the developer community
+
+Produce a release
+* 2004-12-06 10.0.2.1 release approval voted
+* 2004-12-06 SVN tag created
+             http://svn.apache.org/repos/asf/incubator/derby/code/tags/10.0.2.1
+
+Exit
+
+Things to check for before voting the project out.
+
 Organizational acceptance of responsibility for the project
+Has the receiving PMC voted to accept it? **YES**
 
-    * Has the receiving PMC voted to accept it? **YES**
+Incubator sign-off
+
+Has the Incubator decided that the project has accomplished all of the above
+tasks?
 
 
 Releases:
 
-None so far. A first release is in progress. This first release will be
-versioned 10.0.2.1.
+ * 10.0.2.1 : Released 12/06/2004
+ * 10.1.0.0 : In development
 
 PENDING ISSUES
 ==============
 
-Derby documentation in PDF format:
+None.
 
-  A request was made for PDF documentation, however, the source files for the
-  current HTML documentation for Derby are not in a form useful for creating PDF
-  documentation with Forrest. A proposal was made by Jeff Levitt 
-  <jlevitt@mutagen.net> to convert the documentation into XML DITA format.
-
- 
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
-[VOTE] on repository layout:
+[VOTE] Re-vote for Derby docs in DITA format
 
-   [ Ten votes ]  Option 1: Keep the code and site pages in separately-versionable
-                  trees ( derby/site/{trunk,tags,branches}/<pages> and 
-                  derby/code/{t,t,b}<code> )
-   
-   [ One vote ]   Option 2: Put all things Derby into a single tree 
-                  ( derby/{trunk,tags,branches}/{<code>,<pages>} )
+  Jeff Levitt called for a vote to to decide whether to use DITA source files
+  for the Derby documentation, or to continue to look for other options.
+  This would allow us the project to create PDF's, single html files for each
+  document, or dynamically update indexes as opposed to the current HTML source.
 
+  Passed with seven +1 votes.
 
-[VOTE] Establish development model based on Apache DB guidelines
+[VOTE] Reject tally of logo votes
 
-  Derby is being sponsored by the Apache DB project and the Derby status
-  page states 'The Apache DB project will own the Derby subproject, and
-  the subproject will follow the Apache DB PMC's direction'. 
-  (http://incubator.apache.org/projects/derby.html)
-  
-  A vote was proposed that the Derby development model
-  follows the guidelines defined by the Apache DB project. This will set
-  the initial rules for development, changes to the model could
-  subsequently be called for and voted on using the Derby developer
-  mailing list.
-  
-  The guidelines are defined at http://db.apache.org/guidelines.html
-  
-  There is one difference that the Derby code is in SVN and not CVS.
-  
-  Note the decision making page at http://db.apache.org/decisions.html
-  and the Changes section on this page http://db.apache.org/source.html.
-  
-  The Changes section indicates the commit model is:
-  
-  (quote)
-  
-  Simple patches to fix bugs can be committed then reviewed. With a
-  commit-then-review process, the Committer is trusted to have a high
-  degree of confidence in the change.
-  
-  Doubtful changes, new features, and large scale overhauls need to be
-  discussed before committing them into the repository. Any change that
-  affects the semantics of an existing API function, the size of the
-  program, configuration data formats, or other major areas must receive
-  consensus approval before being committed.
-  
-  (end-quote)
-  
-  Result: Six +1 votes.
+  Due to irregularities in the voting for the Derby Logo Contest, Jean
+  Anderson called for a vote to reject the tally of votes and restart
+  the contest at a later date.
 
+[VOTE] to accept Derby Network Client contribution
 
-[VOTE] Derby upgrade policy
+  On April 18, 2005, Satheesh Bandaram announced the availability of a new
+  open source Network Client Driver for the Derby Network Server, replacing
+  the need to use the IBM DB2 Universal JDBC Driver (JCC) as the client to
+  connect to the Derby Network Server.
 
-  A vote was proposed to accept that for any release of Derby the upgrade policy described in:
+  Passed with nine +1 votes.
 
-  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgNo=77
+[VOTE] Network client driver should match embedded where possible for
+       implementation specific behaviour.
 
-  is followed.
+  In order to create a seamless transition from embedded to client, Kathey
+  Marsden called for a vote to agree that the client driver behavior should be
+  changed to match the embedded wherever possible.
 
-  The summary is that any release of Derby can run against a database
-  created by a previous release with either no upgrade, soft upgrade or
-  hard upgrade mode, depending on the circumstance.
-  
-  This would mean that if some new feature was added to Derby, before a
-  release occurred the correct upgrade code would have to be written, if
-  the feature contributor did not provide it.
-  
-  Result: Three +1 votes.
+  Passed with ten +1 votes.
 
+[VOTE] to accept Derby UI and Help plugins for Eclipse
 
-[VOTE] Derby versioning:
-  
-  A vote was proposed related to the Derby upgrade policy vote.
-  
-  That the version scheme currently in place, and described in:
-  
-  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby- 
-  dev@db.apache.org&msgNo=73
-  
-  be accepted in order to facilitate the upgrade policy voted on and  
-  accepted in the Derby upgrade policy thread. As such, Derby versions  
-  should take the following form: MAJOR.Minor.interim.point {beta} (build  
-  identifier). As an example, the currently posted snapshot version of  
-  Derby is 10.0.2.0 (46005).
-  
-  Whereby:
-  
-  Differences in the major version are used to identify large changes in  
-  architecture and functionality, and for which upgrade is required.
-  Differences in the minor version are used to identify changes in  
-  functionality large enough to require an upgrade procedure for  
-  databases from the previous version, and for which upgrade is required.
-  Differences in the interim version are used to identify significant  
-  differences in behavior of the database engine from the previous  
-  interim version, but for which upgrade to databases is not required.
-  Differences in the point version are used to identify that any amount  
-  of change to the database engine has occurred from the previously  
-  released point version.
-  That the build identifier be used to distinguish the exact state of the  
-  code from which any specific set of binaries have been compiled,
-  That the beta flag in the version denote that the upgrade policy is in  
-  an indeterminate state with respect to the previous version and, as  
-  such, that an upgrade to a beta version of Derby is allowed, but an  
-  upgrade from a beta version of Derby to any other version of Derby is  
-  not allowed.
-  
-  I would like to further propose that, following that version scheme,  
-  that releases from any branch have a specific version number and be  
-  tagged in the repository. Thus, following this version scheme, the  
-  forthcoming baseline release of Derby should be versioned 10.0.2.1, as  
-  it includes changes which are not included in the first public version  
-  of the source. Once the release is ready, the version on the trunk will  
-  be changed to 10.0.2.1 and then tagged in subversion.
-  
-  I would like to also further propose that before changes which would  
-  require upgrade are allowed into the trunk, that the trunk be branched,  
-  so that the branch can serve as the reference for the upgrade policy.  
-  After branching, the minor (and/or major) version of the trunk will be  
-  incremented, and the beta tag applied to indicate that significant  
-  changes exist in the trunk which would require database upgrade and  
-  that the code for performing the upgrade has not been rigorously  
-  tested. As an example, before a change could be applied which would  
-  require upgrade, a new 10.0 branch would be created and the trunk would  
-  be reversioned 10.1.0.0 beta, in order to distinguish the trunk from  
-  the new branch and to allow changes that require a database upgrade  
-  into the trunk.
-  
-  Result: Three +1 votes. Passed.
+  On May 13, 2005, Rajesh Kartha announced that the source for the UI components
+  for Eclipse that had been previously available as the IBM Integration plugin
+  for Derby would be contributed to the Derby project and called for a vote to
+  accept it.
 
-  
-[VOTE] Re: Help detecting client disconnects for network server  
-
-  Kathey Marsden proposed the following vote concerning the use of TCP keepalive
-  for Network Server:
-  
-  1) Have keepAlive on by default. It seems important not only for locks
-  but for potential network server bloat due to connections not getting
-  cleaned up.  Result: Three +1 votes. Passed.
-  
-  2) Add a property derby.drda.keepAlive={true|false} (defaults to true as
-  described above).  There seems to be a need to be able to turn keepAlive
-  off in some cases.  Result: Two +1 votes, no objections. Passed.
-
-  3) Add property derby.drda.connSoTimeout=<milliseconds> (defaults to 0,
-  infinite) to provide the ability to have connections timeout after a
-  period of inactivity. The connections will still timeout, even if the
-  connection is working fine but will timeout after blocking on a read for
-  this length of time.   I am about +.5 on this one.  It would be nice to
-  provide the capability, but hesitate to add yet another property.
-  Result: One +1 vote, objections noted. Not passed.
-  
-
-Copyright issues with the Derby codebase
-
-  There were concerns over how the IBM copyright notices attached to the
-  Derby source files were to be retained, if at all. For the discussion
-  of the concerns surrounding this issue, please see:
-
-  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgId=1885981
-
-  and the thread concerning the resolution of this issue:
-
-  http://nagoya.apache.org/eyebrowse/ReadMsg?listName=derby-dev@db.apache.org&msgId=1968757
+  Passed with three +1 votes.
 
 
 OTHER NEWS
 ==========
 
-Bug tracking has been set up at http://issues.apache.org/jira/browse/DERBY 
+The Derby Logo contest has been restarted. New submissions for logos can be
+attached to JIRA entry Derby-297.
+
+http://issues.apache.org/jira/browse/DERBY-297
 
 
 RELEASE STATUS
 ==============
 
-A baseline release is in progress. This first release will be versioned 10.0.2.1.
+Work for A release that includes the new Network Client Driver, 10.1, is 
+underway.
+
 Any release must be approved by the Incubator PMC and must clearly be marked as
 an incubator release, according to the Apache Incubator guidelines:
 
 http://incubator.apache.org/incubation/Incubation_Policy.html#Releases%0A
 
+Bugs which need to be resolved before the 10.1 release can occur are being
+tracked in JIRA. You can see the current status at:
+
+http://issues.apache.org/jira/browse/DERBY?report=com.atlassian.jira.plugin.system.project:roadmap-panel
+
 Open showstoppers:
 
-  None.
+  DERBY-217: issue with BLOBs and batch updates in 10.1.0.0
 
-Resolved showstoppers:
-
-  DERBY-24 Client should not be able to raise an event on a PooledConnection
-  it no longer owns.
-
-  DERBY-32 Logic to prevent mutiple jvms booting the same database in parallel 
-  to avoid accidental corruptions on Unix environment is not working.
-
-Resolved non-showstoppers:
-
-  DERBY-6 Trigger of the form: create trigger ... values myFunction(); has
-  no effect.
-
-  DERBY-14 Triggers do not evaluate functions in VALUES trigger actions.
-
-  DERBY-21 ResultsetMetaData.getColumnClassName() for CLOB and BLOB datatypes is
-  incorrect.
-
-  DERBY-30 Connection.close() method inconsistently throws exception on 
-  closed connection
-
-  DERBY-35 DRDA Chaining in Network Server is incorrect
-
-  DERBY-38 Make LOCKS as non-reserved keyword in Derby since it is not a
-  reserved keyword in the SQL standards
-
-  DERBY-40 Cannot set default value for BIGINT
-
-  DERBY-42 When using encryption, do not store the length information about the
-  external key in service.properties
-
-  DERBY-44 Support for like ? Escape ?
-
-  DERBY-50 getMaxColumnNameLength() database metadata function returns incorrect
-  value.
-  
-  DERBY-54 'retain' was not a keyword, now it is, possible schema impact
-  
-  DERBY-59 dblook currently has driver classes hard coded
-
-  DERBY-67 Network Server on a 64 bit JVM fails with: Execution failed because 
-  of a Distributed Protocol Error: DRDA_Proto_SYNTAXRM; CODPNT arg = 2116; Error
-  Code Value = 14
-
-  DERBY-72 IBM (c) message in properties files
-  
- 
-Items deferred to next release:
-
-  [PATCH] retrieveMessages... true by default in ij
-  The original submitter of this patch (myrnap) requested that it not be applied to
-  the current release due to an issue when setting the property on the command-line
-  and passing the same property with the connection URL.
-
-Other applied patches:
-
-  [PATCH] Optimization of org.apache.derby.impl.services.uuid.BasicUUID.toByteArray()
-  [PATCH] Set Derby's build number to be the subversion revision number
-  [PATCH] derby.war file build
-  [PATCH] derby.log file error message
-  [PATCH] Network servlet display only message key
-  [PATCH] added 3 more parser generated files to the clobber target in main build.xml
-  [PATCH] Various fixes to javadoc generation
-  [PATCH] Trigger Bug Fix
-  [PATCH] Fix to prevent empty log file switches that could cause recovery failures
-  [PATCH] ExternalSortFactory Bug Fix
-  [PATCH] Modify dblook messages to enable localization ...
-  [PATCH] minor bugs in dblook 
-  [PATCH] Extension Packaging
-  [PATCH] DB Shutdown fix for Network Server
