@@ -89,7 +89,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	private boolean	calledOnNullInput;
 
 	// What type of alias is this: PROCEDURE or FUNCTION?
-	private char aliasType;
+	private transient char aliasType;
 
 	public RoutineAliasInfo() {
 	}
