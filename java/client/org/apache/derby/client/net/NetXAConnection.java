@@ -132,7 +132,7 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
         // this logic must be in sync with willAutoCommitGenerateFlow() logic
         if (isXAConnection_) { // XA Connection
             int xaState = getXAState();
-            if (xaState == XA_LOCAL){
+            if (xaState == XA_T0_NOT_ASSOCIATED){
                 xares_.callInfoArray_[xares_.conn_.currXACallInfoOffset_].xid_ =
                         NetXAResource.nullXid;
                 writeLocalXACommit_();
@@ -147,7 +147,7 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
             int xaState = getXAState();
             NetXACallInfo callInfo = xares_.callInfoArray_[currXACallInfoOffset_];
             callInfo.xaRetVal_ = NetXAResource.XARETVAL_XAOK; // initialize XARETVAL
-            if (xaState == XA_LOCAL) {
+            if (xaState == XA_T0_NOT_ASSOCIATED) {
                 readLocalXACommit_();
                 //TODO: Remove
                 //setXAState(XA_LOCAL);
@@ -191,7 +191,7 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
 
             // for all XA connectiions
             // TODO:KATHEY - Do we need this?
-            setXAState(XA_LOCAL);
+            setXAState(XA_T0_NOT_ASSOCIATED);
         } else {
             readLocalRollback_(); // non-XA connections
         }

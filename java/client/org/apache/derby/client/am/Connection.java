@@ -85,13 +85,29 @@ public abstract class Connection implements java.sql.Connection,
     protected boolean isXAConnection_ = false; // Indicates an XA connection
 
     // XA States
-    public static final int XA_LOCAL = 0;   //  No global transaction in process
-    public static final int XA_GLOBAL = 1;  // Global transaction in process
-    //TODO: Remove entirely once indoubtlist is gone.  
+    // The client needs to keep track of the connection's transaction branch association
+    // per table 2.6 in the XA+ specification in order to determine if commits should flow in
+    // autocommit mode.  There is no need to keep track of suspended transactions separately from
+    // XA_TO_NOT_ASSOCIATED.
+    // 
+    /**
+     * <code>XA_T0_NOT_ASSOCIATED</code>
+     * This connection is not currently associated with an XA transaction
+     * In this state commits will flow in autocommit mode.
+     */
+    public static final int XA_T0_NOT_ASSOCIATED = 0;   
+    
+    /**
+     * <code>XA_T1_ASSOCIATED</code>
+     * In this state commits will not flow in autocommit mode.
+     */
+    public static final int XA_T1_ASSOCIATED = 1;  
+    
+    //TODO: Remove XA_RECOVER entirely once indoubtlist is gone.  
     //public static final int XA_RECOVER = 14;
 
 
-    protected int xaState_ = XA_LOCAL;
+    protected int xaState_ = XA_T0_NOT_ASSOCIATED;
 
     // XA Host Type
     public int xaHostVersion_ = 0;
@@ -524,7 +540,7 @@ public abstract class Connection implements java.sql.Connection,
 
     public void writeCommit() throws SqlException {
         if (isXAConnection_) {
-            if ((xaState_ == XA_LOCAL) ) {
+            if ((xaState_ == XA_T0_NOT_ASSOCIATED) ) {
                 writeLocalXACommit_();
             }
         } else {
@@ -541,7 +557,7 @@ public abstract class Connection implements java.sql.Connection,
 
     public void readCommit() throws SqlException {
         if (isXAConnection_) {
-            if ((xaState_ == XA_LOCAL) ) {
+            if ((xaState_ == XA_T0_NOT_ASSOCIATED) ) {
                 readLocalXACommit_();               
             }
         } else {
@@ -749,7 +765,7 @@ public abstract class Connection implements java.sql.Connection,
     * 	Might be logically closed but available for reuse.
     *   @return true if physical connection still open
     */
-    public boolean isPhysicallyClosed() {
+    public boolean isPhysicalConnClosed() {
     return !open_ && !availableForReuse_; 
    }
 

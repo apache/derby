@@ -183,7 +183,7 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "commit", xid, onePhase);
         }
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -215,9 +215,6 @@ public class NetXAResource implements XAResource {
         if (rc != XAResource.XA_OK) {
             throwXAException(rc, false);
         }
-        else {
-        	conn_.setXAState(Connection.XA_LOCAL);
-        }
     }
 
     /**
@@ -247,7 +244,7 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "end", xid, flags);
         }
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -278,8 +275,9 @@ public class NetXAResource implements XAResource {
         }
         if (rc != XAResource.XA_OK) {
             throwXAException(rc, false);
+        }else {
+        	conn_.setXAState(Connection.XA_T0_NOT_ASSOCIATED);
         } 
-
     }
 
     /**
@@ -299,7 +297,7 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "forget", xid);
         }
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
@@ -352,7 +350,7 @@ public class NetXAResource implements XAResource {
             conn_.agent_.logWriter_.traceEntry(this, "getTransactionTimeout");
         }
         exceptionsOnXA = null;
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -381,7 +379,7 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "prepare", xid);
         }
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -447,7 +445,7 @@ public class NetXAResource implements XAResource {
             conn_.agent_.logWriter_.traceEntry(this, "recover", flag);
         }
         exceptionsOnXA = null;
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -512,7 +510,7 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "rollback", xid);
         }
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -543,9 +541,7 @@ public class NetXAResource implements XAResource {
         if (rc != XAResource.XA_OK) {
             throwXAException(rc, false);
         }
-        else {
-        	conn_.setXAState(Connection.XA_LOCAL);
-        }
+ 
     }
 
     /**
@@ -585,7 +581,7 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "start", xid, flags);
         }
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -609,7 +605,7 @@ public class NetXAResource implements XAResource {
             // Setting this is currently required to avoid client from sending
             // commit for autocommit.
             if (rc == XARETVAL_XAOK) {
-                conn_.setXAState(Connection.XA_GLOBAL);
+                conn_.setXAState(Connection.XA_T1_ASSOCIATED);
             }
 
         } catch (SqlException sqle) {
@@ -626,7 +622,6 @@ public class NetXAResource implements XAResource {
 
 
     protected void throwXAException(int rc) throws XAException {
-        // By default, throwXAException will reset the state of the failed connection
         throwXAException(rc, rc != XAException.XAER_NOTA);
     }
 
@@ -735,7 +730,54 @@ public class NetXAResource implements XAResource {
                         sqlExceptions,
                         xaExceptionText);
         xaException.errorCode = rc;
+        setXaStateForXAException(rc); 
         throw xaException;
+    }
+
+
+    /**
+     * Reset the transaction branch association state  to XA_T0_NOT_ASSOCIATED
+     * for XAER_RM* and XA_RB* Exceptions. All other exeptions leave the state 
+     * unchanged
+     * 
+     * @param rc  // return code from XAException
+     * @throws XAException
+     */
+    private void setXaStateForXAException(int rc) {
+    	switch (rc)
+		{
+        	// Reset to T0, not  associated for XA_RB*, RM*
+           // XAER_RMFAIL and XAER_RMERR will be fatal to the connection
+           // but that is not dealt with here
+           case javax.transaction.xa.XAException.XAER_RMFAIL:
+           case javax.transaction.xa.XAException.XAER_RMERR:
+           case javax.transaction.xa.XAException.XA_RBROLLBACK:
+           case javax.transaction.xa.XAException.XA_RBCOMMFAIL:
+           case javax.transaction.xa.XAException.XA_RBDEADLOCK:
+           case javax.transaction.xa.XAException.XA_RBINTEGRITY:
+           case javax.transaction.xa.XAException.XA_RBOTHER:
+           case javax.transaction.xa.XAException.XA_RBPROTO:
+           case javax.transaction.xa.XAException.XA_RBTIMEOUT:
+           case javax.transaction.xa.XAException.XA_RBTRANSIENT:
+           	conn_.setXAState(Connection.XA_T0_NOT_ASSOCIATED);
+           break;
+            // No change for other XAExceptions
+            // javax.transaction.xa.XAException.XA_NOMIGRATE
+           //javax.transaction.xa.XAException.XA_HEURHAZ
+           // javax.transaction.xa.XAException.XA_HEURCOM
+           // javax.transaction.xa.XAException.XA_HEURRB
+           // javax.transaction.xa.XAException.XA_HEURMIX
+           // javax.transaction.xa.XAException.XA_RETRY
+           // javax.transaction.xa.XAException.XA_RDONLY
+           // javax.transaction.xa.XAException.XAER_ASYNC
+           // javax.transaction.xa.XAException.XAER_NOTA
+           // javax.transaction.xa.XAException.XAER_INVAL                
+           // javax.transaction.xa.XAException.XAER_PROTO
+           // javax.transaction.xa.XAException.XAER_DUPID
+           // javax.transaction.xa.XAException.XAER_OUTSIDE            	
+            default:
+  			  return;
+		}	
     }
 
     public boolean isSameRM(XAResource xares) throws XAException {
@@ -745,7 +787,7 @@ public class NetXAResource implements XAResource {
         if (conn_.agent_.loggingEnabled()) {
             conn_.agent_.logWriter_.traceEntry(this, "isSameRM", xares);
         }
-        if (conn_.isPhysicallyClosed()) {
+        if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
 
@@ -787,7 +829,7 @@ public class NetXAResource implements XAResource {
         }
         return isSame;
     }
-
+    
     public static boolean xidsEqual(Xid xid1, Xid xid2) { // determine if the 2 xids contain the same values even if not same object
         // comapre the format ids
         if (xid1.getFormatId() != xid2.getFormatId()) {

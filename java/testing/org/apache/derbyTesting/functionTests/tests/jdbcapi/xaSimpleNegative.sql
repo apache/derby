@@ -2,7 +2,7 @@
 -- some negative test for error checking
 --
 xa_datasource 'wombat';
-xa_connect user 'negativeTest';
+xa_connect user 'negativeTest' password 'xxx';
 
 -- start new transaction
 xa_start xa_noflags 0;

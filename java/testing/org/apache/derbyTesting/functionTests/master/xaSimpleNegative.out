@@ -2,7 +2,7 @@ ij> --
 -- some negative test for error checking
 --
 xa_datasource 'wombat';
-ij> xa_connect user 'negativeTest';
+ij> xa_connect user 'negativeTest' password 'xxx';
 ij> -- start new transaction
 xa_start xa_noflags 0;
 ij> -- ERROR: cannot start without end
