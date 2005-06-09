@@ -169,6 +169,11 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		// boot the validation needed to do property validation, now property
 		// validation is separated from AccessFactory, therefore from store
 		bootValidation(create, startParams);
+		
+		// boot the type factpry before store to ensure any dynamically
+		// registered types (DECIMAL) are there before logical undo recovery might need them.
+		Monitor.bootServiceModule(create, this,
+					org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
 
 		bootStore(create, startParams);
 
