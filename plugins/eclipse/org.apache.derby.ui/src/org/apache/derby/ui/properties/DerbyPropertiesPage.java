@@ -20,11 +20,15 @@
 
 package org.apache.derby.ui.properties;
 
+import org.apache.derby.ui.common.CommonNames;
+import org.apache.derby.ui.common.Messages;
+import org.apache.derby.ui.util.DerbyServerUtils;
 import org.apache.derby.ui.util.Logger;
 import org.apache.derby.ui.util.SelectionUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
@@ -32,6 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PropertyPage;
 
@@ -45,6 +50,7 @@ public   class DerbyPropertiesPage extends PropertyPage {
 	protected Text hostText;
 	protected Text portText;
 	protected Text systemHomeText;
+	private boolean isServerRunning;
 	
 
 	protected void addControls(Composite parent) {
@@ -115,6 +121,26 @@ public   class DerbyPropertiesPage extends PropertyPage {
 		portText.setText(Integer.toString(dsProps.getPort()));
 		hostText.setText(dsProps.getHost());
 		systemHomeText.setText(dsProps.getSystemHome());
+		isServerRunning = checkServer();
+		// if the server is running do not allow
+		// editing of the settings
+		if (isServerRunning) {
+		    portText.setEditable(false);
+		    hostText.setEditable(false);
+		    systemHomeText.setEditable(false);
+		}
+	}
+	
+	protected boolean checkServer() {
+	    IProject proj = (IProject)getElement();
+	    boolean serverRunning = false;
+	    try {
+	        serverRunning = DerbyServerUtils.getDefault().getRunning(proj);
+	    }
+	    catch (CoreException ce) {
+	        Logger.log(SelectionUtil.getStatusMessages(ce),IStatus.ERROR);
+	    }
+	    return serverRunning;
 	}
 
 	protected void getParams() {
@@ -127,6 +153,16 @@ public   class DerbyPropertiesPage extends PropertyPage {
 		}
 		dsProps.setHost(hostText.getText());
 		dsProps.setSystemHome(systemHomeText.getText());
+		
+		// if the server is running inform the user
+		// to stop the server before changing the settings
+		if (isServerRunning) {
+		    Shell shell = new Shell();
+			MessageDialog.openInformation(
+			shell,
+			CommonNames.PLUGIN_NAME,
+			Messages.SERVER_RUNNING );
+		}
 	}
 
 	protected GridData getSeperatorLabelGridData() {

@@ -43,4 +43,5 @@ public class Messages {
 	public static String ADD_N_TRY="Please add the Derby nature and try again.";
 	
 	public static String NO_ACTION="Unable to execute the action";
+	public static String SERVER_RUNNING="The Network Server is already running.\nStop the server prior to changing the settings.";
 }
