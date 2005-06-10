@@ -255,7 +255,7 @@ java.sun.com/j2me
 IBM's WCTME 5.7
 
 Once you have obtained these jars and set the jsr169compile.classpath
-(see section 3.2) the regulat Derby builds will include the JSR169 code
+(see section 3.2) the regular Derby builds will include the JSR169 code
 for the embedded engine. The resulting jar file (derby.jar) can be used
 on J2ME, or J2SE, write once run anywhere.
 
@@ -329,7 +329,7 @@ to specify your environment and options:
     - j14lib
 
       This is a required variable which defines the location of
-      JDK 1.4.x. Define the variable as following:
+      JDK 1.4.x. Define the variable as follows:
 
           j14lib=${jdk14.dir}/jre/lib
       
@@ -339,12 +339,24 @@ to specify your environment and options:
     - j13lib
 
       This is a required variable which defines the location of
-      JDK 1.3.x. Define the variable as following:
+      JDK 1.3.x. Define the variable as follows:
 
           j13lib=${jdk13.dir}/jre/lib
 
       where ${jdk13.dir} is the directory name where you have 
       installed JDK 1.3.x. Check out section 2.2.3 of this document.
+
+    - java14compile.classpath - IBM JVMs only
+
+      IBM Java SDKs may be used in place of Sun's, but IBM packages
+      its Java runtime libraries in multiple jar files instead of
+      a single jar file, rt.jar. This means that if you are using
+      IBM SDKs to provide your Java runtime environment, you need to
+      also override the property java14compile.classpath in your 
+      ant.properties file to account for the difference in
+      packaging. Define the variable as follows:
+
+      java14compile.classpath=${j14lib}/core.jar;${j14lib}/server.jar;${j14lib}/xml.jar
       
     - build.compiler
 
@@ -389,7 +401,7 @@ to specify your environment and options:
       for the top-level default, engine or all targets.
       The compile classpath needs to include the Foundation 1.0
       and JSR169 environments, see any documentation for your
-      source of J2ME libraries. Here is an example foe IBM's WCTME 5.7
+      source of J2ME libraries. Here is an example for IBM's WCTME 5.7
  
       jsr169compile.classpath=C:/wctme5.7/ive/lib/jclFoundation10/classes.zip;C:/wctme5.7/ive/lib/jdbc.jar
 
@@ -554,6 +566,9 @@ Some of the main targets that can be called as
 
   cleandocs: remove javadoc directory (${derby.source}/javadoc)
 
+  plugin:  creates a zip file, derby_eclipse_plug-in.zip, in the 
+           jars/insane directory.  The plugin target depends on the 
+           default ant target.  This creates the Core plug-in only.
 
 
 4.2   Derby source code upgrade
