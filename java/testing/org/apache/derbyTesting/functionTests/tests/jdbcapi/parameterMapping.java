@@ -1077,6 +1077,28 @@ public class parameterMapping {
 	}
 	private static void setXXX(Statement s, PreparedStatement psi, PreparedStatement psq, int type) throws SQLException, java.io.IOException {
 
+		boolean executeBatchTests = true;
+		
+		// DERBY-349 - Disable executeBatch on these target types as invald conversions
+		// using setByte() and executeBatch lead to the test hanging.
+		if (TestUtil.isDerbyNetClientFramework())
+		{		
+			switch (jdbcTypes[type])
+			{
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+			case Types.DATE:
+			case Types.TIMESTAMP:
+			case Types.TIME:
+			case Types.CLOB:
+			case Types.BLOB:
+				executeBatchTests = false;
+				break;
+			}
+		}
+			
+		
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1097,7 +1119,28 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 0, type);
 		}
+		// and as a batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
 
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setByte() as batch ");
+				psi.setByte(1, (byte) 98);
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 0, type);
+			}
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1118,7 +1161,28 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 1, type);
 		}
+		// and as a batch
+		if (executeBatchTests) {
+		s.execute("DELETE FROM PM.TYPE_AS");
+			
+		SQLException sqleResult = null;
+		boolean worked;
+		try {
+			System.out.print("  setShort() as batch ");
+			psi.setShort(1, (short) 98);
+			psi.addBatch();
+			psi.executeBatch();
 
+			getValidValue(psq, jdbcTypes[type]);
+
+			worked = true;
+
+		} catch (SQLException sqle) {
+			sqleResult = sqle;
+			worked = false;
+		}
+		judge_setXXX(worked, sqleResult, 1, type);
+		}
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1139,7 +1203,28 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 2, type);
 		}
-	
+		// and as a batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
+
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setInt() as batch ");
+				psi.setInt(1, 98);
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 2, type);
+		}	
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1160,7 +1245,29 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 3, type);
 		}
-		
+		// as a batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
+
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setLong() as batch ");
+				psi.setLong(1, 98L);
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 3, type);
+			}
+					
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1180,6 +1287,29 @@ public class parameterMapping {
 			worked = false;
 		}
 		judge_setXXX(worked, sqleResult, 4, type);
+		}
+		
+		// and as a batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
+
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setFloat() as batch ");
+				psi.setFloat(1, 98.4f);
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 4, type);
 		}
 
 		{
@@ -1202,6 +1332,30 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 5, type);
 		}
+		
+		// as a batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
+
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setDouble() as batch ");
+				psi.setDouble(1, 98.5);
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 5, type);
+		}
+
 
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
@@ -1223,6 +1377,28 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 6, type);
 		}
+		// as a batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
+
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setBigDecimal() as batch ");
+				psi.setBigDecimal(1, new BigDecimal(99.0));
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 6, type);
+			}
 		// null BigDecimal
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
@@ -1233,6 +1409,29 @@ public class parameterMapping {
 			System.out.print("  setBigDecimal(null) ");
 			psi.setBigDecimal(1, null);
 			psi.executeUpdate();
+
+			getValidValue(psq, jdbcTypes[type]);
+
+			worked = true;
+
+		} catch (SQLException sqle) {
+			sqleResult = sqle;
+			worked = false;
+		}
+		judge_setXXX(worked, sqleResult, 6, type);
+		}
+
+		// null BigDecimal
+		if (executeBatchTests) {
+		s.execute("DELETE FROM PM.TYPE_AS");
+
+		SQLException sqleResult = null;
+		boolean worked;
+		try {
+			System.out.print("  setBigDecimal(null) as batch ");
+			psi.setBigDecimal(1, null);
+			psi.addBatch();
+			psi.executeBatch();
 
 			getValidValue(psq, jdbcTypes[type]);
 
@@ -1265,7 +1464,27 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 7, type);
 		}
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
 
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setBoolean() as batch ");
+				psi.setBoolean(1, true);
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 7, type);
+		}
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1292,7 +1511,35 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 8, type);
 		}
+		// as batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
 
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setString() as batch ");
+				psi.setString(1, "97");
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			} catch (Throwable t) {
+				// JCC has some bugs
+				System.out.println(t.getMessage());
+				worked = false;
+				sqleResult = null;
+
+			}
+			judge_setXXX(worked, sqleResult, 8, type);
+			}
+		
 		// null String
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
@@ -1320,7 +1567,34 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 8, type);
 		}
+		// null String as batch
+		if (executeBatchTests) {
+		s.execute("DELETE FROM PM.TYPE_AS");
 
+		SQLException sqleResult = null;
+		boolean worked;
+		try {
+			System.out.print("  setString(null) as batch ");
+			psi.setString(1, null);
+			psi.addBatch();
+			psi.executeBatch();
+
+			getValidValue(psq, jdbcTypes[type]);
+
+			worked = true;
+
+		} catch (SQLException sqle) {
+			sqleResult = sqle;
+			worked = false;
+		} catch (Throwable t) {
+			// JCC has some bugs
+			System.out.println(t.getMessage());
+			worked = false;
+			sqleResult = null;
+
+		}
+		judge_setXXX(worked, sqleResult, 8, type);
+		}
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1384,6 +1658,27 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 10, type);
 		}
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
+
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setDate() as batch ");
+				psi.setDate(1, java.sql.Date.valueOf("2004-02-14"));
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 10, type);
+			}
 		// null Date
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
@@ -1405,7 +1700,30 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 10, type);
 		}
+		
+		// null Date
+		if (executeBatchTests) {
+		s.execute("DELETE FROM PM.TYPE_AS");
 
+		SQLException sqleResult = null;
+		boolean worked;
+		try {
+			System.out.print("  setDate(null) as batch ");
+			psi.setDate(1, null);
+			psi.addBatch();
+			psi.executeBatch();
+
+			getValidValue(psq, jdbcTypes[type]);
+
+			worked = true;
+
+		} catch (SQLException sqle) {
+			sqleResult = sqle;
+			worked = false;
+		}
+		judge_setXXX(worked, sqleResult, 10, type);
+		}
+		
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1467,6 +1785,29 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 12, type);
 		}
+		// as batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
+
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setTimestamp() as batch ");
+				psi.setTimestamp(1, java.sql.Timestamp.valueOf("2004-02-23 17:14:24.097625551"));
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 12, type);
+			}
+
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1487,7 +1828,29 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 12, type);
 		}
+		// as batch
+		if (executeBatchTests) {
+			s.execute("DELETE FROM PM.TYPE_AS");
 
+			SQLException sqleResult = null;
+			boolean worked;
+			try {
+				System.out.print("  setTimestamp(null) as batch ");
+				psi.setTimestamp(1, null);
+				psi.addBatch();
+				psi.executeBatch();
+
+				getValidValue(psq, jdbcTypes[type]);
+
+				worked = true;
+
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			judge_setXXX(worked, sqleResult, 12, type);
+			}
+		
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
