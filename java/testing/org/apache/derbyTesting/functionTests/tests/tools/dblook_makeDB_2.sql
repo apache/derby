@@ -61,6 +61,12 @@ create index ix1 on bar.t1 (i desc);
 create view v1 (dum, dee, dokie) as select a.c, a.i, a.vc from bar.t1 as a;
 
 -- ----------------------------------------------
+-- Synonyms
+-- ----------------------------------------------
+
+create synonym syn1 for bar.t1;
+
+-- ----------------------------------------------
 -- Triggers
 -- ----------------------------------------------
 

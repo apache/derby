@@ -216,6 +216,54 @@ ij> drop table primaryTab;
 0 rows inserted/updated/deleted
 ij> drop synonym synPrimary;
 0 rows inserted/updated/deleted
+ij> -- Tests with non existant schemas
+----- Implicitly creates junkSchema
+create synonym junkSchema.syn1 for table2;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'SYN1' resolved to the object 'JUNKSCHEMA.TABLE2' which is currently undefined. : 
+ij> select * from junkSchema.syn1;
+ERROR 42X05: Table 'JUNKSCHEMA.TABLE2' does not exist.
+ij> set schema junkSchema;
+0 rows inserted/updated/deleted
+ij> create table table2(c char(10));
+0 rows inserted/updated/deleted
+ij> select * from syn1;
+C         
+-----
+ij> set schema APP;
+0 rows inserted/updated/deleted
+ij> -- Should resolve to junkSchema.table2
+select * from junkSchema.syn1;
+C         
+-----
+ij> drop table junkSchema.table2;
+0 rows inserted/updated/deleted
+ij> -- Should fail. Need to drop synonym first
+drop schema junkSchema restrict;
+ERROR X0Y54: Schema 'JUNKSCHEMA' cannot be dropped because it is not empty.
+ij> drop synonym junkSchema.syn1;
+0 rows inserted/updated/deleted
+ij> drop schema junkSchema restrict;
+0 rows inserted/updated/deleted
+ij> -- Test with target schema missing
+create synonym mySynonym for notPresent.t1;
+0 rows inserted/updated/deleted
+WARNING 01522: The newly defined synonym 'MYSYNONYM' resolved to the object 'NOTPRESENT.T1' which is currently undefined. : 
+ij> select * from mySynonym;
+ERROR 42Y07: Schema 'NOTPRESENT' does not exist
+ij> create table notPresent.t1(j int, c char(10));
+0 rows inserted/updated/deleted
+ij> insert into notPresent.t1 values (100, 'satheesh');
+1 row inserted/updated/deleted
+ij> -- Should resolve now
+select * from mySynonym;
+J |C         
+-----
+100 |satheesh  
+ij> drop table notPresent.t1;
+0 rows inserted/updated/deleted
+ij> drop synonym mySynonym;
+0 rows inserted/updated/deleted
 ij> -- Positive test case with three levels of synonym chaining
 create schema synonymSchema;
 0 rows inserted/updated/deleted
