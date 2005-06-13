@@ -119,6 +119,16 @@ public class LimitReader extends Reader implements Limit
 		limitInPlace = true;
 		return;
 	}
+    
+    /**
+     * return limit of the stream that can be read without throwing
+     * EOFException
+     * @return the remaining bytes left to be read from the stream
+     */
+    public final int getLimit()
+    {
+        return remainingBytes;
+    }
 
 	/**
 		Clear any limit set by setLimit. After this call no limit checking

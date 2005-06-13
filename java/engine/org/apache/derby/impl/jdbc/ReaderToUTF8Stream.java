@@ -43,11 +43,14 @@ final class ReaderToUTF8Stream
 	private int blen;
 	private boolean eof;
 	private boolean multipleBuffer;
+    // buffer to hold the data read from stream 
+    // and converted to UTF8 format
+    private final static int BUFSIZE = 32768;
 
 	ReaderToUTF8Stream(LimitReader reader)
 	{
 		this.reader = reader;
-		buffer = new byte[4096];
+		buffer = new byte[BUFSIZE];
 		blen = -1;
 	}
 
@@ -196,5 +199,20 @@ final class ReaderToUTF8Stream
 		reader.close();
 	}
 
+    /**
+     * Return an optimized version of bytes available to read from 
+     * the stream 
+     * Note, it is not exactly per java.io.InputStream#available()
+     */
+    public final int available()
+    {
+       int remainingBytes = reader.getLimit();
+       // this object buffers BUFSIZE bytes that can be read 
+       // and when that is finished it reads the next available bytes
+       // from the reader object 
+       // reader.getLimit() returns the remaining bytes available
+       // on this stream
+       return (BUFSIZE > remainingBytes ? remainingBytes : BUFSIZE);
+    }
 }
 
