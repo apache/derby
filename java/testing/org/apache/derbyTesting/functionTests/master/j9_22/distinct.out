@@ -2280,9 +2280,9 @@ ij> close past;
 ij> -- . for update on a select distinct
 -- both should get errors, not updatable.
 select distinct d from u for update;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> select distinct d from u for update of d;
-ERROR 42Y90: FOR UPDATE is not permitted on this type of statement.
+ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- . positioned update/delete on a select distinct
 get cursor c1 as 'select distinct d from u';
 ij> next c1;

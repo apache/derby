@@ -86,6 +86,18 @@ public class SQLChar
 	extends DataType implements StringDataValue, StreamStorable
 {
 
+    /**
+     * threshold, that decides when we return space back to the VM
+     * see getString() where it is used
+     */
+    protected final static int RETURN_SPACE_THRESHOLD = 4096;
+    
+    /**
+     * when we know that the array needs to grow by at least
+     * one byte, it is not performant to grow by just one byte
+     * instead this amount is used to provide a reasonable growby size.
+     */
+    private final static int GROWBY_FOR_CHAR = 64;
 	/**
 		Static array that can be used for blank padding.
 	*/
@@ -335,7 +347,7 @@ public class SQLChar
 				// data is stored in the char[] array
 
 				value = new String(rawData, 0, len);
-				if (len > 4096) {
+				if (len > RETURN_SPACE_THRESHOLD) {
 					// free up this char[] array to reduce memory usage
 					rawData = null;
 					rawLength = -1;
@@ -641,6 +653,11 @@ public class SQLChar
         int utflen = in.readUnsignedShort();
 
         int requiredLength;
+        // minimum amount that is reasonable to grow the array
+        // when we know the array needs to growby at least one
+        // byte but we dont want to grow by one byte as that
+        // is not performant
+        int minGrowBy = growBy();
         if (utflen != 0)
         {
             // the object was not stored as a streaming column 
@@ -654,8 +671,8 @@ public class SQLChar
             // OR
             // The original string was a 0 length string.
             requiredLength = in.available();
-            if (requiredLength < 64)
-                requiredLength = 64;
+            if (requiredLength < minGrowBy)
+                requiredLength = minGrowBy;
         }
 
         char str[];
@@ -707,12 +724,26 @@ readingLoop:
             if (strlen >= arrayLength) // the char array needs to be grown 
             {
                 int growby = in.available();
-
-                // We know at the array needs to be grown by at least one.
+                // We know that the array needs to be grown by at least one.
                 // However, even if the input stream wants to block on every
                 // byte, we don't want to grow by a byte at a time.
-                if (growby < 64)
-                    growby = 64;
+                // Note, for large data (clob > 32k), it is performant
+                // to grow the array by atleast 4k rather than a small amount
+                // Even better maybe to grow by 32k but then may be
+                // a little excess(?) for small data. 
+                // hopefully in.available() will give a fair
+                // estimate of how much data can be read to grow the 
+                // array by larger and necessary chunks.
+                // This performance issue due to 
+                // the slow growth of this array was noticed since inserts
+                // on clobs was taking a really long time as
+                // the array here grew previously by 64 bytes each time 
+                // till stream was drained.  (Derby-302)
+                // for char, growby 64 seems reasonable, but for varchar
+                // clob 4k or 32k is performant and hence
+                // growBy() is override correctly to ensure this
+                if (growby < minGrowBy)
+                    growby = minGrowBy;
 
                 int newstrlength = arrayLength + growby;
                 char oldstr[] = str;
@@ -804,6 +835,18 @@ readingLoop:
         cKey = null;
     }
 
+    /**
+     * returns the reasonable minimum amount by 
+     * which the array can grow . See readExternal. 
+     * when we know that the array needs to grow by at least
+     * one byte, it is not performant to grow by just one byte
+     * instead this amount is used to provide a resonable growby size.
+     * @return minimum reasonable growby size
+     */
+    protected int growBy()
+    {
+        return GROWBY_FOR_CHAR;  //seems reasonable for a char
+    }
 	/**
 	 * @see Storable#restoreToNull
 	 *

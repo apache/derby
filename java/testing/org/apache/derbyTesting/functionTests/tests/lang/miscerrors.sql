@@ -29,5 +29,3 @@ drop table a;
 -- set isolation to repeatable read
 set isolation serializable;
 
--- Print the output of the ErrorLogVTI, make sure it's valid
-SELECT * FROM new org.apache.derby.diag.ErrorLogReader() vti;

@@ -56,6 +56,7 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
 
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
@@ -671,7 +672,8 @@ public abstract class MethodCallNode extends JavaValueNode
 
 		ClassInspector classInspector = getClassFactory().getClassInspector();
 
-		String[]		parmTypeNames = getObjectSignature();
+		
+		String[]		parmTypeNames;
 		String[]		primParmTypeNames = null;
 		boolean[]		isParam = getIsParam();
 
@@ -680,16 +682,27 @@ public abstract class MethodCallNode extends JavaValueNode
         /*
         ** Find the matching method that is public.
         */
-        try
-        {
+
+        	int signatureOffset = methodName.indexOf('(');
+        	
             // support Java signatures by checking if the method name contains a '('
-            if (methodName.indexOf('(') != -1) {
-                method = classInspector.findPublicMethod(javaClassName, methodName, staticMethod);
-                methodName = method.getName();
+            if (signatureOffset != -1) {
+               	parmTypeNames = parseValidateSignature(methodName, signatureOffset, hasDynamicResultSets);
+               methodName = methodName.substring(0, signatureOffset);
+               
+               // If the signature is specified then Derby resolves to exactly
+               // that method. Setting this flag to false disables the method
+               // resolution from automatically optionally repeating the last
+               // parameter as needed.
+               hasDynamicResultSets = false;
+              	 
             }
             else
             {
-                /* First try with built-in types and mappings */
+            	parmTypeNames = getObjectSignature();
+            }
+        try
+        {                      	
                 method = classInspector.findPublicMethod(javaClassName,
                                                     methodName,
                                                     parmTypeNames,
@@ -702,7 +715,8 @@ public abstract class MethodCallNode extends JavaValueNode
                 // DB2 LUW does not support Java object types for SMALLINT, INTEGER, BIGINT, REAL, DOUBLE
                 // and these are the only types that can map to a primitive or an object type according
                 // to SQL part 13. So we never have a second chance match.
-                if (routineInfo == null) {
+                // Also if the DDL specified a signature, then no alternate resolution
+                if (signatureOffset == -1 && routineInfo == null) {
 
                     /* If no match, then retry with combinations of object and
                      * primitive types.
@@ -720,7 +734,6 @@ public abstract class MethodCallNode extends JavaValueNode
                                                     hasDynamicResultSets);
                     }
                 }
-            }
         }
         catch (ClassNotFoundException e)
         {
@@ -829,7 +842,7 @@ public abstract class MethodCallNode extends JavaValueNode
 				}
 			}
 
-			if (classInspector.primitiveType(methodParameter))
+			if (ClassInspector.primitiveType(methodParameter))
 				methodParms[i].castToPrimitive(true);
 		}
 
@@ -853,6 +866,137 @@ public abstract class MethodCallNode extends JavaValueNode
 			getCompilerContext().getParameterTypes()[0] = dts;
 		}
   }
+	
+	/**
+	 * Parse the user supplied signature for a method and validate
+	 * it, need to match the number of parameters passed in and match
+	 * the valid types for the parameter.
+	 * @param signature complete external name with signature
+	 * @param offset Character offset of first paren
+	 * @param hasDynamicResultSets Can ResultSet[] parameters be specified.
+	 * @return The valid array of types for resolution.
+	 * @throws StandardException
+	 */
+	private String[] parseValidateSignature(String externalName, int offset,
+			boolean hasDynamicResultSets)
+		throws StandardException
+	{
+		int siglen = externalName.length();
+
+		// Ensure the opening paren is not the last
+		// character and that the last character is a close paren
+		if (((offset + 1) == siglen)
+			|| (externalName.charAt(siglen - 1) != ')'))
+			throw StandardException.newException(SQLState.SQLJ_SIGNATURE_INVALID); // invalid
+		
+        StringTokenizer st = new StringTokenizer(externalName.substring(offset + 1, siglen - 1), ",", true);
+        
+        String[] signatureTypes = new String[signature.length];
+        int count;
+        boolean seenClass = false;
+        for (count = 0; st.hasMoreTokens();)
+        {
+           	String type = st.nextToken().trim();
+ 
+           	// check sequence is <class><comma>class> etc.
+           	if (",".equals(type))
+           	{
+           		if (!seenClass)
+           			throw StandardException.newException(SQLState.SQLJ_SIGNATURE_INVALID); // invalid
+           		seenClass = false;
+           		continue;
+           	}
+           	else
+           	{
+           		if (type.length() == 0)
+           			throw StandardException.newException(SQLState.SQLJ_SIGNATURE_INVALID); // invalid
+           		seenClass = true;
+           		count++;
+           	}
+           	           	           	           
+           	if (count > signature.length)
+        	{
+        		if (hasDynamicResultSets)
+        		{
+        			// Allow any number of dynamic result set holders
+        			// but they must match the exact type.
+        			String rsType = signature[signature.length - 1].getSQLType().
+						getTypeId().getCorrespondingJavaTypeName();
+        			
+        			if (!type.equals(rsType))
+        				throw StandardException.newException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, 
+                				type, rsType);
+
+        			if (signatureTypes.length == signature.length)
+        			{
+        				// expand once
+        				String[] sigs = new String[st.countTokens()];
+        				System.arraycopy(signatureTypes, 0, sigs, 0, signatureTypes.length);
+        				signatureTypes = sigs;
+        			}
+        			
+            		signatureTypes[count - 1] = type;
+            		continue;
+       			
+        		}
+    			throw StandardException.newException(SQLState.SQLJ_SIGNATURE_PARAMETER_COUNT, 
+        				Integer.toString(count),
+        				Integer.toString(signature.length)); // too many types
+        	}
+
+        	       	
+        	TypeId	paramTypeId = signature[count - 1].getSQLType().getTypeId();
+        	        	
+        	// Does it match the object name
+        	if (type.equals(paramTypeId.getCorrespondingJavaTypeName()))
+        	{
+        		signatureTypes[count - 1] = type;
+        		continue;
+        	}
+      	
+        	// how about the primitive name
+			if ((paramTypeId.isNumericTypeId() && !paramTypeId.isDecimalTypeId())
+					|| paramTypeId.isBooleanTypeId())
+			{
+				TypeCompiler tc = getTypeCompiler(paramTypeId);
+				if (type.equals(tc.getCorrespondingPrimitiveTypeName()))
+				{
+		       		signatureTypes[count - 1] = type;
+	        		continue;					
+				}
+			}
+        	throw StandardException.newException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, 
+        				type, paramTypeId.getSQLTypeName()); // type conversion error
+        }
+        
+        // Did signature end with trailing comma?
+        if (count != 0 && !seenClass)
+        	throw StandardException.newException(SQLState.SQLJ_SIGNATURE_INVALID); // invalid
+        
+        if (count < signatureTypes.length)
+        {
+        	if (hasDynamicResultSets)
+        	{
+        		// we can tolerate a count of one less than the
+        		// expected count, which means the procedure is declared
+        		// to have dynamic result sets, but the explict signature
+        		// doesn't have any ResultSet[] types.
+        		// So accept, and procedure will automatically have 0
+        		// dynamic results at runtime
+        		if (count == (signature.length - 1))
+        		{
+        			String[] sigs = new String[count];
+        			System.arraycopy(signatureTypes, 0, sigs, 0, count);
+        			return sigs;
+        		}
+        	}
+			throw StandardException.newException(SQLState.SQLJ_SIGNATURE_PARAMETER_COUNT, 
+    				Integer.toString(count),
+    				Integer.toString(signature.length)); // too few types
+        }
+
+        return signatureTypes;
+	}
 
 	/**
 	  *	Return true if some parameters are null, false otherwise.

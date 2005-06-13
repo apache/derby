@@ -139,6 +139,35 @@ drop table foreignTab;
 drop table primaryTab;
 drop synonym synPrimary;
 
+-- Tests with non existant schemas
+-- Implicitly creates junkSchema
+create synonym junkSchema.syn1 for table2;
+select * from junkSchema.syn1;
+set schema junkSchema;
+create table table2(c char(10));
+select * from syn1;
+set schema APP;
+
+-- Should resolve to junkSchema.table2
+select * from junkSchema.syn1;
+drop table junkSchema.table2;
+
+-- Should fail. Need to drop synonym first
+drop schema junkSchema restrict;
+drop synonym junkSchema.syn1;
+drop schema junkSchema restrict;
+
+-- Test with target schema missing
+create synonym mySynonym for notPresent.t1;
+select * from mySynonym;
+create table notPresent.t1(j int, c char(10));
+insert into notPresent.t1 values (100, 'satheesh');
+-- Should resolve now
+select * from mySynonym;
+
+drop table notPresent.t1;
+drop synonym mySynonym;
+
 -- Positive test case with three levels of synonym chaining
 
 create schema synonymSchema;

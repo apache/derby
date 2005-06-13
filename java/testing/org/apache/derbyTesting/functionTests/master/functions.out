@@ -488,4 +488,43 @@ MODIFIES SQL DATA
 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.countRows'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 ERROR 42X01: Syntax error: MODIFIES SQL DATA.
+ij> CREATE FUNCTION SIGNATURE_BUG_DERBY_258_D(P_VAL INT, P_RADIX INT) RETURNS VARCHAR(20)
+LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+EXTERNAL NAME 'java.lang.Integer.toString(int, int)';
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION SIGNATURE_BUG_DERBY_258_NS(P_VAL INT, P_RADIX INT) RETURNS VARCHAR(20)
+LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+EXTERNAL NAME 'java.lang.Integer.toString';
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION SIGNATURE_BUG_DERBY_258_E() RETURNS VARCHAR(20)
+LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+EXTERNAL NAME 'java.lang.Integer.toXXString()';
+0 rows inserted/updated/deleted
+ij> -- these are ok
+VALUES SIGNATURE_BUG_DERBY_258_NS(2356, 16);
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+934                                                                                                                             
+ij> VALUES SIGNATURE_BUG_DERBY_258_NS(2356, 10);
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+2356                                                                                                                            
+ij> VALUES SIGNATURE_BUG_DERBY_258_NS(2356, 2);
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+100100110100                                                                                                                    
+ij> -- Must resolve as above
+VALUES SIGNATURE_BUG_DERBY_258_D(2356, 16);
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+934                                                                                                                             
+ij> -- no method to resolve to (with specified signature)
+VALUES SIGNATURE_BUG_DERBY_258_E();
+ERROR 42X50: No method was found that matched the method call java.lang.Integer.toXXString(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
+ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_D;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_E;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_NS;
+0 rows inserted/updated/deleted
 ij> 

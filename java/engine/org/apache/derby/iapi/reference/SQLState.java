@@ -1456,9 +1456,12 @@ public interface SQLState {
 	String UU_INVALID_PARAMETER										= "XCZ02.S";
 
 	/*
+	** SQL Java DDL 46xxx
 	** SQLJ jar file support
 	*/
 	String SQLJ_INVALID_JAR				= "46001";
+	String SQLJ_SIGNATURE_INVALID	    		= "46J01";
+	String SQLJ_SIGNATURE_PARAMETER_COUNT	    = "46J02";
 
 	/*
 	** Import/Export

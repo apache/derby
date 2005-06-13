@@ -201,6 +201,7 @@ public class CreateAliasNode extends CreateStatementNode
 
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				String targetSchema;
+				implicitCreateSchema = true;
 				TableName t = (TableName) targetObject;
 				if (t.getSchemaName() != null)
 					targetSchema = t.getSchemaName();
@@ -257,13 +258,8 @@ public class CreateAliasNode extends CreateStatementNode
 						this.getFullName(),
 						targetSchema+"."+targetTable);
 
-		// Raise error if targetSchema doesn't exists
-		SchemaDescriptor targetSD = getSchemaDescriptor(targetSchema);
-
-		// Synonym can't be defined on temporary tables.
-		TableDescriptor targetTD = getTableDescriptor(targetTable, targetSD);
-		if (targetTD != null &&
-			targetTD.getTableType() == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
+		SchemaDescriptor targetSD = getSchemaDescriptor(targetSchema, false);
+		if ((targetSD != null) && isSessionSchema(targetSD))
 			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
 		return this;

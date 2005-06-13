@@ -182,4 +182,17 @@ public class SQLVarchar
 	{
 		return TypeId.VARCHAR_PRECEDENCE;
 	}
+    
+    /**
+     * returns the reasonable minimum amount by 
+     * which the array can grow . See readExternal. 
+     * when we know that the array needs to grow by at least
+     * one byte, it is not performant to grow by just one byte
+     * instead this amount is used to provide a resonable growby size.
+     * @return minimum reasonable growby size
+     */
+    protected final int growBy()
+    {
+        return RETURN_SPACE_THRESHOLD;  //seems reasonable for a varchar or clob 
+    }
 }

@@ -51,6 +51,27 @@ CALL APP.NSP(?, ?)
 EXPECTED SQL Exception: (42Y03) 'APP.NSP' is not recognized as a function or procedure.
 call syscs_util.syscs_set_database_property("foo", "bar")
 EXPECTED SQL Exception: (42X15) Column name 'foo' appears in a statement without a FROM list.
+signature mismatched types
+CALL APP.SIGNATURE_BUG_DERBY_258_A(4)
+EXPECTED SQL Exception: (22005) An attempt was made to get a data value of type 'java.lang.String' from a data value of type 'INTEGER'.
+signature too many parameters
+VALUES APP.SIGNATURE_BUG_DERBY_258_B(4)
+EXPECTED SQL Exception: (46J02) Java method signature contains incorrect number (2) of parameters, expected 1.
+signature too few parameters
+CALL APP.SIGNATURE_BUG_DERBY_258_C(4)
+EXPECTED SQL Exception: (46J02) Java method signature contains incorrect number (0) of parameters, expected 1.
+signature invalid format
+CALL APP.SIGNATURE_BUG_DERBY_258_F(4)
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
+signature invalid format
+CALL APP.SIGNATURE_BUG_DERBY_258_G(4)
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
+signature invalid format
+CALL APP.SIGNATURE_BUG_DERBY_258_H(4)
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
+signature invalid format
+CALL APP.SIGNATURE_BUG_DERBY_258_I(4)
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
 testDelayedClassChecking
 call noclass()
 EXPECTED SQL Exception: (42X51) The class 'asdf' does not exist or is inaccessible. This can happen if the class is not public.

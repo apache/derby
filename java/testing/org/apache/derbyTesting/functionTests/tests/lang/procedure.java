@@ -149,8 +149,51 @@ public class procedure
 
 		// bug 5760 - this caused a null pointer exception at one time.
 		statementExceptionExpected(s, "call syscs_util.syscs_set_database_property(\"foo\", \"bar\")");
+		
+		// Derby-258 specific signatures with types not matching JDBC spec.
+		System.out.println("signature mismatched types");
+		s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_A(IN A INT) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'java.lang.System.load(java.lang.String)'");
+		statementExceptionExpected(s, "CALL APP.SIGNATURE_BUG_DERBY_258_A(4)");
+		s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_A");
 
+		// signature with wrong number of arguments, too many
+		System.out.println("signature too many parameters");
+		s.execute("CREATE FUNCTION SIGNATURE_BUG_DERBY_258_B(A INT) RETURNS VARCHAR(128) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'java.lang.Integer.toString(int, int)'");
+		statementExceptionExpected(s, "VALUES APP.SIGNATURE_BUG_DERBY_258_B(4)");
+		s.execute("DROP FUNCTION SIGNATURE_BUG_DERBY_258_B");
+
+		// and too few
+		System.out.println("signature too few parameters");
+		s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_C(IN A INT) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'java.lang.System.gc()'");
+		statementExceptionExpected(s, "CALL APP.SIGNATURE_BUG_DERBY_258_C(4)");
+		s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_C");
+
+		// only a leading paren
+		System.out.println("signature invalid format");
+		s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_F(IN A INT) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'java.lang.System.gc('");
+		statementExceptionExpected(s, "CALL APP.SIGNATURE_BUG_DERBY_258_F(4)");
+		s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_F");
+
+		// signature of (,,)
+		System.out.println("signature invalid format");
+		s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_G(IN A INT) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'java.lang.System.gc(,,)'");
+		statementExceptionExpected(s, "CALL APP.SIGNATURE_BUG_DERBY_258_G(4)");
+		s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_G");
+
+		// signature of (, ,)
+		System.out.println("signature invalid format");
+		s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_H(IN A INT) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'java.lang.System.gc(, ,)'");
+		statementExceptionExpected(s, "CALL APP.SIGNATURE_BUG_DERBY_258_H(4)");
+		s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_H");
+
+		// signature of (int,)
+		System.out.println("signature invalid format");
+		s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_I(IN A INT) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'java.lang.System.gc(int ,)'");
+		statementExceptionExpected(s, "CALL APP.SIGNATURE_BUG_DERBY_258_I(4)");
+		s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_I");
+		
 		s.close();
+		
 	}
 	
    
