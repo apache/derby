@@ -1083,7 +1083,7 @@ ij> insert into myNumeric values (null), (+0), (-0), (+1), (-1),
 (1.0e31, ,1.0e-31),
 (-1.0e31, -1.0e-31 ), 
 select a from myNumeric;
-ERROR 42X80: VALUES clause must contain at least 1 element and all elements must be non-empty.
+ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> select -a from myNumeric;
 1                               
 --------------------------------
@@ -1571,7 +1571,7 @@ values{fn abs( DOUBLE( 1.79769E+308 * 2)       )};
 ----------------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values{fn abs(-DOUBLE( NaN)                    )};
-ERROR 42X04: Column 'NAN' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'NAN' is not a column in the target table.
+ERROR 42X04: Column 'NAN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NAN' is not a column in the target table.
 ij> values{fn abs( DOUBLE( 4.9E-324)               )};
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values{fn abs( DOUBLE( 1.7976931348623157E308) )};
@@ -1834,15 +1834,15 @@ ij> -- 3 args
 values{ fn locate( 'hello', 'hello',-1 ) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '-1'.  The string to search for is 'hello'.  The string to search from is 'hello'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '-1'.  The string to search for is 'hello'.  The string to search from is 'hello'. 
 ij> values{ fn locate( 'hello', 'hello',-0 ) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is 'hello'.  The string to search from is 'hello'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is 'hello'.  The string to search from is 'hello'. 
 ij> values{ fn locate( 'hello', 'hello', 0 ) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is 'hello'.  The string to search from is 'hello'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is 'hello'.  The string to search from is 'hello'. 
 ij> values{ fn locate( 'hello', 'hello', 1 ) };
 1          
 -----------
@@ -1862,7 +1862,7 @@ ij> values{ fn locate( 'hello', 'hello', 9 ) };
 ij> values{ fn locate( 'hello', 'hellohello', 0 ) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is 'hello'.  The string to search from is 'hellohello'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is 'hello'.  The string to search from is 'hellohello'. 
 ij> values{ fn locate( 'hello', 'hellohello', 1 ) };
 1          
 -----------
@@ -1910,15 +1910,15 @@ ij> values{ fn locate( 'hello', 'match me, hello now!', 15 ) };
 ij> values{ fn locate( '?', '?',-1 ) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '-1'.  The string to search for is '?'.  The string to search from is '?'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '-1'.  The string to search for is '?'.  The string to search from is '?'. 
 ij> values{ fn locate( '?', '?',-0 ) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is '?'.  The string to search from is '?'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is '?'.  The string to search from is '?'. 
 ij> values{ fn locate( '?', '?', 0 ) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is '?'.  The string to search from is '?'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is '?'.  The string to search from is '?'. 
 ij> values{ fn locate( '?', '?', 1 ) };
 1          
 -----------
@@ -1930,7 +1930,7 @@ ij> values{ fn locate( '?', '?', 2 ) };
 ij> values{ fn locate( '\', '\\',0) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is '\'.  The string to search from is '\\'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is '\'.  The string to search from is '\\'. 
 ij> values{ fn locate( '\', '\\',1) };
 1          
 -----------
@@ -1946,7 +1946,7 @@ ij> values{ fn locate( '\', '\\',3) };
 ij> values{ fn locate( '/', '//',0) };
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is '/'.  The string to search from is '//'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is '/'.  The string to search from is '//'. 
 ij> values{ fn locate( '/', '//',1) };
 1          
 -----------
@@ -2747,11 +2747,11 @@ NULL
 ij> select locate(a, b, 0) from foo;
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '0'.  The string to search for is 'abc'.  The string to search from is 'abcd'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '0'.  The string to search for is 'abc'.  The string to search from is 'abcd'. 
 ij> select locate(a, b, -1) from foo;
 1          
 -----------
-ERROR 22014: The start positon for LOCATE is invalid; it must be a positive integer.  The index to start the search from is '-1'.  The string to search for is 'abc'.  The string to search from is 'abcd'. 
+ERROR 22014: The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '-1'.  The string to search for is 'abc'.  The string to search from is 'abcd'. 
 ij> select locate(a, b, 1) from foo;
 1          
 -----------
@@ -3477,7 +3477,7 @@ ij> values{fn  sqrt( DOUBLE( 1.79769E+308 * 2)       )};
 ----------------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values{fn  sqrt(-DOUBLE( NaN)                    )};
-ERROR 42X04: Column 'NAN' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'NAN' is not a column in the target table.
+ERROR 42X04: Column 'NAN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NAN' is not a column in the target table.
 ij> values{fn  sqrt( DOUBLE( 4.9E-324)               )};
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values{fn  sqrt( DOUBLE( 1.7976931348623157E308) )};
@@ -3598,7 +3598,7 @@ ERROR 42Y95: The 'mod' operator with a left operand type of 'REAL' and a right o
 ij> select { fn mod(dbl, 3) } from modfn;
 ERROR 42Y95: The 'mod' operator with a left operand type of 'DOUBLE' and a right operand type of 'INTEGER' is not supported.
 ij> select { fn mod(67, t) } from modfn where s <> 0;
-ERROR 42X04: Column 'T' is not in any table in the FROM list or it appears within a join specification and is outside the scope of the join specification or it appears in a HAVING clause and is not in the GROUP BY list.  If this is a CREATE or ALTER TABLE statement then 'T' is not a column in the target table.
+ERROR 42X04: Column 'T' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T' is not a column in the target table.
 ij> select { fn mod(67, s) } from modfn where s <> 0;
 1          
 -----------
