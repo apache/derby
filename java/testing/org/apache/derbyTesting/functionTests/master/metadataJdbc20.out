@@ -1,5 +1,5 @@
 Test metadataJdbc20 starting
-JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.0.0 alpha)
+JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.1.0)
 The URL is: jdbc:derby:wombat
 getUDTs() with user-named types null :
 TYPE_CAT,TYPE_SCHEM,TYPE_NAME,CLASS_NAME,DATA_TYPE,REMARKS
