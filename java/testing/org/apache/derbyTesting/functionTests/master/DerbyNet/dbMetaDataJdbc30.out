@@ -12,7 +12,7 @@ getJDBCMinorVersion() : 0
 getSQLStateType() : 2
 getResultSetHoldability() : 1
 getDatabaseMajorVersion() : 10
-getDatabaseMinorVersion() : 1
+getDatabaseMinorVersion() : 2
 supportsStatementPooling() : false
 getMaxColumnNameLength() = 128
 getMaxCursorNameLength() = 128

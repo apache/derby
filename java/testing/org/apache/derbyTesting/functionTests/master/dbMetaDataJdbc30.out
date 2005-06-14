@@ -1,5 +1,5 @@
 Test dbMetaDataJdbc30 starting
-JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.0.0 alpha)
+JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.2 (10.2.0.0 alpha)
 The URL is: jdbc:derby:wombat
 supportsSavepoints() : true
 supportsNamedParameters() : false
@@ -12,7 +12,7 @@ getJDBCMinorVersion() : 0
 getSQLStateType() : 2
 getResultSetHoldability() : 1
 getDatabaseMajorVersion() : 10
-getDatabaseMinorVersion() : 1
+getDatabaseMinorVersion() : 2
 supportsStatementPooling() : false
 getMaxColumnNameLength() = 128
 getMaxCursorNameLength() = 128
