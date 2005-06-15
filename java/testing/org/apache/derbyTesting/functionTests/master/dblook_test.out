@@ -5230,6 +5230,10 @@ CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "F
 -- ----------------------------------------------
 CREATE INDEX "BAR"."IX1" ON "BAR"."T1" ("I" DESC)
 -- ----------------------------------------------
+-- DDL Statements for Synonyms
+-- ----------------------------------------------
+CREATE SYNONYM "APP"."SYN1" FOR "BAR"."T1"
+-- ----------------------------------------------
 -- DDL Statements for keys
 -- ----------------------------------------------
 -- primary/unique
@@ -5356,6 +5360,10 @@ CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "F
 -- DDL Statements for indexes
 -- ----------------------------------------------
 CREATE INDEX "BAR"."IX1" ON "BAR"."T1" ("I" DESC) #
+-- ----------------------------------------------
+-- DDL Statements for Synonyms
+-- ----------------------------------------------
+CREATE SYNONYM "APP"."SYN1" FOR "BAR"."T1" #
 -- ----------------------------------------------
 -- DDL Statements for keys
 -- ----------------------------------------------
