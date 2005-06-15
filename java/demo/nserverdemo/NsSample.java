@@ -40,7 +40,8 @@ import java.io.PrintWriter;
  The program:
 
  1.	starts the Derby Network Server
- 2.	loads the IBM DB2 JDBC Universal driver
+ 2.	loads the IBM DB2 JDBC Universal driver or derby client JDBC driver
+        (default is the derby client JDBC driver)
  3. creates the database if not already created
  4. checks to see if the schema is already created, and if not,
  5. creates the schema which includes the table SAMPLETBL and corresponding indexes.
@@ -65,6 +66,7 @@ import java.io.PrintWriter;
 public class NsSample {
 
 	public static final String DB2_JDBC_UNIVERSAL_DRIVER = new String("com.ibm.db2.jcc.DB2Driver");
+        public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDriver";
 	public static int NUM_ROWS = 50; /* Number of rows to load initially */
 	public static int ITERATIONS = 10;  //Each client does these many iterations
 	public static int NUM_CLIENT_THREADS = 2;
@@ -80,19 +82,33 @@ public class NsSample {
 	// This URL describes the target database for type 4 connectivity
 	// Notice that the properties may be established via the URL syntax
 	private static final String CS_NS_DBURL= "jdbc:derby:net://localhost:"+NETWORKSERVER_PORT+"/NSSampledb;create=true;retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
+        // URL for the Derby client JDBC driver.
+	private static final String DERBY_CLIENT_URL= "jdbc:derby://localhost:"+NETWORKSERVER_PORT+"/NSSampledb;create=true;";
+
+        // Default to using the Derby Client JDBC Driver for database connections
+        String url = DERBY_CLIENT_URL;
+        String jdbcDriver = DERBY_CLIENT_DRIVER;
 
 	public static void main(String[] args) throws Exception {
 
+                   new nserverdemo.NsSample().startSample(args);
+        }
+	public void startSample(String[] args) throws Exception {
 	  NetworkServerUtil nwServer;
 
-	  // DB2Connection provides additional functionality than java.sql.Connection
-	  // One can use either depending on the requirements
 	  Connection conn = null;
 
 	  PrintWriter pw = null;
+          
+      
 
 	  try  {
+
+                // Determine which JDBC driver we are using with Derby
+                parseArguments(args);
+
 		pw = new PrintWriter(System.out,true);	// to print messages
+		pw.println("Using JDBC driver: " + jdbcDriver);
 
 		/* Start - In order to start the network server do the following
 		   In case you want to start the server as a script or another program
@@ -138,11 +154,11 @@ public class NsSample {
 		pw.println("[NsSample] Sample Derby Network Server program demo starting. ");
 		pw.println("Please wait .....................");
 
-		// Load the JCC Driver
+		// Load the JDBC Driver
 		try	{
-			Class.forName(DB2_JDBC_UNIVERSAL_DRIVER).newInstance();
+			Class.forName(jdbcDriver).newInstance();
 		} catch (Exception e) {
-			pw.println("[NsSample] Unable to load JCC driver. Following exception was thrown");
+			pw.println("[NsSample] Unable to load the JDBC driver. Following exception was thrown");
 			e.printStackTrace();
 			System.exit(1);  //critical error, so exit
 		  }
@@ -156,10 +172,10 @@ public class NsSample {
 		properties.setProperty("user","cloud");
 		properties.setProperty("password","scape");
 
-		// Get database connection using the JCC client via DriverManager api
+		// Get database connection via DriverManager api
 		try	{
 			
-			conn =  (Connection) DriverManager.getConnection(CS_NS_DBURL, properties);
+			conn =  (Connection) DriverManager.getConnection(url, properties);
 		} catch(Exception e) {
 			pw.println("[NsSample] Connection request unsuccessful, exception thrown was: ");
 			pw.println("[NsSample] Please check if all the jar files are in the classpath and the dbUrl is set correctly.");
@@ -191,7 +207,7 @@ public class NsSample {
 		   Please be aware of the database URL for obtaining a client connection
 		 */
 		for (int i=1; i<NUM_CLIENT_THREADS; i++) {
-			clientThreads[i] = new NsSampleClientThread(i+1,CS_NS_DBURL,properties,pw);
+			clientThreads[i] = new NsSampleClientThread(i+1,url,properties,pw);
 			clientThreads[i].start();
 
 		}
@@ -213,4 +229,34 @@ public class NsSample {
 		if(pw != null) pw.close();
       }
 	 }
+
+    /**
+     * Determine which jdbc driver to use by parsing the command line args.
+     *  Accepted values:
+     *  jccjdbclient   - The DB2 type 4 universal driver
+     *  derbyclient    - The Derby network driver (default).
+     *  Note: because this is just a sample, we only care about whether
+     *  the above values are specified.  If they are not, then we default
+     *  to the Derby network driver.
+     */
+    private void parseArguments(String[] args)
+    {
+        int length = args.length;
+
+        for (int index = 0; index < length; index++)
+        {
+            if (args[index].equalsIgnoreCase("jccjdbcclient"))
+            {
+                jdbcDriver = DB2_JDBC_UNIVERSAL_DRIVER;
+                url = CS_NS_DBURL;
+                break;
+            } else if (args[index].equalsIgnoreCase("derbyClient"))
+            {
+                jdbcDriver = DERBY_CLIENT_DRIVER;
+                url = DERBY_CLIENT_URL;
+                break;
+            }
+        }
+    }
+
 }
