@@ -47,12 +47,12 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 
 /** 
- * ErrorMessage is a VTI that shows all the SQLStates, locale-sensitive error
+ * ErrorMessage shows all the SQLStates, locale-sensitive error
  * messages, and exception severities for a database.
  * 
- * <p>To use it, query it as an external virtual table:</p>
- * <PRE> SELECT* FROM NEW ErrorMessages() AS EQ; </PRE>
- * <P>The ErrorMessages VTI has the following columns:
+ * <p>To use it, query it as follows:</p>
+ * <PRE> SELECT* FROM NEW org.apache.derby.diag.ErrorMessages() AS EQ; </PRE>
+ * <P>The following columns will be returned:
  * <UL><LI>SQL_STATE--VARCHAR(5) - nullable.  The SQLState of the SQLException.<br>
  * (The code returned by getSQLState() in SQLException.)</LI>
  * <LI>MESSAGE--VARCHAR(32672) - nullable.  The error message<br>
