@@ -308,10 +308,8 @@ public class SimpleNetworkServerSample
 
 		String ijUsage = "\nWhile my app is busy with embedded work, ";
 		ijUsage += "ij might connect like this:\n\n";
-		ijUsage +=  "\t$ java -Dij.user=me -Dij.password=pw -Dij.protocol=jdbc:derby:net://localhost:1527/ org.apache.derby.tools.ij\n";
-		ijUsage += "\tij> connect '" + DBNAME + ":retrieveMessagesFromServerOnGetMessage=true;';\n";
-		ijUsage += "Watch that punctuation.  Put a ':' before the jcc\n";
-		ijUsage += "attributes and a ';' after each one (even the last).\n\n";
+		ijUsage +=  "\t$ java -Dij.user=me -Dij.password=pw -Dij.protocol=jdbc:derby://localhost:1527/ org.apache.derby.tools.ij\n";
+		ijUsage += "\tij> connect '" + DBNAME + "';\n\n";
 
 		return ijUsage;
 	}

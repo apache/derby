@@ -92,7 +92,24 @@ order to run this sample program:</p>
 <pre>java SimpleNetworkServerSample</pre>
 </li></ol>
 <p>You should receive output similar to the following if the program runs successfully:</p>
-<tt>Starting Network Server<br>Testing if Network Server is up and running!<br>Derby Network Server now running<br><span>Got an embedded connection.</span><br>Testing embedded connection by executing a sample query<br><span>number</span> of rows in <span>sys.systables</span> = 16<br><br>While my app is busy with embedded work, <span>ij</span> might connect like this:<br><br><span>  </span>$ <span>java</span> -<span>Dij.user</span>=me -<span>Dij.password</span>=<span>pw</span> -<span>Dij.protocol</span>=jdbc:derby:net://localhost:1527/ <span>org.apache.derby.tools.ij</span><br><span>     </span><span><span >ij</span></span>&gt; connect '<span>NSSimpleDB:retrieveMessagesFromServerOnGetMessage</span>=true;';<br>Watch that punctuation. Put a ':' before the <span>jcc</span><br><span >attributes</span> and a ';' after each one (even the last).<br><br><br>Clients can continue to connect:<br>Press [Enter] to stop Server</tt>
+
+<tt>
+Starting Network Server<br>
+Testing if Network Server is up and running!<br>
+Derby Network Server now running<br>
+Got an embedded connection.<br>
+Testing embedded connection by executing a sample query <br>
+number of rows in sys.systables = 16<br>
+<br>
+While my app is busy with embedded work, ij might connect like this:<br>
+<br>
+        $ java -Dij.user=me -Dij.password=pw -Dij.protocol=jdbc:derby://localhost:1527/ org.apache.derby.tools.ij<br>
+        ij> connect 'NSSimpleDB';<br>
+<br>
+<br>
+Clients can continue to connect: <br>
+Press [Enter] to stop Server<br>
+</tt>
 
 <p>Running this program will also create new directories and files:</p>
 
@@ -112,7 +129,7 @@ This log file contains Derby progress and error messages.
 <p>This program:</p>
 
 <ul>
- <li>loads the DB2 JDBC Universal Driver</li>
+ <li>loads the DB2 JDBC Universal Driver or the Derby Network Client JDBC Driver</li>
  <li>obtains a client connection using the Driver Manager</li>
  <li>obtains a client connection using a DataSource</li>
  <li>tests the database connections by executing a sample query</li>
@@ -134,19 +151,38 @@ This log file contains Derby progress and error messages.
  <li>Clients of Derby Network Server only need the following jar files in the CLASSPATH in order to connect to the Network Server.<span>  </span>Set the CLASSPATH to include the following jar files:
  <ul>
   <li>the current directory (".")</li>
+<li><tt>derbyclient.jar</tt><br>This jar file must be in your CLASSPATH to use t
+he Derby Client Network JDBC Driver.</li>
   <li><tt>db2jcc.jar</tt><br>This jar file must be in your CLASSPATH to use the DB2 JDBC Universal Driver.</li>
   <li><tt>db2jcc_license_c.jar</tt><br>This jar file is the license file for the Universal Driver for Derby.</li>
  </ul></li>
 <li>Once you have set up your environment correctly, execute the
 application from the <br><span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory:
-<pre><tt>java SimpleNetworkClientSample</tt></pre>
+<pre><tt>java SimpleNetworkClientSample [driverType]</tt></pre>
+<ul>
+<li>Where the possible values for driverType are:
+<ul>
+<li>derbyClient (default)
+<li>jccjdbcclient
+</ul>
+</ul>
 </li>
 </ol>
 
 <p>You should receive output similar to the following if the program runs
 successfully:</p>
 
-<tt>Starting Sample client program<br><span>Got a client connection via the <span>DriverManager</span>.</span><br><span>connection</span> from <span>datasource</span>; <span>getDriverName</span> = IBM DB2 JDBC Universal Driver Architecture<br><span>Got a client connection via a <span>DataSource</span>.</span><br>Testing the connection obtained via <span>DriverManager</span> by executing a sample query<br><span>number</span> of rows in <span>sys.systables</span> = 16<br>Testing the connection obtained via a <span>DataSource</span> by executing a sample query<br><span>number</span> of rows in <span>sys.systables</span> = 16<br>Goodbye!</tt>
+<tt>
+Starting Sample client program <br>
+Got a client connection via the DriverManager.<br>
+connection from datasource; getDriverName = Apache Derby Network Client JDBC Driver<br>
+Got a client connection via a DataSource.<br>
+Testing the connection obtained via DriverManager by executing a sample query <br>
+number of rows in sys.systables = 16<br>
+Testing the connection obtained via a DataSource by executing a sample query <br>
+number of rows in sys.systables = 16<br>
+Goodbye!<br>
+</tt>
 
 </body>
 

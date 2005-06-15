@@ -44,6 +44,7 @@ import java.util.Properties;
  *
  * <p>When you run this application, give one of the following arguments:
  *    * embedded (default, if none specified)
+ *    * derbyclient (will use the Net client driver to access Network Server)
  *    * jccjdbcclient (if Derby is running embedded in the JCC Server framework)
  *
  * @author janet
@@ -238,6 +239,12 @@ public class SimpleApp
                 framework = "jccjdbc";
                 driver = "com.ibm.db2.jcc.DB2Driver";
                 protocol = "jdbc:derby:net://localhost:1527/";
+            }
+            if (args[index].equalsIgnoreCase("derbyclient"))
+            {
+                framework = "derbyclient";
+                driver = "org.apache.derby.jdbc.ClientDriver";
+                protocol = "jdbc:derby://localhost:1527/";
             }
         }
     }
