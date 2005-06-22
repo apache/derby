@@ -11,12 +11,6 @@ xa_start xa_noflags 0;
 xa_start xa_noflags 1;
 
 xa_getconnection;
--- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 
 -- ERROR: cannot get connection again
 xa_getconnection;
@@ -79,12 +73,6 @@ xa_end xa_fail 0;
 
 xa_start xa_noflags 2;
 xa_getconnection;
--- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 
 insert into APP.negative values ('ok', 3);
 
@@ -117,12 +105,6 @@ xa_start xa_resume 2;
 -- this is OK
 xa_start xa_join 2;
 xa_getconnection;
--- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 
 -- ERROR: another dup 
 insert into APP.negative values ('rollback', 3);
@@ -178,12 +160,6 @@ disconnect;
 
 xa_start xa_noflags 3;
 xa_getconnection;
--- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 select * from global_xactTable order by gxid, status, username, type;
 drop table foo;
 create table foo (a int);

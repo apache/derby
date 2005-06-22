@@ -177,8 +177,6 @@ public class checkDataSource30 extends checkDataSource
 			xid = getXid(27, (byte) 21, (byte) 01);
 			xr.start(xid, XAResource.TMNOFLAGS);
 			conn1 = xac.getConnection();
-			System.out.println("This is a bug. Connection's holdability should have been CLOSE_CURSORS_AT_COMMIT since it is in the global transaction");
-			System.out.println("Have reported this on Derby dev-list");
 			System.out.println("CONNECTION(in xa transaction) HOLDABILITY " + (conn1.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
 			System.out.println("Autocommit on Connection inside global transaction has been set correctly to " + conn1.getAutoCommit());
 			xr.end(xid, XAResource.TMSUCCESS);

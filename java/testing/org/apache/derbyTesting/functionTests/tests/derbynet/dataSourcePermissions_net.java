@@ -127,8 +127,11 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 						   TestUtil.getJdbcUrlPrefix("localhost",
 													 NETWORKSERVER_PORT) +
 						   "wombat;create=true");
-		System.setProperty("ij.user", "EDWARD");
-		System.setProperty("ij.password", "noodle");
+		if (TestUtil.isJCCFramework())
+		{
+			System.setProperty("ij.user", "EDWARD");
+			System.setProperty("ij.password", "noodle");
+		}
 
 	}
 
@@ -186,9 +189,11 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		{
 			attrs.setProperty("driverType","4");
 		}
-
-		attrs.setProperty("serverName","localhost");
-		attrs.setProperty("portNumber","20000");
+		if (TestUtil.isJCCFramework())
+		{
+			attrs.setProperty("serverName","localhost");
+		}
+			attrs.setProperty("portNumber","20000");
 		//attrs.setProperty("retrieveMessagesFromServerOnGetMessage","true");
 		return attrs;
 	}

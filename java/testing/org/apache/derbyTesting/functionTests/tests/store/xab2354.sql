@@ -2,12 +2,6 @@ xa_datasource 'wombat' create;
 xa_connect;
 xa_start xa_noflags 1;
 xa_getconnection;
--- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 create table foo (a int);
 insert into foo values (1);
 xa_end xa_success 1;

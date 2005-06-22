@@ -225,7 +225,7 @@ EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connectio
 EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 EVENT(5):connectionClosed
 Running JDBC 3.0 connection checks on Global EmbeddedXADataSource
-  holdability     true
+  holdability     false
 JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
 Running connection checks on Global EmbeddedXADataSource
   isolation level 2
@@ -240,7 +240,7 @@ Global EmbeddedXADataSource <closedconn>.close() no error
 Global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
 Global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Running JDBC 3.0 connection checks on Global EmbeddedXADataSource
-  holdability     true
+  holdability     false
 JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
 Running connection checks on Global EmbeddedXADataSource
   isolation level 2
@@ -303,7 +303,7 @@ Switch to global EmbeddedXADataSource <closedconn>.close() no error
 Switch to global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
 Switch to global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Running JDBC 3.0 connection checks on Switch to global EmbeddedXADataSource
-  holdability     true
+  holdability     false
 JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
 Running connection checks on Switch to global EmbeddedXADataSource
   isolation level 2
@@ -361,7 +361,7 @@ new handle - local
   read only       false
 EVENT(6):connectionClosed
 re-join with new handle X1
-  holdability     true
+  holdability     false
   isolation level READ_UNCOMMITTED
   auto commit     false
   read only       true
@@ -372,7 +372,7 @@ pre-X1 commit - local
   auto commit     true
   read only       false
 pre-X1 commit - X1
-  holdability     true
+  holdability     false
   isolation level READ_UNCOMMITTED
   auto commit     false
   read only       true
@@ -721,9 +721,7 @@ CONNECTION(not in xa transaction yet) HOLDABILITY true
 Notice that autocommit now is false for connection because it is part of the global transaction
 Notice that connection's holdability at this point is CLOSE_CURSORS_AT_COMMIT because it is part of the global transaction
 CONNECTION(in xa transaction) HOLDABILITY false
-This is a bug. Connection's holdability should have been CLOSE_CURSORS_AT_COMMIT since it is in the global transaction
-Have reported this on Derby dev-list
-CONNECTION(in xa transaction) HOLDABILITY true
+CONNECTION(in xa transaction) HOLDABILITY false
 Autocommit on Connection inside global transaction has been set correctly to false
 CONNECTION(non-xa) HOLDABILITY false
 STATEMENT HOLDABILITY false

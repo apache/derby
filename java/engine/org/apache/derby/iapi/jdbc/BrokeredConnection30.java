@@ -32,9 +32,6 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
  */
 public class BrokeredConnection30 extends BrokeredConnection
 {
-	
-	// default for Cloudscape
-	private int stateHoldability = java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
 
 	public	BrokeredConnection30(BrokeredConnectionControl control)
 	{
@@ -215,19 +212,6 @@ public class BrokeredConnection30 extends BrokeredConnection
 			notifyException(se);
 			throw se;
 		}
-	}
-	public void syncState() throws SQLException {
-		super.syncState();
-		// make the underlying connection pick my holdability state
-		// since holdability is a state of the connection handle
-		// not the underlying transaction.
-		getRealConnection().setHoldability(stateHoldability);
-	}
-
-	public void setState(boolean complete) throws SQLException {
-		super.setState(complete);
-		if (complete) 
-			getRealConnection().setHoldability(stateHoldability);
 	}
 
 	public BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {

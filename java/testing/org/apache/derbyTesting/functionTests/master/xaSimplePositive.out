@@ -5,12 +5,6 @@ ij> ---------------------------------------------
 xa_connect ;
 ij> xa_start xa_noflags 0;
 ij> xa_getconnection;
-ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 ij(XA)> drop table foo;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'FOO' because it does not exist.
 ij(XA)> create table foo (a int);
@@ -46,12 +40,6 @@ xa_datasource 'wombat';
 ij(XA)> xa_connect user 'sku' password 'testxa' ;
 ij(XA)> xa_start xa_noflags 1;
 ij(XA)> xa_getconnection;
-ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 ij(XA)> insert into APP.foo values (1);
 1 row inserted/updated/deleted
 ij(XA)> xa_end xa_suspend 1;
@@ -148,12 +136,6 @@ A
 3          
 ij(LOCAL)> xa_start xa_resume 4;
 ij(LOCAL)> xa_getconnection;
-ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 ij(XA)> insert into APP.foo values (4);
 1 row inserted/updated/deleted
 ij(XA)> disconnect;
@@ -170,12 +152,6 @@ ij(LOCAL)> -- this getconnection should get a local connection
 --disconnect;
 xa_start xa_resume 5;
 ij(LOCAL)> xa_getconnection;
-ij(XA)> -- Global transactions can not have hold cursor over commit. And hence we need to make sure the holdability is false for all jdks
--- In jdk13 and lower, this Brokered Connection has its holdability false over commit so we are fine. 
--- In jdk14 and higher, this Brokered Connection has its holdability true over commit. In order to set it to false, we have NoHoldForConnection 
--- NoHoldForConnection uses setHoldability api on Connection to set the holdability to false. But this api exists only for jdk14 and higher
--- And that is why, in jkd13 master, we see an exception nosuchmethod 
-NoHoldForConnection;
 ij(XA)> insert into APP.foo values (5);
 1 row inserted/updated/deleted
 ij(XA)> xa_end xa_success 5;
