@@ -766,25 +766,22 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 * This method will get called if the statement is referencing tables in SESSION schema.
-	 * We do not want to cache such statements because multiple connections can have
-	 * different definition of the same table name and hence compiled plan for one connection
-	 * may not make sense for some other connection. Because of this, remove the statement from the cache
-	 *
-	 * @exception StandardException thrown if lookup goes wrong.
-	 */
+	*  This method will remove a statement from the  statement cache.
+	*  It will be called,  for example, if there is an exception preparing
+	*  the statement.
+	*
+	*  @param statement Statement to remove
+	*  @exception StandardException thrown if lookup goes wrong.
+	*/	
 	public void removeStatement(Statement statement)
 		throws StandardException {
 
 		if (statementCache == null)
 			return;
-
-		synchronized (statementCache) {
-
+ 
 			Cacheable cachedItem = statementCache.findCached(statement);
 			if (cachedItem != null)
 				statementCache.remove(cachedItem);
-		}
 	}
 
 	/**
