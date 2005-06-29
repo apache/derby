@@ -587,6 +587,43 @@ public class AllocExtent implements Externalizable
         return;
     }
 
+    /**
+     * Undo the compress space operation.
+     * <p>
+     * Undo of this operation doesn't really "undo" the operation, it just
+     * makes sure the data structures are ok after the undo.  We are 
+     * guaranteed at the point of the transaction doing the 
+     * Undo of the compress space operation fixes up the bit maps to
+     * only point at pages within the new_highest_page range.
+     * <p>
+     * Prior to logging the compress space operation all pages greater 
+     * than 
+     * There are only 2 possibilities at this point:
+     * 1) the truncate of pages greater than new_highest_page happened before
+     *    the abort took place.  W
+     * 2) 
+     *
+	 * @return The identifier to be used to open the conglomerate later.
+     *
+     * @param param1 param1 does this.
+     * @param param2 param2 does this.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    protected void undoCompressPages(
+    int        new_highest_page,
+    int        num_pages_truncated)
+    {
+        if (new_highest_page >= 0)
+        {
+            freePages.shrink(new_highest_page + 1);
+            unFilledPages.shrink(new_highest_page + 1);
+            preAllocLength = extentLength = (new_highest_page + 1);
+        }
+
+        return;
+    }
+
 	protected long getExtentEnd()
 	{
 		return extentEnd;

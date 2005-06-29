@@ -146,7 +146,19 @@ public class PhysicalUndoOperation extends PageBasicOperation implements Compens
 		undoOp.undoMe(xact, this.page, instant, in);
 
 		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(oldversion < this.page.getPageVersion());
+
+            if (oldversion >= this.page.getPageVersion())
+            {
+                SanityManager.THROWASSERT(
+                    "oldversion = " + oldversion +
+                    ";page version = "  + this.page.getPageVersion() +
+                    "page = " + page + 
+                    "; my class name is " + getClass().getName() +
+                    " undoOp is " + undoOp.getClass().getName() );
+            }
+			SanityManager.ASSERT(
+                oldversion < this.page.getPageVersion());
+
 			if (instant != null &&
 				! instant.equals(this.page.getLastLogInstant()))
 				SanityManager.THROWASSERT(

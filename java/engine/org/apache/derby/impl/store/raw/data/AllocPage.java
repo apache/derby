@@ -916,6 +916,21 @@ public class AllocPage extends StoredPage
         extent.compressPages(new_highest_page, num_pages_truncated);
 	}
 
+    /**
+     * Handle undo of compress space operation.
+     **/
+	protected void undoCompressSpace(
+    LogInstant  instant,
+    int         new_highest_page,
+    int         num_pages_truncated)
+		throws StandardException
+    {
+		logAction(instant);
+
+        extent.undoCompressPages(new_highest_page, num_pages_truncated);
+
+    }
+
 	public String toString()
 	{
 		if (SanityManager.DEBUG)

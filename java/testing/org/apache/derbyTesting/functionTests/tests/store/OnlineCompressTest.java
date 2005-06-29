@@ -48,7 +48,7 @@ public class OnlineCompressTest extends BaseTest
      * Utility test function to call the system procedure.
      *
      **/
-    private void callCompress(
+    protected void callCompress(
     Connection  conn,
     String      schemaName,
     String      tableName,
@@ -173,11 +173,12 @@ public class OnlineCompressTest extends BaseTest
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    private void createAndLoadTable(
+    protected void createAndLoadTable(
     Connection  conn,
     boolean     create_table,
     String      tblname,
-    int         num_rows)
+    int         num_rows,
+    int         start_value)
         throws SQLException
     {
         if (create_table)
@@ -209,14 +210,14 @@ public class OnlineCompressTest extends BaseTest
         int row_count = 0;
         try
         {
-            for (;row_count < num_rows; row_count++)
+            for (int i = start_value; row_count < num_rows; row_count++, i++)
             {
-                insert_stmt.setInt(1, row_count);               // keycol
-                insert_stmt.setInt(2, row_count * 10);          // indcol1
-                insert_stmt.setInt(3, row_count * 100);         // indcol2
-                insert_stmt.setInt(4, -row_count);              // indcol3
-                insert_stmt.setString(5, data1_str);            // data1_data
-                insert_stmt.setString(6, data2_str);            // data2_data
+                insert_stmt.setInt(1, i);               // keycol
+                insert_stmt.setInt(2, i * 10);          // indcol1
+                insert_stmt.setInt(3, i * 100);         // indcol2
+                insert_stmt.setInt(4, -i);              // indcol3
+                insert_stmt.setString(5, data1_str);    // data1_data
+                insert_stmt.setString(6, data2_str);    // data2_data
 
                 insert_stmt.execute();
             }
@@ -384,19 +385,6 @@ public class OnlineCompressTest extends BaseTest
         conn.commit();
     }
 
-    private void executeQuery(
-    Connection  conn,
-    String      stmt_str,
-    boolean     commit_query)
-        throws SQLException
-    {
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate(stmt_str);
-        stmt.close();
-        if (commit_query)
-            conn.commit();
-    }
-
     private void log_wrong_count(
     String  error_msg,
     String  table_name,
@@ -442,7 +430,7 @@ public class OnlineCompressTest extends BaseTest
         if (long_table)
             createAndLoadLongTable(conn, create_table, table_name, num_rows);
         else
-            createAndLoadTable(conn, create_table, table_name, num_rows);
+            createAndLoadTable(conn, create_table, table_name, num_rows, 0);
 
         if (verbose)
             testProgress("Calling compress.");
@@ -525,7 +513,7 @@ public class OnlineCompressTest extends BaseTest
         if (long_table)
             createAndLoadLongTable(conn, create_table, table_name, num_rows);
         else
-            createAndLoadTable(conn, create_table, table_name, num_rows);
+            createAndLoadTable(conn, create_table, table_name, num_rows, 0);
 
         if (verbose)
             testProgress("Calling compress.");
@@ -601,7 +589,7 @@ public class OnlineCompressTest extends BaseTest
         if (long_table)
             createAndLoadLongTable(conn, create_table, table_name, num_rows);
         else
-            createAndLoadTable(conn, create_table, table_name, num_rows);
+            createAndLoadTable(conn, create_table, table_name, num_rows, 0);
 
         // dump_table(conn, schemaName, table_name, false);
 
@@ -728,7 +716,7 @@ public class OnlineCompressTest extends BaseTest
         if (long_table)
             createAndLoadLongTable(conn, create_table, table_name, num_rows);
         else
-            createAndLoadTable(conn, create_table, table_name, num_rows);
+            createAndLoadTable(conn, create_table, table_name, num_rows, 0);
         conn.commit();
 
         // delete all rows, and NO commit.

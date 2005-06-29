@@ -221,7 +221,7 @@ public abstract class BaseContainer implements Lockable {
 		}
 		finally
 		{
-            ntt.commitNoSync(Transaction.RELEASE_LOCKS);
+            ntt.commit();
 
 			ntt.close();
 		}

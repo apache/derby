@@ -1351,6 +1351,12 @@ public abstract class FileContainer
 			return;
         }
 
+        // make sure we don't execute redo recovery on any page
+        // which is getting truncated.  At this point we have an exclusive
+        // table lock on the table, so after checkpoint no page change
+        // can happen between checkpoint log record and compress of space.
+        dataFactory.getRawStoreFactory().checkpoint();
+
 		try
 		{
             synchronized(allocCache)
@@ -1388,6 +1394,7 @@ public abstract class FileContainer
                 // reset, as pages may not exist after compress
                 lastUnfilledPage    = ContainerHandle.INVALID_PAGE_NUMBER;
                 lastAllocatedPage   = ContainerHandle.INVALID_PAGE_NUMBER;
+
 
                 alloc_page.compress(ntt, this);
             }
