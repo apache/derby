@@ -251,6 +251,11 @@ public class CreateAliasNode extends CreateStatementNode
 		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
 			return this;
 
+		// Don't allow creating synonyms in SESSION schema. Causes confusion if
+		// a temporary table is created later with same name.
+		if (isSessionSchema(getSchemaDescriptor().getSchemaName()))
+			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
+
 		String targetSchema = ((SynonymAliasInfo)aliasInfo).getSynonymSchema();
 		String targetTable = ((SynonymAliasInfo)aliasInfo).getSynonymTable();
 		if (this.getObjectName().equals(targetSchema, targetTable))

@@ -76,6 +76,9 @@ ij> create synonym synForTemp for session.t1;
 ERROR XCL51: The requested function can not reference tables in SESSION schema.
 ij> create synonym synForTemp for session."T1";
 ERROR XCL51: The requested function can not reference tables in SESSION schema.
+ij> -- Synonyms can't be created in session schemas
+create synonym session.table1 for APP.table1;
+ERROR XCL51: The requested function can not reference tables in SESSION schema.
 ij> -- Creating a table or a view when a synonym of that name is present. Error.
 create synonym myTable for table1;
 0 rows inserted/updated/deleted
