@@ -42,6 +42,7 @@ import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.services.timer.TimerFactory;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
@@ -125,6 +126,7 @@ public abstract class BaseMonitor
 	private InfoStreams systemStreams;
 	private ContextService contextService;
 	private UUIDFactory uuidFactory;
+    private TimerFactory timerFactory;
 
 	protected boolean reportOn;
 	private PrintStream logging;
@@ -365,6 +367,7 @@ public abstract class BaseMonitor
 
 			uuidFactory = (UUIDFactory) Monitor.startSystemModule("org.apache.derby.iapi.services.uuid.UUIDFactory");
 
+            timerFactory = (TimerFactory)Monitor.startSystemModule("org.apache.derby.iapi.services.timer.TimerFactory");
 		} catch (StandardException se) {
 
 			// if we can't create an error log or a context then there's no point going on
@@ -580,8 +583,7 @@ public abstract class BaseMonitor
 	/**
 		Obtain a class that supports the given identifier.
 
-		@param identifier	identifer to associate with class
-		@param length		number of bytes to use from identifier
+		@param fmtId identifer to associate with class
 
 		@return a reference InstanceGetter
 
@@ -1910,6 +1912,15 @@ nextModule:
 
 		return uuidFactory;
 	}
+        
+    /**
+     * Returns the Timer factory for this system.
+     *
+     * @return the system's Timer factory.
+     */
+    public TimerFactory getTimerFactory() {
+        return timerFactory;
+    }
 
 	/*
 	** Methods to deal with storing error messages until an InfoStreams is available.

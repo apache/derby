@@ -124,6 +124,16 @@ public interface PreparedStatement
 	ResultSet	execute(LanguageConnectionContext lcc, boolean rollbackParentContext)
 		throws StandardException;
 
+    /**
+     * Sets the timeout for execution of this statement.
+     * The timeout value will be set in the assigned StatementContext object.
+     *
+     * @param timeoutMillis timeout value in milliseconds.
+     *
+     * @see org.apache.derby.iapi.sql.conn.StatementContext
+     */
+    void setQueryTimeout(long timeoutMillis);
+
 	/**
 	 * Get the ResultDescription for the statement.  The ResultDescription
 	 * describes what the results look like: what are the rows and columns?

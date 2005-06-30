@@ -1,0 +1,20 @@
+Test SetQueryTimeoutTest starting
+Got connections
+Preparing for testing queries with timeout
+Initializing tables with prefix t
+Initializing tables with prefix u
+Initializing tables with prefix v
+Initializing tables with prefix x
+Testing timeout with fetch operations
+Statement 0 timed out
+Statement 1 completed
+Statement 2 completed
+Statement 3 completed
+Testing timeout with an execute operation
+Statement 0 timed out
+Statement 1 completed
+Testing setting a negative timeout value
+Negative timeout value caused exception, as expected
+Execute returned a ResultSet
+Test SetQueryTimeoutTest PASSED
+Closed connections

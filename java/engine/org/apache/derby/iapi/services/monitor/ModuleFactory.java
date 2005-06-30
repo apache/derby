@@ -282,4 +282,12 @@ public interface ModuleFactory
 	 * methods to create and recreate database unique identifiers.
 	 */
 	public org.apache.derby.iapi.services.uuid.UUIDFactory getUUIDFactory();
+        
+	/**
+	 * Get the Timer factory for the system. The Timer factory provides
+     * access to Timer objects for various purposes.
+     *
+     * @return the system's Timer factory.
+	 */
+    public org.apache.derby.iapi.services.timer.TimerFactory getTimerFactory();
 }

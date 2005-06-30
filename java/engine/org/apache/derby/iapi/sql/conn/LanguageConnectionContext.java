@@ -122,8 +122,6 @@ public interface LanguageConnectionContext extends Context {
 	 * executing statement to error log.)
 	 *
 	 * @param logStatementText	Whether or not logStatementText property is set.
-	 *
-	 * @return Nothing.
 	 */
 	public void setLogStatementText(boolean logStatementText);
 
@@ -203,20 +201,20 @@ public interface LanguageConnectionContext extends Context {
 	 * Mark the passed temporary table as modified in the current unit of work. That information will be used at rollback time
 	 * The compile phase will generate code to call this method if the DML is on a temporary table
 	 *
-	 * @param String tableName Mark the passed temporary table name as modified
+	 * @param tableName Mark the passed temporary table name as modified
 	 */
 	public void markTempTableAsModifiedInUnitOfWork(String tableName);
   
 	/**
 	 * Add the declared global temporary table to the list of temporary tables known by this connection.
-	 * @param TableDescriptor td Corresponding to the temporary table
+	 * @param td Corresponding to the temporary table
 	 *
 	 */
 	public void addDeclaredGlobalTempTable(TableDescriptor td) throws StandardException;
 
 	/**
 	 * Drop (mark the declared global temporary table for dropping) from the list of temporary tables known by this connection.
-	 * @param String tableName look for this table name in the saved list and drop it if found
+	 * @param tableName look for this table name in the saved list and drop it if found
 	 * @return true if dropped the temporary table. False if no such temporary table exists.
 	 *
 	 * @see org.apache.derby.impl.sql.conn.TempTableInfo
@@ -226,7 +224,7 @@ public interface LanguageConnectionContext extends Context {
 	/**
 	 * Get table descriptor for the declared global temporary table from the list of temporary
 	 * tables known by this connection.
-	 * @param String tableName Get table descriptor for the passed table name
+	 * @param tableName Get table descriptor for the passed table name
 	 * @return TableDescriptor if found the temporary table. Else return null
 	 *
 	 */
@@ -247,8 +245,6 @@ public interface LanguageConnectionContext extends Context {
 
 		@param	commitStore	true if we should commit the Store transaction
 
-		@return	the commit instant
-
 		@exception StandardException thrown if something goes wrong
 	 */
 	void internalCommit( boolean commitStore )
@@ -260,8 +256,6 @@ public interface LanguageConnectionContext extends Context {
 		@param	commitflag	the flags to pass to commitNoSync in the store's
 							TransactionController
 
-		@return	the commit instant
-
 		@exception StandardException	thrown if something goes wrong
 	 */
 	void internalCommitNoSync(int commitflag) throws StandardException;
@@ -269,8 +263,6 @@ public interface LanguageConnectionContext extends Context {
 	/**
 		Do a commit, as issued directly by a user (e.g. via Connection.commit()
 		or the JSQL 'COMMIT' statement.
-
-		@return	the commit instant
 
 		@exception StandardException thrown if something goes wrong
 	 */
@@ -281,8 +273,6 @@ public interface LanguageConnectionContext extends Context {
 
 		@param onePhase if true, allow it to commit without first going thru a
 		prepared state.
-
-		@return	the commit instant
 
 		@exception StandardException	thrown if something goes wrong
 	 */
@@ -493,7 +483,7 @@ public interface LanguageConnectionContext extends Context {
 	/**
 	 *	Set the current default schema
 	 *
-	 * @param SchemaDescriptor	the new default schema
+	 * @param sd the new default schema
 	 *
 	 * @exception StandardException thrown on failure
 	 */
@@ -517,7 +507,7 @@ public interface LanguageConnectionContext extends Context {
 	/**
 	 * Set the field of most recently generated identity column value.
 	 *
-	 * @param the generated identity column value
+	 * @param val the generated identity column value
 	 */
 	public void setIdentityValue(long val);
 
@@ -576,8 +566,6 @@ public interface LanguageConnectionContext extends Context {
 	 *
 	 * @param compilerContext  The compiler context.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException thrown on failure
 	 */
 	public void popCompilerContext(CompilerContext compilerContext);
@@ -598,21 +586,21 @@ public interface LanguageConnectionContext extends Context {
 	 * @param rollbackParentContext True if 1) the statement context is
 	 * 	NOT a top-level context, AND 2) in the event of a statement-level
 	 *	exception, the parent context needs to be rolled back, too.
+     *
+     * @param timeoutMillis Timeout value for this statement, in milliseconds.
+     *  Zero means no timeout.
 	 *
 	 * @return StatementContext	The statement context.
 	 *
 	 */
 	StatementContext pushStatementContext(boolean isAtomic, String stmtText,
-		ParameterValueSet pvs, boolean rollbackParentContext);
+		ParameterValueSet pvs, boolean rollbackParentContext, long timeoutMillis);
 
 	/**
 	 * Pop a StatementContext of the context stack.
 	 *
 	 * @param statementContext  The statement context.
 	 * @param error				The error, if any  (Only relevant for DEBUG)
-	 *
-	 * @return Nothing.
-	 *
 	 */
 	public void popStatementContext(StatementContext statementContext,
 									Throwable error);
@@ -797,8 +785,6 @@ public interface LanguageConnectionContext extends Context {
 	 * Set current isolation level.
 	 * 
 	 * @param isolationLevel	The new isolationLevel.
-	 *
-	 * @return Nothing.
 	 */
 	public void setIsolationLevel(int isolationLevel) throws StandardException;
 
@@ -956,7 +942,7 @@ public interface LanguageConnectionContext extends Context {
      * Convert an identifier to the proper case for this connection. This method
      * is here to support the Plugin.
      *
-     * @param	an identifier string
+     * @param id an identifier string
      * @return  the string converted to upper or lower case, as appropriate
      *
      * @exception StandardException thrown if something goes wrong
@@ -1074,7 +1060,7 @@ public interface LanguageConnectionContext extends Context {
 	/**
 	 * Set the DRDA ID of this LCC.
 	 *
-	 * @param	DRDA ID.
+	 * @param drdaID DRDA ID.
 	 */
 	public void setDrdaID(String drdaID);
 

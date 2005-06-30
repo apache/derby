@@ -599,6 +599,8 @@ public class TableScanResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+        checkCancellationFlag();
+            
 		if (currentRow == null)
 		{
 			currentRow =

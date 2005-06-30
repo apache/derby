@@ -152,6 +152,7 @@ public class GenericPreparedStatement
 	private String execSchemaName;
 	protected boolean isAtomic;
 	protected String sourceTxt;
+    private long timeoutMillis; // Timeout value, in milliseconds.
 
 	private int inUseCount;
 
@@ -194,6 +195,7 @@ public class GenericPreparedStatement
 		UUIDValue = uuidFactory.createUUID();
 		UUIDString = UUIDValue.toString();
 		spsAction = false;
+        timeoutMillis = 0L; // 0 means no timeout; default.
 	}
 
 	/**
@@ -254,6 +256,18 @@ public class GenericPreparedStatement
 
 		return ac;
 	}
+
+    /**
+     * Sets a timeout value for execution of this statement.
+     * Will also apply to each row fetch from the ResultSet
+     * produced by this statement.
+     *
+     * @param timeoutMillis Timeout value in milliseconds. 0 means no timeout.
+     */
+    public void setQueryTimeout(long timeoutMillis)
+    {
+        this.timeoutMillis = timeoutMillis;
+    }
 
 	public ResultSet execute(LanguageConnectionContext lcc, boolean rollbackParentContext)
 		throws StandardException
@@ -342,7 +356,7 @@ recompileOutOfDatePlan:
 			rePrepare(lccToUse);
 
 			StatementContext statementContext = lccToUse.pushStatementContext(
-				isAtomic, getSource(), pvs, rollbackParentContext);
+				isAtomic, getSource(), pvs, rollbackParentContext, timeoutMillis);
 
 			if (needsSavepoint())
 			{
@@ -529,8 +543,6 @@ recompileOutOfDatePlan:
 	 * Set the compile time for this prepared statement.
 	 *
 	 * @param compileTime	The compile time
-	 *
-	 * @return Nothing.
 	 */
 	protected void setCompileTimeMillis(long parseTime, long bindTime,
 										long optimizeTime, 
@@ -594,7 +606,7 @@ recompileOutOfDatePlan:
 	 *	Set the Execution constants. This routine is called as we Prepare the
 	 *	statement.
 	 *
-	 *	@param	ConstantAction	The big structure enclosing the Execution constants.
+	 *	@param constantAction The big structure enclosing the Execution constants.
 	 */
 	public	final void	setConstantAction( ConstantAction constantAction )
 	{
@@ -886,8 +898,6 @@ recompileOutOfDatePlan:
 		and associated information.
 
 		@param qt the query tree for this statement
-		@param dtd	The DataTypeDescriptors for the parameters, if any
-		@param ac the generated class for this statement
 
 		@return	true if there is a reference to SESSION schema tables, else false
 

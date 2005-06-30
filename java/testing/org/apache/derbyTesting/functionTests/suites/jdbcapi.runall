@@ -13,6 +13,7 @@ jdbcapi/LOBTest.java
 jdbcapi/blobclob4BLOB.java
 jdbcapi/parameterMapping.java
 jdbcapi/setTransactionIsolation.java
+jdbcapi/SetQueryTimeoutTest.java
 jdbcapi/prepStmtNull.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java

@@ -1299,7 +1299,10 @@ public interface SQLState {
 
     // Initial release of DB2 Cloudscape does not support upgrade
 	String LANG_CANT_UPGRADE_DATABASE                                 = "XCL50.S";
-	/*
+
+    String LANG_STATEMENT_CANCELLED_OR_TIMED_OUT                       = "XCL52.S";
+
+    /*
 	** Language errors that match DB2
 	*/
 
@@ -1382,6 +1385,7 @@ public interface SQLState {
     String NULL_SQL_TEXT = "XJ067.S";
     String MIDDLE_OF_BATCH = "XJ068.S";
     String NO_SETXXX_FOR_EXEC_USING = "XJ069.S";
+    String INVALID_QUERYTIMEOUT_VALUE = "XJ074.S";
     String LANG_NUM_PARAMS_INCORRECT = "XJ080.S";
     String INVALID_API_PARAMETER = "XJ081.S";
     String INTERNAL_ERROR = "XJ999.S";

@@ -44,7 +44,7 @@ public interface StatementContext extends Context {
 	/**
 	 * Mark this context as being in use.
 	 *
-	 *	@param	parentInTrigger	true if the parent started in the context of a trigger
+	 *	@param inTrigger true if the parent started in the context of a trigger
 	 *	@param	isAtomic true if the statement must be executed
 	 *		atomically
 	 *  @param stmtText the text of the statement.  Needed for any language
@@ -52,8 +52,11 @@ public interface StatementContext extends Context {
 	 * 	to fire).  Please set this unless you are some funky jdbc setXXX
 	 *	method or something.
 	 *	@param	pvs	parameter value set, if it has one
+     *  @param timeoutMillis timeout value for the statement, in milliseconds.
+     *   Zero means no timeout.
 	 */
-	public void setInUse(boolean inTrigger, boolean isAtomic, String stmtText, ParameterValueSet pvs);
+    public void setInUse(boolean inTrigger, boolean isAtomic, String stmtText,
+                         ParameterValueSet pvs, long timeoutMillis);
 
 	/**
 	 * Mark this context as not in use.  This is important because we
@@ -96,7 +99,6 @@ public interface StatementContext extends Context {
 	 * @param subqueryTrackingArray	(Sparse) of tops of subquery ResultSet trees
 	 *
 	 * @exception StandardException Thrown on error
-	 * @return Nothing.
 	 */
 	public void setTopResultSet(ResultSet topResultSet,
 								NoPutResultSet[] subqueryTrackingArray)
@@ -111,7 +113,6 @@ public interface StatementContext extends Context {
 	 * @param subqueryResultSet	The NoPutResultSet at the top of the subquery
 	 * @param numSubqueries		The total # of subqueries in the entire query
 	 *
-	 * @return Nothing.
 	 * @exception StandardException Thrown on error
 	 */
 	public void setSubqueryResultSet(int subqueryNumber,
@@ -137,7 +138,6 @@ public interface StatementContext extends Context {
 	 *
 	 * @param dy	The dependency to track.
 	 *
-	 * @return Nothing.
 	 * @exception StandardException Thrown on error
 	 */
 	public void addDependency(Dependency dy)
@@ -174,6 +174,22 @@ public interface StatementContext extends Context {
 	 */
 	public boolean inUse();
 	
+    /**
+     * Checks if the statement which has allocated this statement context
+     * should cancel its execution.
+     *
+     * @return true if the statement execution should be cancelled.
+     **/
+    public boolean isCancelled();
+
+    /**
+     * Indicate that the statement which has allocated this statement
+     * context should cancel its execution.
+     * Usually called as a consequence of Statement.cancel() or a query timeout
+     * set with Statement.setQueryTimeout().
+     */
+    public void cancel();
+
 	/**
 	 * Return the text of the current statement.
 	 * Note that this may be null.  It is currently

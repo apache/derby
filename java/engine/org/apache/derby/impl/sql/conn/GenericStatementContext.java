@@ -24,6 +24,10 @@ import org.apache.derby.iapi.services.context.Context;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.services.monitor.Monitor;
+
+import org.apache.derby.iapi.services.timer.TimerFactory;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -45,6 +49,8 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.SQLState;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.sql.SQLException;
 
 /**
@@ -67,6 +73,18 @@ final class GenericStatementContext
 	private NoPutResultSet[] materializedSubqueries;
 	private	final LanguageConnectionContext lcc;
 	private boolean		inUse = true;
+
+    // This flag satisfies all the conditions
+    // for using volatile instead of synchronized.
+    // (Source: Doug Lea, Concurrent Programming in Java, Second Edition,
+    // section 2.2.7.4, page 97)
+    // true if statement has been cancelled
+    private volatile boolean cancellationFlag = false;
+
+    // Reference to the TimerTask that will time out this statement.
+    // Needed for stopping the task when execution completes before timeout.
+    private CancelQueryTask cancelTask = null;
+        
     private	boolean		parentInTrigger;	// whetherparent started with a trigger on stack
     private	boolean		isAtomic;	
 	private boolean		isSystemCode;
@@ -99,6 +117,72 @@ final class GenericStatementContext
 
 	}
 
+    /**
+     * This is a TimerTask that is responsible for timing out statements,
+     * typically when an application has called Statement.setQueryTimeout().
+     *
+     * When the application invokes execute() on a statement object, or
+     * fetches data on a ResultSet, a StatementContext object is allocated
+     * for the duration of the execution in the engine (until control is
+     * returned to the application).
+     *
+     * When the StatementContext object is assigned with setInUse(),
+     * a CancelQueryTask is scheduled if a timeout > 0 has been set.
+     */
+    private static class CancelQueryTask
+        extends
+            TimerTask
+    {
+        /**
+         * Reference to the StatementContext for the executing statement
+         * which might time out.
+         */
+        private StatementContext statementContext;
+
+        /**
+         * Initializes a new task for timing out a statement's execution.
+         * This does not schedule it for execution, the caller is
+         * responsible for calling Timer.schedule() with this object
+         * as parameter.
+         */
+        public CancelQueryTask(StatementContext ctx)
+        {
+            statementContext = ctx;
+        }
+
+        /**
+         * Invoked by a Timer class to cancel an executing statement.
+         * This method just sets a volatile flag in the associated
+         * StatementContext object by calling StatementContext.cancel();
+         * it is the responsibility of the thread executing the statement
+         * to check this flag regularly.
+         */
+        public void run()
+        {
+            synchronized (this) {
+                if (statementContext != null) {
+                    statementContext.cancel();
+                }
+            }
+        }
+
+        /**
+         * Stops this task and prevents it from cancelling a statement.
+         * Guarantees that after this method returns, the associated
+         * StatementContext object will not be tampered with by this task.
+         * Thus, the StatementContext object may safely be allocated to
+         * other executing statements.
+         */
+        public void forgetContext() {
+            boolean mayStillRun = !cancel();
+            if (mayStillRun) {
+                synchronized (this) {
+                    statementContext = null;
+                }
+            }
+        }
+    }
+
 	// StatementContext Interface
 
 	public void setInUse
@@ -106,7 +190,8 @@ final class GenericStatementContext
 		boolean parentInTrigger,
 		boolean isAtomic, 
 		String stmtText,
-		ParameterValueSet pvs
+		ParameterValueSet pvs,
+        long timeoutMillis
 	) 
 	{
 		inUse = true;
@@ -116,6 +201,12 @@ final class GenericStatementContext
 		this.stmtText = stmtText;
 		this.pvs = pvs;
 		rollbackParentContext = false;
+        if (timeoutMillis > 0) {
+            TimerFactory factory = Monitor.getMonitor().getTimerFactory();
+            Timer timer = factory.getCancellationTimer();
+            cancelTask = new CancelQueryTask(this);
+            timer.schedule(cancelTask, timeoutMillis);
+        }
 	}
 
 	public void clearInUse() {
@@ -131,6 +222,12 @@ final class GenericStatementContext
 		sqlAllowed = -1;
 		isSystemCode = false;
 		rollbackParentContext = false;
+
+        if (cancelTask != null) {
+            cancelTask.forgetContext();
+            cancelTask = null;
+        }
+        cancellationFlag = false;
 	}
 
 	/**
@@ -216,7 +313,6 @@ final class GenericStatementContext
 	 * an error.
 	 *
 	 * @exception StandardException thrown on error.
-	 * @return Nothing.
 	 */
 	public void setTopResultSet(ResultSet topResultSet, 
 							    NoPutResultSet[] subqueryTrackingArray)
@@ -267,8 +363,6 @@ final class GenericStatementContext
 	  *
 	  *	@param	topResultSet	make this the top result set
 	  *	@param	subqueryTrackingArray	where to keep track of subqueries in this statement
-	  *
-	  * @return Nothing.
 	  */
 	private	void	stuffTopResultSet(ResultSet topResultSet, 
 									  NoPutResultSet[] subqueryTrackingArray)
@@ -289,7 +383,6 @@ final class GenericStatementContext
 	 * @param numSubqueries		The total # of subqueries in the entire query
 	 *
 	 * @exception StandardException thrown on error.
-	 * @return Nothing.
 	 */
 	public void setSubqueryResultSet(int subqueryNumber,
 									 NoPutResultSet subqueryResultSet,
@@ -350,7 +443,6 @@ final class GenericStatementContext
 	 *
 	 * @param dy	The dependency to track.
 	 *
-	 * @return Nothing.
 	 * @exception StandardException thrown on error.
 	 */
 	public void addDependency(Dependency dy)
@@ -551,6 +643,31 @@ final class GenericStatementContext
 	{
 		return inUse;
 	}
+        
+    /**
+     * Tests whether the statement which has allocated this StatementContext
+     * object has been cancelled. This method is typically called from the
+     * thread which is executing the statement, to test whether execution
+     * should continue or stop.
+     *
+     * @return whether the statement which has allocated this StatementContext
+     *  object has been cancelled.
+     */
+    public boolean isCancelled()
+    {
+        return cancellationFlag;
+    }
+
+    /**
+     * Cancels the statement which has allocated this StatementContext object.
+     * This is done by setting a flag in the StatementContext object. For
+     * this to have any effect, it is the responsibility of the executing
+     * statement to check this flag regularly.
+     */
+    public void cancel()
+    {
+        cancellationFlag = true;
+    }
 
 	public void setSQLAllowed(short allow, boolean force) {
 

@@ -158,7 +158,7 @@ public class BulkTableScanResultSet extends TableScanResultSet
     /**
  	 * Open the scan controller
 	 *
-	 * @param transaction controller will open one if null
+	 * @param tc transaction controller will open one if null
      *
 	 * @exception StandardException thrown on failure to open
 	 */
@@ -261,6 +261,8 @@ public class BulkTableScanResultSet extends TableScanResultSet
 	public ExecRow getNextRowCore() throws StandardException
 	{
 	    ExecRow result = null;
+            
+        checkCancellationFlag();
 
 		beginTime = getCurrentTimeMillis();
 		if (isOpen && scanControllerOpened)

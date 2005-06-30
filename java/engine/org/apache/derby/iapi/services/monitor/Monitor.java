@@ -278,7 +278,7 @@ public class Monitor {
   <P> If MonitorBoot.start() is called more then once then subsequent calls
   have no effect.
 
-		@param properties The application properties
+		@param bootProperties The application properties
 		@param logging Where to place initial error output. This location will be used
 			until an InfoStreams module is successfully started.
 	*/

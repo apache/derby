@@ -142,6 +142,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	protected final EmbedStatement stmt;
 	private EmbedStatement owningStmt;
+    private long timeoutMillis;
 
 	protected final boolean isAtomic;
 
@@ -171,6 +172,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 		theResults = resultsToWrap;
 		this.forMetaData = forMetaData;
 		this.stmt = owningStmt = stmt;
+
+        this.timeoutMillis = stmt == null
+            ? 0L
+            : (long)stmt.getQueryTimeout() * 1000L;
+
 		this.isAtomic = isAtomic;
 
 		//If the Statement object has CONCUR_READ_ONLY set on it then the concurrency on the ResultSet object will be CONCUR_READ_ONLY also.
@@ -329,8 +335,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 				 * on an error.
 				 * (Cache the LanguageConnectionContext)
 				 */
-				StatementContext statementContext = lcc.pushStatementContext(isAtomic, getSQLText(),
-														getParameterValueSet(), false);
+                StatementContext statementContext =
+                    lcc.pushStatementContext(isAtomic, getSQLText(),
+                                             getParameterValueSet(),
+                                             false, timeoutMillis);
 
 				switch (position)
 				{
@@ -3068,10 +3076,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * 
 	 * @param columnName
 	 *            the name of the column
-	 * @param x
+	 * @param reader
 	 *            the new column value
 	 * @param length
-	 *            of the stream
+	 *            length of the stream
 	 * @exception SQLException
 	 *                if a database-access error occurs
 	 */
@@ -3180,7 +3188,9 @@ public abstract class EmbedResultSet extends ConnectionChild
             //using quotes around the cursor name to preserve case sensitivity
             updateWhereCurrentOfSQL.append(" WHERE CURRENT OF \"" + getCursorName() + "\"");
             lcc = getEmbedConnection().getLanguageConnection();
-            statementContext = lcc.pushStatementContext(isAtomic, updateWhereCurrentOfSQL.toString(), null, false);
+
+            // Context used for preparing, don't set any timeout (use 0)
+            statementContext = lcc.pushStatementContext(isAtomic, updateWhereCurrentOfSQL.toString(), null, false, 0L);
             org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(updateWhereCurrentOfSQL.toString());
             Activation act = ps.getActivation(lcc, false);
 
@@ -3189,6 +3199,8 @@ public abstract class EmbedResultSet extends ConnectionChild
                 if (columnGotUpdated[i-1])  //if the column got updated, do following
                     act.getParameterValueSet().getParameterForSet(paramPosition++).setValue(currentRow.getColumn(i));
             }
+            // Don't set any timeout when updating rows (use 0)
+            ps.setQueryTimeout(0L);
             org.apache.derby.iapi.sql.ResultSet rs = ps.execute(act, false, true, true); //execute the update where current of sql
             rs.close();
             rs.finish();
@@ -3229,8 +3241,12 @@ public abstract class EmbedResultSet extends ConnectionChild
                 deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF \"" + getCursorName() + "\"");
 
                 LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
-                StatementContext statementContext = lcc.pushStatementContext(isAtomic, deleteWhereCurrentOfSQL.toString(), null, false);
+
+                // Context used for preparing, don't set any timeout (use 0)
+                StatementContext statementContext = lcc.pushStatementContext(isAtomic, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
+                // Don't set any timeout when deleting rows (use 0)
+                ps.setQueryTimeout(0L);
                 org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true); //execute delete where current of sql
                 rs.close();
                 rs.finish();
@@ -3349,8 +3365,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * 
 	 * Get a BLOB column.
 	 * 
-	 * @param i
-	 *            the first column is 1, the second is 2, ...
+	 * @param columnIndex the first column is 1, the second is 2, ...
 	 * @return an object representing a BLOB
 	 */
 	public Blob getBlob(int columnIndex) throws SQLException {
@@ -3401,8 +3416,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * 
 	 * Get a CLOB column.
 	 * 
-	 * @param i
-	 *            the first column is 1, the second is 2, ...
+	 * @param columnIndex the first column is 1, the second is 2, ...
 	 * @return an object representing a CLOB
 	 */
 	public final Clob getClob(int columnIndex) throws SQLException {
@@ -3454,8 +3468,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * 
 	 * Get a BLOB column.
 	 * 
-	 * @param colName
-	 *            the column name
+	 * @param columnName the column name
 	 * @return an object representing a BLOB
 	 */
 	public final Blob getBlob(String columnName) throws SQLException {
@@ -3467,8 +3480,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * 
 	 * Get a CLOB column.
 	 * 
-	 * @param colName
-	 *            the column name
+	 * @param columnName the column name
 	 * @return an object representing a CLOB
 	 * @exception SQLException
 	 *                Feature not implemented for now.
@@ -3580,9 +3592,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * 
 	 * @param columnName
 	 *            the name of the column
-	 * @param operation
-	 *            the operation the caller is trying to do (for error
-	 *            reporting). Null means don't do error checking.
 	 * @return the column index
 	 * @exception SQLException
 	 *                thrown on failure.
@@ -3842,9 +3851,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 					 */
 					LanguageConnectionContext lcc = getEmbedConnection()
 							.getLanguageConnection();
-					StatementContext statementContext = lcc
-							.pushStatementContext(isAtomic, getSQLText(),
-									getParameterValueSet(), false);
+                    // No timeout for this operation (use 0)
+					StatementContext statementContext =
+                        lcc.pushStatementContext(isAtomic, getSQLText(),
+                                                 getParameterValueSet(),
+                                                 false, 0L);
 
 					boolean result = theResults.checkRowPosition(position);
 

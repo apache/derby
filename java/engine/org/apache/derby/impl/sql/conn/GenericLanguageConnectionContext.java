@@ -632,8 +632,8 @@ public class GenericLanguageConnectionContext
 	 * them by dropping the conglomerate and recreating the conglomerate. In order to store the new conglomerate
 	 * information for the temp table, we need to replace the existing table descriptor with the new table descriptor
 	 * which has the new conglomerate information
-	 * @param String tableName Temporary table name whose table descriptor is getting changed
-	 * @param TableDescriptor td New table descriptor for the temporary table
+	 * @param tableName Temporary table name whose table descriptor is getting changed
+	 * @param td New table descriptor for the temporary table
 	 */
 	private void replaceDeclaredGlobalTempTable(String tableName, TableDescriptor td) {
     TempTableInfo tempTableInfo = findDeclaredGlobalTempTable(tableName);
@@ -656,7 +656,7 @@ public class GenericLanguageConnectionContext
 
 	/**
 	 * Find the declared global temporary table in the list of temporary tables known by this connection.
-	 * @param String tableName look for this table name in the saved list
+	 * @param tableName look for this table name in the saved list
 	 * @return data structure defining the temporary table if found. Else, return null 
 	 *
 	 */
@@ -945,8 +945,6 @@ public class GenericLanguageConnectionContext
 
 		@param onePhase if true, allow it to commit without first going thru a
 		prepared state.
-
-		@return	the commit instant
 
 		@exception StandardException	thrown if something goes wrong
 	 */
@@ -1488,7 +1486,7 @@ public class GenericLanguageConnectionContext
 
 	/**
 	 * check if there are any activations that reference this temporary table
-	 * @param String tableName look for any activations referencing this table name
+	 * @param tableName look for any activations referencing this table name
 	 * @return boolean  false if found no activations
 	 */
 	private boolean checkIfAnyActivationHasHoldCursor(String tableName)
@@ -1719,7 +1717,7 @@ public class GenericLanguageConnectionContext
 	/**
 	 * Set the default schema -- used by SET SCHEMA.
 	 * 
-	 * @param SchemaDescriptor	the new default schema.
+	 * @param sd the new default schema.
 	 * If null, then the default schema descriptor is used.
 	 *
 	 * @exception StandardException thrown on failure
@@ -1748,7 +1746,7 @@ public class GenericLanguageConnectionContext
 	/**
 	 * Set the field of most recently generated identity column value.
 	 *
-	 * @param the generated identity column value
+	 * @param val the generated identity column value
 	 */
 	public void setIdentityValue(long val)
 	{
@@ -1839,9 +1837,6 @@ public class GenericLanguageConnectionContext
 	 * Pop a CompilerContext off the context stack.
 	 *
 	 * @param cc  The compiler context.
-	 *
-	 * @return Nothing.
-	 *
 	 */
 	public void popCompilerContext(CompilerContext cc)
 	{
@@ -1878,12 +1873,14 @@ public class GenericLanguageConnectionContext
 	 * @param rollbackParentContext True if 1) the statement context is
 	 * 	NOT a top-level context, AND 2) in the event of a statement-level
 	 *	exception, the parent context needs to be rolled back, too.
+     * @param timeoutMillis timeout value for this statement, in milliseconds.
+     *  The value 0 means that no timeout is set.
 	 *
 	 * @return StatementContext  The statement context.
 	 *
 	 */
 	public StatementContext pushStatementContext(boolean isAtomic, String stmtText,
-		ParameterValueSet pvs, boolean rollbackParentContext)
+		ParameterValueSet pvs, boolean rollbackParentContext, long timeoutMillis)
 	{
 		int					parentStatementDepth = statementDepth;
 		boolean				inTrigger = false;
@@ -1933,7 +1930,7 @@ public class GenericLanguageConnectionContext
 
 		incrementStatementDepth();
 
-		statementContext.setInUse(inTrigger, isAtomic || parentIsAtomic, stmtText, pvs);
+		statementContext.setInUse(inTrigger, isAtomic || parentIsAtomic, stmtText, pvs, timeoutMillis);
 		if (rollbackParentContext)
 			statementContext.setParentRollback();
 		return statementContext;
@@ -1944,9 +1941,6 @@ public class GenericLanguageConnectionContext
 	 *
 	 * @param statementContext  The statement context.
 	 * @param error				The error, if any  (Only relevant for DEBUG)
-	 *
-	 * @return Nothing.
-	 *
 	 */
 	public void popStatementContext(StatementContext statementContext,
 									Throwable error) 
@@ -2507,7 +2501,7 @@ public class GenericLanguageConnectionContext
      * Convert an identifier to the proper case for this connection. This method
      * is here to support the Plugin.
      *
-     * @param	an identifier string
+     * @param id an identifier string
      * @return  the string converted to upper or lower case, as appropriate
      *
      * @exception StandardException thrown if something goes wrong
@@ -2930,8 +2924,6 @@ public class GenericLanguageConnectionContext
 	 * used when as autoincrement column is added to a table by an alter 
 	 * table statemenet and during bulk insert.
 	 *
-	 * @param init		Initial value, used the first time this routine is called.
-	 * @param increment how much to increment by.
 	 * @param schemaName
 	 * @param tableName
 	 * @param columnName identify the column uniquely in the system.

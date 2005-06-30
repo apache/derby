@@ -91,7 +91,6 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	 *  @param tableName		Table name.
 	 *  @param tableId			UUID of table.
 	 *  @param schemaName		schema that table and constraint lives in.
-	 *  @param tdSd				the schema that table lives in.
 	 *  @param indexAction		IndexConstantAction for constraint (if necessary)
 	 *  RESOLVE - the next parameter should go away once we use UUIDs
 	 *			  (Generated constraint names will be based off of uuids)
@@ -310,6 +309,11 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 		try
 		{
 			PreparedStatement ps = lcc.prepareInternalStatement(td.getSchemaDescriptor(), checkStmt.toString());
+
+            // This is a substatement; for now, we do not set any timeout
+            // for it. We might change this behaviour later, by linking
+            // timeout to its parent statement's timeout settings.
+            ps.setQueryTimeout(0L);
 
 			rs = ps.execute(lcc, false);
 			ExecRow row = rs.getNextRow();

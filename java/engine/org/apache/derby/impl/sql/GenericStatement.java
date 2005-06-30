@@ -236,8 +236,9 @@ public class GenericStatement
 			if (!preparedStmt.isStorable() || lcc.getStatementDepth() == 0)
 			{
 				// since this is for compilation only, set atomic
-				// param to true
-				statementContext = lcc.pushStatementContext(true, getSource(), null, false);
+				// param to true and timeout param to 0
+				statementContext = lcc.pushStatementContext(true, getSource(),
+                                                            null, false, 0L);
 			}
 
 

@@ -1557,8 +1557,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	/**
 	 * Get info on the indexes on the table being compress. 
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	private void getAffectedIndexes(Activation activation)
@@ -2054,6 +2052,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	private static void executeUpdate(LanguageConnectionContext lcc, String updateStmt) throws StandardException
 	{
 		PreparedStatement ps = lcc.prepareInternalStatement(updateStmt);
+
+        // This is a substatement; for now, we do not set any timeout
+        // for it. We might change this behaviour later, by linking
+        // timeout to its parent statement's timeout settings.
+        ps.setQueryTimeout(0L);
+
 		ResultSet rs = ps.execute(lcc, true);
 		rs.close();
 		rs.finish();
@@ -2073,6 +2077,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		PreparedStatement ps = lcc.prepareInternalStatement(maxStmt);
+
+        // This is a substatement, for now we do not set any timeout for it
+        // We might change this later by linking timeout to parent statement
+        ps.setQueryTimeout(0L);
 
 		ResultSet rs = ps.execute(lcc, false);
 		DataValueDescriptor[] rowArray = rs.getNextRow().getRowArray();
