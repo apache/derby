@@ -693,12 +693,7 @@ public class utilMain implements java.security.PrivilegedAction {
 			throw ijException.forwardOnlyCursor("ABSOLUTE");
 		}
 
-		// 0 is an invalid value for row
-		if (row == 0)
-		{
-			throw ijException.zeroInvalidForAbsolute();
-		}
-
+		// 0 is an *VALID* value for row
 		return new ijRowResult(rs, rs.absolute(row));
 	}
 

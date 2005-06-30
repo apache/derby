@@ -34,19 +34,18 @@ ij> relative 1 c1;
 IJ ERROR: RELATIVE is not allowed on a forward only cursor.
 ij> close c1;
 ij> get scroll insensitive cursor c1 as 'select * from t1';
-ij> -- 0 is invalid value for absolute
-absolute 0 c1;
-IJ ERROR: 0 is an invalid value for ABSOLUTE <integer> <cursorname>
+ij> absolute 0 c1;
+No current row
 ij> close c1;
 ij> get scroll insensitive cursor c1 as 'select * from t1';
-ij> -- relative is invalid when not positioned on a row
-relative 0 c1;
-ERROR (no SQLState): Cursor is Not on a Valid Row
+ij> relative 0 c1;
+No current row
 ij> close c1;
 ij> get scroll insensitive cursor c1 as 'select * from t1';
-ij> -- relative is invalid when not positioned on a row
-relative 2 c1;
-ERROR (no SQLState): Cursor is Not on a Valid Row
+ij> relative 2 c1;
+C50 |I          
+-----
+c |3          
 ij> close c1;
 ij> -- positive
 ----- test positioning

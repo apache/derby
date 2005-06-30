@@ -1804,17 +1804,50 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
 
-        // this method may only be called when the cursor on a valid row,
-        // not after the last row, before the first row, or on the insert row.
-        // throw exception if result set contains no rows, because there is no current row.
-        if (isBeforeFirstX() || isAfterLastX() || isOnInsertRow_ || resultSetContainsNoRows()) {
+        // this method may not be called when the cursor on the insert row
+        if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, "Cursor is Not on a Valid Row");
         }
 
-        if (rows == 0) {
-            isValidCursorPosition_ = true;
+        // If the resultset is empty, relative(n) is a null operation
+        if (resultSetContainsNoRows()) {
+            isValidCursorPosition_ = false;
             return isValidCursorPosition_;
         }
+        
+        // relative(0) is a null-operation, but the retruned result is
+        // dependent on wether the cursorposition is on a row or not.
+        if (rows == 0) {
+            if (isBeforeFirstX() || isAfterLastX()) {
+                isValidCursorPosition_ = false;
+            } else {
+                isValidCursorPosition_ = true;
+            }
+            return isValidCursorPosition_;
+        }
+
+        // Handle special cases when the cursor is before first or
+        // after last, since the following code assumes we ar on a
+        // valid cursor
+        if (isBeforeFirstX()) {
+            if (rows > 0) {
+                nextX();
+                return relativeX(rows-1);
+            } else {
+                isValidCursorPosition_ = false;
+                return isValidCursorPosition_;
+            }
+        }
+        if (isAfterLastX()) {
+            if (rows < 0) {
+                previousX();
+                return relativeX(rows+1);
+            } else {
+                isValidCursorPosition_ = false;
+                return isValidCursorPosition_;
+            }
+        }
+        // Ok, now we are on a row and ready to do some real positioning.....
 
         resetRowsetFlags();
 

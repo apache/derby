@@ -25,18 +25,14 @@ relative 1 c1;
 close c1;
 
 get scroll insensitive cursor c1 as 'select * from t1';
--- 0 is invalid value for absolute
 absolute 0 c1;
 close c1;
 get scroll insensitive cursor c1 as 'select * from t1';
--- relative is invalid when not positioned on a row
 relative 0 c1;
 close c1;
 get scroll insensitive cursor c1 as 'select * from t1';
--- relative is invalid when not positioned on a row
 relative 2 c1;
 close c1;
-
 
 -- positive
 
