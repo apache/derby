@@ -50,7 +50,7 @@ JINT       |JTIME   |JVARCHAR
 13         |15:34:29|\u8ad6\u7406\u30ed\u30b0 3\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002                                                      
 15         |15:35:35|sysmaster\u30c7\u30fc\u30bf\u30d9\u30fc\u30b9\u306e\u4f5c\u6210\u306f\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002                 
 16         |15:39:10|\u30c1\u30a7\u30c3\u30af\u30dd\u30a4\u30f3\u30c8\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f:\u7d99\u7d9a\u6642\u9593\u306f 8\u79&
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', 'jtest' , 'extout/jtest.unl' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', 'JTEST' , 'extout/jtest.unl' , 
                                     null, null,'EUC_JP') ;
 0 rows inserted/updated/deleted
 ij> 

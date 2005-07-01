@@ -123,7 +123,7 @@ create table Alt1 (	Account	int,
 			Balance decimal(8,2));
 
 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'Alt1' , 'extin/Alt1.asc' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT1' , 'extin/Alt1.asc' , 
                                       null, null, null, 0) ;
 
 
@@ -147,7 +147,7 @@ create table Alt3 (	Account	int,
 
 
 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'Alt3' , 'extin/Alt3.asc' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT3' , 'extin/Alt3.asc' , 
                                       null, null, null, 0) ;
 
 
@@ -185,7 +185,7 @@ create table sqlAnywhere1 (
 	email	varchar(80),
 	web	varchar(50));
 
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'sqlAnywhere1' ,
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'SQLANYWHERE1' ,
                                   null , '1,2,3,4,5,7,8,9,10,11,12,13,14', 
 	 		          'extin/sqlAnywhere1.txt' , 
 				  '|', '''', 'ASCII', 0) ;
@@ -200,7 +200,7 @@ create table sqlAnywhere2 (
 	email varchar(40),
 	phone varchar(30));
 
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'sqlAnywhere2' , 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'SQLANYWHERE2' , 
 		                  null , '3, 4, 7, 5',
 			          'extin/sqlAnywhere2.txt' , 
 				  '|', '''', 'ASCII', 0) ;
@@ -230,7 +230,7 @@ create table HouseHoldItem (
 -- import it first with just LF as record seperator, we should be seeing 
 -- ^M's at the end of note field.
 
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HouseHoldItem' , 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HOUSEHOLDITEM' , 
 				  null , '2,3,4,5,6,7,8,11,14', 
 				  'extin/Access1.txt' , 
 				  null, null, null, 0) ;
@@ -252,7 +252,7 @@ create table  imp_temp(column2 varchar(200),
                   column5 varchar(200),
                   column6 varchar(200));
 
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'imp_temp' ,null, '2, 3, 4, 5, 6',
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'IMP_TEMP' ,null, '2, 3, 4, 5, 6',
                                     'extinout/t1.dump', '|', '''', 'ASCII', 0) ;
 
 select * from imp_temp ;

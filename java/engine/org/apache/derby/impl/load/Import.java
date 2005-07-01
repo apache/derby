@@ -160,9 +160,9 @@ public class Import extends ImportAbstract{
 		if (connection == null)
 			throw LoadError.connectionNull();
 		
-		String entityName = (schemaName == null ? tableName : schemaName + "." + tableName); 
+	
 		
-		if (entityName == null)
+		if (tableName == null)
 			throw LoadError.entityNameMissing();
 		
 
@@ -197,6 +197,18 @@ public class Import extends ImportAbstract{
 
 		String importvti = sb.toString();
 
+		// delimit the table and schema names with quotes.
+		// because they might have been  created as quoted
+		// identifiers(for example when reserved words are used, names are quoted)
+		
+		// Import procedures are to be called with case-senisitive names. 
+		// Incase of delimited table names, they need to be passed as defined
+		// and when they are not delimited, they need to be passed in upper
+		// case, because all undelimited names are stored in the upper case 
+		// in the database. 
+
+		String entityName = (schemaName == null ? "\""+ tableName + "\"" : 
+							 "\"" + schemaName + "\"" + "." + "\"" + tableName + "\""); 
 
 		String insertModeValue;
 		if(replace > 0)

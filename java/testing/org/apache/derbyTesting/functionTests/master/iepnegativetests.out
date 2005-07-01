@@ -7,16 +7,16 @@ ij> insert into iep.t1 values(100) , (101) , (102) , (103) , (104) , (105) , (10
 7 rows inserted/updated/deleted
 ij> --export error cases
 --export can not create file
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'nodir/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'nodir/t1.dat' , 
                                  null, null, null) ;
 ERROR XIE0I: An IOException occurred while writing data to the file.
 ij> --export table not found
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 'NOTABLE' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
 ERROR 38000: The exception 'SQL Exception: Table 'IEP.NOTABLE' does not exist.' was thrown while evaluating an expression.
 ERROR 42X05: Table 'IEP.NOTABLE' does not exist.
 ij> ---export schema is not valid
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
 ERROR 38000: The exception 'SQL Exception: Schema 'XXXX' does not exist' was thrown while evaluating an expression.
 ERROR 42Y07: Schema 'XXXX' does not exist
@@ -29,52 +29,52 @@ ij> --export codeset is invalid
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1', 
                                     'extinout/t1.dat' , null, null, 'NOSUCHCODESET') ;
 ERROR XIE0I: An IOException occurred while writing data to the file.
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
 ERROR 38000: The exception 'SQL Exception: Schema 'XXXX' does not exist' was thrown while evaluating an expression.
 ERROR 42Y07: Schema 'XXXX' does not exist
 ij> --export delimiter errror cases
 --period can not be used as character ot column delimiter
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, '.', null) ;
 ERROR XIE0K: The period was specified as a character string delimiter.
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  '.', null, null) ;
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> --same delimter can not be used as character and column delimters
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  ';', ';', null) ;
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> --space character can not be a delimiter
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  ' ', ';', null) ;
 ERROR XIE0J: A delimiter is not valid or is used more than once.
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, ' ', null) ;
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> --if emtry strinng is passed actual value delimiter should be space
 --and the that should become a invalid delimiter 
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  '', ';', null) ;
 ERROR XIE0J: A delimiter is not valid or is used more than once.
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, '', null) ;
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> --more than one character passed to the delimiters get truncated to one
 --following one should give error because eventually '\' delimiter 
 --is used a both for char and col
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  '\a', '\', null) ;
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> --DO A VALID EXPORT AND  IMPORT 
 set schema iep;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, null, 'utf-8') ;
 0 rows inserted/updated/deleted
 ij> delete from t1 ;
 7 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE('iep', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from t1;
@@ -89,21 +89,21 @@ A
 106        
 ij> --import error cases
 --import can not find input file
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE('iep', 't1' , 'nodir/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'nodir/t1.dat' , 
                                  null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE04: Data file not found: nodir/t1.dat
 ij> --import table not found
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 'NOTABLE' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
 ERROR XIE0M: Table 'IEP.NOTABLE' does not exist.  
 ij> --import schema is not valid
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
 ERROR XIE0M: Table 'XXXX.T1' does not exist.  
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, null, 'INCORRECTCODESET', 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
@@ -112,20 +112,20 @@ ERROR XJ001: Java exception: 'java.io.UnsupportedEncodingException: INCORRECTCOD
 ij> --check import with invalid delimiter usage
 --if emtry strinng is passed actual value delimiter should be space
 --and the that should become a invalid delimiter 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  '', ';', null, 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: A delimiter is not valid or is used more than once.
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, '', null, 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> --same delimter can not be used as character and column delimters
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 't1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  ';', ';', null, 1) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
@@ -148,7 +148,7 @@ C1
 5          
 6          
 ij> --export to from a temporary table
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('session', 'temp1' , 'extinout/temp1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('SESSION', 'TEMP1' , 'extinout/temp1.dat' , 
                            null, null, null) ;
 0 rows inserted/updated/deleted
 ij> -- because temporary table has on commit preserve rows, commit issued by export will not delete data from the temp table.
@@ -162,7 +162,7 @@ C1
 5          
 6          
 ij> --import back to a regualr table
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 'v1' , 'extinout/temp1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'V1' , 'extinout/temp1.dat' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from v1;
@@ -178,7 +178,7 @@ ij> commit;
 ij> --import to a temp table should fail with a table not found errror
 declare global temporary table session.temp2(c1 int) not logged;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('session', 'temp2' , 'extinout/temp1.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SESSION', 'TEMP2' , 'extinout/temp1.dat' , 
                                  null, null, null, 0) ;
 ERROR XIE0M: Table 'SESSION.TEMP2' does not exist.  
 ij> select * from session.temp2 ;
@@ -197,10 +197,10 @@ ij> insert into t3 values(3 , 3.5 , 8.6 , 'test strings');
 1 row inserted/updated/deleted
 ij> insert into t3 values(4 , 3.5 , 8.6 , 'test strings');
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't3' , 'extinout/t3.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T3' , 'extinout/t3.dat' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 't3' , 'extinout/t3.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T3' , 'extinout/t3.dat' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from t3;
@@ -215,26 +215,26 @@ C1         |C2                    |C3    |C4
 3          |3.5                   |8     |test strings        
 4          |3.5                   |8     |test strings        
 ij> --import data column names are incorrect
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3, x4', null,
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3, X4', null,
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE08: There is no column named: x1.  
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3', '1,2,3,4', 
+ERROR XIE08: There is no column named: X1.  
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE08: There is no column named: x1.  
+ERROR XIE08: There is no column named: X1.  
 ij> --import data insert column names count < column indexes does not match
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'c1, c2, c3', '1,2,3,4', 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> --import data column indexes count > insert columns count
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'c1, c2, c3,c4', '1,2', 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3,C4', '1,2', 
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , null, '11,22,12,24', 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
                                  'extinout/t3.dat' , 
 				 null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: Column 'COLUMN11' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN11' is not a column in the target table.' was thrown while evaluating an expression.
@@ -242,31 +242,31 @@ ERROR 42X04: Column 'COLUMN11' is either not in any table in the FROM list or ap
 ij> --repeat the above type cases with empty file and minor variation to paramters
 delete from t3 ;
 12 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 't3' , 'extinout/t3.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T3' , 'extinout/t3.dat' , 
                                   ';', '^', 'utf-16') ;
 0 rows inserted/updated/deleted
 ij> --import data column names are incorrect
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3, x4', null, 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3, X4', null, 
                                  'extinout/t3.dat' , 
                                  ';', '^', 'utf-16', 1) ;
-ERROR XIE08: There is no column named: x1.  
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'x1, x2, x3', '1,2,3,4', 
+ERROR XIE08: There is no column named: X1.  
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
 				    ';', '^', 'utf-16', 1) ;
-ERROR XIE08: There is no column named: x1.  
+ERROR XIE08: There is no column named: X1.  
 ij> --import data insert column names count < column indexes does not match
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , 'c1, c2, c3', null, 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3', null, 
                                  'extinout/t3.dat' , 
 				    ';', '^', 'utf-16', 1) ;
 0 rows inserted/updated/deleted
 ij> --import data column indexes count > insert columns count
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , null, '1,2', 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '1,2', 
                                  'extinout/t3.dat' , 
 				    ';', '^', 'utf-16', 1) ;
 ERROR 38000: The exception 'SQL Exception: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> --specify column indexes that are not there in the file that is being  imported
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 't3' , null, '11,22,12,24', 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
                                  'extinout/t3.dat' , 
 				    ';', '^', 'utf-16', 1) ;
 0 rows inserted/updated/deleted
@@ -280,17 +280,17 @@ create table ntype(a int , ct CLOB(1024));
 0 rows inserted/updated/deleted
 ij> create table ntype1(bt BLOB(1024) , a int);
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('iep', 'ntype' , 'extinout/ntype.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
                                  null, null, null) ;
 ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by the import/export feature.   
 ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.ntype1',
 				   'extinout/ntype.dat' , 
                                    null, null, null) ;
 ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by the import/export feature.   
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('iep', 'ntype' , 'extinout/ntype.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
 ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by the import/export feature.   
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('iep', 'ntype1' , null , null, 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'NTYPE1' , null , null, 
                                  'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
 ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by the import/export feature.   
@@ -313,7 +313,7 @@ ij(C2)> autocommit off;
 ij(C2)> --following import should fail with lock time out
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '5');
 0 rows inserted/updated/deleted
-ij(C2)> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('iep', 'parent', 'extinout/parent.del',null, null, null,1);
+ij(C2)> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'PARENT', 'extinout/parent.del',null, null, null,1);
 ERROR 38000: The exception 'SQL Exception: Table 'IEP.PARENT' cannot be locked in 'EXCLUSIVE' mode.' was thrown while evaluating an expression.
 ERROR X0X02: Table 'IEP.PARENT' cannot be locked in 'EXCLUSIVE' mode.
 ERROR 40XL1: A lock could not be obtained within the time requested

@@ -80,13 +80,14 @@ class ColumnInfo {
 		columnTypes = new ArrayList(1);
 		noOfColumns = 0;
 		this.conn = conn;
-		this.schemaName = (sName !=null ? sName.toUpperCase(java.util.Locale.ENGLISH):sName);
-		this.tableName =  (tName !=null ? tName.toUpperCase(java.util.Locale.ENGLISH):tName);
+
+		this.schemaName = sName;
+		this.tableName =  tName;
 
 		if(insertColumnList!=null)
 		{
 			//break the comma seperated column list and initialze column info
-			//eg: c2 , c1 , c3
+			//eg: C2 , C1 , C3
 			StringTokenizer st = new StringTokenizer(insertColumnList , ",");
 			while (st.hasMoreTokens()) 
 			{
@@ -152,7 +153,7 @@ class ColumnInfo {
 		ResultSet rs = dmd.getColumns(null, 
 									  schemaName,
 									  tableName,
-									  (columnPattern !=null ? columnPattern.toUpperCase(java.util.Locale.ENGLISH):columnPattern));
+									  columnPattern);
 		boolean foundTheColumn=false;
 		while (rs.next())
 		{
@@ -306,8 +307,9 @@ class ColumnInfo {
 			return sb.toString();
 	}
 
-	/* returns comma seperated column Names for insert statement
-	 * eg: c1, c2 , c3 , c4 
+	/* returns comma seperated column Names delimited by quotes for the insert 
+     * statement
+	 * eg: "C1", "C2" , "C3" , "C4" 
 	 */
 	public String getInsertColumnNames()
 	{
@@ -319,7 +321,11 @@ class ColumnInfo {
 				sb.append(", ");
 			else
 				first = false;
+			// column names can be SQL reserved words, so it 
+			// is necessary delimit them using quotes for insert to work correctly. 
+			sb.append("\"");
 			sb.append(insertColumnNames.get(index));
+			sb.append("\"");
 		}
 	
 		//there is no column info available
@@ -354,9 +360,6 @@ class ColumnInfo {
 	}
 
 }
-
-
-
 
 
 
