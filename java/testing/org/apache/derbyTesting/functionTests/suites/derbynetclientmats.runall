@@ -1,2 +1,2 @@
-derbynet/netxaPositive.sql
+jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql

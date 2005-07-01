@@ -182,7 +182,7 @@ public final class CompressSpacePageOperation extends PhysicalPageOperation
 				"undo Page is not an allocPage");
 		}
 
-		((AllocPage)undoPage).compressSpace(
+		((AllocPage)undoPage).undoCompressSpace(
              CLRInstant, newHighestPage, num_pages_truncated);
 	}
 

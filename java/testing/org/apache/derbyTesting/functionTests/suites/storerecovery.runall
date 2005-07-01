@@ -3,3 +3,7 @@ store/LogChecksumRecovery.java
 store/LogChecksumRecovery1.java
 store/MaxLogNumber.java
 store/MaxLogNumberRecovery.java
+store/oc_rec1.java
+store/oc_rec2.java
+store/oc_rec3.java
+store/oc_rec4.java

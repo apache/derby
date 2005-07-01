@@ -107,6 +107,22 @@ public abstract class BaseTest
     }
 
     /**
+     * Simple wrapper to execute a sql string.
+     **/
+    public void executeQuery(
+    Connection  conn,
+    String      stmt_str,
+    boolean     commit_query)
+        throws SQLException
+    {
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate(stmt_str);
+        stmt.close();
+        if (commit_query)
+            conn.commit();
+    }
+
+    /**
      * Call consistency checker on the table.
      * <p>
      **/

@@ -1,7 +1,7 @@
 ij> xa_datasource 'wombat';
 ij> ---------------------------------------------
--- a single connection and 1 phase commit
----------------------------------------------
+----- a single connection and 1 phase commit
+-----
 xa_connect ;
 ij> xa_start xa_noflags 0;
 ij> xa_getconnection;
@@ -13,7 +13,7 @@ ij(XA)> insert into foo values (0);
 1 row inserted/updated/deleted
 ij(XA)> select * from foo;
 A          
------------
+-----
 0          
 ij(XA)> run resource '/org/apache/derbyTesting/functionTests/tests/store/global_xactTable.view';
 ij(XA)> create view global_xactTable as
@@ -26,16 +26,16 @@ select
 from new org.apache.derby.diag.TransactionTable() t;
 0 rows inserted/updated/deleted
 ij(XA)> select * from global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(0  |ACTIVE  |false|APP       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(0 |ACTIVE |false |APP |UserTransaction               
 ij(XA)> xa_end xa_success 0;
 ij(XA)> xa_commit xa_1phase 0;
 ij(XA)> xa_datasource 'wombat' shutdown;
-ERROR 08006: Database 'wombat' shutdown.
+ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 ij(XA)> ---------------------------------------------
--- two interleaving connections and prepare/commit prepare/rollback
----------------------------------------------
+----- two interleaving connections and prepare/commit prepare/rollback
+-----
 xa_datasource 'wombat';
 ij(XA)> xa_connect user 'sku' password 'testxa' ;
 ij(XA)> xa_start xa_noflags 1;
@@ -55,18 +55,18 @@ ij(XA)> xa_start xa_resume 2;
 ij(XA)> insert into APP.foo values (4);
 1 row inserted/updated/deleted
 ij(XA)> select * from APP.global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |ACTIVE  |false|SKU       |UserTransaction               
-(2  |ACTIVE  |false|SKU       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(1 |ACTIVE |false |SKU |UserTransaction               
+(2 |ACTIVE |false |SKU |UserTransaction               
 ij(XA)> -- this prepare won't work since transaction 1 has been suspended - XA_PROTO
 xa_prepare 1;
 IJ ERROR: XAER_PROTO 
 ij(XA)> select * from APP.global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |ACTIVE  |false|SKU       |UserTransaction               
-(2  |ACTIVE  |false|SKU       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(1 |ACTIVE |false |SKU |UserTransaction               
+(2 |ACTIVE |false |SKU |UserTransaction               
 ij(XA)> xa_end xa_success 2;
 ij(XA)> -- this assumes a resume
 xa_end xa_success 1;
@@ -74,28 +74,28 @@ ij(XA)> xa_prepare 1;
 ij(XA)> xa_prepare 2;
 ij(XA)> -- both transactions should be prepared
 select * from APP.global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |PREPARED|false|SKU       |UserTransaction               
-(2  |PREPARED|false|SKU       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(1 |PREPARED |false |SKU |UserTransaction               
+(2 |PREPARED |false |SKU |UserTransaction               
 ij(XA)> -- NOTE: The following call to "xa_recover xa_startrscan" is apt to
--- return the result set rows in reverse order when changes to
--- the Derby engine affect the number of transactions that it takes
--- to create a database.  The transactions are stored in a hash table
--- based on a global and local id, and when the number of transactions
--- changes, the (internal) local id can change, which may lead to a
--- change in the result set order.  This order is determined by the
--- JVM's hashing algorithm. Examples of changes to the engine that
--- can affect this include ones that cause more commits or that
--- change the amount of data being stored, such as changes to the
--- metadata statements (which is what prompted this explanation in
--- the first place).  Ultimately, the problem is that there is no
--- way to order the return values from "xa_recover" since it is an
--- ij internal statement, not SQL...
+----- return the result set rows in reverse order when changes to
+----- the Derby engine affect the number of transactions that it takes
+----- to create a database.  The transactions are stored in a hash table
+----- based on a global and local id, and when the number of transactions
+----- changes, the (internal) local id can change, which may lead to a
+----- change in the result set order.  This order is determined by the
+----- JVM's hashing algorithm. Examples of changes to the engine that
+----- can affect this include ones that cause more commits or that
+----- change the amount of data being stored, such as changes to the
+----- metadata statements (which is what prompted this explanation in
+----- the first place).  Ultimately, the problem is that there is no
+----- way to order the return values from "xa_recover" since it is an
+----- ij internal statement, not SQL...
 xa_recover xa_startrscan;
 Recovered 2 in doubt transactions
-Transaction 1 : (1,FILTERED,FILTERED)
-Transaction 2 : (2,FILTERED,FILTERED)
+Transaction 1 : {ClientXid: formatID(2), gtrid_length(6), bqual_length(6), data(776F6D62 6174776F 6D626174)}
+Transaction 2 : {ClientXid: formatID(1), gtrid_length(6), bqual_length(6), data(776F6D62 6174776F 6D626174)}
 ij(XA)> xa_recover xa_noflags;
 Recovered 0 in doubt transactions
 ij(XA)> xa_commit xa_2Phase 1;
@@ -103,12 +103,12 @@ ij(XA)> xa_rollback 2;
 ij(XA)> -- check results
 xa_start xa_noflags 3;
 ij(XA)> select * from APP.global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(3  |IDLE    |NULL |SKU       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(3 |IDLE |NULL |SKU |UserTransaction               
 ij(XA)> select * from APP.foo;
 A          
------------
+-----
 0          
 1          
 3          
@@ -119,8 +119,8 @@ xa_commit xa_1Phase 3;
 IJ ERROR: XAER_NOTA 
 ij(XA)> disconnect;
 ij> ---------------------------------------------
--- 3 interleaving xa connections and a local connection
----------------------------------------------
+----- 3 interleaving xa connections and a local connection
+-----
 xa_start xa_noflags 4;
 ij> xa_end xa_suspend 4;
 ij> xa_start xa_noflags 5;
@@ -130,7 +130,7 @@ ij> xa_end xa_suspend 6;
 ij> connect 'wombat' as local;
 ij(LOCAL)> select * from foo;
 A          
------------
+-----
 0          
 1          
 3          
@@ -145,11 +145,11 @@ ij(LOCAL)> insert into foo values (77);
 ij(LOCAL)> xa_end xa_suspend 4;
 ij(LOCAL)> xa_end xa_success 4;
 ij(LOCAL)> -- this getconnection should get a local connection
--- this has problems
---xa_getconnection;
---insert into APP.foo values (88);
---commit;
---disconnect;
+----- this has problems
+-----xa_getconnection;
+-----insert into APP.foo values (88);
+-----commit;
+-----disconnect;
 xa_start xa_resume 5;
 ij(LOCAL)> xa_getconnection;
 ij(XA)> insert into APP.foo values (5);
@@ -159,30 +159,30 @@ ij(XA)> xa_start xa_resume 6;
 ij(XA)> insert into APP.foo values (6);
 1 row inserted/updated/deleted
 ij(XA)> select * from APP.global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(4  |ACTIVE  |false|SKU       |UserTransaction               
-(5  |ACTIVE  |false|SKU       |UserTransaction               
-(6  |ACTIVE  |false|SKU       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(4 |ACTIVE |false |SKU |UserTransaction               
+(5 |ACTIVE |false |SKU |UserTransaction               
+(6 |ACTIVE |false |SKU |UserTransaction               
 ij(XA)> xa_commit xa_1Phase 4;
 ij(XA)> insert into APP.foo values (6);
 1 row inserted/updated/deleted
 ij(XA)> select * from APP.global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(5  |ACTIVE  |false|SKU       |UserTransaction               
-(6  |ACTIVE  |false|SKU       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(5 |ACTIVE |false |SKU |UserTransaction               
+(6 |ACTIVE |false |SKU |UserTransaction               
 ij(XA)> xa_end xa_fail 6;
 IJ ERROR: XA_RBROLLBACK 
 ij(XA)> xa_rollback 6;
 ij(XA)> xa_start xa_join 5;
 ij(XA)> select * from APP.global_xactTable where gxid is not null order by gxid;
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(5  |ACTIVE  |false|SKU       |UserTransaction               
+GXID |STATUS |READ& |USERNAME |TYPE                          
+-----
+(5 |ACTIVE |false |SKU |UserTransaction               
 ij(XA)> select * from APP.foo;
 A          
------------
+-----
 0          
 1          
 3          

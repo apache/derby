@@ -613,6 +613,16 @@ public class scrollCursors2 {
 			System.out.println("expected to be before the 1st row");
 			passed = false;
 		}
+                if (rs.absolute(0))
+                {
+			System.out.println("absolute(0) expected to return false");
+			passed = false;
+                }
+		if (! rs.isBeforeFirst())
+		{
+			System.out.println("still expected to be before the 1st row");
+			passed = false;
+		}
 		// go to first row
 		if (! rs.first())
 		{
@@ -898,7 +908,6 @@ public class scrollCursors2 {
 			passed = false;
 		}
 		rs.close();
-		
 
 		return passed;
 	}
@@ -968,6 +977,11 @@ public class scrollCursors2 {
 			System.out.println("rs.next() expected to show result set is empty");
 			passed = false;
 		}
+		if (rs.previous())
+		{
+			System.out.println("rs.previous() expected to show result set is empty");
+			passed = false;
+		}
 		if (rs.isAfterLast())
 		{
 			System.out.println("isAfterLast() expected to return false on empty result set");
@@ -983,6 +997,42 @@ public class scrollCursors2 {
 			System.out.println("isLast() expected to return false on empty result set");
 			passed = false;
 		}
+
+		if (rs.relative(0))
+		{
+			System.out.println("relative(0) expected to return false on empty result set");
+			passed = false;
+		}
+
+		if (rs.relative(1))
+		{
+			System.out.println("relative(1) expected to return false on empty result set");
+			passed = false;
+		}
+
+		if (rs.relative(-1))
+		{
+			System.out.println("relative(-1) expected to return false on empty result set");
+			passed = false;
+		}
+
+		if (rs.absolute(0))
+		{
+			System.out.println("absolute(0) expected to return false on empty result set");
+			passed = false;
+		}
+		if (rs.absolute(1))
+		{
+			System.out.println("absolute(1) expected to return false on empty result set");
+			passed = false;
+		}
+
+		if (rs.absolute(-1))
+		{
+			System.out.println("absolute(-1) expected to return false on empty result set");
+			passed = false;
+		}
+
 
 		rs.close();
 		// End of empty result set tests
@@ -1000,19 +1050,6 @@ public class scrollCursors2 {
 		{
 			/* Check to be sure the exception is the one we expect */
 			passed = passed && checkException(sqle, "XJ062");
-		}
-
-		// absolute(0)
-		try
-		{
-			rs.absolute(0);
-			System.out.println("absolute(0) expected to fail");
-			passed = false;
-		}
-		catch (SQLException sqle)
-		{
-			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "X0X86");
 		}
 
 		s_i_r.close();

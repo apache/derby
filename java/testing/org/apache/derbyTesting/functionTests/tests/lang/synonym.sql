@@ -45,6 +45,9 @@ declare global temporary table session.t1 (c1 int) not logged;
 create synonym synForTemp for session.t1;
 create synonym synForTemp for session."T1";
 
+-- Synonyms can't be created in session schemas
+create synonym session.table1 for APP.table1;
+
 -- Creating a table or a view when a synonym of that name is present. Error.
 create synonym myTable for table1;
 

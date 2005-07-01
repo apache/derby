@@ -33,12 +33,21 @@ import org.apache.derby.impl.jdbc.Util;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 
+import java.lang.reflect.*;
+
+import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.error.StandardException;
+
 /**
  * This is a rudimentary connection that delegates
  * EVERYTHING to Connection.
  */
 public class BrokeredConnection implements Connection
 {
+	
+	// default for Derby
+	protected int stateHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
 
 	protected final BrokeredConnectionControl control;
 	private boolean isClosed;
@@ -383,6 +392,15 @@ public class BrokeredConnection implements Connection
 		stateIsolationLevel = conn.getTransactionIsolation();
 		stateReadOnly = conn.isReadOnly();
 		stateAutoCommit = conn.getAutoCommit();
+		// jdk13 does not have Connection.getHoldability method and hence using
+		// reflection to cover both jdk13 and higher jdks
+		try {
+			Method sh = conn.getClass().getMethod("getHoldability", null);
+			stateHoldability = ((Integer)sh.invoke(conn, null)).intValue();
+		} catch( Exception e)
+		{
+			throw PublicAPI.wrapStandardException( StandardException.plainWrapException( e));
+		}       
 	}
 
 	/**
@@ -396,6 +414,8 @@ public class BrokeredConnection implements Connection
 		
 	*/
 	public void setState(boolean complete) throws SQLException {
+		Class[] CONN_PARAM = { Integer.TYPE };
+		Object[] CONN_ARG = { new Integer(stateHoldability)};
 
 		Connection conn = getRealConnection();
 
@@ -403,6 +423,18 @@ public class BrokeredConnection implements Connection
 			conn.setTransactionIsolation(stateIsolationLevel);
 			conn.setReadOnly(stateReadOnly);
 			conn.setAutoCommit(stateAutoCommit);
+			// make the underlying connection pick my holdability state
+			// since holdability is a state of the connection handle
+			// not the underlying transaction.
+			// jdk13 does not have Connection.setHoldability method and hence using
+			// reflection to cover both jdk13 and higher jdks
+			try {
+				Method sh = conn.getClass().getMethod("setHoldability", CONN_PARAM);
+				sh.invoke(conn, CONN_ARG);
+			} catch( Exception e)
+			{
+				throw PublicAPI.wrapStandardException( StandardException.plainWrapException( e));
+			}
 		}
 	}
 

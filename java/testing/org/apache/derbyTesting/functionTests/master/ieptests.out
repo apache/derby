@@ -11,11 +11,11 @@ ij> --After an export from ex_emp and import to imp_emp both tables should have
 insert into ex_emp values(99, 'smith' , 'tennis"p,l,ayer"', 190.55) ;
 1 row inserted/updated/deleted
 ij> -- Perform Export:
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'ex_emp' , 'extinout/emp.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
 ij> -- Perform Import
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'imp_emp' , 'extinout/emp.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' , 
                                       null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> insert into ex_emp values(100, 'smith' , 'tennis"player"', 190.55) ;
@@ -41,11 +41,11 @@ ij> --all values are nulls
 insert into ex_emp values(108, null , null, null) ;
 1 row inserted/updated/deleted
 ij> -- Perform Export:
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'ex_emp' , 'extinout/emp.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
 ij> -- Perform Import
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'imp_emp' , 'extinout/emp.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' , 
                                       null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from ex_emp;
@@ -89,7 +89,7 @@ ij> --export from ex_emp using the a query only rows that got deleted in imp_emp
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from ex_emp where id < 105', 
                                     'extinout/emp.dat' , null, null, null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'imp_emp' , 'extinout/emp.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' , 
                                       null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> --checking query
@@ -105,7 +105,7 @@ call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select name , salary , skills, id from ex_em
                                     'extinout/emp.dat' , null, null, null) ;
 0 rows inserted/updated/deleted
 ij> -- import them in to a with order different than in the table;
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'imp_emp' ,'name, salary, skills, id', null,
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'IMP_EMP' ,'NAME, SALARY, SKILLS, ID', null,
                                     'extinout/emp.dat', null, null, null, 1) ;
 0 rows inserted/updated/deleted
 ij> --check query
@@ -117,7 +117,7 @@ select count(*) from imp_emp, ex_emp
 -----------
 6          
 ij> -- do import replace into the table with table order but using column indexes
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'imp_emp' ,null, '4, 1, 3, 2',
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'IMP_EMP' ,null, '4, 1, 3, 2',
                                     'extinout/emp.dat', null, null, null, 1) ;
 0 rows inserted/updated/deleted
 ij> --check query
@@ -129,7 +129,7 @@ select count(*) from imp_emp, ex_emp
 -----------
 6          
 ij> --replace using insert column names and column indexes
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'imp_emp' ,'salary, id, skills, name', '2, 4, 3, 1',
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'IMP_EMP' ,'SALARY, ID, SKILLS, NAME', '2, 4, 3, 1',
                                     'extinout/emp.dat', null, null, null, 1) ;
 0 rows inserted/updated/deleted
 ij> --check query
@@ -142,10 +142,10 @@ select count(*) from imp_emp, ex_emp
 6          
 ij> ---testing with different delimiters
 -- single quote(') as character delimiter
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'ex_emp' , 'extinout/emp.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                     null, '''', null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'imp_emp' , 'extinout/emp.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' , 
                                     null, '''', null, 1) ;
 0 rows inserted/updated/deleted
 ij> select * from imp_emp ;
@@ -162,12 +162,12 @@ ID         |NAME   |SKILLS                                                      
 107        |smith" |NULL                                                                                                                            |190.55       
 108        |NULL   |NULL                                                                                                                            |NULL         
 ij> -- single quote(') as column delimiter
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'ex_emp' , 'extinout/emp.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                     '''',null, null) ;
 0 rows inserted/updated/deleted
 ij> delete from imp_emp ;
 10 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'imp_emp' , 'extinout/emp.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' , 
                                     '''', null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from imp_emp;
@@ -183,10 +183,10 @@ ID         |NAME   |SKILLS                                                      
 106        |smith  |"""""""""""""""""""                                                                                                             |190.55       
 107        |smith" |NULL                                                                                                                            |190.55       
 108        |NULL   |NULL                                                                                                                            |NULL         
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'ex_emp' , 'extinout/emp.dat' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                  '*', '%', null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ex_emp' , 'extinout/emp.dat' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                  '*', '%', null, 1) ;
 0 rows inserted/updated/deleted
 ij> select * from imp_emp ;
@@ -213,11 +213,11 @@ ij> insert into noncast values(1.5 , 6.7 ) ;
 1 row inserted/updated/deleted
 ij> insert into noncast values(2.5 , 8.999) ;
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP' , 'noncast' , 'extinout/noncast.dat'  , null , null , null) ;
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP' , 'NONCAST' , 'extinout/noncast.dat'  , null , null , null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'noncast' , 'extinout/noncast.dat'  , null , null , null , 0) ;
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'NONCAST' , 'extinout/noncast.dat'  , null , null , null , 0) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'noncast', 'c2 , c1' , '2, 1' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'NONCAST', 'C2 , C1' , '2, 1' , 
                                    'extinout/noncast.dat'  , null , null , null , 0) ;
 0 rows inserted/updated/deleted
 ij> select * from noncast ;
@@ -242,10 +242,10 @@ ij> insert into ttypes values('2004-04-03' , '15:18:31' , 'xxxxxxFILTERED-TIMEST
 1 row inserted/updated/deleted
 ij> insert into ttypes values(null , null , null);
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'ttypes' , 'extinout/ttypes.del' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'TTYPES' , 'extinout/ttypes.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ttypes' , 'extinout/ttypes.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'TTYPES' , 'extinout/ttypes.del' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from ttypes;
@@ -269,10 +269,10 @@ ij> insert into t1 values(1) ;
 1 row inserted/updated/deleted
 ij> insert into t1 values(2) ;
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 't1' , 'extinout/t1.del' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'T1' , 'extinout/t1.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 't1' , 'extinout/t1.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extinout/t1.del' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> --above import should have committed , following rollback should be a noop.
@@ -289,7 +289,7 @@ ij> insert into t1 values(3) ;
 ij> insert into t1 values(4) ;
 1 row inserted/updated/deleted
 ij> --file not found error should rollback 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 't1' , 'extinout/nofile.del' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extinout/nofile.del' , 
                                  null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
@@ -308,7 +308,7 @@ ij> insert into t1 values(3) ;
 ij> insert into t1 values(4) ;
 1 row inserted/updated/deleted
 ij> --table not found error should issue a implicit rollback 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'notable' , 'extinout/t1.del' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'NOTABLE' , 'extinout/t1.del' , 
                                  null, null, null, 0) ;
 ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
@@ -326,7 +326,7 @@ insert into t1 values(1) ;
 1 row inserted/updated/deleted
 ij> insert into t1 values(2) ;
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 't1' , 'extinout/t1.del' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'T1' , 'extinout/t1.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
 ij> --above export should have a commit.rollback below should be a noop
@@ -336,7 +336,7 @@ A
 -----------
 1          
 2          
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 't1' , 'extinout/t1.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extinout/t1.del' , 
                                  null, null, null, 1) ;
 0 rows inserted/updated/deleted
 ij> --above import should have committed , following rollback should be a noop.
@@ -351,7 +351,7 @@ ij> insert into t1 values(3) ;
 ij> insert into t1 values(4) ;
 1 row inserted/updated/deleted
 ij> --file not found error should rollback 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 't1' , 'extinout/nofile.del' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extinout/nofile.del' , 
                                  null, null, null, 1) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
@@ -368,7 +368,7 @@ ij> insert into t1 values(3) ;
 ij> insert into t1 values(4) ;
 1 row inserted/updated/deleted
 ij> --table not found error should issue a implicit rollback 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'notable' , 'extinout/t1.del' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'NOTABLE' , 'extinout/t1.del' , 
                                  null, null, null, 1) ;
 ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
@@ -385,10 +385,10 @@ insert into t1 values(1) ;
 1 row inserted/updated/deleted
 ij> insert into t1 values(2) ;
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 't1' , 'extinout/t1.del' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'T1' , 'extinout/t1.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 't1' , 'a' , '1' , 'extinout/t1.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T1' , 'A' , '1' , 'extinout/t1.del' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> --above import should have committed , following rollback should be a noop.
@@ -405,7 +405,7 @@ ij> insert into t1 values(3) ;
 ij> insert into t1 values(4) ;
 1 row inserted/updated/deleted
 ij> --file not found error should rollback 
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 't1', 'a' , '1'  , 'extinout/nofile.del' , 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T1', 'A' , '1'  , 'extinout/nofile.del' , 
                                  null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
@@ -424,7 +424,7 @@ ij> insert into t1 values(3) ;
 ij> insert into t1 values(4) ;
 1 row inserted/updated/deleted
 ij> --table not found error should issue a implicit rollback 
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'notable' , 'a' , '1', 'extinout/t1.del' , 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'NOTABLE' , 'A' , '1', 'extinout/t1.del' , 
                                  null, null, null, 1) ;
 ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
@@ -441,7 +441,7 @@ insert into t1 values(3) ;
 1 row inserted/updated/deleted
 ij> insert into t1 values(4) ;
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 't1' , 'a' , '1' , 'extinout/t1.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T1' , 'A' , '1' , 'extinout/t1.del' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from t1 ;
@@ -460,7 +460,7 @@ ij> insert into t1 values(5) ;
 ij> insert into t1 values(6) ;
 1 row inserted/updated/deleted
 ij> --following import will back , but should not have any impact on inserts
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 't1', 'a' , '1'  , 'extinout/nofile.del' , 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T1', 'A' , '1'  , 'extinout/nofile.del' , 
                                  null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
@@ -480,7 +480,7 @@ A
 5          
 6          
 ij> --END IMPORT COMMIT/ROLLBACK TESTSING
----all types supported by DB2 cloudscape import/export
+---all types supported by Derby import/export
 create table alltypes(chartype char(20) , 
 	          biginttype bigint , 
 		  datetype date , 
@@ -533,10 +533,10 @@ ij> insert into  alltypes values('"chartype" string' ,
                               'xxxxxxFILTERED-TIMESTAMPxxxxx,
                               '"varchar" testing');
 1 row inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'alltypes' , 'extinout/alltypes.del' , 
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'ALLTYPES' , 'extinout/alltypes.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'alltypes' , 'extinout/alltypes.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALLTYPES' , 'extinout/alltypes.del' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from alltypes ;
@@ -558,7 +558,7 @@ referencing new as newrow
 for each  row mode db2sql
 insert into test1 values(newrow.chartype);
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'alltypes' , 'extinout/alltypes.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALLTYPES' , 'extinout/alltypes.del' , 
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select count(*) from alltypes ;
@@ -573,7 +573,7 @@ chartype string
 "chartype" string   
 ij> delete from alltypes;
 3 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'alltypes' , 'extinout/alltypes.del' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALLTYPES' , 'extinout/alltypes.del' , 
                                  null, null, null, 1) ;
 ERROR 38000: The exception 'SQL Exception: Bulk insert replace is not permitted on 'APP.ALLTYPES' because it has an enabled trigger (TRIG_IMPORT).' was thrown while evaluating an expression.
 ERROR 42Z08: Bulk insert replace is not permitted on 'APP.ALLTYPES' because it has an enabled trigger (TRIG_IMPORT).
@@ -605,7 +605,7 @@ ij> insert into table2 values('Leo',102, 23.4, 'I');
 ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select c1,c3,c4 from table2' , 'extinout/import.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_DATA(NULL,'table1', 'c1,c3,c4' , null, 'extinout/import.del',null, null,null,0);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_DATA(NULL,'TABLE1', 'C1,C3,C4' , null, 'extinout/import.del',null, null,null,0);
 0 rows inserted/updated/deleted
 ij> select * from table1;
 C1                            |C2         |C3           |C4  
@@ -615,14 +615,14 @@ Mike                          |2          |76.9         |K
 Leo                           |3          |23.4         |I   
 ij> delete from table1;
 3 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'table2' , 'extinout/import.del',  null, null, null) ;
+ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'TABLE2' , 'extinout/import.del',  null, null, null) ;
 0 rows inserted/updated/deleted
 ij> --following import should fail becuase of inserting into identity column.
-CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'table1', 'extinout/import.del',null, null, null,1);
+CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'TABLE1', 'extinout/import.del',null, null, null,1);
 ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'C2'.' was thrown while evaluating an expression.
 ERROR 42Z23: Attempt to modify an identity column 'C2'. 
 ij> --following import should be succesful
-CALL SYSCS_UTIL.SYSCS_IMPORT_DATA(NULL, 'table1', 'c1,c3,c4' , '1,3,4', 'extinout/import.del',null, null, null,1);
+CALL SYSCS_UTIL.SYSCS_IMPORT_DATA(NULL, 'TABLE1', 'C1,C3,C4' , '1,3,4', 'extinout/import.del',null, null, null,1);
 0 rows inserted/updated/deleted
 ij> select * from table1;
 C1                            |C2         |C3           |C4  
@@ -633,10 +633,10 @@ Leo                           |3          |23.4         |I
 ij> update table2 set c2=null;
 3 rows inserted/updated/deleted
 ij> --check null values import to identity columns should also fail
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'table2' , 'extinout/import.del' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'TABLE2' , 'extinout/import.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'table1', 'extinout/import.del',null, null, null,1);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'TABLE1', 'extinout/import.del',null, null, null,1);
 ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'C2'.' was thrown while evaluating an expression.
 ERROR 42Z23: Attempt to modify an identity column 'C2'. 
 ij> select * from table1;
@@ -659,7 +659,7 @@ ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from parent where a < 3' , 'ext
                                  null, null, null) ;
 0 rows inserted/updated/deleted
 ij> --replace should fail because of dependent table
-CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'parent', 'extinout/parent.del',null, null, null,1);
+CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'PARENT', 'extinout/parent.del',null, null, null,1);
 ERROR 38000: The exception 'SQL Exception: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.' was thrown while evaluating an expression.
 ERROR 23503: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.
 ij> select * from parent;
@@ -672,7 +672,7 @@ A
 ij> ---test with a file which has a differen records seperators (\n, \r , \r\n)
 create table nt1( a int , b char(30));
 0 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'nt1', 'extin/mixednl.del',null, null, null,0);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'NT1', 'extin/mixednl.del',null, null, null,0);
 0 rows inserted/updated/deleted
 ij> select * from nt1;
 A          |B                             
@@ -705,7 +705,7 @@ create table position_info
        web_flag varchar(1)
     );
 0 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ('APP', 'position_info', 'extin/position_info.del',
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ('APP', 'POSITION_INFO', 'extin/position_info.del',
                                     null, null, null, 1);
 0 rows inserted/updated/deleted
 ij> select count(*) from position_info ;
@@ -717,12 +717,12 @@ DETAIL_DESCRIPTION
 --------------------------------------------------------------------------------------------------------------------------------
 Essential Duties and Responsibilities (include but not limited to):
 *Assist the director in his work activities in leading the&
-ij> CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', 'position_info', 'extinout/pinfo.del',
+ij> CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', 'POSITION_INFO', 'extinout/pinfo.del',
                                     null, null, null);
 0 rows inserted/updated/deleted
 ij> delete from position_info;
 680 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ('APP', 'position_info', 'extinout/pinfo.del',
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ('APP', 'POSITION_INFO', 'extinout/pinfo.del',
                                     null, null, null, 1);
 0 rows inserted/updated/deleted
 ij> select count(*) from position_info ;
@@ -741,13 +741,13 @@ ij> create table dest_always(i int generated always as identity);
 0 rows inserted/updated/deleted
 ij> create table dest_by_default(i int generated by default as identity);
 0 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','dest_always','extinout/autoinc.dat',null,null,null,0);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','DEST_ALWAYS','extinout/autoinc.dat',null,null,null,0);
 ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'I'.' was thrown while evaluating an expression.
 ERROR 42Z23: Attempt to modify an identity column 'I'. 
 ij> select * from dest_always;
 I          
 -----------
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','dest_by_default','extinout/autoinc.dat',null,null,null,0);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','DEST_BY_DEFAULT','extinout/autoinc.dat',null,null,null,0);
 0 rows inserted/updated/deleted
 ij> select * from dest_by_default;
 I          
@@ -763,13 +763,13 @@ ij> create table dest_always(i int generated always as identity);
 0 rows inserted/updated/deleted
 ij> create table dest_by_default(i int generated by default as identity);
 0 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','dest_always','extinout/autoinc.dat',null,null,null,1);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','DEST_ALWAYS','extinout/autoinc.dat',null,null,null,1);
 ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'I'.' was thrown while evaluating an expression.
 ERROR 42Z23: Attempt to modify an identity column 'I'. 
 ij> select * from dest_always;
 I          
 -----------
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','dest_by_default','extinout/autoinc.dat',null,null,null,1);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','DEST_BY_DEFAULT','extinout/autoinc.dat',null,null,null,1);
 0 rows inserted/updated/deleted
 ij> select * from dest_by_default;
 I          
@@ -781,4 +781,147 @@ ij> drop table dest_always;
 0 rows inserted/updated/deleted
 ij> drop table dest_by_default;
 0 rows inserted/updated/deleted
+ij> --test case for bug (DERBY-390)
+--test import/export with reserved words as table Name, column Names ..etc.
+create schema "Group";
+0 rows inserted/updated/deleted
+ij> create table "Group"."Order"("select" int, "delete" int, itemName char(20)) ;
+0 rows inserted/updated/deleted
+ij> insert into "Group"."Order" values(1, 2, 'memory') ;
+1 row inserted/updated/deleted
+ij> insert into "Group"."Order" values(3, 4, 'disk') ;
+1 row inserted/updated/deleted
+ij> insert into "Group"."Order" values(5, 6, 'mouse') ;
+1 row inserted/updated/deleted
+ij> --following export should fail because schema name is not matching the way it is defined using delimited quotes.
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('GROUP', 'Order' , 'extinout/order.dat', null, null, null) ;
+ERROR 38000: The exception 'SQL Exception: Schema 'GROUP' does not exist' was thrown while evaluating an expression.
+ERROR 42Y07: Schema 'GROUP' does not exist
+ij> --following export should fail because table name is not matching the way it is defined in the quotes.
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('Group', 'ORDER' , 'extinout/order.dat', null, null, null) ;
+ERROR 38000: The exception 'SQL Exception: Table 'Group.ORDER' does not exist.' was thrown while evaluating an expression.
+ERROR 42X05: Table 'Group.ORDER' does not exist.
+ij> --following export should fail because of unquoted table name that is a reserved word.
+call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "Group".Order' , 'extinout/order.dat' ,    null , null , null ) ;
+ERROR 38000: The exception 'SQL Exception: Syntax error: Encountered "Order" at line 1, column 23.' was thrown while evaluating an expression.
+ERROR 42X01: Syntax error: Encountered "Order" at line 1, column 23.
+ij> --following exports should pass.
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('Group', 'Order' , 'extinout/order.dat', null, null, null) ;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "Group"."Order"' , 'extinout/order.dat' ,    null , null , null ) ;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select "select" , "delete" , itemName from "Group"."Order"' , 
+                                                 'extinout/order.dat' ,    null , null , null ) ;
+0 rows inserted/updated/deleted
+ij> --following import should fail because schema name is not matching the way it is defined using delimited quotes.
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('GROUP', 'Order' , 'extinout/order.dat', null, null, null, 0) ;
+ERROR XIE0M: Table 'GROUP.Order' does not exist.  
+ij> --following import should fail because table name is not matching the way it is defined in the quotes.
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('Group', 'ORDER' , 'extinout/order.dat', null, null, null, 0) ;
+ERROR XIE0M: Table 'Group.ORDER' does not exist.  
+ij> --following import should fail because table name is not matching the way it is defined in the quotes.
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'ORDER' , null , null ,   'extinout/order.dat'   , null , null , null, 1) ;
+ERROR XIE0M: Table 'Group.ORDER' does not exist.  
+ij> --following import should fail because column name is not matching the way it is defined in the quotes.
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'Order' , 'DELETE, ITEMNAME' , '2, 3' ,   'extinout/order.dat'   , null , null , null, 1) ;
+ERROR XIE08: There is no column named: DELETE.  
+ij> --following import should fail because undelimited column name is not in upper case.
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'Order' , 'delete, itemName' , '2, 3' ,   'extinout/order.dat'   , null , null , null, 1) ;
+ERROR XIE08: There is no column named: itemName.  
+ij> --following imports should pass
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('Group', 'Order' , 'extinout/order.dat', null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select * from "Group"."Order";
+select     |delete     |ITEMNAME            
+--------------------------------------------
+1          |2          |memory              
+3          |4          |disk                
+5          |6          |mouse               
+1          |2          |memory              
+3          |4          |disk                
+5          |6          |mouse               
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'Order' , null , null ,   'extinout/order.dat'   , null , null , null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from "Group"."Order";
+select     |delete     |ITEMNAME            
+--------------------------------------------
+1          |2          |memory              
+3          |4          |disk                
+5          |6          |mouse               
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'Order' , 'delete' , '2' ,   'extinout/order.dat'   , null , null , null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from "Group"."Order";
+select     |delete     |ITEMNAME            
+--------------------------------------------
+NULL       |2          |NULL                
+NULL       |4          |NULL                
+NULL       |6          |NULL                
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'Order' , 'ITEMNAME, select, delete' , '3,2,1' ,   'extinout/order.dat'   , null , null , null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from "Group"."Order";
+select     |delete     |ITEMNAME            
+--------------------------------------------
+2          |1          |memory              
+4          |3          |disk                
+6          |5          |mouse               
+ij> drop table "Group"."Order";
+0 rows inserted/updated/deleted
+ij> ---test undelimited names( All unquoted SQL identfiers should be passed in upper case). 
+create schema inventory;
+0 rows inserted/updated/deleted
+ij> create table inventory.orderTable(id int, amount int, itemName char(20)) ;
+0 rows inserted/updated/deleted
+ij> insert into inventory.orderTable values(101, 5, 'pizza') ;
+1 row inserted/updated/deleted
+ij> insert into inventory.orderTable values(102, 6, 'coke') ;
+1 row inserted/updated/deleted
+ij> insert into inventory.orderTable values(103, 7, 'break sticks') ;
+1 row inserted/updated/deleted
+ij> insert into inventory.orderTable values(104, 8, 'buffolo wings') ;
+1 row inserted/updated/deleted
+ij> --following export should fail because schema name is not in upper case.
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('inventory', 'ORDERTABLE' , 'extinout/order.dat', null, null, null) ;
+ERROR 38000: The exception 'SQL Exception: Schema 'inventory' does not exist' was thrown while evaluating an expression.
+ERROR 42Y07: Schema 'inventory' does not exist
+ij> --following export should fail because table name is not in upper case.
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', 'ordertable' , 'extinout/order.dat', null, null, null) ;
+ERROR 38000: The exception 'SQL Exception: Table 'INVENTORY.ordertable' does not exist.' was thrown while evaluating an expression.
+ERROR 42X05: Table 'INVENTORY.ordertable' does not exist.
+ij> --following export should pass.
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', 'ORDERTABLE' , 'extinout/order.dat', null, null, null) ;
+0 rows inserted/updated/deleted
+ij> --following import should fail because schema name is not in upper case
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('inventory', 'ORDERTABLE' , 'extinout/order.dat', null, null, null, 0) ;
+ERROR XIE0M: Table 'inventory.ORDERTABLE' does not exist.  
+ij> --following import should fail because table name is not in upper case.
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('INVENTORY', 'ordertable' , 'extinout/order.dat', null, null, null, 0) ;
+ERROR XIE0M: Table 'INVENTORY.ordertable' does not exist.  
+ij> --following import should fail because table name is not in upper case .
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('INVENTORY', 'ordertable' , null , null ,   'extinout/order.dat'   , null , null , null, 1) ;
+ERROR XIE0M: Table 'INVENTORY.ordertable' does not exist.  
+ij> --following import should fail because column name is not in upper case.
+call SYSCS_UTIL.SYSCS_IMPORT_DATA('INVENTORY', 'ORDERTABLE' , 'amount, ITEMNAME' , '2, 3' ,   'extinout/order.dat'   , null , null , null, 1) ;
+ERROR XIE08: There is no column named: amount.  
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('INVENTORY', 'ORDERTABLE' , null , null ,   'extinout/order.dat'   , null , null , null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from inventory.orderTable;
+ID         |AMOUNT     |ITEMNAME            
+--------------------------------------------
+101        |5          |pizza               
+102        |6          |coke                
+103        |7          |break sticks        
+104        |8          |buffolo wings       
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('INVENTORY', 'ORDERTABLE' , 'ITEMNAME, ID, AMOUNT' , '3,2,1' ,   'extinout/order.dat'   , null , null , null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from inventory.orderTable;
+ID         |AMOUNT     |ITEMNAME            
+--------------------------------------------
+5          |101        |pizza               
+6          |102        |coke                
+7          |103        |break sticks        
+8          |104        |buffolo wings       
+ij> drop table inventory.orderTable;
+0 rows inserted/updated/deleted
+ij> --end derby-390 related test cases.
+;
 ij> 

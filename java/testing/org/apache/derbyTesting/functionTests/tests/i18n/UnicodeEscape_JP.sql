@@ -17,5 +17,5 @@ insert into jtest values(14,'15:34:30','\u30ea\u30bf\u30fc\u30f3\u30b3\u30fc\u30
 insert into jtest values(15,'15:35:35','sysmaster\u30c7\u30fc\u30bf\u30d9\u30fc\u30b9\u306e\u4f5c\u6210\u306f\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002');
 insert into jtest values(16,'15:39:10','\u30c1\u30a7\u30c3\u30af\u30dd\u30a4\u30f3\u30c8\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f:\u7d99\u7d9a\u6642\u9593\u306f 8\u79d2\u3067\u3057\u305f');
 select * from jtest;
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', 'jtest' , 'extout/jtest.unl' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', 'JTEST' , 'extout/jtest.unl' , 
                                     null, null,'EUC_JP') ;

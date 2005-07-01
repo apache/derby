@@ -24,8 +24,14 @@ org/apache/derby/drda/NetworkServerControl.java
 
 # package: org.apache.derby.jdbc
 
+org/apache/derby/jdbc/ClientBaseDataSource.java
+org/apache/derby/jdbc/ClientConnectionPoolDataSource.java
+org/apache/derby/jdbc/ClientDataSource.java
+org/apache/derby/jdbc/ClientDriver.java
+org/apache/derby/jdbc/ClientXADataSource.java
 org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java
 org/apache/derby/jdbc/EmbeddedDataSource.java
+org/apache/derby/jdbc/EmbeddedSimpleDataSource.java
 org/apache/derby/jdbc/EmbeddedDriver.java
 org/apache/derby/jdbc/EmbeddedXADataSource.java
 
@@ -33,4 +39,4 @@ org/apache/derby/jdbc/EmbeddedXADataSource.java
 
 org/apache/derby/tools/ij.java
 org/apache/derby/tools/sysinfo.java
-org/apache/derby/tools/cslook.java
+org/apache/derby/tools/dblook.java

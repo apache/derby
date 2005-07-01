@@ -364,7 +364,7 @@ ij> create table Alt1 (	Account	int,
 			Payment	decimal(8,2),
 			Balance decimal(8,2));
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'Alt1' , 'extin/Alt1.asc' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT1' , 'extin/Alt1.asc' , 
                                       null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: Invalid character string format for type INTEGER.' was thrown while evaluating an expression.
 ERROR 22018: Invalid character string format for type INTEGER.
@@ -388,7 +388,7 @@ ij> create table Alt3 (	Account	int,
 			Payment	decimal(8,2),
 			Balance decimal(8,2));
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'Alt3' , 'extin/Alt3.asc' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT3' , 'extin/Alt3.asc' , 
                                       null, null, null, 0) ;
 ERROR 38000: The exception 'SQL Exception: Invalid character string format for type INTEGER.' was thrown while evaluating an expression.
 ERROR 22018: Invalid character string format for type INTEGER.
@@ -428,7 +428,7 @@ ij> create table sqlAnywhere1 (
 	email	varchar(80),
 	web	varchar(50));
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'sqlAnywhere1' ,
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'SQLANYWHERE1' ,
                                   null , '1,2,3,4,5,7,8,9,10,11,12,13,14', 
 	 		          'extin/sqlAnywhere1.txt' , 
 				  '|', '''', 'ASCII', 0) ;
@@ -552,7 +552,7 @@ ij> create table sqlAnywhere2 (
 	email varchar(40),
 	phone varchar(30));
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'sqlAnywhere2' , 
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'SQLANYWHERE2' , 
 		                  null , '3, 4, 7, 5',
 			          'extin/sqlAnywhere2.txt' , 
 				  '|', '''', 'ASCII', 0) ;
@@ -584,7 +584,7 @@ ij> create table HouseHoldItem (
 0 rows inserted/updated/deleted
 ij> -- import it first with just LF as record seperator, we should be seeing 
 -- ^M's at the end of note field.
-call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HouseHoldItem' , 
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HOUSEHOLDITEM' , 
 				  null , '2,3,4,5,6,7,8,11,14', 
 				  'extin/Access1.txt' , 
 				  null, null, null, 0) ;
@@ -605,7 +605,7 @@ ij> create table  imp_temp(column2 varchar(200),
                   column5 varchar(200),
                   column6 varchar(200));
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'imp_temp' ,null, '2, 3, 4, 5, 6',
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'IMP_TEMP' ,null, '2, 3, 4, 5, 6',
                                     'extinout/t1.dump', '|', '''', 'ASCII', 0) ;
 0 rows inserted/updated/deleted
 ij> select * from imp_temp ;

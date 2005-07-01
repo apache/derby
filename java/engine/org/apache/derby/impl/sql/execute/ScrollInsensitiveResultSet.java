@@ -232,10 +232,11 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			}
 		}
 
-		// 0 is an invalid parameter
+                // Absolute 0 is defined to be before first!
 		if (row == 0)
 		{
-			throw StandardException.newException(SQLState.LANG_ZERO_INVALID_FOR_R_S_ABSOLUTE);
+                    setBeforeFirstRow();
+                    return null;
 		}
 
 		if (row > 0)
@@ -330,16 +331,15 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			}
 		}
 
-		/* Throw exception if before first or after last */
-		if (beforeFirst || afterLast)
-		{
-			throw StandardException.newException(SQLState.LANG_NO_CURRENT_ROW_FOR_RELATIVE);
-		}
-
 		// Return the current row for 0
 		if (row == 0)
 		{
+                    if ((beforeFirst || afterLast) ||
+                        (!beforeFirst && !afterLast)) {
+                        return null;
+                    } else {
 			return getRowFromHashTable(currentPosition);
+                    }
 		}
 		else if (row > 0)
 		{

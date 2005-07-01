@@ -533,6 +533,12 @@
                includesfile="${javadoctools.dir}/publishedapi.ant"/>
     </copy>
 
+    <!-- client files -->
+    <copy todir="${out.javadoc.dir}/sourcedir">
+      <fileset dir="${derby.client.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+    </copy>
+
     <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
              classpath="${compile.classpath};${osgi};${servlet24};${out.dir}"
              breakiterator="true"
@@ -541,7 +547,7 @@
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
              Footer="${javadoc.Footer}"
-             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2004 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"/>
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2005 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"/>
 
     <delete dir="${out.javadoc.dir}/sourcedir"/>
 
@@ -563,7 +569,7 @@
         windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
         doctitle="Apache Derby V${major}.${minor} Engine Documentation"
         Footer="${javadoc.Footer}"
-        bottom="Apache Derby V${major}.${minor} Engine Documentation - &lt;i&gt;Copyright &amp;copy; 1997,2004 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"
+        bottom="Apache Derby V${major}.${minor} Engine Documentation - &lt;i&gt;Copyright &amp;copy; 1997,2005 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"
         source="1.4">
         <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
                 path="${basedir}/classes"/>
