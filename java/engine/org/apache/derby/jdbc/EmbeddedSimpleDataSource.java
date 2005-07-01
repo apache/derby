@@ -41,12 +41,18 @@ import org.apache.derby.impl.jdbc.Util;
  * 
  * 
  * EmbeddedSimpleDataSource is Derby's DataSource implementation
- * for JSR 169.
+ * for J2ME/CDC/Foundation. It is also supports J2SE platforms.
  * 
- * THIS IS A WORK IN PROGRESS
  * 
- * Supports the same properties as EmbeddedDataSource, see that class for details
- * 
+ * Supports the same properties as EmbeddedDataSource, see that class for details.
+ * <P>
+	EmbeddedSimpleDataSource automatically supports the correct JDBC specification version
+	for the Java Virtual Machine's environment.
+	<UL>
+	<LI> JDBC Optional Package for CDC/Foundation Profile(JSR-169) - J2ME - CDC/Foundation
+	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+	</UL> 
  * @see EmbeddedDataSource
  *
  */
@@ -522,3 +528,4 @@ public class EmbeddedSimpleDataSource implements DataSource {
 		jdbcurl = sb.toString();
 	}
 }
+
