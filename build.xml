@@ -563,7 +563,7 @@
         packagenames="org.*"
         access="private"
         breakiterator="yes"
-        sourcepath="${derby.engine.src.dir};${derby.drda.src.dir};${derby.tools.src.dir}"
+        sourcepath="${derby.engine.src.dir};${derby.client.src.dir};${derby.drda.src.dir};${derby.tools.src.dir}"
         classpath="${basedir}/classes;${java14compile.classpath};${jars.extras};${osgi}"
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
