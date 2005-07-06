@@ -185,9 +185,14 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		if (TestUtil.isJCCFramework())
 		{
 			attrs.setProperty("driverType","4");
+            /**
+             * As per the fix of derby-410
+             * servername should now default to localhost 
+             */
+            attrs.setProperty("serverName","localhost");
 		}
 
-		attrs.setProperty("serverName","localhost");
+
 		attrs.setProperty("portNumber","20000");
 		//attrs.setProperty("retrieveMessagesFromServerOnGetMessage","true");
 		return attrs;
@@ -246,6 +251,12 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	{
 		testRetrieveMessageText();
 		testDescription();
+        
+        //Added for Derby-409
+        testConnectionAttributes();
+        
+        //Added for Derby-406
+        allUsernameAndPasswordTests();
 	}
 
 	/**
@@ -361,7 +372,129 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 
 		}
 	}
-
+       
+    /**
+     * Added for Derby-409
+     * 
+     * Designed to test combinations of attributes to insure that 
+     * no exceptions are thrown. 
+     */
+    public void testConnectionAttributes() {
+        try {
+            System.out.println("Begin connection attribute tests");
+            testDataSourceConnection("One attribute test: ", 
+                    "EDWARD", "noodle", "create=true");
+            testDataSourceConnection("Another different attribute: ", 
+                    "EDWARD", "noodle", "tracefile=trace.out"); 
+            testDataSourceConnection("Two Attributes: ", 
+                    "EDWARD", "noodle", "create=true;tracefile=trace.out");
+            System.out.println("End connection attribute tests");
+        }
+        catch (Exception e)
+        {
+            System.out.println("FAIL: testSetConnectionAttributes() Unexpected Exception " + e.getMessage());
+            e.printStackTrace(System.out);
+        }
+    }
+    
+    /**
+     * Added for Derby-406
+     * 
+     * Tests DataSource with a number of different username/password
+     * input combinations.
+     */
+    public void allUsernameAndPasswordTests() {
+        
+        try {
+            System.out.println("Begin username and password tests");
+            
+            testDataSourceConnection("Normal test: ", "EDWARD", "noodle", null);
+            
+            testDataSourceConnection("No username or password, only attributes test: ", 
+                    null, null, "user=EDWARD;password=noodle");
+            
+            testDataSourceConnection("Bogus username and password, good attributes test: ", 
+                    "Whatis", "theMatrix?", "user=EDWARD;password=noodle");
+            
+            testDataSourceConnection("Username, password attribute test: ", 
+                    "EDWARD", null, "password=noodle");
+            
+            testDataSourceConnection("Password, username attribute test: ", 
+                    null, "noodle", "user=EDWARD");
+            
+            System.out.println("Turning off authentication");
+            DataSource ds = getDS("wombat", "EDWARD", "noodle");
+            Connection conn = ds.getConnection();
+            CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+            cs.setString(1, "derby.connection.requireAuthentication");
+            cs.setString(2, "false");
+            cs.execute();
+            cs.close();
+            cs = null;
+            conn.close();
+            //We have to shut down before the changes will take effect.
+            shutdown();
+            start();
+            
+            testDataSourceConnection("Username, no password test: ", 
+                    "EDWARD", null, null);
+            
+            testDataSourceConnection("No username, password test: ", 
+                    null, "noodle", null);
+            
+            testDataSourceConnection("No username, no password test: ", 
+                    null, null, null);
+            
+            System.out.println("Turning on authentication");
+            ds = getDS("wombat", "EDWARD", "noodle");
+            conn = ds.getConnection();
+            cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+            cs.setString(1, "derby.connection.requireAuthentication");
+            cs.setString(2, "true");
+            cs.execute();
+            cs.close();
+            cs = null;
+            conn.close();
+            shutdown();
+            start();
+            
+            System.out.println("End username and password tests");
+        }
+        catch (Exception e)
+        {
+            System.out.println("FAIL: allUsernameAndPasswordTests. Unexpected Exception " + e.getMessage());
+            e.printStackTrace(System.out);
+        }
+    }
+    
+    /**
+     * A method that attempts to retrieve the connection via a datasource
+     * with the given user, password and connection attributes.
+     * 
+     * @param testType A string description of the type of test
+     * @param username The user
+     * @param password The Password
+     * @param attributes A string to be added to a properties object. A
+     * null string means null Property object.
+     * @throws SQLException
+     */
+    public void testDataSourceConnection(String testType, String username, String password, String attributes) throws SQLException {
+        try {
+            System.out.print(testType);
+            Properties props = null;
+            if (attributes != null) {
+                props = new Properties();
+                props.put("ConnectionAttributes", attributes);
+            }
+            DataSource ds = getDS("wombat", username, password, props);
+            Connection conn = ds.getConnection();
+            conn.close();
+            System.out.println("PASS.");
+        } catch (SQLException e) {
+            System.out.println("FAIL. Unexpected Exception: ");
+            e.printStackTrace(System.out);
+        }
+    }
 }
 
 
