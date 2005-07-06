@@ -1207,6 +1207,8 @@ values cast ('-1e+1' as DECIMAL(6,2));
 values cast ('-1e-1' as DECIMAL(6,2));
 values cast ('-1e-+1' as DECIMAL(6,2));
 values cast ('-1e--1' as DECIMAL(6,2));
+values cast ('-1e+-1' as DECIMAL(6,2));
+values cast ('-1e+-1' as DECIMAL(6,2));
 values cast ('1.0e' as DECIMAL(6,2));
 values cast ('1.0e+' as DECIMAL(6,2));
 values cast ('1.0e-' as DECIMAL(6,2));
