@@ -104,11 +104,6 @@ public class EmbeddedSimpleDataSource implements DataSource {
 	 */
 	private String connectionAttributes;
 
-	/**
-	 * Set password to be a set of connection attributes.
-	 */
-	private boolean attributesAsPassword;
-
 	/** instance variables that will not be serialized */
 	transient private PrintWriter printer;
 
@@ -116,7 +111,7 @@ public class EmbeddedSimpleDataSource implements DataSource {
 
 	// Unlike a DataSource, LocalDriver is shared by all
 	// Cloudscape databases in the same jvm.
-	transient protected InternalDriver driver;
+	transient private InternalDriver driver;
 
 	transient private String jdbcurl;
 
@@ -333,7 +328,12 @@ public class EmbeddedSimpleDataSource implements DataSource {
 	/**
 	 * Set this property to pass in more Cloudscape specific connection URL
 	 * attributes.
-	 * 
+	<BR>
+   Any attributes that can be set using a property of this DataSource implementation
+   (e.g user, password) should not be set in connectionAttributes. Conflicting
+   settings in connectionAttributes and properties of the DataSource will lead to
+   unexpected behaviour. 
+   	 * 
 	 * @param prop
 	 *            set to the list of Cloudscape connection attributes separated
 	 *            by semi-colons. E.g., to specify an encryption bootPassword of
@@ -357,30 +357,6 @@ public class EmbeddedSimpleDataSource implements DataSource {
 		return connectionAttributes;
 	}
 
-	/**
-	 * Set attributeAsPassword property to enable passing connection request
-	 * attributes in the password argument of getConnection. If the property is
-	 * set to true then the password argument of the
-	 * DataSource.getConnection(String user, String password) method call is
-	 * taken to be a list of connection attributes with the same format as the
-	 * connectionAttributes property.
-	 * 
-	 * @param attributesAsPassword
-	 *            true to encode password argument as a set of connection
-	 *            attributes in a connection request.
-	 */
-	public final void setAttributesAsPassword(boolean attributesAsPassword) {
-		this.attributesAsPassword = attributesAsPassword;
-		update();
-	}
-
-	/**
-	 * Return the value of the attributesAsPassword property.
-	 */
-	public final boolean getAttributesAsPassword() {
-		return attributesAsPassword;
-	}
-
 	/*
 	 * DataSource methods
 	 */
@@ -393,7 +369,7 @@ public class EmbeddedSimpleDataSource implements DataSource {
 	 *                if a database-access error occurs.
 	 */
 	public final Connection getConnection() throws SQLException {
-		return this.getConnection(getUser(), getPassword(), false);
+		return this.getConnection(getUser(), getPassword());
 	}
 
 	/**
@@ -413,45 +389,20 @@ public class EmbeddedSimpleDataSource implements DataSource {
 	 */
 	public final Connection getConnection(String username, String password)
 			throws SQLException {
-		return this.getConnection(username, password, true);
-	}
-
-	/**
-	 * @param requestPassword
-	 *            true if the password came from the getConnection() call.
-	 */
-	final Connection getConnection(String username, String password,
-			boolean requestPassword) throws SQLException {
 
 		Properties info = new Properties();
 		if (username != null)
 			info.put(Attribute.USERNAME_ATTR, username);
 
-		if (!requestPassword || !attributesAsPassword) {
-			if (password != null)
-				info.put(Attribute.PASSWORD_ATTR, password);
-		}
+		if (password != null)
+			info.put(Attribute.PASSWORD_ATTR, password);
 
 		if (createDatabase != null)
 			info.put(Attribute.CREATE_ATTR, "true");
 		if (shutdownDatabase != null)
 			info.put(Attribute.SHUTDOWN_ATTR, "true");
 
-		String url = jdbcurl;
-
-		if (attributesAsPassword && requestPassword && password != null) {
-
-			StringBuffer sb = new StringBuffer(url.length() + password.length()
-					+ 1);
-
-			sb.append(url);
-			sb.append(';');
-			sb.append(password); // these are now request attributes on the URL
-
-			url = sb.toString();
-
-		}
-		Connection conn = findDriver().connect(url, info);
+		Connection conn = findDriver().connect(jdbcurl, info);
 
 		// JDBC driver's getConnection method returns null if
 		// the driver does not handle the request's URL.

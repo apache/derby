@@ -60,7 +60,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     //---------------------contructors/finalizers---------------------------------
 
     // This class is abstract, hide the default constructor
-    protected ClientBaseDataSource() {
+    ClientBaseDataSource() {
     }
 
     // ---------------------------- loginTimeout -----------------------------------
@@ -91,7 +91,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      *
      * @see #traceLevel
      */
-    protected transient PrintWriter logWriter = null;
+    private transient PrintWriter logWriter;
 
     public synchronized void setLogWriter(PrintWriter logWriter) {
         this.logWriter = logWriter;
@@ -108,7 +108,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // and therefore may throw an SQLException.
     //
     //
-    protected String databaseName = null;
+    protected String databaseName;
     public final static String propertyKey_databaseName = "databaseName";
 
     // databaseName is not permitted in a properties object
@@ -116,7 +116,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     // ---------------------------- description ------------------------------
     // A description of this data source.
-    protected String description = null;
+    protected String description;
     public final static String propertyKey_description = "description";
 
     // ---------------------------- dataSourceName -----------------------------------
@@ -125,7 +125,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // used to name an underlying XADataSource,
     // or ConnectionPoolDataSource when pooling of connections is done.
     //
-    protected String dataSourceName = null;
+    protected String dataSourceName;
     public final static String propertyKey_dataSourceName = "dataSourceName";
 
     // ---------------------------- portNumber -----------------------------------
@@ -164,10 +164,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     public final static int HOLD_CURSORS_OVER_COMMIT = 1; // this matches jdbc 3 ResultSet.HOLD_CURSORS_OVER_COMMIT
     public final static int CLOSE_CURSORS_AT_COMMIT = 2;  // this matches jdbc 3 ResultSet.CLOSE_CURSORS_AT_COMMIT
-
-    public final static int NOT_SET = 0; // 0 means not set.
-    public final static int YES = 1; // ="yes" as property string
-    public final static int NO = 2;  // ="no" as property string
 
 
     // ---------------------------- securityMechanism -----------------------------------
@@ -238,7 +234,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     // ---------------------------- traceFile -----------------------------------
     //
-    protected String traceFile = null;
+    protected String traceFile;
     public final static String propertyKey_traceFile = "traceFile";
 
     public static String getTraceFile(Properties properties) {
@@ -249,7 +245,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // For the suffix of the trace file when traceDirectory is enabled.
     private transient int traceFileSuffixIndex_ = 0;
     //
-    protected String traceDirectory = null;
+    protected String traceDirectory;
     public final static String propertyKey_traceDirectory = "traceDirectory";
 
     public static String getTraceDirectory(Properties properties) {
@@ -278,10 +274,14 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return properties.getProperty("password");
     }
 
-    protected String password = null;
+    protected String password;
 
-    synchronized public void setPassword(String password) {
+    synchronized public final void setPassword(String password) {
         this.password = password;
+    }
+    
+    public final String getPassword() {
+    	return password;
     }
 
     //------------------------ interface methods ---------------------------------
@@ -358,6 +358,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * Not an external.  Do not document in pubs. Populates member data for this data source given a JNDI reference.
      */
     public void hydrateFromReference(Reference ref) throws SQLException {
+    	
         RefAddr address;
 
         Class clz = getClass();
@@ -495,14 +496,14 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // If neither traceFile nor jdbc logWriter are set, then null is returned.
     // logWriterInUseSuffix used only for trace directories to indicate whether
     // log writer is use is from xads, cpds, sds, ds, driver, config, reset.
-    public LogWriter computeDncLogWriterForNewConnection(String logWriterInUseSuffix) throws SqlException {
+    LogWriter computeDncLogWriterForNewConnection(String logWriterInUseSuffix) throws SqlException {
         return computeDncLogWriterForNewConnection(logWriter, traceDirectory, traceFile, traceFileAppend, traceLevel, logWriterInUseSuffix, traceFileSuffixIndex_++);
     }
 
     // Called on for connection requests.
     // The java.io.PrintWriter overrides the traceFile setting.
     // If neither traceFile, nor logWriter, nor traceDirectory are set, then null is returned.
-    static public LogWriter computeDncLogWriterForNewConnection(PrintWriter logWriter, String traceDirectory, String traceFile, boolean traceFileAppend, int traceLevel, String logWriterInUseSuffix, int traceFileSuffixIndex) throws SqlException {
+    static LogWriter computeDncLogWriterForNewConnection(PrintWriter logWriter, String traceDirectory, String traceFile, boolean traceFileAppend, int traceLevel, String logWriterInUseSuffix, int traceFileSuffixIndex) throws SqlException {
         int globaltraceFileSuffixIndex = Configuration.traceFileSuffixIndex__++;
 
         // compute regular dnc log writer if there is any
@@ -618,7 +619,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // tokenize "property=value;property=value..." and returns new properties object
     //This method is used both by ClientDriver to parse the url and
     // ClientDataSource.setConnectionAttributes
-    public static Properties tokenizeAttributes(String attributeString, Properties properties) throws SqlException {
+    static Properties tokenizeAttributes(String attributeString, Properties properties) throws SqlException {
         Properties augmentedProperties;
 
         if (attributeString == null) {
@@ -783,6 +784,11 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     /**
      * Set this property to pass in more Derby specific connection URL attributes.
+     * <BR>
+     * Any attributes that can be set using a property of this DataSource implementation
+     * (e.g user, password) should not be set in connectionAttributes. Conflicting
+     * settings in connectionAttributes and properties of the DataSource will lead to
+     * unexpected behaviour. 
      *
      * @param prop set to the list of Cloudscape connection attributes separated by semi-colons.   E.g., to specify an
      *             encryption bootPassword of "x8hhk2adf", and set upgrade to true, do the following: <PRE>
@@ -871,7 +877,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * The dataSource keeps individual fields for the values that are relevant to the client. These need to be updated
      * when set connection attributes is called.
      */
-    protected void updateDataSourceValues(Properties prop) {
+    void updateDataSourceValues(Properties prop) {
         if (prop.containsKey(propertyKey_user)) {
             setUser(getUser(prop));
         }

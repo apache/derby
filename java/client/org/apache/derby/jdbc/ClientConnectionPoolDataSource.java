@@ -47,7 +47,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
         if (dncLogWriter != null) {
             dncLogWriter.traceEntry(this, "getPooledConnection");
         }
-        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
+        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, getUser(), getPassword());
         if (dncLogWriter != null) {
             dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
         }
@@ -61,19 +61,6 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
             dncLogWriter.traceEntry(this, "getPooledConnection", user, "<escaped>");
         }
         PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
-        if (dncLogWriter != null) {
-            dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
-        }
-        return pooledConnection;
-    }
-
-    //  method that establishes the initial physical connection using DS properties instead of CPDS properties.
-    public PooledConnection getPooledConnection(ClientDataSource ds, String user, String password) throws SQLException {
-        LogWriter dncLogWriter = ds.computeDncLogWriterForNewConnection("_cpds");
-        if (dncLogWriter != null) {
-            dncLogWriter.traceEntry(this, "getPooledConnection", ds, user, "<escaped>");
-        }
-        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, ds, user, password);
         if (dncLogWriter != null) {
             dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
         }

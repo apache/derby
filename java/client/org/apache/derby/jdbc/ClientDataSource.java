@@ -132,7 +132,7 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
      * @throws java.sql.SQLException if a database-access error occurs.
      */
     public Connection getConnection() throws SQLException {
-        return getConnection(user, password);
+        return getConnection(getUser(), getPassword());
     }
 
     /**
@@ -152,7 +152,7 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
         // This log writer will be passed to the agent constructor.
 
         LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
-        updateDataSourceValues(tokenizeAttributes(connectionAttributes, null));
+        updateDataSourceValues(tokenizeAttributes(getConnectionAttributes(), null));
         return new NetConnection((NetLogWriter) dncLogWriter, user, password, this, -1, false);
     }
 

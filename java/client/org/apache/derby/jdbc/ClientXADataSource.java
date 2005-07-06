@@ -39,7 +39,7 @@ public class ClientXADataSource extends ClientDataSource implements XADataSource
     }
 
     public XAConnection getXAConnection() throws SQLException {
-        return getXAConnection(user, password);
+        return getXAConnection(getUser(), getPassword());
     }
 
     public XAConnection getXAConnection(String user, String password) throws SQLException {

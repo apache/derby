@@ -109,6 +109,11 @@ import org.apache.derby.impl.jdbc.Util;
   E.g. <code>setConnectionAttributes("bootPassword=erd3234dggd3kazkj3000");</code>.
   <BR>The database name must be set by the DataSource property <code>databaseName</code> and not by setting the <code>databaseName</code>
   connection attribute in the <code>connectionAttributes</code> property.
+	<BR>
+   Any attributes that can be set using a property of this DataSource implementation
+   (e.g user, password) should not be set in connectionAttributes. Conflicting
+   settings in connectionAttributes and properties of the DataSource will lead to
+   unexpected behaviour. 
   <BR>Please see the Derby documentation for a complete list of connection attributes. </LI>
 
   <LI><B><code>createDatabase</code></B> (String): <I>Optional</I>
@@ -240,7 +245,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 
 	// Unlike a DataSource, LocalDriver is shared by all
 	// Derby databases in the same jvm.
-	transient protected InternalDriver driver;
+	transient InternalDriver driver;
 
 	transient private String jdbcurl;
 
@@ -358,6 +363,11 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	/**
  		Set this property to pass in more Derby specific
 		connection URL attributes.
+		<BR>
+       Any attributes that can be set using a property of this DataSource implementation
+       (e.g user, password) should not be set in connectionAttributes. Conflicting
+       settings in connectionAttributes and properties of the DataSource will lead to
+       unexpected behaviour. 
 
 		@param prop set to the list of Derby connection
 		attributes separated by semi-colons.   E.g., to specify an encryption
