@@ -49,7 +49,9 @@ Committers      kmarsden  Katherine Marsden (CLA on file)
 Committers      mikem     Mike Matrigali (CLA on file)
 Committers      mcintyre  Samuel McIntyre (CLA on file)
 Committers      coar      Ken Coar (CLA on file)
-Committers                Tomohito Nakayama (CLA on file)
+Committers      tmnk      Tomohito Nakayama (CLA on file)
+Committers                Bernt M. Johnsen (CLA on file)
+Committers                Øyvind Bakksjø (CLA on file)
 
 Completed tasks are shown by the completion date (YYYY-MM-dd).
 Incubation status reports
@@ -212,6 +214,18 @@ RESOLVED ISSUES SINCE LAST STATUS
   Passed with +1 votes from Jeremy Boynes, Jean T Anderson,
   Satheesh Bandaram, Brian McAllister, Mike Matrigali,
   Andrew McIntyre, Kathey Marsden
+
+[VOTE] to accept Bernt M. Johnsen as a committer
+  Passed with +1 votes from Daniel John Debrunner, Jeremy Boynes, Andrew McIntyre
+  Tomohito Nakayama, Jean T Anderson, Mike Matrigali, Satheesh Bandaram
+  and support from Suresh Thalamati, Oystein Grovlen, Dag H. Wanvik, Olav Sandstaa,
+  Lance J. Anderson, Rajesh Kartha, Manjula G Kutty
+  
+[VOTE] to accept Øyvind Bakksjø as a committer
+  Passed with +1 votes from Daniel John Debrunner, Jeremy Boynes, Andrew McIntyre
+  Tomohito Nakayama, Jean T Anderson, Mike Matrigali, Satheesh Bandaram
+  and support from Suresh Thalamati, Oystein Grovlen, Dag H. Wanvik, Olav Sandstaa,
+  Lance J. Anderson, Rajesh Kartha, Manjula G Kutty
 
 OTHER NEWS
 ==========
