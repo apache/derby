@@ -9657,7 +9657,12 @@ DB2DefaultOption(String columnName) throws StandardException :
 	}
 |
 	LOOKAHEAD( {getToken(2).kind == LEFT_PAREN ||
-				getToken(4).kind == LEFT_PAREN})
+		       (getToken(4).kind == LEFT_PAREN && 
+		        getToken(2).kind != COMMA)} ) 
+		// Check against comma: see Derby-331 
+		// Before adding this, the following was erroneously
+		// flagged as invalid: 
+		//	   create table foo(.., b int default 0, unique (a))
 	value = miscBuiltins()
 	{
 		// If we have a function (as indicated by an open paren,

@@ -175,6 +175,17 @@ ij> select * from t7;
 C1         
 -----------
 10         
+ij> -- JIRA issue Derby-331
+create table t_331 (a int not null, b int default 0, unique (a));
+0 rows inserted/updated/deleted
+ij> insert into t_331 values (4, default);
+1 row inserted/updated/deleted
+ij> insert into t_331 values (4, default);
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T_331'.
+ij> select * from t_331;
+A          |B          
+-----------------------
+4          |0          
 ij> -- clean up
 drop function asdf;
 0 rows inserted/updated/deleted
@@ -187,5 +198,7 @@ ij> drop table "x1";
 ij> drop table "otherschema"."y1";
 0 rows inserted/updated/deleted
 ij> drop schema "otherschema" restrict;
+0 rows inserted/updated/deleted
+ij> drop table t_331;
 0 rows inserted/updated/deleted
 ij> 
