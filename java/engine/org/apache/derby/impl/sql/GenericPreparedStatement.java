@@ -353,7 +353,20 @@ recompileOutOfDatePlan:
 
 			/* put it in try block to unlock the PS in any case
 			 */
-			rePrepare(lccToUse);
+			if (!spsAction) {
+			// only re-prepare if this isn't an SPS for a trigger-action;
+			// if it _is_ an SPS for a trigger action, then we can't just
+			// do a regular prepare because the statement might contain
+			// internal SQL that isn't allowed in other statements (such as a
+			// static method call to get the trigger context for retrieval
+			// of "new row" or "old row" values).  So in that case we
+			// skip the call to 'rePrepare' and if the statement is out
+			// of date, we'll get a NEEDS_COMPILE exception when we try
+			// to execute.  That exception will be caught by the executeSPS()
+			// method of the GenericTriggerExecutor class, and at that time
+			// the SPS action will be recompiled correctly.
+				rePrepare(lccToUse);
+			}
 
 			StatementContext statementContext = lccToUse.pushStatementContext(
 				isAtomic, getSource(), pvs, rollbackParentContext, timeoutMillis);
