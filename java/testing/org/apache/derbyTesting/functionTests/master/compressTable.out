@@ -1082,4 +1082,63 @@ ij> drop table oldconglom;
 0 rows inserted/updated/deleted
 ij> drop table newconglom;
 0 rows inserted/updated/deleted
+ij> --test case for bug (DERBY-437)
+--test compress table with reserved words as table Name/schema Name
+create schema "Group";
+0 rows inserted/updated/deleted
+ij> create table "Group"."Order"("select" int, "delete" int, itemName char(20)) ;
+0 rows inserted/updated/deleted
+ij> insert into "Group"."Order" values(1, 2, 'memory') ;
+1 row inserted/updated/deleted
+ij> insert into "Group"."Order" values(3, 4, 'disk') ;
+1 row inserted/updated/deleted
+ij> insert into "Group"."Order" values(5, 6, 'mouse') ;
+1 row inserted/updated/deleted
+ij> --following compress call should fail because schema name is not matching the way it is defined using delimited quotes.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('GROUP', 'Order' , 0) ;
+ERROR 38000: The exception 'SQL Exception: Schema 'GROUP' does not exist' was thrown while evaluating an expression.
+ERROR 42Y07: Schema 'GROUP' does not exist
+ij> --following compress call should fail because table name is not matching the way it is defined in the quotes.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'ORDER' , 0) ;
+ERROR 38000: The exception 'SQL Exception: 'ALTER TABLE' cannot be performed on 'Group.ORDER' because it does not exist.' was thrown while evaluating an expression.
+ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'Group.ORDER' because it does not exist.
+ij> --following compress should pass.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'Order' , 0) ;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'Order' , 1) ;
+0 rows inserted/updated/deleted
+ij> drop table "Group"."Order";
+0 rows inserted/updated/deleted
+ij> drop schema "Group" RESTRICT;
+0 rows inserted/updated/deleted
+ij> ---test undelimited names( All unquoted SQL identfiers should be passed in upper case). 
+create schema inventory;
+0 rows inserted/updated/deleted
+ij> create table inventory.orderTable(id int, amount int, itemName char(20)) ;
+0 rows inserted/updated/deleted
+ij> insert into inventory.orderTable values(101, 5, 'pizza') ;
+1 row inserted/updated/deleted
+ij> insert into inventory.orderTable values(102, 6, 'coke') ;
+1 row inserted/updated/deleted
+ij> insert into inventory.orderTable values(103, 7, 'break sticks') ;
+1 row inserted/updated/deleted
+ij> insert into inventory.orderTable values(104, 8, 'buffolo wings') ;
+1 row inserted/updated/deleted
+ij> --following compress should fail because schema name is not in upper case.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('inventory', 'ORDERTABLE' , 0) ;
+ERROR 38000: The exception 'SQL Exception: Schema 'inventory' does not exist' was thrown while evaluating an expression.
+ERROR 42Y07: Schema 'inventory' does not exist
+ij> --following compress should fail because table name is not in upper case.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('INVENTORY', 'ordertable', 0) ;
+ERROR 38000: The exception 'SQL Exception: 'ALTER TABLE' cannot be performed on 'INVENTORY.ordertable' because it does not exist.' was thrown while evaluating an expression.
+ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'INVENTORY.ordertable' because it does not exist.
+ij> --following compress should pass.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('INVENTORY', 'ORDERTABLE' , 1) ;
+0 rows inserted/updated/deleted
+ij> drop table inventory.orderTable;
+0 rows inserted/updated/deleted
+ij> drop schema inventory RESTRICT;
+0 rows inserted/updated/deleted
+ij> --end derby-437 related test cases.
+;
 ij> 

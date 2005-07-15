@@ -452,3 +452,41 @@ drop table noindexes;
 drop table indexes;
 drop table oldconglom;
 drop table newconglom;
+
+--test case for bug (DERBY-437)
+--test compress table with reserved words as table Name/schema Name
+create schema "Group";
+create table "Group"."Order"("select" int, "delete" int, itemName char(20)) ;
+insert into "Group"."Order" values(1, 2, 'memory') ;
+insert into "Group"."Order" values(3, 4, 'disk') ;
+insert into "Group"."Order" values(5, 6, 'mouse') ;
+
+--following compress call should fail because schema name is not matching the way it is defined using delimited quotes.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('GROUP', 'Order' , 0) ;
+--following compress call should fail because table name is not matching the way it is defined in the quotes.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'ORDER' , 0) ;
+
+--following compress should pass.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'Order' , 0) ;
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'Order' , 1) ;
+drop table "Group"."Order";
+drop schema "Group" RESTRICT;
+---test undelimited names( All unquoted SQL identfiers should be passed in upper case). 
+create schema inventory;
+create table inventory.orderTable(id int, amount int, itemName char(20)) ;
+insert into inventory.orderTable values(101, 5, 'pizza') ;
+insert into inventory.orderTable values(102, 6, 'coke') ;
+insert into inventory.orderTable values(103, 7, 'break sticks') ;
+insert into inventory.orderTable values(104, 8, 'buffolo wings') ;
+
+--following compress should fail because schema name is not in upper case.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('inventory', 'ORDERTABLE' , 0) ;
+--following compress should fail because table name is not in upper case.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('INVENTORY', 'ordertable', 0) ;
+
+--following compress should pass.
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('INVENTORY', 'ORDERTABLE' , 1) ;
+
+drop table inventory.orderTable;
+drop schema inventory RESTRICT;
+--end derby-437 related test cases.
