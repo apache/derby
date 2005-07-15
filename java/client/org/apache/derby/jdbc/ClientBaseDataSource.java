@@ -782,7 +782,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return getUpgradedSecurityMechanism(securityMechanism, password);
     }
 
-    protected String connectionAttributes = "";
+    protected String connectionAttributes = null;
 
     /**
      * Set this property to pass in more Derby specific connection URL attributes.
@@ -880,6 +880,10 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * when set connection attributes is called.
      */
     void updateDataSourceValues(Properties prop) {
+        if (prop == null) {
+            return;
+        }
+        
         if (prop.containsKey(propertyKey_user)) {
             setUser(getUser(prop));
         }
