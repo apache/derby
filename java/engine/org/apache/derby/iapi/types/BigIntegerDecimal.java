@@ -98,6 +98,15 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		return NumberDataType.normalizeDOUBLE(Double.parseDouble(getString()));
 	}	
 	
+    // 0 or null is false, all else is true
+	public boolean	getBoolean()
+	{
+		if (isNull())
+			return false;
+		
+		BigInteger bi = new BigInteger(data2c);
+		return bi.compareTo(java.math.BigInteger.ZERO) != 0;
+	}
 
 	/**
 	 * Set the value from a String, the format is
