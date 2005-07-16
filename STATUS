@@ -248,8 +248,8 @@ http://issues.apache.org/jira/browse/DERBY-297
 RELEASE STATUS
 ==============
 
-Work for A release that includes the new Network Client Driver, 10.1, is 
-underway.
+Derby PPMC voted to release 10.1 - waiting for permission from Incubator PMC to
+distribute the software.
 
 Any release must be approved by the Incubator PMC and must clearly be marked as
 an incubator release, according to the Apache Incubator guidelines:
@@ -260,8 +260,4 @@ Bugs which need to be resolved before the 10.1 release can occur are being
 tracked in JIRA. You can see the current status at:
 
 http://issues.apache.org/jira/browse/DERBY?report=com.atlassian.jira.plugin.system.project:roadmap-panel
-
-Open showstoppers:
-
-  DERBY-217: issue with BLOBs and batch updates in 10.1.0.0
 
