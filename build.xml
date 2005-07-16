@@ -756,6 +756,7 @@
 
     <jar destfile="${derby.jar.dir}/derby.jar" 
          update="true"
+         filesonly="true"
          compress="true">
       <fileset dir="${out.dir}"
                includes="org/apache/derby/loc/m?_en.properties,
@@ -901,6 +902,11 @@
     <copy todir="${derby.jar.dir}/lists/META-INF">
       <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
     </copy>
+  	
+    <manifest file="${derby.jar.dir}/lists/smfnet.mf">
+      <attribute name="Main-Class" value="org.apache.derby.drda.NetworkServerControl"/>
+      <attribute name="Class-Path" value="derby.jar"/>
+    </manifest> 
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
     <jar destfile="${derby.jar.dir}/derbynet.jar"
@@ -911,7 +917,8 @@
     <jar destfile="${derby.jar.dir}/derbynet.jar"
          compress="true"
          filesonly="true"
-         update="true">
+         update="true"
+    	 manifest="${derby.jar.dir}/lists/smfnet.mf">
       <fileset dir="${out.dir}"
                includes="org/apache/derby/loc/drda/**,
                          org/apache/derby/info/net.properties"/>
