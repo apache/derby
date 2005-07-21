@@ -3,7 +3,10 @@ default_derby.properties
 st_schema.sql
 st_schema_app.properties
 st_1.sql
+st_1_app.properties
 st_b5772.sql
+st_b5772_app.properties
 derby94.sql
+derby94_app.properties
 derby94_derby.properties
 onlineCompressTable.sql

@@ -269,6 +269,44 @@ output directory will not be emptied out before testing is
 begun, although individual test files and result files will be cleaned
 out and overwritten.&nbsp;
 </p>
+<p>	
+To run a suite with J2ME/CDC/Foundation:
+</p>
+<table
+ style="text-align: left; width: 546px; height: 32px; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><small>(note that the command below
+has carriage returns for formatting reasons):<br>
+		  syntax:<br></small>
+&nbsp; <small>&lt;java&gt;
+-Xbootclasspath/a:$jardir/&lt;jdbc_jar&gt; -Dbootcp=$jardir/&lt;jdbc_jar&gt; <br>
+-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource <br>
+-Djvmflags="-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource" <br>
+org.apache.derbyTesting.functionTests.harness.RunSuite&nbsp;
+&lt;testsuite&gt;</small><br>
+      <small>where <br>
+      </small>
+      <ul>
+        <li><small>&nbsp;&nbsp; &lt;java&gt; is the jvm with any jvm flags. 
+        For testing with CDC/Foundation Profile using j9 jvm from IBM, 
+        this will be 'j9 -jcl:foun10'. </small></li>
+		<li><small>&nbsp;&nbsp; &lt;jdbc_jar&gt; is the jar file which implements 
+		the JDBC API for CDC/Foundation Profile (JSR169). </small></li>
+        <li><small>&nbsp;&nbsp; &lt;testsuite&gt; is one of the suites under
+org/apache/derbyTesting/suites</small></li>
+      </ul>
+      <small>for example for running&nbsp; the suite derbyall:<br>
+      </small><small>&nbsp;&nbsp; j9 -jcl:foun10 -Xbootclasspath/a:$jardir/jdbc.jar 
+      -Dbootcp=$jardir/jdbc.jar <br>
+	  -Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource <br>
+      -Djvmflags="-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource" <br>
+      org.apache.derbyTesting.functionTests.harness.RunSuite derbyall</small><br>
+      </td>
+    </tr>
+  </tbody>
+</table>		  
 <p>
 The suites provided are:
 </p>

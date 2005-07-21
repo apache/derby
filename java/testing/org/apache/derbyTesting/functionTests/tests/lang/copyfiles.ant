@@ -1,3 +1,4 @@
+db2Compatibility_app.properties
 DB2IsolationLevels.sql
 LOB.sql
 LOBDB2compatibility.sql
@@ -16,13 +17,16 @@ authorize.sql
 authorize_app.properties
 authorize_derby.properties
 autoincrement.sql
+autoincrement_app.properties
 bit.sql
 bit2.sql
 big.sql
 big_derby.properties
 case.sql
 cast.sql
+cast_app.properties
 checkConstraint.sql
+closed_app.properties
 columnDefaults.sql
 columnDefaults_app.properties
 comparisons.sql
@@ -37,6 +41,7 @@ consistencyChecker.sql
 constantExpression.sql
 createTestProcedures.subsql
 currentSchema.sql
+currentSchema_app.properties
 currentof_derby.properties
 cursorerrors.sql
 cursorerrors_app.properties
@@ -84,6 +89,8 @@ floattypes.sql
 floattypes_app.properties
 forupdate.sql
 functions.sql
+functions_app.properties
+GetPropertyInfoTest_app.properties
 groupBy.sql
 holdCursorJavaReflection_app.properties
 holdCursorJava_app.properties
@@ -105,21 +112,27 @@ isolationLevels.sql
 joinDeadlock.sql
 joinDeadlock.sql1
 joinDeadlock.sql2
+joinDeadlock_app.properties
 joinDeadlock_derby.properties
 joins.sql
 joins_app.properties
 langUnitTests.sql
 langUnitTests_derby.properties
+LOBDB2compatibility_app.properties
 lockTable.sql
+lockTable_app.properties
 lockTable_derby.properties
 logop.sql
+logStream_app.properties
 lojreorder.sql
 longStringColumn_derby.properties
 maxMemPerTab.sql
+maxMemPerTab_app.properties
 maxMemPerTab_derby.properties
 miscerrors.sql
 modifyColumn.sql
 nestedCommit.sql
+nestedCommit_app.properties
 nonreserved.sql
 nulls.sql
 openScans.sql
@@ -128,6 +141,7 @@ orderby.sql
 orderbyElimination.sql
 orderbyElimination_derby.properties
 outerjoin.sql
+outparams_app.properties
 paramij.sql
 partdml.sql
 partdml_app.properties
@@ -138,6 +152,7 @@ predicatesIntoViews_derby.properties
 primarykey.sql
 procedure_app.properties
 procedure_derby.properties
+procedureJdbc30_app.properties
 refActions.sql
 refActions1.sql
 refActions2.sql
@@ -160,6 +175,7 @@ repeat_derby.properties
 schemas.sql
 scrollCursors1.sql
 scrollCursors3.sql
+scrollCursors3_app.properties
 select.sql
 selectivity.sql
 selectivity_app.properties
@@ -186,6 +202,7 @@ subqueryFlattening.sql
 subqueryFlattening_derby.properties
 subquery_derby.properties
 supersimple.sql
+supersimple_app.properties
 supersimple_derby.properties
 syscat.sql
 synonym.sql
@@ -197,6 +214,7 @@ triggerGeneral_derby.properties
 triggerRecursion.sql
 triggerRecursion_derby.properties
 triggerRefClause.sql
+triggerRefClause_app.properties
 triggerStream.sql
 triggerStream_app.properties
 triggerStream_derby.properties
@@ -206,6 +224,7 @@ unlimited.sql
 unlimited2.sql
 update.sql
 updateCursor_derby.properties
+updatableResultSet_app.properties
 updatableResultSet_sed.properties
 valuesclause.sql
 views.sql
