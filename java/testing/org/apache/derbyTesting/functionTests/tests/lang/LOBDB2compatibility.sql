@@ -1,4 +1,3 @@
-connect 'jdbc:derby:jonas;create=true';
 
 ----- TEST TO RUN IN DB2 COMPATIBLITY MODE
 --
