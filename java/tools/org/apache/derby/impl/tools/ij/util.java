@@ -51,7 +51,7 @@ import java.util.Locale;
 	@see org.apache.derby.tools.JDBCDisplayUtil
 	@author ames
  */
-public class util implements java.security.PrivilegedAction {
+public final class util implements java.security.PrivilegedAction {
 	
 	private static boolean HAVE_BIG_DECIMAL;
 	
@@ -680,7 +680,7 @@ AppUI.out.println("SIZE="+l);
 		// perhaps just document the behavior... 
 	}
 
-	public static final String getSystemProperty(String propertyName) {
+	static final String getSystemProperty(String propertyName) {
 		try
 		{
 			if (propertyName.startsWith("ij.") || propertyName.startsWith("derby."))

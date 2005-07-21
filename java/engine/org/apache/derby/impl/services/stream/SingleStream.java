@@ -68,7 +68,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author ames
  */
-public class SingleStream
+public final class SingleStream
 implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 {
 

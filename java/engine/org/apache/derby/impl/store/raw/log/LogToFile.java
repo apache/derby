@@ -205,9 +205,12 @@ import java.util.zip.CRC32;
 
 	<P>Multithreading considerations:<BR>
 	Log Factory must be MT-safe.
-*/
+	<P>
+	Class is final as it has methods with privilege blocks
+	and implements PrivilegedExceptionAction.
+	*/
 
-public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
+public final class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 								  Serviceable, java.security.PrivilegedExceptionAction
 {
 
@@ -4677,7 +4680,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		return runBooleanAction(1, file);
     }
 
-    protected synchronized StorageRandomAccessFile privRandomAccessFile(StorageFile file, String perms)
+    private synchronized StorageRandomAccessFile privRandomAccessFile(StorageFile file, String perms)
         throws IOException
     {
 		action = 2;
@@ -4703,7 +4706,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 		return runBooleanAction(4, file);
     }
 
-	protected synchronized String[] privList(File file)
+	private synchronized String[] privList(File file)
     {
 		action = 8;
         toFile = file;
@@ -4718,7 +4721,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
         }
 	}
     
-	protected synchronized String[] privList(StorageFile file)
+	private synchronized String[] privList(StorageFile file)
     {
 		action = 5;
         activeFile = file;
@@ -4734,7 +4737,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 	}
 
 
-	protected synchronized boolean privCopyFile(StorageFile from, File to)
+	private synchronized boolean privCopyFile(StorageFile from, File to)
 	{
 		action = 6;
 		activeFile = from;
@@ -4749,7 +4752,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
         }	
 	}
 
-	protected synchronized boolean privCopyFile(File from, StorageFile to)
+	private synchronized boolean privCopyFile(File from, StorageFile to)
 	{
 		action = 9;
 		activeFile = to;
@@ -4764,7 +4767,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
         }	
 	}
 
-	protected boolean privRemoveDirectory(StorageFile file)
+	private boolean privRemoveDirectory(StorageFile file)
 	{
 		return runBooleanAction(7, file);
 	}
@@ -4784,7 +4787,7 @@ public class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
 
 	
 
-	public Object run() throws IOException {
+	public final Object run() throws IOException {
 		switch (action) {
 		case 0:
 			// SECURITY PERMISSION - MP1

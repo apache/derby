@@ -100,7 +100,7 @@ import java.net.URL;
 
 */
 
-public abstract class BaseMonitor
+abstract class BaseMonitor
 	implements ModuleFactory, BundleFinder {
 
 	/* Fields */
@@ -108,17 +108,17 @@ public abstract class BaseMonitor
 	/**
 		Hashtable of objects that implement PersistentService keyed by their getType() method.
 	*/
-	protected Hashtable serviceProviders;
+	Hashtable serviceProviders;
 
 	// Vector of class objects of implementations, found in the System, application
 	// and default (modules.properties) properties
 
-	protected Vector[]     implementationSets;
+	Vector[]     implementationSets;
 
 	private Vector	  services;					// Vector of TopServices
 
-	protected Properties bootProperties;		// specifc properties provided by the boot method, override everything else
-	protected Properties applicationProperties;
+	Properties bootProperties;		// specifc properties provided by the boot method, override everything else
+	Properties applicationProperties;
 
 	boolean inShutdown;
 
@@ -128,10 +128,10 @@ public abstract class BaseMonitor
 	private UUIDFactory uuidFactory;
     private TimerFactory timerFactory;
 
-	protected boolean reportOn;
+	boolean reportOn;
 	private PrintStream logging;
 
-	protected ThreadGroup daemonGroup;
+	ThreadGroup daemonGroup;
 
 	// anti GC stuff
 	AntiGC dontGC;
@@ -144,7 +144,7 @@ public abstract class BaseMonitor
 //	private InstanceGetter[]	rc4;
 
 	/* Constructor  */
-	public  BaseMonitor() {
+	BaseMonitor() {
 		super();
 
 		services = new Vector(0, 1);
@@ -1306,7 +1306,7 @@ nextModule:
 		return getImplementations(moduleList, true);
 	} // end of getDefaultImplementations
 
-	protected InputStream loadModuleDefinitions( URL propertyFileURL) throws IOException {
+	InputStream loadModuleDefinitions( URL propertyFileURL) throws IOException {
 		// SECURITY PERMISSION - IP1
 		return propertyFileURL.openStream();
 	}
@@ -1338,7 +1338,7 @@ nextModule:
 	/**	
 		Get InputStream for application properties file Returns nul if it does not exist.
 	*/
-	protected abstract InputStream applicationPropertiesStream()
+	abstract InputStream applicationPropertiesStream()
 	  throws IOException;
 
 
@@ -2097,7 +2097,7 @@ nextModule:
 		Initialize the monitor wrt the current environemnt.
 		Returns false if the monitor cannot be initialized, true otherwise.
 	*/
-	public abstract boolean initialize(boolean lite);
+	abstract boolean initialize(boolean lite);
 
     class ProviderEnumeration implements Enumeration
     {

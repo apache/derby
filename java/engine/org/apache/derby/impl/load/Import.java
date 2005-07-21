@@ -248,7 +248,7 @@ public class Import extends ImportAbstract{
 	/** virtual method from the abstract class
 	 * @exception	Exception on error
 	 */
-	protected ImportReadData getImportReadData() throws Exception {
+	ImportReadData getImportReadData() throws Exception {
 		return new ImportReadData(inputFileName, controlFileReader);
 	}
 }

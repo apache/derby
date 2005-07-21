@@ -77,7 +77,7 @@ import org.apache.derby.drda.NetworkServerControl;
 	@see NetworkServerControl for description
 
 */
-public class NetworkServerControlImpl {
+public final class NetworkServerControlImpl {
 	private final static int NO_USAGE_MSGS= 12;
 	private final static String [] COMMANDS = 
 	{"start","shutdown","trace","tracedirectory","ping", 

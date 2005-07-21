@@ -121,7 +121,7 @@ that file was made to inherit from this one.
 
 **/
 
-public class BaseDataFileFactory
+public final class BaseDataFileFactory
     implements DataFactory, CacheableFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
 {
 
@@ -2190,7 +2190,7 @@ public class BaseDataFileFactory
     }
 
     // PrivilegedExceptionAction method
-    public Object run() throws Exception
+    public final Object run() throws Exception
     {
         switch( actionCode)
         {

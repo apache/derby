@@ -23,7 +23,6 @@ package org.apache.derby.impl.services.monitor;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.reference.Property;
 
-import org.apache.derby.impl.services.monitor.BaseMonitor;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
@@ -166,7 +165,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	/**
 		Initialize the system in a privileged block.
 	**/
-	public synchronized final boolean initialize(boolean lite)
+	synchronized final boolean initialize(boolean lite)
 	{
 		action = lite ? 0 : 1;
 		try {
@@ -178,7 +177,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 		}
 	}
 
-	protected synchronized final InputStream loadModuleDefinitions(URL propertyFileURL) throws IOException {
+	synchronized final InputStream loadModuleDefinitions(URL propertyFileURL) throws IOException {
 		action = 2;
         this.propertyFileURL = propertyFileURL;
 		try {
@@ -239,7 +238,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 		}
 	}
 
-	protected synchronized final InputStream applicationPropertiesStream()
+	synchronized final InputStream applicationPropertiesStream()
 	  throws IOException {
 		action = 6;
 		try {

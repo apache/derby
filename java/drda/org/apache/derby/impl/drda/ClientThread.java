@@ -24,7 +24,7 @@ import java.io.*;
 import java.net.*;
 import java.security.*;
 
-class ClientThread extends Thread {
+final class ClientThread extends Thread {
 
 	NetworkServerControlImpl parent;
 	ServerSocket serverSocket;
@@ -33,7 +33,7 @@ class ClientThread extends Thread {
 	private String traceDir;
 	private boolean traceAll;
 
-		protected ClientThread (NetworkServerControlImpl nsi, ServerSocket ss) {
+		ClientThread (NetworkServerControlImpl nsi, ServerSocket ss) {
 
 			// Create a more meaningful name for this thread (but preserve its
 			// thread id from the default name).

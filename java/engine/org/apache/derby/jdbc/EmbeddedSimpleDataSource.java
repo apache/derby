@@ -56,7 +56,7 @@ import org.apache.derby.impl.jdbc.Util;
  * @see EmbeddedDataSource
  *
  */
-public class EmbeddedSimpleDataSource implements DataSource {
+public final class EmbeddedSimpleDataSource implements DataSource {
 
 	private String password;
 
@@ -413,7 +413,7 @@ public class EmbeddedSimpleDataSource implements DataSource {
 		return conn;
 	}
 
-	InternalDriver findDriver() throws SQLException {
+	private InternalDriver findDriver() throws SQLException {
 		String url = jdbcurl;
 
 		if (driver == null || !driver.acceptsURL(url)) {
@@ -439,7 +439,7 @@ public class EmbeddedSimpleDataSource implements DataSource {
 		// else driver != null and driver can accept url
 	}
 
-	void update() {
+	private void update() {
 		StringBuffer sb = new StringBuffer(64);
 
 		sb.append(Attribute.PROTOCOL);

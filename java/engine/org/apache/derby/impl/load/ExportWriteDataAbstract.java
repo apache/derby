@@ -52,7 +52,7 @@ abstract class ExportWriteDataAbstract {
 
   //if control file says true for column definition, write it as first line of the
   //data file
-  public abstract void writeColumnDefinitionOptionally(String[] columnNames,
+  abstract void writeColumnDefinitionOptionally(String[] columnNames,
   													   String[] columnTypes)
   											throws Exception;
 

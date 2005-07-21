@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class EmbeddedActivator implements BundleActivator {
+public final class EmbeddedActivator implements BundleActivator {
 
 	public void start(BundleContext context) {
 		new org.apache.derby.jdbc.EmbeddedDriver();

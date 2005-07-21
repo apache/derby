@@ -87,9 +87,13 @@ import java.security.PrivilegedExceptionAction;
 	<PRE>
 	String TransactionFactoryId=<moduleIdentifier>
 	</PRE>
+	
+	<P>
+	Class is final as it has methods with privilege blocks
+	and implements PrivilegedExceptionAction.
 */
 
-public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
+public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
 {
 	private static final String BACKUP_HISTORY = "BACKUP.HISTORY";
 	private static final String[] BACKUP_FILTER =
@@ -1044,7 +1048,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
         }
 	}
 
-	protected synchronized boolean privExists( File file)
+	private synchronized boolean privExists( File file)
     {
         actionCode = REGULAR_FILE_EXISTS_ACTION;
         actionRegularFile = file;
@@ -1061,7 +1065,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
         }
     }
 
-	protected synchronized boolean privExists(final StorageFile file)
+	private synchronized boolean privExists(final StorageFile file)
     {
         actionCode = STORAGE_FILE_EXISTS_ACTION;
         actionStorageFile = file;
@@ -1079,7 +1083,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
     }
 
 
-    protected synchronized boolean privDelete( File file)
+    private synchronized boolean privDelete( File file)
     {
         actionCode = REGULAR_FILE_DELETE_ACTION;
         actionRegularFile = file;
@@ -1097,7 +1101,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
     }
 
 
-    protected synchronized boolean privMkdirs( File file)
+    private synchronized boolean privMkdirs( File file)
     {
         actionCode = REGULAR_FILE_MKDIRS_ACTION;
         actionRegularFile = file;
@@ -1115,7 +1119,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
     }
 
 
-    protected synchronized boolean privIsDirectory( File file)
+    private synchronized boolean privIsDirectory( File file)
     {
         actionCode = REGULAR_FILE_IS_DIRECTORY_ACTION;
         actionRegularFile = file;
@@ -1132,7 +1136,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
         }
     }
 
-    protected synchronized boolean privRemoveDirectory( File file)
+    private synchronized boolean privRemoveDirectory( File file)
     {
         actionCode = REGULAR_FILE_REMOVE_DIRECTORY_ACTION;
         actionRegularFile = file;
@@ -1149,7 +1153,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
         }
     }
 
-    protected synchronized boolean privRenameTo( File file1, File file2)
+    private synchronized boolean privRenameTo( File file1, File file2)
     {
         actionCode = REGULAR_FILE_RENAME_TO_ACTION;
         actionRegularFile = file1;
@@ -1168,7 +1172,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
         }
     }
 
-    protected synchronized boolean privCopyDirectory( StorageFile from, File to, byte[] buffer, String[] filter)
+    private synchronized boolean privCopyDirectory( StorageFile from, File to, byte[] buffer, String[] filter)
     {
         actionCode = COPY_STORAGE_DIRECTORY_TO_REGULAR_ACTION;
         actionStorageFile = from;
@@ -1192,7 +1196,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
     }
 
 
-    protected synchronized boolean privCopyDirectory( File from, StorageFile to, byte[] buffer, String[] filter)
+    private synchronized boolean privCopyDirectory( File from, StorageFile to, byte[] buffer, String[] filter)
     {
         actionCode = COPY_REGULAR_DIRECTORY_TO_STORAGE_ACTION;
         actionStorageFile = to;
@@ -1216,7 +1220,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
     }
 
 	
-    protected synchronized boolean privCopyFile( File from, StorageFile to)
+    private synchronized boolean privCopyFile( File from, StorageFile to)
     {
         actionCode = COPY_REGULAR_FILE_TO_STORAGE_ACTION;
         actionStorageFile = to;
@@ -1235,7 +1239,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
         }
     }
 
-    protected synchronized String[] privList(final File file)
+    private synchronized String[] privList(final File file)
     {
         actionCode = REGULAR_FILE_LIST_DIRECTORY_ACTION;
         actionRegularFile = file;
@@ -1252,7 +1256,7 @@ public class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportab
     }
 
     // PrivilegedExceptionAction method
-    public Object run() throws IOException
+    public final Object run() throws IOException
     {
         switch(actionCode)
         {

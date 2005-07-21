@@ -61,7 +61,7 @@ import java.security.PrivilegedActionException;
  * This class implements the PersistentService interface using a StorageFactory class.
  * It handles all subSubProtocols except for cache.
  */
-public class PersistentServiceImpl implements PersistentService
+final class PersistentServiceImpl implements PersistentService
 {
 
     private String home; // the path of the database home directory. Can be null
@@ -71,7 +71,7 @@ public class PersistentServiceImpl implements PersistentService
     private StorageFactory rootStorageFactory;
     private char separatorChar;
 
-    public PersistentServiceImpl( String subSubProtocol, Class storageFactoryClass)
+    PersistentServiceImpl( String subSubProtocol, Class storageFactoryClass)
         throws StandardException
     {
         this.subSubProtocol = subSubProtocol;
@@ -816,7 +816,7 @@ public class PersistentServiceImpl implements PersistentService
         return storageFactoryClass;
     }
     
-    class DirectoryList implements Enumeration, PrivilegedAction
+    final class DirectoryList implements Enumeration, PrivilegedAction
     {
         private String[] contents;
         private StorageFile systemDirectory;	 
@@ -853,7 +853,7 @@ public class PersistentServiceImpl implements PersistentService
         } // end of nextElement
 
         // PrivilegedAction method
-        public Object run()
+        public final Object run()
         {
             switch( actionCode)
             {

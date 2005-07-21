@@ -522,7 +522,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	** Security related methods 
 	*/
 	private String productGenus;
-	public Object run() {
+	public final Object run() {
 
 		// SECURITY PERMISSION - IP4
 		return loadProperties(this.productGenus);

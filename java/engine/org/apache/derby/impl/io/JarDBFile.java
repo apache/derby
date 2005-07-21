@@ -33,10 +33,6 @@ import java.io.FileNotFoundException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
 
 /**
  * This class provides a jar file based implementation of the StorageFile interface. It is used by the

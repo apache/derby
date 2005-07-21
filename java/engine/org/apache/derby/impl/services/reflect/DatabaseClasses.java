@@ -220,7 +220,7 @@ public abstract class DatabaseClasses
 		}
 	}
 
-	protected Class loadClassNotInDatabaseJar(String className) throws ClassNotFoundException {
+	Class loadClassNotInDatabaseJar(String className) throws ClassNotFoundException {
 		return Class.forName(className);
 	}
 
@@ -294,5 +294,5 @@ public abstract class DatabaseClasses
 	** Keep track of loaded generated classes and their GeneratedClass objects.
 	*/
 
-	protected abstract LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump); 
+	abstract LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump); 
 }
