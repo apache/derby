@@ -51,7 +51,6 @@ import java.io.DataInput;
 import java.io.IOException;
 
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 
@@ -60,7 +59,7 @@ import java.security.PrivilegedActionException;
 	for FileContainers which are implemented on java.io.RandomAccessFile.
 */
 
-public class RAFContainer extends FileContainer implements PrivilegedExceptionAction
+class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 {
 
 	/*
@@ -91,7 +90,7 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 	 * Constructors
 	 */
 
-	protected RAFContainer(BaseDataFileFactory factory) {
+	RAFContainer(BaseDataFileFactory factory) {
 		super(factory);
 	}
 
@@ -160,7 +159,7 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 		// RESOLVE: leaveStub false
 	}
 
-	protected final void closeContainer() {
+	final void closeContainer() {
 
 		if (fileData != null) {
 			try {
@@ -641,7 +640,7 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 	}
 
 
-	 protected synchronized StorageFile getFileName(ContainerKey identity, boolean stub,
+	 synchronized StorageFile getFileName(ContainerKey identity, boolean stub,
 											 boolean errorOK, boolean tryAlternatePath)
 		 throws StandardException
 	 {
@@ -706,7 +705,7 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
     } // end of privGetFileName
 
 
-	protected synchronized void createContainer(ContainerKey newIdentity)
+	synchronized void createContainer(ContainerKey newIdentity)
         throws StandardException
     {
 
@@ -725,7 +724,7 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
         finally{ actionIdentity = null; }
     } // end of createContainer
 
-	protected synchronized boolean removeFile(StorageFile file)
+	synchronized boolean removeFile(StorageFile file)
         throws SecurityException, StandardException
     {
         actionCode = REMOVE_FILE_ACTION;
@@ -757,7 +756,7 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
 		return true;
     } // end of privRemoveFile
 
-	protected synchronized boolean openContainer(ContainerKey newIdentity)
+	synchronized boolean openContainer(ContainerKey newIdentity)
         throws StandardException
     {
         actionCode = OPEN_CONTAINER_ACTION;
@@ -770,7 +769,7 @@ public class RAFContainer extends FileContainer implements PrivilegedExceptionAc
         finally{ actionIdentity = null; }
     }
 
-	protected synchronized void stubbify(LogInstant instant)
+	private synchronized void stubbify(LogInstant instant)
         throws StandardException
 	{
          // update header, synchronized this in case the cache is cleaning

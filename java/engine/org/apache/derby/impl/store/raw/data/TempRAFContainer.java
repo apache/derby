@@ -130,7 +130,7 @@ class TempRAFContainer extends RAFContainer {
 		needsSync = false;
 	}
 
-	protected StorageFile getFileName(ContainerKey identity, boolean stub,
+	StorageFile getFileName(ContainerKey identity, boolean stub,
         boolean errorOK, boolean tryAlternatePath)
 	{
 		return privGetFileName( identity, stub, errorOK, tryAlternatePath);

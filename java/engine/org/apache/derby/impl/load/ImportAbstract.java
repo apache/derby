@@ -32,28 +32,28 @@ import java.util.ArrayList;
  */
 abstract class ImportAbstract extends VTITemplate {
 
-  protected ControlInfo controlFileReader;
-  protected ImportReadData importReadData;
+  ControlInfo controlFileReader;
+  ImportReadData importReadData;
 
-  protected String[] columnNames;
-  protected int numberOfColumns;
-  protected int[] columnWidths;
+  String[] columnNames;
+  int numberOfColumns;
+  int[] columnWidths;
 
-  protected String[] nextRow;
+  String[] nextRow;
 
-  protected ResultSetMetaData importResultSetMetaData;
-  protected int noOfColumnsExpected;
+  ResultSetMetaData importResultSetMetaData;
+  int noOfColumnsExpected;
 
   private boolean wasNull;
 
-	protected static final String COLUMNNAMEPREFIX = "COLUMN";
+	static final String COLUMNNAMEPREFIX = "COLUMN";
 
-  protected abstract ImportReadData getImportReadData() throws Exception;
+  abstract ImportReadData getImportReadData() throws Exception;
 
   /** Does all the work
  	* @exception	Exception if there is an error
 	*/
-  protected void doAllTheWork() throws Exception {
+  void doAllTheWork() throws Exception {
 
     //prepare the input file for import. Get the number of columns per row
     //from the input file.
@@ -80,7 +80,7 @@ abstract class ImportAbstract extends VTITemplate {
 //    while (next()) ;
   }
   //the column names will be Column#
-  protected void loadColumnNames() {
+  void loadColumnNames() {
     for (int i=1; i<=numberOfColumns; i++)
       columnNames[i-1] = COLUMNNAMEPREFIX + i;
   }

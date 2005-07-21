@@ -33,7 +33,7 @@ public final class ReflectClassesJava2 extends DatabaseClasses
 
 	private int action;
 
-	protected synchronized LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump) {
+	synchronized LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump) {
 
 		if (classDump == null || classDump.getArray() == null) {
 
@@ -61,7 +61,7 @@ public final class ReflectClassesJava2 extends DatabaseClasses
 		return ((ReflectLoaderJava2) java.security.AccessController.doPrivileged(this)).loadGeneratedClass(fullyQualifiedName, classDump);
 	}
 
-	public Object run() {
+	public final Object run() {
 		// SECURITY PERMISSION - MP2
 		switch (action) {
 		case 1:
@@ -73,7 +73,7 @@ public final class ReflectClassesJava2 extends DatabaseClasses
 		}
 	}
 
-	protected synchronized Class loadClassNotInDatabaseJar(String name) throws ClassNotFoundException {
+	synchronized Class loadClassNotInDatabaseJar(String name) throws ClassNotFoundException {
 		
 		Class foundClass = null;
 		action = 2;

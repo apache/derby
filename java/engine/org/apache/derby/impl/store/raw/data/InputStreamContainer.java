@@ -44,7 +44,7 @@ import java.io.DataInputStream;
 
 */
 
-public class InputStreamContainer extends FileContainer  {
+final class InputStreamContainer extends FileContainer  {
 
     private StorageFile containerPath;
     
@@ -52,12 +52,12 @@ public class InputStreamContainer extends FileContainer  {
 	 * Constructors
 	 */
 
-	public InputStreamContainer(BaseDataFileFactory factory) {
+	InputStreamContainer(BaseDataFileFactory factory) {
 		super(factory);
 		canUpdate = false;
 	}
 
-	protected final boolean openContainer(ContainerKey newIdentity) throws StandardException {
+	final boolean openContainer(ContainerKey newIdentity) throws StandardException {
 		DataInputStream dis = null;
 		try
         {
@@ -105,7 +105,7 @@ public class InputStreamContainer extends FileContainer  {
 		}
 	} // end of openContainer
 
-	protected void closeContainer()
+	void closeContainer()
     {
 		containerPath = null;
 	}
@@ -147,7 +147,7 @@ public class InputStreamContainer extends FileContainer  {
 		Create a new container, all references to identity must be through the
 		passed in identity, this object will no identity until after this method returns.
 	*/
-	protected void createContainer(ContainerKey newIdentity) throws StandardException {
+	void createContainer(ContainerKey newIdentity) throws StandardException {
 		// RESOLVE - probably should throw an error ...
 	}
 

@@ -41,7 +41,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
   private OutputStreamWriter aStream;
 
   //writes data into the o/p file using control file properties
-  public ExportWriteData(String outputFileName, ControlInfo controlFileReader)
+  ExportWriteData(String outputFileName, ControlInfo controlFileReader)
   throws Exception {
     this.outputFileName = outputFileName;
     this.controlFileReader = controlFileReader;
@@ -74,7 +74,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
   *  data file
  	* @exception	Exception if there is an error
 	*/
-  public void writeColumnDefinitionOptionally(String[] columnNames,
+  void writeColumnDefinitionOptionally(String[] columnNames,
   											  String[] columnTypes)
   														throws Exception {
 	boolean ignoreColumnTypes=true;

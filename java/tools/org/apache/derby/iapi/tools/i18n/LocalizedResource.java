@@ -42,7 +42,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 
-public class LocalizedResource  implements java.security.PrivilegedAction {
+public final class LocalizedResource  implements java.security.PrivilegedAction {
 
 	private ResourceBundle res;
 	private Locale locale;

@@ -40,7 +40,7 @@ import java.util.Locale;
 */
 
 
-class TopService {
+final class TopService {
 
 	/*
 	** Fields.
@@ -49,32 +49,32 @@ class TopService {
 	/**
 		The idenity of this service, note that it may not be active yet.
 	*/
-	protected ProtocolKey key;
+	ProtocolKey key;
 
 	/**
 		The top module instance
 	*/
-	protected ModuleInstance topModule;
+	ModuleInstance topModule;
 
 	/**
 		List of protocols.
 	*/
-	protected Hashtable		protocolTable;
+	Hashtable		protocolTable;
 
 	/**
 	*/
-	protected Vector		moduleInstances;
+	Vector		moduleInstances;
 
 	/**
 	*/
-	protected BaseMonitor	monitor;
+	BaseMonitor	monitor;
 
-	protected boolean inShutdown;
+	boolean inShutdown;
 
 	/**
 		The type of service this was created by. If null then this is a non-persistent service.
 	*/
-	protected PersistentService serviceType;
+	PersistentService serviceType;
 
 	Locale serviceLocale;
 
@@ -99,7 +99,7 @@ class TopService {
 		this.serviceLocale = serviceLocale;
 	}
 
-	protected void setTopModule(Object instance) {
+	void setTopModule(Object instance) {
 		synchronized (this) {
 			for (int i = 0; i < moduleInstances.size(); i++) {
 				ModuleInstance module = (ModuleInstance) moduleInstances.elementAt(i);
@@ -124,12 +124,12 @@ class TopService {
 		}
 	}
 
-	protected Object getService() {
+	Object getService() {
 
 		return topModule.getInstance();
 	}
 
-	protected boolean isPotentialService(ProtocolKey otherKey) {
+	boolean isPotentialService(ProtocolKey otherKey) {
 
 
 		String otherCanonicalName;
@@ -207,7 +207,7 @@ class TopService {
 		Returns the instance of the module or null if one does not exist in
 		the protocol table.
 	*/
-	protected synchronized Object findModule(ProtocolKey key, boolean findOnly, Properties properties) {
+	synchronized Object findModule(ProtocolKey key, boolean findOnly, Properties properties) {
 
 		ModuleInstance module = (ModuleInstance) protocolTable.get(key);
 
@@ -380,7 +380,7 @@ class TopService {
 		}
 	}
 
-	protected boolean inService(Object instance) {
+	boolean inService(Object instance) {
 
 		for (int i = 0; i < moduleInstances.size(); i++) {
 

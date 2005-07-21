@@ -133,7 +133,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
   }
   //inputFileName: File to read data from
   //controlFileReader: File used to interpret data in the inputFileName
-  public ImportReadData(String inputFileName, ControlInfo controlFileReader)
+  ImportReadData(String inputFileName, ControlInfo controlFileReader)
   throws Exception {
     this.inputFileName = inputFileName;
     this.controlFileReader = controlFileReader;
@@ -147,7 +147,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
   }
 
   //just a getter returning number of columns for a row in the data file
-  public int getNumberOfColumns() {
+  int getNumberOfColumns() {
     return numberOfColumns;
   }
   /**if columndefinition is true, ignore first row. The way to do that is to just
@@ -262,7 +262,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
   /**close the input data file
  	* @exception	Exception if there is an error
 	*/
-  public void closeStream() throws Exception {
+  void closeStream() throws Exception {
     if (streamOpenForReading) {
        bufferedReader.close();
        streamOpenForReading = false;
@@ -270,7 +270,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
   }
 
   //actually looks at the data file to find how many columns make up a row
-  public int findNumberOfColumnsInARow() throws Exception {
+  int findNumberOfColumnsInARow() throws Exception {
     // init the number of columns to 1 - no such thing as a table
     // without columns
     numberOfColumns=1;
@@ -358,7 +358,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
   //keep looking for field and record separators simultaneously because we don't yet
   //know how many columns make up a row in this data file. Stop as soon as we get
   //the record separator which is indicated by a return value of true from this function
-  public boolean readTokensUntilEndOfRecord() throws Exception {
+  boolean readTokensUntilEndOfRecord() throws Exception {
     int nextChar;
     int fieldSeparatorIndex = 0;
     int recordSeparatorIndex = 0;
@@ -610,14 +610,14 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
 
   /**returns the number of the current row
   */
-  public int getCurrentRowNumber() {
+  int getCurrentRowNumber() {
     return lineNumber;
   }
 
   /**the way we read the next row from input file depends on it's format
  	* @exception	Exception if there is an error
 	*/
-  public boolean readNextRow(String[] returnStringArray) throws Exception {
+  boolean readNextRow(String[] returnStringArray) throws Exception {
     boolean readVal;
     int idx;
 
@@ -856,7 +856,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
     return true;
   }
   //read one column's value at a time
-  public boolean readNextToken(char[] delimiter, int delimiterIndex,
+  boolean readNextToken(char[] delimiter, int delimiterIndex,
 							   int delimiterLength, 
 							   boolean isRecordSeperator) throws Exception {
     int nextChar;

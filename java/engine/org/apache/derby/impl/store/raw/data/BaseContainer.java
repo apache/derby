@@ -59,7 +59,7 @@ import java.util.Hashtable;
 	allocated.
 	<BR> MT - Mutable - mutable identity : 
 */
-public abstract class BaseContainer implements Lockable {
+abstract class BaseContainer implements Lockable {
 
 	/**
 		Identity of the container.
@@ -100,7 +100,7 @@ public abstract class BaseContainer implements Lockable {
 	*/
 	protected boolean isReusableRecordId = false;
 
-	protected BaseContainer() {
+	BaseContainer() {
 	}
 
 	/*

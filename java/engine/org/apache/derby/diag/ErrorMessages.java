@@ -62,7 +62,7 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  * </UL>
  * 
  */
-public class ErrorMessages extends VTITemplate implements VTICosting, java.security.PrivilegedAction  {
+public final class ErrorMessages extends VTITemplate implements VTICosting, java.security.PrivilegedAction  {
 	
 	/* The name of the file containing all the SQLSTate codes.
 	 * The class gets the SQLState code from the messages

@@ -160,7 +160,7 @@ import java.sql.Types;
  * booting this class instead of booting the super-class.
  */
 
-public	class	DataDictionaryImpl
+public final class	DataDictionaryImpl
 	implements DataDictionary, CacheableFactory, ModuleControl, ModuleSupportable,java.security.PrivilegedAction
 {
 

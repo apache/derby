@@ -32,11 +32,6 @@ import java.io.FileNotFoundException;
 
 import java.net.URL;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
-
 /**
  * This class provides a class path based implementation of the StorageFile interface. It is used by the
  * database engine to access persistent data and transaction logs under the classpath subsubprotocol.

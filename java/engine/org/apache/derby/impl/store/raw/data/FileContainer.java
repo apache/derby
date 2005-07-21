@@ -81,7 +81,7 @@ import java.util.zip.CRC32;
 	This class extends BaseContainer and implements Cacheable and TypedFormat
 */
 
-public abstract class FileContainer 
+abstract class FileContainer 
     extends BaseContainer implements Cacheable, TypedFormat
 {
 
@@ -307,7 +307,7 @@ public abstract class FileContainer
 	protected static final String SPACE_TRACE = 
         (SanityManager.DEBUG ? "SpaceTrace" : null);
 
-	protected FileContainer(BaseDataFileFactory factory) 
+	FileContainer(BaseDataFileFactory factory) 
     {
 		dataFactory = factory;
 		pageCache = factory.getPageCache();
@@ -547,7 +547,7 @@ public abstract class FileContainer
      *
      * @exception StandardException Cloudscape Standard error policy
      **/
-	protected abstract void createContainer(ContainerKey newIdentity) 
+	abstract void createContainer(ContainerKey newIdentity) 
         throws StandardException;
 	
 
@@ -565,10 +565,10 @@ public abstract class FileContainer
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-	protected abstract boolean openContainer(ContainerKey newIdentity) 
+	abstract boolean openContainer(ContainerKey newIdentity) 
         throws StandardException;
 
-	protected abstract void closeContainer();
+	abstract void closeContainer();
 
     /**
      * Drop Container.

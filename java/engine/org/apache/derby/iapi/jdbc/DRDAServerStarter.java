@@ -36,7 +36,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-public class DRDAServerStarter implements ModuleControl, Runnable
+public final class DRDAServerStarter implements ModuleControl, Runnable
 {
 
     private Object server;
