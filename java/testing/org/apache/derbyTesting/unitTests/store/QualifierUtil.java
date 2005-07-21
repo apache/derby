@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.store.access.conglomerate.QualifierUtil
+   Derby - Class org.apache.derbyTesting.unitTests.store..QualifierUtil
 
    Copyright 1999, 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -18,13 +18,13 @@
 
  */
 
-package org.apache.derby.impl.store.access.conglomerate;
+package org.apache.derbyTesting.unitTests.store;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-public class QualifierUtil implements Qualifier 
+class QualifierUtil implements Qualifier 
 {
     private int                 column_id;
     private DataValueDescriptor key_val;
