@@ -7,7 +7,7 @@ DS connected as FRANCES
 Checking connections with DataSource
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 data source with no default user
-EXPECTED CONNFAIL null userid not supported
+EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
 EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
 DS connected as EDWARD
 DS connected as FRANCES
@@ -22,7 +22,7 @@ DS connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 Checking connections with ConnectionPoolDataSource
 ConnectionPoolDataSource with no default user
-EXPECTED CONNFAIL null userid not supported
+EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
 EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
 CP connected as EDWARD
 CP connected as FRANCES
@@ -39,4 +39,23 @@ EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Datab
 PASS: Message text not retrieved
 ** checkMessageText() with retrieveMessageText= true
 PASS: Message Text retrieved properly
+Begin connection attribute tests
+One attribute test: PASS.
+Another different attribute: PASS.
+Two Attributes: PASS.
+End connection attribute tests
+Begin username and password tests
+Normal test: PASS.
+No username or password, only attributes test: PASS.
+Bogus username and password, good attributes test: PASS.
+Username, password attribute test: PASS.
+Password, username attribute test: PASS.
+Turning off authentication
+EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+Username, no password test: PASS.
+No username, password test: PASS.
+No username, no password test: PASS.
+Turning on authentication
+EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+End username and password tests
 Completed dataSourcePermissions_net

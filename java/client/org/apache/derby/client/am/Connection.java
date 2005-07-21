@@ -155,7 +155,8 @@ public abstract class Connection implements java.sql.Connection,
         user_ = user;
 
         // Extract common properties.
-        databaseName_ = dataSource.getDatabaseName() + dataSource.getConnectionAttributes();
+        // Derby-409 fix
+        databaseName_ = dataSource.getDatabaseName() + ";" + dataSource.getConnectionAttributes();
         retrieveMessageText_ = dataSource.getRetrieveMessageText();
 
         loginTimeout_ = dataSource.getLoginTimeout();

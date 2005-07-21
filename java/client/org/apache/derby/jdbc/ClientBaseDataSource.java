@@ -136,8 +136,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     // ---------------------------- serverName -----------------------------------
     //
-    //
-    protected String serverName = null;
+    // Derby-410 fix.
+    protected String serverName = propertyDefault_serverName;
+    public final static String propertyDefault_serverName = "localhost";
     public final static String propertyKey_serverName = "serverName";
 
     // serverName is not permitted in a properties object
@@ -153,7 +154,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // Each data source implementation subclass will maintain it's own <code>password</code> property.
     // This password property may or may not be declared transient, and therefore may be serialized
     // to a file in clear-text, care must taken by the user to prevent security breaches.
-    protected String user = null;
+    // Derby-406 fix
+    protected String user = propertyDefault_user;
     public final static String propertyKey_user = "user";
     public final static String propertyDefault_user = "APP";
 
