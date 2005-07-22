@@ -792,6 +792,9 @@
     	<section name="org/apache/derby/impl/tools/sysinfo/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
+    	<section name="org/apache/derby/iapi/services/context/">
+    	  <attribute name="Sealed" value="false"/>
+    	</section>
     	<section name="org/apache/derby/iapi/services/info/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
@@ -847,6 +850,9 @@
     	  <attribute name="Sealed" value="false"/>
     	</section>
     	<section name="org/apache/derby/jdbc/">
+    	  <attribute name="Sealed" value="false"/>
+    	</section>
+    	<section name="org/apache/derby/iapi/services/context/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
     	<section name="org/apache/derby/info/">
