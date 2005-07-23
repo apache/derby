@@ -230,6 +230,7 @@ public class SortResultSet extends NoPutResultSetImpl
      */
 	public void	openCore() throws StandardException 
 	{
+		nextCalled = false;
 		beginTime = getCurrentTimeMillis();
 		// REVISIT: through the direct DB API, this needs to be an
 		// error, not an ASSERT; users can open twice. Only through JDBC
