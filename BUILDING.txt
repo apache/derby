@@ -609,11 +609,10 @@ sanity state, org.apache.derby.iapi.services.sanity.SanityState
 is then generated from a template. The sanity state defaults to 
 true. This also directs the compiler to turn on all debugging 
 options on the compiler. The sanity state can be set to insane 
-by running 'ant insane' or passing in the value -Dsane=false or 
--Dsanity=false. Note that this file will be removed after 
-'ant clobber,' so if you are rebuilding from scratch and want 
-the build to be a non-debug build, run 'ant insane' before 
-building.
+by running 'ant insane' or passing in the value -Dsane=false.
+Note that this file will be removed after 'ant clobber,' so if
+you are rebuilding from scratch and want the build to be a
+non-debug build, run 'ant insane' before building.
 
 Once the sanity state has been generated, Ant prints out for 
 reference the current properties that affect the build, 
