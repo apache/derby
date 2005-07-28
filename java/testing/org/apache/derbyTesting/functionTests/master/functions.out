@@ -527,4 +527,46 @@ ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_E;
 0 rows inserted/updated/deleted
 ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_NS;
 0 rows inserted/updated/deleted
+ij> -- Test for DERBY-479 the commented out VALUES clauses
+-- below cause linkage errors loading the generated class.;
+CREATE FUNCTION RN_COS(A DOUBLE) RETURNS DOUBLE
+EXTERNAL NAME 'java.lang.Math.cos(double)'
+RETURNS NULL ON NULL INPUT
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION RN_RADIANS(A DOUBLE) RETURNS DOUBLE
+EXTERNAL NAME 'java.lang.Math.toRadians(double)'
+RETURNS NULL ON NULL INPUT
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION CALL_COS(A DOUBLE) RETURNS DOUBLE
+EXTERNAL NAME 'java.lang.Math.cos(double)'
+CALLED ON NULL INPUT
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION CALL_RADIANS(A DOUBLE) RETURNS DOUBLE
+EXTERNAL NAME 'java.lang.Math.toRadians(double)'
+CALLED ON NULL INPUT
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> -- DERBY-479;
+-- VALUES CAST( RN_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
+VALUES CAST( CALL_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
+1     
+------
+0.00  
+ij> -- DERBY-479;
+-- VALUES CAST( CALL_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
+VALUES CAST( RN_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
+1     
+------
+0.00  
+ij> DROP FUNCTION RN_COS;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION RN_RADIANS;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION CALL_COS;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION CALL_RADIANS;
+0 rows inserted/updated/deleted
 ij> 
