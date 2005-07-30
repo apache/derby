@@ -20,10 +20,9 @@
 
 package org.apache.derby.ui.launch;
 
-import org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate;
-
+import org.eclipse.jdt.launching.JavaLaunchDelegate;
 
 public class StartDerbyServerLaunchConfigurationDelegate extends
-		JavaLocalApplicationLaunchConfigurationDelegate {
-
+		JavaLaunchDelegate {
+	
 }

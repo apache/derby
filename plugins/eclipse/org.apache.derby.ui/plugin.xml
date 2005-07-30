@@ -3,7 +3,7 @@
 <plugin
    id="org.apache.derby.ui"
    name="Apache Derby Ui Plug-in for Eclipse"
-   version="1.0.0"
+   version="1.1.0"
    provider-name="The Apache Software Foundation"
    class="org.apache.derby.ui.DerbyPlugin">
 
@@ -380,7 +380,7 @@
             public="false"
             name="IJ"
             id="org.apache.derby.ui.ijDerbyLaunchConfigurationType"
-            modes="run, debug"/>
+            modes="run, debug"/>         
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
