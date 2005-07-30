@@ -49,6 +49,11 @@ cursorerrors_derby.properties
 datetime.sql
 db2Compatibility.sql
 dbManagerLimits_app.properties
+dcl.sql
+dcl_app.properties
+dcl_emc1.jar
+dcl_emc2.jar
+dcl_emcaddon.jar
 ddlTableLockMode.sql
 ddlTableLockMode_app.properties
 deadlockMode_derby.properties
