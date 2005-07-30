@@ -122,7 +122,6 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		this.sqlAllowed = sqlAllowed;
 		this.calledOnNullInput = calledOnNullInput;
 		this.returnType = returnType;
-		setAliasType();
 
 		if (SanityManager.DEBUG) {
 
@@ -232,7 +231,6 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			parameterTypes = null;
 			parameterModes = null;
 		}
-		setAliasType();
 	}
 
 	/**
@@ -286,7 +284,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			if (i != 0)
 				sb.append(',');
 
-			if (aliasType == AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR) {
+			if (returnType == null) {
 			// This is a PROCEDURE.  We only want to print the
 			// parameter mode (ex. "IN", "OUT", "INOUT") for procedures--
 			// we don't do it for functions since use of the "IN" keyword
@@ -300,14 +298,14 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		}
 		sb.append(')');
 
-		if (aliasType == AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR) {
+		if (returnType != null) {
 		// this a FUNCTION, so syntax requires us to append the return type.
 			sb.append(" RETURNS " + returnType.getSQLstring());
 		}
 
 		sb.append(" LANGUAGE JAVA PARAMETER STYLE JAVA ");
 		sb.append(RoutineAliasInfo.SQL_CONTROL[getSQLAllowed()]);
-		if ((aliasType == AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR) &&
+		if ((returnType == null) &&
 			(dynamicResultSets != 0))
 		{ // Only print dynamic result sets if this is a PROCEDURE
 		  // because it's not valid syntax for FUNCTIONs.
@@ -315,7 +313,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			sb.append(dynamicResultSets);
 		}
 
-		if (aliasType == AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR) {
+		if (returnType != null) {
 		// this a FUNCTION, so append the syntax telling what to
 		// do with a null parameter.
 			sb.append(calledOnNullInput ? " CALLED " : " RETURNS NULL ");
@@ -336,19 +334,5 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		default:
 			return "UNKNOWN";
 		}
-	}
-
-	/**
-	 * Set the type of this alias based on whether or not
-	 * the returnType is null.
-	 */
-	private void setAliasType()
-	{
-		if (returnType == null)
-		// must be a PROCEDURE.
-			aliasType = AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR;
-		else
-		// must be a FUNCTION.
-			aliasType = AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR;
 	}
 }

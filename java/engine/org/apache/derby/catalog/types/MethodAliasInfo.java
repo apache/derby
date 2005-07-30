@@ -113,20 +113,6 @@ implements AliasInfo, Formatable
 	{
 		return methodName;
 	}
-	/**
-	  @see org.apache.derby.catalog.AliasInfo#getTargetClassName
-	  */
-	public String getTargetClassName()
-	{
-		return null;
-	}
-	/**
-	  @see org.apache.derby.catalog.AliasInfo#getTargetMethodName
-	  */
-	public String getTargetMethodName()
-	{
-		return null;
-	}
 
 	/**
 	  @see java.lang.Object#toString

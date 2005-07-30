@@ -258,3 +258,42 @@ DROP FUNCTION RN_COS;
 DROP FUNCTION RN_RADIANS;
 DROP FUNCTION CALL_COS;
 DROP FUNCTION CALL_RADIANS;
+
+
+
+-- SYSFUN functions (unqualifed functions are automatically resolved
+-- to the in-memory SYSFUN functions if the function does not exist
+-- in the current schema.
+
+-- SYSFUN math functions
+create table SYSFUN_MATH_TEST (d double);
+insert into SYSFUN_MATH_TEST values null;
+insert into SYSFUN_MATH_TEST values 0.67;
+insert into SYSFUN_MATH_TEST values 1.34;
+
+-- cast result to DECIMAL to reduce possible diffs
+-- with different vms and double values.;
+
+select cast (ACOS(d) as DECIMAL(6,3)) AS ACOS FROM SYSFUN_MATH_TEST;
+select cast (ASIN(d) as DECIMAL(6,3)) AS ASIN FROM SYSFUN_MATH_TEST;
+select cast (ATAN(d) as DECIMAL(6,3)) AS ATAN FROM SYSFUN_MATH_TEST;
+
+select cast (COS(d) as DECIMAL(6,3)) AS COS FROM SYSFUN_MATH_TEST;
+select cast (SIN(d) as DECIMAL(6,3)) AS SIN FROM SYSFUN_MATH_TEST;
+select cast (TAN(d) as DECIMAL(6,3)) AS TAN FROM SYSFUN_MATH_TEST;
+
+select cast (DEGREES(d) as DECIMAL(6,3)) AS DEGREES FROM SYSFUN_MATH_TEST;
+select cast (RADIANS(d) as DECIMAL(6,3)) AS RADIANS FROM SYSFUN_MATH_TEST;
+
+select cast (LN(d) as DECIMAL(6,3)) AS LN FROM SYSFUN_MATH_TEST;
+select cast (EXP(d) as DECIMAL(6,3)) AS EXP FROM SYSFUN_MATH_TEST;
+
+select cast (CEIL(d) as DECIMAL(6,3)) AS CEIL FROM SYSFUN_MATH_TEST;
+select cast (CEILING(d) as DECIMAL(6,3)) AS CEILING FROM SYSFUN_MATH_TEST;
+select cast (FLOOR(d) as DECIMAL(6,3)) AS FLOOR FROM SYSFUN_MATH_TEST;
+
+select cast (SYSFUN.ACOS(d) as DECIMAL(6,3)) AS SYSFUN_ACOS FROM SYSFUN_MATH_TEST;
+
+drop table SYSFUN_MATH_TEST;
+
+drop function SYSFUN.ACOS;

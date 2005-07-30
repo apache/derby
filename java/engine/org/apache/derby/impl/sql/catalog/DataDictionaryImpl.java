@@ -183,6 +183,51 @@ public final class	DataDictionaryImpl
 	private static final int		SYSCOLUMNS_CORE_NUM = 2;
 	private	static final int		SYSSCHEMAS_CORE_NUM = 3;
 	private static final int        NUM_CORE = 4;
+	
+	/**
+	* SYSFUN functions. Table of functions that automatically appear
+	* in the SYSFUN schema. This simple table assumes a single parameter
+	* and RETURNS NULL ON NULL INPUT. The scheme could be expanded
+	* to handle other function options such as other parameters if needed.
+	*[0] = FUNCTION name
+	*[1] = RETURNS type
+	*[2] = Java class
+	*[3] = method name and signature
+	*[4] = parameter type (single parameter)
+	*
+	*/
+	private static final String[][] SYSFUN_FUNCTIONS = {
+			{"ACOS", "DOUBLE", "java.lang.Math", "acos(double)", "DOUBLE"},
+			{"ASIN", "DOUBLE", "java.lang.Math", "asin(double)", "DOUBLE"},
+			{"ATAN", "DOUBLE", "java.lang.Math", "atan(double)", "DOUBLE"},
+			{"COS", "DOUBLE", "java.lang.Math", "cos(double)", "DOUBLE"},
+			{"SIN", "DOUBLE", "java.lang.Math", "sin(double)", "DOUBLE"},
+			{"TAN", "DOUBLE", "java.lang.Math", "tan(double)", "DOUBLE"},
+			{"DEGREES", "DOUBLE", "java.lang.Math", "toDegrees(double)", "DOUBLE"},
+			{"RADIANS", "DOUBLE", "java.lang.Math", "toRadians(double)", "DOUBLE"},
+			{"LN", "DOUBLE", "java.lang.Math", "log(double)", "DOUBLE"},
+			{"EXP", "DOUBLE", "java.lang.Math", "exp(double)", "DOUBLE"},
+			{"CEIL", "DOUBLE", "java.lang.Math", "ceil(double)", "DOUBLE"},
+			{"CEILING", "DOUBLE", "java.lang.Math", "ceil(double)", "DOUBLE"},
+			{"FLOOR", "DOUBLE", "java.lang.Math", "floor(double)", "DOUBLE"},			
+	};
+	
+	/**
+	 * Runtime definition of the functions from SYSFUN_FUNCTIONS.
+	 * Populated dynamically as functions are called.
+	 */
+	private static final AliasDescriptor[] SYSFUN_AD =
+		new AliasDescriptor[SYSFUN_FUNCTIONS.length];
+	
+	/**
+	 * Dummy parameter name for functions from SYSFUN_FUNCTIONS.
+	 */
+	private static final String[] SYSFUN_PNAME = {"P1"};
+	
+	/**
+	 * Parameter mode (IN as required) for functions from SYSFUN_FUNCTIONS.
+	 */	
+	private static final int[] SYSFUN_PMODE = {JDBC30Translation.PARAMETER_MODE_IN};
 
 	// the structure that holds all the core table info
 	private TabInfo[] coreInfo;
@@ -5650,12 +5695,60 @@ public final class	DataDictionaryImpl
 		Get the list of routines matching the schema and routine name.
 		While we only support a single alias for a given name,namespace just
 		return a list of zero or one item.
+		If the schema is SYSFUN then do not use the system catalogs,
+		but instead look up the routines from the in-meomry table driven
+		by the contents of SYSFUN_FUNCTIONS.
+		@see SYSFUN_FUNCTIONS
 	 */
 	public java.util.List getRoutineList(String schemaID, String routineName, char nameSpace)
 		throws StandardException {
 
 		java.util.List list = new  java.util.ArrayList();
+		
+		// Special in-memory table lookup for SYSFUN
+		if (schemaID.equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID)
+				&& nameSpace == AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR)
+		{
+			for (int f = 0; f < DataDictionaryImpl.SYSFUN_FUNCTIONS.length; f++)
+			{
+				String[] details = DataDictionaryImpl.SYSFUN_FUNCTIONS[f];
+				String name = details[0];
+				if (!name.equals(routineName))
+					continue;
+				
+				AliasDescriptor ad = DataDictionaryImpl.SYSFUN_AD[f];
+				if (ad == null)
+				{
+					// details[1] Return type
+					TypeDescriptor rt =
+						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[1]);
 
+					// details[4] - single argument type
+					TypeDescriptor[] pt = new TypeDescriptor[1];
+					pt[0] =
+						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[4]);
+					
+					// details[3] = java method
+					RoutineAliasInfo ai = new RoutineAliasInfo(details[3],
+							1, DataDictionaryImpl.SYSFUN_PNAME,
+							pt, DataDictionaryImpl.SYSFUN_PMODE, 0,
+							RoutineAliasInfo.PS_JAVA, RoutineAliasInfo.NO_SQL,
+							false, rt);
+
+					// details[2] = class name
+					ad = new AliasDescriptor(this, uuidFactory.createUUID(), name,
+							uuidFactory.recreateUUID(schemaID),
+							details[2], AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR,
+							AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR,
+							true, ai, null);
+
+					DataDictionaryImpl.SYSFUN_AD[f] = ad;
+				}
+				list.add(ad);
+			}
+			return list;
+		}
+		
 		AliasDescriptor ad = getAliasDescriptor(schemaID, routineName, nameSpace);
 		if (ad != null) {
 			list.add(ad);
