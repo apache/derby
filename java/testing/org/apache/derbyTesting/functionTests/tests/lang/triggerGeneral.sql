@@ -579,3 +579,15 @@ drop trigger tgood;
 delete from x;
 
 drop table x;
+
+-- Derby-388: When a set of inserts/updates is performed on a table
+-- and each update fires a trigger that in turn performs other updates,
+-- Derby will sometimes try to recompile the trigger in the middle
+-- of the update process and will throw an NPE when doing so.
+
+create procedure d388 () language java parameter style java modifies sql data
+	external name 'org.apache.derbyTesting.functionTests.tests.lang.userDefMethods.derby388';
+
+-- Just call the procedure; it will do the rest.
+call d388();
+
