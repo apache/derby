@@ -600,6 +600,7 @@ public class BinaryOperatorNode extends ValueNode
 					mb.push(getTypeServices().getScale());
 					mb.push(true);
 					mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", ClassName.DataValueDescriptor, 3);
+					mb.cast(resultTypeName);
 				}
 			}
 
