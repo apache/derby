@@ -10459,15 +10459,14 @@ valueSpecification() throws StandardException :
 |
 	<NULLIF> <LEFT_PAREN> leftExpression = additiveExpression(null, 0, false) <COMMA> rightExpression = additiveExpression(null, 0, false) <RIGHT_PAREN>
 	{
-		// "NULLIF(L, R)" is the same as "L=R ? CAST(NULL AS CHAR(1)) : L"
+		// "NULLIF(L, R)" is the same as "L=R ? untyped NULL : L"
 		// An impl assumption here is that Cloudscape can promote CHAR to any comparable datatypes such as numeric
 		ContextManager cm = getContextManager();
 		ValueNodeList thenElseList = (ValueNodeList) nodeFactory.getNode(C_NodeTypes.VALUE_NODE_LIST, cm);
 
+		//Use untyped null for then clause at this point. At the bind time, we will cast it to the datatype of L 
 		thenElseList.addElement((ValueNode) nodeFactory.getNode(
-									C_NodeTypes.CAST_NODE,
-									(ValueNode) nodeFactory.getNode(C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,	cm),
-									DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),	
+									C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
 									cm));
 		thenElseList.addElement(leftExpression);
 
@@ -10479,6 +10478,7 @@ valueSpecification() throws StandardException :
 														rightExpression,
 														cm),
 											thenElseList,
+											Boolean.TRUE,//this node is for nullif 
 											cm);
 	}
 |
@@ -10543,6 +10543,7 @@ whenThenExpression() throws StandardException :
 		return((ValueNode) nodeFactory.getNode(C_NodeTypes.CONDITIONAL_NODE,
 												expr,
 												thenElseList,
+												Boolean.FALSE,
 												cm));
 	}
 }

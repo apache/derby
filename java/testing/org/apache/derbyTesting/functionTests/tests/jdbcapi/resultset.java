@@ -21,12 +21,15 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 
 import java.lang.reflect.*;
@@ -48,14 +51,84 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
  * @author ames
  */
 
-public class resultset { 
+public class resultset {
 
   private static Class[] CONN_PARAM = { Integer.TYPE };
   private static Object[] CONN_ARG = { new Integer(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)};
 
 	static private boolean isDerbyNet = false;
 
-	public static void main(String[] args) {
+	private static String VALID_DATE_STRING = "'2000-01-01'";
+	private static String VALID_TIME_STRING = "'15:30:20'";
+	private static String VALID_TIMESTAMP_STRING = "'2000-01-01 15:30:20'";
+	private static String NULL_VALUE="NULL";
+
+	private static String[] SQLTypes =
+	{
+		"SMALLINT",
+		"INTEGER",
+		"BIGINT",
+		"DECIMAL(10,5)",
+		"REAL",
+		"DOUBLE",
+		"CHAR(60)",
+		"VARCHAR(60)",
+		"LONG VARCHAR",
+		"CHAR(60) FOR BIT DATA",
+		"VARCHAR(60) FOR BIT DATA",
+		"LONG VARCHAR FOR BIT DATA",
+		"CLOB(1k)",
+		"DATE",
+		"TIME",
+		"TIMESTAMP",
+		"BLOB(1k)",
+
+	};
+
+	private static String[] ColumnNames =
+	{
+		"SMALLINTCOL",
+		"INTEGERCOL",
+		"BIGINTCOL",
+		"DECIMALCOL",
+		"REALCOL",
+		"DOUBLECOL",
+		"CHARCOL",
+		"VARCHARCOL",
+		"LONGVARCHARCOL",
+		"CHARFORBITCOL",
+		"VARCHARFORBITCOL",
+		"LVARCHARFORBITCOL",
+		"CLOBCOL",
+		"DATECOL",
+		"TIMECOL",
+		"TIMESTAMPCOL",
+		"BLOBCOL",
+
+	};
+
+ private static String[][]SQLData =
+	{
+		{NULL_VALUE, "0","1","2"},       // SMALLINT
+		{NULL_VALUE,"0","1","21"},       // INTEGER
+		{NULL_VALUE,"0","1","22"},       // BIGINT
+		{NULL_VALUE,"0.0","1.0","23.0"},      // DECIMAL(10,5)
+		{NULL_VALUE,"0.0","1.0","24.0"},      // REAL,
+		{NULL_VALUE,"0.0","1.0","25.0"},      // DOUBLE
+		{NULL_VALUE,"'0'","'aa'","'2.0'"},      // CHAR(60)
+		{NULL_VALUE,"'0'","'aa'",VALID_TIME_STRING},      //VARCHAR(60)",
+		{NULL_VALUE,"'0'","'aa'",VALID_TIMESTAMP_STRING},      // LONG VARCHAR
+		{NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaaa'"},  // CHAR(60)  FOR BIT DATA
+		{NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaba'"},  // VARCHAR(60) FOR BIT DATA
+		{NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaca'"},  //LONG VARCHAR FOR BIT DATA
+		{NULL_VALUE,"'13'","'14'",NULL_VALUE},     //CLOB(1k)
+		{NULL_VALUE,VALID_DATE_STRING,VALID_DATE_STRING,NULL_VALUE},        // DATE
+		{NULL_VALUE,VALID_TIME_STRING,VALID_TIME_STRING,VALID_TIME_STRING},        // TIME
+		{NULL_VALUE,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING},   // TIMESTAMP
+		{NULL_VALUE,NULL_VALUE,NULL_VALUE,NULL_VALUE}                 // BLOB
+	};
+
+	public static void main(String[] args) throws Throwable {
 
 		isDerbyNet = TestUtil.isNetFramework();
 
@@ -89,7 +162,6 @@ public class resultset {
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 									   ResultSet.CONCUR_UPDATABLE);
 
-			// REMIND: might want a usertype case as well...
 			stmt.execute("create table t (i int, s smallint, r real, "+
 				"d double precision, dt date, t time, ts timestamp, "+
 				"c char(10), v varchar(40) not null, dc dec(10,2),"+
@@ -526,10 +598,12 @@ public class resultset {
 
 			testMutableValues(con);
 			testCorrelationNamesAndMetaDataCalls(con);
+			testNullIfAndMetaDataCalls(con);
 			con.close();
 
 		}
 		catch (SQLException e) {
+			System.out.println("FAIL -- unexpected exception: " + e.toString());
 			dumpSQLExceptions(e);
 			e.printStackTrace();
 		}
@@ -540,6 +614,202 @@ public class resultset {
 
 		System.out.println("Test resultset finished");
     }
+
+
+	//test NULLIF(L,R) with and without parameter and check the return value's data type
+	static private void testNullIfAndMetaDataCalls(Connection conn) throws Throwable
+	{
+		System.out.println("Tests to check metadata information of nullif column");
+		tablesForTestingAllDatatypesCombinations(conn);
+		testAllDatatypesCombinations(conn);
+		testParameterForFirstOperandToNullIf(conn);
+	}
+          
+	public static void testParameterForFirstOperandToNullIf( Connection conn) throws Throwable
+	{
+		System.out.println("Start testing first operand as parameter to nullif");
+		PreparedStatement ps;
+		for (int secondColumnType = 0; secondColumnType < SQLTypes.length; secondColumnType++) {
+			System.out.println("Testing nullif(?,"+SQLTypes[secondColumnType]+")");
+			String nullIfString =
+				new String("SELECT NULLIF(?," + ColumnNames[secondColumnType] +") from AllDataTypesTable");
+			try {
+					ps = conn.prepareStatement(nullIfString);
+					switch(secondColumnType) {
+						case 0:
+						case 1:
+						case 2:
+						case 3:
+						case 4:
+						case 5:
+						case 6:
+						case 7:
+							System.out.println("Testing nullif(?,"+SQLTypes[secondColumnType]+") with setBoolean");
+							ps.setBoolean(1, true);
+							break;
+						case 8: //'LONG VARCHAR'
+						case 11: //'LONG VARCHAR FOR BIT DATA'
+						case 12: //'CLOB'
+						case 16: //'BLOB'
+						//Take specific case of LONG VARCHAR. Prepare of nullif(?,long varchar)
+						//fails early on because at bind time, Derby tries to set ? to
+						//long varchar. But comparison between 2 long varchars is not
+						//supported and hence bind code in BinaryComparisonOperatorNode fails
+						//Similar thing happens for CLOB, BLOB and LONG VARCHAR FOR BIT DATA
+						case 9:
+						case 10:
+							System.out.println("Testing nullif(?,"+SQLTypes[secondColumnType]+") with setBinaryStream");
+							ps.setBinaryStream(1, (java.io.InputStream)null, 1);
+							break;
+						case 13://DATE
+							System.out.println("Testing nullif(?,"+SQLTypes[secondColumnType]+") with setDate");
+							ps.setDate(1, Date.valueOf("2000-01-01"));
+							break;
+						case 14://TIME
+							System.out.println("Testing nullif(?,"+SQLTypes[secondColumnType]+") with setTime");
+							ps.setTime(1, Time.valueOf("15:30:20"));
+							break;
+						case 15://TIMESTAMP
+							System.out.println("Testing nullif(?,"+SQLTypes[secondColumnType]+") with setTimestamp");
+							ps.setTimestamp(1, Timestamp.valueOf("2000-01-01 15:30:20"));
+							break;
+						default: break;
+					}
+					dumpRS(ps.executeQuery());
+			} catch (SQLException e)
+			{
+				dumpSQLExceptions(e);
+			}
+		}
+	}
+
+	public static void testAllDatatypesCombinations( Connection conn) throws Throwable
+	{
+		System.out.println("Start testing all datatypes combinations in NULLIF function");
+		Statement s = conn.createStatement();
+		for (int firstColumnType = 0; firstColumnType < SQLTypes.length; firstColumnType++) {
+			StringBuffer nullIfString = new StringBuffer("SELECT NULLIF(" + ColumnNames[firstColumnType]);
+			for (int secondColumnType = 0; secondColumnType < SQLTypes.length; secondColumnType++) {
+				try {
+					StringBuffer completeNullIfString = new StringBuffer(nullIfString.toString() + "," + ColumnNames[secondColumnType]);
+					System.out.println(completeNullIfString + ") from AllDataTypesTable");
+					dumpRS(s.executeQuery(completeNullIfString + ") from AllDataTypesTable"));
+				} catch (SQLException e)
+				{
+					dumpSQLExceptions(e);
+				}
+			}
+		}
+	}
+
+	public static void tablesForTestingAllDatatypesCombinations( Connection conn) throws Throwable
+	{
+		System.out.println("Set up by creating table for testing all datatypes combinations");
+
+		Statement s = conn.createStatement();
+
+		try {
+			s.executeUpdate("DROP TABLE AllDataTypesTable");
+		}
+		catch(SQLException se) {}
+
+		StringBuffer createSQL = new StringBuffer("create table AllDataTypesTable (");
+		for (int type = 0; type < SQLTypes.length - 1; type++)
+		{
+			createSQL.append(ColumnNames[type] + " " + SQLTypes[type] + ",");
+		}
+		createSQL.append(ColumnNames[SQLTypes.length - 1] + " " + SQLTypes[SQLTypes.length - 1] + ")");
+		System.out.println(createSQL);
+		s.executeUpdate(createSQL.toString());
+
+		for (int row = 0; row < SQLData[0].length; row++)
+		{
+			createSQL = new StringBuffer("insert into AllDataTypesTable values(");
+			for (int type = 0; type < SQLTypes.length - 1; type++)
+			{
+				createSQL.append(SQLData[type][row] + ",");
+			}
+			createSQL.append(SQLData[SQLTypes.length - 1][row]+")");
+			System.out.println(createSQL);
+			s.executeUpdate(createSQL.toString());
+		}
+
+		s.close();
+		conn.commit();
+	}
+
+	public static void dumpRS(ResultSet s) throws SQLException
+	{
+		if (s == null)
+		{
+			System.out.println("<NULL>");
+			return;
+		}
+
+		ResultSetMetaData rsmd = s.getMetaData();
+
+		// Get the number of columns in the result set
+		int numCols = rsmd.getColumnCount();
+
+		if (numCols <= 0)
+		{
+			System.out.println("(no columns!)");
+			return;
+		}
+
+		StringBuffer heading = new StringBuffer("\t ");
+		StringBuffer underline = new StringBuffer("\t ");
+
+		int len;
+		// Display column headings
+		for (int i=1; i<=numCols; i++)
+		{
+			if (i > 1)
+			{
+				heading.append(",");
+				underline.append(" ");
+			}
+			len = heading.length();
+			heading.append("COL"+i);
+			heading.append("(datatype : " + rsmd.getColumnTypeName(i));
+			heading.append(", precision : " + rsmd.getPrecision(i));
+			heading.append(", scale : " + rsmd.getScale(i) + ")");
+			len = heading.length() - len;
+			for (int j = len; j > 0; j--)
+			{
+				underline.append("-");
+			}
+		}
+		System.out.println(heading.toString());
+		System.out.println(underline.toString());
+
+
+		StringBuffer row = new StringBuffer();
+		// Display data, fetching until end of the result set
+		while (s.next())
+		{
+			row.append("\t{");
+			// Loop through each column, getting the
+			// column data and displaying
+			for (int i=1; i<=numCols; i++)
+			{
+				if (i > 1) row.append(",");
+				try{
+				row.append(s.getString(i));
+				} catch(SQLException ex){
+					if (ex.getSQLState().equals("22005")) {
+						if (s.getBytes(i) != null)
+                row.append(new String(s.getBytes(i)));
+						else
+                row.append(s.getBytes(i));
+					} else throw ex;
+				}
+			}
+			row.append("}\n");
+		}
+		System.out.println(row.toString());
+		s.close();
+	}
 
 
 	static private void testCorrelationNamesAndMetaDataCalls(Connection conn) throws Exception
@@ -656,10 +926,9 @@ public class resultset {
 	}
 
 	static private void dumpSQLExceptions (SQLException se) {
-		System.out.println("FAIL -- unexpected exception");
 		while (se != null) {
-            JDBCTestDisplayUtil.ShowCommonSQLException(System.out, se);			
-	         se = se.getNextException();
+			JDBCTestDisplayUtil.ShowCommonSQLException(System.out, se);
+			se = se.getNextException();
 		}
 	}
 
