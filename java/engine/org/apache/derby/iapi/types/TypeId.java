@@ -1267,10 +1267,6 @@ public final class TypeId implements Formatable
                                 {
                                         orderable = false;
                                 } 
-                                catch (LinkageError le) 
-                                {
-                                        orderable = false;
-                                }
                                 break;
 
                         default:

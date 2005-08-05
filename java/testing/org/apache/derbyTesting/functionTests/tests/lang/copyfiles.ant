@@ -53,6 +53,9 @@ dcl.sql
 dcl_app.properties
 dcl_emc1.jar
 dcl_emc2.jar
+dcl_emc2l.jar
+dcl_emc2s.jar
+dcl_emc2sm.jar
 dcl_emcaddon.jar
 ddlTableLockMode.sql
 ddlTableLockMode_app.properties

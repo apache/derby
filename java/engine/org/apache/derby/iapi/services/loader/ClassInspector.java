@@ -794,7 +794,8 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		and primitive types.
 		This will attempt to load the class from the application set.
 
-		@exception ClassNotFoundException Class cannot be found.
+		@exception ClassNotFoundException Class cannot be found, or
+		a SecurityException or LinkageException was thrown loading the class.
 	*/
 	public Class getClass(String className) throws ClassNotFoundException {
 

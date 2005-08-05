@@ -67,6 +67,43 @@ call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', 'EMC.MAI
 
 select e_mail, "emcAddOn".VALIDCONTACT(e_mail) from EMC.CONTACTS;
 
+-- function that gets the signers of the class (loaded from the jar)
+create function EMC.GETSIGNERS(CLASS_NAME VARCHAR(256))
+RETURNS VARCHAR(60)
+NO SQL
+external name 'org.apache.derbyTesting.databaseclassloader.emc.getSigners'
+language java parameter style java;
+
+-- at this point the jar is not signed, NULL expected
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
+
+-- Replace with a signed jar
+-- (self signed certificate)
+--
+-- Commands used to sign jar
+-- keytool -genkey -dname "cn=EMC CTO, ou=EMC APP, o=Easy Mail Company, c=US" -alias emccto -keypass kpi135 -keystore emcks -storepass ab987c
+-- keytool -selfcert -alias emccto -keypass kpi135 -keystore emcks -storepass ab987c
+-- jarsigner -keystore emcks -storepass ab987c -keypass kpi135 -signedjar dcl_emc2s.jar dcl_emc2.jar emccto
+--
+--
+
+CALL SQLJ.REPLACE_JAR('file:dcl_emc2s.jar', 'EMC.MAIL_APP');
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
+
+-- other jar should not be signed
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
+
+-- replace with a hacked jar file, emc.class modified to diable
+-- valid e-mail address check but using same signatures.
+-- ie direct replacement of the .class file.
+CALL SQLJ.REPLACE_JAR('file:dcl_emc2sm.jar', 'EMC.MAIL_APP');
+CALL EMC.ADDCONTACT(99, 'spamking@cracker.org');
+
+-- replace with a hacked jar file, emc.class modified to 
+-- be an invalid jar file (no signing on this jar).
+CALL SQLJ.REPLACE_JAR('file:dcl_emc2l.jar', 'EMC.MAIL_APP');
+CALL EMC.ADDCONTACT(999, 'spamking2@cracker.org');
+
 
 -- cleanup
 CALL SQLJ.REMOVE_JAR('EMC.MAIL_APP', 0);
@@ -74,6 +111,7 @@ call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', '"emcAdd
 CALL EMC.ADDCONTACT(99, 'cash@venture.com');
 CALL SQLJ.REMOVE_JAR('EMC.MAIL_APP', 0);
 DROP PROCEDURE EMC.ADDCONTACT;
+DROP FUNCTION EMC.GETSIGNERS;
 
 select e_mail, "emcAddOn".VALIDCONTACT(e_mail) from EMC.CONTACTS;
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', '');
