@@ -63,8 +63,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
     /** The id for this connection.  */
     private int connectionId;
     
-    /** String representation of id */
-    private String idString;
+    /** the connection string */
+    private String connString;
     
 	private Vector eventListener; // who wants to know I am closed or error
 
@@ -459,12 +459,18 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
      */
     public String toString()
     {
-        if ( idString == null )
+        if ( connString == null )
         {
-            idString = Integer.toString(connectionId);
-        }
+            String physicalConnString = isActive ?
+                realConnection.toString() : "<none>";
+            
+            connString = 
+              this.getClass().getName() + "@" + this.hashCode() + " " +
+                "(ID = " + connectionId + "), " +
+                "Physical Connection = " + physicalConnString;
+        }    
         
-        return idString;
+        return connString;
     }
 
 }

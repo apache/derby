@@ -119,8 +119,9 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement location="${jta1_2}"/>
         <pathelement path="${java13compile.classpath}"/>
+        <pathelement location="${oro}"/>
+        <pathelement location="${jta1_2}"/>
       </classpath>
       <!--exclude name=""/-->
       <include name="${this.dir}/checkDataSource.java"/>

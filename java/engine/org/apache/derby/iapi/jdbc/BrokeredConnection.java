@@ -51,6 +51,7 @@ public class BrokeredConnection implements Connection
 
 	protected final BrokeredConnectionControl control;
 	private boolean isClosed;
+        private String connString;
 
 	/**
 		Maintain state as seen by this Connection handle, not the state
@@ -486,33 +487,30 @@ public class BrokeredConnection implements Connection
 	}
             
     /**
-     * Get the string representation for the underlying physical
-     * connection.
-     *
-     *  When a physical connection is created, it is assigned a unique id 
-     *  that is unchanged for the lifetime of the connection. When an 
-     *  application calls Connection.toString(), it gets the string 
-     *  representation of the underlying physical connection, regardless 
-     *  of whether the application has a reference to the physical connection 
-     *  itself or a reference to a proxy connection (aka brokered connection) 
-     *  that wraps the physical connection.
-     *
-     *  Since this BrokeredConnection is a proxy connection, we return the
-     *  string value of its underlying physical connection
+     * Get the string representation for this connection.  Return
+     * the class name/hash code and various debug information.
      * 
-     * @return unique string representation of the underlying
-     *   physical connection
+     * @return unique string representation for this connection
      */
     public String toString() 
     {
-        try
+        if ( connString == null )
         {
-            return getRealConnection().toString();
+            String wrappedString;
+            try
+            {
+                wrappedString = getRealConnection().toString();
+            }
+            catch ( SQLException e )
+            {
+                wrappedString = "<none>";
+            }
+            
+            connString = this.getClass().getName() + "@" + this.hashCode() +
+                ", Wrapped Connection = " + wrappedString;
         }
-        catch ( SQLException e )
-        {
-            return "<no connection>";
-        }
+        
+        return connString;
     }
 
 	protected int getJDBCLevel() { return 2;}

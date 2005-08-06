@@ -145,7 +145,7 @@ public class EmbedConnection implements java.sql.Connection
 	private int resultSetId;
     
     /** Cached string representation of the connection id */
-    private String idString;
+    private String connString;
 
 
 	//////////////////////////////////////////////////////////
@@ -1919,7 +1919,8 @@ public class EmbedConnection implements java.sql.Connection
 
     /**
      * Get a String representation that uniquely identifies
-     * this connection
+     * this connection.  Include the same information that is
+     * printed in the log for various trace and error messages.
      *
      * In Derby the "physical" connection is a LanguageConnectionContext, 
      * or LCC.
@@ -1928,18 +1929,27 @@ public class EmbedConnection implements java.sql.Connection
      * Note that this is a big aid in debugging, because much of the
      * engine trace and log code prints the LCC id. 
      *
-     * @return a string representation of the unique id for the
-     *    underlying LanguageConnectionContext
+     * @return a string representation for this connection
      */
     public String toString()
     {
-        if ( idString == null )
+        if ( connString == null )
         {
-            idString = 
-              Integer.toString(getLanguageConnection().getInstanceNumber());
-        }
+            
+            LanguageConnectionContext lcc = getLanguageConnection();
+
+            connString = 
+              this.getClass().getName() + "@" + this.hashCode() + " " +
+                lcc.xidStr +                  
+                    lcc.getTransactionExecute().getTransactionIdString() + 
+                    "), " +
+                lcc.lccStr + 
+                    Integer.toString(lcc.getInstanceNumber()) + "), " +
+                lcc.dbnameStr + lcc.getDbname() + "), " +
+                lcc.drdaStr + lcc.getDrdaID() + ") ";
+        }       
         
-        return idString;
+        return connString;
     }
 
 

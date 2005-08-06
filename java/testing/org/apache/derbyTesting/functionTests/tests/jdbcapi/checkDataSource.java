@@ -24,6 +24,8 @@ import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
+import org.apache.derby.iapi.jdbc.BrokeredConnection;
+import org.apache.derby.impl.jdbc.EmbedConnection;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -49,13 +51,33 @@ import org.apache.derby.tools.ij;
 import java.io.*;
 import java.util.Hashtable;
 import java.util.Iterator;
-
+import org.apache.oro.text.perl.Perl5Util;
 import javax.naming.*;
 import javax.naming.directory.*;
 
 public class checkDataSource
 { 
+    /**
+     * A hashtable of opened connections.  This is used when checking to
+     * make sure connection strings are unique; we need to make sure all
+     * the connections are closed when we are done, so they are stored
+     * in this hashtable
+     */
     protected static Hashtable conns = new Hashtable();
+    
+    /**
+     * This is a utility that knows how to do pattern matching.  Used
+     * in checking the format of a connection string
+     */
+    protected static Perl5Util p5u = new Perl5Util();
+    
+    /** The expected format of a connection string. In English:
+     * "<classname>@<hashcode> (XID=<xid>), (SESSION = <sessionid>),
+     *  (DATABASE=<dbname>), (DRDAID = <drdaid>)"
+     */
+    private static final String CONNSTRING_FORMAT = "\\S+@[0-9]+ " +
+        "\\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
+        "\\(DATABASE = [A-Za-z]+\\), \\(DRDAID = .+\\)";
 
 	public static void main(String[] args) throws Exception {
 
@@ -841,8 +863,9 @@ public class checkDataSource
     /**
      * Make sure this connection's string is unique (DERBY-243)
      */
-    protected void checkToString(Connection conn) throws Exception
+    protected static void checkToString(Connection conn) throws Exception
     {
+        checkStringFormat(conn);
         String str = conn.toString();
 
         if ( conns.containsKey(str))
@@ -853,11 +876,89 @@ public class checkDataSource
         conns.put(str, conn);
     }
     
+    /** 
+     * Check the format of a pooled connection
+     **/
+    protected static void checkStringFormat(PooledConnection pc) throws Exception
+    {
+        String prefix = checkStringPrefix(pc);
+        String connstr = pc.toString();
+        String format = "/" + prefix + 
+            " \\(ID = [0-9]+\\), Physical Connection = " +
+            "<none>|" + CONNSTRING_FORMAT + "/";
+        
+        if ( ! p5u.match(format, connstr) )
+        {
+            throw new Exception( "Connection.toString() (" + connstr + ") " +
+              "does not match expected format (" + format + ")");
+        }
+    }
+    
+    /**
+     * Check the format for the toString() of a Connection that is an
+     * instance of BrokeredConnection.  This is different, as the Brokered
+     * Connection prints out its class name and then the toString() value
+     * of the underlying, wrapped connection.
+     */
+    protected static void checkStringFormat(BrokeredConnection conn) throws Exception
+    {
+        String connstr = conn.toString();
+        String prefix = checkStringPrefix(connstr);
+        
+        String format = "/" + prefix + ", Wrapped Connection = " + 
+            "<none>|" + CONNSTRING_FORMAT + "/";
+
+        if ( ! p5u.match(format, connstr) )
+        {
+            throw new Exception( "Connection.toString() (" + connstr + ") " +
+                "does not match expected format (" + format + ")");
+        }
+    }
+        
+     /**
+     * Check the format of the connection string.  This is the default test
+     * to run if this is not a BrokeredConnection class
+     */
+    protected static void checkStringFormat(Connection conn) throws Exception
+    {
+        String prefix = checkStringPrefix(conn);
+        
+        String str = conn.toString();        
+       
+        // See if the connection string matches the format pattern    
+        if ( ! p5u.match("/" + CONNSTRING_FORMAT + "/", str) )
+        {
+            throw new Exception( "Connection.toString() (" + str + ") " +
+                "does not match expected format (" + CONNSTRING_FORMAT + ")");
+        }
+    }
+    
+    /**
+     * Make sure the connection string starts with the right prefix, which
+     * is the classname@hashcode.
+     *
+     * @return the expected prefix string, this is used in further string
+     *   format checking
+     */
+    protected static String checkStringPrefix(Object conn) throws Exception
+    {
+        String connstr = conn.toString();
+        String prefix = conn.getClass().getName() + "@" + conn.hashCode();
+        if ( ! connstr.startsWith(prefix) )
+        {
+            throw new Exception("Connection class and hash code for " +
+                "connection string (" + connstr + ") does not match expected " +
+                "(" + prefix + ")");
+        }  
+        
+        return prefix;
+    }
+    
     /**
      * Clear out and close connections in the connections
      * hashtable. 
      */
-    protected void clearConnections() throws SQLException
+    protected static void clearConnections() throws SQLException
     {
         java.util.Iterator it = conns.values().iterator();
         while ( it.hasNext() )
@@ -872,7 +973,7 @@ public class checkDataSource
      * Get connections  using ij.startJBMS() and make sure
      * they're unique
      */
-    protected void checkJBMSToString() throws Exception
+    protected static void checkJBMSToString() throws Exception
     {
         clearConnections();
         // Open ten connections rather than just two to
@@ -893,7 +994,7 @@ public class checkDataSource
      * Check uniqueness of connection strings coming from a
      * DataSouce
      */
-    protected void checkToString(DataSource ds) throws Exception
+    protected static void checkToString(DataSource ds) throws Exception
     {
         clearConnections();
         
@@ -912,7 +1013,7 @@ public class checkDataSource
      * We want to check the PooledConnection as well as the
      * underlying physical connection. 
      */
-    protected void checkToString(ConnectionPoolDataSource pds)
+    protected static void checkToString(ConnectionPoolDataSource pds)
         throws Exception
     {
         int numConnections = 10;
@@ -923,6 +1024,7 @@ public class checkDataSource
         for ( int i = 0 ; i < numConnections ; i++ )
         {
             PooledConnection pc = pds.getPooledConnection();
+            checkStringFormat(pc);
             String str = pc.toString();
             if ( pooledConns.get(str) != null )
             {
@@ -952,26 +1054,12 @@ public class checkDataSource
             pc.close();
         }
         pooledConns.clear();
-        
-        // Now check that two connections from the same 
-        // PooledConnection have the same string value
-        PooledConnection pc = pds.getPooledConnection();
-        Connection conn = pc.getConnection();
-        String str = conn.toString();
-        conn = pc.getConnection();
-        if ( ! conn.toString().equals(str) )
-        {
-            throw new Exception("Two connections from the " +
-              "same pooled connection have different string " +
-              "values: " + str + ", " + conn.toString());
-        }
-        pc.close();
     }
     
     /**
      * Check uniqueness of strings for an XA data source
      */
-    protected void checkToString(XADataSource xds) throws Exception
+    protected static void checkToString(XADataSource xds) throws Exception
     {
         int numConnections = 10;
         
@@ -981,6 +1069,7 @@ public class checkDataSource
         for ( int i = 0 ; i < numConnections ; i++ )
         {
             XAConnection xc = xds.getXAConnection();
+            checkStringFormat(xc);
             String str = xc.toString();
             if ( xaConns.get(str) != null )
             {
@@ -1010,20 +1099,6 @@ public class checkDataSource
             xc.close();
         }
         xaConns.clear();
-        
-        // Now check that two connections from the same 
-        // XAConnection have the same string value
-        XAConnection xc = xds.getXAConnection();
-        Connection conn = xc.getConnection();
-        String str = conn.toString();
-        conn = xc.getConnection();
-        if ( ! conn.toString().equals(str) )
-        {
-            throw new Exception("Two connections from the " +
-              "same pooled connection have different string " +
-              "values: " + str + ", " + conn.toString());
-        }
-        xc.close();
     }
     
 	protected static void checkConnectionPreCloseS(String dsName, Connection conn) throws SQLException {
