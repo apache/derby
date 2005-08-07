@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2005 The Apache Software Foundation
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<!-- $Rev: 111629 $ $Date: 2004-12-11 19:52:51 -0800 (Sat, 11 Dec 2004) $ -->
+
+<project>
+    <pomVersion>3</pomVersion>
+
+    <groupId>org.apache.derby</groupId>
+    <name>Derby Project</name>
+    <id>derby-project</id>
+    <currentVersion>10.2-SNAPSHOT</currentVersion>
+    <organization>
+        <name>Apache Software Foundation</name>
+        <url>http://db.apache.org/</url>
+    </organization>
+    <inceptionYear>2004</inceptionYear>
+    <package>org.apache.derby</package>
+    <shortDescription>A Java RDBMS.</shortDescription>
+
+    <description>
+    </description>
+
+    <url>http://db.apache.org/derby/</url>
+    <issueTrackingUrl>http://issues.apache.org/jira/browse/DERBY</issueTrackingUrl>
+
+    <repository>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/db/derby/code/trunk</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/db/derby/code/trunk</developerConnection>
+        <url>http://svn.apache.org/viewcvs.cgi/db/derby/code/trunk/?root=Apache-SVN</url>
+    </repository>
+
+    <mailingLists>
+        <mailingList>
+            <name>Derby User List</name>
+            <subscribe>derby-user-subscribe@db.apache.org</subscribe>
+            <unsubscribe>derby-user-unsubscribe@db.apache.org</unsubscribe>
+            <archive>http://issues.apache.org/eyebrowse/SummarizeList?listName=derby-user@db.apache.org</archive>
+        </mailingList>
+        <mailingList>
+            <name>Derby Developer List</name>
+            <subscribe>derby-dev-subscribe@db.apache.org</subscribe>
+            <unsubscribe>derby-dev-unsubscribe@db.apache.org</unsubscribe>
+            <archive>http://issues.apache.org/eyebrowse/SummarizeList?listName=derby-dev@db.apache.org</archive>
+        </mailingList>
+        <mailingList>
+            <name>Derby Commit List</name>
+            <subscribe>derby-commits-subscribe@db.apache.org</subscribe>
+            <unsubscribe>derby-commits-unsubscribe@db.apache.org</unsubscribe>
+            <archive>http://issues.apache.org/eyebrowse/SummarizeList?listName=derby-commits@db.apache.org</archive>
+        </mailingList>
+    </mailingLists>
+
+</project>
