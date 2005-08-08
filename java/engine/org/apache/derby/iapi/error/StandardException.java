@@ -89,8 +89,8 @@ public class StandardException extends Exception
 
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(messageID != null,
-					"StandardException with no messageID");
+                    SanityManager.ASSERT(messageID != null,
+                                         "StandardException with no messageID");
 		}
 	}
 
@@ -321,6 +321,35 @@ public class StandardException extends Exception
 		Object[] oa = new Object[] {a1, a2};
 		return new StandardException(messageID, oa);
 	}
+
+    /**
+     * Dummy exception to catch incorrect use of
+     * StandardException.newException(), at compile-time. If you get a
+     * compilation error because this exception isn't caught, it means
+     * that you are using StandardException.newException(...)
+     * incorrectly. The nested exception should always be the second
+     * argument.
+     * @see StandardException#newException(String, Object, Throwable)
+     * @see StandardException#newException(String, Object, Object, Throwable)
+     */
+    public static class BadMessageArgumentException extends Throwable {}
+
+    /**
+     * Dummy overload which should never be called. Only used to
+     * detect incorrect usage, at compile time.
+     * @param messageID - the sql state id of the message
+     * @param a1 - Message arg
+     * @param t - Incorrectly placed exception to be nested
+     * @return nothing - always throws
+     * @throws BadMessageArgumentException - always (dummy)
+     */
+    public static StandardException newException(String messageID, 
+                                                 Object a1, 
+                                                 Throwable t) 
+        throws BadMessageArgumentException {
+        throw new BadMessageArgumentException();
+    }
+
 	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2) {
 		Object[] oa = new Object[] {a1, a2};
 		return new StandardException(messageID, t, oa);
@@ -332,6 +361,25 @@ public class StandardException extends Exception
 		Object[] oa = new Object[] {a1, a2, a3};
 		return new StandardException(messageID, oa);
 	}
+    
+    /**
+     * Dummy overload which should never be called. Only used to
+     * detect incorrect usage, at compile time.
+     * @param messageID - the sql state id of the message
+     * @param a1 - First message arg
+     * @param a2 - Second message arg
+     * @param t - Incorrectly placed exception to be nested
+     * @return nothing - always throws
+     * @throws BadMessageArgumentException - always (dummy)
+     */
+    public static StandardException newException(String messageID, 
+                                                 Object a1, 
+                                                 Object a2,
+                                                 Throwable t) 
+        throws BadMessageArgumentException {
+        throw new BadMessageArgumentException(); 
+    }
+
 	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2, Object a3) {
 		Object[] oa = new Object[] {a1, a2, a3};
 		return new StandardException(messageID, t, oa);
@@ -589,6 +637,7 @@ public class StandardException extends Exception
 	public String getMessage() {
 		if (textMessage == null)
 			textMessage = MessageService.getCompleteMessage(getMessageId(), getArguments());
+
 		return textMessage;
 	}
 

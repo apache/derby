@@ -3816,7 +3816,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 if( i > 20 )
                 {
                     throw StandardException.newException(
-                                SQLState.LOG_FULL, ioe, null );
+                                SQLState.LOG_FULL, ioe);
                 }
             }
         }

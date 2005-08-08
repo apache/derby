@@ -826,7 +826,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		try {
 			return fr.getAsStream(externalName, generationId);
 		} catch (java.io.IOException ioe) {
-			throw StandardException.newException(SQLState.LANG_FILE_ERROR, ioe.toString(),ioe);	
+            throw StandardException.newException(SQLState.LANG_FILE_ERROR, ioe, ioe.toString());    
 		}
 	}
 

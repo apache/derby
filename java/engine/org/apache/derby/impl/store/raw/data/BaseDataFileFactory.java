@@ -276,7 +276,7 @@ public final class BaseDataFileFactory
         catch( IOException ioe)
         {
             if( create)
-                throw StandardException.newException( SQLState.SERVICE_DIRECTORY_CREATE_ERROR, dataDirectory, ioe);
+                throw StandardException.newException( SQLState.SERVICE_DIRECTORY_CREATE_ERROR, ioe, dataDirectory);
             else
                 throw StandardException.newException( SQLState.DATABASE_NOT_FOUND, ioe, dataDirectory);
         }

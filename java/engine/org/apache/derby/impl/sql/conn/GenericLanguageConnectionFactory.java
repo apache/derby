@@ -412,7 +412,7 @@ public class GenericLanguageConnectionFactory
 			String[] newList_a;
 			try {newList_a = IdUtil.parseIdList(value_s);}
 			catch (StandardException se) {
-				throw StandardException.newException(SQLState.AUTH_INVALID_AUTHORIZATION_PROPERTY, key,value_s,se);
+                throw StandardException.newException(SQLState.AUTH_INVALID_AUTHORIZATION_PROPERTY, se, key,value_s);
 			}
 
 			/** Check the new list userIdList for duplicates. */

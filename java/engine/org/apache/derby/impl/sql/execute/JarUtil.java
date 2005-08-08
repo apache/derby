@@ -392,7 +392,7 @@ public class JarUtil
 		try {
 			return fr.getAsStream(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()), generationId);
 		} catch (IOException ioe) {
-			throw StandardException.newException(SQLState.LANG_FILE_ERROR, ioe.toString(),ioe);	
+            throw StandardException.newException(SQLState.LANG_FILE_ERROR, ioe, ioe.toString());    
 		}
 	}
 

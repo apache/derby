@@ -656,7 +656,7 @@ public class LogAccessFile
 
                 if( i > 20 )
                     throw StandardException.newException(
-                        SQLState.LOG_FULL, sfe, null);
+                        SQLState.LOG_FULL, sfe);
             }
         }
     }

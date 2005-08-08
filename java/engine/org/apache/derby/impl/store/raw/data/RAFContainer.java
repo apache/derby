@@ -909,11 +909,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  try {
                      fileDeleted = privRemoveFile(file);
                  } catch (SecurityException se) {
-                     throw StandardException.newException( SQLState.FILE_CREATE_NO_CLEANUP, ioe, file, se);
+                     throw StandardException.newException( SQLState.FILE_CREATE_NO_CLEANUP, ioe, file, se.toString());
                  }
 
                  if (!fileDeleted) {
-                     throw StandardException.newException( SQLState.FILE_CREATE_NO_CLEANUP, ioe, file, null);
+                     throw StandardException.newException( SQLState.FILE_CREATE_NO_CLEANUP, ioe, file, ioe.toString());
                  }
 
                  throw StandardException.newException( SQLState.FILE_CREATE, ioe, file);
@@ -973,9 +973,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
                  if (isStub)
                  {
-                     throw dataFactory.markCorrupt(
-                         StandardException.newException(
-                             SQLState.FILE_CONTAINER_EXCEPTION, ioe, this, ioe));
+                     throw dataFactory.
+                         markCorrupt(StandardException.
+                                     newException(SQLState.
+                                                  FILE_CONTAINER_EXCEPTION, 
+                                                  ioe, this));
                  }
 
                  // maybe it is being stubbified... try that
@@ -995,18 +997,22 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                      }
                      catch (IOException ioe2)
                      {
-                         throw dataFactory.markCorrupt(
-                             StandardException.newException(
-                                 SQLState.FILE_CONTAINER_EXCEPTION, ioe2, this, ioe2));
+                         throw dataFactory.
+                             markCorrupt(StandardException.
+                                         newException(SQLState.
+                                                      FILE_CONTAINER_EXCEPTION,
+                                                      ioe2, this));
                      }
 
                      // RESOLVE: this is a temporary hack
 
                  }
                  else
-                     throw dataFactory.markCorrupt(
-                         StandardException.newException(
-                             SQLState.FILE_CONTAINER_EXCEPTION, ioe, this, ioe));
+                     throw dataFactory.
+                         markCorrupt(StandardException.
+                                     newException(SQLState.
+                                                  FILE_CONTAINER_EXCEPTION,
+                                                  ioe, this));
              }
 
              return this;
@@ -1066,8 +1072,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
              }
              catch (SecurityException se)
              {
-                 throw StandardException.newException(
-                     SQLState.FILE_CANNOT_REMOVE_FILE, se, file, se);
+                 throw StandardException.
+                     newException(SQLState.FILE_CANNOT_REMOVE_FILE, se, file, 
+                                  se.toString());
              }
              catch (IOException ioe)
              {
@@ -1091,7 +1098,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  catch (IOException ioe2)
                  {
                      throw StandardException.newException(
-                         SQLState.FILE_CANNOT_REMOVE_FILE, ioe2, file, ioe);
+                         SQLState.FILE_CANNOT_REMOVE_FILE, ioe2, file, ioe.toString());
                  }
                  catch (SecurityException se)
                  {

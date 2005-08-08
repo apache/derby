@@ -541,10 +541,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
                 if (!privRenameTo(backupcopy,oldbackup))
                 {
-					renameFailed = true;
-					throw StandardException.newException(
-                        SQLState.RAWSTORE_ERROR_RENAMING_FILE,
-                        backupcopy, oldbackup, (Throwable)null);
+                    renameFailed = true;
+                    throw StandardException.
+                        newException(SQLState.RAWSTORE_ERROR_RENAMING_FILE,
+                                     backupcopy, oldbackup);
                 }
 				else
 				{
@@ -566,9 +566,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             if (!privCopyDirectory(dbase, backupcopy, (byte[])null, BACKUP_FILTER))
             {
-				throw StandardException.newException(
-                    SQLState.RAWSTORE_ERROR_COPYING_FILE,
-					dbase, backupcopy, (Throwable)null);
+                throw StandardException.
+                    newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                 dbase, backupcopy);
             }
 
 			logHistory(historyFile,
@@ -633,14 +633,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             }
 
 		
-			// copy the log to the backup location
-			if(!logFactory.copyActiveLogFiles(logBackup))
-			{
-				throw StandardException.newException(
-													 SQLState.RAWSTORE_ERROR_COPYING_FILE,
-													 logdir, logBackup, (Throwable)null);
-			}	
-
+            // copy the log to the backup location
+            if(!logFactory.copyActiveLogFiles(logBackup))
+                {
+                    throw StandardException.
+                        newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                     logdir, logBackup);
+                }       
+            
 			logHistory(historyFile,
                 MessageService.getTextMessage(
                     MessageId.STORE_COPIED_LOG,

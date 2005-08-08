@@ -673,8 +673,7 @@ final class PersistentServiceImpl implements PersistentService
                                     throw ioe;
                                 }
                             }
-                            throw StandardException.newException(SQLState.SERVICE_DIRECTORY_CREATE_ERROR,
-                                                                 serviceDirectory, null);
+                            throw StandardException.newException(SQLState.SERVICE_DIRECTORY_CREATE_ERROR, serviceDirectory);
                         }
                         finally { storageFactory.shutdown(); }
                     }
@@ -689,7 +688,7 @@ final class PersistentServiceImpl implements PersistentService
                 throw (StandardException) t;
         }
 
-        throw StandardException.newException(SQLState.SERVICE_DIRECTORY_CREATE_ERROR, name, t);
+        throw StandardException.newException(SQLState.SERVICE_DIRECTORY_CREATE_ERROR, t, name);
     } // end of createServiceRoot
 
     private String getDirectoryPath( String name)

@@ -92,11 +92,10 @@ final class InputStreamContainer extends FileContainer  {
 
 			return true;
 
-		} catch (IOException ioe) {
-
-			throw StandardException.newException(
-                    SQLState.FILE_CONTAINER_EXCEPTION, ioe, this, ioe);
-		} finally {
+        } catch (IOException ioe) {
+            throw StandardException.
+                newException(SQLState.FILE_CONTAINER_EXCEPTION, ioe, this);
+        } finally {
 			if (dis != null) {
 				try {
 					dis.close();

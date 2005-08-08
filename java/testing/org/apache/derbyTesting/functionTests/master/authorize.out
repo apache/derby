@@ -49,6 +49,7 @@ ij> --
 --
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.readOnlyAccessUsers','fred,0IsABadFirstLetter');
 ERROR 28501: Invalid database authorization property 'derby.database.readOnlyAccessUsers=fred,0IsABadFirstLetter'.
+ERROR XCXC0: Invalid id list.
 ij> VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.readOnlyAccessUsers');
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
@@ -58,6 +59,7 @@ ij> --
 --
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.fullAccessUsers','fred,0IsABadFirstLetter');
 ERROR 28501: Invalid database authorization property 'derby.database.fullAccessUsers=fred,0IsABadFirstLetter'.
+ERROR XCXC0: Invalid id list.
 ij> VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.fullAccessUsers');
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
