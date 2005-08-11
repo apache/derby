@@ -319,11 +319,11 @@ to specify your environment and options:
 
     For example, you should have:
 
-      j13lib=c:/jdk1.3.1_15/lib
+      j13lib=c:/jdk1.3.1_15/jre/lib
 
     NOT
  
-      j13lib=c:\jdk1.3.1_15\lib
+      j13lib=c:\jdk1.3.1_15\jre\lib
 
    
     - j14lib
