@@ -161,3 +161,56 @@ commit;
 -- clean up
 autocommit on;
 drop table x;
+
+--------------------------------------------
+--
+-- Test delete piece of the fix for bug171.
+--
+--------------------------------------------
+
+create table bug171_employee( empl_id int, bonus int );
+create table bug171_bonuses( empl_id int, bonus int );
+
+insert into bug171_employee( empl_id, bonus ) values ( 1, 0 ), ( 2, 0 ), ( 3, 0 );
+insert into bug171_bonuses( empl_id, bonus )
+values
+( 1, 100 ), ( 1, 100 ), ( 1, 100 ),
+( 2, 200 ), ( 2, 200 ), ( 2, 200 ),
+( 3, 300 ), ( 3, 300 ), ( 3, 300 );
+
+select * from bug171_employee;
+select * from bug171_bonuses;
+
+--
+-- The problem query. could not use correlation names in delete.
+--
+
+delete from bug171_employee e
+    where e.empl_id > 2 and e.bonus <
+    (
+        select sum( b.bonus ) from bug171_bonuses b
+        where b.empl_id = e.empl_id
+    );
+select * from bug171_employee;
+
+-- positioned delete with correlation names
+
+autocommit off;
+
+get cursor bug171_c2 as
+'select * from bug171_employee where empl_id = 2 for update';
+next bug171_c2;
+
+delete from bug171_employee e where current of bug171_c2;
+
+close bug171_c2;
+select * from bug171_employee;
+
+autocommit on;
+
+--
+-- Cleanup
+--
+
+drop table bug171_employee;
+drop table bug171_bonuses;

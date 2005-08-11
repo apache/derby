@@ -2783,7 +2783,7 @@ ij> delete from db2test.emp
                   where e.mgrname = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E.MGRNAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.MGRNAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -2941,7 +2941,10 @@ ij> select * from db2test.emp e
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2, 3, 4;
-ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
+C0         |NAME      |MGRNAME   |DNO 
+--------------------------------------
+16         |GUY       |JOHN      |K55 
+6          |HAMID     |JOHN      |K55 
 ij> delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -2951,7 +2954,7 @@ ij> delete from db2test.emp
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where db2test.emp.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+2 rows inserted/updated/deleted
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -2967,8 +2970,6 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 10         |BOBBIE    |HAMID     |K55 
 17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
 8          |LARRY1    |HAMID     |K55 
 9          |LARRY2    |HAMID     |K55 
 19         |LILY1     |GUY       |K55 
@@ -2990,8 +2991,6 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 10         |BOBBIE    |HAMID     |K55 
 17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
 8          |LARRY1    |HAMID     |K55 
 9          |LARRY2    |HAMID     |K55 
 19         |LILY1     |GUY       |K55 
@@ -3013,8 +3012,6 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 10         |BOBBIE    |HAMID     |K55 
 17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
 8          |LARRY1    |HAMID     |K55 
 9          |LARRY2    |HAMID     |K55 
 19         |LILY1     |GUY       |K55 
@@ -3036,8 +3033,6 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 10         |BOBBIE    |HAMID     |K55 
 17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
 8          |LARRY1    |HAMID     |K55 
 9          |LARRY2    |HAMID     |K55 
 19         |LILY1     |GUY       |K55 
@@ -3059,8 +3054,6 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 10         |BOBBIE    |HAMID     |K55 
 17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
 8          |LARRY1    |HAMID     |K55 
 9          |LARRY2    |HAMID     |K55 
 19         |LILY1     |GUY       |K55 
@@ -3109,7 +3102,7 @@ ij> select * from db2test.emp e
                   where e4.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2, 3, 4;
-ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E4.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E4.NAME' is not a column in the target table.
 ij> -- select should get -119;
 delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
@@ -3120,7 +3113,7 @@ delete from db2test.emp
                   where e4.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                   where db2test.emp.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E4.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E4.NAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -3278,7 +3271,10 @@ ij> select * from db2test.emp e
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2, 3, 4;
-ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
+C0         |NAME      |MGRNAME   |DNO 
+--------------------------------------
+16         |GUY       |JOHN      |K55 
+6          |HAMID     |JOHN      |K55 
 ij> delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -3288,7 +3284,7 @@ ij> delete from db2test.emp
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+ERROR 42X04: Column 'E.MGRNAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.MGRNAME' is not a column in the target table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -5999,20 +5995,18 @@ C0         |DNO|DNAME
 2          |K52|OFC       
 1          |K55|DB        
 ij> delete from db2test.dept d where
-  dno in (select dno from db2test.emp e where
- e.dno = d.dno and e.dno in (select dno from db2test.emp2 e2 where
- e2.dno = e.dno and e2.dno in (select dno from db2test.emp3 e3 where
- e3.dno = e2.dno and e3.dno in (select dno from db2test.emp4 e4 where
- e4.dno = e3.dno and e4.dno in (select dno from db2test.emp5 e5 where
- e5.dno = e4.dno and e5.dno in (select dno from db2test.emp6 e6 where
+  d.dno in (select e.dno from db2test.emp e where
+ e.dno = d.dno and e.dno in (select e2.dno from db2test.emp2 e2 where
+ e2.dno = e.dno and e2.dno in (select e3.dno from db2test.emp3 e3 where
+ e3.dno = e2.dno and e3.dno in (select e4.dno from db2test.emp4 e4 where
+ e4.dno = e3.dno and e4.dno in (select e5.dno from db2test.emp5 e5 where
+ e5.dno = e4.dno and e5.dno in (select e6.dno from db2test.emp6 e6 where
  e6.dno = e5.dno and e6.dno in ('K55', 'K52')))))));
-ERROR 42X01: Syntax error: Encountered "d" at line 1, column 26.
+2 rows inserted/updated/deleted
 ij> select * from db2test.dept order by dno, dname;
 C0         |DNO|DNAME     
 --------------------------
 3          |K51|CS        
-2          |K52|OFC       
-1          |K55|DB        
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6021,21 +6015,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.secondemp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6067,21 +6061,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp3 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6090,21 +6084,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp4 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6113,21 +6107,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp5 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6136,21 +6130,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp6 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6159,21 +6153,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp7 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6182,21 +6176,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp8 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6205,21 +6199,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp9 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6228,21 +6222,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp10 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6251,21 +6245,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp11 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6274,21 +6268,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp12 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6297,21 +6291,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp13 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6320,21 +6314,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp14 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6343,21 +6337,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> select * from db2test.emp15 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -6366,21 +6360,21 @@ C0         |NAME      |MGRNAME   |DNO
 5          |JOE2      |ASHOK     |K51 
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
-13         |DAN       |ROGER     |K52 
-12         |JIM       |ROGER     |K52 
-11         |ROGER     |ROBIN     |K52 
-14         |SAM1      |ROGER     |K52 
-15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+10         |BOBBIE    |HAMID     |NULL
+13         |DAN       |ROGER     |NULL
+17         |DON       |GUY       |NULL
+16         |GUY       |JOHN      |NULL
+6          |HAMID     |JOHN      |NULL
+12         |JIM       |ROGER     |NULL
+8          |LARRY1    |HAMID     |NULL
+9          |LARRY2    |HAMID     |NULL
+19         |LILY1     |GUY       |NULL
+20         |LILY2     |GUY       |NULL
+18         |MONICA    |GUY       |NULL
+11         |ROGER     |ROBIN     |NULL
+14         |SAM1      |ROGER     |NULL
+15         |SAM2      |ROGER     |NULL
+7          |TRUONG    |HAMID     |NULL
 ij> -- "END OF TESTUNIT: 11";
 -- *************************************************************************
 -- TESTUNIT         : 12
@@ -6390,7 +6384,7 @@ ij> -- "END OF TESTUNIT: 11";
 -- "START OF TESTUNIT: 12";
 -- reset to original rows
 delete from db2test.dept;
-3 rows inserted/updated/deleted
+1 row inserted/updated/deleted
 ij> delete from db2test.emp;
 20 rows inserted/updated/deleted
 ij> delete from db2test.secondemp;
@@ -7575,17 +7569,26 @@ ij> select * from db2test.emp e
                   e2.dno in (select dno from db2test.emp e1
                   where e1.name = e.mgrname and e1.mgrname = 'JOHN')))))
    order by 2,3,4;
-ERROR 42X04: Column 'E5.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E5.NAME' is not a column in the target table.
+C0         |NAME      |MGRNAME   |DNO 
+--------------------------------------
+10         |BOBBIE    |HAMID     |K55 
+17         |DON       |GUY       |K55 
+8          |LARRY1    |HAMID     |K55 
+9          |LARRY2    |HAMID     |K55 
+19         |LILY1     |GUY       |K55 
+20         |LILY2     |GUY       |K55 
+18         |MONICA    |GUY       |K55 
+7          |TRUONG    |HAMID     |K55 
 ij> delete from db2test.emp e
-  where dno in (select dno from db2test.emp5 e5
-   where e5.dno in (select dno from db2test.emp4 e4 where
-   e5.name = e4.mgrname group by dno having dno in
-     (select dno from db2test.emp3 e3 where e4.dno = e3.dno and
-       e3.dno in (select dno from db2test.emp2 e2
-                  where e3.name = e2.mgrname group by dno having
-                  e2.dno in (select dno from db2test.emp  e1
+  where e.dno in (select e5.dno from db2test.emp5 e5
+   where e5.dno in (select e4.dno from db2test.emp4 e4 where
+   e5.name = e4.mgrname group by e4.dno having dno in
+     (select e3.dno from db2test.emp3 e3 where e4.dno = e3.dno and
+       e3.dno in (select e2.dno from db2test.emp2 e2
+                  where e3.name = e2.mgrname group by e2.dno having
+                  e2.dno in (select e1.dno from db2test.emp  e1
                   where e1.name = e.mgrname and e1.mgrname = 'JOHN')))));
-ERROR 42X01: Syntax error: Encountered "e" at line 1, column 25.
+8 rows inserted/updated/deleted
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7599,16 +7602,8 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
 ij> select * from db2test.emp2 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7713,7 +7708,7 @@ ij> -- "END OF TESTUNIT: 05";
 delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
-20 rows inserted/updated/deleted
+12 rows inserted/updated/deleted
 ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.emp3;
@@ -7743,17 +7738,20 @@ ij> select * from db2test.emp e
                   where e.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2,3,4;
-ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
+C0         |NAME      |MGRNAME   |DNO 
+--------------------------------------
+16         |GUY       |JOHN      |K55 
+6          |HAMID     |JOHN      |K55 
 ij> delete from db2test.emp e
-  where dno in (select dno from db2test.emp5 e5
-   where e5.dno in (select dno from db2test.emp4 e4 where
-   e.name = e4.mgrname group by dno having dno in
-     (select dno from db2test.emp3 e3 where e.name = e3.mgrname and
-       e3.dno in (select dno from db2test.emp2 e2
-                  where e.name = e2.mgrname group by dno having
-                  e2.dno in (select dno from db2test.emp  e1
+  where e.dno in (select e5.dno from db2test.emp5 e5
+   where e5.dno in (select e4.dno from db2test.emp4 e4 where
+   e.name = e4.mgrname group by e4.dno having e4.dno in
+     (select e3.dno from db2test.emp3 e3 where e.name = e3.mgrname and
+       e3.dno in (select e2.dno from db2test.emp2 e2
+                  where e.name = e2.mgrname group by e2.dno having
+                  e2.dno in (select e1.dno from db2test.emp  e1
                    where e.mgrname = 'JOHN')))));
-ERROR 42X01: Syntax error: Encountered "e" at line 1, column 25.
+2 rows inserted/updated/deleted
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7769,8 +7767,6 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 10         |BOBBIE    |HAMID     |K55 
 17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
 8          |LARRY1    |HAMID     |K55 
 9          |LARRY2    |HAMID     |K55 
 19         |LILY1     |GUY       |K55 
@@ -7790,16 +7786,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> select * from db2test.emp3 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7813,16 +7809,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> select * from db2test.emp4 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7836,16 +7832,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> select * from db2test.emp5 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7859,16 +7855,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> -- "END OF TESTUNIT: 06";
 -- *************************************************************************
 -- TESTUNIT         : 07
@@ -7881,7 +7877,7 @@ ij> -- "END OF TESTUNIT: 06";
 delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
-20 rows inserted/updated/deleted
+18 rows inserted/updated/deleted
 ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.emp3;
@@ -7911,7 +7907,10 @@ ij> select * from db2test.emp e
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2,3,4;
-ERROR 42X04: Column 'E.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E.NAME' is not a column in the target table.
+C0         |NAME      |MGRNAME   |DNO 
+--------------------------------------
+16         |GUY       |JOHN      |K55 
+6          |HAMID     |JOHN      |K55 
 ij> delete from db2test.emp
   where dno in (select dno from db2test.emp5 e5
    where e5.dno in (select dno from db2test.emp4 e4 where
@@ -7921,7 +7920,7 @@ ij> delete from db2test.emp
                   where e4.dno = e2.dno group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where db2test.emp.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'DB2TEST.EMP.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DB2TEST.EMP.NAME' is not a column in the target table.
+2 rows inserted/updated/deleted
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7937,8 +7936,6 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 10         |BOBBIE    |HAMID     |K55 
 17         |DON       |GUY       |K55 
-16         |GUY       |JOHN      |K55 
-6          |HAMID     |JOHN      |K55 
 8          |LARRY1    |HAMID     |K55 
 9          |LARRY2    |HAMID     |K55 
 19         |LILY1     |GUY       |K55 
@@ -7958,16 +7955,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> select * from db2test.emp3 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7981,16 +7978,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> select * from db2test.emp4 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -8004,16 +8001,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> select * from db2test.emp5 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -8027,16 +8024,16 @@ C0         |NAME      |MGRNAME   |DNO
 11         |ROGER     |ROBIN     |K52 
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
-10         |BOBBIE    |HAMID     |K55 
-17         |DON       |GUY       |K55 
+10         |BOBBIE    |NULL      |K55 
+17         |DON       |NULL      |K55 
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
-8          |LARRY1    |HAMID     |K55 
-9          |LARRY2    |HAMID     |K55 
-19         |LILY1     |GUY       |K55 
-20         |LILY2     |GUY       |K55 
-18         |MONICA    |GUY       |K55 
-7          |TRUONG    |HAMID     |K55 
+8          |LARRY1    |NULL      |K55 
+9          |LARRY2    |NULL      |K55 
+19         |LILY1     |NULL      |K55 
+20         |LILY2     |NULL      |K55 
+18         |MONICA    |NULL      |K55 
+7          |TRUONG    |NULL      |K55 
 ij> -- "END OF TESTUNIT: 07";
 -- "cleanup";
 drop table db2test.emp6;

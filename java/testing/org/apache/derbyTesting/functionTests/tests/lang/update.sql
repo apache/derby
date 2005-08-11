@@ -251,3 +251,62 @@ rollback;
 
 autocommit on;
 drop table tab1;
+
+--------------------------------------------
+--
+-- Test upgrade piece of the fix for bug171.
+--
+--------------------------------------------
+
+create table bug171_employee( empl_id int, bonus int );
+create table bug171_bonuses( empl_id int, bonus int );
+
+insert into bug171_employee( empl_id, bonus ) values ( 1, 0 ), ( 2, 0 ), ( 3, 0 );
+insert into bug171_bonuses( empl_id, bonus )
+values
+( 1, 100 ), ( 1, 100 ), ( 1, 100 ),
+( 2, 200 ), ( 2, 200 ), ( 2, 200 ),
+( 3, 300 ), ( 3, 300 ), ( 3, 300 );
+
+select * from bug171_employee;
+select * from bug171_bonuses;
+
+--
+-- The problem query. could not use correlation names in update.
+--
+
+update bug171_employee e
+    set e.bonus =
+    (
+        select sum( b.bonus ) from bug171_bonuses b
+        where b.empl_id = e.empl_id
+    );
+select * from bug171_employee;
+
+-- positioned update with correlation names
+
+autocommit off;
+get cursor bug171_c1 as
+'select * from bug171_employee where empl_id = 1 for update';
+
+next bug171_c1;
+
+update bug171_employee e
+    set e.bonus =
+    (
+        select 2 * sum( b.bonus ) from bug171_bonuses b
+        where b.empl_id = e.empl_id
+    )
+where current of bug171_c1;
+
+close bug171_c1;
+select * from bug171_employee;
+
+autocommit on;
+
+--
+-- Cleanup
+--
+
+drop table bug171_employee;
+drop table bug171_bonuses;

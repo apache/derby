@@ -142,9 +142,7 @@ public class ColumnReference extends ValueNode
 				"tableNumber: " + tableNumber + "\n" +
 				"columnNumber: " + columnNumber + "\n" +
 				"replacesAggregate: " + replacesAggregate + "\n" +
-				( ( tableName != null) ?
-						tableName.toString() :
-						"tableName: null\n") +
+				"tableName: " + ( ( tableName != null) ? tableName.toString() : "null") + "\n" +
 				"nestingLevel: " + nestingLevel + "\n" +
 				"sourceLevel: " + sourceLevel + "\n" +
 				super.toString();
@@ -387,7 +385,6 @@ public class ColumnReference extends ValueNode
 			Vector aggregateVector) 
 				throws StandardException
 	{
-
 		ResultColumn matchingRC;
 
 		if (SanityManager.DEBUG)

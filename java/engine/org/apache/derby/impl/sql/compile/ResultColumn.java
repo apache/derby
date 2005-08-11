@@ -267,7 +267,7 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Clear the table name for the underlying ColumnReference.
-	 * See UpdateNode for full explaination.
+	 * See UpdateNode.scrubResultColumns() for full explaination.
 	 */
 	public void clearTableName()
 	{
@@ -764,6 +764,7 @@ public class ResultColumn extends ValueNode
 				*/
 				String realName = tableDescriptor.getName();
 				String refName = reference.getTableName();
+
 				throw StandardException.newException(SQLState.LANG_TABLE_NAME_MISMATCH, 
 					realName, refName);
 			}
@@ -1745,4 +1746,8 @@ public class ResultColumn extends ValueNode
     public TableName getTableNameObject() {
         return null;
     }
+
+	/* Get the wrapped reference if any */
+	public	ColumnReference	getReference() { return reference; }
+	
 }

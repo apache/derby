@@ -309,7 +309,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindExpressions()
+	public void bindExpressions( FromList fromListParam )
 					throws StandardException
 	{
 		FromTable	fromTable;
@@ -318,10 +318,31 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
-			fromTable.bindExpressions(this);
+			fromTable.bindExpressions( makeFromList( fromListParam, fromTable ) );
 		}
 	}
 
+	/**
+	 * Construct an appropriate from list for binding an individual
+	 * table element. Normally, this is just this list. However,
+	 * for the special wrapper queries which the parser creates for
+	 * GROUP BY and HAVING clauses, the appropriate list is the
+	 * outer list passed into us--it will contain the appropriate
+	 * tables needed to resolve correlated columns.
+	 */
+	private	FromList	makeFromList( FromList fromListParam, FromTable fromTable )
+	{
+		if ( fromTable instanceof FromSubquery )
+		{
+			FromSubquery	fromSubquery = (FromSubquery) fromTable;
+
+			if ( fromSubquery.generatedForGroupByClause || fromSubquery.generatedForHavingClause )
+			{ return fromListParam; }
+		}
+
+		return this;
+	}
+	
 	/**
 	 * Bind the result columns of the ResultSetNodes in this FromList when there is no
 	 * base table to bind them to.  This is useful for SELECT statements,
@@ -521,6 +542,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 			previousLevel = currentLevel;
 
 			resultColumn = fromTable.getMatchingColumn(columnReference);
+
 			if (resultColumn != null)
 			{
 				if (! columnNameMatch)

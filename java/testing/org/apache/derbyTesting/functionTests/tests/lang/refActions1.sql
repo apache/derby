@@ -2307,12 +2307,12 @@ select * from db2test.dept d where
  e6.dno = e5.dno and e6.dno in ('K55', 'K52')))))))
  order by 2, 3;
 delete from db2test.dept d where
-  dno in (select dno from db2test.emp e where
- e.dno = d.dno and e.dno in (select dno from db2test.emp2 e2 where
- e2.dno = e.dno and e2.dno in (select dno from db2test.emp3 e3 where
- e3.dno = e2.dno and e3.dno in (select dno from db2test.emp4 e4 where
- e4.dno = e3.dno and e4.dno in (select dno from db2test.emp5 e5 where
- e5.dno = e4.dno and e5.dno in (select dno from db2test.emp6 e6 where
+  d.dno in (select e.dno from db2test.emp e where
+ e.dno = d.dno and e.dno in (select e2.dno from db2test.emp2 e2 where
+ e2.dno = e.dno and e2.dno in (select e3.dno from db2test.emp3 e3 where
+ e3.dno = e2.dno and e3.dno in (select e4.dno from db2test.emp4 e4 where
+ e4.dno = e3.dno and e4.dno in (select e5.dno from db2test.emp5 e5 where
+ e5.dno = e4.dno and e5.dno in (select e6.dno from db2test.emp6 e6 where
  e6.dno = e5.dno and e6.dno in ('K55', 'K52')))))));
 select * from db2test.dept order by dno, dname;
 select * from db2test.emp order by dno, name, mgrname;
@@ -2712,13 +2712,13 @@ select * from db2test.emp e
                   where e1.name = e.mgrname and e1.mgrname = 'JOHN')))))
    order by 2,3,4;
 delete from db2test.emp e
-  where dno in (select dno from db2test.emp5 e5
-   where e5.dno in (select dno from db2test.emp4 e4 where
-   e5.name = e4.mgrname group by dno having dno in
-     (select dno from db2test.emp3 e3 where e4.dno = e3.dno and
-       e3.dno in (select dno from db2test.emp2 e2
-                  where e3.name = e2.mgrname group by dno having
-                  e2.dno in (select dno from db2test.emp  e1
+  where e.dno in (select e5.dno from db2test.emp5 e5
+   where e5.dno in (select e4.dno from db2test.emp4 e4 where
+   e5.name = e4.mgrname group by e4.dno having dno in
+     (select e3.dno from db2test.emp3 e3 where e4.dno = e3.dno and
+       e3.dno in (select e2.dno from db2test.emp2 e2
+                  where e3.name = e2.mgrname group by e2.dno having
+                  e2.dno in (select e1.dno from db2test.emp  e1
                   where e1.name = e.mgrname and e1.mgrname = 'JOHN')))));
 select * from db2test.emp order by dno, name, mgrname;
 select * from db2test.emp2 order by dno, name, mgrname;
@@ -2759,13 +2759,13 @@ select * from db2test.emp e
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2,3,4;
 delete from db2test.emp e
-  where dno in (select dno from db2test.emp5 e5
-   where e5.dno in (select dno from db2test.emp4 e4 where
-   e.name = e4.mgrname group by dno having dno in
-     (select dno from db2test.emp3 e3 where e.name = e3.mgrname and
-       e3.dno in (select dno from db2test.emp2 e2
-                  where e.name = e2.mgrname group by dno having
-                  e2.dno in (select dno from db2test.emp  e1
+  where e.dno in (select e5.dno from db2test.emp5 e5
+   where e5.dno in (select e4.dno from db2test.emp4 e4 where
+   e.name = e4.mgrname group by e4.dno having e4.dno in
+     (select e3.dno from db2test.emp3 e3 where e.name = e3.mgrname and
+       e3.dno in (select e2.dno from db2test.emp2 e2
+                  where e.name = e2.mgrname group by e2.dno having
+                  e2.dno in (select e1.dno from db2test.emp  e1
                    where e.mgrname = 'JOHN')))));
 select * from db2test.emp order by dno, name, mgrname;
 select * from db2test.emp2 order by dno, name, mgrname;

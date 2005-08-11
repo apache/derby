@@ -469,7 +469,7 @@ public class SelectNode extends ResultSetNode
 		if (! bindTargetListOnly)
 		{
 			/* Bind the expressions in FromSubquerys, JoinNodes, etc. */
-			fromList.bindExpressions();
+			fromList.bindExpressions( fromListParam );
 		}
 
 		selectSubquerys = (SubqueryList) getNodeFactory().getNode(

@@ -98,9 +98,9 @@ public final class CurrentOfNode extends FromTable {
 	//
 	// initializers
 	//
-	public void init(Object cursor, Object tableProperties)
+	public void init( Object correlationName, Object cursor, Object tableProperties)
 	{
-		super.init(null, tableProperties);
+		super.init(correlationName, tableProperties);
 		cursorName = (String) cursor;
 	}
 
@@ -337,7 +337,11 @@ public final class CurrentOfNode extends FromTable {
 		 * matches the table we're looking at, see whether the column
 		 * is in this table, and also whether it is in the for update list.
 		*/
-		if (columnsTableName == null || columnsTableName.getFullTableName().equals(baseTableName.getFullTableName()))
+		if (
+			   (columnsTableName == null) ||
+			   (columnsTableName.getFullTableName().equals(baseTableName.getFullTableName())) ||
+			   ((correlationName != null) && correlationName.equals( columnsTableName.getTableName()))
+		   )
 		{
 			boolean notfound = false;
 
@@ -367,6 +371,15 @@ public final class CurrentOfNode extends FromTable {
 			}
 		}
 
+		/*
+		 * Patch up the table number for correlated references.
+		 * Part of the fix for bug 171.
+		 */
+		if ( (correlationName != null) && (columnReference.getTableNumber() < 0) )
+		{
+			columnReference.setTableNumber( tableNumber );
+		}
+		
 		return resultColumn;
 	}
 

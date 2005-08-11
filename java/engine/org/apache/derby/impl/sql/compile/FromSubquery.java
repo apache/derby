@@ -257,12 +257,20 @@ public class FromSubquery extends FromTable
 									getContextManager());
 		ResultColumnList	derivedRCL = resultColumns;
 		ResultColumnList	subqueryRCL;
+		FromList			nestedFromList;
 
 		/* From subqueries cannot be correlated, so we pass an empty FromList
-		 * to subquery.bindExpressions() and .bindResultColumns().
+		 * to subquery.bindExpressions() and .bindResultColumns(). However,
+		 * the parser rewrites queries which have GROUP BY and HAVING clauses.
+		 * For these rewritten pseudo-subqueries, we need to pass in the outer FromList
+		 * which contains correlated tables.
 		 */
-		subquery.bindExpressions(emptyFromList);
-		subquery.bindResultColumns(emptyFromList);
+		if ( generatedForGroupByClause || generatedForHavingClause )
+		{ nestedFromList = fromListParam; }
+		else { nestedFromList = emptyFromList; }
+		
+		subquery.bindExpressions(nestedFromList);
+		subquery.bindResultColumns(nestedFromList);
 
 		/* Now that we've bound the expressions in the subquery, we 
 		 * can propagate the subquery's RCL up to the FromSubquery.

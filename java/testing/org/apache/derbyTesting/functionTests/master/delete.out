@@ -213,4 +213,77 @@ ij> -- clean up
 autocommit on;
 ij> drop table x;
 0 rows inserted/updated/deleted
+ij> --------------------------------------------
+--
+-- Test delete piece of the fix for bug171.
+--
+--------------------------------------------
+create table bug171_employee( empl_id int, bonus int );
+0 rows inserted/updated/deleted
+ij> create table bug171_bonuses( empl_id int, bonus int );
+0 rows inserted/updated/deleted
+ij> insert into bug171_employee( empl_id, bonus ) values ( 1, 0 ), ( 2, 0 ), ( 3, 0 );
+3 rows inserted/updated/deleted
+ij> insert into bug171_bonuses( empl_id, bonus )
+values
+( 1, 100 ), ( 1, 100 ), ( 1, 100 ),
+( 2, 200 ), ( 2, 200 ), ( 2, 200 ),
+( 3, 300 ), ( 3, 300 ), ( 3, 300 );
+9 rows inserted/updated/deleted
+ij> select * from bug171_employee;
+EMPL_ID    |BONUS      
+-----------------------
+1          |0          
+2          |0          
+3          |0          
+ij> select * from bug171_bonuses;
+EMPL_ID    |BONUS      
+-----------------------
+1          |100        
+1          |100        
+1          |100        
+2          |200        
+2          |200        
+2          |200        
+3          |300        
+3          |300        
+3          |300        
+ij> --
+-- The problem query. could not use correlation names in delete.
+--
+delete from bug171_employee e
+    where e.empl_id > 2 and e.bonus <
+    (
+        select sum( b.bonus ) from bug171_bonuses b
+        where b.empl_id = e.empl_id
+    );
+1 row inserted/updated/deleted
+ij> select * from bug171_employee;
+EMPL_ID    |BONUS      
+-----------------------
+1          |0          
+2          |0          
+ij> -- positioned delete with correlation names
+autocommit off;
+ij> get cursor bug171_c2 as
+'select * from bug171_employee where empl_id = 2 for update';
+ij> next bug171_c2;
+EMPL_ID    |BONUS      
+-----------------------
+2          |0          
+ij> delete from bug171_employee e where current of bug171_c2;
+1 row inserted/updated/deleted
+ij> close bug171_c2;
+ij> select * from bug171_employee;
+EMPL_ID    |BONUS      
+-----------------------
+1          |0          
+ij> autocommit on;
+ij> --
+-- Cleanup
+--
+drop table bug171_employee;
+0 rows inserted/updated/deleted
+ij> drop table bug171_bonuses;
+0 rows inserted/updated/deleted
 ij> 

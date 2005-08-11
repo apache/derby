@@ -125,6 +125,11 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		tableNumber = -1;
 	}
 
+	/**
+	 * Get this table's correlation name, if any.
+	 */
+	public	String	getCorrelationName() { return correlationName; }
+
 	/*
 	 *  Optimizable interface
 	 */

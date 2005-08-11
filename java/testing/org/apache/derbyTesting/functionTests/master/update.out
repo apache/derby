@@ -436,4 +436,86 @@ ij> rollback;
 ij> autocommit on;
 ij> drop table tab1;
 0 rows inserted/updated/deleted
+ij> --------------------------------------------
+--
+-- Test upgrade piece of the fix for bug171.
+--
+--------------------------------------------
+create table bug171_employee( empl_id int, bonus int );
+0 rows inserted/updated/deleted
+ij> create table bug171_bonuses( empl_id int, bonus int );
+0 rows inserted/updated/deleted
+ij> insert into bug171_employee( empl_id, bonus ) values ( 1, 0 ), ( 2, 0 ), ( 3, 0 );
+3 rows inserted/updated/deleted
+ij> insert into bug171_bonuses( empl_id, bonus )
+values
+( 1, 100 ), ( 1, 100 ), ( 1, 100 ),
+( 2, 200 ), ( 2, 200 ), ( 2, 200 ),
+( 3, 300 ), ( 3, 300 ), ( 3, 300 );
+9 rows inserted/updated/deleted
+ij> select * from bug171_employee;
+EMPL_ID    |BONUS      
+-----------------------
+1          |0          
+2          |0          
+3          |0          
+ij> select * from bug171_bonuses;
+EMPL_ID    |BONUS      
+-----------------------
+1          |100        
+1          |100        
+1          |100        
+2          |200        
+2          |200        
+2          |200        
+3          |300        
+3          |300        
+3          |300        
+ij> --
+-- The problem query. could not use correlation names in update.
+--
+update bug171_employee e
+    set e.bonus =
+    (
+        select sum( b.bonus ) from bug171_bonuses b
+        where b.empl_id = e.empl_id
+    );
+3 rows inserted/updated/deleted
+ij> select * from bug171_employee;
+EMPL_ID    |BONUS      
+-----------------------
+1          |300        
+2          |600        
+3          |900        
+ij> -- positioned update with correlation names
+autocommit off;
+ij> get cursor bug171_c1 as
+'select * from bug171_employee where empl_id = 1 for update';
+ij> next bug171_c1;
+EMPL_ID    |BONUS      
+-----------------------
+1          |300        
+ij> update bug171_employee e
+    set e.bonus =
+    (
+        select 2 * sum( b.bonus ) from bug171_bonuses b
+        where b.empl_id = e.empl_id
+    )
+where current of bug171_c1;
+1 row inserted/updated/deleted
+ij> close bug171_c1;
+ij> select * from bug171_employee;
+EMPL_ID    |BONUS      
+-----------------------
+1          |600        
+2          |600        
+3          |900        
+ij> autocommit on;
+ij> --
+-- Cleanup
+--
+drop table bug171_employee;
+0 rows inserted/updated/deleted
+ij> drop table bug171_bonuses;
+0 rows inserted/updated/deleted
 ij> 

@@ -238,6 +238,7 @@ public class DeleteNode extends DMLModStatementNode
 			** Start off assuming no columns from the base table
 			** are needed in the rcl.
 			*/
+
 			resultColumnList = new ResultColumnList();
 
 			FromBaseTable fbt = getResultColumnList(resultColumnList);
@@ -246,6 +247,7 @@ public class DeleteNode extends DMLModStatementNode
 										targetTableDescriptor);
 
 			resultColumnList = fbt.addColsToList(resultColumnList, readColsBitSet);
+
 			/*
 			** If all bits are set, then behave as if we chose all
 			** in the first place
@@ -285,6 +287,9 @@ public class DeleteNode extends DMLModStatementNode
 			/* Append to the ResultColumnList */
 			resultColumnList.addResultColumn(rowLocationColumn);
 
+			/* Force the added columns to take on the table's correlation name, if any */
+			correlateAddedColumns( resultColumnList, targetTable );
+			
 			/* Set the new result column list in the result set */
 			resultSet.setResultColumns(resultColumnList);
 		}
@@ -968,4 +973,34 @@ public class DeleteNode extends DMLModStatementNode
 		return	columnMap;
 	}
     
+	/*
+	 * Force column references (particularly those added by the compiler)
+	 * to use the correlation name on the base table, if any.
+	 */
+	private	void	correlateAddedColumns( ResultColumnList rcl, FromTable fromTable )
+		throws StandardException
+	{
+		String		correlationName = fromTable.getCorrelationName();
+
+		if ( correlationName == null ) { return; }
+
+		TableName	correlationNameNode = makeTableName( null, correlationName );
+		int			count = rcl.size();
+
+		for ( int i = 0; i < count; i++ )
+		{
+			ResultColumn	column = (ResultColumn) rcl.elementAt( i );
+
+			ValueNode		expression = column.getExpression();
+
+			if ( (expression != null) && (expression instanceof ColumnReference) )
+			{
+				ColumnReference	reference = (ColumnReference) expression;
+				
+				reference.setTableNameNode( correlationNameNode );
+			}
+		}
+		
+	}
+	
 }

@@ -2599,6 +2599,7 @@ QueryTreeNode
 deleteBody() throws StandardException :
 {
 	JavaToSQLValueNode	javaToSQLNode = null;
+	String				correlationName = null;
 	TableName  tableName = null;
 	ValueNode  whereClause = null;
 	FromTable  fromTable = null;
@@ -2623,6 +2624,11 @@ deleteBody() throws StandardException :
 	}
 |
 	<FROM> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
+		[ 
+			LOOKAHEAD
+			( { (getToken(1).kind != EOF) && (getToken(1).kind != WHERE) && !propertyListFollows() } )
+			[ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
+		]
 	    [targetProperties = propertyList() ] 
 		[ 
 			whereToken = <WHERE>
@@ -2635,7 +2641,7 @@ deleteBody() throws StandardException :
 					 (getToken(2).kind == OF) 
 				  	}
 				)	
-				fromTable = currentOfClause() |
+				fromTable = currentOfClause( correlationName ) |
 				whereClause = whereClause(whereToken)
 			)
 		]
@@ -2654,7 +2660,7 @@ deleteBody() throws StandardException :
 			fromTable = (FromTable) nodeFactory.getNode(
 										C_NodeTypes.FROM_BASE_TABLE,
 										tableName,
-										null,
+										correlationName,
 										ReuseFactory.getInteger(
 												FromBaseTable.DELETE),
 										null,
@@ -2682,7 +2688,7 @@ deleteBody() throws StandardException :
  * <A NAME="currentOfClause">currentOfClause</A>
  */
 FromTable
-currentOfClause() throws StandardException :
+currentOfClause( String correlationName ) throws StandardException :
 {
 	String cursorName = null;
 }
@@ -2691,6 +2697,7 @@ currentOfClause() throws StandardException :
 	{ 
 		return (FromTable) nodeFactory.getNode(
 								C_NodeTypes.CURRENT_OF_NODE,
+								correlationName,
 								cursorName,
 								null,
 								getContextManager());
@@ -2845,6 +2852,7 @@ QueryTreeNode
 updateBody() throws StandardException :
 {
 	ResultColumnList	columnList;
+	String				correlationName = null;
 	JavaToSQLValueNode	javaToSQLNode = null;
 	TableName  tableName = null;
 	ValueNode  whereClause = null;
@@ -2870,13 +2878,19 @@ updateBody() throws StandardException :
 	}
 |
 		tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
-		[targetProperties = propertyList() ] 
+		[
+			LOOKAHEAD( { (getToken(1).kind != SET) && !propertyListFollows() } )
+			[ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
+		]
+		[
+			targetProperties = propertyList()
+		] 
 		<SET> columnList = setClauseList()
 		[ 
 			whereToken = <WHERE>
 		    (
 				whereClause = whereClause(whereToken) |
-				fromTable = currentOfClause()
+				fromTable = currentOfClause( correlationName )
 			)
 		]
 	{
@@ -2894,7 +2908,7 @@ updateBody() throws StandardException :
 			fromTable = (FromTable) nodeFactory.getNode(
 										C_NodeTypes.FROM_BASE_TABLE,
 										tableName,
-										null,
+										correlationName,
 										ReuseFactory.getInteger(
 														FromBaseTable.UPDATE),
 										null,
