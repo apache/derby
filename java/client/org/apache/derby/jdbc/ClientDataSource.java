@@ -30,7 +30,7 @@ import org.apache.derby.client.net.NetLogWriter;
 
 /**
  * ClientDataSource is a simple data source implementation that can be used for establishing connections in a
- * non-pooling, non-distributed environment. The class ClientDataSource can be used in a connection pooling environment,
+ * non-pooling, non-distributed environment. The class ClientConnectionPoolDataSource can be used in a connection pooling environment,
  * and the class ClientXADataSource can be used in a distributed, and pooling environment.
  * <p/>
  * The example below registers a DNC data source object with a JNDI naming service.
