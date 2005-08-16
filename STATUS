@@ -3,30 +3,24 @@ Last modified at [$Date$] by $Author$.
 
 Web site: http://incubator.apache.org/derby/
 
-Incubator Status
+Project Status
 
   Description
 
-  "Derby" is a snapshot of the IBM's Cloudscape Java relational database. IBM is
-  opening the code by contributing it to The Apache Software Foundation and 
-  basing future versions of IBM Cloudscape on the Apache-managed code.
+  "Derby" began as a snapshot of the IBM's Cloudscape Java relational database. IBM
+  contributed the code to The Apache Software Foundation and 
+  bases future versions of IBM Cloudscape on the Apache-managed code.
 
-  To participate in the Derby podling, you should join the mailing list. Just 
-  send an empty message to derby-dev-subscribe@db.apache.org .
+  To participate in Derby, you should join the mailing list. Just 
+  send an empty message to derby-dev-subscribe@db.apache.org.
 
-  The initial goal of the project while in incubation is to build a viable 
-  developer community around the codebase.
-
-  The second goal of Derby-in-incubation is to successfully produce a release. 
-  Since Derby is in incubation, such a release would not have formal standing; 
-  it will serve as a proof-of-concept to demonstrate to the developers' and 
-  incubator's satisfaction that this aspect of the project is health and 
-  understood.
+  Derby graduated from incubation in July, 2005 and is now a
+  full-fledged Apache DB project..
 
 Project info
 
-  * The Apache DB project will own the Derby subproject, and the subproject will
-    follow the Apache DB PMC's direction. Significant contributors to this sub-
+  * The Apache DB project owns the Derby subproject, and the subproject
+    follows the Apache DB PMC's direction. Significant contributors to this sub-
     project (for example, after a significant interval of sustained
     contribution) will be proposed for commit access to the codebase.
 
@@ -155,11 +149,12 @@ Incubator sign-off
 Has the Incubator decided that the project has accomplished all of the above
 tasks?
 
+Graduated from Incubator in July 2005.
 
 Releases:
 
  * 10.0.2.1 : Released 12/06/2004
- * 10.1.0.0 : In development
+ * 10.1.1.0 : Released 8/3/2005
 
 PENDING ISSUES
 ==============
@@ -235,6 +230,12 @@ RESOLVED ISSUES SINCE LAST STATUS
   and support from Lance J Anderson, Suresh Thalamati, James Eacret, Dag H. Wanvik,
   Susan Cline, Olav Sandstaa, Manjula G Kutty
   
+[VOTE] to sunset support for jdk1.3 and to support jdbc4.0 in release 10.2.
+  See email thread: "[VOTE] Policy for supported platforms". Vote
+  ended on August 12, 2005.
+  Passed with +1 support votes from Lance Andersen, Rick Hillegas,
+  Shreyas Kaushik, and Francois Orsini.
+
 
 OTHER NEWS
 ==========
@@ -248,16 +249,4 @@ http://issues.apache.org/jira/browse/DERBY-297
 RELEASE STATUS
 ==============
 
-Derby PPMC voted to release 10.1 - waiting for permission from Incubator PMC to
-distribute the software.
-
-Any release must be approved by the Incubator PMC and must clearly be marked as
-an incubator release, according to the Apache Incubator guidelines:
-
-http://incubator.apache.org/incubation/Incubation_Policy.html#Releases%0A
-
-Bugs which need to be resolved before the 10.1 release can occur are being
-tracked in JIRA. You can see the current status at:
-
-http://issues.apache.org/jira/browse/DERBY?report=com.atlassian.jira.plugin.system.project:roadmap-panel
-
+Derby PPMC voted to release 10.1
