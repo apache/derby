@@ -384,7 +384,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		else // StandardException or run time exception, log it first
 		{
-			String info = LocalizedResource.getMessage("IJ_01SeeClouLog", t.toString(), t.getMessage());
+			String info = LocalizedResource.getMessage("IJ_01SeeLog", t.toString(), t.getMessage());
 			//		t.printStackTrace(System.out);
 			throw new ijException(info);
 		}
