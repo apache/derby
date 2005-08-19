@@ -72,3 +72,4 @@ xaSimplePositive_app.properties
 xaSimplePositive_sed.properties
 xaSimplePositive_derby.properties
 xaStateTran.sql
+blobSetBinaryStream_app.properties

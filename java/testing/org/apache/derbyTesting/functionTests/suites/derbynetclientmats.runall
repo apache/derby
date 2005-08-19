@@ -1,2 +1,4 @@
 jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
+jdbcapi/blobSetBinaryStream.java
+

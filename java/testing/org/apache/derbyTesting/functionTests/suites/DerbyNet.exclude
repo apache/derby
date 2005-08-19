@@ -16,3 +16,4 @@ jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
 lang/updatableResultSet.java
+jdbcapi/blobSetBinaryStream.java
