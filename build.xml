@@ -48,13 +48,18 @@
 
   <target name="ensuresanitystate" unless="state.available">
     <antcall target="evaluate.sane"/>
-    <antcall target="ensuresanitystate.sane"/>
-    <antcall target="ensuresanitystate.insane"/>
   </target>
   <target name="evaluate.sane">
     <condition property="generate.sane">
-      <equals arg1="${sane}" arg2="true"/>
+      <or>
+        <equals arg1="${sane}" arg2="true"/>
+        <not>
+          <isset property="${sane}"/>
+        </not>
+      </or>
     </condition>
+    <antcall target="ensuresanitystate.sane"/>
+    <antcall target="ensuresanitystate.insane"/>
   </target>
   <target name="ensuresanitystate.sane" if="generate.sane">
     <antcall target="sane"/>
