@@ -3,8 +3,3 @@ START: testBlob1
 testBlob1 finished
 FINISHED TEST blobSetBinaryStream :-)
 Test blob setBinaryStream with multiple writes finished
-Test blob setBinaryStram with mutiple writes starting
-START: testBlob1
-testBlob1 finished
-FINISHED TEST blobSetBinaryStream :-)
-Test blob setBinaryStram with mutiple writes finished
