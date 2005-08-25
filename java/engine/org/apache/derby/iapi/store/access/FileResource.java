@@ -121,20 +121,6 @@ public interface FileResource {
 	public StorageFile getAsFile(String name, long generationId);
 
 	/**
-	  Get the File handle to a file resource. In some situations
-	  higher level code can make optimisations if it can access
-	  a file as a File, rather than an output stream. If this call
-	  returns null then the resouce is not accessable as a file
-	  (e.g. the database is in a zip file).
-	  
-	  @param name The name of the fileResource
-	  
-	  @return A File object representing the file, or null if
-	  the resource is not accessable as a file.
-	  */
-	public StorageFile getAsFile(String name);
-
-	/**
 	  Get the file resource as a stream.
 
 	  @exception IOException some io error occured
@@ -142,22 +128,6 @@ public interface FileResource {
 	*/
 	public InputStream getAsStream(String name, long generationId)
 		throws IOException;
-
-	/**
-	  Get the file resource as a stream.
-
-	  @exception IOException some io error occured
-	  @exception FileNotFoundException file does not exist.
-	*/
-	public InputStream getAsStream(String name)
-		throws IOException;
-	/**
-	  Purge old generations that were removed or replaced
-	  before the database instant provided.
-	  @exception StandardException Ooops
-	  */
-    public void purgeOldGenerations(DatabaseInstant purgeTo)
-		throws StandardException;
 
     /**
      * @return the separator character to be used in file names.

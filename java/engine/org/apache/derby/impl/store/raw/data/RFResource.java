@@ -42,7 +42,7 @@ import java.io.OutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class RFResource implements FileResource {
+class RFResource implements FileResource {
 
 	protected final BaseDataFileFactory factory;
 
@@ -142,11 +142,11 @@ public class RFResource implements FileResource {
             factory.getRawStoreFactory().findUserTransaction(
                 cm, AccessFactoryGlobals.USER_TRANS_NAME);
 
-		tran.logAndDo(privRemoveFileOperation(name, currentGenerationId, purgeOnCommit));
+		tran.logAndDo(new RemoveFileOperation(name, currentGenerationId, purgeOnCommit));
 
 		if (purgeOnCommit) {
 
-			Serviceable s = privRemoveFile(getAsFile(name, currentGenerationId));
+			Serviceable s = new RemoveFile(getAsFile(name, currentGenerationId));
 
 			tran.addPostCommitWork(s);
 		}
@@ -183,7 +183,7 @@ public class RFResource implements FileResource {
 	/**
 	  @see FileResource#getAsFile
 	  */
-	public StorageFile getAsFile(String name)
+	private StorageFile getAsFile(String name)
 	{
 		return factory.storageFactory.newStorageFile( name);
 	}
@@ -198,44 +198,9 @@ public class RFResource implements FileResource {
         return getAsFile(name, generationId).getInputStream();
 	}
 
-	/**
-	  @see FileResource#getAsStream
-	  @exception IOException trouble accessing file.
-	  */
-	public InputStream getAsStream(String name)
-		 throws IOException
-	{
-		return getAsFile(name).getInputStream();
-	}
-
-	/**
-	  @see FileResource#purgeOldGenerations
-	  */
-    public void purgeOldGenerations(DatabaseInstant purgeTo)
-	{
-
-		// search from the start of the log until now
-		// remove any generation files that have been
-		// logged for removal and their transaction committed.
-
-		if (SanityManager.DEBUG)
-			SanityManager.THROWASSERT("purgeOldGenerations is not implemented");
-	}
-
     public char getSeparatorChar()
     {
         return factory.storageFactory.getSeparator();
-    }
-    
-    protected Serviceable privRemoveFile(StorageFile file)
-    {
-        return new RemoveFile(file);
-    }
-
-    protected RemoveFileOperation privRemoveFileOperation(
-        String name, long generationId, boolean removeAtOnce)
-    {
-        return new RemoveFileOperation(name,generationId,removeAtOnce);
     }
 } // end of class RFResource
 
