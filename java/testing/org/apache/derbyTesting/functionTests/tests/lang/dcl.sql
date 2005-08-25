@@ -16,7 +16,7 @@ CALL EMC.ADDCONTACT(1, 'bill@somecompany.com');
 -- install the jar, copied there by the magic of supportfiles
 -- in the test harness (dcl_app.properties). The source for
 -- the class is contained within the jar for reference.
-CALL SQLJ.INSTALL_JAR('file:dcl_emc1.jar', 'EMC.MAIL_APP', 0);
+CALL SQLJ.INSTALL_JAR('file:extin/dcl_emc1.jar', 'EMC.MAIL_APP', 0);
 
 -- fails because no class not in classpath, jar file not in database classpath.
 CALL EMC.ADDCONTACT(1, 'bill@somecompany.com');
@@ -42,7 +42,7 @@ SELECT id, e_mail, ok from EMC.CONTACTS;
 -- now change the application to run checks on the e-mail
 -- address to ensure it is valid (in this case by seeing if
 -- simply includes 'spam' in the title.
-CALL SQLJ.REPLACE_JAR('file:dcl_emc2.jar', 'EMC.MAIL_APP');
+CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2.jar', 'EMC.MAIL_APP');
 
 CALL EMC.ADDCONTACT(4, 'spammer@ripoff.com');
 CALL EMC.ADDCONTACT(5, 'open@source.org');
@@ -61,7 +61,7 @@ READS SQL DATA
 external name 'org.apache.derbyTesting.databaseclassloader.addon.vendor.util.valid'
 language java parameter style java;
 
-CALL SQLJ.INSTALL_JAR('file:dcl_emcaddon.jar', '"emcAddOn"."MailAddOn"', 0);
+CALL SQLJ.INSTALL_JAR('file:extin/dcl_emcaddon.jar', '"emcAddOn"."MailAddOn"', 0);
 
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', 'EMC.MAIL_APP:"emcAddOn"."MailAddOn"');
 
@@ -87,7 +87,7 @@ VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
 --
 --
 
-CALL SQLJ.REPLACE_JAR('file:dcl_emc2s.jar', 'EMC.MAIL_APP');
+CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2s.jar', 'EMC.MAIL_APP');
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
 
 -- other jar should not be signed
@@ -96,12 +96,12 @@ VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.
 -- replace with a hacked jar file, emc.class modified to diable
 -- valid e-mail address check but using same signatures.
 -- ie direct replacement of the .class file.
-CALL SQLJ.REPLACE_JAR('file:dcl_emc2sm.jar', 'EMC.MAIL_APP');
+CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2sm.jar', 'EMC.MAIL_APP');
 CALL EMC.ADDCONTACT(99, 'spamking@cracker.org');
 
 -- replace with a hacked jar file, emc.class modified to 
 -- be an invalid jar file (no signing on this jar).
-CALL SQLJ.REPLACE_JAR('file:dcl_emc2l.jar', 'EMC.MAIL_APP');
+CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2l.jar', 'EMC.MAIL_APP');
 CALL EMC.ADDCONTACT(999, 'spamking2@cracker.org');
 
 
