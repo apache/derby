@@ -38,45 +38,7 @@ import java.util.Properties;
  */
 
 public class CPStorageFactory extends BaseStorageFactory
-{
-    boolean useContextLoader = true;
-    
-    /**
-     * Classes implementing the StorageFactory interface must have a null
-     * constructor.  This method is called when the database is booted up to
-     * initialize the class. It should perform all actions necessary to start the
-     * basic storage, such as creating a temporary file directory.
-     *
-     * The init method will be called once, before any other method is called, and will not
-     * be called again.
-     *
-     * @param home The name of the directory containing the database. It comes from the system.home system property.
-     *             It may be null. A storage factory may decide to ignore this parameter. (For instance the classpath
-     *             storage factory ignores it.
-     * @param databaseName The name of the database (directory). All relative pathnames are relative to this directory.
-     *                     If null then the storage factory will only be used to deal with the directory containing
-     *                     the databases.
-     * @param create If true then the database is being created.
-     * @param tempDirName The name of the temporary file directory set in properties. If null then a default
-     *                    directory should be used. Each database should get a separate temporary file
-     *                    directory within this one to avoid collisions.
-     * @param uniqueName A unique name that can be used to create the temporary file directory for this database.
-     *
-     * @exception IOException on an error (unexpected).
-     */
-    public void init( String home, String databaseName, String tempDirName, String uniqueName)
-        throws IOException
-    {
-        // Prefix the database name with a '/' so that the class loader will not use a Cloudscape
-        // internal package.
-        if( databaseName == null
-            || ( databaseName.length() > 0
-                 && (databaseName.charAt( 0) == '/' || databaseName.charAt( 0) == getSeparator())))
-            super.init( home, databaseName, tempDirName, uniqueName);
-        else
-            super.init( home, "/" + databaseName, tempDirName, uniqueName);
-    }
-    
+{   
     /**
      * Construct a persistent StorageFile from a path name.
      *

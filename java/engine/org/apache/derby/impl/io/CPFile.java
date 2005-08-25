@@ -21,13 +21,9 @@
 package org.apache.derby.impl.io;
 
 import org.apache.derby.io.StorageFile;
-import org.apache.derby.io.StorageRandomAccessFile;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
+
 import java.io.FileNotFoundException;
 
 /**
@@ -38,9 +34,7 @@ class CPFile extends InputStreamFile
 {
 
     private final CPStorageFactory storageFactory;
-    private int actionCode;
-    private static final int EXISTS_ACTION = 1;
-
+ 
     CPFile( CPStorageFactory storageFactory, String path)
     {
         super( storageFactory, path);
@@ -72,19 +66,24 @@ class CPFile extends InputStreamFile
      */
     public boolean exists()
     {
-        if( storageFactory.useContextLoader)
-        {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            if( cl != null && cl.getResource( path) != null)
-                return true;
-        }
-        if( getClass().getResource( path) != null)
-        {
-            if( storageFactory.useContextLoader)
-                storageFactory.useContextLoader = false;
-            return true;
-        }
-        return false;
+    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    	if (cl != null)
+    		if (cl.getResource(path) != null)
+    			return true;
+    	// don't assume the context class loader is tied
+    	// into the class loader that loaded this class.
+    	cl = getClass().getClassLoader();
+		// Javadoc indicates implementations can use
+		// null as a return from Class.getClassLoader()
+		// to indicate the system/bootstrap classloader.
+    	if (cl != null)
+    	{
+    		return (cl.getResource(path) != null);
+    	}
+    	else
+    	{
+    		return ClassLoader.getSystemResource(path) != null;
+    	}
     } // end of exists
 
     /**
@@ -106,19 +105,29 @@ class CPFile extends InputStreamFile
      */
     public InputStream getInputStream( ) throws FileNotFoundException
     {
-        InputStream is = null;
-        if( storageFactory.useContextLoader)
-        {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            is = cl.getResourceAsStream( path);
-            if( is != null)
-                return is;
-        }
-        is = getClass().getResourceAsStream( path);
-        if( is != null && storageFactory.useContextLoader)
-            storageFactory.useContextLoader = false;
-        if( is == null)
-            throw new FileNotFoundException( "Not in class path: " + path);
-        return is;
+    	//System.out.println("HERE FOR " + toString());
+    	InputStream is = null;
+    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    	if (cl != null)
+    		is = cl.getResourceAsStream(path);
+    	
+       	// don't assume the context class loader is tied
+    	// into the class loader that loaded this class.
+    	if (is == null)
+    	{
+    		cl = getClass().getClassLoader();
+    		// Javadoc indicates implementations can use
+    		// null as a return from Class.getClassLoader()
+    		// to indicate the system/bootstrap classloader.
+    		if (cl != null)
+    			is = cl.getResourceAsStream(path);
+    		else
+    			is = ClassLoader.getSystemResourceAsStream(path);
+    	}
+    	
+    	if (is == null)
+    		throw new FileNotFoundException(toString());
+    	return is;
+    	
     } // end of getInputStream
 }
