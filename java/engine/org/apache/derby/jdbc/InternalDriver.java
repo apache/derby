@@ -102,7 +102,11 @@ public abstract class InternalDriver implements ModuleControl {
 	** Methods from java.sql.Driver
 	*/
 	public boolean acceptsURL(String url) {
-		return active && (url.startsWith(Attribute.PROTOCOL) || url.equals(Attribute.SQLJ_NESTED));
+		return active &&
+		//	need to reject network driver's URL's
+		!url.startsWith(Attribute.JCC_PROTOCOL) && !url.startsWith(Attribute.DNC_PROTOCOL) &&
+		(url.startsWith(Attribute.PROTOCOL) || url.equals(Attribute.SQLJ_NESTED));
+				
 	}
 
 	public Connection connect(String url, Properties info)
