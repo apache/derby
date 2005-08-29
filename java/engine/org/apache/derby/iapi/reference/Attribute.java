@@ -44,7 +44,7 @@ package org.apache.derby.iapi.reference;
 public interface Attribute {
 
 	/**
-		Not an attribute but the root for the JDBC URL that Cloudscape supports.
+		Not an attribute but the root for the JDBC URL that Derby supports.
 	*/
 	String PROTOCOL = "jdbc:derby:";
 		
@@ -54,7 +54,21 @@ public interface Attribute {
 	 */
 	String SQLJ_NESTED = "jdbc:default:connection";
 
-
+	
+	// Network Protocols.  These need to be rejected by the embedded driver.
+	
+	/**
+	 * The protocol for Derby Network Client 
+	 */ 
+	String DNC_PROTOCOL = "jdbc:derby://";
+	
+	/** 
+	 * The protocol for the IBM Universal JDBC Driver 
+	 * 
+	 */
+	String JCC_PROTOCOL = "jdbc:derby:net:";
+	
+	
 	/**
 		Attribute name to encrypt the database on disk.
 		If set to true, all user data is stored encrypted on disk.
