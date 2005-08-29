@@ -1993,4 +1993,8 @@ Testing nullif(?,TIMESTAMP) with setTimestamp
 	{null}
 Testing nullif(?,BLOB(1k))
 ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+Single RS auto-commit test: PASS.
+SingleRSCloseCursorsAtCommit: PASS.
+MultipleRSAutoCommit: PASS. 
+MultipleRSNoCommit: PASS. 
 Test resultset finished

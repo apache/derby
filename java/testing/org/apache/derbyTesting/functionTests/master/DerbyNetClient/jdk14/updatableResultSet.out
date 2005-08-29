@@ -70,11 +70,11 @@ updateRow will check if it is on a row or not even though no changes have been m
 SQL State : null
 Got expected exception Invalid operation to update at current cursor position
 ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
-SQL State : null
-Got expected exception Invalid operation: result set closed
+SQL State : XCL08
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 ResultSet is positioned after the last row. attempt to updateRow at this point should fail!
 SQL State : null
-Got expected exception Invalid operation: result set closed
+Got expected exception Invalid operation to update at current cursor position
 Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset
 Make sure that we got CONCUR_UPDATABLE? true
 SQL State : null
@@ -374,8 +374,8 @@ Verify that update trigger got fired by verifying the row count to be 1 in updat
 Positive Test13a - Another test case for delete trigger
 column 1 on this row is 1
 this delete row will fire the delete trigger which will delete all the rows from the table and from the resultset
-SQL State : null
-Got expected exception Invalid operation: result set closed
+SQL State : XCL08
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Verify that delete trigger got fired by verifying the row count to be 0 in table1WithTriggers
 	 1
 	 -
@@ -391,7 +391,7 @@ Look at the current contents of table2WithTriggers
 column 1 on this row is 2
 this update row will fire the update trigger which will update all the rows in the table to have c1=1 and hence no more rows will qualify for the resultset
 SQL State : null
-Got expected exception Invalid operation: result set closed
+Got expected exception Invalid operation to update at current cursor position
 Verify that update trigger got fired by verifying that all column c1s have value 1 in table2WithTriggers
 	 C1,C2
 	 -- --
@@ -408,8 +408,8 @@ Positive Test14a - make sure self referential delete cascade works when deleteRo
 	{e4,e3}
 column 1 on this row is e1
 this delete row will cause the delete cascade constraint to delete all the rows from the table and from the resultset
-SQL State : null
-Got expected exception Invalid operation: result set closed
+SQL State : XCL08
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Verify that delete trigger got fired by verifying the row count to be 0 in selfReferencingT1
 	 1
 	 -

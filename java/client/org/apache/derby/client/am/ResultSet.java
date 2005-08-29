@@ -281,6 +281,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             //   In these cases, the commit occurs when all results and output parameter values have been retrieved.
             // we will check to see if the forward only result set has gone past the end,
             // we will close the result set, the autocommit logic is in the closeX() method
+            //
+            //Aug 24, 2005: Auto-commit logic is no longer in the closeX() method. Insted it has been 
+            //moved to Statement and is handled in a manner similar to the embedded driver.
 //    if (!isValidCursorPosition_ && // We've gone past the end (+100)
 //        cursor_ != null) {
             if ((!isValidCursorPosition_ && cursor_ != null) ||
@@ -291,10 +294,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 // check for an error which may have caused the cursor to terminate.
                 // if there were no more rows because of an error, then this method
                 // should throw an SqlException rather than just returning false.
-                // note: closeX is still called and this will cause the
-                // result set to be closed on the client. any additional calls to
-                // next() will fail checkForClosedResultSet(), the query terminating exception is
-                // only thrown once.
                 // depending on how this works with scrollable cursors, there may be
                 // a better way/more common place for this logic.
                 SqlException sqlException = null;
@@ -304,16 +303,17 @@ public abstract class ResultSet implements java.sql.ResultSet,
                         accumulateWarning(new SqlWarning(agent_.logWriter_, queryTerminatingSqlca_));
                     } else if (sqlcode < 0) {
                         sqlException = new SqlException(agent_.logWriter_, queryTerminatingSqlca_);
-                    }
+                    }                    
                 }
+            
                 try {
-                    closeX(); // the auto commit logic is in closeX()
+                    statement_.resultSetCommitting(this);
                 } catch (SqlException sqle) {
                     sqlException = Utils.accumulateSQLException(sqle, sqlException);
                 }
-                if (sqlException != null) {
+                
+                if (sqlException != null)
                     throw sqlException;
-                }
             }
         }
 
@@ -385,14 +385,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (openOnServer_) {
                 flowCloseAndAutoCommitIfNotAutoCommitted();
             } else {
-                flowAutoCommitIfNotAutoCommitted(); // in case of early close
+                statement_.resultSetCommitting(this);
             }
         } finally {
             markClosed();
             connection_.CommitAndRollbackListeners_.remove(this);
         }
 
-        flowAutoCommitIfLastOpenMultipleResultSetWasJustClosed();
         if (statement_.openOnClient_ && statement_.isCatalogQuery_) {
             statement_.closeX();
         }
@@ -413,31 +412,28 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     void flowCloseAndAutoCommitIfNotAutoCommitted() throws SqlException {
         agent_.beginWriteChain(statement_);
-        writeCloseAndAutoCommitIfNotAutoCommitted();
+        boolean performedAutoCommit = writeCloseAndAutoCommit();
         agent_.flow(statement_);
-        readCloseAndAutoCommitIfNotAutoCommitted();
+        readCloseAndAutoCommit(performedAutoCommit);
         agent_.endReadChain();
     }
 
-    private void writeCloseAndAutoCommitIfNotAutoCommitted() throws SqlException {
+    private boolean writeCloseAndAutoCommit() throws SqlException {
         // set autoCommitted_ to false so commit will flow following
         // close cursor if autoCommit is true.
         autoCommitted_ = false;
         if (generatedSection_ == null) { // none call statement result set case
             writeCursorClose_(statement_.section_);
-            writeAutoCommitIfNotAutoCommitted();
         } else { // call statement result set(s) case
             writeCursorClose_(generatedSection_);
         }
+        return statement_.resultSetCommitting(this, true);
     }
 
-    private void readCloseAndAutoCommitIfNotAutoCommitted() throws SqlException {
-        if (generatedSection_ == null) { // none call statement result set case
-            readCursorClose_();
+    private void readCloseAndAutoCommit(boolean readAutoCommit) throws SqlException {
+        readCursorClose_();
+        if (readAutoCommit) 
             readAutoCommitIfNotAutoCommitted();
-        } else { // call statement result set(s) case
-            readCursorClose_();
-        }
     }
 
     void writeClose() throws SqlException {
@@ -463,13 +459,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    void flowAutoCommitIfNotAutoCommitted() throws SqlException {
-        if (generatedSection_ == null && connection_.autoCommit_ && !autoCommitted_) {
-            connection_.flowAutoCommit();
-            markAutoCommitted();
-        }
-    }
-
     // precondition: transaction state allows for auto commit to generate flow
     private void writeAutoCommitIfNotAutoCommitted() throws SqlException {
         if (connection_.autoCommit_ && !autoCommitted_) {
@@ -482,25 +471,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
             connection_.readAutoCommit();
             markAutoCommitted();
         }
-    }
-
-    private void flowAutoCommitIfLastOpenMultipleResultSetWasJustClosed() throws SqlException {
-        // After this call, the generatedSection_ is reset to null to avoid repeating the commit.
-        if (generatedSection_ != null && statement_ != null && statement_.resultSetList_ != null) {
-            int count = 0;
-            for (int i = 0; i < statement_.resultSetList_.length; i++) {
-                if (statement_.resultSetList_[i] == null) {
-                    count++;
-                }
-            }
-            if (count == statement_.resultSetList_.length) {
-                if (connection_.autoCommit_ && !autoCommitted_) {
-                    connection_.flowAutoCommit();
-                    markAutoCommitted();
-                }
-            }
-        }
-        generatedSection_ = null; // this is prevent a subsequent close() call from doing another autocommit.
     }
 
     public boolean wasNull() throws SqlException {
@@ -3005,6 +2975,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (statement_.resultSet_ == this) {
             statement_.resultSet_ = null;
         }
+        /*
+         * Aug 10, 2005: Do we really only want to only null out the one resultSet? 
+         * The only time this method is called is from completeLocalCommit or 
+         * completeLocalRollback, both of which affect *all* ResultSets  
+         */
         if (statement_.resultSetList_ != null) {
             for (int i = 0; i < statement_.resultSetList_.length; i++) {
                 if (statement_.resultSetList_[i] == this) {
@@ -3890,17 +3865,3 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

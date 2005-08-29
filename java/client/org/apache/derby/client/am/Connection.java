@@ -520,10 +520,12 @@ public abstract class Connection implements java.sql.Connection,
     }
 
     // precondition: autoCommit_ is true
-    public void flowAutoCommit() throws SqlException {
+    public boolean flowAutoCommit() throws SqlException {
         if (willAutoCommitGenerateFlow()) {
             flowCommit();
+            return true;
         }
+        return false;
     }
 
     public boolean willAutoCommitGenerateFlow() throws org.apache.derby.client.am.SqlException {

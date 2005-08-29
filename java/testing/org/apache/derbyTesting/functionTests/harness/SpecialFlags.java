@@ -105,6 +105,8 @@ public class SpecialFlags
 	{
 	    // flags is a list of key-value pairs separated by a ^;
 	    // to be parsed and added to either ijProps or srvProps
+        if (flags == null)
+            flags = "";
 	    StringTokenizer st = new StringTokenizer(flags, "^");
 	    String str = "";
 	    String key = "";

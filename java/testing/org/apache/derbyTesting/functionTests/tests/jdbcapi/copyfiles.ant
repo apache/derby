@@ -32,6 +32,7 @@ resultsetStream.gif
 resultsetStream_app.properties
 resultsetJdbc30_sed.properties
 resultset_app.properties
+resultset_derby.properties
 savepointJdbc30_app.properties
 savepointJdbc30_derby.properties
 secureUsers.sql

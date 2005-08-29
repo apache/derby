@@ -2108,4 +2108,74 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             cursorName_ = null;
         }
     }
+    
+    /**
+     * Convenience method for resultSetCommitting(ResultSet, boolean)
+     * 
+     * @see Statement#resultSetCommitting(ResultSet, boolean)
+     * @param closingRS The ResultSet to be closed
+     * @throws SqlException
+     */
+    public void resultSetCommitting(ResultSet closingRS) throws SqlException {
+        resultSetCommitting(closingRS, false);
+    }
+    
+    /**
+     * Method that checks to see if any other ResultSets are open. If not
+     * proceeds with the autocommit.
+     * 
+     * @param closingRS The ResultSet to be closed
+     * @param writeChain A Boolean indicating whether this method
+     * is part of a chain of write from client to Server
+     * @throws SqlException
+     */
+    public boolean resultSetCommitting(ResultSet closingRS, boolean writeChain) throws SqlException {
+
+        // If the Connection is not in auto commit then this statement completion
+        // cannot cause a commit.
+        if (!connection_.autoCommit_ || closingRS.autoCommitted_)
+            return false;
+
+        // If we have multiple results, see if there is another result set open.
+        // If so, then no commit. The last result set to close will close the statement.
+        if (resultSetList_ != null) {
+            for (int i = 0; i < resultSetList_.length; i++) {
+                ResultSet crs = resultSetList_[i];
+                if (crs == null)
+                    continue;
+                if (!crs.openOnClient_)
+                    continue;
+                if (crs == closingRS)
+                    continue;
+
+                // at least one still open so no commit now.
+                return false;
+            }
+        }
+        
+        if (writeChain) {
+            connection_.writeAutoCommit();
+            return true;
+        } else {
+            if (connection_.flowAutoCommit()) {
+                markAutoCommitted();
+                return true;
+            }
+            return false;
+        }
+    }
+    
+    /**
+     * Mark all ResultSets associated with this statement as auto-committed.   
+     */
+    public void markAutoCommitted() {
+        if (resultSetList_ != null) {
+            for (int i = 0; i < resultSetList_.length; i++)
+                if (resultSetList_[i] != null) {
+                    resultSetList_[i].markAutoCommitted();
+                }
+        } else if (resultSet_ != null) {
+            resultSet_.markAutoCommitted();
+        }
+    }
 }

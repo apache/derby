@@ -56,7 +56,7 @@ No current row
 ij> -- the delete will get a 'cursor not updatable' execution error, but won't get
 ----- a compile time error
 delete from t1 where current of c1;
-ERROR (no SQLState): Invalid cursor name "C1" in the Update/Delete statement.
+ERROR 42X23: Cursor SQL_CURLH000C1 is not updatable.
 ij> close c1;
 ij> -- . read only for read only cursor spec
 ----- we know because the delete is refused with a 'cursor not updatable' message
@@ -129,10 +129,10 @@ ij> next c4;
 No current row
 ij> -- this will get a target table mismatch error, it uses the correlation name:
 delete from s1 where current of c4;
-ERROR (no SQLState): Invalid cursor name "C4" in the Update/Delete statement.
+ERROR 42X28: Delete table 'S1' is not target of cursor 'SQL_CURLH000C1'.
 ij> -- this will compile and get a 'no current row' error, it uses the table name:
 delete from t1 where current of c4;
-ERROR (no SQLState): Invalid cursor name "C4" in the Update/Delete statement.
+ERROR XCL08: Cursor 'SQL_CURLH000C1' is not on a row.
 ij> close c4;
 ij> -- . list columns in order same/different from appearance in table
 ----- the columns are 'found' regardless of their order.

@@ -58,7 +58,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> close test1;
 ij> -- should fail
 next test1;
@@ -68,25 +68,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> close test1;
-ij> -- should fail
-next test1;
-IJ ERROR: Unable to establish cursor
-ij> get with hold cursor test1 as 'select * from foo for update';
-ij> next  test1;
 No current row
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -97,16 +79,14 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -117,16 +97,36 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as 'select * from foo for update';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
 ij> close test1;
 ij> commit;
 ij> -- should fail
@@ -337,7 +337,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> close test1;
 ij> -- should fail
 next test1;
@@ -348,26 +348,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> close test1;
-ij> -- should fail
-next test1;
-IJ ERROR: Unable to establish cursor
-ij> get with hold cursor test1 as
-    'select * from foo for update of data';
-ij> next  test1;
 No current row
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -379,16 +360,14 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -400,16 +379,37 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo for update of data';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
 ij> close test1;
 ij> commit;
 ij> -- should fail
@@ -678,7 +678,7 @@ A |DATA
 ij> next  test1;
 No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> close test1;
 ij> commit;
 ij> -- should fail
@@ -732,7 +732,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> close test1;
 ij> -- should fail
 next test1;
@@ -743,26 +743,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> close test1;
-ij> -- should fail
-next test1;
-IJ ERROR: Unable to establish cursor
-ij> get with hold cursor test1 as
-    'select * from foo ';
-ij> next  test1;
 No current row
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -774,16 +755,14 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -795,16 +774,37 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select * from foo ';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
 ij> close test1;
 ij> commit;
 ij> -- should fail
@@ -1026,7 +1026,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> close test1;
 ij> -- should fail
 next test1;
@@ -1037,26 +1037,7 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> close test1;
-ij> -- should fail
-next test1;
-IJ ERROR: Unable to establish cursor
-ij> get with hold cursor test1 as
-    'select a,data from foo order by data desc';
-ij> next  test1;
 No current row
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> commit;
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -1068,16 +1049,14 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
-ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> close test1;
 ij> -- should fail
@@ -1089,16 +1068,37 @@ ij> next  test1;
 No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> commit;
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
 ij> next  test1;
-ERROR (no SQLState): Invalid operation: result set closed
+No current row
+ij> commit;
+ij> close test1;
+ij> -- should fail
+next test1;
+IJ ERROR: Unable to establish cursor
+ij> get with hold cursor test1 as
+    'select a,data from foo order by data desc';
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> commit;
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
+ij> next  test1;
+No current row
 ij> close test1;
 ij> commit;
 ij> -- should fail
