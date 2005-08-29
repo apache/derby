@@ -44,6 +44,19 @@ import java.sql.Types;
 
 public final class LocalizedResource  implements java.security.PrivilegedAction {
 
+	private static boolean HAVE_BIG_DECIMAL;
+	
+	{
+		boolean haveBigDecimal;
+		try {
+			Class.forName("java.math.BigDecimal");
+			haveBigDecimal = true;
+		} catch (Throwable t) {
+			haveBigDecimal = false;
+		}
+		HAVE_BIG_DECIMAL = haveBigDecimal;
+	}
+	
 	private ResourceBundle res;
 	private Locale locale;
 	private String encode;
@@ -305,7 +318,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 					type == Types.DOUBLE ) {
 				return getNumberAsString(rs.getDouble(columnNumber));
 			}
-			else if (type == Types.NUMERIC || type == Types.DECIMAL ) {
+			else if (HAVE_BIG_DECIMAL && (type == Types.NUMERIC || type == Types.DECIMAL)) {
 				return	getNumberAsString(rs.getBigDecimal(columnNumber,
 											rsm.getScale(columnNumber)));
 			}
