@@ -208,6 +208,15 @@ abstract class BinaryDecimal extends NumberDataType
 	}
 	
 	/**
+	 * Set the value from a boolean
+	 */
+	public void setValue(boolean theValue)
+	{
+		int intValue = theValue ? 1 : 0;
+		setValue(intValue);
+	}
+	
+	/**
 	 * Convert from a double, normalize and then convert as a String.
 	 *
 	 * @exception StandardException		Thrown on error

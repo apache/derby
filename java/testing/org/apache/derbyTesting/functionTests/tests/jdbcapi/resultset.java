@@ -41,6 +41,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.JDBCTestDisplayUtil;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 
 /**
  * Test of JDBC result set and result set meta-data.
@@ -220,7 +221,7 @@ public class resultset {
 				for (int i=1;i<=colCount;i++) {
 					try {
 						System.out.println("getBigDecimal("+i+",1): "+
-													rs.getBigDecimal(i, 1));
+											BigDecimalHandler.getBigDecimalString(rs,i));
 					}
 					catch (Throwable e) {
 						System.out.println(
@@ -234,7 +235,7 @@ public class resultset {
 							System.out.println("beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)");
 						System.out.println("getBigDecimal("+
 										columnNames[i-1]+ ",1): "+
-										rs.getBigDecimal(columnNames[i-1], 1));
+										BigDecimalHandler.getBigDecimalString(rs,columnNames[i-1],i));
 					}
 					catch (Throwable e) {
 						System.out.println(
@@ -438,12 +439,12 @@ public class resultset {
 						// this does not test the values returned, just whether it gives an exception.
 						if (i>11)
 						{
-							rs.getObject(i);
+							BigDecimalHandler.getObjectString(rs,i);
 							System.out.println("getObject("+i+") is ok");
 						}
 						else
 							System.out.println("getObject("+i+"): "+
-													rs.getObject(i));
+												BigDecimalHandler.getObjectString(rs,i));
 					}
 					catch (SQLException e) {
 						System.out.println(
@@ -457,13 +458,13 @@ public class resultset {
 						// this does not test the values returned, just whether it gives an exception.
 						if (i>11)
 						{
-							rs.getObject(columnNames[i-1]);
+							BigDecimalHandler.getObjectString(rs,columnNames[i-1],i);
 							System.out.println("getObject("+columnNames[i-1]+") is ok ");
 						}
 						else
 							System.out.println("getObject("+
 										columnNames[i-1]+ "): "+
-										rs.getObject(columnNames[i-1]));
+										BigDecimalHandler.getObjectString(rs,columnNames[i-1],i));
 					}
 					catch (SQLException e) {
 						System.out.println(
