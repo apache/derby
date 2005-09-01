@@ -59,10 +59,7 @@ abstract class ExportAbstract {
     if (rs.next()){
        String[] rowObjects = new String[columnCount];
        for (int colNum = 0; colNum < columnCount; colNum++) {
-           if (rs.getObject(colNum + 1) != null)
-			{
-				rowObjects[colNum]=rs.getString(colNum + 1);
-			}
+       		rowObjects[colNum]=rs.getString(colNum + 1);
        }
        return rowObjects;
     }
