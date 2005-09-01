@@ -60,6 +60,7 @@ dcl_emc2l.jar
 dcl_emc2s.jar
 dcl_emc2sm.jar
 dcl_emcaddon.jar
+dcl_readOnly.sql
 ddlTableLockMode.sql
 ddlTableLockMode_app.properties
 deadlockMode_derby.properties

@@ -167,6 +167,22 @@ VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.
 1                                                                                                                                                                                                                                                                                                           
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 NULL                                                                                                                                                                                                                                                                                                        
+ij> -- Jar up this database (wombat) for use in database in a jar testing
+-- at the end of this script.
+disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- jar up the database
+connect 'jdbc:derby:db1;create=true';
+ij> create procedure CREATEARCHIVE(jarName VARCHAR(20), path VARCHAR(20), dbName VARCHAR(20))
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.createArchive';
+0 rows inserted/updated/deleted
+ij> call CREATEARCHIVE('ina.jar', 'wombat', 'db7');
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat';
 ij> -- replace with a hacked jar file, emc.class modified to diable
 -- valid e-mail address check but using same signatures.
 -- ie direct replacement of the .class file.
@@ -215,4 +231,132 @@ ij> DROP FUNCTION "emcAddOn".VALIDCONTACT;
 0 rows inserted/updated/deleted
 ij> DROP TABLE EMC.CONTACTS;
 0 rows inserted/updated/deleted
+ij> disconnect;
+ij> -- test reading a database from a jar file and loading
+-- classes etc. from the jars within the database.
+-- first using the jar protocol and then the classpath option.
+connect 'jdbc:derby:jar:(ina.jar)db7' AS DB7;
+ij> run resource '/org/apache/derbyTesting/functionTests/tests/lang/dcl_readOnly.sql';
+ij> -- common tests for read-only jarred database
+select * from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+4          |spammer@ripoff.com            |0     
+5          |open@source.org               |1     
+ij> select e_mail, "emcAddOn".VALIDCONTACT(e_mail) from EMC.CONTACTS;
+E_MAIL                        |2     
+-------------------------------------
+bill@ruletheworld.com         |0     
+penguin@antartic.com          |0     
+big@blue.com                  |0     
+spammer@ripoff.com            |0     
+open@source.org               |1     
+ij> insert into EMC.CONTACTS values(3, 'no@is_read_only.gov', NULL);
+ERROR 25502: An SQL data change is not permitted for a read-only connection, user or database.
+ij> CALL EMC.ADDCONTACT(3, 'really@is_read_only.gov');
+ERROR 25502: An SQL data change is not permitted for a read-only connection, user or database.
+ij> -- same set as dcl.sql for reading resources
+-- VALUES EMC.GETARTICLE('graduate.txt');
+-- VALUES EMC.GETARTICLE('/article/release.txt');
+-- VALUES EMC.GETARTICLE('/article/fred.txt');
+-- VALUES EMC.GETARTICLE('barney.txt');
+-- VALUES EMC.GETARTICLE('emc.class');
+-- VALUES EMC.GETARTICLE('/org/apache/derbyTesting/databaseclassloader/emc.class');
+-- signed
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CN=EMC CTO, OU=EMC APP, O=Easy Mail Company, C=US                                                                                                                                                                                                                                                           
+ij> -- not signed
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
+ij> -- ensure that a read-only database automatically gets table locking
+autocommit off;
+ij> select * from EMC.CONTACTS WITH RR;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+4          |spammer@ripoff.com            |0     
+5          |open@source.org               |1     
+ij> select TYPE, MODE, TABLENAME from new org.apache.derby.diag.LockTable() AS L ORDER BY 1,2,3;
+TYPE |MODE|TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+TABLE|S   |CONTACTS                                                                                                                        
+ij> disconnect;
+ij> -- connect to database in jar file via classpath
+-- should fail as it is not on the classpath yet.
+connect 'jdbc:derby:classpath:db7' AS DB7CLF;
+ERROR XJ004: Database 'classpath:db7' not found.
+ij> -- create a class loader for this current thread
+connect 'jdbc:derby:db1';
+ij> create procedure setDBContextClassLoader(JARNAME VARCHAR(20))
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.setDBContextClassLoader';
+0 rows inserted/updated/deleted
+ij> call setDBContextClassLoader('ina.jar');
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:classpath:db7' AS DB7CL;
+ij> run resource '/org/apache/derbyTesting/functionTests/tests/lang/dcl_readOnly.sql';
+ij> -- common tests for read-only jarred database
+select * from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+4          |spammer@ripoff.com            |0     
+5          |open@source.org               |1     
+ij> select e_mail, "emcAddOn".VALIDCONTACT(e_mail) from EMC.CONTACTS;
+E_MAIL                        |2     
+-------------------------------------
+bill@ruletheworld.com         |0     
+penguin@antartic.com          |0     
+big@blue.com                  |0     
+spammer@ripoff.com            |0     
+open@source.org               |1     
+ij> insert into EMC.CONTACTS values(3, 'no@is_read_only.gov', NULL);
+ERROR 25502: An SQL data change is not permitted for a read-only connection, user or database.
+ij> CALL EMC.ADDCONTACT(3, 'really@is_read_only.gov');
+ERROR 25502: An SQL data change is not permitted for a read-only connection, user or database.
+ij> -- same set as dcl.sql for reading resources
+-- VALUES EMC.GETARTICLE('graduate.txt');
+-- VALUES EMC.GETARTICLE('/article/release.txt');
+-- VALUES EMC.GETARTICLE('/article/fred.txt');
+-- VALUES EMC.GETARTICLE('barney.txt');
+-- VALUES EMC.GETARTICLE('emc.class');
+-- VALUES EMC.GETARTICLE('/org/apache/derbyTesting/databaseclassloader/emc.class');
+-- signed
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CN=EMC CTO, OU=EMC APP, O=Easy Mail Company, C=US                                                                                                                                                                                                                                                           
+ij> -- not signed
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
+ij> -- ensure that a read-only database automatically gets table locking
+autocommit off;
+ij> select * from EMC.CONTACTS WITH RR;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+4          |spammer@ripoff.com            |0     
+5          |open@source.org               |1     
+ij> select TYPE, MODE, TABLENAME from new org.apache.derby.diag.LockTable() AS L ORDER BY 1,2,3;
+TYPE |MODE|TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+TABLE|S   |CONTACTS                                                                                                                        
+ij> disconnect;
 ij> 

@@ -113,6 +113,23 @@ VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
 -- other jar should not be signed
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
 
+-- Jar up this database (wombat) for use in database in a jar testing
+-- at the end of this script.
+disconnect;
+connect 'jdbc:derby:wombat;shutdown=true';
+
+-- jar up the database
+connect 'jdbc:derby:db1;create=true';
+create procedure CREATEARCHIVE(jarName VARCHAR(20), path VARCHAR(20), dbName VARCHAR(20))
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.createArchive';
+
+call CREATEARCHIVE('ina.jar', 'wombat', 'db7');
+disconnect;
+
+connect 'jdbc:derby:wombat';
+
 -- replace with a hacked jar file, emc.class modified to diable
 -- valid e-mail address check but using same signatures.
 -- ie direct replacement of the .class file.
@@ -140,3 +157,30 @@ CALL SQLJ.REMOVE_JAR('"emcAddOn"."MailAddOn"', 0);
 DROP FUNCTION "emcAddOn".VALIDCONTACT;
 
 DROP TABLE EMC.CONTACTS;
+disconnect;
+
+-- test reading a database from a jar file and loading
+-- classes etc. from the jars within the database.
+-- first using the jar protocol and then the classpath option.
+
+connect 'jdbc:derby:jar:(ina.jar)db7' AS DB7;
+run resource '/org/apache/derbyTesting/functionTests/tests/lang/dcl_readOnly.sql';
+disconnect;
+
+-- connect to database in jar file via classpath
+-- should fail as it is not on the classpath yet.
+connect 'jdbc:derby:classpath:db7' AS DB7CLF;
+
+-- create a class loader for this current thread
+connect 'jdbc:derby:db1';
+create procedure setDBContextClassLoader(JARNAME VARCHAR(20))
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.setDBContextClassLoader';
+
+call setDBContextClassLoader('ina.jar');
+disconnect;
+
+connect 'jdbc:derby:classpath:db7' AS DB7CL;
+run resource '/org/apache/derbyTesting/functionTests/tests/lang/dcl_readOnly.sql';
+disconnect;
