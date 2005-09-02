@@ -401,4 +401,58 @@ ij> create index locks on locks(locks);
 ij> drop table LOCKS;
 0 rows inserted/updated/deleted
 ij> remove locks;
+ij> -- making COUNT keyword nonreserved as fix for Derby-
+create table count(i int);
+0 rows inserted/updated/deleted
+ij> drop table count;
+0 rows inserted/updated/deleted
+ij> create table t1 (count int);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table count(count int);
+0 rows inserted/updated/deleted
+ij> insert into count values (1);
+1 row inserted/updated/deleted
+ij> select * from count;
+COUNT      
+-----------
+1          
+ij> select count from count;
+COUNT      
+-----------
+1          
+ij> select count from count where count=1;
+COUNT      
+-----------
+1          
+ij> select count.count from count;
+COUNT      
+-----------
+1          
+ij> prepare count as 'select * from count';
+ij> create index count on count(count);
+0 rows inserted/updated/deleted
+ij> drop table count;
+0 rows inserted/updated/deleted
+ij> remove count;
+ij> create table t1(i int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values -1,2,-3,4,-5,6,-7,8,-9,0;
+10 rows inserted/updated/deleted
+ij> create function count(i int) returns int no sql
+external name 'java.lang.Math.abs' language java parameter style java;
+0 rows inserted/updated/deleted
+ij> select count(*) from t1;
+1          
+-----------
+10         
+ij> select count(i) from t1;
+1          
+-----------
+10         
+ij> select * from t1 where count(i)=i;
+ERROR 42903: Invalid use of an aggregate function.
+ij> drop table t1;
+0 rows inserted/updated/deleted
 ij> 

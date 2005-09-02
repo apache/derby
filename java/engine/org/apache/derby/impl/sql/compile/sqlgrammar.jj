@@ -986,7 +986,6 @@ public class SQLParser
 
 		switch (getToken(1).kind)
 		{
-		  case COUNT:
 		  case MAX:
 		  case AVG:
 		  case MIN:
@@ -995,6 +994,11 @@ public class SQLParser
 			retval = true;
 			break;
 
+		  case COUNT:
+			// COUNT is not a reserved word
+			// This may eclipse use of COUNT as a function or a procedure that is probably what we want
+		  	if (getToken(2).kind == LEFT_PAREN)
+				retval = true;
 		  default:
 			// Not a built-in aggregate - assume the first token is an
 			// identifier, and see whether it is followed by " ( DISTINCT "
@@ -8557,23 +8561,6 @@ generalAggregate() throws StandardException :
 	{
 		return aggExpr;
 	}
-|
-	/*
-	** If we know we have a distinct, then we can catch
-	** a user aggregate here; otherwise, we have to generate
-	** a staticMethodNode and fix it up later.
-	*/
-	methodAliasString = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
-	<LEFT_PAREN> setQuantifier() value = additiveExpression(null, 0, false) <RIGHT_PAREN>
-	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.AGGREGATE_NODE,
-								value,
-								methodAliasString, 
-								Boolean.TRUE,
-								methodAliasString, 
-								getContextManager());
-	}
 }
 
 /*
@@ -11574,7 +11561,6 @@ reservedKeyword() :
 |	tok = <CONTINUE>
 |	tok = <CONVERT>
 |	tok = <CORRESPONDING>
-|	tok = <COUNT>
 |	tok = <CREATE>
 |	tok = <CURRENT>
 |	tok = <CURRENT_DATE>
@@ -11792,6 +11778,7 @@ nonReservedKeyword()  :
 	|	tok = <CONCAT>
 	|	tok = <CONTAINS>
 	|	tok = <CONTENT>
+	|	tok = <COUNT>
 	|   tok = <CS>
 	|	tok = <CURDATE>
 	|	tok = <CURTIME>
