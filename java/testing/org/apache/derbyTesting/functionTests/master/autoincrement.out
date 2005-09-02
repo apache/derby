@@ -286,17 +286,17 @@ ij> -- should see 20.
 values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-0                              
+20                             
 ij> insert into ai_test (y) select y+10 from ai_test;
 10 rows inserted/updated/deleted
 ij> values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-0                              
+40                             
 ij> values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-0                              
+40                             
 ij> -- try some more connection info tests
 create table ai_single1 (c char(100), a_odd int generated always as identity (start with 1, increment by 2));
 0 rows inserted/updated/deleted
@@ -588,7 +588,7 @@ X          |S1         |S2         |S0
 ij> values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-0                              
+4                              
 ij> -- test some more generated column specs
 create table trigtest (s1 smallint generated always as identity, lvl int);
 0 rows inserted/updated/deleted
@@ -1169,7 +1169,7 @@ ij> -- multi-values insert, return value of the function should not change, same
 values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-2                              
+4                              
 ij> select * from t1;
 C1         |C2         
 -----------------------
@@ -1183,7 +1183,7 @@ ij> -- insert with sub-select, return value should not change
 values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-2                              
+8                              
 ij> select * from t1;
 C1         |C2         
 -----------------------
@@ -1200,13 +1200,13 @@ ij> delete from t1;
 ij> values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-2                              
+8                              
 ij> insert into t1(c2) select c1 from t1;
 0 rows inserted/updated/deleted
 ij> values IDENTITY_VAL_LOCAL();
 1                              
 -------------------------------
-2                              
+0                              
 ij> -- end of practice, back to start...
 insert into t1(c2) values (8);
 1 row inserted/updated/deleted
