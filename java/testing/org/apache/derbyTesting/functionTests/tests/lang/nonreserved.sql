@@ -182,3 +182,28 @@ prepare locks as 'select * from locks';
 create index locks on locks(locks);
 drop table LOCKS;
 remove locks;
+
+-- making COUNT keyword nonreserved as fix for Derby-
+create table count(i int);
+drop table count;
+create table t1 (count int);
+drop table t1;
+create table count(count int);
+insert into count values (1);
+select * from count;
+select count from count;
+select count from count where count=1;
+select count.count from count;
+prepare count as 'select * from count';
+create index count on count(count);
+drop table count;
+remove count;
+create table t1(i int);
+insert into t1 values -1,2,-3,4,-5,6,-7,8,-9,0;
+create function count(i int) returns int no sql
+external name 'java.lang.Math.abs' language java parameter style java;
+
+select count(*) from t1;
+select count(i) from t1;
+select * from t1 where count(i)=i;
+drop table t1; 
