@@ -340,5 +340,42 @@ select * from td, (select distinct 1 from td) as sub(x);
 -- get the storage system to do the sort.
 select * from td, (select distinct x from td) as sub(x);
 
--- reset autocomiit
+-- Tests for DERBY-504 (select distinct from a subquery)
+
+create table names (id int, name varchar(10), age int);
+
+insert into names (id, name, age) values
+       (1, 'Anna', 23), (2, 'Ben', 24), (3, 'Carl', 25),
+       (4, 'Anna', 23), (5, 'Ben', 24), (6, 'Carl', 25);
+
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+maximumdisplaywidth 20000;
+
+-- distinct names should be returned
+select distinct name from (select name, id from names) as n;
+
+-- runtime statistics should not have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- distinct names should be returned
+select distinct name from (select name from names) as n;
+
+-- runtime statistics should have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+select distinct a, b, b, a from (select y as a, x as b from (select id as x, name as y from names) as n) as m;
+
+-- runtime statistics should have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+select distinct a, a from (select y as a from (select id as x, name as y from names) as n) as m;
+
+-- runtime statistics should not have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+
+drop table names;
+
+-- reset autocommit
 autocommit on;

@@ -64,6 +64,8 @@ import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.util.Properties;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A ProjectRestrictNode represents a result set for any of the basic DML
@@ -1608,16 +1610,26 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * Is it possible to do a distinct scan on this ResultSet tree.
 	 * (See SelectNode for the criteria.)
 	 *
+	 * @param distinctColumns the set of distinct columns
 	 * @return Whether or not it is possible to do a distinct scan on this ResultSet tree.
 	 */
-	boolean isPossibleDistinctScan()
+	boolean isPossibleDistinctScan(Set distinctColumns)
 	{
 		if (restriction != null || 
 			(restrictionList != null && restrictionList.size() != 0))
 		{
 			return false;
 		}
-		return childResult.isPossibleDistinctScan();
+
+		HashSet columns = new HashSet();
+		for (int i = 0; i < resultColumns.size(); i++) {
+			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+			BaseColumnNode bc = rc.getBaseColumnNode();
+			if (bc == null) return false;
+			columns.add(bc);
+		}
+
+		return columns.equals(distinctColumns) && childResult.isPossibleDistinctScan(distinctColumns);
 	}
 
 	/**

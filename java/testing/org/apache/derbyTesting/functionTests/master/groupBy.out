@@ -293,7 +293,6 @@ EXPR1      |EXPR2
 ------------------------------------------------------------------------
 0          |goodbye   everyone is here                                  
 0          |hello     everyone is here                                  
-0          |hello     everyone is here                                  
 100        |hello     everyone is here                                  
 0          |hello     noone is here                                     
 NULL       |NULL                                                        

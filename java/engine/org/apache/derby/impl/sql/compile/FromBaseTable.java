@@ -96,6 +96,8 @@ import java.sql.Connection;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A FromBaseTable represents a table in the FROM list of a DML statement,
@@ -4005,12 +4007,22 @@ public class FromBaseTable extends FromTable
 	 * Is it possible to do a distinct scan on this ResultSet tree.
 	 * (See SelectNode for the criteria.)
 	 *
+	 * @param distinctColumns the set of distinct columns
 	 * @return Whether or not it is possible to do a distinct scan on this ResultSet tree.
 	 */
-	boolean isPossibleDistinctScan()
+	boolean isPossibleDistinctScan(Set distinctColumns)
 	{
-		return (restrictionList == null ||
-				restrictionList.size() == 0);
+		if ((restrictionList != null && restrictionList.size() != 0)) {
+			return false;
+		}
+
+		HashSet columns = new HashSet();
+		for (int i = 0; i < resultColumns.size(); i++) {
+			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+			columns.add(rc.getExpression());
+		}
+
+		return columns.equals(distinctColumns);
 	}
 
 	/**
