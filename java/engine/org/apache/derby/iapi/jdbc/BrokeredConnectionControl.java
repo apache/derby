@@ -69,6 +69,18 @@ public interface BrokeredConnectionControl
 	public void checkHoldCursors(int holdability) throws SQLException;
 
 	/**
+		Returns true if isolation level has been set using JDBC/SQL.
+	*/
+	public boolean isIsolationLevelSetUsingSQLorJDBC() throws SQLException;
+	/**
+		Reset the isolation level flag used to keep state in 
+		BrokeredConnection. It will get set to true when isolation level 
+		is set using JDBC/SQL. It will get reset to false at the start
+		and the end of a global transaction.
+	*/
+	public void resetIsolationLevelFlag() throws SQLException;
+
+	/**
 		Close called on BrokeredConnection. If this call
 		returns true then getRealConnection().close() will be called.
 	*/

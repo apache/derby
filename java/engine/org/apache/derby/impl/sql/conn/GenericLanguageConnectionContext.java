@@ -195,6 +195,22 @@ public class GenericLanguageConnectionContext
 	protected int isolationLevel = defaultIsolationLevel;
 
 	private boolean isolationLevelExplicitlySet = false;
+	// Isolation level can be changed using JDBC api Connection.setTransactionIsolation
+	// or it can be changed using SQL "set current isolation = NEWLEVEL".
+	// 
+	// In XA transactions, BrokeredConnection keeps isolation state information.
+	// When isolation is changed in XA transaction using JDBC, that state gets
+	// correctly set in BrokeredConnection.setTransactionIsolation method. But
+	// when SQL is used to set the isolation level, the code path is different
+	// and it does not go through BrokeredConnection's setTransactionIsolation
+	// method and hence the state is not maintained correctly when coming through
+	// SQL. To get around this, I am adding following flag which will get set
+	// everytime the isolation level is set using JDBC or SQL. This flag will be
+	// checked at global transaction start and end time. If the flag is set to true
+	// then BrokeredConnection's isolation level state will be brought upto date
+	// with Real Connection's isolation level and this flag will be set to false
+	// after that.
+	private boolean isolationLevelSetUsingSQLorJDBC = false;
 
 	// isolation level to when preparing statements.
 	// if unspecified, the statement won't be prepared with a specific 
@@ -2287,6 +2303,22 @@ public class GenericLanguageConnectionContext
 	{ return statementDepth; }
 
 	/**
+	 * @see LanguageConnectionContext#isIsolationLevelSetUsingSQLorJDBC
+	 */
+	public boolean isIsolationLevelSetUsingSQLorJDBC()
+	{
+		return isolationLevelSetUsingSQLorJDBC;
+	}
+
+	/**
+	 * @see LanguageConnectionContext#resetIsolationLevelFlagUsedForSQLandJDBC
+	 */
+	public void resetIsolationLevelFlagUsedForSQLandJDBC()
+	{
+		isolationLevelSetUsingSQLorJDBC = false;
+	}
+
+	/**
 	 * @see LanguageConnectionContext#setIsolationLevel
 	 */
 	public void setIsolationLevel(int isolationLevel) throws StandardException
@@ -2328,6 +2360,7 @@ public class GenericLanguageConnectionContext
 		}
 		this.isolationLevel = isolationLevel;
 		this.isolationLevelExplicitlySet = true;
+		this.isolationLevelSetUsingSQLorJDBC = true;
 	}
 
 	/**
