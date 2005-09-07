@@ -97,7 +97,7 @@ Add the bin directory to your $PATH. Currently supported are:<br>
   </li>
 </ul>
 <table
- style="text-align: left; width: 497px; height: 32px; margin-left: 40px;"
+ style="text-align: left; width: 727px; height: 40px; margin-left: 40px;"
  border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
@@ -111,7 +111,11 @@ HotSpot jdk1.3.1</small><br>
       <small>&nbsp;&nbsp;&nbsp; ibm141 - IBM Classic jdk1.4.1</small><br>
       <small>&nbsp;&nbsp;&nbsp; ibm142 - IBM Classic jdk1.4.2</small><br>
       <small>&nbsp;&nbsp;&nbsp; j9_13 - WCTME jvm (available with IBM
-Websphere Client Technology Micro Edition) <br>
+      Websphere Studio Device Developer, 5.6), version 2.1</small><br>
+      <small>&nbsp;&nbsp;&nbsp; j9_22 - WCTME jvm (available with IBM
+      Websphere Client Technology Micro Edition, 5.7), version 2.2</small><br>
+      <small>&nbsp;&nbsp;&nbsp; j9_foundation - WCTME jvm (available with IBM
+      Websphere Client Technology Micro Edition, 5.7), version 2.2, foundation library <br>
       </small></td>
     </tr>
   </tbody>
@@ -1079,7 +1083,7 @@ with a new jvm<br>
 </h3>
 <p>Currently, the supported jvms are:
 </p>
-<table style="text-align: left; width: 497px; height: 32px;" border="1"
+<table style="text-align: left; width: 839px; height: 32px;" border="1"
  cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
@@ -1098,7 +1102,12 @@ ibm14</small><br>
       <small>&nbsp;&nbsp;&nbsp; ibm142 - IBM Classic jdk1.4.1 - class
 ibm14</small><br>
       <small>&nbsp;&nbsp;&nbsp; j9_13 - WCTME jvm (available with IBM
-Websphere Client Technology Micro Edition) - class j9_13<br>
+      Websphere Studio Device Developer, 5.6), version 2.1 - class j9_13</small><br>
+      <small>&nbsp;&nbsp;&nbsp; j9_22 - WCTME jvm (available with IBM
+      Websphere Client Technology Micro Edition, 5.7), version 2.2 - class j9_22</small><br>
+      <small>&nbsp;&nbsp;&nbsp; j9_foundation - WCTME jvm (available with IBM
+      Websphere Client Technology Micro Edition, 5.7), version 2.2,
+      foundation library - class j9_foundation<br>
       </small></td>
     </tr>
   </tbody>
@@ -1129,7 +1138,8 @@ need to be created.</li>
 line in the testname_app.properties file indicating this. For instance
 to add a line for a jvm called jdk29, it would be like this:
 runwithjdk29=false. Note that the versioning does not currently extend
-past 2 digits.</li>
+past 2 digits. For j9 jvms, versioning does not apply currently. For all
+j9 versions, use runwithj9=false. For j9_foundation, use runwithfoundation=false.</li>
     <li>Add code in RunTest.java to switch to the new jvm based on
 values for system and vendor properties</li>
   </ul>
