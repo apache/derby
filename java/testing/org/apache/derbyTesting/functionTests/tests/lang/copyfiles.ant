@@ -49,9 +49,6 @@ cursorerrors_derby.properties
 datetime.sql
 db2Compatibility.sql
 dbManagerLimits_app.properties
-dbjar.jar
-dbjar.sql
-dbjar_app.properties
 dcl.sql
 dcl_app.properties
 dcl_emc1.jar
