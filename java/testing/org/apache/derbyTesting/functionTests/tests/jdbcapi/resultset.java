@@ -1074,7 +1074,6 @@ public class resultset {
         conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         testSingleRSAutoCommit(conn);
         testSingleRSCloseCursorsAtCommit(conn);
-        multipleRSTests(conn);
         conn.setTransactionIsolation(isolation);
         s.executeUpdate("drop table AutoCommitTable");
         s.close();
@@ -1144,104 +1143,6 @@ public class resultset {
         }
     }
     
-    /**
-     * Sets up and runs two tests with multiple ResultSets
-     * 
-     * @param conn The Connection
-     * @throws SQLException
-     */
-    private static void multipleRSTests(Connection conn) throws SQLException {
-        setHoldability(conn, JDBC30Translation.HOLD_CURSORS_OVER_COMMIT);
-        
-        //Installing Procedure
-        Statement stmt = conn.createStatement();
-        ResultSet mdrs = conn.getMetaData().getProcedures(
-                null, null, "MULTIRESULT");
-        if (mdrs != null || !mdrs.next()) {
-            stmt.executeUpdate("create procedure multiResult(p1 int, " +
-                    "p2 int) parameter style JAVA READS SQL DATA dynamic " +
-                    "result sets 2 language java external name " +
-                    "'org.apache.derbyTesting.functionTests." +
-                    "tests.jdbcapi.resultset.multiResult'");
-        }
-        mdrs.close();
-        multipleRSAutoCommit(conn);
-        multipleRSNoCommit(conn);
-        stmt.executeUpdate("drop procedure multiResult");
-        stmt.close();
-    }
-    
-    /**
-     * Test to see that an auto commit occurs for multiple ResultSets if all 
-     * ResultSets but one are closed and the final ResultSet has completed.
-     * 
-     * @param conn The Connection
-     * @throws SQLException
-     */
-    private static void multipleRSAutoCommit(Connection conn) throws SQLException {
-        System.out.print("MultipleRSAutoCommit: ");
-        CallableStatement cs = conn.prepareCall("call multiResult(?, ?)");
-        cs.setInt(1, 1);
-        cs.setInt(2, 2);
-        cs.execute();
-        ResultSet rs = null;
-        do {
-            if (rs != null)
-                rs.close();
-            rs = cs.getResultSet();
-            while (rs.next());
-            
-            if (rs.next()) {
-                System.out.println("FAIL. Final call to ResultSet should return false.");
-            }
-        } while (getMoreResults(cs));
-        
-        if (!checkLocks()) {
-            return;
-        }
-        
-        System.out.println("PASS. ");
-        
-        if (rs != null)
-            rs.close();
-        cs.close();
-    }
-    
-    /**
-     * Used to insure that there is no auto-commit in the event that there is
-     * more then one ResultSet open.
-     * 
-     * @param conn The Connection
-     * @throws SQLException
-     */
-    private static void multipleRSNoCommit(Connection conn) throws SQLException {
-        System.out.print("MultipleRSNoCommit: ");
-        CallableStatement cs = conn.prepareCall("call multiResult(?, ?)");
-        cs.setInt(1, 1);
-        cs.setInt(2, 2);
-        cs.execute();
-        ResultSet rs = null;
-        do {
-            rs = cs.getResultSet();
-            while (rs.next());
-            
-            if (rs.next()) {
-                System.out.println("FAIL. Final call to ResultSet should return false.");
-            }
-        } while (getMoreResults(cs));
-        
-        if (checkLocks()) {
-            System.out.println("FAIL. Connection incorrectly auto-committed.");
-        }
-        
-        System.out.println("PASS. ");
-        
-        if (rs != null)
-            rs.close();
-        cs.close();
-    }
-
-    
     
     /**
      * Checks to see if there is a lock on a table by attempting to modify the
@@ -1293,48 +1194,4 @@ public class resultset {
             sh.invoke(conn, holdArray);
         } catch (Exception e) {System.out.println("shouldn't get that error " + e.getMessage());}//for jdks prior to jdk14
     }
-    
-    /**
-     * Uses reflection to call CallableStatement.getMoreResults(KEEP_CURRENT_RESULT)
-     * for JDBC2.0 compatibilty
-     * @param cs The Callable statement
-     * @return boolean value indicating if there are more results 
-     * @throws SQLException
-     */
-    public static boolean getMoreResults(CallableStatement cs) throws SQLException {
-        try {
-            Object[] holdArray = {new Integer(JDBC30Translation.KEEP_CURRENT_RESULT)};
-            Method sh = cs.getClass().getMethod("getMoreResults", CONN_PARAM);
-            Boolean temp = (Boolean)sh.invoke(cs, holdArray);
-            return temp.booleanValue();
-        } catch (Exception e) {return cs.getMoreResults();}//for jdks prior to jdk14 
-    }
-    
-    
-    
-    /**
-     * Procedure installed by the multipleResultSet method and used by the 
-     * multiRSHelper. Designed to return two ResultSets from a specified table
-     * where the num column equals p1 and p2 respectively.  
-     *  
-     * @param p1 Number parameter for the first ResultSet
-     * @param p2 Number parameter for the second ResultSet 
-     * @param data1 The first ResultSet to be returned.
-     * @param data2 The Second ResultSet to be returned
-     * @throws SQLException
-     */
-     public static void multiResult(int p1, int p2, ResultSet[] data1, ResultSet[] data2) 
-        throws SQLException {
-
-        Connection conn = DriverManager.getConnection("jdbc:default:connection");
-        PreparedStatement ps = conn.prepareStatement("select * from AutoCommitTable where num = ?");
-        ps.setInt(1, p1);
-        data1[0] = ps.executeQuery();
-
-        ps = conn.prepareStatement("select * from AutoCommitTable where num = ?");
-        ps.setInt(1, p2);
-        data2[0] = ps.executeQuery();
-
-        conn.close();
-     }
 }

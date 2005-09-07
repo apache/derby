@@ -23,8 +23,11 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import java.sql.*;
 
+
 import org.apache.derby.tools.ij;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.SQLState;
+
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.math.BigDecimal;
@@ -80,8 +83,9 @@ public class procedure
 			testOutparams(conn);
 
 			testSQLControl(conn);
-
-				testLiterals(conn);
+			testLiterals(conn);
+            
+            multipleRSTests(conn);
 		} catch (SQLException sqle) {
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
 			sqle.printStackTrace(System.out);
@@ -1570,5 +1574,187 @@ public class procedure
 		return;
 
 	}
+
+    /**
+     * Sets up and runs two tests with multiple ResultSets
+     * 
+     * @param conn The Connection
+     * @throws SQLException
+     */
+    private static void multipleRSTests(Connection conn) throws SQLException {
+        //DerbyNet is known to fail this test
+        if (TestUtil.isJCCFramework()) return;
+        
+        setHoldability(conn, JDBC30Translation.HOLD_CURSORS_OVER_COMMIT);
+        int iso = conn.getTransactionIsolation();
+        conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        //Installing Procedure
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select tablename from sys.systables " +
+                "where tablename = 'AUTOCOMMITTABLE'");
+        if (rs.next()) {
+            rs.close();
+            stmt.executeUpdate("delete from autoCommitTable");
+        } else {
+            rs.close();
+            stmt.executeUpdate("create table autoCommitTable (num int)");
+        }
+        
+        ResultSet mdrs = conn.getMetaData().getProcedures(
+                null, null, "MULTIRESULT");
+        if (mdrs != null || !mdrs.next()) {
+            stmt.executeUpdate("create procedure multiResult(p1 int, " +
+                    "p2 int) parameter style JAVA READS SQL DATA dynamic " +
+                    "result sets 2 language java external name " +
+                    "'org.apache.derbyTesting.functionTests." +
+                    "util.ProcedureTest.multiResult'");
+        }
+        mdrs.close();
+        multipleRSAutoCommit(conn);
+        multipleRSNoCommit(conn);
+        stmt.executeUpdate("drop procedure multiResult");
+        stmt.executeUpdate("drop table autoCommitTable");
+        stmt.close();
+        conn.setTransactionIsolation(iso);
+    }
+    
+    /**
+     * Test to see that an auto commit occurs for multiple ResultSets if all 
+     * ResultSets but one are closed and the final ResultSet has completed.
+     * 
+     * @param conn The Connection
+     * @throws SQLException
+     */
+    private static void multipleRSAutoCommit(Connection conn) throws SQLException {
+        System.out.print("MultipleRSAutoCommit: ");
+        CallableStatement cs = conn.prepareCall("call multiResult(?, ?)");
+        cs.setInt(1, 1);
+        cs.setInt(2, 2);
+        cs.execute();
+        ResultSet rs = null;
+        do {
+            if (rs != null)
+                rs.close();
+            rs = cs.getResultSet();
+            while (rs.next());
+            
+            if (rs.next()) {
+                System.out.println("FAIL. Final call to ResultSet should return false.");
+            }
+        } while (getMoreResults(cs));
+        
+        if (!checkLocks()) {
+            return;
+        }
+        
+        System.out.println("PASS. ");
+        
+        if (rs != null)
+            rs.close();
+        cs.close();
+    }
+    
+    /**
+     * Used to insure that there is no auto-commit in the event that there is
+     * more then one ResultSet open.
+     * 
+     * @param conn The Connection
+     * @throws SQLException
+     */
+    private static void multipleRSNoCommit(Connection conn) throws SQLException {
+        System.out.print("MultipleRSNoCommit: ");
+        CallableStatement cs = conn.prepareCall("call multiResult(?, ?)");
+        cs.setInt(1, 1);
+        cs.setInt(2, 2);
+        cs.execute();
+        ResultSet rs = null;
+        do {
+            rs = cs.getResultSet();
+            while (rs.next());
+            
+            if (rs.next()) {
+                System.out.println("FAIL. Final call to ResultSet should return false.");
+            }
+        } while (getMoreResults(cs));
+        
+        if (checkLocks()) {
+            System.out.println("FAIL. Connection incorrectly auto-committed.");
+        }
+        
+        System.out.println("PASS. ");
+        
+        if (rs != null)
+            rs.close();
+        cs.close();
+    }
+
+    
+    
+    /**
+     * Checks to see if there is a lock on a table by attempting to modify the
+     * same table. If the first connection was serializable then it will 
+     * continue to hold a lock and the second Connection will time out.
+     * 
+     * @return false if the a lock could not be established, true if a lock
+     * can be established.
+     * @throws SQLException
+     */
+    private static boolean checkLocks() throws SQLException {
+        Connection conn = null;
+        try {
+            conn = ij.startJBMS();
+        } catch (Exception e) {
+            System.out.println("FAIL. Unable to establish connection in checkLocks");
+            return false;
+        }
+        Statement stmt = conn.createStatement();
+        try {
+            stmt.executeUpdate("update AutoCommitTable " 
+                    + "set num = 3 where num = 2");
+            stmt.executeUpdate("update AutoCommitTable " 
+                    + "set num = 2 where num = 3");
+        } catch (SQLException e) {
+            if (e.getSQLState().equals(SQLState.LOCK_TIMEOUT)) {
+                return false;
+            } else {
+                throw e;
+            }
+        }
+        stmt.close();
+        conn.close();
+        return true;
+    }
+    
+    /**
+     * Sets the holdability of a Connection using reflection so it is
+     * JDBC2.0 compatible.
+     * 
+     * @param conn The Connection
+     * @param hold The new holdability.
+     * @throws SQLException
+     */
+    public static void setHoldability(Connection conn, int hold) throws SQLException {
+        try {
+            Object[] holdArray = {new Integer(hold)};
+            Method sh = conn.getClass().getMethod("setHoldability", CONN_PARAM);
+            sh.invoke(conn, holdArray);
+        } catch (Exception e) {System.out.println("shouldn't get that error " + e.getMessage());}//for jdks prior to jdk14
+    }
+    
+    /**
+     * Uses reflection to call CallableStatement.getMoreResults(KEEP_CURRENT_RESULT)
+     * for JDBC2.0 compatibilty
+     * @param cs The Callable statement
+     * @return boolean value indicating if there are more results 
+     * @throws SQLException
+     */
+    public static boolean getMoreResults(CallableStatement cs) throws SQLException {
+        try {
+            Object[] holdArray = {new Integer(JDBC30Translation.KEEP_CURRENT_RESULT)};
+            Method sh = cs.getClass().getMethod("getMoreResults", CONN_PARAM);
+            Boolean temp = (Boolean)sh.invoke(cs, holdArray);
+            return temp.booleanValue();
+        } catch (Exception e) {return cs.getMoreResults();}//for jdks prior to jdk14 
+    }
 
 }

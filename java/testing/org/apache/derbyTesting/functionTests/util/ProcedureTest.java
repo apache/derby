@@ -730,5 +730,30 @@ public abstract class ProcedureTest implements ResultSet {
 		conn.close();
 		return count;
 	}
+    
+    /**
+     * Procedure installed to test multiple ResultSets in the lang/procedure.java
+     * test class. 
+     * 
+     * @param p1 Number parameter for the first ResultSet
+     * @param p2 Number parameter for the second ResultSet 
+     * @param data1 The first ResultSet to be returned.
+     * @param data2 The Second ResultSet to be returned
+     * @throws SQLException
+     */
+     public static void multiResult(int p1, int p2, ResultSet[] data1, ResultSet[] data2) 
+        throws SQLException {
+
+        Connection conn = DriverManager.getConnection("jdbc:default:connection");
+        PreparedStatement ps = conn.prepareStatement("select * from AutoCommitTable where num = ?");
+        ps.setInt(1, p1);
+        data1[0] = ps.executeQuery();
+
+        ps = conn.prepareStatement("select * from AutoCommitTable where num = ?");
+        ps.setInt(1, p2);
+        data2[0] = ps.executeQuery();
+
+        conn.close();
+     }
 }
 
