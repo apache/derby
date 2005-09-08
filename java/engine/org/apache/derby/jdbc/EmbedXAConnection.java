@@ -145,7 +145,14 @@ final class EmbedXAConnection extends EmbedPooledConnection
 						throw new XAException(XAException.XAER_OUTSIDE);
 
 					if (currentConnectionHandle != null) {
-
+						// It is possible that the isolation level state in connection
+						// handle has gotten out of sync with the real isolation level.
+						// This can happen if SLQ instead of JDBC api has been used to
+						// set the isolation level. The code below will check if isolation
+						// was set using JDBC or SQL and if yes, then it will update the
+						// isolation state in BrokeredConnection with EmbedConnection's
+						// isolation level.
+						currentConnectionHandle.getIsolationUptoDate();
 						// we have a current handle so we need to keep
 						// the connection state of the current connection.
 						currentConnectionHandle.setState(true);
@@ -167,14 +174,13 @@ final class EmbedXAConnection extends EmbedPooledConnection
 
 				realConnection.getLanguageConnection().
 					getTransactionExecute().createXATransactionFromLocalTransaction(
-						 xid_im.getFormatId(), 
+						 xid_im.getFormatId(),
 						 xid_im.getGlobalTransactionId(),
 						 xid_im.getBranchQualifier());
 
 
 			} catch (StandardException se) {
 				throw wrapInXAException(se);
-			
 			} catch (SQLException sqle) {
 				throw wrapInXAException(sqle);
 			}
@@ -254,6 +260,20 @@ final class EmbedXAConnection extends EmbedPooledConnection
 	public final synchronized void end(Xid xid, int flags) throws XAException
 	{
 		checkXAActive();
+
+		try {
+			// It is possible that the isolation level state in connection
+			// handle has gotten out of sync with the real isolation level.
+			// This can happen if SLQ instead of JDBC api has been used to
+			// set the isolation level. The code below will check if isolation
+			// was set using JDBC or SQL and if yes, then it will update the
+			// isolation state in BrokeredConnection with EmbedConnection's
+			// isolation level.
+			if (currentConnectionHandle != null)
+				currentConnectionHandle.getIsolationUptoDate();
+		} catch (SQLException sqle) {
+			throw wrapInXAException(sqle);
+		}
 
 		// ensure immtable and correct equals method.
 		XAXactId xid_im = new XAXactId(xid);

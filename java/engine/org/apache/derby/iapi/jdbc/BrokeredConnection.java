@@ -404,6 +404,18 @@ public class BrokeredConnection implements Connection
 	}
 
 	/**
+		Isolation level state in BrokeredConnection can get out of sync
+		if the isolation is set using SQL rather than JDBC. In order to
+		ensure correct state level information, this method is called
+		at the start and end of a global transaction.
+	*/
+	public void getIsolationUptoDate() throws SQLException {
+		if (control!=null && control.isIsolationLevelSetUsingSQLorJDBC()) {
+			stateIsolationLevel = getRealConnection().getTransactionIsolation();
+			control.resetIsolationLevelFlag();
+		}
+	}
+	/**
 		Set the state of the underlying connection according to the
 		state of this connection's view of state.
 
@@ -411,7 +423,7 @@ public class BrokeredConnection implements Connection
 		Connection, otherwise set only the Connection related state (ie.
 		the non-transaction specific state).
 
-		
+
 	*/
 	public void setState(boolean complete) throws SQLException {
 		Class[] CONN_PARAM = { Integer.TYPE };

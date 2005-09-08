@@ -339,6 +339,27 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	*/
 
 	/**
+		Returns true if isolation level has been set using either JDBC api or SQL
+	 */
+	public boolean isIsolationLevelSetUsingSQLorJDBC() throws SQLException {
+		if (realConnection != null)
+			return realConnection.getLanguageConnection().isIsolationLevelSetUsingSQLorJDBC();
+		else
+			return false;
+	}
+
+	/**
+		Reset the isolation level flag used to keep state in 
+		BrokeredConnection. It will get set to true when isolation level 
+		is set using JDBC/SQL. It will get reset to false at the start
+		and the end of a global transaction.
+	*/
+	public void resetIsolationLevelFlag() throws SQLException {
+		realConnection.getLanguageConnection().resetIsolationLevelFlagUsedForSQLandJDBC();
+	}
+	
+	
+	/**
 		Notify the control class that a SQLException was thrown
 		during a call on one of the brokered connection's methods.
 	*/

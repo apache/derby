@@ -794,8 +794,22 @@ public interface LanguageConnectionContext extends Context {
     public Database getDatabase();
 
 	/**
+	 * Returns true if isolation level has been set using JDBC/SQL.
+	 */
+	public boolean isIsolationLevelSetUsingSQLorJDBC();
+	/**
+	 * Reset the isolation level flag used to keep correct isolation level
+	 * state in BrokeredConnection. This resetting will happen at the start 
+	 * and end of a global transaction, after the BrokeredConection's 
+	 * isolation level state is brought upto date with the EmbedConnection's
+	 * isolation state.
+	 * The flag gets set to true when isolation level is set using JDBC/SQL.
+	 */
+	public void resetIsolationLevelFlagUsedForSQLandJDBC();
+
+	/**
 	 * Set current isolation level.
-	 * 
+	 *
 	 * @param isolationLevel	The new isolationLevel.
 	 *
 	 * @return Nothing.

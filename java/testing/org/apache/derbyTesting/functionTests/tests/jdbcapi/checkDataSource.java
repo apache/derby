@@ -336,6 +336,59 @@ public class checkDataSource
 		printState("post-X1 commit - local", cs1);
 		cs1.close();
 
+		//Derby-421 Setting isolation level with SQL was not getting handled correctly 
+		System.out.println("Some more isolation testing using SQL and JDBC api");
+		cs1 = xac.getConnection();
+		s = cs1.createStatement();
+		printState("initial local", cs1);
+
+    System.out.println("Issue setTransactionIsolation in local transaction");
+		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		printState("setTransactionIsolation in local", cs1);
+
+    System.out.println("Issue SQL to change isolation in local transaction");
+		s.executeUpdate("set current isolation = RR");
+		printState("SQL to change isolation in local", cs1);
+
+		xid = new cdsXid(1, (byte) 35, (byte) 47);
+		xar.start(xid, XAResource.TMNOFLAGS);
+		printState("1st global(new)", cs1);
+		xar.end(xid, XAResource.TMSUCCESS);
+
+		printState("local", cs1);
+    System.out.println("Issue SQL to change isolation in local transaction");
+		s.executeUpdate("set current isolation = RS");
+		printState("SQL to change isolation in local", cs1);
+
+		Xid xid2 = new cdsXid(1, (byte) 93, (byte) 103);
+		xar.start(xid2, XAResource.TMNOFLAGS);
+		printState("2nd global(new)", cs1);
+		xar.end(xid2, XAResource.TMSUCCESS);
+
+		xar.start(xid, XAResource.TMJOIN);
+		printState("1st global(existing)", cs1);
+		xar.end(xid, XAResource.TMSUCCESS);
+
+		printState("local", cs1);
+
+		xar.start(xid, XAResource.TMJOIN);
+		printState("1st global(existing)", cs1);
+    System.out.println("Issue SQL to change isolation in 1st global transaction");
+		s.executeUpdate("set current isolation = UR");
+		printState("change isolation of existing 1st global transaction", cs1);
+		xar.end(xid, XAResource.TMSUCCESS);
+
+		printState("local", cs1);
+
+		xar.start(xid2, XAResource.TMJOIN);
+		printState("2nd global(existing)", cs1);
+		xar.end(xid2, XAResource.TMSUCCESS);
+
+		xar.rollback(xid2);
+		printState("(After 2nd global rollback) local", cs1);
+
+		xar.rollback(xid);
+		printState("(After 1st global rollback) local", cs1);
 
 		// now check re-use of *Statement objects across local/global connections.
 		System.out.println("TESTING RE_USE OF STATEMENT OBJECTS");
