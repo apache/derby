@@ -1770,7 +1770,8 @@ public class DRDAConnThread extends Thread {
 	 * the values sent in the ACCRDB are used.
 	 * Objects may follow in one DSS or in several DSS chained together.
 	 * 
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void parseOPNQRYobjects(DRDAStatement stmt) 
 		throws DRDAProtocolException, SQLException
@@ -1961,7 +1962,7 @@ public class DRDAConnThread extends Thread {
 	 * There are two possible formats, fixed and extended which includes length
 	 * information for the strings
 	 *
-	 * @exception throws DRDAProtocolException
+	 * @throws DRDAProtocolException
 	 */
 	private void writePKGNAMCSN(String pkgcnstknStr) throws DRDAProtocolException
 	{
@@ -2013,7 +2014,8 @@ public class DRDAConnThread extends Thread {
 	 *   MONITOR - Monitor events - optional.
 	 *
 	 * @return DRDAStatement we are continuing
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private DRDAStatement parseCNTQRY() throws DRDAProtocolException, SQLException
 	{
@@ -3072,7 +3074,8 @@ public class DRDAConnThread extends Thread {
 	 *   
 	 * @return return 0 - don't return sqlda, 1 - return input sqlda, 
 	 * 		2 - return output sqlda
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private int parsePRPSQLSTT() throws DRDAProtocolException,SQLException
 	{
@@ -3151,7 +3154,8 @@ public class DRDAConnThread extends Thread {
 	 * Objects may follow in one DSS or in several DSS chained together.
 	 * 
 	 * @return SQL statement
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private String parsePRPSQLSTTobjects(DRDAStatement stmt) 
 		throws DRDAProtocolException, SQLException
@@ -3285,7 +3289,8 @@ public class DRDAConnThread extends Thread {
 	 *  MONITOR - Monitor events - optional.
 	 *
 	 * @return expect "output sqlda" or not
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private boolean parseDSCSQLSTT() throws DRDAProtocolException,SQLException
 	{
@@ -3347,7 +3352,8 @@ public class DRDAConnThread extends Thread {
 	 *  QRYROWSET - Query Rowset Size - Level 7
 	 *  MONITOR - Monitor events - optional.
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void parseEXCSQLSTT() throws DRDAProtocolException,SQLException
 	{
@@ -3642,7 +3648,8 @@ public class DRDAConnThread extends Thread {
 	 * Objects may follow in one DSS or in several DSS chained together.
 	 * 
 	 * @param stmt	the DRDAStatement to execute
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void parseEXCSQLSTTobjects(DRDAStatement stmt) throws DRDAProtocolException, SQLException
 	{
@@ -3695,12 +3702,14 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Write SQLCINRD - result set column information
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeSQLCINRD(DRDAStatement stmt) throws DRDAProtocolException,SQLException
 	{
 		ResultSet rs = null;
-		PreparedStatement ps = stmt.getPreparedStatement();
+        // todo ps is never used or closed - could this be a memory leak?
+        PreparedStatement ps = stmt.getPreparedStatement();
 		
 		if (!stmt.needsToSendParamData)
 			rs = stmt.getResultSet();
@@ -3733,7 +3742,8 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Write SQLRSLRD - result set reply data
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeSQLRSLRD(DRDAStatement stmt) throws DRDAProtocolException,SQLException
 	{
@@ -3762,7 +3772,8 @@ public class DRDAConnThread extends Thread {
 	 *  PKGSNLST - list of PKGNAMCSN -required
 	 *  SRVDGN - Server Diagnostic Information -optional
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeRSLSETRM(DRDAStatement stmt) throws DRDAProtocolException,SQLException
 	{
@@ -3803,7 +3814,8 @@ public class DRDAConnThread extends Thread {
 	 *  FDODSC - FD:OCA data descriptor - required
 	 *  FDODTA - FD:OCA data - optional
 	 *    
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void parseSQLDTA_work(DRDAStatement stmt) throws DRDAProtocolException,SQLException
 	{
@@ -3953,7 +3965,8 @@ public class DRDAConnThread extends Thread {
 	 * @param paramLenNumBytes Number of bytes for encoding LOB Length
 	 *
 	 * @return updated paramExtPositions
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private ArrayList readAndSetParams(int i, DRDAStatement stmt, int
 									   drdaType, EmbedParameterSetMetaData pmeta,
@@ -4198,7 +4211,8 @@ public class DRDAConnThread extends Thread {
 	 * @param stmt			associated ps
 	 * @param drdaType	drda type of the parameter
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void readAndSetExtParam( int i, DRDAStatement stmt,
 									  int drdaType, int extLen)
@@ -4267,7 +4281,8 @@ public class DRDAConnThread extends Thread {
 	 *  SQLSTT - SQL Statement -required
 	 *
 	 * @return update count
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private int parseEXCSQLIMM() throws DRDAProtocolException,SQLException
 	{
@@ -4321,7 +4336,8 @@ public class DRDAConnThread extends Thread {
 	 *  TYPDEFOVR - TYPDEF Overrides - required
 	 *  SQLSTT - SQL Statement - required (at least one; may be more)
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private boolean parseEXCSQLSET() throws DRDAProtocolException,SQLException
 	{
@@ -4383,7 +4399,8 @@ public class DRDAConnThread extends Thread {
 	 * Objects may follow in one DSS or in several DSS chained together.
 	 * 
 	 * @return SQL Statement
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private String parseEXECSQLIMMobjects() throws DRDAProtocolException, SQLException
 	{
@@ -4433,8 +4450,8 @@ public class DRDAConnThread extends Thread {
 	 *
 	 * Objects may follow in one DSS or in several DSS chained together.
 	 * 
-	 * @return Count of updated rows.
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void parseEXCSQLSETobjects()
 		throws DRDAProtocolException, SQLException
@@ -4576,7 +4593,7 @@ public class DRDAConnThread extends Thread {
 	 *   PKGCNSTKN - RDB Package Consistency Token
 	 *   PKGSN - RDB Package Section Number
 	 *
-	 * @exception throws DRDAProtocolException
+	 * @throws DRDAProtocolException
 	 */
 	private String parsePKGNAMCSN() throws DRDAProtocolException
 	{
@@ -4801,7 +4818,8 @@ public class DRDAConnThread extends Thread {
 	 *  MONITOR - Monitor events - optional.
 	 *
 	 * @return DRDAstatement being closed
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private DRDAStatement parseCLSQRY() throws DRDAProtocolException, SQLException
 	{
@@ -5533,7 +5551,8 @@ public class DRDAConnThread extends Thread {
 	 *
 	 * @param stmt	prepared statement
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeSQLDARD(DRDAStatement stmt, boolean rtnOutput, SQLException e) throws DRDAProtocolException, SQLException
 	{
@@ -5582,7 +5601,8 @@ public class DRDAConnThread extends Thread {
 	 * If the QRYDSC will not fit into the current block, as many columns as can
 	 * fit are sent and then the remaining are sent in the following blocks.
 	 * 
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeQRYDSC(DRDAStatement stmt, boolean FDODSConly)
 		throws DRDAProtocolException, SQLException
@@ -5682,7 +5702,8 @@ public class DRDAConnThread extends Thread {
 	 * @param colEnd	end column to send
 	 * @param first		is this the first group
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeSQLDTAGRP(DRDAStatement stmt, ResultSetMetaData rsmeta, 
 								EmbedParameterSetMetaData pmeta,
@@ -5807,7 +5828,8 @@ public class DRDAConnThread extends Thread {
 	 *   Byte string
 	 *
 	 * @param stmt	DRDA statement we are processing
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeQRYDTA (DRDAStatement stmt) 
 		throws DRDAProtocolException, SQLException
@@ -6069,7 +6091,8 @@ public class DRDAConnThread extends Thread {
 	 * @param stmt DRDA statment
 	 * @param blksize size of query block
 	 * 
-	 * @exception SQLException, DRDAProtocolException
+	 * @throws SQLException
+     * @throws DRDAProtocolException
 	 */
 	private void splitQRYDTA(DRDAStatement stmt, int blksize) throws SQLException, 
 			DRDAProtocolException
@@ -6115,7 +6138,8 @@ public class DRDAConnThread extends Thread {
 	 * 
 	 * @param stmt DRDA statement
 	 * @param rs Result set
-	 * @exception DRDAProtocolException,SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void doneData(DRDAStatement stmt, ResultSet rs) 
 			throws DRDAProtocolException, SQLException
@@ -6256,7 +6280,8 @@ public class DRDAConnThread extends Thread {
 	 *					parameter number (in case of parameter)
 	 * @param rtnOutput	whether this is for a result set	
 	 *
-	 * @exception DRDAProtocolException, SQLException
+	 * @throws DRDAProtocolException
+     * @throws SQLException
 	 */
 	private void writeSQLDAGRP(ResultSetMetaData rsmeta, EmbedParameterSetMetaData pmeta, int elemNum, boolean rtnOutput)
 		throws DRDAProtocolException, SQLException
