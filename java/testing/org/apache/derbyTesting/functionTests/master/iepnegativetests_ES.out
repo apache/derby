@@ -79,7 +79,7 @@ ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' ,
 ij> delete from t1 ;
 7 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extinout/t1.dat' , 
-                                 null, null, null, 0) ;
+                                 null, null, 'utf-8', 0) ;
 0 rows inserted/updated/deleted
 ij> select * from t1;
 A          

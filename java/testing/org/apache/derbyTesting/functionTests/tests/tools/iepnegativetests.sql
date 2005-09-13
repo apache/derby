@@ -63,7 +63,7 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' ,
 delete from t1 ;
 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extinout/t1.dat' , 
-                                 null, null, null, 0) ;
+                                 null, null, 'utf-8', 0) ;
 select * from t1;
 
 --import error cases
