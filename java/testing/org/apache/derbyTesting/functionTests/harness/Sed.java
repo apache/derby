@@ -158,6 +158,8 @@ public class Sed
         // Filter for "DB2ConnectionCorrelator" text that can be printed as
         // part of some JCC error messages.
         searchStrings.addElement("  DB2ConnectionCorrelator: [0-9A-Z.]*");
+		// Filter for SAX exception name diffs between jvms.
+        searchStrings.addElement("org.xml.sax.SAX.*$");
 
         Vector subStrings = new Vector();
         subStrings.addElement("Transaction:(XXX)|");
@@ -193,6 +195,8 @@ public class Sed
         subStrings.addElement("Directory DBLOCATION/wombat already exists");
         // ignore the 'DB2ConnectionCorrelator' thing altogether.
         subStrings.addElement("");
+		// Filter for SAX exception name diffs between jvms.
+        subStrings.addElement("xxxFILTERED-SAX-EXCEPTIONxxx'.");
         doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed, isI18N);
         
     } // end exec

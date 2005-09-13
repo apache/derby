@@ -241,3 +241,6 @@ wisconsin.sql
 wisconsin_app.properties
 wisconsin_derby.properties
 wisconsin_sed.properties
+xml_general.sql
+xmlBinding_app.properties
+xmlTestFiles/*
