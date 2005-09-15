@@ -1477,26 +1477,7 @@ public abstract class DMLModStatementNode extends DMLStatementNode
 			indexNames[ictr] = 
 				((cd.isConstraint()) ? null : cd.getConglomerateName());
 
-			/*
-			** This is a nasty hack to deal with the fact that
-			** some testing wind up calling this method w/o
-			** going through the normal setup -- so there is
-			** no connection context.  So, in the debug codeline,
-			** we'll skip setting the dependency if isn't on
-			** in the compilation context.
-			*/
-			if (SanityManager.DEBUG)
-			{
-				if (cc.getCurrentDependent() != null)
-				{
-					cc.createDependency(cd);
-				}
-			}
-			else
-			{
-				cc.createDependency(cd);
-			}
-
+			cc.createDependency(cd);
 		}
 
 	}

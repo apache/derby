@@ -4339,8 +4339,7 @@ public class FromBaseTable extends FromTable
 										ConglomerateDescriptor cd)
 			throws StandardException
 	{
-		return getCompilerContext().getStoreCostController(cd.getConglomerateNumber(), 
-														   getLanguageConnectionContext());
+		return getCompilerContext().getStoreCostController(cd.getConglomerateNumber());
 	}
 
 	private StoreCostController getBaseCostController()

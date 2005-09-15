@@ -65,9 +65,10 @@ import java.sql.SQLWarning;
 import java.util.Vector;
 import java.util.Properties;
 
-/*
+/**
  *
- * CompilerContextImpl
+ * CompilerContextImpl, implementation of CompilerContext.
+ * CompilerContext and hence CompilerContextImpl objects are private to a LanguageConnectionContext.
  *
  */
 public class CompilerContextImpl extends ContextImpl
@@ -98,11 +99,6 @@ public class CompilerContextImpl extends ContextImpl
 			{
 				if (currentDependent != null)
 				{
-					LanguageConnectionContext lcc;
-
-					/* Find the LanguageConnectionContext */
-					lcc = (LanguageConnectionContext)
-						getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
 					currentDependent.makeInvalid(DependencyManager.COMPILE_FAILED,
 												 lcc);
 				}
@@ -240,11 +236,6 @@ public class CompilerContextImpl extends ContextImpl
 		return lcf.getJavaFactory();
 	}
 
-
-	public Dependent getCurrentDependent() {
-		return currentDependent;
-	}
-
 	public void setCurrentDependent(Dependent d) {
 		currentDependent = d;
 	}
@@ -276,13 +267,12 @@ public class CompilerContextImpl extends ContextImpl
 
 	public void createDependency(Provider p) throws StandardException {
 		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(getCurrentDependent() != null,
+		SanityManager.ASSERT(currentDependent != null,
 				"no current dependent for compilation");
 
-		LanguageConnectionContext	lcc = (LanguageConnectionContext)
-			getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
-		DependencyManager dm = lcc.getDataDictionary().getDependencyManager();
-		dm.addDependency(getCurrentDependent(), p, getContextManager());
+		if (dm == null)
+			dm = lcc.getDataDictionary().getDependencyManager();
+		dm.addDependency(currentDependent, p, getContextManager());
 		addProviderToAuxiliaryList(p);
 	}
 
@@ -296,9 +286,8 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	public	void createDependency(Dependent d, Provider p) throws StandardException
 	{
-		LanguageConnectionContext lcc = (LanguageConnectionContext)
-			getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
-		DependencyManager dm = lcc.getDataDictionary().getDependencyManager();
+		if (dm == null)
+			dm = lcc.getDataDictionary().getDependencyManager();
 
 		dm.addDependency(d, p, getContextManager());
 		addProviderToAuxiliaryList(p);
@@ -348,20 +337,6 @@ public class CompilerContextImpl extends ContextImpl
 		{
 			addSavedObject(objs[i]);
 		}		
-	}
-
-	/** @see CompilerContext#setParams */
-	public void setParams(ParameterValueSet params)
-	{
-		this.params = params;
-	}
-
-	/** @see CompilerContext#getParams */
-	public ParameterValueSet getParams()
-	{
-		ParameterValueSet tmpParams = this.params;
-		this.params = null;
-		return tmpParams;
 	}
 
 	/** @see CompilerContext#setCursorInfo */
@@ -446,8 +421,7 @@ public class CompilerContextImpl extends ContextImpl
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public StoreCostController getStoreCostController(long conglomerateNumber,
-													  LanguageConnectionContext lcc)
+	public StoreCostController getStoreCostController(long conglomerateNumber)
 			throws StandardException
 	{
 		/*
@@ -513,11 +487,6 @@ public class CompilerContextImpl extends ContextImpl
 			/*
 			** Get a StoreCostController from the store.
 			*/
-			LanguageConnectionContext lcc;
-
-			/* Find the LanguageConnectionContext */
-			lcc = (LanguageConnectionContext)
-				getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
 
 			sortCostController =
 				lcc.getTransactionCompile().openSortCostController((Properties) null);
@@ -614,21 +583,6 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/**
-	 * @see CompilerContext#getNextParameterNumber
-	 */
-	public int getNextParameterNumber()
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(parameterList != null,
-				"parameterList is expected to be non-null");
-		}
-		
-		// Parameter #s are 0-based
-		return parameterList.size();
-	}
-
-	/**
 	 * @see CompilerContext#setScanIsolationLevel
 	 */
 	public void setScanIsolationLevel(int isolationLevel)
@@ -696,13 +650,15 @@ public class CompilerContextImpl extends ContextImpl
 	//
 	/////////////////////////////////////////////////////////////////////////////////////
 
-	public CompilerContextImpl(ContextManager cm, LanguageConnectionFactory lcf,
+	public CompilerContextImpl(ContextManager cm,
+			LanguageConnectionContext lcc,
 		TypeCompilerFactory typeCompilerFactory )
 	{
 		super(cm, CompilerContext.CONTEXT_ID);
 
+		this.lcc = lcc;
+		lcf = lcc.getLanguageConnectionFactory();
 		this.parser = lcf.newParser(this);
-		this.lcf = lcf;
 		this.typeCompilerFactory = typeCompilerFactory;
 
 		// the prefix for classes in this connection
@@ -714,10 +670,11 @@ public class CompilerContextImpl extends ContextImpl
 	*/
 
 	private final Parser 		parser;
-	private LanguageConnectionFactory lcf;
+	private final LanguageConnectionContext lcc;
+	private final LanguageConnectionFactory lcf;
 	private TypeCompilerFactory	typeCompilerFactory;
 	private Dependent			currentDependent;
-	private DependencyManager	dmgr;
+	private DependencyManager	dm;
 	private boolean				firstOnStack;
 	private boolean				inUse;
 	private int					reliability = CompilerContext.SQL_LEGAL;
@@ -731,7 +688,6 @@ public class CompilerContextImpl extends ContextImpl
 	private long				nextClassName;
 	private Vector				savedObjects;
 	private String				classPrefix;
-	private ParameterValueSet	params;
 	private SchemaDescriptor	compilationSchema;
 	private ProviderList		currentAPL;
 	private boolean returnParameterFlag;

@@ -1825,7 +1825,7 @@ public class GenericLanguageConnectionContext
 
 		if (cc == null || cc.getInUse())
 		{
-			cc = new CompilerContextImpl(getContextManager(), connFactory, tcf);
+			cc = new CompilerContextImpl(getContextManager(), this, tcf);
 			if (firstCompilerContext) { cc.firstOnStack(); }
 		}
 		else

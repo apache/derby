@@ -61,7 +61,6 @@ import org.apache.derby.catalog.UUID;
 
 public class CreateViewNode extends CreateStatementNode
 {
-	Dependent			currentDependent;
 	ResultColumnList	resultColumns;
 	ResultSetNode		queryExpression;
 	String				qeText;
@@ -212,13 +211,6 @@ public class CreateViewNode extends CreateStatementNode
 		{
 			throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_NAME_CREATE_VIEW, duplicateColName);
 		}
-
-		/* Remember the current Dependent (the statement) here (since we
-		 * already have the CompilerContext).  We will use this info
-		 * during generate() to create the dependencies for the view.
-		 */
-		currentDependent = cc.getCurrentDependent();
-
 
 		/* Only 5000 columns allowed per view */
 		if (queryExpression.getResultColumns().size() > Limits.DB2_MAX_COLUMNS_IN_VIEW)

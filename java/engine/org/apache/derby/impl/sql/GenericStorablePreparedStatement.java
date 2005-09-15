@@ -125,7 +125,7 @@ public class GenericStorablePreparedStatement
 		return activationClass;
 	}
 
-	public void setActivationClass(GeneratedClass ac) {
+	void setActivationClass(GeneratedClass ac) {
 
 		super.setActivationClass(ac);
 		if (ac != null) {

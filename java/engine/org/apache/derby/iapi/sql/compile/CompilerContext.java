@@ -51,6 +51,7 @@ import java.sql.SQLWarning;
  * the compiler.  Stack compiler contexts when a new, local parser is needed
  * (if calling the compiler recursively from within the compiler,
  * for example).
+ * CompilerContext objects are private to a LanguageConnectionContext.
  *
  * @author ames
  *
@@ -248,15 +249,6 @@ public interface CompilerContext extends Context
 	String getUniqueClassName();
 
 	/**
-	 * Get the current dependent from this CompilerContext.
-	 *
-	 * @return	The Dependent currently being compiled.
-	 *
-	 */
-
-	Dependent getCurrentDependent();
-
-	/**
 	 * Set the current dependent from this CompilerContext.
 	 * This should be called at the start of a compile to
 	 * register who has the dependencies needed for the compilation.
@@ -402,14 +394,12 @@ public interface CompilerContext extends Context
 	 *
 	 * @param conglomerateNumber	The conglomerate for which to get a
 	 *								StoreCostController.
-	 * @param lcc					Current LanguageConnectionContext.
 	 *
 	 * @return	The appropriate StoreCostController.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public StoreCostController getStoreCostController(long conglomerateNumber,
-													  LanguageConnectionContext lcc)
+	public StoreCostController getStoreCostController(long conglomerateNumber)
 			throws StandardException;
 
 	/**
@@ -458,32 +448,6 @@ public interface CompilerContext extends Context
 	 */
 
 	public DataTypeDescriptor[] getParameterTypes();
-
-	/**
-	 * Get the next parameter number.
-	 * Useful when generating "associated" 
-	 * parameters.
-	 *
-	 * @return The next parameter number for the statement.
-	 */
-	public int getNextParameterNumber();
-
-	/**
-	 * Get the params stored vai setParams.
-	 * WARNING: nulls out the params value before
-	 * returning it, so a subsequent get will
-	 * get a null.
-	 *
-	 * @return the parameters
-	 */
-	public ParameterValueSet getParams();
-	
-	/**
-	 * Set params
-	 *
-	 * @param params the params
-	 */
-	public void setParams(ParameterValueSet params);
 
 	/**
 	 * Get the cursor info stored in the context.

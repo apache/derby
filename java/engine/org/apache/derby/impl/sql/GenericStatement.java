@@ -460,7 +460,6 @@ public class GenericStatement
 					preparedStmt.setConstantAction( qt.makeConstantAction() );
 					preparedStmt.setSavedObjects( cc.getSavedObjects() );
 					preparedStmt.setActivationClass(ac);
-					preparedStmt.setParams(cc.getParams());
 					preparedStmt.setNeedsSavepoint(qt.needsSavepoint());
 					preparedStmt.setCursorInfo((CursorInfo)cc.getCursorInfo());
 					preparedStmt.setIsAtomic(qt.isAtomic());

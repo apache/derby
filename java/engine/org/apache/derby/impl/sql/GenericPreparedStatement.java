@@ -20,16 +20,12 @@
 
 package org.apache.derby.impl.sql;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-
 import	org.apache.derby.catalog.Dependable;
 import	org.apache.derby.catalog.DependableFinder;
 
-import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 
-import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -41,11 +37,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.util.ByteArray;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 
@@ -59,12 +51,10 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -75,14 +65,11 @@ import org.apache.derby.impl.sql.compile.QueryTreeNode;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.services.loader.GeneratedClass;
-import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import java.sql.Timestamp;
 import java.sql.SQLWarning;
-import java.util.Vector;
 
 /**
  * Basic implementation of prepared statement.
@@ -145,7 +132,6 @@ public class GenericPreparedStatement
 	protected String UUIDString;
 	protected UUID   UUIDValue;
 
-	private ParameterValueSet params;
 	private boolean needsSavepoint;
 
 	private String execStmtName;
@@ -187,7 +173,7 @@ public class GenericPreparedStatement
 	// constructors
 	//
 
-	protected GenericPreparedStatement() {
+	GenericPreparedStatement() {
 		/* Get the UUID for this prepared statement */
 		UUIDFactory uuidFactory = 
 			Monitor.getMonitor().getUUIDFactory();
@@ -246,11 +232,6 @@ public class GenericPreparedStatement
 		}
 
 		Activation ac = new GenericActivationHolder(lcc, gc, this, scrollable);
-
-		if (params != null)
-		{
-			ac.setParameters(params, null);
-		}
 
 		inUseCount++;
 
@@ -621,7 +602,7 @@ recompileOutOfDatePlan:
 	 *
 	 *	@param constantAction The big structure enclosing the Execution constants.
 	 */
-	public	final void	setConstantAction( ConstantAction constantAction )
+	final void	setConstantAction( ConstantAction constantAction )
 	{
 		executionConstants = constantAction;
 	}
@@ -642,7 +623,7 @@ recompileOutOfDatePlan:
 	 *
 	 *	@param	objects	The objects to save from compilation
 	 */
-	public	final void	setSavedObjects( Object[] objects )
+	final void	setSavedObjects( Object[] objects )
 	{
 		savedObjects = objects;
 	}
@@ -1065,22 +1046,6 @@ recompileOutOfDatePlan:
 	}
 
 	/**
-	 * Set parameters to be associated with this
-	 * statement.  Used to process EXECUTE STATMENT <name>
-	 * USING <resultSet> statements -- the <resultSet>
-	 * is evaluated and a parameter list is generated.
-	 * That list is saved using this call.  Parameters
-	 * are set in the activation when it is created
-	 * (see getActivation). 
-	 * 
-	 * @param params the parameters
-	 */
-	protected void setParams(ParameterValueSet params)
-	{
-		this.params = params;
-	}
-
-	/**
 	 * Does this statement need a savepoint?  
 	 * 
 	 * @return true if this statement needs a savepoint.
@@ -1165,7 +1130,6 @@ recompileOutOfDatePlan:
 		clone.targetColumns = targetColumns;
 		clone.updateColumns = updateColumns;
 		clone.updateMode = updateMode;	
-		clone.params = params;
 		clone.needsSavepoint = needsSavepoint;
 
 		return clone;
