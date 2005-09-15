@@ -20,6 +20,9 @@
 
 package org.apache.derby.jdbc;
 
+import java.util.Enumeration;
+import java.util.Properties;
+
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.ResourceUtilities;
 import org.apache.derby.client.am.SqlException;
@@ -92,11 +95,11 @@ public class ClientDriver implements java.sql.Driver {
             port = ClientDataSource.propertyDefault_portNumber;
         }
 
-        // longDatabase is the databaseName and attributes.  This will be
+        // database is the database name and attributes.  This will be
         // sent to network server as the databaseName
         String database = tokenizeDatabase(urlTokenizer, url); // "database"
         java.util.Properties augmentedProperties = tokenizeURLProperties(url, properties);
-
+        database = appendDatabaseAttributes(database,augmentedProperties);
 
         int traceLevel;
         try {
@@ -129,8 +132,33 @@ public class ClientDriver implements java.sql.Driver {
         return conn;
     }
 
-    public boolean acceptsURL(String url) throws java.sql.SQLException {
-        java.util.StringTokenizer urlTokenizer = new java.util.StringTokenizer(url, "/:=; \t\n\r\f", true);
+    /**
+     * Append attributes to the database name except for user/password 
+     * which are sent as part of the protocol.
+     * Other attributes will  be sent to the server with the database name
+     * Assumes augmentedProperties is not null
+     * 
+	 * @param database - Short database name
+	 * @param augmentedProperties - Set of properties to append as attributes
+	 * @return databaseName + attributes (e.g. mydb;create=true) 
+	 */
+	private String appendDatabaseAttributes(String database, Properties augmentedProperties) {
+	
+		StringBuffer longDatabase = new StringBuffer(database);
+		for (Enumeration keys = augmentedProperties.keys(); keys.hasMoreElements() ;)
+		{
+			String key = (String) keys.nextElement();
+			if (key.equals(ClientDataSource.propertyKey_user) || 
+				key.equals(ClientDataSource.propertyKey_password))
+				continue;
+			longDatabase.append(";" + key + "=" + augmentedProperties.getProperty(key));
+		}
+		return longDatabase.toString();
+	}
+
+	public boolean acceptsURL(String url) throws java.sql.SQLException {
+        java.util.StringTokenizer urlTokenizer = 
+        		new java.util.StringTokenizer(url, "/:=; \t\n\r\f", true);
         int protocol = tokenizeProtocol(url, urlTokenizer);
         return protocol != 0;
     }
@@ -262,11 +290,11 @@ public class ClientDriver implements java.sql.Driver {
         }
     }
 
-    //return database name and attributes
+    //return database name
     private static String tokenizeDatabase(java.util.StringTokenizer urlTokenizer,
                                            String url) throws SqlException {
         try {
-            String databaseName = urlTokenizer.nextToken(" \t\n\r\f");
+            String databaseName = urlTokenizer.nextToken(" \t\n\r\f;");
             return databaseName;
         } catch (java.util.NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced

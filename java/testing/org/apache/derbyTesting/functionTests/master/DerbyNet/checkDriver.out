@@ -1,0 +1,7 @@
+jdbcCompliant() = true
+driver.getMajorVersion() = EXPECTED VERSION
+driver.getMinorVersion() = EXPECTED VERSION
+checking acceptsURL(jdbc:derby:wombat;create=true)
+checking acceptsURL(jdbc:derby://localhost:1527/wombat;create=true)
+checking acceptsURL(jdbc:derby:net://localhost:1527/wombat;create=true)
+checking acceptsURL(jdbc:db2j:wombat;create=true)

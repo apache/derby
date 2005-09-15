@@ -20,17 +20,22 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+
+import java.io.File;
+import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+import org.apache.derby.tools.JDBCDisplayUtil;
 
 /**
  * @author marsden
  *
  * This test tests java.sql.Driver methods.
- * Right now it just tests acceptsURL.  
+ * Right now it just tests acceptsURL and some attributes  
  * Tests for getPropertyInfo need to be added. as well as connection attributes
  * 
  */
@@ -42,6 +47,8 @@ public class checkDriver {
 	private static String JCC_URL = "jdbc:derby:net://localhost:1527/wombat;create=true";
 	private static String INVALID_URL = "jdbc:db2j:wombat;create=true";
 	
+	private static String DERBY_SYSTEM_HOME = System.getProperty("derby.system.home");
+	
 	// URLS to check.  New urls need to also be added to the acceptsUrl table
 	private static String[] urls = new String[]
 	{
@@ -52,7 +59,10 @@ public class checkDriver {
 	};
 	
 	
-	
+	/**
+	 * url prefix for this framework
+	 */
+	private static String frameworkPrefix;
 	
 	// The acceptsURLTable uses  the frameworkOffset column int he table 
 	// to check for valid results for each framework
@@ -64,6 +74,7 @@ public class checkDriver {
 	private static int DERBYNET_OFFSET = 2;   // JCC
 	
 	static {
+		frameworkPrefix = TestUtil.getJdbcUrlPrefix();
 		if (TestUtil.isEmbeddedFramework())
 			frameworkOffset = EMBEDDED_OFFSET;
 		else if (TestUtil.isDerbyNetClientFramework())
@@ -87,18 +98,148 @@ public class checkDriver {
 
 	public static void main(String[] args) {
 		try {
-			Driver driver = loadAndCheckDriverForFramework();
+			Driver driver = loadAndCheckDriverForFramework();			
 			checkAcceptsURL(driver);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
+			testEmbeddedAttributes(driver);
+			testClientAttributes(driver);
 		}
+		catch (SQLException se)
+		{
+			while (se != null)
+			{
+				se.printStackTrace(System.out);
+				se = se.getNextException();
+			}
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace(System.out);
+		}
+		
 	}
 	
 
 	/**
+	 * Tests that client side attributes cann be specified in either url or info argument to connect.
+	 * DERBY"-530. 
+	 * 
+	 * TODO: Add more comprehensive client attribute testing and enhance to handle jcc attributes in url. 
 	 * 
 	 * @param driver
+	 */
+	private static void testClientAttributes(Driver driver) throws SQLException
+	{
+		if (!TestUtil.isDerbyNetClientFramework())
+			return;
+		
+		System.out.println("\ntestClientAttributes()");
+		Properties info = new Properties();
+
+		// Note: we have to put the trace file in an absolute path because the 
+		// test harness sets user.dir and this confuses the File api greatly.
+		// We put it in DERBY_SYSTEM_HOME since that is always available when 
+		// tests are run
+		String traceDirectory = DERBY_SYSTEM_HOME
+			+ File.separator;
+		String traceFile= traceDirectory + "trace.out";
+		
+		//		 traceFile attribute in url
+		testConnect(driver, frameworkPrefix + "testpropdb;traceFile=" + 
+					traceFile,info);
+		assertTraceFileExists(traceFile);
+		
+		traceFile = traceDirectory + "trace2.out";
+		
+		// traceFile attribute in property
+		info.setProperty("traceFile",traceFile);
+		testConnect(driver, frameworkPrefix + "testpropdb",info);
+		assertTraceFileExists(traceFile);
+
+	}
+
+
+
+	/**
+	 * Check that trace file exists in <framework> directory
+	 * 
+	 * @param filename Name of trace file
+	 */
+	private static void assertTraceFileExists(String filename) 
+	{
+		File traceFile = new File(filename);
+		//System.out.println("user.dir=" + System.getProperty("user.dir"));
+		//System.out.println("fullpath = " + traceFile.getAbsolutePath());
+		boolean exists = traceFile.exists();
+		if (! exists)
+			new Exception("FAILED trace file: " + filename + " does not exist").printStackTrace(System.out); 
+		else
+			System.out.println(" trace file exists");
+			
+	}
+
+
+	/**
+	 * Tests that embedded attributes can be specified in either url or info argument to connect
+	 * DERBY-530. Only valid for emebedded driver and client. JCC has a different url format for 
+	 * embedded attributes
+	 * 
+	 * @param driver
+	 */
+	private static void testEmbeddedAttributes(Driver driver) throws SQLException
+	{
+		// JCC can't take embedded attributes in info or as normal url attributes,
+		// so not tested here.
+		if (TestUtil.isJCCFramework())
+			return;
+		
+		System.out.println("\ntestEmbeddedAttributes()");
+		Properties info = new Properties();
+		// create attribute as property
+		info.setProperty("create","true");
+		testConnect(driver, frameworkPrefix + "testcreatedb1", info);
+		
+		// create attribute in url
+		testConnect(driver, frameworkPrefix + "testcreatedb2;create=true", null);
+		
+		// user/password in properties
+		// testpropdb was created in load and test driver
+		info.clear();
+		info.setProperty("user","APP");
+		info.setProperty("password", "xxxx");
+		testConnect(driver, frameworkPrefix + "testpropdb", info);
+		
+		// user/password  in url
+		testConnect(driver, frameworkPrefix + "testpropdb;user=testuser;password=testpass", null);
+		
+		// user in url, password in property
+		info.clear();
+		info.setProperty("password","testpass");
+		testConnect(driver,frameworkPrefix + "testpropdb;user=testusr",info);
+
+		// different users in url and in properties. URL is the winner
+		info.clear();
+		info.setProperty("user","APP");
+		info.setProperty("password","xxxx");
+		testConnect(driver, frameworkPrefix + "testpropdb;user=testuser;password=testpass", null);
+		
+		// shutdown with properties
+		info.clear();
+		info.setProperty("shutdown","true");				
+		try {
+			testConnect(driver,frameworkPrefix + "testcreatedb1", info);
+		} catch (SQLException se)
+		{
+			System.out.println("Expected Exception:" + se.getSQLState() + ":" + se.getMessage());
+		}
+	}
+		
+
+	/**
+	 * Check that drivers accept the correct urls and reject those for other supported drivers.
+	 * 
+	 * @param driver  driver we are testing.
+	 * 
+	 * @throws SQLException
 	 */
 	private static void checkAcceptsURL(Driver driver) throws SQLException{
 		for (int u = 0; u < urls.length;u++)
@@ -115,39 +256,116 @@ public class checkDriver {
 	}
 
 
+	/**
+	 * Load the driver and check java.sql.Driver methods, 
+	 * @return
+	 * @throws Exception
+	 */
 	private static Driver loadAndCheckDriverForFramework() throws Exception	
 	{	
 		TestUtil.loadDriver();
-			
-		String frameworkURL = TestUtil.getJdbcUrlPrefix() + "wombat;create=true";
-		TestUtil.loadDriver();
+		String frameworkURL = TestUtil.getJdbcUrlPrefix() + "testpropdb;create=true";
 		
 		// Test that we loaded the right driver by making a connection
 		Driver driver = DriverManager.getDriver(frameworkURL);
 		Properties props = new Properties();
-		props.put("user","APP");
-		props.put("password","xxx");
-		Connection conn = driver.connect(frameworkURL,props);
-		//System.out.println("Successfully made connection for  " + conn.getMetaData().getDriverName());
+		props.put("user","testuser");
+		props.put("password","testpass");
+		Connection conn = DriverManager.getConnection(frameworkURL, props);
+		DatabaseMetaData dbmd = conn.getMetaData();
+		System.out.println("jdbcCompliant() = " +  driver.jdbcCompliant());
+		
+		// Just check versions against database metadata to avoid more master updates.
+		// Metadata test prints the actual version.
+		
+		int majorVersion = driver.getMajorVersion();
+		if (majorVersion == dbmd.getDriverMajorVersion())
+			System.out.println("driver.getMajorVersion() = EXPECTED VERSION");
+		else 
+			new Exception("FAILED: unexpected value for  getMajorVersion(): " +
+						majorVersion).printStackTrace();
+		
+		int  minorVersion = driver.getMinorVersion();
+		if (minorVersion == dbmd.getDriverMinorVersion())
+			System.out.println("driver.getMinorVersion() = EXPECTED VERSION");
+		else 
+			new Exception("FAILED: unexpected value for getMinorVersion()" +
+					minorVersion).printStackTrace(System.out);
+		
 		conn.close();
-		//System.out.println("jdbcCompliant = " +  driver.jdbcCompliant());	
 		return driver;
 	}
 		
 
 	
 	
+	/**
+	 * Check the actual return value of acceptsURL against the expected value and error and stack
+	 * trace if they don't match
+	 * 
+	 * @param url URL that was checked for acceptsURL
+	 * @param expectedAcceptance  expected return value 
+	 * @param actualAcceptance    actual return value
+	 * 
+	 */
 	private static void assertExpectedURLAcceptance(String url, boolean expectedAcceptance, 
 				boolean actualAcceptance)
 	{
 		if (actualAcceptance != expectedAcceptance)
 		{
-			new Exception("FAILED acceptURL check. url = " + url  + 
+			new Exception("FAILED acceptsURL check. url = " + url  + 
 						   " expectedAcceptance = " + expectedAcceptance +
 						   " actualAcceptance = " + actualAcceptance).printStackTrace(System.out);
 		}
 
 	}
 	
+	/**
+	 * Make  java.sql.Driver.connect(String url, Properties info call) and print the status of
+	 * the connection.
+	 * 
+	 * @param driver   driver for framework
+	 * @param url       url to pass to Driver.connect()
+	 * @param info      properties to pass to Driver.Connect()
+	 * 
+	 * @throws SQLException on error.
+	 */
+	private static void testConnect(Driver driver, String url, Properties info) throws SQLException
+	{
+		String infoString = null;
+		if (info != null)
+			infoString = replaceSystemHome(info.toString());
+		String urlString = replaceSystemHome(url);
+		Connection conn = driver.connect(url,info);
+		
+		System.out.println("\nConnection info for connect(" + urlString + ", " + infoString +")");
+		String getUrlValue = conn.getMetaData().getURL();
+		// URL may include path of DERBY_SYSTEM_HOME for traceFile
+		// filter it out.
+		getUrlValue = replaceSystemHome(getUrlValue);
+		System.out.println("getURL() = " + getUrlValue);
+		System.out.println("getUserName() = " + conn.getMetaData().getUserName());
+		// CURRENT SCHEMA should match getUserName()
+		ResultSet rs = conn.createStatement().executeQuery("VALUES(CURRENT SCHEMA)");
+		rs.next();
+		System.out.println("CURRENT SCHEMA = " + rs.getString(1));
+		conn.close();
+
+	}
+
+
+	/**
+	 * @param origString
+	 * 
+	 * @return origString with derby.system.home path replaed with [DERBY_SYSTEM_HOME]
+	 */
+	private static String replaceSystemHome(String origString) {
+		int offset = origString.indexOf(DERBY_SYSTEM_HOME);
+		if (offset == -1)
+			return origString;
+		else
+			return origString.substring(0,offset) + "[DERBY_SYSTEM_HOME]"+ 
+			origString.substring(offset + DERBY_SYSTEM_HOME.length());
+	}
 	
 }

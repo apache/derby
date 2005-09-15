@@ -36,11 +36,11 @@ ij(CONNECTION1)> connect 'wombat;user=ames;password=AnyVolunteer?';
 ij(CONNECTION2)> connect 'wombat;user=howardR;password=IamBetterAtTennis';
 ij(CONNECTION3)> connect 'wombat;user=francois;password=paceesalute';
 ij(CONNECTION4)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;user=kreg;password=visualWhat?
-CONNECTION1 - 	jdbc:derby://localhost:1527/wombat;user=jeff;password=HomeRun61
-CONNECTION2 - 	jdbc:derby://localhost:1527/wombat;user=ames;password=AnyVolunteer?
-CONNECTION3 - 	jdbc:derby://localhost:1527/wombat;user=howardR;password=IamBetterAtTennis
-CONNECTION4* - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
+CONNECTION0 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION1 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION2 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION3 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION4* - 	jdbc:derby://localhost:1527/wombat
 * = current connection
 ij(CONNECTION4)> disconnect all;
 ij> -- check allowed users in myDB db.
@@ -84,12 +84,12 @@ FRANCOIS
 ij(CONNECTION5)> update APP.t1 set c1 = USER;
 ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
 ij(CONNECTION5)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/myDB;user=jerry;password=SacreBleu
-CONNECTION1 - 	jdbc:derby://localhost:1527/myDB;user=kreg;password=visualWhat?
-CONNECTION2 - 	jdbc:derby://localhost:1527/myDB;user=ames;password=AnyVolunteer?
-CONNECTION3 - 	jdbc:derby://localhost:1527/myDB;user=dan;password=MakeItFaster
-CONNECTION4 - 	jdbc:derby://localhost:1527/myDB;user=francois;password=paceesalute
-CONNECTION5* - 	jdbc:derby://localhost:1527/myDB;user=jamie;password=MrNamePlates
+CONNECTION0 - 	jdbc:derby://localhost:1527/myDB
+CONNECTION1 - 	jdbc:derby://localhost:1527/myDB
+CONNECTION2 - 	jdbc:derby://localhost:1527/myDB
+CONNECTION3 - 	jdbc:derby://localhost:1527/myDB
+CONNECTION4 - 	jdbc:derby://localhost:1527/myDB
+CONNECTION5* - 	jdbc:derby://localhost:1527/myDB
 * = current connection
 ij(CONNECTION5)> disconnect all;
 ij> --
@@ -127,8 +127,8 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij(CONNECTION1)> connect 'wombat;user=jerry;password=SacreBleu;shutdown=true';
 ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: Database connection refused.
 ij(CONNECTION1)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
-CONNECTION1* - 	jdbc:derby://localhost:1527/myDB;user=jerry;password=SacreBleu
+CONNECTION0 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION1* - 	jdbc:derby://localhost:1527/myDB
 * = current connection
 ij(CONNECTION1)> -- Database shutdown - check user - should succeed
 ----- beetle 5367
@@ -137,8 +137,8 @@ ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database '
 ij(CONNECTION1)> connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'myDB' shutdown.
 ij(CONNECTION1)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
-CONNECTION1* - 	jdbc:derby://localhost:1527/myDB;user=jerry;password=SacreBleu
+CONNECTION0 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION1* - 	jdbc:derby://localhost:1527/myDB
 * = current connection
 ij(CONNECTION1)> -- JBMS System shutdown - check user - should fail
 connect ';user=jamie;password=LetMeIn;shutdown=true';
