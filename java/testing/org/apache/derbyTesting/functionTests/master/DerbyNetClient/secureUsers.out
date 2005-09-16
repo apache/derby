@@ -98,11 +98,11 @@ ij(CONNECTION2)> connect 'wombat;user=francois;password=paceesalute';
 ij(CONNECTION3)> -- Invalid ones:
 connect 'wombat;user=Jamie;password=theHooligan';
 ij(CONNECTION4)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true;user=kreg;password=IwasBornReady
-CONNECTION1 - 	jdbc:derby://localhost:1527/wombat;user=jeff;password=homeRun
-CONNECTION2 - 	jdbc:derby://localhost:1527/wombat;user=howardR;password=takeItEasy
-CONNECTION3 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
-CONNECTION4* - 	jdbc:derby://localhost:1527/wombat;user=Jamie;password=theHooligan
+CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true
+CONNECTION1 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION2 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION3 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION4* - 	jdbc:derby://localhost:1527/wombat
 * = current connection
 ij(CONNECTION4)> connect 'guestSchemeDB;user=kreg;password=IwasBornReady';
 ij(CONNECTION5)> connect 'guestSchemeDB;user=jeff;password=homeRun';
@@ -111,16 +111,16 @@ ij(CONNECTION7)> connect 'guestSchemeDB;user=francois;password=paceesalute';
 ij(CONNECTION8)> -- Invalid ones:
 connect 'guestSchemeDB;user=Jamie;password=theHooligan';
 ij(CONNECTION9)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true;user=kreg;password=IwasBornReady
-CONNECTION1 - 	jdbc:derby://localhost:1527/wombat;user=jeff;password=homeRun
-CONNECTION2 - 	jdbc:derby://localhost:1527/wombat;user=howardR;password=takeItEasy
-CONNECTION3 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
-CONNECTION4 - 	jdbc:derby://localhost:1527/wombat;user=Jamie;password=theHooligan
-CONNECTION5 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=kreg;password=IwasBornReady
-CONNECTION6 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=jeff;password=homeRun
-CONNECTION7 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=howardR;password=takeItEasy
-CONNECTION8 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=francois;password=paceesalute
-CONNECTION9* - 	jdbc:derby://localhost:1527/guestSchemeDB;user=Jamie;password=theHooligan
+CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true
+CONNECTION1 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION2 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION3 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION4 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION5 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION6 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION7 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION8 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION9* - 	jdbc:derby://localhost:1527/guestSchemeDB
 * = current connection
 ij(CONNECTION9)> connect 'derbySchemeDB;user=mamta;password=ieScape';
 ij(CONNECTION10)> connect 'derbySchemeDB;user=dan;password=makeItFaster';
@@ -131,19 +131,19 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij(CONNECTION12)> connect 'derbySchemeDB;user=francois;password=paceesalute';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij(CONNECTION12)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true;user=kreg;password=IwasBornReady
-CONNECTION1 - 	jdbc:derby://localhost:1527/wombat;user=jeff;password=homeRun
-CONNECTION10 - 	jdbc:derby://localhost:1527/derbySchemeDB;user=mamta;password=ieScape
-CONNECTION11 - 	jdbc:derby://localhost:1527/derbySchemeDB;user=dan;password=makeItFaster
-CONNECTION12* - 	jdbc:derby://localhost:1527/derbySchemeDB;user=martin;password=obfuscateIt
-CONNECTION2 - 	jdbc:derby://localhost:1527/wombat;user=howardR;password=takeItEasy
-CONNECTION3 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
-CONNECTION4 - 	jdbc:derby://localhost:1527/wombat;user=Jamie;password=theHooligan
-CONNECTION5 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=kreg;password=IwasBornReady
-CONNECTION6 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=jeff;password=homeRun
-CONNECTION7 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=howardR;password=takeItEasy
-CONNECTION8 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=francois;password=paceesalute
-CONNECTION9 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=Jamie;password=theHooligan
+CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true
+CONNECTION1 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION10 - 	jdbc:derby://localhost:1527/derbySchemeDB
+CONNECTION11 - 	jdbc:derby://localhost:1527/derbySchemeDB
+CONNECTION12* - 	jdbc:derby://localhost:1527/derbySchemeDB
+CONNECTION2 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION3 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION4 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION5 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION6 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION7 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION8 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION9 - 	jdbc:derby://localhost:1527/guestSchemeDB
 * = current connection
 ij(CONNECTION12)> connect 'simpleSchemeDB;user=jeff;password=homeRun';
 ij(CONNECTION13)> connect 'simpleSchemeDB;user=howardR;password=takeItEasy';
@@ -159,22 +159,22 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij(CONNECTION15)> connect 'simpleSchemeDB;user=francois;password=corsica';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij(CONNECTION15)> show connections;
-CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true;user=kreg;password=IwasBornReady
-CONNECTION1 - 	jdbc:derby://localhost:1527/wombat;user=jeff;password=homeRun
-CONNECTION10 - 	jdbc:derby://localhost:1527/derbySchemeDB;user=mamta;password=ieScape
-CONNECTION11 - 	jdbc:derby://localhost:1527/derbySchemeDB;user=dan;password=makeItFaster
-CONNECTION12 - 	jdbc:derby://localhost:1527/derbySchemeDB;user=martin;password=obfuscateIt
-CONNECTION13 - 	jdbc:derby://localhost:1527/simpleSchemeDB;user=jeff;password=homeRun
-CONNECTION14 - 	jdbc:derby://localhost:1527/simpleSchemeDB;user=howardR;password=takeItEasy
-CONNECTION15* - 	jdbc:derby://localhost:1527/simpleSchemeDB;user=francois;password=paceesalute
-CONNECTION2 - 	jdbc:derby://localhost:1527/wombat;user=howardR;password=takeItEasy
-CONNECTION3 - 	jdbc:derby://localhost:1527/wombat;user=francois;password=paceesalute
-CONNECTION4 - 	jdbc:derby://localhost:1527/wombat;user=Jamie;password=theHooligan
-CONNECTION5 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=kreg;password=IwasBornReady
-CONNECTION6 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=jeff;password=homeRun
-CONNECTION7 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=howardR;password=takeItEasy
-CONNECTION8 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=francois;password=paceesalute
-CONNECTION9 - 	jdbc:derby://localhost:1527/guestSchemeDB;user=Jamie;password=theHooligan
+CONNECTION0 - 	jdbc:derby://localhost:1527/wombat;create=true
+CONNECTION1 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION10 - 	jdbc:derby://localhost:1527/derbySchemeDB
+CONNECTION11 - 	jdbc:derby://localhost:1527/derbySchemeDB
+CONNECTION12 - 	jdbc:derby://localhost:1527/derbySchemeDB
+CONNECTION13 - 	jdbc:derby://localhost:1527/simpleSchemeDB
+CONNECTION14 - 	jdbc:derby://localhost:1527/simpleSchemeDB
+CONNECTION15* - 	jdbc:derby://localhost:1527/simpleSchemeDB
+CONNECTION2 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION3 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION4 - 	jdbc:derby://localhost:1527/wombat
+CONNECTION5 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION6 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION7 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION8 - 	jdbc:derby://localhost:1527/guestSchemeDB
+CONNECTION9 - 	jdbc:derby://localhost:1527/guestSchemeDB
 * = current connection
 ij(CONNECTION15)> disconnect all;
 ij> show connections;

@@ -7,6 +7,7 @@ blobclob4BLOB_derby.properties
 bestrowidentifier.sql
 bestrowidentifier_app.properties
 checkDriver_app.properties
+checkDriver_derby.properties
 dbMetaDataJdbc30_app.properties
 dbMetaDataJdbc30_sed.properties
 default_app.properties

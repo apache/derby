@@ -1,0 +1,44 @@
+jdbcCompliant() = true
+driver.getMajorVersion() = EXPECTED VERSION
+driver.getMinorVersion() = EXPECTED VERSION
+checking acceptsURL(jdbc:derby:wombat;create=true)
+checking acceptsURL(jdbc:derby://localhost:1527/wombat;create=true)
+checking acceptsURL(jdbc:derby:net://localhost:1527/wombat;create=true)
+checking acceptsURL(jdbc:db2j:wombat;create=true)
+testEmbeddedAttributes()
+Connection info for connect(jdbc:derby://localhost:1527/testcreatedb1, {create=true})
+getURL() = jdbc:derby://localhost:1527/testcreatedb1;create=true
+getUserName() = APP
+CURRENT SCHEMA = APP
+Connection info for connect(jdbc:derby://localhost:1527/testcreatedb2;create=true, null)
+getURL() = jdbc:derby://localhost:1527/testcreatedb2;create=true
+getUserName() = APP
+CURRENT SCHEMA = APP
+Connection info for connect(jdbc:derby://localhost:1527/testpropdb, {user=APP, password=xxxx})
+getURL() = jdbc:derby://localhost:1527/testpropdb
+getUserName() = APP
+CURRENT SCHEMA = APP
+Connection info for connect(jdbc:derby://localhost:1527/testpropdb;user=testuser;password=testpass, null)
+getURL() = jdbc:derby://localhost:1527/testpropdb
+getUserName() = testuser
+CURRENT SCHEMA = TESTUSER
+Connection info for connect(jdbc:derby://localhost:1527/testpropdb;user=testusr, {password=testpass})
+getURL() = jdbc:derby://localhost:1527/testpropdb
+getUserName() = testusr
+CURRENT SCHEMA = TESTUSR
+Connection info for connect(jdbc:derby://localhost:1527/testpropdb;user=testuser;password=testpass, null)
+getURL() = jdbc:derby://localhost:1527/testpropdb
+getUserName() = testuser
+CURRENT SCHEMA = TESTUSER
+Expected Exception:08006:DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'testcreatedb1' shutdown.
+testClientAttributes()
+Connection info for connect(jdbc:derby://localhost:1527/testpropdb;traceFile=[DERBY_SYSTEM_HOME]\trace.out, {})
+getURL() = jdbc:derby://localhost:1527/testpropdb;traceFile=[DERBY_SYSTEM_HOME]\trace.out
+getUserName() = APP
+CURRENT SCHEMA = APP
+ trace file exists
+Connection info for connect(jdbc:derby://localhost:1527/testpropdb, {traceFile=[DERBY_SYSTEM_HOME]\trace2.out})
+getURL() = jdbc:derby://localhost:1527/testpropdb;traceFile=[DERBY_SYSTEM_HOME]\trace2.out
+getUserName() = APP
+CURRENT SCHEMA = APP
+ trace file exists
