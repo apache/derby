@@ -209,7 +209,7 @@ public abstract class InternalDriver implements ModuleControl {
 	}
 
 	public boolean jdbcCompliant() {
-		return false;
+		return true;
 	}
 
 	/*
