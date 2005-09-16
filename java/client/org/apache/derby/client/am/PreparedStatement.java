@@ -1367,7 +1367,7 @@ public class PreparedStatement extends Statement
                 connection_.completeTransactionStart();
             }
 
-            super.markResultSetsClosed();
+            super.markResultSetsClosed(true); // true means remove from list of commit and rollback listeners
 
             switch (sqlMode_) {
             case isUpdate__:

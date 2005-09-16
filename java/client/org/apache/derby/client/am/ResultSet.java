@@ -388,8 +388,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 statement_.resultSetCommitting(this);
             }
         } finally {
-            markClosed();
-            connection_.CommitAndRollbackListeners_.remove(this);
+            markClosed(true);
         }
 
         if (statement_.openOnClient_ && statement_.isCatalogQuery_) {
@@ -2989,12 +2988,31 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
+    /**
+     * Mark this ResultSet as closed. The ResultSet will not be
+     * removed from the commit and rollback listeners list in
+     * <code>org.apache.derby.client.am.Connection</code>.
+     */
     void markClosed() {
+        markClosed(false);
+    }
+
+    /**
+     * Mark this ResultSet as closed.
+     *
+     * @param removeListener if true the ResultSet will be removed
+     * from the commit and rollback listeners list in
+     * <code>org.apache.derby.client.am.Connection</code>.
+     */
+    void markClosed(boolean removeListener) {
         openOnClient_ = false;
         openOnServer_ = false;
         statement_.resetCursorNameAndRemoveFromWhereCurrentOfMappings(); // for SELECT...FOR UPDATE queries
         statement_.removeClientCursorNameFromCache();
         markPositionedUpdateDeletePreparedStatementsClosed();
+        if (removeListener) {
+            connection_.CommitAndRollbackListeners_.remove(this);
+        }
     }
 
     void markClosedOnServer() {
