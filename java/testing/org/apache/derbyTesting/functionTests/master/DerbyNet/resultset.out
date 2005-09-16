@@ -288,9 +288,9 @@ getScale(16): 0
 getColumnTypeName(16): BLOB
 isReadOnly(16): true
 isDefinitelyWritable(16): false
-getBigDecimal(1,1): 1.0
+getBigDecimal(1,1): 1
 beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
-getBigDecimal(i,1): 1.0
+getBigDecimal(i,1): 1
 getBoolean(1): true
 getBoolean(i): true
 getByte(1): 1
@@ -325,9 +325,9 @@ getTimestamp(1) got exception
 Data Conversion SQLException
 getTimestamp(i) got exception 
 Data Conversion SQLException
-getBigDecimal(2,1): 2.0
+getBigDecimal(2,1): 2
 beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
-getBigDecimal(s,1): 2.0
+getBigDecimal(s,1): 2
 getBoolean(2): true
 getBoolean(s): true
 getByte(2): 2
@@ -683,9 +683,9 @@ getTimestamp(9) got exception
 Data Conversion SQLException
 getTimestamp(v) got exception 
 Data Conversion SQLException
-getBigDecimal(10,1): 10.1
+getBigDecimal(10,1): 10.10
 beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
-getBigDecimal(dc,1): 10.1
+getBigDecimal(dc,1): 10.10
 getBoolean(10): true
 getBoolean(dc): true
 getByte(10): 10
@@ -720,9 +720,9 @@ getTimestamp(10) got exception
 Data Conversion SQLException
 getTimestamp(dc) got exception 
 Data Conversion SQLException
-getBigDecimal(11,1): 11.0
+getBigDecimal(11,1): 11
 beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
-getBigDecimal(bi,1): 11.0
+getBigDecimal(bi,1): 11
 getBoolean(11): true
 getBoolean(bi): true
 getByte(11): 11
