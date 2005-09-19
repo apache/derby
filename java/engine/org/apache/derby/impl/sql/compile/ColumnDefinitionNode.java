@@ -306,8 +306,6 @@ public class ColumnDefinitionNode extends TableElementNode
 			foundMatch = classInspector.accessible(columnTypeName);
 		} catch (ClassNotFoundException cnfe) {
 			reason = cnfe;
-		} catch (LinkageError le) {
-			reason = le;
 		}
 
 		if (!foundMatch)

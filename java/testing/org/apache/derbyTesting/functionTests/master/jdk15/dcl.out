@@ -1,0 +1,180 @@
+ij> -- test database class loading.
+create schema emc;
+0 rows inserted/updated/deleted
+ij> set schema emc;
+0 rows inserted/updated/deleted
+ij> create table contacts (id int primary key, e_mail varchar(30));
+0 rows inserted/updated/deleted
+ij> create procedure EMC.ADDCONTACT(id INT, e_mail VARCHAR(30))
+MODIFIES SQL DATA
+external name 'org.apache.derbyTesting.databaseclassloader.emc.addContact'
+language java parameter style java;
+0 rows inserted/updated/deleted
+ij> -- fails because no class in classpath, 
+CALL EMC.ADDCONTACT(1, 'bill@somecompany.com');
+ERROR 42X51: The class 'org.apache.derbyTesting.databaseclassloader.emc' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'org.apache.derbyTesting.databaseclassloader.emc: java.lang.ClassNotFoundException'.
+ij> -- install the jar, copied there by the magic of supportfiles
+-- in the test harness (dcl_app.properties). The source for
+-- the class is contained within the jar for reference.
+CALL SQLJ.INSTALL_JAR('file:dcl_emc1.jar', 'EMC.MAIL_APP', 0);
+0 rows inserted/updated/deleted
+ij> -- fails because no class not in classpath, jar file not in database classpath.
+CALL EMC.ADDCONTACT(1, 'bill@somecompany.com');
+ERROR 42X51: The class 'org.apache.derbyTesting.databaseclassloader.emc' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'org.apache.derbyTesting.databaseclassloader.emc: java.lang.ClassNotFoundException'.
+ij> -- now add this into the database class path
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', 'EMC.MAIL_APP');
+0 rows inserted/updated/deleted
+ij> -- all should work now
+CALL EMC.ADDCONTACT(1, 'bill@ruletheworld.com');
+0 rows inserted/updated/deleted
+ij> CALL EMC.ADDCONTACT(2, 'penguin@antartic.com');
+0 rows inserted/updated/deleted
+ij> SELECT id, e_mail from EMC.CONTACTS;
+ID         |E_MAIL                        
+------------------------------------------
+1          |bill@ruletheworld.com         
+2          |penguin@antartic.com          
+ij> -- now the application needs to track if e-mails are valid
+ALTER TABLE EMC.CONTACTS ADD COLUMN OK SMALLINT;
+0 rows inserted/updated/deleted
+ij> SELECT id, e_mail, ok from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+ij> -- well written application, INSERT used explicit column names
+-- ok defaults to NULL
+CALL EMC.ADDCONTACT(3, 'big@blue.com');
+0 rows inserted/updated/deleted
+ij> SELECT id, e_mail, ok from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+ij> -- now change the application to run checks on the e-mail
+-- address to ensure it is valid (in this case by seeing if
+-- simply includes 'spam' in the title.
+CALL SQLJ.REPLACE_JAR('file:dcl_emc2.jar', 'EMC.MAIL_APP');
+0 rows inserted/updated/deleted
+ij> CALL EMC.ADDCONTACT(4, 'spammer@ripoff.com');
+0 rows inserted/updated/deleted
+ij> CALL EMC.ADDCONTACT(5, 'open@source.org');
+0 rows inserted/updated/deleted
+ij> SELECT id, e_mail, ok from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+4          |spammer@ripoff.com            |0     
+5          |open@source.org               |1     
+ij> -- now add another jar in to test two jars and
+-- a quoted identifer for the jar names.
+create schema "emcAddOn";
+0 rows inserted/updated/deleted
+ij> set schema emcAddOn;
+ERROR 42Y07: Schema 'EMCADDON' does not exist
+ij> set schema "emcAddOn";
+0 rows inserted/updated/deleted
+ij> create function "emcAddOn".VALIDCONTACT(e_mail VARCHAR(30))
+RETURNS SMALLINT
+READS SQL DATA
+external name 'org.apache.derbyTesting.databaseclassloader.addon.vendor.util.valid'
+language java parameter style java;
+0 rows inserted/updated/deleted
+ij> CALL SQLJ.INSTALL_JAR('file:dcl_emcaddon.jar', '"emcAddOn"."MailAddOn"', 0);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', 'EMC.MAIL_APP:"emcAddOn"."MailAddOn"');
+0 rows inserted/updated/deleted
+ij> select e_mail, "emcAddOn".VALIDCONTACT(e_mail) from EMC.CONTACTS;
+E_MAIL                        |2     
+-------------------------------------
+bill@ruletheworld.com         |0     
+penguin@antartic.com          |0     
+big@blue.com                  |0     
+spammer@ripoff.com            |0     
+open@source.org               |1     
+ij> -- function that gets the signers of the class (loaded from the jar)
+create function EMC.GETSIGNERS(CLASS_NAME VARCHAR(256))
+RETURNS VARCHAR(60)
+NO SQL
+external name 'org.apache.derbyTesting.databaseclassloader.emc.getSigners'
+language java parameter style java;
+0 rows inserted/updated/deleted
+ij> -- at this point the jar is not signed, NULL expected
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- Replace with a signed jar
+-- (self signed certificate)
+--
+-- Commands used to sign jar
+-- keytool -genkey -dname "cn=EMC CTO, ou=EMC APP, o=Easy Mail Company, c=US" -alias emccto -keypass kpi135 -keystore emcks -storepass ab987c
+-- keytool -selfcert -alias emccto -keypass kpi135 -keystore emcks -storepass ab987c
+-- jarsigner -keystore emcks -storepass ab987c -keypass kpi135 -signedjar dcl_emc2s.jar dcl_emc2.jar emccto
+--
+--
+CALL SQLJ.REPLACE_JAR('file:dcl_emc2s.jar', 'EMC.MAIL_APP');
+0 rows inserted/updated/deleted
+ij> VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+CN=EMC CTO, OU=EMC APP, O=Easy Mail Company, C=US                                                                               
+ij> -- other jar should not be signed
+VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                            
+ij> -- replace with a hacked jar file, emc.class modified to diable
+-- valid e-mail address check but using same signatures.
+-- ie direct replacement of the .class file.
+CALL SQLJ.REPLACE_JAR('file:dcl_emc2sm.jar', 'EMC.MAIL_APP');
+0 rows inserted/updated/deleted
+ij> CALL EMC.ADDCONTACT(99, 'spamking@cracker.org');
+ERROR 42X51: The class 'org.apache.derbyTesting.databaseclassloader.emc' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'org.apache.derbyTesting.databaseclassloader.emc : Security exception thrown accessing class org.apache.derbyTesting.databaseclassloader.emc in jar "EMC"."MAIL_APP" : SHA1 digest error for org/apache/derbyTesting/databaseclassloader/emc.class: java.lang.ClassNotFoundException'.
+ij> -- replace with a hacked jar file, emc.class modified to 
+-- be an invalid jar file (no signing on this jar).
+CALL SQLJ.REPLACE_JAR('file:dcl_emc2l.jar', 'EMC.MAIL_APP');
+0 rows inserted/updated/deleted
+ij> CALL EMC.ADDCONTACT(999, 'spamking2@cracker.org');
+ERROR 42X51: The class 'org.apache.derbyTesting.databaseclassloader.emc' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'org.apache.derbyTesting.databaseclassloader.emc : Bad version number in .class file: java.lang.ClassNotFoundException'.
+ij> -- cleanup
+CALL SQLJ.REMOVE_JAR('EMC.MAIL_APP', 0);
+ERROR X0X07: Cannot drop jar file '"EMC"."MAIL_APP"' because its on your db2j.database.classpath '"EMC"."MAIL_APP"'.
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', '"emcAddOn"."MailAddOn"');
+0 rows inserted/updated/deleted
+ij> CALL EMC.ADDCONTACT(99, 'cash@venture.com');
+ERROR 42X51: The class 'org.apache.derbyTesting.databaseclassloader.emc' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'org.apache.derbyTesting.databaseclassloader.emc: java.lang.ClassNotFoundException'.
+ij> CALL SQLJ.REMOVE_JAR('EMC.MAIL_APP', 0);
+0 rows inserted/updated/deleted
+ij> DROP PROCEDURE EMC.ADDCONTACT;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION EMC.GETSIGNERS;
+0 rows inserted/updated/deleted
+ij> select e_mail, "emcAddOn".VALIDCONTACT(e_mail) from EMC.CONTACTS;
+E_MAIL                        |2     
+-------------------------------------
+bill@ruletheworld.com         |0     
+penguin@antartic.com          |0     
+big@blue.com                  |0     
+spammer@ripoff.com            |0     
+open@source.org               |1     
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', '');
+0 rows inserted/updated/deleted
+ij> select e_mail, "emcAddOn".VALIDCONTACT(e_mail) from EMC.CONTACTS;
+ERROR 42X51: The class 'org.apache.derbyTesting.databaseclassloader.addon.vendor.util' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'org.apache.derbyTesting.databaseclassloader.addon.vendor.util: java.lang.ClassNotFoundException'.
+ij> CALL SQLJ.REMOVE_JAR('"emcAddOn"."MailAddOn"', 0);
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION "emcAddOn".VALIDCONTACT;
+0 rows inserted/updated/deleted
+ij> DROP TABLE EMC.CONTACTS;
+0 rows inserted/updated/deleted
+ij> 

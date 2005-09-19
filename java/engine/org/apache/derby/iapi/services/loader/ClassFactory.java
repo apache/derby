@@ -51,7 +51,8 @@ public interface ClassFactory {
 	/**
 		Load an application class, or a class that is potentially an application class.
 
-		@exception ClassNotFoundException Class cannot be found
+		@exception ClassNotFoundException Class cannot be found, or
+		a SecurityException or LinkageException was thrown loading the class.
 	*/
 	public Class loadApplicationClass(String className)
 		throws ClassNotFoundException;
@@ -59,7 +60,8 @@ public interface ClassFactory {
 	/**
 		Load an application class, or a class that is potentially an application class.
 
-		@exception ClassNotFoundException Class cannot be found
+		@exception ClassNotFoundException Class cannot be found, or
+		a SecurityException or LinkageException was thrown loading the class.
 	*/
 	public Class loadApplicationClass(ObjectStreamClass classDescriptor)
 		throws ClassNotFoundException;

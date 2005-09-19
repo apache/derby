@@ -31,7 +31,7 @@ public final class ReflectClassesJava2 extends DatabaseClasses
 
 	private java.util.HashMap preCompiled;
 
-	private int action;
+	private int action = -1;
 
 	synchronized LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump) {
 
@@ -62,21 +62,27 @@ public final class ReflectClassesJava2 extends DatabaseClasses
 	}
 
 	public final Object run() {
-		// SECURITY PERMISSION - MP2
-		switch (action) {
-		case 1:
-			return new ReflectLoaderJava2(getClass().getClassLoader(), this);
-		case 2:
-			return Thread.currentThread().getContextClassLoader();
-		default:
-			return null;
+
+		try {
+			// SECURITY PERMISSION - MP2
+			switch (action) {
+			case 1:
+				return new ReflectLoaderJava2(getClass().getClassLoader(), this);
+			case 2:
+				return Thread.currentThread().getContextClassLoader();
+			default:
+				return null;
+			}
+		} finally {
+			action = -1;
 		}
+		
 	}
 
-	synchronized Class loadClassNotInDatabaseJar(String name) throws ClassNotFoundException {
+	Class loadClassNotInDatabaseJar(String name) throws ClassNotFoundException {
 		
 		Class foundClass = null;
-		action = 2;
+		
 	    // We may have two problems with calling  getContextClassLoader()
 	    // when trying to find our own classes for aggregates.
 	    // 1) If using the URLClassLoader a ClassNotFoundException may be 
@@ -88,8 +94,12 @@ public final class ReflectClassesJava2 extends DatabaseClasses
 	    // (the classLoader that loaded Cloudscape). 
 	    // So we call Class.forName to ensure that we find the class.
         try {
-            ClassLoader cl = ((ClassLoader)
+        	ClassLoader cl;
+        	synchronized(this) {
+        	  action = 2;
+              cl = ((ClassLoader)
 			      java.security.AccessController.doPrivileged(this));
+        	}
 			
 			foundClass = (cl != null) ?  cl.loadClass(name) 
 				      :Class.forName(name);

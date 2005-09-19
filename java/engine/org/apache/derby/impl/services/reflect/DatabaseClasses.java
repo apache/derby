@@ -76,7 +76,7 @@ import java.io.Serializable;
 	@see org.apache.derby.iapi.services.loader.ClassFactory
 */
 
-public abstract class DatabaseClasses
+abstract class DatabaseClasses
 	implements ClassFactory, ModuleControl
 {
 	/*
@@ -92,7 +92,7 @@ public abstract class DatabaseClasses
 	** Constructor
 	*/
 
-	public DatabaseClasses() {
+	DatabaseClasses() {
 	}
 
 	/*
@@ -208,22 +208,36 @@ public abstract class DatabaseClasses
 	public final Class loadApplicationClass(String className)
 		throws ClassNotFoundException {
 
+		Throwable loadError;
 		try {
-			return loadClassNotInDatabaseJar(className);
-		} catch (ClassNotFoundException cnfe) {
-			if (applicationLoader == null)
-				throw cnfe;
-			Class c = applicationLoader.loadClass(className, true);
-			if (c == null)
-				throw cnfe;
-			return c;
+			try {
+				return loadClassNotInDatabaseJar(className);
+			} catch (ClassNotFoundException cnfe) {
+				if (applicationLoader == null)
+					throw cnfe;
+				Class c = applicationLoader.loadClass(className, true);
+				if (c == null)
+					throw cnfe;
+				return c;
+			}
 		}
+		catch (SecurityException se)
+		{
+			// Thrown if the class has been comprimised in some
+			// way, e.g. modified in a signed jar.
+			loadError = se;	
+		}
+		catch (LinkageError le)
+		{
+			// some error linking the jar, again could
+			// be malicious code inserted into a jar.
+			loadError = le;	
+		}
+		throw new ClassNotFoundException(className + " : " + loadError.getMessage());
 	}
-
-	Class loadClassNotInDatabaseJar(String className) throws ClassNotFoundException {
-		return Class.forName(className);
-	}
-
+	
+	abstract Class loadClassNotInDatabaseJar(String className)
+		throws ClassNotFoundException;
 
 	public final Class loadApplicationClass(ObjectStreamClass classDescriptor)
 		throws ClassNotFoundException {

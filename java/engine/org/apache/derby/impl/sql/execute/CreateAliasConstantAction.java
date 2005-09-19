@@ -211,7 +211,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 				// Does the class exist?
 				realClass = cf.loadApplicationClass(checkClassName);
 			}
-			catch (Throwable t)
+			catch (ClassNotFoundException t)
 			{
 				throw StandardException.newException(SQLState.LANG_TYPE_DOESNT_EXIST2, t, checkClassName);
 			}
