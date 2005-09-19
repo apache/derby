@@ -1,0 +1,129 @@
+ij> --
+-- This tests database in a jar
+-- and a jar in a database in a jar!
+--
+;
+ij> connect 'jdbc:derby:db1;create=true' AS DB1;
+ij(DB1)> create table t ( i int not null primary key, c char(20));
+0 rows inserted/updated/deleted
+ij(DB1)> insert into t values (1, 'hello');
+1 row inserted/updated/deleted
+ij(DB1)> insert into t values (2, 'goodbye');
+1 row inserted/updated/deleted
+ij(DB1)> create function APP.D2ME(VAL INT) RETURNS INT
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'InAJar.doubleMe';
+0 rows inserted/updated/deleted
+ij(DB1)> -- should not be found;
+values APP.D2ME(2);
+ERROR 42X51: The class 'InAJar' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'InAJar: java.lang.ClassNotFoundException'.
+ij(DB1)> CALL sqlj.install_jar('file:extin/dbjar.jar', 'APP.DMJ', 0);
+0 rows inserted/updated/deleted
+ij(DB1)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', 'APP.DMJ');
+0 rows inserted/updated/deleted
+ij(DB1)> -- check the class loading is working;
+values APP.D2ME(2);
+1          
+-----------
+4          
+ij(DB1)> -- shutdown to allow jarring of database
+disconnect;
+ij> connect 'jdbc:derby:db1;shutdown=true';
+ERROR 08006: Database 'db1' shutdown.
+ij> -- jar up the database
+set connection CONNECTION0;
+ij> create procedure CREATEARCHIVE(jarName VARCHAR(20), path VARCHAR(20), dbName VARCHAR(20))
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.createArchive';
+0 rows inserted/updated/deleted
+ij> call CREATEARCHIVE('ina.jar', 'db1', 'db7');
+0 rows inserted/updated/deleted
+ij> -- reconnect back to db1 to modify table to ensure we are not seeing db1 unjarred
+connect 'jdbc:derby:db1' AS DB1;
+ij(DB1)> insert into t values (4, 'directory version');
+1 row inserted/updated/deleted
+ij(DB1)> disconnect;
+ij> connect 'jdbc:derby:jar:(ina.jar)db7' AS DB7;
+ij(DB7)> select * from t;
+I          |C                   
+--------------------------------
+1          |hello               
+2          |goodbye             
+ij(DB7)> insert into t values(3, 'is read only');
+ERROR 25502: An SQL data change is not permitted for a read-only connection, user or database.
+ij(DB7)> values APP.D2ME(2);
+1          
+-----------
+4          
+ij(DB7)> autocommit off;
+ij(DB7)> select * from t WITH RR;
+I          |C                   
+--------------------------------
+1          |hello               
+2          |goodbye             
+ij(DB7)> select TYPE, MODE, TABLENAME from new org.apache.derby.diag.LockTable() AS L ORDER BY 1,2,3;
+TYPE |MODE|TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+TABLE|S   |T                                                                                                                               
+ij(DB7)> disconnect;
+ij> -- connect to database in jar file via classpath
+-- should fail as it is not on the classpath yet.
+connect 'jdbc:derby:classpath:db7' AS DB7CLF;
+ERROR XJ004: Database 'classpath:db7' not found.
+ij> -- create a class loader for this current thread
+set connection CONNECTION0;
+ij> create procedure setDBContextClassLoader(JARNAME VARCHAR(20))
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.setDBContextClassLoader';
+0 rows inserted/updated/deleted
+ij> call setDBContextClassLoader('ina.jar');
+0 rows inserted/updated/deleted
+ij> connect 'jdbc:derby:classpath:db7' AS DB7CL;
+ij(DB7CL)> select * from t;
+I          |C                   
+--------------------------------
+1          |hello               
+2          |goodbye             
+ij(DB7CL)> insert into t values(3, 'is read only');
+ERROR 25502: An SQL data change is not permitted for a read-only connection, user or database.
+ij(DB7CL)> values APP.D2ME(2);
+1          
+-----------
+4          
+ij(DB7CL)> autocommit off;
+ij(DB7CL)> select * from t WITH RR;
+I          |C                   
+--------------------------------
+1          |hello               
+2          |goodbye             
+ij(DB7CL)> select TYPE, MODE, TABLENAME from new org.apache.derby.diag.LockTable() AS L ORDER BY 1,2,3;
+TYPE |MODE|TABLENAME                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------
+TABLE|S   |T                                                                                                                               
+ij(DB7CL)> disconnect;
+ij> -- Beetle 5171.  Don't crash if the contextClassLoader is null
+set connection CONNECTION0;
+ij> create procedure setNullContextClassLoader()
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.setNullContextClassLoader';
+0 rows inserted/updated/deleted
+ij> call setNullContextClassLoader();
+0 rows inserted/updated/deleted
+ij> create table t2 (i int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values(1);
+1 row inserted/updated/deleted
+ij> insert into t2 values(2);
+1 row inserted/updated/deleted
+ij> select count(*) from t2;
+1          
+-----------
+2          
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> 
