@@ -1,5 +1,6 @@
 ij> -- test database class loading.
-create schema emc;
+maximumdisplaywidth 300;
+ij> create schema emc;
 0 rows inserted/updated/deleted
 ij> set schema emc;
 0 rows inserted/updated/deleted
@@ -8,6 +9,11 @@ ij> create table contacts (id int primary key, e_mail varchar(30));
 ij> create procedure EMC.ADDCONTACT(id INT, e_mail VARCHAR(30))
 MODIFIES SQL DATA
 external name 'org.apache.derbyTesting.databaseclassloader.emc.addContact'
+language java parameter style java;
+0 rows inserted/updated/deleted
+ij> create function EMC.GETARTICLE(path VARCHAR(40)) RETURNS VARCHAR(256)
+NO SQL
+external name 'org.apache.derbyTesting.databaseclassloader.emc.getArticle'
 language java parameter style java;
 0 rows inserted/updated/deleted
 ij> -- fails because no class in classpath, 
@@ -36,6 +42,38 @@ ID         |E_MAIL
 ------------------------------------------
 1          |bill@ruletheworld.com         
 2          |penguin@antartic.com          
+ij> -- Test resource loading from the jar file
+-- Simple path should be prepended with the package name
+-- of the class executing the code to find
+-- /org/apache/derbyTesting/databaseclassloader/graduation.txt
+VALUES EMC.GETARTICLE('graduate.txt');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The Apache Foundation has released the first version of the open-source Derby database, which also gained support from Sun Microsystems.                                                                                                                                                                    
+ij> -- now an absolute path
+VALUES EMC.GETARTICLE('/article/release.txt');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The Apache Derby development community is pleased to announce its first release after graduating from the Apache Incubator, Apache Derby 10.1.1.0.                                                                                                                                                          
+ij> -- no such resources
+VALUES EMC.GETARTICLE('/article/fred.txt');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
+ij> VALUES EMC.GETARTICLE('barney.txt');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
+ij> -- try to read the class file should be disallowed
+-- by returning null
+VALUES EMC.GETARTICLE('emc.class');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
+ij> VALUES EMC.GETARTICLE('/org/apache/derbyTesting/databaseclassloader/emc.class');
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
 ij> -- now the application needs to track if e-mails are valid
 ALTER TABLE EMC.CONTACTS ADD COLUMN OK SMALLINT;
 0 rows inserted/updated/deleted
@@ -106,9 +144,9 @@ language java parameter style java;
 0 rows inserted/updated/deleted
 ij> -- at this point the jar is not signed, NULL expected
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-NULL                                                                                                                            
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
 ij> -- Replace with a signed jar
 -- (self signed certificate)
 --
@@ -121,14 +159,14 @@ ij> -- Replace with a signed jar
 CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2s.jar', 'EMC.MAIL_APP');
 0 rows inserted/updated/deleted
 ij> VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-CN=EMC CTO, OU=EMC APP, O=Easy Mail Company, C=US                                                                               
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CN=EMC CTO, OU=EMC APP, O=Easy Mail Company, C=US                                                                                                                                                                                                                                                           
 ij> -- other jar should not be signed
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-NULL                                                                                                                            
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
 ij> -- replace with a hacked jar file, emc.class modified to diable
 -- valid e-mail address check but using same signatures.
 -- ie direct replacement of the .class file.

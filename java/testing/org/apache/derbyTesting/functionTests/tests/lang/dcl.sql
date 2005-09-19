@@ -1,6 +1,6 @@
 -- test database class loading.
 
-
+maximumdisplaywidth 300;
 create schema emc;
 set schema emc;
 create table contacts (id int primary key, e_mail varchar(30));
@@ -8,6 +8,11 @@ create table contacts (id int primary key, e_mail varchar(30));
 create procedure EMC.ADDCONTACT(id INT, e_mail VARCHAR(30))
 MODIFIES SQL DATA
 external name 'org.apache.derbyTesting.databaseclassloader.emc.addContact'
+language java parameter style java;
+
+create function EMC.GETARTICLE(path VARCHAR(40)) RETURNS VARCHAR(256)
+NO SQL
+external name 'org.apache.derbyTesting.databaseclassloader.emc.getArticle'
 language java parameter style java;
 
 -- fails because no class in classpath, 
@@ -29,6 +34,21 @@ call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', 'EMC.MAI
 CALL EMC.ADDCONTACT(1, 'bill@ruletheworld.com');
 CALL EMC.ADDCONTACT(2, 'penguin@antartic.com');
 SELECT id, e_mail from EMC.CONTACTS;
+
+-- Test resource loading from the jar file
+-- Simple path should be prepended with the package name
+-- of the class executing the code to find
+-- /org/apache/derbyTesting/databaseclassloader/graduation.txt
+VALUES EMC.GETARTICLE('graduate.txt');
+-- now an absolute path
+VALUES EMC.GETARTICLE('/article/release.txt');
+-- no such resources
+VALUES EMC.GETARTICLE('/article/fred.txt');
+VALUES EMC.GETARTICLE('barney.txt');
+-- try to read the class file should be disallowed
+-- by returning null
+VALUES EMC.GETARTICLE('emc.class');
+VALUES EMC.GETARTICLE('/org/apache/derbyTesting/databaseclassloader/emc.class');
 
 -- now the application needs to track if e-mails are valid
 ALTER TABLE EMC.CONTACTS ADD COLUMN OK SMALLINT;
