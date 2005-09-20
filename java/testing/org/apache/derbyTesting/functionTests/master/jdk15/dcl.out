@@ -92,6 +92,41 @@ ID         |E_MAIL                        |OK
 1          |bill@ruletheworld.com         |NULL  
 2          |penguin@antartic.com          |NULL  
 3          |big@blue.com                  |NULL  
+ij> -- check the roll back of class loading.
+-- install a new jar in a transaction, see
+-- that the new class is used and then rollback
+-- the old class should be used after the rollback.
+AUTOCOMMIT OFF;
+ij> CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2.jar', 'EMC.MAIL_APP');
+0 rows inserted/updated/deleted
+ij> CALL EMC.ADDCONTACT(99, 'wormspam@soil.com');
+0 rows inserted/updated/deleted
+ij> SELECT id, e_mail, ok from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+99         |wormspam@soil.com             |0     
+ij> rollback;
+ij> AUTOCOMMIT ON;
+ij> SELECT id, e_mail, ok from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+ij> CALL EMC.ADDCONTACT(99, 'wormspam2@soil.com');
+0 rows inserted/updated/deleted
+ij> SELECT id, e_mail, ok from EMC.CONTACTS;
+ID         |E_MAIL                        |OK    
+-------------------------------------------------
+1          |bill@ruletheworld.com         |NULL  
+2          |penguin@antartic.com          |NULL  
+3          |big@blue.com                  |NULL  
+99         |wormspam2@soil.com            |NULL  
+ij> DELETE FROM EMC.CONTACTS WHERE ID = 99;
+1 row inserted/updated/deleted
 ij> -- now change the application to run checks on the e-mail
 -- address to ensure it is valid (in this case by seeing if
 -- simply includes 'spam' in the title.

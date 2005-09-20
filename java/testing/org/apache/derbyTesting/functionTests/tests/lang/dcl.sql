@@ -59,6 +59,21 @@ SELECT id, e_mail, ok from EMC.CONTACTS;
 CALL EMC.ADDCONTACT(3, 'big@blue.com');
 SELECT id, e_mail, ok from EMC.CONTACTS;
 
+-- check the roll back of class loading.
+-- install a new jar in a transaction, see
+-- that the new class is used and then rollback
+-- the old class should be used after the rollback.
+AUTOCOMMIT OFF;
+CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2.jar', 'EMC.MAIL_APP');
+CALL EMC.ADDCONTACT(99, 'wormspam@soil.com');
+SELECT id, e_mail, ok from EMC.CONTACTS;
+rollback;
+AUTOCOMMIT ON;
+SELECT id, e_mail, ok from EMC.CONTACTS;
+CALL EMC.ADDCONTACT(99, 'wormspam2@soil.com');
+SELECT id, e_mail, ok from EMC.CONTACTS;
+DELETE FROM EMC.CONTACTS WHERE ID = 99;
+
 -- now change the application to run checks on the e-mail
 -- address to ensure it is valid (in this case by seeing if
 -- simply includes 'spam' in the title.
