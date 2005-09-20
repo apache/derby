@@ -360,12 +360,13 @@ public class checkDriver {
 	 * @return origString with derby.system.home path replaed with [DERBY_SYSTEM_HOME]
 	 */
 	private static String replaceSystemHome(String origString) {
-		int offset = origString.indexOf(DERBY_SYSTEM_HOME);
+		String replaceString = DERBY_SYSTEM_HOME + File.separator;
+		int offset = origString.indexOf(replaceString);
 		if (offset == -1)
 			return origString;
 		else
-			return origString.substring(0,offset) + "[DERBY_SYSTEM_HOME]"+ 
-			origString.substring(offset + DERBY_SYSTEM_HOME.length());
+			return origString.substring(0,offset) + "[DERBY_SYSTEM_HOME]/"+ 
+			origString.substring(offset + replaceString.length());
 	}
 	
 }
