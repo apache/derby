@@ -2184,9 +2184,6 @@ class AntiGC implements Runnable {
 	}
 
 	public void run() {
-
-		goAway = false;
-
 		while (true) {
 			synchronized (this) {
 				if (goAway)

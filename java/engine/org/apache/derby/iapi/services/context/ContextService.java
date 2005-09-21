@@ -94,9 +94,9 @@ public final class ContextService //OLD extends Hashtable
 			STACK for last 3
 	*/
 
-	final ThreadLocal	threadContextList = new ThreadLocal();
+	private ThreadLocal threadContextList = new ThreadLocal();
 
-	private final HashSet allContexts;
+	private HashSet allContexts;
 
 	// don't want any instances
 	public ContextService() {
@@ -114,6 +114,12 @@ public final class ContextService //OLD extends Hashtable
 		So it can be given to us and taken away...
 	 */
 	public static void stop() {
+		// For some unknown reason, the ContextManager and
+		// ContextService objects will not be garbage collected
+		// without the next two lines.
+		factory.allContexts = null;
+		factory.threadContextList = null;
+
 		ContextService.factory = null;
 	}
 

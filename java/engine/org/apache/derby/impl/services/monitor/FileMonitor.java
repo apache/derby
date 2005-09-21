@@ -89,7 +89,12 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	{
 		if (!lite) {
 			try {
+				// Create a ThreadGroup and set the daemon property to
+				// make sure the group is destroyed and garbage
+				// collected when all its members have finished (i.e.,
+				// when the driver is unloaded).
 				daemonGroup = new ThreadGroup("derby.daemons");
+				daemonGroup.setDaemon(true);
 			} catch (SecurityException se) {
 			}
 		}
