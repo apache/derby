@@ -48,7 +48,7 @@ nullsAreSortedLow(): false
 nullsAreSortedAtStart(): false
 nullsAreSortedAtEnd(): false
 getDatabaseProductName(): Apache Derby
-getDatabaseProductVersion(): 10.1.1.0
+getDatabaseProductVersion(): 10.1.1.1
 getDriverVersion(): EXPECTED VERSION
 usesLocalFiles(): true
 usesLocalFilePerTable(): true

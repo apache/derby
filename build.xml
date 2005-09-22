@@ -1252,16 +1252,16 @@
     <antcall target="publishedapi"/>
 
     <mkdir dir="${basedir}/snapshot"/>
-    <zip destfile="${basedir}/snapshot/incubating-derby-snapshot-${major}.${minor}-${changenumber}.zip">
-      <fileset dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <fileset dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
-      <fileset dir="${basedir}/java" includes="demo/**"/>
+    <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}-${changenumber}.zip">
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
     </zip>
-    <tar destfile="${basedir}/snapshot/incubating-derby-snapshot-${major}.${minor}-${changenumber}.tar.gz"
+    <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}-${changenumber}.tar.gz"
          compression="gzip">
-      <tarfileset dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <tarfileset dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
-      <tarfileset dir="${basedir}/java" includes="demo/**"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
     </tar>
 
     <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.0.zip"
