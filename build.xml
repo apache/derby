@@ -1252,20 +1252,26 @@
     <antcall target="publishedapi"/>
 
     <mkdir dir="${basedir}/snapshot"/>
-    <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}-${changenumber}.zip">
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
+    <java classname="org.apache.derbyBuild.maintversion2props">
+        <classpath path="${out.dir}"/>
+        <arg value="${out.dir}/org/apache/derby/info/DBMS.properties"/>
+        <arg value="${basedir}/snapshot/maintversion.properties"/>
+    </java>
+    <property file="${basedir}/snapshot/maintversion.properties"/>
+    <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
     </zip>
-    <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}-${changenumber}.tar.gz"
+    <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
-      <tarfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <tarfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
-      <tarfileset prefix="db-derby-snapshot-${major}.${minor}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
     </tar>
 
-    <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.0.zip"
-          tofile="${basedir}/snapshot/derby_core_plugin_${major}.${minor}.0.${changenumber}.zip"/>
+    <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
+          tofile="${basedir}/snapshot/derby_core_plugin_${major}.${minor}.${interim}.${changenumber}.zip"/>
   </target>
 
   <target name="snapshotError" if="is.sane">
