@@ -26,48 +26,119 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.math.BigDecimal;
+import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 
 public class outparams
 {
- 
-	static final String outputMethods[] =
-	{
-		"takesNothing",
-
-		null, 
 	
-		null,
-		null,
+	private static boolean HAVE_BIG_DECIMAL;
+	private static boolean HAVE_DRIVER_CLASS;
+	private static String CLASS_NAME;
 	
-		"takesShortPrimitive",
-		null,
+	//Get the class name to be used for the procedures
+	//outparams - J2ME; outparams30 - non-J2ME
+	static{
+		if(BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
+			HAVE_BIG_DECIMAL = false;
+		else
+			HAVE_BIG_DECIMAL = true;
+		if(HAVE_BIG_DECIMAL)
+			CLASS_NAME = "org.apache.derbyTesting.functionTests.tests.lang.outparams30.";
+		else
+			CLASS_NAME = "org.apache.derbyTesting.functionTests.tests.lang.outparams.";
+	}
 	
-		"takesIntegerPrimitive",
-		null,
+	static{
+		try{
+			Class.forName("java.sql.Driver");
+			HAVE_DRIVER_CLASS = true;
+		}
+		catch(ClassNotFoundException e){
+			//Used for JSR169
+			HAVE_DRIVER_CLASS = false;
+		}
+	}
 	
-		"takesLongPrimitive",
-		null,
-	
-		"takesFloatPrimitive",
-		null,
-	
-		"takesDoublePrimitive",
-		null,
-	
-		"takesBigDecimal",
-	
-		"takesByteArray",
-		
-		"takesString",
-		
-		"takesDate",
-		
-		"takesTimestamp",
-	
-		"takesTime",
-	
-		null
-	};
+	static String[] outputMethods;
+	//Get the array to be used based on HAVE_BIG_DECIMAL
+	static{
+		if(HAVE_BIG_DECIMAL){
+			outputMethods = new String[] {
+									"takesNothing",
+							
+									null, 
+								
+									null,
+																	
+									"takesShortPrimitive",
+									null,
+								
+									"takesIntegerPrimitive",
+									null,
+								
+									"takesLongPrimitive",
+									null,
+								
+									"takesFloatPrimitive",
+									null,
+								
+									"takesDoublePrimitive",
+									null,
+								
+									"takesBigDecimal",
+								
+									"takesByteArray",
+									
+									"takesString",
+									
+									"takesDate",
+									
+									"takesTimestamp",
+								
+									"takesTime",
+								
+									null
+								};
+		}
+		else{
+			outputMethods = new String[] {
+									"takesNothing",
+							
+									null, 
+								
+									null,
+																	
+									"takesShortPrimitive",
+									null,
+								
+									"takesIntegerPrimitive",
+									null,
+								
+									"takesLongPrimitive",
+									null,
+								
+									"takesFloatPrimitive",
+									null,
+								
+									"takesDoublePrimitive",
+									null,
+								
+									null,
+								
+									"takesByteArray",
+									
+									"takesString",
+									
+									"takesDate",
+									
+									"takesTimestamp",
+								
+									"takesTime",
+								
+									null
+								};			
+		}
+	}
 
 	// parameter types for outputMethods.
 	private static final String[] outputProcParam =
@@ -77,8 +148,7 @@ public class outparams
 		null, 
 	
 		null,
-		null,
-	
+			
 		"SMALLINT", // "takesShortPrimitive",
 		null,
 	
@@ -108,46 +178,87 @@ public class outparams
 	
 		null
 	};
-
-	
-	static final String returnMethods[] =
-	{
-		"returnsNothing",
-
-		null,
-		null,
-	
-		"returnsShortP",
-		null,
-	
-		"returnsIntegerP",
-		null,
-	
-		"returnsLongP",
-		null,
-	
-		"returnsFloatP",
-		null,
-	
-		"returnsDoubleP",
-		null,
-	
-		"returnsBigDecimal",
-	
-		"returnsByteArray",
 		
-		"returnsString",
-		
-		"returnsDate",
-		
-		"returnsTimestamp",
+	static String returnMethods[];
+	//Get the array to be used based on HAVE_BIG_DECIMAL
+	static{
+		if(HAVE_BIG_DECIMAL){
+			returnMethods = new String[] 	{
+									"returnsNothing",
+				
+									null,
+									null,
+								
+									"returnsShortP",
+									null,
+								
+									"returnsIntegerP",
+									null,
+								
+									"returnsLongP",
+									null,
+								
+									"returnsFloatP",
+									null,
+								
+									"returnsDoubleP",
+									null,
+								
+									"returnsBigDecimal",
+								
+									"returnsByteArray",
+									
+									"returnsString",
+									
+									"returnsDate",
+									
+									"returnsTimestamp",
+								
+									"returnsTime",
+								
+									null
+								};
+		}
+		else{
+			returnMethods = new String[] 	{
+									"returnsNothing",
+				
+									null,
+									null,
+								
+									"returnsShortP",
+									null,
+								
+									"returnsIntegerP",
+									null,
+								
+									"returnsLongP",
+									null,
+								
+									"returnsFloatP",
+									null,
+								
+									"returnsDoubleP",
+									null,
+								
+									null,
+								
+									"returnsByteArray",
+									
+									"returnsString",
+									
+									"returnsDate",
+									
+									"returnsTimestamp",
+								
+									"returnsTime",
+								
+									null
+								};
+		}
+	}
 	
-		"returnsTime",
-	
-		null
-	};
-
-	static final String[] returnMethodType =
+	static String[] returnMethodType =
 	{
 		null, // "returnsNothing",
 
@@ -183,6 +294,44 @@ public class outparams
 	
 		null, // "returnsBigInteger"
 	};
+	
+	//JDBC type (java.sql.Types) corresponding to the methods
+	static int[] paramJDBCType =
+	{
+		Types.NULL, // "returnsNothing",
+
+		Types.NULL, // "returnsBytePrimitive",
+		Types.NULL, // "returnsByte",
+	
+		Types.SMALLINT, // "returnsShortPrimitive",
+		Types.NULL, // "returnsShort",
+	
+		Types.INTEGER, // "returnsIntegerPrimitive",
+		Types.NULL, // "returnsInteger",
+	
+		Types.BIGINT, // "returnsLongPrimitive",
+		Types.NULL, // "returnsLong",
+	
+		Types.REAL, // "returnsFloatPrimitive",
+		Types.NULL, // "returnsFloat",
+	
+		Types.DOUBLE, // "returnsDoublePrimitive",
+		Types.NULL, // "returnsDouble",
+	
+		Types.NUMERIC, // "returnsBigDecimal",
+	
+		Types.VARBINARY, // "returnsByteArray",
+		
+		Types.VARCHAR, // "returnsString",
+		
+		Types.DATE, // "returnsDate",
+		
+		Types.TIMESTAMP, // "returnsTimestamp",
+	
+		Types.TIME, // "returnsTime",
+	
+		Types.NULL, // "returnsBigInteger"
+	};	
 	
 	static final int types[] =
 	{
@@ -255,7 +404,9 @@ public class outparams
 		testReturnTypes(conn);
 		testOtherOutputType(conn);
 		testManyOut(conn);
-		test5116(conn);
+		//Uses a procedure with nested connection - Cannot be tested with JSR169
+		if(HAVE_DRIVER_CLASS)
+			test5116(conn);
 	}
 
 	private static void testMisc(Connection conn) throws Throwable
@@ -267,7 +418,7 @@ public class outparams
 		Statement scp = conn.createStatement();
 
 		scp.execute("CREATE PROCEDURE takesString(OUT P1 VARCHAR(40), IN P2 INT) " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.takesString'" +
+						"EXTERNAL NAME '" + CLASS_NAME + "takesString'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 		CallableStatement cs = conn.prepareCall("call takesString(?,?)");
@@ -368,27 +519,27 @@ public class outparams
 		cs.close();
 		scp.execute("DROP PROCEDURE takesString");
 
-		scp.execute("CREATE FUNCTION returnsBigDecimal(P2 INT) RETURNS DECIMAL(10,2) " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.returnsBigDecimal'" +
+		scp.execute("CREATE FUNCTION returnsString(P2 INT) RETURNS VARCHAR(40) " +
+						"EXTERNAL NAME '" + CLASS_NAME + "returnsString'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 		// return output params -- cannot do set on return output param
-		cs = conn.prepareCall("? = call returnsBigDecimal(?)");
+		cs = conn.prepareCall("? = call returnsString(?)");
 		try
 		{
-			cs.setBigDecimal(1, new BigDecimal(1d));
-			System.out.println("ERROR: setBigDecimal() on return output parameter succeeded");
+			cs.setString(1, new String("test"));
+			System.out.println("ERROR: setString() on return output parameter succeeded");
 		}
 		catch (SQLException se)
 		{
-			System.out.println("Expected exception on setBigDecimal() on a return output param: "+se);
+			System.out.println("Expected exception on setString() on a return output param: "+se);
 		}
 		cs.close();
-		scp.execute("DROP FUNCTION returnsBigDecimal");
+		scp.execute("DROP FUNCTION returnsString");
 
 		// lets try ? = call syntax on a call that doesn't return anything
 		
 		scp.execute("CREATE PROCEDURE returnsNothing() " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.returnsNothing'" +
+						"EXTERNAL NAME '" + CLASS_NAME + "returnsNothing'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 		try
 		{
@@ -413,7 +564,7 @@ public class outparams
 		Statement scp = conn.createStatement();
 
 		scp.execute("CREATE PROCEDURE testNullBug4317(IN P1 VARCHAR(10)) " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.testNullBug4317'" +
+						"EXTERNAL NAME '" + CLASS_NAME + "testNullBug4317'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
@@ -454,7 +605,7 @@ public class outparams
 		Statement scp = conn.createStatement();
 
 		scp.execute("CREATE FUNCTION returnsIntegerP(P1 INT) RETURNS INTEGER " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.returnsIntegerP'" +
+						"EXTERNAL NAME '" + CLASS_NAME + "returnsIntegerP'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
@@ -515,19 +666,19 @@ public class outparams
 				{
 
 					scp.execute("CREATE PROCEDURE " + methodName + "(INOUT P1 " + outputProcParam[method] + ", IN P2 INT) " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams." + methodName +
+						"EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 						"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
 					if (method%2 == 0)
-						str = "call "+methodName+"(?,?)";
-					else
 						str = "{call "+methodName+"(?,?)}";
+					else
+						str = "call "+methodName+"(?,?)";
 				}
 				else
 				{
 					scp.execute("CREATE PROCEDURE " + methodName + "() " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams." + methodName +
+						"EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 						"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 					str = "{call "+methodName+"()}";
 				}
@@ -604,7 +755,7 @@ public class outparams
 						StringBuffer getbuf = new StringBuffer();
 						try
 						{
-							callGetMethod(cs, 1, types[getType], getbuf);
+							callGetMethod(cs, 1, types[getType], paramJDBCType[method], getbuf);
 						}
 						catch (SQLException se)
 						{
@@ -649,19 +800,19 @@ public class outparams
 			{
 
 				scp.execute("CREATE PROCEDURE " + methodName + "(INOUT P1 " + outputProcParam[method] + ", IN P2 INT) " +
-					"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams." + methodName +
+					"EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 					"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
 				if (method%2 == 0)
-					str = "call "+methodName+"(?,?)";
-				else
 					str = "{call "+methodName+"(?,?)}";
+				else
+					str = "call "+methodName+"(?,?)";
 			}
 			else
 			{
 				scp.execute("CREATE PROCEDURE " + methodName + "() " +
-					"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams." + methodName +
+					"EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 					"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 				str = "{call "+methodName+"()}";
 			}
@@ -721,7 +872,7 @@ public class outparams
 					StringBuffer getbuf = new StringBuffer();
 					try
 					{
-						callGetMethod(cs, 1, types[getType], getbuf);
+						callGetMethod(cs, 1, types[getType], Types.OTHER , getbuf);
 					}
 					catch (SQLException se)
 					{
@@ -760,7 +911,7 @@ public class outparams
 			{
 
 				scf.execute("CREATE PROCEDURE " + methodName + "()" +
-					" EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams." + methodName +
+					" EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 					"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
@@ -772,7 +923,7 @@ public class outparams
 			{
 
 				scf.execute("CREATE FUNCTION " + methodName + "(P1 INT) RETURNS " + returnMethodType[method] +
-					" EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams." + methodName +
+					" EXTERNAL NAME '" + CLASS_NAME + "" + methodName +
 					"' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 				dropRoutine = "DROP FUNCTION " + methodName;
 
@@ -837,7 +988,7 @@ public class outparams
 					StringBuffer getbuf = new StringBuffer();
 					try
 					{
-						callGetMethod(cs, 1, types[getType], getbuf);
+						callGetMethod(cs, 1, types[getType], paramJDBCType[method], getbuf);
 					}
 					catch (SQLException se)
 					{
@@ -902,8 +1053,7 @@ public class outparams
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 				strbuf.append("setObject("+arg+", 666.666)");
-				BigDecimal bd = new BigDecimal("666.666");
-				cs.setObject(arg, bd);
+				BigDecimalHandler.setObjectString(cs,arg,"666.666");
 				break;
 
 			case Types.CHAR:
@@ -990,8 +1140,7 @@ public class outparams
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 				strbuf.append("setBigDecimal("+arg+", 666.666)");
-				BigDecimal bd = new BigDecimal("666.666");
-				cs.setBigDecimal(arg, bd);
+				BigDecimalHandler.setBigDecimalString(cs,arg,"666.666");
 				break;
 
 			case Types.CHAR:
@@ -1035,7 +1184,7 @@ public class outparams
 		}	
 	}
 
-	private static void callGetMethod(CallableStatement cs, int arg, int type, StringBuffer strbuf) throws Throwable
+	private static void callGetMethod(CallableStatement cs, int arg, int type, int paramType ,StringBuffer strbuf) throws Throwable
 	{
 		switch (type)	
 		{
@@ -1079,8 +1228,7 @@ public class outparams
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 				strbuf.append("getBigDecimal("+arg+") = ");
-				BigDecimal bd = cs.getBigDecimal(arg);
-				strbuf.append(bd == null ? "null" : bd.toString());
+				strbuf.append(BigDecimalHandler.getBigDecimalString(cs,arg,paramType));
 				break;
 
 			case Types.CHAR:
@@ -1289,12 +1437,6 @@ public class outparams
 		outparam[0] = new Boolean(true);
 	}
 
-	public static void takesBigDecimal(BigDecimal[] outparam, int type)
-	{
-		outparam[0] = (outparam[0] == null ? new BigDecimal("33") : outparam[0].add(outparam[0]));
-		outparam[0].setScale(4, BigDecimal.ROUND_DOWN);
-	}
-
 	public static void takesByteArray(byte[][] outparam, int type)
 	{
 		byte[] myarray = new byte[16];
@@ -1391,12 +1533,6 @@ public class outparams
 		return new Double(666);
 	}
 
-
-	public static BigDecimal returnsBigDecimal(int type)
-	{
-		return new BigDecimal(666d);
-	}
-
 	public static byte[] returnsByteArray(int type)
 	{
 		byte[] myarray = new byte[16];
@@ -1441,14 +1577,14 @@ public class outparams
 			"(OUT I1 INT, OUT I2 INT, OUT I3 INT, OUT I4 INT, OUT I5 INT, "+
 			"OUT V1 VARCHAR(40), OUT V2 VARCHAR(40), OUT V3 VARCHAR(40), OUT V4 VARCHAR(40), OUT V5 VARCHAR(40)) "+
 
-			"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.output' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
+			"EXTERNAL NAME '" + CLASS_NAME + "output' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
 		scp.execute("CREATE PROCEDURE OP_INOUT " +
 			"(INOUT I1 INT, INOUT I2 INT, INOUT I3 INT, INOUT I4 INT, INOUT I5 INT, " +
 			"INOUT V1 VARCHAR(40), INOUT V2 VARCHAR(40), INOUT V3 VARCHAR(40), INOUT V4 VARCHAR(40), INOUT V5 VARCHAR(40)) " +
 
-			"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.output' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
+			"EXTERNAL NAME '" + CLASS_NAME + "output' NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
 		CallableStatement csOut_cs = conn.prepareCall("CALL OP_OUT(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -1583,7 +1719,7 @@ public class outparams
     "PRIMARY KEY ( AIID ) )");
 
 		stmt.execute("CREATE PROCEDURE doInsertion(IN P1 VARCHAR(2) FOR BIT DATA) " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.doInsertion'" +
+						"EXTERNAL NAME '" + CLASS_NAME + "doInsertion'" +
 						" MODIFIES SQL DATA LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 		CallableStatement cs = conn.prepareCall("call doInsertion (?)");

@@ -21,6 +21,9 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.util;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.math.BigDecimal;
 
 /**
  *  BigDecimalHandler provides wrappers for JDBC API methods which use BigDecimal.
@@ -33,9 +36,9 @@ import java.sql.SQLException;
  */
 public class BigDecimalHandler {
 	
-	static int representation;
-	static final int STRING_REPRESENTATION = 1;
-	static final int BIGDECIMAL_REPRESENTATION = 2;
+	public static int representation;
+	public static final int STRING_REPRESENTATION = 1;
+	public static final int BIGDECIMAL_REPRESENTATION = 2;
 	
 	static{
 		try{
@@ -47,6 +50,24 @@ public class BigDecimalHandler {
 			representation = STRING_REPRESENTATION;
 		}
 	}
+	
+	//Type conversions supported by ResultSet getBigDecimal method - JDBC3.0 Table B-6 
+	private static final int[] bdConvertibleTypes = 
+	{	java.sql.Types.TINYINT,
+		java.sql.Types.SMALLINT,
+		java.sql.Types.INTEGER,
+		java.sql.Types.BIGINT,
+		java.sql.Types.REAL,
+		java.sql.Types.FLOAT,
+		java.sql.Types.DOUBLE,
+		java.sql.Types.DECIMAL,
+		java.sql.Types.NUMERIC,
+		java.sql.Types.BIT,
+		//java.sql.Types.BOOLEAN,	//Not supported in jdk13
+		java.sql.Types.CHAR,
+		java.sql.Types.VARCHAR,
+		java.sql.Types.LONGVARCHAR
+	};
 	
 	/** This method is a wrapper for the ResultSet method getBigDecimal(int columnIndex).
 	 * 
@@ -66,7 +87,8 @@ public class BigDecimalHandler {
 				break;
 			case STRING_REPRESENTATION:
 				bigDecimalString = rs.getString(columnIndex);
-				if((bigDecimalString != null) && !canConvertToDecimal(rs,columnIndex))
+				int columnType= rs.getMetaData().getColumnType(columnIndex);
+				if((bigDecimalString != null) && !canConvertToDecimal(columnType))
 					throw new SQLException("Invalid data conversion. Method not called.");
 				break;
 			default:	
@@ -95,7 +117,8 @@ public class BigDecimalHandler {
 				break;
 			case STRING_REPRESENTATION:
 				bigDecimalString = rs.getString(columnName);
-				if((bigDecimalString != null) && !canConvertToDecimal(rs,columnIndex))
+				int columnType= rs.getMetaData().getColumnType(columnIndex);
+				if((bigDecimalString != null) && !canConvertToDecimal(columnType))
 					throw new SQLException("Invalid data conversion. Method not called.");
 				break;
 			default:	
@@ -168,6 +191,80 @@ public class BigDecimalHandler {
 		return objectString;
 	}
 	
+	/** This method is a wrapper for the CallableStatement method getBigDecimal(int parameterIndex).
+	 * The wrapper method needs the parameterType as an input since ParameterMetaData is not available in JSR169.
+	 * 
+	 * @param cs CallableStatement 
+	 * @param parameterIndex Parameter Index
+	 * @param parameterType Parameter Type
+	 * @return String value of getXXX(parameterIndex)method on the CallableStatement
+	 * @throws SQLException
+	 */
+	public static String getBigDecimalString(CallableStatement cs, int parameterIndex, int parameterType) throws SQLException{
+		String bigDecimalString = null;
+		
+		switch(representation){
+			case BIGDECIMAL_REPRESENTATION:
+				//Call toString() only for non-null values, else return null
+				if(cs.getBigDecimal(parameterIndex) != null)
+					bigDecimalString = cs.getBigDecimal(parameterIndex).toString();
+				break;
+			case STRING_REPRESENTATION:
+				bigDecimalString = cs.getString(parameterIndex);
+				if((bigDecimalString != null) && !canConvertToDecimal(parameterType))
+					throw new SQLException("Invalid data conversion. Method not called.");
+				break;
+			default:	
+				new Exception("Failed: Invalid Big Decimal representation").printStackTrace();
+		}
+		return bigDecimalString;
+	}	
+
+	/** This method is a wrapper for the PreparedStatement method setBigDecimal(int parameterIndex,BigDecimal x)
+	 * 
+	 * @param ps PreparedStatement 
+	 * @param parameterIndex Parameter Index
+	 * @param bdString String to be used in setXXX method
+	 * @throws SQLException
+	 */
+	public static void setBigDecimalString(PreparedStatement ps, int parameterIndex, String bdString) throws SQLException{
+		
+		switch(representation){
+			case BIGDECIMAL_REPRESENTATION:
+				ps.setBigDecimal(parameterIndex,new BigDecimal(bdString));
+				break;
+			case STRING_REPRESENTATION:
+				//setString is used since setBigDecimal is not available in JSR169
+				//If bdString cannot be converted to short,int or long, this will throw
+				//"Invalid character string format exception" 
+				ps.setString(parameterIndex,bdString);
+				break;
+			default:	
+				new Exception("Failed: Invalid Big Decimal representation").printStackTrace();
+		}
+	}
+	
+	/** This method is a wrapper for the PreparedStatement method setObject(int parameterIndex, Object x) 
+	 * 
+	 * @param ps PreparedStatement 
+	 * @param parameterIndex Parameter Index
+	 * @param bdString String to be used in setObject method
+	 * @throws SQLException
+	 */
+	public static void setObjectString(PreparedStatement ps, int parameterIndex, String objectString) throws SQLException{
+		
+		switch(representation){
+			case BIGDECIMAL_REPRESENTATION:
+				ps.setObject(parameterIndex,new BigDecimal(objectString));
+				break;
+			case STRING_REPRESENTATION:
+				ps.setObject(parameterIndex,objectString);
+				break;
+			default:	
+				new Exception("Failed: Invalid Big Decimal representation").printStackTrace();
+		}
+	}	
+	
 	/** This method checks that the SQL type can be converted to Decimal
 	 * 
 	 * @param rs ResultSet
@@ -175,20 +272,17 @@ public class BigDecimalHandler {
 	 * @return true if the SQL type is convertible to DECIMAL, false otherwise.
 	 * @throws SQLException
 	 */
-	protected static boolean canConvertToDecimal(ResultSet rs,int columnIndex) throws SQLException{
-		int columnType= rs.getMetaData().getColumnType(columnIndex);
-		if(columnType == java.sql.Types.BIGINT || 
-		   columnType == java.sql.Types.DECIMAL || 
-		   columnType == java.sql.Types.DOUBLE || 
-		   columnType == java.sql.Types.FLOAT || 
-		   columnType == java.sql.Types.INTEGER || 
-		   columnType == java.sql.Types.NUMERIC || 
-		   columnType == java.sql.Types.REAL || 
-		   columnType == java.sql.Types.SMALLINT || 
-		   columnType == java.sql.Types.TINYINT){
-			return true;
+	protected static boolean canConvertToDecimal(int type) throws SQLException{
+		boolean  canConvert = false;
+		
+		for (int bdType = 0; bdType < bdConvertibleTypes.length; bdType++){
+			if(type == bdConvertibleTypes[bdType]){
+				canConvert = true;
+				break;
+			}
 		}
-		return false;
+		
+		return canConvert;
 	}
 	
 }

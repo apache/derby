@@ -35,8 +35,25 @@ import java.sql.Types;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 
 public class batchUpdate { 
+	
+	private static boolean HAVE_BIG_DECIMAL;
+	private static String CLASS_NAME;
+	
+	//Get the class name to be used for the procedures
+	//outparams - J2ME; outparams30 - non-J2ME
+	static{
+		if(BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
+			HAVE_BIG_DECIMAL = false;
+		else
+			HAVE_BIG_DECIMAL = true;
+		if(HAVE_BIG_DECIMAL)
+			CLASS_NAME = "org.apache.derbyTesting.functionTests.tests.lang.outparams30.";
+		else
+			CLASS_NAME = "org.apache.derbyTesting.functionTests.tests.lang.outparams.";
+	}
 
 	public static void main(String[] args) {
 		boolean		passed = true;
@@ -1518,7 +1535,7 @@ public class batchUpdate {
 		Statement s = conn.createStatement();
 
 		s.execute("CREATE PROCEDURE takesString(OUT P1 VARCHAR(40), IN P2 INT) " +
-				"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.takesString'" +
+				"EXTERNAL NAME '" + CLASS_NAME + "takesString'" +
 				" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
   	CallableStatement cs = conn.prepareCall("call takesString(?,?)");

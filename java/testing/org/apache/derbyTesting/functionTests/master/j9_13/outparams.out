@@ -6,7 +6,7 @@ Expected exception SQL Exception: The parameter position '9' is out of range.  T
 Expected exception SQL Exception: The parameter position '0' is out of range.  The number of parameters for this prepared  statement is '2'.
 Expected exception SQL Exception: Return output parameters cannot be set.
 Expected exception SQL Exception: Return output parameters cannot be set.
-Expected exception on setBigDecimal() on a return output param: SQL Exception: Return output parameters cannot be set.
+Expected exception on setString() on a return output param: SQL Exception: Return output parameters cannot be set.
 Expected exception on prepare of '? = call returnsNothing()': SQL Exception: 'RETURNSNOTHING' is not recognized as a function or procedure.
 ==============================================
 TESTING NULLS

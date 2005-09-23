@@ -31,11 +31,27 @@ import java.sql.Date;
 import java.sql.Types;
 import java.util.GregorianCalendar;
 import org.apache.derby.iapi.reference.JDBC20Translation;
+import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class StmtCloseFunTest {
     
-
+	private static boolean HAVE_BIG_DECIMAL;
+	private static String CLASS_NAME;
+	
+	//Get the class name to be used for the procedures
+	//outparams - J2ME; outparams30 - non-J2ME
+	static{
+		if(BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
+			HAVE_BIG_DECIMAL = false;
+		else
+			HAVE_BIG_DECIMAL = true;
+		if(HAVE_BIG_DECIMAL)
+			CLASS_NAME = "org.apache.derbyTesting.functionTests.tests.lang.outparams30.";
+		else
+			CLASS_NAME = "org.apache.derbyTesting.functionTests.tests.lang.outparams.";
+	}
+	
 	static private boolean isDerbyNet = false;
 
     public static void main(String[] args) {
@@ -301,7 +317,7 @@ public class StmtCloseFunTest {
 		   	*/
 		   	ps.setInt(1, 420);
 		   	ps.setFloat(2, (float)12.21);
-		   	ps.setDate(3, new Date(1971, 1, 10));
+		   	ps.setDate(3, new Date(870505200000L));
 		   	ps.setString(4, "China");
 		   	ps.executeUpdate();
 		   	ps.close();
@@ -320,13 +336,13 @@ public class StmtCloseFunTest {
 			catch(SQLException e) { }
 
 			try {
-				ps.setDate(3, new Date(1975, 11, 15));
+				ps.setDate(3, new Date(870505200000L));
 				System.out.println("Prepared Statement Test failed");
 			}
 			catch(SQLException e) { }
 
 			try {
-				ps.setDate(3, new Date(1975, 11, 15), new GregorianCalendar());
+				ps.setDate(3, new Date(870505200000L), new GregorianCalendar());
 				System.out.println("Prepared Statement Test failed");
 			}
 			catch(SQLException e) { }
@@ -541,7 +557,7 @@ public class StmtCloseFunTest {
 				Statement s = conn.createStatement();
 
 				s.execute("CREATE PROCEDURE takesString(OUT P1 VARCHAR(40), IN P2 INT) " +
-						"EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.outparams.takesString'" +
+						"EXTERNAL NAME '" + CLASS_NAME + "takesString'" +
 						" NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
 
