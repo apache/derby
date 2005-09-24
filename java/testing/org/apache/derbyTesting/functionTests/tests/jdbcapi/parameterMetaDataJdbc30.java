@@ -67,7 +67,7 @@ public class parameterMetaDataJdbc30 {
 			/* Create the table and do any other set-up */
 			setUpTest(s);
 
-      s.executeUpdate("create function RDB(P1 INT) RETURNS DECIMAL(10,2) language java external name 'org.apache.derbyTesting.functionTests.tests.lang.outparams.returnsBigDecimal' parameter style java");
+      s.executeUpdate("create function RDB(P1 INT) RETURNS DECIMAL(10,2) language java external name 'org.apache.derbyTesting.functionTests.tests.lang.outparams30.returnsBigDecimal' parameter style java");
 
       //first testing a callable statement
       s.executeUpdate("create procedure dummyint(in a integer, in b integer, out c integer, inout d integer) language java external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.parameterMetaDataJdbc30.dummyint' parameter style java");
