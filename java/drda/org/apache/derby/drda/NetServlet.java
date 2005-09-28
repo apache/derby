@@ -51,7 +51,7 @@ import org.apache.derby.iapi.reference.Property;
 public class NetServlet extends HttpServlet {
 	private final static int MAX_CONNECT_TRYS = 20;
 	private final static String SERVLET_PROP_MESSAGES =  "org.apache.derby.loc.drda.servlet";
-	private final static String SERVLET_ADDRESS = "csnet";
+	private final static String SERVLET_ADDRESS = "derbynet";
 
 	private String formHeader = null;
 	private String host = "localhost";
@@ -885,7 +885,7 @@ public class NetServlet extends HttpServlet {
 	}
 	/**
 	 * Determine the locale file needed for this browsers preferences
-	 * Defaults to the settings for db2j.locale and db2j.codeset if set
+	 * Defaults to the settings for derby.locale and derby.codeset if set
 	 *		English otherwise if browsers preferences can't be found
 	 *
 	 * @param request 			HttpServetRequest for forms
@@ -896,7 +896,7 @@ public class NetServlet extends HttpServlet {
 		LocalizedResource localUtil;
 		String acceptLanguage = request.getHeader("Accept-Language");
 		localUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
-		// if no language specified use one set by db2j.locale, db2j.codeset
+		// if no language specified use one set by derby.locale, derby.codeset
 		locale = null;
 		if (acceptLanguage == null)
 		{
