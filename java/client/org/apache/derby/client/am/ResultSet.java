@@ -879,13 +879,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkGetterPreconditions(column);
         java.io.InputStream result = null;
         if (wasNonNullSensitiveUpdate(column)) {
-            try {
-                result = new java.io.ByteArrayInputStream
-                        (((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
-                                updatedColumns_[column - 1])).getBytes("US-ASCII"));
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, e, e.getMessage());
-            }
+		
+		result = new java.io.ByteArrayInputStream
+			(convertToAsciiByteArray((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
+											    updatedColumns_[column - 1])));
         } else {
             result = isNull(column) ? null : cursor_.getAsciiStream(column);
         }
@@ -3882,4 +3879,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
         }
     }
+
+	
+	private static byte[] convertToAsciiByteArray(String original){
+
+		byte[] result = new byte[original.length()];
+
+		for(int i = 0;
+		    i < original.length();
+		    i ++){
+			
+			if(original.charAt(i) <= 0x00ff)
+				result[i] = (byte) original.charAt(i);
+			else
+				result[i] = 0x003f;
+		}
+
+		return result;
+
+	}
 }
