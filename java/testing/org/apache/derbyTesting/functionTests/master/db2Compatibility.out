@@ -164,7 +164,7 @@ ij> select * from new com.acme.myVTI() as T;
 ERROR 42X01: Syntax error: com.acme.myVTI.
 ij> select * from new org.apache.derbyTesting.not.myVTI() as T;
 ERROR 42X01: Syntax error: org.apache.derbyTesting.not.myVTI.
-ij> select * from new org.apache.derby.diag.LockTable() as T;
+ij> select * from syscs_diag.lock_table;
 XID            |TYPE |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE|TABLETYPE|LOCK&|INDEXNAME                                                                                                                       
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> -- VTI in CREATE TRIGGER statement

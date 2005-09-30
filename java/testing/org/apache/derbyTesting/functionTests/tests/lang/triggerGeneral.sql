@@ -516,7 +516,7 @@ insert into parent values (4, 1);
 
 autocommit off ;
 delete from t1 where a = 3;
-select type, mode, tablename from new org.apache.derby.diag.LockTable() t order by tablename, type;
+select type, mode, tablename from syscs_diag.lock_table order by tablename, type;
 rollback;
 autocommit on;
 drop table t1;

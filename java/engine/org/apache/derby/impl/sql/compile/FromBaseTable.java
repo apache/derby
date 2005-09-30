@@ -2119,11 +2119,16 @@ public class FromBaseTable extends FromTable
 	{
 		TableDescriptor tableDescriptor = bindTableDescriptor();
 
-/*		if (tableDescriptor.getTableType() == TableDescriptor.VTI_TYPE) {
-			ResultSetNode vtiNode = getNodeFactory().mapTableAsVTI(getContextManager(), tableDescriptor);
+		if (tableDescriptor.getTableType() == TableDescriptor.VTI_TYPE) {
+			ResultSetNode vtiNode = getNodeFactory().mapTableAsVTI(
+					tableDescriptor,
+					dataDictionary.getVTIClass(tableDescriptor),
+					getCorrelationName(),
+					resultColumns,
+					getProperties(),
+					getContextManager());
 			return vtiNode.bindNonVTITables(dataDictionary, fromListParam);
-		}
-*/	
+		}	
 		
 		ResultColumnList	derivedRCL = resultColumns;
   

@@ -31,7 +31,7 @@ select
 (dmlstatic()) 
 from sys.systables where tablename = 'SYSCONGLOMERATES';
 
-select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table
 order by 1;
 
 commit;
@@ -44,7 +44,7 @@ select
 from sys.systables where tablename = 'SYSCONGLOMERATES';
 
 -- only two locks!
-select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table
 order by 1;
 
 -- verify that the row went into t1.
@@ -52,7 +52,7 @@ select * from t1;
 drop table t1;
 commit;
 
-select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table
 order by 1;
 
 commit;
@@ -65,18 +65,18 @@ commit;
 
 -- earlier we would get a bunch of locks on the system catalogs 
 -- when trying to resolve the method alias.
-select count(*) from new org.apache.derby.diag.LockTable() l;
+select count(*) from syscs_diag.lock_table;
 
 -- select from a system catalog.
 select count(*) from sys.sysviews;
 -- look ma, no locks.
-select count(*) from new org.apache.derby.diag.LockTable() l;
+select count(*) from syscs_diag.lock_table;
 
 insert into test_tab values (2);
 -- only see locks on test_tab, none on system catalogs
 -- 
 
-select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l
+select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table
 order by 1;
 
 -- bugid 3214, atlas case: 962505
@@ -105,11 +105,11 @@ commit;
 
 -- prepare a statement-- no locks.
 prepare cursor1 as 'update test_tab set x=2 where x=?';
-select count(*) from new org.apache.derby.diag.LockTable() l;
+select count(*) from syscs_diag.lock_table;
 
 -- now execute it-- should see locks on test_tab
 execute cursor1 using 'values (1)';
-select TYPE, MODE, TABLENAME, LOCKNAME, STATE from new org.apache.derby.diag.LockTable() l 
+select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table
 order by 1;
 commit;
 
@@ -125,7 +125,7 @@ commit;
 prepare ps as 'select * from t where c1 = ? and c2 = ?';
 
 -- no locks, no locks at all.
-select * from new org.apache.derby.diag.LockTable() l;
+select * from syscs_diag.lock_table;
 
 -- clear DataDictionary cache
 create table x(c1 int);
@@ -134,7 +134,7 @@ commit;
 
 -- try inserting into the table; no locks on system catalogs.
 prepare pi as 'insert into t values (3,2)';
-select * from new org.apache.derby.diag.LockTable() l;
+select * from syscs_diag.lock_table;
 
 commit;
 
@@ -145,7 +145,7 @@ commit;
 
 -- try updating the table; no locks on system catalogs.
 prepare p1 as 'update t set c2 = c1, c1 = c2';
-select * from new org.apache.derby.diag.LockTable() l;
+select * from syscs_diag.lock_table;
 
 commit;
 
@@ -156,7 +156,7 @@ commit;
 
 -- try deleting from the table; no locks on system catalogs.
 prepare p1 as 'delete from t';
-select * from new org.apache.derby.diag.LockTable() l;
+select * from syscs_diag.lock_table;
 
 commit;
 
@@ -169,5 +169,5 @@ commit;
 
 -- t has (1,1) (2,1) (3,2)
 prepare pu as 'update t set c2=2 where c1=2';
-select * from new org.apache.derby.diag.LockTable() l;
+select * from syscs_diag.lock_table;
 commit;

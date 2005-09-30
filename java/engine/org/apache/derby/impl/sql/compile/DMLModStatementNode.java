@@ -233,18 +233,23 @@ public abstract class DMLModStatementNode extends DMLStatementNode
 				if (targetTableDescriptor == null)
 					throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, targetTableName);
 			}
-
-			// Views are currently not updatable */
-			if (targetTableDescriptor.getTableType() == TableDescriptor.VIEW_TYPE)
+			
+			switch (targetTableDescriptor.getTableType())
 			{
+			case TableDescriptor.VIEW_TYPE:
+				// Views are currently not updatable
 				throw StandardException.newException(SQLState.LANG_VIEW_NOT_UPDATEABLE, 
-								targetTableName);
-			}
-			/* System tables are not updatable */
-			if (targetTableDescriptor.getTableType() == TableDescriptor.SYSTEM_TABLE_TYPE)
-			{
+						targetTableName);
+			
+			case TableDescriptor.VTI_TYPE:
+				// fall through - currently all vti tables are system tables.
+			case TableDescriptor.SYSTEM_TABLE_TYPE:
+				// System tables are not updatable
 				throw StandardException.newException(SQLState.LANG_UPDATE_SYSTEM_TABLE_ATTEMPTED, 
-								targetTableName);
+						targetTableName);
+				default:
+					break;
+				
 			}
 
 			/* We need to get some kind of table lock (IX here), to prevent

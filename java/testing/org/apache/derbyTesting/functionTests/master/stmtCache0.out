@@ -2,7 +2,7 @@ ij> --
 -- testing a cache size of 0
 --
 -- see that it starts out empty; 
-select count(*) from new org.apache.derby.diag.StatementCache() as SC;
+select count(*) from syscs_diag.statement_cache;
 1          
 -----------
 0          
@@ -18,7 +18,7 @@ ij> --
 -- this script registers the various consistency checks for
 -- statement caching as simple aliases for ease of scripting
 --
-create view SC_CONTENTS as select CAST (SUBSTR (CAST (SQL_TEXT as char(200)), 1, 30) AS CHAR(30)) AS SQL_TEXT from new org.apache.derby.diag.StatementCache() as SCVD;
+create view SC_CONTENTS as select CAST (SUBSTR (CAST (SQL_TEXT as char(200)), 1, 30) AS CHAR(30)) AS SQL_TEXT from syscs_diag.STATEMENT_CACHE;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- see that it starts out empty; 

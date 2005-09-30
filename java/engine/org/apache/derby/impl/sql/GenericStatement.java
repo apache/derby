@@ -554,10 +554,6 @@ public class GenericStatement
 		return statementText;
 	}
 
-	public boolean getUnicode() {
-		return true;
-	}
-
 	public String getCompilationSchema() {
 		return compilationSchema.getDescriptorName();
 	}

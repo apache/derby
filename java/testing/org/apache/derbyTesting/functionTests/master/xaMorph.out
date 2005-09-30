@@ -16,7 +16,7 @@ select
     case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
     cast (username as char(10)) as username,
     type 
-from new org.apache.derby.diag.TransactionTable() t;
+from syscs_diag.transaction_table;
 0 rows inserted/updated/deleted
 ij> select * from global_xactTable where gxid is not null order by gxid,username;
 GXID|STATUS  |READ&|USERNAME  |TYPE                          
@@ -168,7 +168,7 @@ select
     status, 
     username, 
     type 
-from new org.apache.derby.diag.TransactionTable() t order by gxid, status, username, type;
+from syscs_diag.transaction_table order by gxid, status, username, type;
 GXID|STATUS  |USERNAME                                                                                                                        |TYPE                          
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 (3  |IDLE    |SKU                                                                                                                             |UserTransaction               

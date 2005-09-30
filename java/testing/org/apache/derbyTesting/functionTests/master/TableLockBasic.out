@@ -29,7 +29,7 @@ select
     state,
     status
 from 
-    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+    syscs_diag.lock_table l  right outer join syscs_diag.transaction_table t
 on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
 0 rows inserted/updated/deleted
 ij> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
@@ -48,7 +48,7 @@ select
     state,
     status
 from 
-    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+    syscs_diag.lock_table l right outer join syscs_diag.transaction_table t
 on l.xid = t.xid where l.tableType <> 'S' ;
 0 rows inserted/updated/deleted
 ij> -- lock table with no join.
@@ -62,7 +62,7 @@ select
     cast(lockname as char(10)) as lockname,
     state
 from 
-    new org.apache.derby.diag.LockTable() l  
+    syscs_diag.lock_table l  
 where l.tableType <> 'S' ;
 0 rows inserted/updated/deleted
 ij> -- transaction table with no join.
@@ -70,7 +70,7 @@ create view tran_table as
 select 
     *
 from 
-    new org.apache.derby.diag.TransactionTable() t ;
+    syscs_diag.transaction_table;
 0 rows inserted/updated/deleted
 ij> autocommit off;
 ij> create table heap_only (a int);

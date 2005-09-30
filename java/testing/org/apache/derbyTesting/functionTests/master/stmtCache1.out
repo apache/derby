@@ -20,7 +20,7 @@ ij> --
 -- this script registers the various consistency checks for
 -- statement caching as simple aliases for ease of scripting
 --
-create view SC_CONTENTS as select CAST (SUBSTR (CAST (SQL_TEXT as char(200)), 1, 30) AS CHAR(30)) AS SQL_TEXT from new org.apache.derby.diag.StatementCache() as SCVD;
+create view SC_CONTENTS as select CAST (SUBSTR (CAST (SQL_TEXT as char(200)), 1, 30) AS CHAR(30)) AS SQL_TEXT from syscs_diag.STATEMENT_CACHE;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- see that it starts out almost empty; well, just us...

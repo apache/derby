@@ -240,13 +240,13 @@ autocommit off;
 
 -- default read committed isolation level
 update tab1 set c2 = c2 + 3 where c1 = 1;
-select type, mode from new org.apache.derby.diag.LockTable() as lockstable where tablename = 'TAB1' order by type;
+select type, mode from syscs_diag.lock_table where tablename = 'TAB1' order by type;
 rollback;
 
 -- serializable isolation level
 set current isolation to SERIALIZABLE;
 update tab1 set c2 = c2 + 3 where c1 = 1;
-select type, mode from new org.apache.derby.diag.LockTable() as lockstable where tablename = 'TAB1' order by type;
+select type, mode from syscs_diag.lock_table where tablename = 'TAB1' order by type;
 rollback;
 
 autocommit on;

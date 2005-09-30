@@ -18,13 +18,13 @@ autocommit off;
 async C2S1 'update c1.account set b = b + 11';
 set connection C1;
 call c1.sleep(200);
-select state from new org.apache.derby.diag.LockTable() t order by state;
+select state from syscs_diag.lock_table order by state;
 commit;
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '180');
 commit;
 set connection c2 ;
 wait for C2S1;
-select state from new org.apache.derby.diag.LockTable() t order by state;
+select state from syscs_diag.lock_table order by state;
 commit;
 
 

@@ -89,7 +89,7 @@ autocommit off;
 -- at this point, should see 4 global connections in the prepared mode and one global
 -- connection in active mode and one local connection.
 select * from global_xactTable where gxid is not null order by gxid, username, status;
-select count(*) from new org.apache.derby.diag.LockTable() t where mode = 'X' or mode = 'IX';
+select count(*) from syscs_diag.lock_table where mode = 'X' or mode = 'IX';
 
 xa_datasource 'wombat' shutdown;
 

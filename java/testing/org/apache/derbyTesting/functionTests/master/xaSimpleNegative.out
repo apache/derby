@@ -32,7 +32,7 @@ select
     case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
     cast (username as char(10)) as username,
     type 
-from new org.apache.derby.diag.TransactionTable() t;
+from syscs_diag.transaction_table;
 0 rows inserted/updated/deleted
 ij(XA)> insert into APP.negative values ('xyz', 1);
 1 row inserted/updated/deleted

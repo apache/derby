@@ -320,7 +320,7 @@ ID         |E_MAIL                        |OK
 3          |big@blue.com                  |NULL  
 4          |spammer@ripoff.com            |0     
 5          |open@source.org               |1     
-ij> select TYPE, MODE, TABLENAME from new org.apache.derby.diag.LockTable() AS L ORDER BY 1,2,3;
+ij> select TYPE, MODE, TABLENAME from syscs_diag.lock_table ORDER BY 1,2,3;
 TYPE |MODE|TABLENAME                                                                                                                       
 -------------------------------------------------------------------------------------------------------------------------------------------
 TABLE|S   |CONTACTS                                                                                                                        
@@ -389,7 +389,7 @@ ID         |E_MAIL                        |OK
 3          |big@blue.com                  |NULL  
 4          |spammer@ripoff.com            |0     
 5          |open@source.org               |1     
-ij> select TYPE, MODE, TABLENAME from new org.apache.derby.diag.LockTable() AS L ORDER BY 1,2,3;
+ij> select TYPE, MODE, TABLENAME from syscs_diag.lock_table ORDER BY 1,2,3;
 TYPE |MODE|TABLENAME                                                                                                                       
 -------------------------------------------------------------------------------------------------------------------------------------------
 TABLE|S   |CONTACTS                                                                                                                        

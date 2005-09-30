@@ -20,9 +20,12 @@
 
 package org.apache.derby.iapi.sql.compile;
 
+import java.util.Properties;
+
 import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -31,6 +34,8 @@ import org.apache.derby.iapi.error.StandardException;
  * manish - Wed Mar 28 13:05:19 PST 2001
  */
 import	org.apache.derby.impl.sql.compile.QueryTreeNode;
+import org.apache.derby.impl.sql.compile.ResultColumnList;
+import org.apache.derby.impl.sql.compile.ResultSetNode;
 
 /**
 	This is an interface for NodeFactories.
@@ -597,6 +602,27 @@ public abstract class NodeFactory
 		ContextManager cm)
 		throws StandardException;
 
+	
+	/**
+	 * Return a correctly configured node that represents
+	 * a scan from a VTI dervied from the TableDesciptor.
+	 * Used to convert from system diagnostic tables
+	 * to VTI scans.
+	 * @param td Table that is really a vti
+	 * @param vtiClass Java class name for virtual table
+	 * @param correlationName Correlation name of table clause
+	 * @param resultColumns Columns extracted from table.
+	 * @param tableProperties Properties being passed onto the table scan
+	 * @param cm Current context manager
+	 * @return
+	 */
+	public abstract ResultSetNode mapTableAsVTI(
+			TableDescriptor td,
+			String vtiClass,
+			String correlationName,
+			ResultColumnList resultColumns,
+			Properties tableProperties,		
+			ContextManager cm) throws StandardException;
 
 }
 

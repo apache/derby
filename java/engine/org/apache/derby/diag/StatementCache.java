@@ -158,7 +158,9 @@ public final class StatementCache extends VTITemplate {
 		wasNull = false;
 		switch (colId) {
 		case 4:
-			return currentPs.statement.getUnicode();
+			// was/is UniCode column, but since Derby 10.0 all
+			// statements are compiled and submitted as UniCode.
+			return true;
 		case 5:
 			return currentPs.isValid();
 		default:

@@ -21,6 +21,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.Properties;
+import java.util.Vector;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 
@@ -32,6 +33,7 @@ import org.apache.derby.iapi.sql.compile.Optimizer;
 
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -70,6 +72,8 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	private Boolean joinOrderOptimization = Boolean.TRUE;
 
 	private final ClassInfo[]	nodeCi = new ClassInfo[205];
+	
+	private static final Vector emptyVector = new Vector(0);
 
 	//////////////////////////////////////////////////////////////////////
 	//
@@ -650,4 +654,62 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 			delimitedIdentifier,
 			cm );
 	}
+
+	/**
+	 * Return a node that represents invocation of the virtual table
+	 * for the given table descriptor using the passed in vti class name.
+	 * <P>
+	 * Currently only handles no argument vtis corresponding to a subset
+	 * of the diagnostic tables. (e.g. lock_table).
+	 * The node returned is a FROM_VTI node with a passed in NEW_INVOCATION_NODE
+	 * representing the class, with no arguments.
+	 * Other attributes of the original FROM_TABLE node (such as resultColumns)
+	 * are passed into the FROM_VTI node.
+	 * 
+	 * @see org.apache.derby.iapi.sql.compile.NodeFactory#mapTableAsVTI(org.apache.derby.iapi.sql.dictionary.TableDescriptor, org.apache.derby.iapi.services.context.ContextManager)
+	 */
+	public ResultSetNode mapTableAsVTI(
+			TableDescriptor td,
+			String vtiClass,
+			String correlationName,
+			ResultColumnList resultColumns,
+			Properties tableProperties,		
+			ContextManager cm)
+		throws StandardException {
+		
+	
+		QueryTreeNode newNode = getNode(C_NodeTypes.NEW_INVOCATION_NODE, 
+				vtiClass,
+				emptyVector, Boolean.FALSE,
+				cm);
+		
+		 QueryTreeNode vtiNode;
+		 
+		 if (correlationName != null)
+		 {
+			 vtiNode = getNode(C_NodeTypes.FROM_VTI,
+						newNode,
+						correlationName,
+						resultColumns,
+						tableProperties,
+						cm);
+		 }
+		 else
+		 {
+			 TableName exposedName = newNode.makeTableName(td.getSchemaName(),
+						td.getDescriptorName());
+			 
+			vtiNode = getNode(C_NodeTypes.FROM_VTI,
+						newNode,
+						correlationName,
+						resultColumns,
+						tableProperties,
+						exposedName,
+						cm);
+		}
+		 
+		return (ResultSetNode) vtiNode;
+	}
 }
+
+

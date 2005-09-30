@@ -401,24 +401,24 @@ insert into t1 (x) values (2);
 
 select * from t1;
 -- should see only locks on t1, no locks on system catalogs.
-select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 
 delete from t1;
 commit;
 
 -- locks should be gone now.
-select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 set isolation serializable;
 
 -- this will get a share  lock on syscolumns
 select columnname, autoincrementvalue
  from sys.syscolumns where columnname = 'YYY';
 
-select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 
 insert into t1 (x) values (3);
 
-select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 commit;
 
 -- try using default keyword with ai.

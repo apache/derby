@@ -9,7 +9,7 @@ select
     state,
     status
 from 
-    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+    syscs_diag.lock_table l right outer join syscs_diag.transaction_table t
 on l.xid = t.xid where l.tableType <> 'S' 
 order by 
     tabname, type desc, mode, cnt, lockname;

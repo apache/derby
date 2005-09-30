@@ -9,12 +9,12 @@ xa_commit xa_1phase 1;
 
 xa_start xa_noflags 1;
 insert into foo values (2);
-select cast(global_xid as char(2)) as gxid, status from new org.apache.derby.diag.TransactionTable() t where gxid is not null order by gxid, status;
+select cast(global_xid as char(2)) as gxid, status from syscs_diag.transaction_table where gxid is not null order by gxid, status;
 xa_end xa_success 1;
 xa_prepare 1;
 
 xa_getconnection ;
-select cast(global_xid as char(2)) as gxid, status from new org.apache.derby.diag.TransactionTable() t where gxid is not null order by gxid, status;
+select cast(global_xid as char(2)) as gxid, status from syscs_diag.transaction_table where gxid is not null order by gxid, status;
 xa_datasource 'wombat' shutdown;
 
 xa_datasource 'wombat';
@@ -29,4 +29,4 @@ xa_getconnection;
 xa_start xa_noflags 1;
 
 -- should see two transactions, one global transaction and one local
-select cast(global_xid as char(2)) as gxid, status from new org.apache.derby.diag.TransactionTable() t where gxid is not null order by gxid, status;
+select cast(global_xid as char(2)) as gxid, status from syscs_diag.transaction_table where gxid is not null order by gxid, status;

@@ -4,7 +4,7 @@
 --
 
 -- see that it starts out empty; 
-select count(*) from new org.apache.derby.diag.StatementCache() as SC;
+select count(*) from syscs_diag.statement_cache;
 
 CREATE FUNCTION ConsistencyChecker() RETURNS VARCHAR(128)
 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker.runConsistencyChecker'

@@ -88,7 +88,4 @@ public interface Statement
 	 *	@return the SQL string this statement is for.
 	 */
 	String getSource();
-
-	public boolean getUnicode();
-
 }

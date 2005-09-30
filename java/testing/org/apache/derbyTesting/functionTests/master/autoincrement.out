@@ -727,7 +727,7 @@ X          |YYY
 1          |0          
 2          |1          
 ij> -- should see only locks on t1, no locks on system catalogs.
-select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 TYPE |TABLENAME                                                                                                                       |MODE
 -------------------------------------------------------------------------------------------------------------------------------------------
 ROW  |T1                                                                                                                              |X   
@@ -737,7 +737,7 @@ ij> delete from t1;
 2 rows inserted/updated/deleted
 ij> commit;
 ij> -- locks should be gone now.
-select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 TYPE |TABLENAME                                                                                                                       |MODE
 -------------------------------------------------------------------------------------------------------------------------------------------
 ij> set isolation serializable;
@@ -748,13 +748,13 @@ select columnname, autoincrementvalue
 COLUMNNAME                                                                                                                      |AUTOINCREMENTVALUE  
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 YYY                                                                                                                             |2                   
-ij> select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+ij> select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 TYPE |TABLENAME                                                                                                                       |MODE
 -------------------------------------------------------------------------------------------------------------------------------------------
 TABLE|SYSCOLUMNS                                                                                                                      |S   
 ij> insert into t1 (x) values (3);
 1 row inserted/updated/deleted
-ij> select  l.type, l.tablename, l.mode from new org.apache.derby.diag.LockTable() l order by tablename, type;
+ij> select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
 TYPE |TABLENAME                                                                                                                       |MODE
 -------------------------------------------------------------------------------------------------------------------------------------------
 ROW  |SYSCOLUMNS                                                                                                                      |X   

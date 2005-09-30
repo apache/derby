@@ -24,7 +24,7 @@ select
     case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
     cast (username as char(10)) as username,
     type 
-from new org.apache.derby.diag.TransactionTable() t;
+from syscs_diag.transaction_table;
 0 rows inserted/updated/deleted
 ij> select * from global_xactTable where gxid is not null order by gxid, username, status;
 GXID|STATUS  |READ&|USERNAME  |TYPE                          
@@ -108,7 +108,7 @@ GXID|STATUS  |READ&|USERNAME  |TYPE
 (3  |PREPARED|false|MAMTA     |UserTransaction               
 (4  |PREPARED|false|MAMTA     |UserTransaction               
 (5  |PREPARED|false|MAMTA     |UserTransaction               
-ij(LOCAL1)> select count(*) from new org.apache.derby.diag.LockTable() t where mode = 'X' or mode = 'IX';
+ij(LOCAL1)> select count(*) from syscs_diag.lock_table where mode = 'X' or mode = 'IX';
 1          
 -----------
 15         

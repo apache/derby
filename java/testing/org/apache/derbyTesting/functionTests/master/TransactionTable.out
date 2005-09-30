@@ -6,7 +6,7 @@ ij(C1)> set isolation to rr;
 ij(C1)> create view xactTable as
 select username, type, status,
 case when first_instant is NULL then 'readonly' else 'not readonly' end as readOnly, cast(sql_text as varchar(512)) sql_text
-  from new org.apache.derby.diag.TransactionTable() t
+  from syscs_diag.transaction_table
     where type != 'InternalTransaction';
 0 rows inserted/updated/deleted
 ij(C1)> commit;
@@ -34,7 +34,7 @@ USERNAME                                                                        
 APP                                                                                                                             |UserTransaction               |ACTIVE  |readonly    |select * from xactTable order by username, sql_text, status, type                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C1)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S' 
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -47,7 +47,7 @@ USERNAME                                                                        
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |select * from xactTable order by username, sql_text, status, type                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C1)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t ;
+from syscs_diag.lock_table ;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij(C1)> insert into foo values (1), (3), (5), (7), (9);
@@ -58,7 +58,7 @@ USERNAME                                                                        
 APP                                                                                                                             |UserTransaction               |ACTIVE  |not readonly|select * from xactTable order by username, sql_text, status, type                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C1)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -76,7 +76,7 @@ USERNAME                                                                        
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |select * from xactTable order by username, sql_text, status, type                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C1)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t;
+from syscs_diag.lock_table;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij(C1)> insert into foo values (6), (10);
@@ -93,7 +93,7 @@ APP                                                                             
 APP                                                                                                                             |UserTransaction               |ACTIVE  |not readonly|NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C2)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -108,7 +108,7 @@ APP                                                                             
 APP                                                                                                                             |UserTransaction               |ACTIVE  |not readonly|NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C2)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -128,7 +128,7 @@ APP                                                                             
 APP                                                                                                                             |UserTransaction               |ACTIVE  |not readonly|NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C2)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -148,7 +148,7 @@ APP                                                                             
 APP                                                                                                                             |UserTransaction               |ACTIVE  |not readonly|NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C2)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -173,7 +173,7 @@ APP                                                                             
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C2)> -- when last statement finished rolling back, this transaction should be IDLE;
 select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -191,7 +191,7 @@ APP                                                                             
 APP                                                                                                                             |UserTransaction               |ACTIVE  |not readonly|NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C2)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -208,7 +208,7 @@ USERNAME                                                                        
 APP                                                                                                                             |UserTransaction               |ACTIVE  |not readonly|select * from xactTable order by username, sql_text, status, type                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C1)> select type, lockcount as cnt, mode, tablename, lockname, state
-from new org.apache.derby.diag.LockTable() t
+from syscs_diag.lock_table
 where tableType <> 'S'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
@@ -225,7 +225,7 @@ USERNAME                                                                        
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |select * from xactTable order by username, sql_text, status, type                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 APP                                                                                                                             |UserTransaction               |IDLE    |readonly    |NULL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 ij(C1)> select l.type, lockcount as cnt, mode, tablename, lockname, state
-from   new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+from   syscs_diag.lock_table l right outer join syscs_diag.transaction_table t
        on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction'
 order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE

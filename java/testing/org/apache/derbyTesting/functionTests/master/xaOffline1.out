@@ -24,7 +24,7 @@ select
     case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
     cast (username as char(10)) as username,
     type 
-from new org.apache.derby.diag.TransactionTable() t;
+from syscs_diag.transaction_table;
 0 rows inserted/updated/deleted
 ij(XA)> run resource 'LockTableQuery.subsql';
 ij(XA)> create view lock_table as
@@ -39,7 +39,7 @@ select
     state,
     status
 from 
-    new org.apache.derby.diag.LockTable() l  right outer join new org.apache.derby.diag.TransactionTable() t
+    syscs_diag.lock_table l  right outer join syscs_diag.transaction_table t
 on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
 0 rows inserted/updated/deleted
 ij(XA)> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
@@ -58,7 +58,7 @@ select
     state,
     status
 from 
-    new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t
+    syscs_diag.lock_table l right outer join syscs_diag.transaction_table t
 on l.xid = t.xid where l.tableType <> 'S' ;
 0 rows inserted/updated/deleted
 ij(XA)> -- lock table with no join.
@@ -72,7 +72,7 @@ select
     cast(lockname as char(10)) as lockname,
     state
 from 
-    new org.apache.derby.diag.LockTable() l  
+    syscs_diag.lock_table l  
 where l.tableType <> 'S' ;
 0 rows inserted/updated/deleted
 ij(XA)> -- transaction table with no join.
@@ -80,7 +80,7 @@ create view tran_table as
 select 
     *
 from 
-    new org.apache.derby.diag.TransactionTable() t ;
+    syscs_diag.transaction_table;
 0 rows inserted/updated/deleted
 ij(XA)> xa_end xa_success 0;
 ij(XA)> xa_commit xa_1phase 0;

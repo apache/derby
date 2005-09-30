@@ -1538,4 +1538,13 @@ public interface DataDictionary
 		@return True if the database has been upgraded to the required level, false otherwise.
 	*/
 	public boolean checkVersion(int majorVersion, String feature) throws StandardException;
+	
+	/**
+	 * Return the Java class to use for the VTI for
+	 * the virtual table. Assumes the descriptor is
+	 * of type TableDescriptor.VTI_TYPE.
+	 */
+	public String getVTIClass(TableDescriptor td)
+		throws StandardException;
+
 }	

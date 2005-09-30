@@ -1101,7 +1101,7 @@ ij> insert into parent values (4, 1);
 ij> autocommit off ;
 ij> delete from t1 where a = 3;
 1 row inserted/updated/deleted
-ij> select type, mode, tablename from new org.apache.derby.diag.LockTable() t order by tablename, type;
+ij> select type, mode, tablename from syscs_diag.lock_table order by tablename, type;
 TYPE |MODE|TABLENAME                                                                                                                       
 -------------------------------------------------------------------------------------------------------------------------------------------
 ROW  |X   |PARENT                                                                                                                          

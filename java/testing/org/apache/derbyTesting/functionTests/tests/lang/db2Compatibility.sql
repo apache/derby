@@ -120,7 +120,7 @@ INSERT INTO NEW org.apache.derbyTesting.functionTests.util.serializabletypes.Ext
 select * from testCS, new org.apache.derbyTesting.functionTests.util.VTIClasses.PositiveInteger_VTICosting_SI(col1, 1) a;
 select * from new com.acme.myVTI() as T;
 select * from new org.apache.derbyTesting.not.myVTI() as T;
-select * from new org.apache.derby.diag.LockTable() as T;
+select * from syscs_diag.lock_table;
 
 -- VTI in CREATE TRIGGER statement
 -- beetle 5234

@@ -397,7 +397,7 @@ delete from default1;
 -- should see only one lock; earlier used to 
 -- see 2, one IX and one for X.
 select count(*)
- from new org.apache.derby.diag.LockTable() l 
+ from syscs_diag.lock_table
  where tablename = 'DEFAULT1' and type = 'TABLE';
 
 commit;

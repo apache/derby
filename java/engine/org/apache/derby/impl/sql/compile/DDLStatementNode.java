@@ -282,6 +282,7 @@ public abstract class DDLStatementNode extends StatementNode
 		String sqlState = null;
 
 		switch (td.getTableType()) {
+		case TableDescriptor.VTI_TYPE:
 		case TableDescriptor.SYSTEM_TABLE_TYPE:
 
 			/*

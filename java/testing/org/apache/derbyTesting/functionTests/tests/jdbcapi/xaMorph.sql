@@ -135,7 +135,7 @@ select
     status, 
     username, 
     type 
-from new org.apache.derby.diag.TransactionTable() t order by gxid, status, username, type;
+from syscs_diag.transaction_table order by gxid, status, username, type;
 
 select * from foo;
 delete from foo;

@@ -25,8 +25,6 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 
@@ -1666,6 +1664,22 @@ public final class	DataDictionaryImpl
 				: schema;
 
 		UUID schemaUUID = sd.getUUID();
+		
+		if (SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME.equals(
+				sd.getSchemaName()))
+		{
+			TableDescriptor td =
+				new TableDescriptor(this, tableName, sd,
+						TableDescriptor.VTI_TYPE,
+						TableDescriptor.DEFAULT_LOCK_GRANULARITY);
+			
+			// ensure a vti class exists
+			if (getVTIClass(td) != null)
+				return td;
+			
+			// otherwise just standard search
+		}
+				
 		TableKey tableKey = 	new TableKey(schemaUUID, tableName);
 
 		/* Only use the cache if we're in compile-only mode */
@@ -9426,6 +9440,37 @@ public final class	DataDictionaryImpl
 
 	private static List newSList() {
 		return java.util.Collections.synchronizedList(new java.util.LinkedList());
+	}
+
+	private String[][] DIAG_VTI_CLASSES =
+	{
+			{"LOCK_TABLE", "org.apache.derby.diag.LockTable"},
+			{"STATEMENT_CACHE", "org.apache.derby.diag.StatementCache"},
+			{"TRANSACTION_TABLE", "org.apache.derby.diag.TransactionTable"},
+			{"ERROR_MESSAGES", "org.apache.derby.diag.ErrorMessages"},
+			
+			
+	};
+	
+	/**
+	 * @see org.apache.derby.iapi.sql.dictionary.DataDictionary#getVTIClass(org.apache.derby.iapi.sql.dictionary.TableDescriptor)
+	 */
+	public String getVTIClass(TableDescriptor td) throws StandardException {
+		
+		if (SanityManager.DEBUG)
+		{
+			if (td.getTableType() != TableDescriptor.VTI_TYPE)
+				SanityManager.THROWASSERT("getVTIClass: Invalid table type " + td);
+		}
+		
+		for (int i = 0; i < DIAG_VTI_CLASSES.length; i++)
+		{
+			String[] entry = DIAG_VTI_CLASSES[i];
+			if (entry[0].equals(td.getDescriptorName()))
+				return entry[1];	
+		}	
+		
+		return null;
 	}
 }
 

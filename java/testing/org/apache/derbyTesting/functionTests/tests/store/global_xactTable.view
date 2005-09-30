@@ -5,4 +5,4 @@ select
     case when first_instant is NULL then 'NULL' else 'false' end as readOnly,
     cast (username as char(10)) as username,
     type 
-from new org.apache.derby.diag.TransactionTable() t;
+from syscs_diag.transaction_table;

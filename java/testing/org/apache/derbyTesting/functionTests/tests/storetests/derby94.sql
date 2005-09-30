@@ -1,7 +1,7 @@
 create view lock_table as select 
 cast(l.type as char(8)) as type,cast(lockcount as char(3)) as
 cnt,mode,cast(tablename as char(12)) as tabname,cast(lockname as char(10))
-as lockname,state from new org.apache.derby.diag.LockTable() l ;
+as lockname,state from syscs_diag.lock_table l ;
 autocommit off;
 create table derby94_t1(c1 int, c2 int not null primary key);
 create table derby94_t2(c1 int);
