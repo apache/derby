@@ -83,6 +83,21 @@ public class characterStreams {
 		System.out.println("Test characterStreams finished");
   }
 
+    
+    
+       private static void expectedException(SQLException sqle) {
+
+        while (sqle != null) {
+            String sqlState = sqle.getSQLState();
+            if (sqlState == null) {
+                sqlState = "<NULL>";
+            }
+            System.out.println("EXPECTED SQL Exception: (" + sqlState + ") "
+                    + sqle.getMessage());
+
+            sqle = sqle.getNextException();
+        }
+    }
 	static void setStreams(Connection conn) throws Exception {
 
 		ResultSet rs;
@@ -227,7 +242,8 @@ public class characterStreams {
 			ps.executeUpdate();
 			System.out.println("FAIL - MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - ACCEPTED");
 		} catch (SQLException sqle) {
-			System.out.println("MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED " + sqle.toString());
+			System.out.println("MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED ");
+            expectedException(sqle);
 		}
 
 		// more bytes than the stream contains
@@ -238,7 +254,8 @@ public class characterStreams {
 			ps.executeUpdate();
 			System.out.println("FAIL - LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - ACCEPTED");
 		} catch (SQLException sqle) {
-			System.out.println("LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED " + sqle.toString());
+			System.out.println("LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED ");
+            expectedException(sqle);
 		}
 
 		// null
@@ -263,7 +280,8 @@ public class characterStreams {
 			ps.executeUpdate();
 			System.out.println("FAIL - MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - ACCEPTED");
 		} catch (SQLException sqle) {
-			System.out.println("MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED " + sqle.toString());
+			System.out.println("MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED ");
+            expectedException(sqle);
 		}
 
 		// more bytes than the stream contains,
@@ -273,7 +291,8 @@ public class characterStreams {
 			ps.executeUpdate();
 			System.out.println("FAIL - LESS CHARACTERS IN READER THAN SPECIFIED LENGTH - ACCEPTED");
 		} catch (SQLException sqle) {
-			System.out.println("LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED " + sqle.toString());
+			System.out.println("LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED ");
+            expectedException(sqle);
 		}
 
 		// null
