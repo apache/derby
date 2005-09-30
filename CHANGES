@@ -1,187 +1,31 @@
-Changes in Derby 10.1.1.0 (since 10.0.2.1)
+Changes in  the Derby 10.1.1.1/292391 since the official 10.1 reease, 10.1.1.0/SVN 208786
 
- * Enhance Derby to support INTERSECT and EXCEPT clauses 
-   [Jack Klebanoff <klebanof@Mutagen.Net>]
+Complete Details for version 10.1.1.1 can be veiwed at:
+http://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12310332&styleName=Text&projectId=10594&Create=Create
 
- * XA support for Network Server
-   [Katherine Marsden <kmarsden@sourcery.org>]
+** Bug fixes
+    * [DERBY-385] - servlet Back to Main Page link points to csnet instead of derbynet
+    * [DERBY-388] - Intermittent failures when executing UPDATE trigger statements
+    * [DERBY-406] - Client DataSource should not require user property to be set
+    * [DERBY-409] - ClientDataSource setConnectionAttributes("create=true") fails with   "An attempt was made to access a database, mydbcreate=true, which was not found."
+    * [DERBY-410] - ClientDataSource should not require serverName/portNumber to  be set
+    * [DERBY-414] - With Network Client starting an XA transaction resets the isolation level set with setTransactionIsolation
+    * [DERBY-440] - derby.jar has directory (package) entries in it which are not required
+    * [DERBY-447] - getBoolean() throws data conversion exception for DECIMAL type in J2ME/CDC/Foundation
+    * [DERBY-452] - Import/export fails for DECIMAL type in J2ME/Foundation
+    * [DERBY-470] - Exception when using LOCALIZEDDISPLAY with JSR169
+    * [DERBY-476] - Derby UI plug-in version 1.0.0 incompatible with Eclipse 3.1 M6 or higher
+    * [DERBY-485] - SecurityException or LinkageException thrown during loading a class from a database jar incorrectly shuts the engine down.
+    * [DERBY-488] - DatabaseMetaData.getColumns() fails on iSeries JDK 1.4 with verfier error on generated class.
+    * [DERBY-518] - Data type mismatch error for boolean to DECIMAL conversion in J2ME
+    * [DERBY-530] - ClientDriver ignores Properties object in connect(String url, Properties connectionProperties) method
+    * [DERBY-535] - Driver.acceptsURL() for embedded driver incorrectly returns true for a client url like jdbc:derby://
+    * [DERBY-540] - Loading databases from jars in the classpath is broken, databases cannot be found.
+    * [DERBY-559] - With Network Client, user and password attriubtes specified in the url should not  be sent to hte server with the RDBNAM or print with getURL
+    * [DERBY-561] - embedded driver jdbcCompliant() method should return true
+    * [DERBY-566] - Doc bug for saving ij output to a file
 
- * Increases the maximum possible log file number to  231 -1  and  keeps the
-   old limit of 222-1 on soft upgrade.
-   [Suresh Thalamati <suresh.thalamati@gmail.com>]
 
- * Derby network client. Derby client is a type 4 JDBC client driver,
-   designed to work with Derby network server.
-   [Satheesh Bandaram]
-
- * Allow the user to specify the host/port on the command line
-   or via the variables DERBY_SERVER_HOST and DERBY_SERVER_PORT
-   in startNetworkServer and stopNetworkServer scripts
-   [Lance Anderson <Lance.Anderson@sun.com>]
-
- * Derby-13: Correctly compare exposed names using TableName objects
-   and not simple Strings.
-   [Shreyas Kaushik <Shreyas.Kaushik@Sun.COM>]
-
- * Derby-18: Exposed name matching has bugs when the column
-   name is qualified with a schema name.
-   [Shreyas Kaushik <Shreyas.Kaushik@Sun.COM>]
-
- * Derby-19: Handle IOException on invalid service name, e.g. device not ready
-   on path to CD-ROM.
-   [Dan Debrunner]
-
- * Derby-62: Serialization of SQLExcepton thrown by Derby throws error due to
-   references to non-serializable objects
-   [Dan Debrunner]
-
- * Derby-81: Add support for JDBC escape functions timestampAdd and 
-   timestampDiff.
-   [Jack Klebanoff <klebanoff-derby@sbcglobal.net>]
-
- * Derby-89: support of explicit Java method signature in
-   function and procedure defintions. 
-   [Jeremy Boynes <jboynes@apache.org]>
-
- * Derby-95: NullPointerExceptionwith XA Connections if databaseName property
-   is incorrectly stated as a JDBC URL.
-   [Shreyas Kaushik <Shreyas.Kaushik@Sun.COM>]
-
- * Derby-96: Checksum support for transactionlog to handle out of order
-   incomplete log writes during recovery.
-   [Suresh Thalamati]
-
- * Derby-97: JSR169 support
-   [Dan Debrunner <djd@debrunners.com>]
-
- * Derby-98: Implement ResultSet.deleteRow() for forward only ResultSets. 
-   [Mamta Satoor <mamta@Remulak.Net>]
-
- * Derby-104: Increase ALL identifier lengths to 128.
-   [Bernt Johnsen <Bernt.Johnsen@Sun.COM>]
-
- * Derby-106: BackingStoreHashTable actually spills over to disk when 
-   necessary.  Prior to this fix it was possible for
-   hash joins to fail with out of memory errors, when they should instead
-   have spilled to disk.
-   [Jack Klebanoff]
-
- * Derby-107: Add metadata support for ODBC metadata calls.
-   [Army Brown <qozinx@sbcglobal.net>]
-
- * DERBY-121: Fix Network Server handling of blob/clob data size
-   [Army Brown]
-
- * Derby-123: Derby incorrectly rounds double/real values during conversion
-   to DECIMAL types.
-   [Shreyas Kaushik <Shreyas.Kaushik@Sun.COM>]
-
- * Derby-124: Set the result type for CONCAT operator correctly for BLOBs 
-   and CLOBs.  
-   [Mamta Satoor <mamta@Remulak.Net>]
-
- * Derby-127: Handle the case of select statements that use a correlation names
-   in the select list, a group by clause, and an order by clause that refers
-   to a column by its database name instead of its correlation name. (Eg:
-   select c1 as x from t where ... group by x order by c1)
-   [Jack Klebanoff <klebanoff-derby@sbcglobal.net>]
-
- * Derby-130: IDENTITY_VAL_LOCAL not reset when EmbedConnection object re-used
-   from pool
-   [Dan Debrunner <djd@debrunners.com>]
-
- * Derby-132 - Add online compress functionality through 
-   SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE function.
-   [Mike Matrigali]
-
- * Derby-134: Improvement to allow ordering by expressions, instead of
-   correlation names or column positions only.
-   [Tomohito Nakayama <tomonaka@basil.ocn.ne.jp>]
-
- * Derby-139: Remove LOCAL as a SQL reserved word. 
-   [Dan Debrunner <djd@debrunners.com>]
-
- * Derby-155: Allow DISTINCT in UNION/INTERSECT/EXCEPT
-   [Jeremy Boynes <jboynes@apache.org>]
-
- * Derby-157: Catch Illegal values for date, time and timestamp.
-   [Army Brown <qozinx@sbcglobal.net>]
-
- * Derby-158: PRIMARY KEY are implicitly set to NOT NULL per the SQL spec
-   [Jeremy Boynes]
-
- * Derby-167: Add support for BY DEFAULT option to IDENTITY columns. 
-   [Tomohito Nakayama <tomonaka@basil.ocn.ne.jp>]
-
- * Derby-173: For the concurrency of ResultSet, Network Server should not send
-   the concurrency of Statement
-   [Mamta Satoor]
-
- * Derby-174 & Derby-175: Make setNull work with Timestamp and Blob datatypes.
-   [Shreyas Kaushik <Shreyas.Kaushik@Sun.COM>]
-
- * Derby-176: Fix errors in generated classes for queries with many joins
-   [Dan Debrunner]
-
- * Derby-184: Network Server frameworks scripts should support Derby network 
-   client driver
-   [Lance Andersen <Lance.Andersen@sun.com>]
-
- * Derby-186: Set currentPosition for scrollable cursors when moving past the
-   last row.
-   [Shreyas Kaushik]
-
- * Derby-194: Modify Derby metadata for datetime values so that the correct
-   "precision" and "scale" for those types will be returned in metadata calls.
-   [Army Brown]
-
- * Derby-203: setNull(x,JDBCType.DATE) does not work when batching is turned on
-   [Shreyas Kaushik <Shreyas.Kaushik@Sun.COM>]
-
- * Derby-214: Remove System.exit from NetworkServerControlImpl
-   [David Van Couvering <David.Vancouvering@sun.com>]
-
- * Derby-218: relaxed durability option - useful for unit testing or at
-   development time when recoverability is not required.
-   [Sunitha Kambhampati <ksunithaghm@gmail.com>]
-
- * Derby-225: Handle negative scale values for BigDecimal values introduced
-   in J2SE 5.0.
-   [Dan Debrunner]
-
- * Derby-229: Return first matching column name, instead of last column in 
-   the select list for getter methods.
-   [Shreyas Kaushik]
-
- * Derby-230: Handle the case of someone else creating a schema from the time
-   we check if it exists to creating it if not.
-   [Oystein Grovlen <Oystein.Grovlen@Sun.COM>]
-
- * DERBY-243 Change connection toString to print connection id
-   [David Van Couvering]
-
- * Derby-251: DISTINCT query returning duplicate rows because of incorrectly
-   applying distinct elimination logic.
-   [Mamta Satoor]
-
- * DERBY-255: Release locks properly after closing a resultset after retriving
-   BLOB or CLOB data > 32K
-   [Army Brown]
-
- * DERBY-258 - Ensure declared signature Java types are mappable to the
-   parameter types, as specified in the SQL2003 spec part 13.
-   [Dan Debrunner]
-
- * Derby-263: Remove UNICODEESCAPE IJ option
-   [Satheesh Bandaram <satheesh@sourcery.org>]
-
- * Derby-265: In Network Server retrieving BLOB values with autocommit off
-   causes NullPointerException
-   [Sunitha Kambhampati <ksunithaghm@gmail.com>]
-
- * Derby-335: Add SQL SYNONYM support
-   [Satheesh Bandaram <satheesh@sourcery.org>
-
- * DERBY-337: Enhance dblook to support SQL functions.
-   [Army Brown <qozinx@sbcglobal.net>]
-
+** Improvement
+    * [DERBY-419] - Support direct execution of derbynet.jar using the -jar option of the VM.
+    * [DERBY-468] - Unreserve COUNT keyword, if possible.

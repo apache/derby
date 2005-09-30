@@ -1,8 +1,33 @@
-Derby is an effort undergoing incubation at the Apache Software Foundation 
-(ASF), sponsored by the Apache DB project. Incubation is required of all
-newly accepted projects until a further review indicates that the
-infrastructure, communications, and decision making process have stabilized
-in a manner consistent with other successful ASF projects. While incubation
-status is not necessarily a reflection of the completeness or stability of 
-the code, it does indicate that the project has yet to be fully endorsed by 
-the ASF.
+Apache Derby is a subproject of the Apache DB project.
+You can find Derby on the web at:
+
+http://db.apache.org/derby/
+
+Apache Derby releases can be downloaded from the following page:
+
+http://db.apache.org/derby/derby_downloads.html
+
+Derby is a pure Java, standards-based relational database engine.
+Derby aims to be an easy to use solution for data management for
+software developers with zero administration for end users.
+
+The 10.1 release includes a new open source network client driver, as
+well as a number of other new features and enhancements:
+
+    * Support for J2ME/CDC/Foundation with JSR-169 JDBC subset
+    * Online compress functionality for reclaiming disk space during
+operation
+    * XA support for Network Server
+    * Increased identifier lengths to 128 characters for all identifiers
+    * Added SQL: INTERSECT and EXCEPT
+    * Added SQL: SYNONYM
+    * JDBC Updatable Result Sets
+    * ORDER by expressions
+    * Allow insertions into an identity column
+    * Support for explicit Java method signature in function and
+procedure definitions
+
+
+See the CHANGES file for a list of changes in the lastest snapshot or release distribution of 10.1.
+
+
