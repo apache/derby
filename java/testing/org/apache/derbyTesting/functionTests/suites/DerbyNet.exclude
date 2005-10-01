@@ -7,6 +7,10 @@
 # excluding jdbcapi/SetQueryTimeoutTest.java because neither the JCC driver nor the ClientDriver support setQueryTimeout() yet.
 # excluding lang/updatableResultSet.java because changes are required in JCC Driver for this test to run correctly
 # excluding jdbcapi/rsgetXXXcolumnNames.java as it fails incorrectly, according to JDBC spec. Forwarding test case to JCC team.
+# excluding jdbcapi/resultsetJdbc30.java because the features tested are not implemented by JCC driver or ClientDriver
+# excluding jdbcapi/checkDataSource30.java - Client behaves differently. Need to look into this
+# excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
+# excluding jdbcapi/holdCursorJava.java - JCC behaves differently with hold cursors.
 jdbcapi/resultsetStream.java
 lang/errorStream.java
 lang/scrollCursors2.java
@@ -17,3 +21,7 @@ jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
 lang/updatableResultSet.java
 jdbcapi/blobSetBinaryStream.java
+jdbcapi/resultsetJdbc30.java
+jdbcapi/checkDataSource30.java
+jdbcapi/statementJdbc30.java
+lang/holdCursorJava.java
