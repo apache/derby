@@ -129,6 +129,10 @@ public class ClientDriver implements java.sql.Driver {
                         port,
                         database,
                         augmentedProperties);
+        
+        if(conn.isConnectionNull())
+        	return null;
+        
         return conn;
     }
 

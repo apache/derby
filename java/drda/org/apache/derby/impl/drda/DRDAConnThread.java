@@ -973,6 +973,13 @@ public class DRDAConnThread extends Thread {
 		verifyRequiredObject(codePoint,CodePoint.ACCRDB);
 		int svrcod = parseACCRDB();
 
+		//If network server gets a null connection form InternalDriver, reply with
+		//RDBAFLRM and SQLCARD with null SQLException 
+		if(database.getConnection() == null && databaseAccessException == null){
+			writeRDBfailure(CodePoint.RDBAFLRM);
+			return false;
+		}		
+		
 		//if earlier we couldn't access the database
 		if (databaseAccessException != null)
 		{
@@ -983,43 +990,16 @@ public class DRDAConnThread extends Thread {
 				|| failureType == CodePoint.RDBATHRM)
 			{
 				writeRDBfailure(failureType);
-				writeSQLCARD(databaseAccessException,
-					CodePoint.SVRCOD_ERROR,0,0);
 			}
 			else
 			{
 				writeRDBfailure(CodePoint.RDBAFLRM);
-
-				// RDBAFLRM requires TYPDEFNAM and TYPDEFOVR
-				writer.createDssObject();
-				writer.writeScalarString(CodePoint.TYPDEFNAM,
-										 CodePoint.TYPDEFNAM_QTDSQLASC);
-				writeTYPDEFOVR();
-				writer.endDss();
-
-				// Finally, per DDM spec, "an SQLCARD always follows
-				// the RDBAFLRM".
-				writeSQLCARD(databaseAccessException,
-							 CodePoint.SVRCOD_ERROR,0,0);
 			}
-
-			// Ignore anything that was chained to the ACCRDB.
-			skipRemainder(false);
-
-			// Finalize chain state for whatever we wrote in
-			// response to ACCRDB.
-			finalizeChain();
 			return false;
 		}
 		else if (database.accessCount > 1 )	// already in conversation with database
 		{
 			writeRDBfailure(CodePoint.RDBACCRM);
-
-			// Ignore anything that was chained to the ACCRDB.
-			skipRemainder(false);
-
-			// Finalize chain state for RDBACCRM
-			finalizeChain();
 			return false;
 		}
 		else // everything is fine 
@@ -1049,7 +1029,28 @@ public class DRDAConnThread extends Thread {
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, CodePoint.SVRCOD_ERROR);
 		writeRDBNAM(database.dbName);
     	writer.endDdmAndDss();
+    	
+    	switch(codePoint){
+    		case CodePoint.RDBAFLRM:
+    			//RDBAFLRM requires TYPDEFNAM and TYPDEFOVR
+    			writer.createDssObject();
+    			writer.writeScalarString(CodePoint.TYPDEFNAM,
+    									 CodePoint.TYPDEFNAM_QTDSQLASC);
+    			writeTYPDEFOVR();
+    			writer.endDss();
+    		case CodePoint.RDBNFNRM:
+    		case CodePoint.RDBATHRM:
+    			writeSQLCARD(databaseAccessException,CodePoint.SVRCOD_ERROR,0,0);
+    		case CodePoint.RDBACCRM:
+    			//Ignore anything that was chained to the ACCRDB.
+    			skipRemainder(false);
 
+    			// Finalize chain state for whatever we wrote in
+    			// response to ACCRDB.
+    			finalizeChain();
+    			break;
+    	}
+    	
 	}
 
 	/* Check the database access exception and return the appropriate

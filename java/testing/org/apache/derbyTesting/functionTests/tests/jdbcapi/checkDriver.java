@@ -49,6 +49,19 @@ public class checkDriver {
 	
 	private static String DERBY_SYSTEM_HOME = System.getProperty("derby.system.home");
 	
+	private static String CLIENT_URL_WITH_COLON1 = 
+		"jdbc:derby://localhost:1527/wombat:create=true";
+	private static String CLIENT_URL_WITH_COLON2 = 
+		"jdbc:derby://localhost:1527/"+ DERBY_SYSTEM_HOME + File.separator +"wombat:create=true";
+	private static String CLIENT_URL_WITH_DOUBLE_QUOTES1 = 
+		"jdbc:derby://localhost:1527/\"wombat\";create=true"; 
+	private static String CLIENT_URL_WITH_DOUBLE_QUOTES2 = 
+		"jdbc:derby://localhost:1527/\"" + DERBY_SYSTEM_HOME + File.separator + "wombat\";create=true";
+	private static String CLIENT_URL_WITH_SINGLE_QUOTES1 = 
+		"jdbc:derby://localhost:1527/'" + DERBY_SYSTEM_HOME + File.separator + "wombat';create=true";
+	private static String CLIENT_URL_WITH_SINGLE_QUOTES2 = 
+		"jdbc:derby://localhost:1527/'wombat';create=true";
+	
 	// URLS to check.  New urls need to also be added to the acceptsUrl table
 	private static String[] urls = new String[]
 	{
@@ -58,6 +71,16 @@ public class checkDriver {
 		INVALID_URL,
 	};
 	
+	//Client URLS
+	private static String[] clientUrls = new String[]
+	{
+		CLIENT_URL_WITH_COLON1,
+		CLIENT_URL_WITH_COLON2,
+		CLIENT_URL_WITH_DOUBLE_QUOTES1,
+		CLIENT_URL_WITH_DOUBLE_QUOTES2,
+		CLIENT_URL_WITH_SINGLE_QUOTES1,
+		CLIENT_URL_WITH_SINGLE_QUOTES2
+	};
 	
 	/**
 	 * url prefix for this framework
@@ -102,6 +125,7 @@ public class checkDriver {
 			checkAcceptsURL(driver);
 			testEmbeddedAttributes(driver);
 			testClientAttributes(driver);
+			doClientURLTest(driver);
 		}
 		catch (SQLException se)
 		{
@@ -321,6 +345,34 @@ public class checkDriver {
 	}
 	
 	/**
+	 * Tests client URLs to see connection is successful or the correct exception is thrown.
+	 * 
+	 * @param driver
+	 * @throws SQLException
+	 */
+	private static void doClientURLTest(Driver driver){
+		if (!TestUtil.isDerbyNetClientFramework())
+			return;
+		
+		System.out.println("doClientURLTest()");
+		Properties info = null;		//test with null Properties object
+
+		for (int i = 0; i < clientUrls.length;i++)
+		{
+			String url = clientUrls[i];
+			System.out.println("doClientURLTest with url: " + replaceSystemHome(url));
+			try{
+				Connection conn = testConnect(driver,url,info);
+				if(conn != null)
+					System.out.println("PASSED:Connection Successful with url: " + replaceSystemHome(url) );
+			}
+			catch(SQLException se){
+				System.out.println("EXPECTED EXCEPTION:"+replaceSystemHome(se.getMessage()));
+			}
+		}
+	}	
+	
+	/**
 	 * Make  java.sql.Driver.connect(String url, Properties info call) and print the status of
 	 * the connection.
 	 * 
@@ -330,13 +382,18 @@ public class checkDriver {
 	 * 
 	 * @throws SQLException on error.
 	 */
-	private static void testConnect(Driver driver, String url, Properties info) throws SQLException
+	private static Connection testConnect(Driver driver, String url, Properties info) throws SQLException
 	{
 		String infoString = null;
 		if (info != null)
 			infoString = replaceSystemHome(info.toString());
 		String urlString = replaceSystemHome(url);
 		Connection conn = driver.connect(url,info);
+		
+		if(conn == null){
+			System.out.println("Null connection returned for url "+urlString);
+			return conn;
+		}
 		
 		System.out.println("\nConnection info for connect(" + urlString + ", " + infoString +")");
 		String getUrlValue = conn.getMetaData().getURL();
@@ -350,7 +407,7 @@ public class checkDriver {
 		rs.next();
 		System.out.println("CURRENT SCHEMA = " + rs.getString(1));
 		conn.close();
-
+		return conn;
 	}
 
 
