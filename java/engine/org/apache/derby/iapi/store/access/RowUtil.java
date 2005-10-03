@@ -243,14 +243,12 @@ public class RowUtil
 
 	/**
 		See if a row actually contains no columns.
-		Returns true if row is null, row.length is null,
-		or columnList is not null but has not bits set.
+		Returns true if row is null or row.length is zero.
 
-		@return true if no columns are selected in this row.
+		@return true if row is empty.
 	*/
 	public static boolean isRowEmpty(
-    DataValueDescriptor[]   row, 
-    FormatableBitSet                 columnList) 
+    DataValueDescriptor[]   row) 
     {
 
 		if (row == null)
@@ -259,14 +257,6 @@ public class RowUtil
 		if (row.length == 0)
 			return true;
 
-		if (columnList == null)
-			return false;
-
-		int size = columnList.getLength();
-		for (int i = 0; i < size; i--) {
-			if (columnList.isSet(i))
-				return true;
-		}
 		return false;
 	}
 

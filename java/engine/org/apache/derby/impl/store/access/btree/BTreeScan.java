@@ -239,7 +239,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 	{
         // startKeyValue init.
 	    this.init_startKeyValue         = startKeyValue;
-		if (RowUtil.isRowEmpty(this.init_startKeyValue, (FormatableBitSet) null))
+		if (RowUtil.isRowEmpty(this.init_startKeyValue))
 			this.init_startKeyValue = null;
 
         // startSearchOperator init.
@@ -252,7 +252,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
         // stopKeyValue init.
 	    this.init_stopKeyValue          = stopKeyValue;
-        if (RowUtil.isRowEmpty(this.init_stopKeyValue, (FormatableBitSet) null))
+        if (RowUtil.isRowEmpty(this.init_stopKeyValue))
             this.init_stopKeyValue = null;
 
         // stopSearchOperator init.

@@ -663,8 +663,8 @@ public final class Heap
 	{
         // Heap scans do not suppport start and stop scan positions (these
         // only make sense for ordered storage structures).
-		if (!RowUtil.isRowEmpty(startKeyValue, (FormatableBitSet) null)
-			|| !RowUtil.isRowEmpty(stopKeyValue, (FormatableBitSet) null))
+		if (!RowUtil.isRowEmpty(startKeyValue)
+			|| !RowUtil.isRowEmpty(stopKeyValue))
 		{
             throw StandardException.newException(
                     SQLState.HEAP_UNIMPLEMENTED_FEATURE);
