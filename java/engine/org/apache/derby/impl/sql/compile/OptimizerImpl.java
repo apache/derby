@@ -348,27 +348,121 @@ public class OptimizerImpl implements Optimizer
 			}
 			else if (permuteState == JUMPING)  //still jumping
 			{
-				nextOptimizable = firstLookOrder[joinPosition];
-				Optimizable nextOpt = optimizableList.getOptimizable(nextOptimizable);
-				if (! (nextOpt.legalJoinOrder(assignedTableMap)))
+				/* We're "jumping" to a join order that puts the optimizables
+				** with the lowest estimated costs first (insofar as it
+				** is legal to do so).  The "firstLookOrder" array holds the
+				** ideal join order for position <joinPosition> up thru
+				** position <numOptimizables-1>.  So here, we look at the
+				** ideal optimizable to place at <joinPosition> and see if
+				** it's legal; if it is, then we're done.  Otherwise, we
+				** swap it with <numOptimizables-1> and see if that gives us
+				** a legal join order w.r.t <joinPosition>.  If not, then we
+				** swap it with <numOptimizables-2> and check, and if that
+				** fails, then we swap it with <numOptimizables-3>, and so
+				** on.  For example, assume we have 6 optimizables whose
+				** order from least expensive to most expensive is 2, 1, 4,
+				** 5, 3, 0.  Assume also that we've already verified the
+				** legality of the first two positions--i.e. that joinPosition
+				** is now "2". That means that "firstLookOrder" currently
+				** contains the following:
+				**
+				** [ pos ]    0  1  2  3  4  5
+				** [ opt ]    2  1  4  5  3  0
+				**
+				** Then at this point, we do the following:
+				**
+				**  -- Check to see if the ideal optimizable "4" is valid
+				**     at its current position (2)
+				**  -- If opt "4" is valid, then we're done; else we
+				**     swap it with the value at position _5_:
+				**
+				** [ pos ]    0  1  2  3  4  5
+				** [ opt ]    2  1  0  5  3  4
+				**
+				**  -- Check to see if optimizable "0" is valid at its
+				**     new position (2).
+				**  -- If opt "0" is valid, then we're done; else we
+				**     put "0" back in its original position and swap
+				**     the ideal optimizer ("4") with the value at
+				**     position _4_:
+				**
+				** [ pos ]    0  1  2  3  4  5
+				** [ opt ]    2  1  3  5  4  0
+				**
+				**  -- Check to see if optimizable "3" is valid at its
+				**     new position (2).
+				**  -- If opt "3" is valid, then we're done; else we
+				**     put "3" back in its original position and swap
+				**     the ideal optimizer ("4") with the value at
+				**     position _3_:
+				**
+				** [ pos ]    0  1  2  3  4  5
+				** [ opt ]    2  1  5  4  3  0
+				**
+				**  -- Check to see if optimizable "5" is valid at its
+				**     new position (2).
+				**  -- If opt "5" is valid, then we're done; else we've
+				**     tried all the available optimizables and none
+				**     of them are legal at position 2.  In this case,
+				**     we give up on "JUMPING" and fall back to normal
+				**     join-order processing.
+				*/
+
+				int idealOptimizable = firstLookOrder[joinPosition];
+				nextOptimizable = idealOptimizable;
+				int lookPos = numOptimizables;
+				int lastSwappedOpt = -1;
+
+				Optimizable nextOpt;
+				for (nextOpt = optimizableList.getOptimizable(nextOptimizable);
+					!(nextOpt.legalJoinOrder(assignedTableMap));
+					nextOpt = optimizableList.getOptimizable(nextOptimizable))
 				{
-					if (joinPosition < numOptimizables - 1)
-					{
-						firstLookOrder[joinPosition] = firstLookOrder[numOptimizables - 1];
-						firstLookOrder[numOptimizables - 1] = nextOptimizable;
+					// Undo last swap, if we had one.
+					if (lastSwappedOpt >= 0) {
+						firstLookOrder[joinPosition] = idealOptimizable;
+						firstLookOrder[lookPos] = lastSwappedOpt;
 					}
-					else
-						permuteState = NO_JUMP; //not good
-					if (joinPosition > 0)
-					{
-						joinPosition--;
-						rewindJoinOrder();  //jump again?
+
+					if (lookPos > joinPosition + 1) {
+					// we still have other possibilities; get the next
+					// one by "swapping" it into the current position.
+						lastSwappedOpt = firstLookOrder[--lookPos];
+						firstLookOrder[joinPosition] = lastSwappedOpt;
+						firstLookOrder[lookPos] = idealOptimizable;
+						nextOptimizable = lastSwappedOpt;
 					}
-					continue;
+					else {
+					// we went through all of the available optimizables
+					// and none of them were legal in the current position;
+					// so we give up and fall back to normal processing.
+						if (joinPosition > 0) {
+							joinPosition--;
+							rewindJoinOrder();
+						}
+						permuteState = NO_JUMP;
+						break;
+					}
 				}
 
-				if (joinPosition == numOptimizables - 1) //ready to walk
-					permuteState = WALK_HIGH;  //walk high hill
+				if (permuteState == NO_JUMP)
+					continue;
+
+				if (joinPosition == numOptimizables - 1) {
+				// we just set the final position within our
+				// "firstLookOrder" join order; now go ahead
+				// and search for the best join order, starting from
+				// the join order stored in "firstLookOrder".  This
+				// is called walking "high" because we're searching
+				// the join orders that are at or "above" (after) the
+				// order found in firstLookOrder.  Ex. if we had three
+				// optimizables and firstLookOrder was [1 2 0], then
+				// the "high" would be [1 2 0], [2 0 1] and [2 1 0];
+				// the "low" would be [0 1 2], [0 2 1], and [1 0 2].
+				// We walk the "high" first, then fall back and
+				// walk the "low".
+					permuteState = WALK_HIGH;
+				}
 			}
 			else
 			{

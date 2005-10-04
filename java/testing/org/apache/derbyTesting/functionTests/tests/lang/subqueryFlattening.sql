@@ -377,3 +377,43 @@ drop table t1;
 drop table t2;
 drop table t3;
 drop table t4;
+
+-- Test case for DERBY-558: optimizer hangs in rare cases where
+-- multiple subqueries flattened to EXISTS put multiple restrictions
+-- on legal join orders.
+
+create table digits (d int);
+insert into digits values 1, 2, 3, 4, 5, 6, 7, 8, 9, 0;
+
+create table odd (o int);
+insert into odd values 1, 3, 5, 7, 9;
+commit;
+
+-- In order to test this, "noTimeout" must be true so that
+-- the optimizer will run through all of the possible join
+-- orders before it quits.  In the case of DERBY-558 the
+-- optimizer was getting stuck in a logic loop and thus never
+-- quit, causing the hang.  NOTE: The "noTimeout" property
+-- is set in the subqueryFlattening_derby.properties file.
+
+select distinct temp_t0.d from 
+	(select d from digits where d > 3) temp_t0,
+	(select o from odd) temp_t1,
+	odd temp_t4,
+	(select o from odd) temp_t3
+	where temp_t0.d = temp_t1.o
+		and temp_t0.d = temp_t3.o
+		and temp_t0.d in (select o from odd where o = temp_t1.o)
+ 		and exists (
+			select d from digits
+				where d = temp_t0.d)
+
+-- Before fix for DERBY-558, we would HANG (loop indefinitely) here;
+-- after fix, we should see three rows returned.
+;
+
+-- clean-up.
+
+drop table digits;
+drop table odd;
+
