@@ -1260,7 +1260,7 @@
     <property file="${basedir}/snapshot/maintversion.properties"/>
     <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,CHANGES,README,frameworks/**,javadoc/publishedapi/**"/>
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
     </zip>
     <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
