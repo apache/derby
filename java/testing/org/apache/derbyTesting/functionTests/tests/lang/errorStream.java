@@ -148,6 +148,7 @@ public class errorStream
       try {
          methodStream.close();
          fieldStream.close();
+	 errStream.close();
 
 	 // reset until next scenario, no expected output
 	 System.setErr(System.out); 
