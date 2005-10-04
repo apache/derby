@@ -106,6 +106,7 @@ public interface PreparedStatement
  	 * @param rollbackParentContext True if 1) the statement context is
 	 *  NOT a top-level context, AND 2) in the event of a statement-level
 	 *	 exception, the parent context needs to be rolled back, too.
+     * @param timeoutMillis timeout value in milliseconds.
 	 *
 	 * @return	A ResultSet for a statement. A ResultSet represents
 	 *		the results returned from the statement, if any.
@@ -114,25 +115,21 @@ public interface PreparedStatement
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	ResultSet	execute(Activation activation, boolean executeQuery, boolean executeUpdate,
-		boolean rollbackParentContext) throws StandardException;
+    ResultSet execute(Activation activation,
+                      boolean executeQuery,
+                      boolean executeUpdate,
+                      boolean rollbackParentContext,
+                      long timeoutMillis)
+        throws StandardException;
 
 	/**
 		Simple form of execute(). Creates a new single use activation and executes it,
 		but also passes rollbackParentContext parameter (see above).
 	*/
-	ResultSet	execute(LanguageConnectionContext lcc, boolean rollbackParentContext)
-		throws StandardException;
-
-    /**
-     * Sets the timeout for execution of this statement.
-     * The timeout value will be set in the assigned StatementContext object.
-     *
-     * @param timeoutMillis timeout value in milliseconds.
-     *
-     * @see org.apache.derby.iapi.sql.conn.StatementContext
-     */
-    void setQueryTimeout(long timeoutMillis);
+    ResultSet execute(LanguageConnectionContext lcc,
+                      boolean rollbackParentContext,
+                      long timeoutMillis)
+        throws StandardException;
 
 	/**
 	 * Get the ResultDescription for the statement.  The ResultDescription

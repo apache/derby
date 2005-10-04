@@ -1138,8 +1138,11 @@ public class EmbedStatement extends ConnectionChild
 				a.reset();
 				a.setMaxRows(maxRows);
                 long timeoutMillis = (long)timeoutSeconds * 1000L;
-                ps.setQueryTimeout(timeoutMillis);
-				ResultSet resultsToWrap = ps.execute(a, executeQuery, executeUpdate, false);
+                ResultSet resultsToWrap = ps.execute(a,
+                                                     executeQuery,
+                                                     executeUpdate,
+                                                     false,
+                                                     timeoutMillis);
 				getWarnings(a.getWarnings());
 
 

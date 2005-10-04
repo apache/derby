@@ -3200,8 +3200,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                     act.getParameterValueSet().getParameterForSet(paramPosition++).setValue(currentRow.getColumn(i));
             }
             // Don't set any timeout when updating rows (use 0)
-            ps.setQueryTimeout(0L);
-            org.apache.derby.iapi.sql.ResultSet rs = ps.execute(act, false, true, true); //execute the update where current of sql
+            org.apache.derby.iapi.sql.ResultSet rs = ps.execute(act, false, true, true, 0L); //execute the update where current of sql
             rs.close();
             rs.finish();
             //For forward only resultsets, after a update, the ResultSet will be positioned right before the next row.
@@ -3246,8 +3245,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 StatementContext statementContext = lcc.pushStatementContext(isAtomic, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
                 // Don't set any timeout when deleting rows (use 0)
-                ps.setQueryTimeout(0L);
-                org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true); //execute delete where current of sql
+                org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true, 0L); //execute delete where current of sql
                 rs.close();
                 rs.finish();
                 //For forward only resultsets, after a delete, the ResultSet will be positioned right before the next row.

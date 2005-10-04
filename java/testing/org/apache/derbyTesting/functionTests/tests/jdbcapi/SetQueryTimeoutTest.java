@@ -39,12 +39,11 @@ import org.apache.derby.iapi.reference.SQLState;
  * This test consists of three parts:
  *
  * 1. Executes a SELECT query in 4 different threads concurrently.
- *    The query is designed to make the execution time for each
- *    ResultSet.next() operation unpredictable, and in the order
- *    of seconds for many of them. The executeQuery() call finishes
- *    quickly, but the fetch operations may take longer time than
- *    the timeout value set. Hence, this part tests getting timeouts
- *    from calls to ResultSet.next().
+ *    The query calls a user-defined, server-side function which
+ *    delays the execution, so that it takes several seconds even
+ *    though the data volume is really low. The fetch operations
+ *    take longer time than the timeout value set. Hence, this part
+ *    tests getting timeouts from calls to ResultSet.next().
  * 
  *    Two connections are used, two threads execute their statement
  *    in the context of one connection, the other two threads in the
@@ -54,7 +53,7 @@ import org.apache.derby.iapi.reference.SQLState;
  *    regardless of what connection/transaction it and other statements
  *    are executed in the context of.
  *    
- * 2. Executes a long-running INSERT query in two threads.
+ * 2. Executes an INSERT query in multiple threads.
  *    This part tests getting timeouts from calls to Statement.execute().
  *    Each thread executes the query in the context of a separate
  *    connection. There is no point in executing multiple statements
@@ -64,9 +63,9 @@ import org.apache.derby.iapi.reference.SQLState;
  *    calls to ResultSet.next() may be interleaved between the different
  *    threads).
  *
- *    Only one thread executes its statement with a timeout value set,
- *    this is to verify that the correct statement is affected by the
- *    timeout, while the other statement executes to completion.
+ *    Half of the threads execute their statement with a timeout value set,
+ *    this is to verify that the correct statements are affected by the
+ *    timeout, while the other statements execute to completion.
  *
  * 3. Sets an invalid (negative) timeout. Verifies that the correct
  *    exception is thrown.
@@ -75,7 +74,8 @@ import org.apache.derby.iapi.reference.SQLState;
  */
 public class SetQueryTimeoutTest
 {
-    private static final int TIMEOUT = 3; // In seconds
+    private static final int TIMEOUT = 1; // In seconds
+    private static final int CONNECTIONS = 100;
 
     private static void printSQLException(SQLException e)
     {
@@ -151,10 +151,10 @@ public class SetQueryTimeoutTest
         throws
             TestFailedException
     {
-        PreparedStatement statement = null;
+        Statement statement = null;
         try {
-            statement = connection.prepareStatement(queryString);
-            statement.execute();
+            statement = connection.createStatement();
+            statement.execute(queryString);
         } catch (SQLException e) {
             String sqlState = e.getSQLState();
             if (!ignoreExceptions.contains(sqlState)) {
@@ -192,12 +192,8 @@ public class SetQueryTimeoutTest
         Collection ignore = new HashSet();
         ignore.add(SQLState.LANG_OBJECT_DOES_NOT_EXIST.substring(0,5));
         
-        exec(conn, "drop table " + tablePrefix + "0", ignore);
-        exec(conn, "drop table " + tablePrefix + "1", ignore);
-        exec(conn, "drop table " + tablePrefix + "2", ignore);
-        exec(conn, "drop table " + tablePrefix + "3", ignore);
-        exec(conn, "drop table " + tablePrefix + "4", ignore);
-        exec(conn, "drop table " + tablePrefix + "5", ignore);
+        exec(conn, "drop table " + tablePrefix + "_orig", ignore);
+        exec(conn, "drop table " + tablePrefix + "_copy", ignore);
     }
     
     private static void prepareTables(Connection conn, String tablePrefix)
@@ -209,64 +205,32 @@ public class SetQueryTimeoutTest
         dropTables(conn, tablePrefix);
         
         exec(conn,
-             "create table " + tablePrefix + "1 (a int, b char(1))");
+             "create table " + tablePrefix + "_orig (a int)");
 
         exec(conn,
-             "create table " + tablePrefix + "2 (a int, b char(2))");
-        
-        exec(conn,
-             "create table " + tablePrefix + "3 (a int, b char(4))");
-
-        exec(conn,
-             "create table " + tablePrefix + "4 (a int, b char(6))");
-
-        exec(conn,
-             "create table " + tablePrefix + "5 (a int, b char(8))");
+             "create table " + tablePrefix + "_copy (a int)");
 
         exec(conn,
              "insert into "
-             + tablePrefix + "1"
-             + " values(3,'a')"
-             + ",(7,'b')"
-             + ",(13,'c')"
-             + ",(37,'d')"
-             + ",(141,'e')"
-             + ",(1,'f')");
-        
-
-        exec(conn,
-             "insert into "
-             + tablePrefix + "2 select "
-             + tablePrefix + "1.a+"
-             + tablePrefix + "x.a,"
-             + tablePrefix + "1.b||"
-             + tablePrefix + "x.b from "
-             + tablePrefix + "1 join "
-             + tablePrefix + "1 as "
-             + tablePrefix + "x on 1=1");
-        
-        exec(conn,
-             "insert into "
-             + tablePrefix + "3 select "
-             + tablePrefix + "2.a+"
-             + tablePrefix + "x.a,"
-             + tablePrefix + "2.b||"
-             + tablePrefix + "x.b from "
-             + tablePrefix + "2 join "
-             + tablePrefix + "2 as "
-             + tablePrefix + "x on 1=1");
-        
-        exec(conn,
-             "insert into "
-             + tablePrefix + "4 select "
-             + tablePrefix + "3.a+"
-             + tablePrefix + "2.a,"
-             + tablePrefix + "3.b||"
-             + tablePrefix + "2.b from "
-             + tablePrefix + "3 join "
-             + tablePrefix + "2 on 1=1");
+             + tablePrefix + "_orig"
+             + " values(0),(1),(2),(3),(4),(5),(6)");
     }
-    
+
+    /**
+     * This is the user-defined function which is called from our queries
+     */
+    public static int delay(int seconds, int value)
+        throws
+            SQLException
+    {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+        return value;
+    }
+
     private static void prepareForTimedQueries(Connection conn)
         throws
             TestFailedException
@@ -279,35 +243,29 @@ public class SetQueryTimeoutTest
             throw new TestFailedException("Should not happen", e);
         }
 
+        exec(conn, "CREATE FUNCTION DELAY(SECONDS INTEGER, VALUE INTEGER) RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest.delay'");
+
         prepareTables(conn, "t");
-        prepareTables(conn, "u");
-        prepareTables(conn, "v");
-        prepareTables(conn, "x");
     }
     
     private static String getFetchQuery(String tablePrefix)
     {
-        return "select "
-            + tablePrefix + "4.a+"
-            + tablePrefix + "3.a,"
-            + tablePrefix + "4.b||"
-            + tablePrefix + "3.b from "
-            + tablePrefix + "4 left join "
-            + tablePrefix + "3 on 1=1 where mod("
-            + tablePrefix + "4.a+"
-            + tablePrefix + "3.a,1000)=0";
+        /**
+         * The reason for using the mod function here is to force
+         * at least one invocation of ResultSet.next() to read
+         * more than one row from the table before returning.
+         * This is necessary since timeout is checked only when
+         * reading rows from base tables, and when the first row
+         * is read, the query still has not exceeded the timeout.
+         */
+        return "select a from " + tablePrefix + "_orig where mod(DELAY(1,a),3)=0";
     }
     
     private static String getExecQuery(String tablePrefix)
     {
         return "insert into "
-            + tablePrefix + "5 select "
-            + tablePrefix + "3.a+"
-            + tablePrefix + "x.a,"
-            + tablePrefix + "3.b from "
-            + tablePrefix + "3 left join "
-            + tablePrefix + "3 as "
-            + tablePrefix + "x on 1=1";
+            + tablePrefix + "_copy select a from "
+            + tablePrefix + "_orig where DELAY(1,1)=1";
     }
     
     private static class StatementExecutor
@@ -330,10 +288,12 @@ public class SetQueryTimeoutTest
             this.timeout = timeout;
             highestRunTime = 0;
             sqlException = null;
-            try {
-                statement.setQueryTimeout(timeout);
-            } catch (SQLException e) {
-                sqlException = e;
+            if (timeout > 0) {
+                try {
+                    statement.setQueryTimeout(timeout);
+                } catch (SQLException e) {
+                    sqlException = e;
+                }
             }
         }
         
@@ -469,9 +429,9 @@ public class SetQueryTimeoutTest
         // D - here just to create equal contention on conn1 and conn2
         
         PreparedStatement statementA = prepare(conn1, getFetchQuery("t"));
-        PreparedStatement statementB = prepare(conn1, getFetchQuery("u"));
-        PreparedStatement statementC = prepare(conn2, getFetchQuery("v"));
-        PreparedStatement statementD = prepare(conn2, getFetchQuery("x"));
+        PreparedStatement statementB = prepare(conn1, getFetchQuery("t"));
+        PreparedStatement statementC = prepare(conn2, getFetchQuery("t"));
+        PreparedStatement statementD = prepare(conn2, getFetchQuery("t"));
 
         StatementExecutor[] statementExecutor = new StatementExecutor[4];
         statementExecutor[0] = new StatementExecutor(statementA, true, TIMEOUT);
@@ -538,34 +498,44 @@ public class SetQueryTimeoutTest
     /**
      * Part two of this test.
      */
-    private static void testTimeoutWithExec(Connection conn1,
-                                            Connection conn2)
+    private static void testTimeoutWithExec(Connection[] connections)
         throws
             TestFailedException
     {
         System.out.println("Testing timeout with an execute operation");
 
-        try {
-            conn1.setAutoCommit(true);
-            conn2.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new TestFailedException("Should not happen", e);
+        for (int i = 0; i < connections.length; ++i) {
+            try {
+                connections[i].setAutoCommit(true);
+            } catch (SQLException e) {
+                throw new TestFailedException("Should not happen", e);
+            }
         }
 
-        PreparedStatement statementA = prepare(conn1, getExecQuery("t"));
-        PreparedStatement statementB = prepare(conn2, getExecQuery("u"));
-        
-        StatementExecutor exec0 = new StatementExecutor(statementA, false, TIMEOUT);
-        StatementExecutor exec1 = new StatementExecutor(statementB, false, 0);
-        
-        exec1.start();
-        exec0.start();
+        PreparedStatement statements[] = new PreparedStatement[connections.length];
+        for (int i = 0; i < statements.length; ++i) {
+            statements[i] = prepare(connections[i], getExecQuery("t"));
+        }
 
-        try {
-            exec0.join();
-            exec1.join();
-        } catch (InterruptedException e) {
-            throw new TestFailedException("Should never happen", e);
+        StatementExecutor[] executors = new StatementExecutor[statements.length];
+        for (int i = 0; i < executors.length; ++i) {
+            int timeout =
+                (i % 2 == 0)
+                ? TIMEOUT
+                : 0;
+            executors[i] = new StatementExecutor(statements[i], false, timeout);
+        }
+
+        for (int i = 0; i < executors.length; ++i) {
+            executors[i].start();
+        }
+
+        for (int i = 0; i < executors.length; ++i) {
+            try {
+                executors[i].join();
+            } catch (InterruptedException e) {
+                throw new TestFailedException("Should never happen", e);
+            }
         }
         
         /**
@@ -584,24 +554,32 @@ public class SetQueryTimeoutTest
          * in this class (note that the TIMEOUT constant is in seconds,
          * while the execution time is in milliseconds). 
          */
-        expectException(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT,
-                        exec0.getSQLException(),
-                        "exec did not time out. Execution time: "
-                        + exec0.getHighestRunTime() + " ms");
-
-        System.out.println("Statement 0 timed out");
-
-        SQLException sqlException = exec1.getSQLException();
-        if (sqlException != null) {
-            throw new TestFailedException(sqlException);
+        for (int i = 0; i < executors.length; ++i) {
+            int timeout =
+                (i % 2 == 0)
+                ? TIMEOUT
+                : 0;
+            if (timeout > 0) {
+                expectException(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT,
+                                executors[i].getSQLException(),
+                                "exec did not time out. Execution time: "
+                                + executors[i].getHighestRunTime() + " ms");
+            } else {
+                SQLException sqlException = executors[i].getSQLException();
+                if (sqlException != null) {
+                    throw new TestFailedException(sqlException);
+                }
+            }
         }
 
-        System.out.println("Statement 1 completed");
-        try {
-            statementA.close();
-            statementB.close();
-        } catch (SQLException e) {
-            throw new TestFailedException(e);
+        System.out.println("Statements that should time out timed out, and statements that should complete completed");
+
+        for (int i = 0; i < statements.length; ++i) {
+            try {
+                statements[i].close();
+            } catch (SQLException e) {
+                throw new TestFailedException(e);
+            }
         }
     }
     
@@ -673,45 +651,44 @@ public class SetQueryTimeoutTest
     public void go(String[] args)
     {
         System.out.println("Test SetQueryTimeoutTest starting");
-        
-        Connection conn1 = null;
-        Connection conn2 = null;
+
+        Connection[] connections = new Connection[CONNECTIONS];
+        for (int i = 0; i < connections.length; ++i) {
+            connections[i] = null;
+        }
 
         try {
             // Load the JDBC Driver class
             // use the ij utility to read the property file and
             // create connections
             ij.getPropertyArg(args);
-            conn1 = ij.startJBMS();
-            conn2 = ij.startJBMS();
+            for (int i = 0; i < connections.length; ++i) {
+                connections[i] = ij.startJBMS();
+            }
 
             System.out.println("Got connections");
-            
-            conn1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-            conn2.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
-            prepareForTimedQueries(conn1);
-            testTimeoutWithFetch(conn1, conn2);
-            testTimeoutWithExec(conn1, conn2);
-            testInvalidTimeoutValue(conn1);
+            for (int i = 0; i < connections.length; ++i) {
+                connections[i].setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            }
+
+            prepareForTimedQueries(connections[0]);
+            testTimeoutWithFetch(connections[0], connections[1]);
+            testTimeoutWithExec(connections);
+            testInvalidTimeoutValue(connections[0]);
   
             System.out.println("Test SetQueryTimeoutTest PASSED");
         } catch (Throwable e) {
             System.out.println("Test SetQueryTimeoutTest FAILED");
             e.printStackTrace();
         } finally {
-            if (conn2 != null) {
-                try {
-                    conn2.close();
-                } catch (SQLException ex) {
-                    printSQLException(ex);
-                }
-            }
-            if (conn1 != null) {
-                try {
-                    conn1.close();
-                } catch (SQLException ex) {
-                    printSQLException(ex);
+            for (int i = connections.length - 1; i >= 0; --i) {
+                if (connections[i] != null) {
+                    try {
+                        connections[i].close();
+                    } catch (SQLException ex) {
+                        printSQLException(ex);
+                    }
                 }
             }
             System.out.println("Closed connections");

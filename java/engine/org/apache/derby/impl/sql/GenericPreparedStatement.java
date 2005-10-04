@@ -138,7 +138,6 @@ public class GenericPreparedStatement
 	private String execSchemaName;
 	protected boolean isAtomic;
 	protected String sourceTxt;
-    private long timeoutMillis; // Timeout value, in milliseconds.
 
 	private int inUseCount;
 
@@ -181,7 +180,6 @@ public class GenericPreparedStatement
 		UUIDValue = uuidFactory.createUUID();
 		UUIDString = UUIDValue.toString();
 		spsAction = false;
-        timeoutMillis = 0L; // 0 means no timeout; default.
 	}
 
 	/**
@@ -238,24 +236,14 @@ public class GenericPreparedStatement
 		return ac;
 	}
 
-    /**
-     * Sets a timeout value for execution of this statement.
-     * Will also apply to each row fetch from the ResultSet
-     * produced by this statement.
-     *
-     * @param timeoutMillis Timeout value in milliseconds. 0 means no timeout.
-     */
-    public void setQueryTimeout(long timeoutMillis)
-    {
-        this.timeoutMillis = timeoutMillis;
-    }
-
-	public ResultSet execute(LanguageConnectionContext lcc, boolean rollbackParentContext)
+    public ResultSet execute(LanguageConnectionContext lcc,
+                             boolean rollbackParentContext,
+                             long timeoutMillis)
 		throws StandardException
 	{
 		Activation a = getActivation(lcc, false);
 		a.setSingleExecution();
-		return execute(a, false, false, rollbackParentContext);
+		return execute(a, false, false, rollbackParentContext, timeoutMillis);
 	}
 
 	/**
@@ -267,14 +255,19 @@ public class GenericPreparedStatement
 	  * @param rollbackParentContext True if 1) the statement context is
 	  *  NOT a top-level context, AND 2) in the event of a statement-level
 	  *	 exception, the parent context needs to be rolled back, too.
+      * @param timeoutMillis timeout value in milliseconds.
 	  *	@return	the result set to be pawed through
 	  *
 	  *	@exception	StandardException thrown on error
 	  */
 
-	public ResultSet execute
-	(Activation activation, boolean executeQuery, boolean executeUpdate,
-		boolean rollbackParentContext) throws StandardException 
+    public ResultSet execute(Activation activation,
+                             boolean executeQuery,
+                             boolean executeUpdate,
+                             boolean rollbackParentContext,
+                             long timeoutMillis)
+        throws
+            StandardException 
 	{
 		boolean				needToClearSavePoint = false;
 
