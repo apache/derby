@@ -756,8 +756,7 @@ ij> select count(bv) from empty group by bv;
 1          
 -----------
 ij> select count(lbv) from empty group by lbv;
-1          
------------
+ERROR X0X67: Columns of type 'LONG VARCHAR FOR BIT DATA' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> select count(dc) from empty group by dc;
 1          
 -----------
@@ -924,11 +923,7 @@ ij> select count(bv) from t group by bv;
 0          
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select count(lbv) from t group by lbv;
-1          
------------
-15         
-0          
-WARNING 01003: Null values were eliminated from the argument of a column function.
+ERROR X0X67: Columns of type 'LONG VARCHAR FOR BIT DATA' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> select count(dc) from t group by dc;
 1          
 -----------

@@ -1245,6 +1245,7 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
                         case StoredFormatIds.XML_TYPE_ID:
+                        case StoredFormatIds.LONGVARBIT_TYPE_ID:
                                 return false;
 
                         case StoredFormatIds.USERDEFINED_TYPE_ID_V3:
