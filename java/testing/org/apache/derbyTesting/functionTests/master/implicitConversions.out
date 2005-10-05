@@ -1881,7 +1881,7 @@ ij> create index all1_b on all1(b);
 ij> create index all1_bv on all1(bv);
 0 rows inserted/updated/deleted
 ij> create index all1_lbv on all1(lbv);
-0 rows inserted/updated/deleted
+ERROR X0X67: Columns of type 'LONG VARCHAR FOR BIT DATA' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> create index all1_dt on all1(dt);
 0 rows inserted/updated/deleted
 ij> create index all1_tm on all1(tm);
@@ -3338,7 +3338,7 @@ ij> create index all1_b on all1(b);
 ij> create index all1_bv on all1(bv);
 0 rows inserted/updated/deleted
 ij> create index all1_lbv on all1(lbv);
-0 rows inserted/updated/deleted
+ERROR X0X67: Columns of type 'LONG VARCHAR FOR BIT DATA' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> create index all1_dt on all1(dt);
 0 rows inserted/updated/deleted
 ij> create index all1_tm on all1(tm);

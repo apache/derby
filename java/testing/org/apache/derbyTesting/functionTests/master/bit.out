@@ -260,14 +260,7 @@ aa  |aa                  |aa
 ff  |ff                  |ff                  
 NULL|null                |null columns        
 ij> select vb16, c20, cv20, lbv from t order by lbv;
-VB16|C20                 |CV20                |LBV                                                                                                                             
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    |0                   |zero length column  |                                                                                                                                
-01  |1                   |1                   |0000000001                                                                                                                      
-03  |3                   |3                   |03                                                                                                                              
-ff  |ff                  |ff                  |1111111111                                                                                                                      
-aa  |aa                  |aa                  |aa                                                                                                                              
-NULL|null                |null columns        |NULL                                                                                                                            
+ERROR X0X67: Columns of type 'LONG VARCHAR FOR BIT DATA' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> select b10 from t where b10 > X'0000000010';
 B10                                     
 ----------------------------------------
