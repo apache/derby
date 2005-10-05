@@ -78,6 +78,7 @@ public class RunList
 	static String keepfiles = "false";
 	static String encryption;
 	static String testEncryptionProvider;
+	static String testEncryptionAlgorithm;
 	static String jdk12test;
 	static String jdk12exttest;
 	static String jdk14test;
@@ -388,6 +389,8 @@ public class RunList
             jvmProps.addElement("encryption=" + encryption);
         if (testEncryptionProvider != null)
             jvmProps.addElement("testEncryptionProvider=" + testEncryptionProvider);
+        if (testEncryptionAlgorithm != null)
+            jvmProps.addElement("testEncryptionAlgorithm=" + testEncryptionAlgorithm);
         if (jdk12test != null)
             jvmProps.addElement("jdk12test=" + jdk12test);
         if (jdk12exttest != null)
@@ -620,6 +623,7 @@ public class RunList
             // And do the same for encryption
             encryption = parentProps.getProperty("encryption");
             testEncryptionProvider = parentProps.getProperty("testEncryptionProvider");
+            testEncryptionAlgorithm = parentProps.getProperty("testEncryptionAlgorithm");
             // And do the same for jdk12test
             jdk12test = parentProps.getProperty("jdk12test");
             jdk12exttest = parentProps.getProperty("jdk12exttest");
@@ -716,6 +720,7 @@ public class RunList
 		useoutput = suiteProperties.getProperty("useoutput");
 		encryption = suiteProperties.getProperty("encryption");
 		testEncryptionProvider = suiteProperties.getProperty("testEncryptionProvider");
+		testEncryptionAlgorithm = suiteProperties.getProperty("testEncryptionAlgorithm");
 		jdk12test = suiteProperties.getProperty("jdk12test");
 		jdk12exttest = suiteProperties.getProperty("jdk12exttest");
 		jdk14test = suiteProperties.getProperty("jdk14test");
@@ -830,6 +835,12 @@ public class RunList
 		    p.put("testEncryptionProvider", testEncryptionProvider);
 		else
             testEncryptionProvider = p.getProperty("testEncryptionProvider");
+
+	// Encryption algorithm may be set at the top or just for a subsuite
+	    if ( parentProperties.getProperty("testEncryptionAlgorithm") != null )
+		    p.put("testEncryptionAlgorithm", testEncryptionAlgorithm);
+		else
+            testEncryptionAlgorithm = p.getProperty("testEncryptionAlgorithm");
 
         // jdk12test may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("jdk12test") != null )

@@ -57,6 +57,7 @@ public class RunSuite
 	static String classpath;
 	static String classpathServer;
 	static String testJavaFlags = ""; // formerly systest_javaflags
+	static String testSpecialProps = ""; 
 	static String userdir;
 	static String framework;
 	static String runwithibmjvm;
@@ -309,6 +310,7 @@ public class RunSuite
             javaCmd = p.getProperty("javaCmd");
             jvmflags = p.getProperty("jvmflags");
             testJavaFlags = p.getProperty("testJavaFlags");
+            testSpecialProps = p.getProperty("testSpecialProps");
             classpath = p.getProperty("classpath");
             classpathServer = p.getProperty("classpathServer");
             framework = p.getProperty("framework");
@@ -393,6 +395,15 @@ public class RunSuite
 		        testJavaFlags = testJavaFlags + "^" + testflags;
 		    suiteProperties.put("testJavaFlags", testJavaFlags);
 		}
+		String testprops = sp.getProperty("testSpecialProps");
+		if (testprops != null)
+		{
+		    if (testSpecialProps == null)
+		        testSpecialProps = testflags;
+		    else // add to testSpecialProps
+		        testSpecialProps = testSpecialProps + "^" + testprops;
+		    suiteProperties.put("testSpecialProps", testSpecialProps);
+		}
 		String clpth = sp.getProperty("classpath");
 		if (clpth != null)
 		{
@@ -420,6 +431,9 @@ public class RunSuite
 		String encrypt = sp.getProperty("encryption");
 		if (encrypt != null)
 		    suiteProperties.put("encryption", encrypt);
+		String encryptAlgorithm = sp.getProperty("testEncryptionAlgorithm");
+		if (encryptAlgorithm != null)
+		    suiteProperties.put("testEncryptionAlgorithm", encryptAlgorithm);
 		String jdk12test = sp.getProperty("jdk12test");
 		if (jdk12test != null)
 		    suiteProperties.put("jdk12test", jdk12test);
