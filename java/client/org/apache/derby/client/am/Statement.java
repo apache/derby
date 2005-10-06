@@ -1393,20 +1393,38 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
+    /**
+     * Mark all ResultSets associated with this statement as
+     * closed. The ResultSets will not be removed from the commit and
+     * rollback listeners list in
+     * <code>org.apache.derby.client.am.Connection</code>.
+     */
     void markResultSetsClosed() {
+        markResultSetsClosed(false);
+    }
+
+    /**
+     * Mark all ResultSets associated with this statement as
+     * closed.
+     *
+     * @param removeListener if true the ResultSets will be removed
+     * from the commit and rollback listeners list in
+     * <code>org.apache.derby.client.am.Connection</code>.
+     */
+    void markResultSetsClosed(boolean removeListener) {
         if (resultSetList_ != null) {
             for (int i = 0; i < resultSetList_.length; i++) {
                 if (resultSetList_[i] != null) {
-                    resultSetList_[i].markClosed();
+                    resultSetList_[i].markClosed(removeListener);
                 }
                 resultSetList_[i] = null;
             }
         }
         if (generatedKeysResultSet_ != null) {
-            generatedKeysResultSet_.markClosed();
+            generatedKeysResultSet_.markClosed(removeListener);
         }
         if (resultSet_ != null) {
-            resultSet_.markClosed();
+            resultSet_.markClosed(removeListener);
         }
         resultSet_ = null;
         resultSetList_ = null;
@@ -1544,7 +1562,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 connection_.completeTransactionStart();
             }
 
-            markResultSetsClosed();
+            markResultSetsClosed(true); // true means remove from list of commit and rollback listeners
             markClosedOnServer();
             section_ = newSection;
 
