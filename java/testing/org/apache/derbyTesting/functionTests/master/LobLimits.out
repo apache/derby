@@ -1,0 +1,103 @@
+-----------------------------------
+ START setup
+-----------------------------------
+ END setup
+-----------------------------------
+ END setup
+========================================
+START ClobTest #1  -insertClob of size = 2147483647
+Rows inserted with clob of size (2147483647) = 2
+========================================
+========================================
+START ClobTest #2 - SELECT CLOB of size = 2147483647
+Matched rows selected with clob of size(2147483647) =1
+========================================
+========================================
+START ClobTest #3 - SELECT CLOB of size = 2147483647
+Matched rows selected with clob of size(2147483647) =1
+========================================
+========================================
+START ClobTest #4 - select and then update clob of size= 2147483647 - Uses setClob api
+Rows Updated = 1
+========================================
+========================================
+START ClobTest #5.1 insert Clob of size = 104857600
+ Rows inserted with clob of size (104857600) =1
+========================================
+========================================
+START ClobTest #5.2  - SELECT CLOB of size = 104857600
+Matched rows selected with clob of size(104857600) =1
+========================================
+========================================
+START ClobTest #8.2 - select and then update clob of size= 104857600 - Uses setClob api
+Rows Updated = 1
+========================================
+========================================
+START ClobTest #6.1 insert Clob of size = 104857600
+ Rows inserted with clob of size (104857600) =1
+========================================
+========================================
+START ClobTest #6.2  - SELECT CLOB of size = 104857600
+Matched rows selected with clob of size(104857600) =1
+========================================
+========================================
+START ClobTest #7insert Clob of size = 104857600
+EXPECTED EXCEPTION - stream has trailing spaces,but stream  length is 1 less than actual length of stream
+EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+========================================
+START ClobTest #7insert Clob of size = 104857600
+EXPECTED EXCEPTION - stream has trailing spaces,but stream  length is 1 greater than actual length of stream
+EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+========================================
+START ClobTest #9.1 insert Clob of size = 104857601
+NEGATIVE TEST - Expected Exception: truncation of non-blanks not allowed
+EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
+EXPECTED SQL Exception: (XJ001) Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 104857600.: java.io.IOException'.
+========================================
+START ClobTest #9.2  - SELECT CLOB of size = 104857600
+Matched rows selected with clob of size(104857600) =0
+========================================
+========================================
+START ClobTest #10 insert Clob of size = 104857601
+NEGATIVE TEST - Expected Exception: truncation of non-blanks not allowed and stream length is one greater than actual length of the stream 
+EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
+EXPECTED SQL Exception: (XJ001) Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 104857600.: java.io.IOException'.
+========================================
+START ClobTest #11 insert Clob of size = 104857601
+NEGATIVE TEST - Expected Exception: truncation of non-blanks not allowed and stream length is one less than actual length of the stream 
+EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+Rows deleted =2
+========================================
+START ClobTest #12.1  -insertClob of size = 104857600
+NEGATIVE TEST - Expected Exception:
+EXPECTED SQL Exception: (XJ025) Input stream cannot have negative length.
+========================================
+START ClobTest #12.2 - SELECT CLOB of size = 104857600
+Matched rows selected with clob of size(104857600) =0
+========================================
+Rows deleted =2
+========================================
+START BlobTest #1insertBlob of size = 2147483647
+ Rows inserted with blob of size (2147483647) =2
+========================================
+========================================
+START BlobTest #2 - SELECT BLOB of size = 2147483647
+Matched rows selected with blob of size(2147483647) =1
+========================================
+========================================
+START BlobTest #3 - SELECT BLOB of size = 2147483647
+Matched rows selected with blob of size(2147483647) =1
+========================================
+========================================
+START BlobTest #5.1 insert Blob of size = 104857600
+ Rows inserted with blob of size (104857600) =1
+========================================
+========================================
+START BlobTest #5.2  - SELECT BLOB of size = 104857600
+Matched rows selected with blob of size(104857600) =1
+========================================
+Rows deleted =1
+Rows deleted =2

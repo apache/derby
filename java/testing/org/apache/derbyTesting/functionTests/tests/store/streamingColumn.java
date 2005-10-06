@@ -63,7 +63,10 @@ public class streamingColumn {
 		fileName[3] = "extin/empty.data"; // set up a file with nothing in it
 	}
 
-
+	private static final int LONGVARCHAR = 1;
+    private static final int CLOB = 2;
+    private static final int VARCHAR = 3;
+    
 	public static void main(String[] args) {
 
 		System.out.println("Test streamingColumn starting");
@@ -92,7 +95,9 @@ public class streamingColumn {
 			streamTest5(conn, 0);
 			streamTest5(conn, 1500);
 			streamTest5(conn, 5000);
-			streamTest5(conn, 100000);
+        //  This test fails when running w/ derby.language.logStatementText=true
+        //  see DERBY-595 
+		//	streamTest5(conn, 100000);
 
 			streamTest6(conn, 5000);
 			streamTest7(conn);
@@ -117,6 +122,11 @@ public class streamingColumn {
 			// bug 5592 test - any character(including blank character) truncation should give error for long varchars
 			streamTest13(conn);
 
+            // Test clob truncation, behavior similar to varchar
+            // trailingspaces are truncated but if there are trailing non-blanks then
+            // exception is thrown
+            // This test is similar to streamTest12.
+            streamTest14(conn);
 			// turn autocommit on because in JCC, java.sql.Connection.close() can not be
 			// requested while a transaction is in progress on the connection.
 			// If autocommit is off in JCC, the transaction remains active, 
@@ -1072,7 +1082,7 @@ public class streamingColumn {
 			insertDataUsingStringOrObject(ps, 3, Limits.DB2_VARCHAR_MAXWIDTH, true, true);
 			insertDataUsingStringOrObject(ps, 4, Limits.DB2_VARCHAR_MAXWIDTH, true, false);
 			System.out.println("===> testing trailing blanks using concatenation");
-			insertDataUsingConcat(stmt, 5, Limits.DB2_VARCHAR_MAXWIDTH, true, false);
+			insertDataUsingConcat(stmt, 5, Limits.DB2_VARCHAR_MAXWIDTH, true, VARCHAR);
 
 			// prepare an InputStream from the file which has 3 trailing non-blanks in the end, and hence there would be overflow exception
 			// try this using setAsciiStream, setCharacterStream, setString and setObject
@@ -1081,7 +1091,7 @@ public class streamingColumn {
 			insertDataUsingStringOrObject(ps, 8, Limits.DB2_VARCHAR_MAXWIDTH, false, true);
 			insertDataUsingStringOrObject(ps, 9, Limits.DB2_VARCHAR_MAXWIDTH, false, false);
 			System.out.println("===> testing trailing non-blank characters using concatenation");
-			insertDataUsingConcat(stmt, 10, Limits.DB2_VARCHAR_MAXWIDTH, false, false);
+			insertDataUsingConcat(stmt, 10, Limits.DB2_VARCHAR_MAXWIDTH, false, VARCHAR);
 
 			rs = stmt.executeQuery("select a, b from testVarChar");
 			streamTestDataVerification(rs, Limits.DB2_VARCHAR_MAXWIDTH);
@@ -1145,6 +1155,73 @@ public class streamingColumn {
 	}
 
 
+    /**
+     * Test truncation behavior for clobs
+     * Test is similar to streamTest12 except that this test tests for clob column
+     * @param conn
+     */
+    private static void streamTest14(Connection conn) {
+
+        ResultSet rs;
+        Statement stmt;
+
+        //The following 2 files are for testing the truncation in clob
+        //only non-blank character truncation will throw an exception for clob.
+        //max value allowed in clob is 2G-1
+        String fileName1 = "extin/char32675trailingblanks.data"; // set up a file 32675 characters long but with last 3 characters as blanks
+        String fileName2 = "extin/char32675.data"; // set up a file 32675 characters long with 3 extra non-blank characters trailing in the end
+
+        System.out.println("Test 14 - clob truncation tests start from here");
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096')");
+            stmt.execute("drop table testConcatenation");
+            stmt.execute("create table testClob (a int, b clob(32672))");
+            //create a table with 4 varchars. This table will be used to try overflow through concatenation
+            
+            stmt.execute("create table testConcatenation (a clob(16350), b clob(16350), c clob(16336), d clob(16336))");
+            stmt.executeUpdate("call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL)");
+            String largeStringA16350 = new String(Formatters.repeatChar("a",16350));
+            String largeStringA16336 = new String(Formatters.repeatChar("a",16336));
+            PreparedStatement ps = conn.prepareStatement("insert into testConcatenation values (?, ?, ?, ?)");
+            ps.setString(1, largeStringA16350);
+            ps.setString(2, largeStringA16350);
+            ps.setString(3, largeStringA16336);
+            ps.setString(4, largeStringA16336);
+            ps.executeUpdate();
+
+            ps = conn.prepareStatement("insert into testClob values(?, ?)");
+
+            // prepare an InputStream from the file which has 3 trailing blanks in the end, so after blank truncation, there won't be any overflow
+            // try this using setAsciiStream, setCharacterStream, setString and setObject
+            insertDataUsingAsciiStream(ps, 1, fileName1, Limits.DB2_VARCHAR_MAXWIDTH);
+            insertDataUsingCharacterStream(ps, 2, fileName1, Limits.DB2_VARCHAR_MAXWIDTH);
+            insertDataUsingStringOrObject(ps, 3, Limits.DB2_VARCHAR_MAXWIDTH, true, true);
+            insertDataUsingStringOrObject(ps, 4, Limits.DB2_VARCHAR_MAXWIDTH, true, false);
+            System.out.println("===> testing trailing blanks using concatenation");
+            insertDataUsingConcat(stmt, 5, Limits.DB2_VARCHAR_MAXWIDTH, true, CLOB);
+
+            // prepare an InputStream from the file which has 3 trailing non-blanks in the end, and hence there would be overflow exception
+            // try this using setAsciiStream, setCharacterStream, setString and setObject
+            insertDataUsingAsciiStream(ps, 6, fileName2, Limits.DB2_VARCHAR_MAXWIDTH);
+            insertDataUsingCharacterStream(ps, 7, fileName2, Limits.DB2_VARCHAR_MAXWIDTH);
+            insertDataUsingStringOrObject(ps, 8, Limits.DB2_VARCHAR_MAXWIDTH, false, true);
+            insertDataUsingStringOrObject(ps, 9, Limits.DB2_VARCHAR_MAXWIDTH, false, false);
+            System.out.println("===> testing trailing non-blank characters using concatenation");
+            insertDataUsingConcat(stmt, 10, Limits.DB2_VARCHAR_MAXWIDTH, false, CLOB);
+
+            rs = stmt.executeQuery("select a, b from testVarChar");
+            streamTestDataVerification(rs, Limits.DB2_VARCHAR_MAXWIDTH);
+    }
+        catch (SQLException e) {
+            dumpSQLExceptions(e);
+        }
+        catch (Throwable e) {
+            System.out.println("FAIL -- unexpected exception:" + e.toString());
+        }
+        System.out.println("Test 14 - clob truncation tests end in here");
+    }
+
 	private static void streamTestDataVerification(ResultSet rs, int maxValueAllowed)
 	throws Exception{
 		ResultSetMetaData met;
@@ -1174,17 +1251,25 @@ public class streamingColumn {
 	//blankPadding
 	//  true means excess trailing blanks
 	//  false means excess trailing non-blank characters
-	//forLongVarChar
-	//  true means testing for long varchar truncation and hence use table testLongVarChars
-	//  false means testing for varchar truncation and hence use table testVarChar
-	private static void insertDataUsingConcat(Statement stmt, int intValue, int maxValueAllowed, boolean blankPadding,
-	 	boolean forLongVarChar)
+	//  @param tblType table type, depending on the table type, the corresponding
+    //  table is used. for varchar - testVarChar , for long varchar - testVarChars,
+    //  and for clob - testClob is used
+    private static void insertDataUsingConcat(Statement stmt, int intValue, int maxValueAllowed, boolean blankPadding,
+	 	int tblType)
 	throws Exception{
 		String sql;
-		if (forLongVarChar)
-			sql = "insert into testLongVarChars select " + intValue + ", a||b||";
-		else
-			sql = "insert into testVarChar select "+ intValue + ", c||d||";
+        
+        switch(tblType)
+        {
+            case LONGVARCHAR:
+                sql = "insert into testLongVarChars select " + intValue + ", a||b||";
+                break;
+            case CLOB:
+                sql = "insert into testClob select "+ intValue + ", c||d||";
+                break;
+            default:
+                sql = "insert into testVarChar select "+ intValue + ", c||d||";
+        }
 
 		if (blankPadding) //try overflow with trailing blanks
 			sql = sql.concat("'   ' from testConcatenation");
@@ -1269,7 +1354,7 @@ public class streamingColumn {
 			if (file.length() > maxValueAllowed && e.getSQLState().equals("22001")) //truncation error
 				System.out.println("expected exception for data > " + maxValueAllowed + " in length");
 			else
-				dumpSQLExceptions(e);
+				TestUtil.dumpSQLExceptions(e,true);
 	 	}
 	 	filer.close();
 	}
@@ -1292,7 +1377,7 @@ public class streamingColumn {
 			if (file.length() > maxValueAllowed && e.getSQLState().equals("22001")) //truncation error
 				System.out.println("expected exception for data > " + maxValueAllowed + " in length");
 			else
-				dumpSQLExceptions(e);
+				TestUtil.dumpSQLExceptions(e,true);
 	 	}
 	 	fileIn.close();
 	}
@@ -1413,7 +1498,7 @@ public class streamingColumn {
 		System.out.println("FAIL -- unexpected exception: " + se.toString());
 		se.printStackTrace();
 		while (se != null) {
-			System.out.print("SQLSTATE("+se.getSQLState()+"):");
+			System.out.println("SQLSTATE("+se.getSQLState()+"):"+se.getMessage());
 			se = se.getNextException();
 		}
 	}

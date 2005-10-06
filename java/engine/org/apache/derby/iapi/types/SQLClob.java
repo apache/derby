@@ -24,6 +24,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -193,6 +194,49 @@ public class SQLClob
 	{
 		throw dataTypeConversion("java.sql.Timestamp");
 	}
+    
+    
+    /**
+     * Normalization method - this method may be called when putting
+     * a value into a SQLClob, for example, when inserting into a SQLClob
+     * column.  See NormalizeResultSet in execution.
+     * Per the SQL standard ,if the clob column is not big enough to 
+     * hold the value being inserted,truncation error will result
+     * if there are trailing non-blanks. Truncation of trailing blanks
+     * is allowed.
+     * @param desiredType   The type to normalize the source column to
+     * @param sourceValue   The value to normalize
+     *
+     *
+     * @exception StandardException             Thrown for null into
+     *                                          non-nullable column, and for
+     *                                          truncation error
+     */
+
+    public void normalize(
+                DataTypeDescriptor desiredType,
+                DataValueDescriptor sourceValue)
+                    throws StandardException
+    {
+        // if sourceValue is of type clob, and has a stream,
+        // dont materialize it here (as the goal of using a stream is to
+        // not have to materialize whole object in memory in the server), 
+        // but instead truncation checks will be done when data is streamed in.
+        // (see ReaderToUTF8Stream) 
+        // if sourceValue is not a stream, then follow the same
+        // protocol as varchar type for normalization
+        if( sourceValue instanceof SQLClob)
+        {
+            SQLClob clob = (SQLClob)sourceValue;
+            if (clob.stream != null)
+            {
+                copyState(clob);
+                return;
+            }
+        }
+        
+        super.normalize(desiredType,sourceValue);
+    }
 
 	public void setValue(Time theValue, Calendar cal) throws StandardException
 	{

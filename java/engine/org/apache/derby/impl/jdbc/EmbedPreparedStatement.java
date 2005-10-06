@@ -603,14 +603,7 @@ public abstract class EmbedPreparedStatement
 		default:
 			throw dataTypeConversion(parameterIndex, "java.io.Reader");
 		}
-		if (length < 0) //we are doing the check here and not in setCharacterStreamInternal becuase setClob needs to pass -1 for length.
-			throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
 
-		if (reader == null)
-		{
-			setNull(parameterIndex, jdbcTypeId);
-			return;
-		}
 
 		setCharacterStreamInternal(parameterIndex, reader, length);
 	}
@@ -619,21 +612,74 @@ public abstract class EmbedPreparedStatement
 						Reader reader, int length)
 	    throws SQLException
 	{
+        // currently the max number of chars that can be inserted
+        // into a clob field is Integer.MAX_INT ( 2Gb -1)
+        // setClob or setCharacterStream interfaces will eventually call 
+        // this method and in setClob, a long is casted to an int; hence
+        // check for -ve length
+        if (length < 0) 
+          throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+      
 		checkStatus();
 
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
-
+	    
+		    
+        if (reader == null)
+        {
+            setNull(parameterIndex, jdbcTypeId);
+            return;
+        }
 
 		try {
+           
+            LimitReader limitIn = new LimitReader(reader);
 			ParameterValueSet pvs = getParms();
+            int usableLength = length;
+            ReaderToUTF8Stream utfIn = null;
 
-			LimitReader limitIn = new LimitReader(reader);
-			if (length != -1)
-				limitIn.setLimit(length);
-			ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(limitIn);
+            // Currently long varchar does not allow for truncation of trailing
+            // blanks.  
+            // For char and varchar types, current mechanism of materializing
+            // when using streams seems fine given their  max limits.
+            // This change is fix for DERBY-352: Insert of clobs using streams
+            // should not materialize the entire stream into memory
+            // In case of clobs, the truncation of trailing blanks is factored
+            // in when reading from the stream without materializing the entire
+            // stream, and so the special casing for clob below.
+            if (jdbcTypeId == Types.CLOB) 
+            {
+                // Need column width to figure out if truncation is needed 
+                DataTypeDescriptor dtd[] = preparedStatement
+                        .getParameterTypes();
+                int colWidth = dtd[parameterIndex - 1].getMaximumWidth();
 
-			/* JDBC is one-based, DBMS is zero-based */
-			pvs.getParameterForSet(parameterIndex - 1).setValue(utfIn, length);
+                // It is possible that the length of the stream passed in is
+                // greater than the column width, in which case the data from
+                // the stream needs to be truncated.
+                // usableLength is the length of the data from stream that can
+                // be inserted which is min(colWidth,length) provided 
+                // length - colWidth has trailing blanks only
+                if (colWidth < length)
+                    usableLength = colWidth;
+                
+                // keep information with the stream about how much data needs 
+                // to be truncated, and colWidth info to give proper truncation
+                // message
+                utfIn = new ReaderToUTF8Stream(
+                            limitIn, colWidth, length - usableLength);
+            }
+            else
+            {
+                utfIn = new ReaderToUTF8Stream(
+                            limitIn,usableLength,length - usableLength);
+            }
+
+            limitIn.setLimit(usableLength);
+
+            /* JDBC is one-based, DBMS is zero-based */
+            pvs.getParameterForSet(
+                parameterIndex - 1).setValue(utfIn,usableLength);
 
 		} catch (StandardException t) {
 			throw EmbedResultSet.noStateChangeException(t);
@@ -661,8 +707,8 @@ public abstract class EmbedPreparedStatement
 		default:
 			throw dataTypeConversion(parameterIndex, "java.io.InputStream");
 		}
-		if (length < 0) //we are doing the check here and not in setBinaryStreamInternal becuase setBlob needs to pass -1 for length.
-			throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+        if (length < 0) //we are doing the check here and not in setBinaryStreamInternal becuase setBlob needs to pass -1 for length.
+            throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
 
     	setBinaryStreamInternal(parameterIndex, x, length);
 	}
@@ -1117,7 +1163,7 @@ public abstract class EmbedPreparedStatement
 		if (x == null)
 			setNull(i, Types.BLOB);
 		else
-			setBinaryStreamInternal(i, x.getBinaryStream(), -1);
+ 			setBinaryStreamInternal(i, x.getBinaryStream(), -1);
 	}
 
     /**
@@ -1144,7 +1190,23 @@ public abstract class EmbedPreparedStatement
 		if (x == null)
 			setNull(i, Types.CLOB);
 		else
-			setCharacterStreamInternal(i, x.getCharacterStream(), -1);
+        {
+            // 1. max number of characters that can be inserted into a clob column
+            // is 2Gb-1 which is Integer.MAX_INT.
+            // This means that we do not allow any inserts of clobs where
+            // clob.length() > Integer.MAX_INT. For now, we cast the x.length()
+            // to int as a result. This will work ok for valid clob values that
+            // derby supports. If we ever decide to increase these limits for clobs, in that
+            // case the cast of x.Length() to int would not be appropriate.
+            // 2. Note, x.length() needs to be called before retrieving the
+            // stream using x.getCharacterStream() because EmbedClob.length()
+            // will read from the stream and drain the stream. 
+            // Hence the need to declare this local variable - streamLength
+            int streamLength = (int) x.length();
+
+            setCharacterStreamInternal(i, x.getCharacterStream(), streamLength);
+        }
+        
 	}
 
 	/**

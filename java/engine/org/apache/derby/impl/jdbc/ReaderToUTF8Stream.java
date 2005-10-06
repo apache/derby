@@ -28,6 +28,7 @@ import java.io.UTFDataFormatException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.LimitReader;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
 	Converts a java.io.Reader to the on-disk UTF8 format used by Cloudscape.
@@ -46,12 +47,26 @@ final class ReaderToUTF8Stream
     // buffer to hold the data read from stream 
     // and converted to UTF8 format
     private final static int BUFSIZE = 32768;
-
-	ReaderToUTF8Stream(LimitReader reader)
+    
+    // Number of characters to truncate from this stream
+    // The SQL standard allows for truncation of trailing spaces 
+    // for clobs,varchar,char.
+    private int charsToTruncate;
+    private final char SPACE =' ';
+    
+    // this stream needs to fit into a column of colWidth
+    // if truncation error happens ,then the error message includes 
+    // information about the column width which is why this variable
+    // is needed.
+    private int colWidth;  
+    
+	ReaderToUTF8Stream(LimitReader reader,int length,int numCharsToTruncate)
 	{
 		this.reader = reader;
 		buffer = new byte[BUFSIZE];
 		blen = -1;
+        this.charsToTruncate = numCharsToTruncate;
+        this.colWidth = length;
 	}
 
 	public int read() throws IOException {
@@ -90,7 +105,8 @@ final class ReaderToUTF8Stream
 			{
 				if (eof)
 				{
-					return readCount == 0 ? readCount : -1;
+                    // return actual number of bytes read into b[]
+					return readCount > 0 ? readCount : -1;
 				}
 				fillBuffer(0);
 				continue;
@@ -103,6 +119,7 @@ final class ReaderToUTF8Stream
 			boff += copyBytes;
 			len -= copyBytes;
 			readCount += copyBytes;
+            off += copyBytes;
 
 		}
 
@@ -157,26 +174,59 @@ final class ReaderToUTF8Stream
 	*/
 	private void checkSufficientData() throws IOException
 	{
-		int remainingBytes = reader.clearLimit();
-
+		// now that we finished reading from the stream; the amount
+        // of data that we can insert,start check for trailing spaces
+        if (charsToTruncate > 0)
+        {
+            reader.setLimit(charsToTruncate);
+            int c = 0;
+            do
+            {
+                c = reader.read();
+                
+                if (c < 0)
+                {
+                    break;
+                }
+                else if (c != SPACE)
+                {
+                    // throw truncation error, wont happen here for any other 
+                    // type except for clob
+                    // hence using TypeId.CLOB_NAME to avoid having to store
+                    // the type information along with this stream.
+                    throw new IOException(
+                        MessageService.getTextMessage(
+                            SQLState.LANG_STRING_TRUNCATION,
+                            TypeId.CLOB_NAME, 
+                            "XXXX", 
+                            String.valueOf(colWidth)));
+                }
+            }
+            while (c == SPACE);
+        }
+        
+        int remainingBytes = reader.clearLimit();
 		if (remainingBytes > 0)
 			throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
 
 		// if we had a limit try reading one more character.
-		// JDBC 3.0 states the stream muct have the correct number of characters in it.
+		// JDBC 3.0 states the stream muct have the correct number of 
+        // characters in it.
+
 		if (remainingBytes == 0) {
 			int c;
 			try
 			{
 				c = reader.read();
+               
 			}
 			catch (IOException ioe) {
 				c = -1;
 			}
 			if (c >= 0)
 				throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
-		}
-
+        }
+		
 		// can put the correct length into the stream.
 		if (!multipleBuffer)
 		{
@@ -214,5 +264,5 @@ final class ReaderToUTF8Stream
        // on this stream
        return (BUFSIZE > remainingBytes ? remainingBytes : BUFSIZE);
     }
-}
+  }
 

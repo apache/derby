@@ -62,7 +62,13 @@ public class characterStreams {
 
 			conn.createStatement().executeUpdate("create table charstream(id int GENERATED ALWAYS AS IDENTITY primary key, c char(25), vc varchar(32532), lvc long varchar)");
 
-			setStreams(conn);
+			setStreams(conn,"LONG VARCHAR");
+
+            System.out.println("run test with clob column");
+            conn.createStatement().executeUpdate("drop table charstream");
+            conn.createStatement().executeUpdate("create table charstream(id int GENERATED ALWAYS AS IDENTITY primary key, c char(25), vc varchar(32532), lvc clob)");
+            
+            setStreams(conn,"CLOB");
 
 			conn.close();
 
@@ -98,7 +104,7 @@ public class characterStreams {
             sqle = sqle.getNextException();
         }
     }
-	static void setStreams(Connection conn) throws Exception {
+	static void setStreams(Connection conn,String colType) throws Exception {
 
 		ResultSet rs;
 
@@ -149,8 +155,8 @@ public class characterStreams {
 		psi.setString(1, null);
 		psi.setString(2, null);
 		psi.setString(3, null);
-		// test setAsciiStream into LONG VARCHAR
-		System.out.println("\nTest setAsciiStream into LONG VARCHAR");
+		// test setAsciiStream into lvc column
+		System.out.println("\nTest setAsciiStream into "+colType);
 		maxid = getMaxId(conn);
 		setAscii(psi, 3);
 		psq.setInt(1, maxid);
@@ -193,7 +199,7 @@ public class characterStreams {
 		psi.setString(3, null);
 
 		// test setCharacterStream into LONG VARCHAR
-		System.out.println("\nTest setCharacterStream into LONG VARCHAR");
+		System.out.println("\nTest setCharacterStream into "+colType);
 		maxid = getMaxId(conn);
 		setCharacter(psi, 3);
 		psq.setInt(1, maxid);
@@ -206,16 +212,16 @@ public class characterStreams {
 
 		// now insert long values using streams and check them programatically.
 		System.out.println("setAsciiStream(LONG ASCII STREAMS)");
-		checkAsciiStreams(psDel, psi, psq2, 18, 104, 67);
-		checkAsciiStreams(psDel, psi, psq2, 25, 16732, 14563);
-		checkAsciiStreams(psDel, psi, psq2, 1, 32433, 32673);
-		checkAsciiStreams(psDel, psi, psq2, 0, 32532, 32700);
+		checkAsciiStreams(psDel, psi, psq2, 18, 104, 67,colType);
+		checkAsciiStreams(psDel, psi, psq2, 25, 16732, 14563,colType);
+		checkAsciiStreams(psDel, psi, psq2, 1, 32433, 32673,colType);
+		checkAsciiStreams(psDel, psi, psq2, 0, 32532, 32700,colType);
 
 		System.out.println("setCharacterStream(LONG CHARACTER STREAMS WITH UNICODE)");
-		checkCharacterStreams(psDel, psi, psq2, 14, 93, 55);
-		checkCharacterStreams(psDel, psi, psq2, 25, 19332, 18733);
-		checkCharacterStreams(psDel, psi, psq2, 1, 32433, 32673);
-		checkCharacterStreams(psDel, psi, psq2, 0, 32532, 32700);
+		checkCharacterStreams(psDel, psi, psq2, 14, 93, 55,colType);
+		checkCharacterStreams(psDel, psi, psq2, 25, 19332, 18733,colType);
+		checkCharacterStreams(psDel, psi, psq2, 1, 32433, 32673,colType);
+		checkCharacterStreams(psDel, psi, psq2, 0, 32532, 32700,colType);
 	}
 
 	private static int getMaxId(Connection conn) throws SQLException {
@@ -408,7 +414,7 @@ public class characterStreams {
 	}
 
 	private static void checkAsciiStreams(PreparedStatement psDel, PreparedStatement psi, PreparedStatement psq2,
-				int cl, int vcl, int lvcl)
+				int cl, int vcl, int lvcl,String colType)
 				throws SQLException, java.io.IOException {
 
 		psDel.executeUpdate();
@@ -433,7 +439,7 @@ public class characterStreams {
 		System.out.println("DONE");
 
 		is = rs.getAsciiStream(3);
-		System.out.print("AS-LONG VARCHAR-" + lvcl + " ");
+		System.out.print("AS-"+colType+"-" + lvcl + " ");
 		c3AsciiStream.check(is, lvcl, -1);
 		System.out.println("DONE");
 
@@ -453,7 +459,7 @@ public class characterStreams {
 		System.out.println("DONE");
 
 		r = rs.getCharacterStream(3);
-		System.out.print("CS-LONG VARCHAR-" + lvcl + " ");
+		System.out.print("CS-"+colType+"-" + lvcl + " ");
 		c3AsciiStream.check(r, lvcl, -1);
 		System.out.println("DONE");
 
@@ -475,7 +481,7 @@ public class characterStreams {
 		System.out.println("DONE");
 
 		r = new java.io.StringReader(rs.getString(3));
-		System.out.print("ST-LONG VARCHAR-" + lvcl + " ");
+		System.out.print("ST-"+colType+"-" + lvcl + " ");
 		c3AsciiStream.check(r, lvcl, -1);
 		System.out.println("DONE");
 
@@ -483,7 +489,7 @@ public class characterStreams {
 		}
 
 	private static void checkCharacterStreams(PreparedStatement psDel, PreparedStatement psi, PreparedStatement psq2,
-				int cl, int vcl, int lvcl)
+				int cl, int vcl, int lvcl,String colType)
 				throws SQLException, java.io.IOException {
 
 		psDel.executeUpdate();
@@ -507,7 +513,7 @@ public class characterStreams {
 		System.out.println("DONE");
 
 		is = rs.getAsciiStream(3);
-		System.out.print("AS-LONG VARCHAR-" + lvcl + " ");
+		System.out.print("AS-"+colType+"-" + lvcl + " ");
 		c3Reader.check(is, lvcl, -1);
 		System.out.println("DONE");
 
@@ -527,7 +533,7 @@ public class characterStreams {
 		System.out.println("DONE");
 
 		r = rs.getCharacterStream(3);
-		System.out.print("CS-LONG VARCHAR-" + lvcl + " ");
+		System.out.print("CS-"+colType+"-" + lvcl + " ");
 		c3Reader.check(r, lvcl, -1);
 		System.out.println("DONE");
 
@@ -551,7 +557,7 @@ public class characterStreams {
 
 		suv = rs.getString(3);
 		r = new java.io.StringReader(suv);
-		System.out.print("ST-LONG VARCHAR-" + lvcl + " ");
+		System.out.print("ST-"+colType+"-" + lvcl + " ");
 		c3Reader.check(r, lvcl, -1);
 		System.out.println("DONE");
 

@@ -98,4 +98,33 @@ expected exception for data > 32700 in length
 ===> testing trailing non-blanks(using setObject) length = 32703
 expected exception for data > 32700 in length
 Test 13 - long varchar truncation tests end in here
+Test 14 - clob truncation tests start from here
+===> testing(using setAsciiStream) extin/char32675trailingblanks.data length = 32675
+No truncation and hence no error
+===> testing(using setCharacterStream) extin/char32675trailingblanks.data length = 32675
+No truncation and hence no error
+===> testing trailing blanks(using setString) length = 32675
+No truncation and hence no error
+===> testing trailing blanks(using setObject) length = 32675
+No truncation and hence no error
+===> testing trailing blanks using concatenation
+No truncation and hence no error.
+===> testing(using setAsciiStream) extin/char32675.data length = 32675
+EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
+EXPECTED SQLSTATE(XJ001): Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 32672.: java.io.IOException'.
+===> testing(using setCharacterStream) extin/char32675.data length = 32675
+EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
+EXPECTED SQLSTATE(XJ001): Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 32672.: java.io.IOException'.
+===> testing trailing non-blanks(using setString) length = 32675
+expected exception for data > 32672 in length
+===> testing trailing non-blanks(using setObject) length = 32675
+expected exception for data > 32672 in length
+===> testing trailing non-blank characters using concatenation
+expected exception for data > 32672 in length
+===> verified length 32672
+===> verified length 32672
+===> verified length 32672
+===> verified length 32672
+===> verified length 32672
+Test 14 - clob truncation tests end in here
 Test streamingColumn finished
