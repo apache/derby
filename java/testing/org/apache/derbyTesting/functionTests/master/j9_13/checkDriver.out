@@ -1,0 +1,33 @@
+jdbcCompliant() = true
+driver.getMajorVersion() = EXPECTED VERSION
+driver.getMinorVersion() = EXPECTED VERSION
+checking acceptsURL(jdbc:derby:wombat;create=true)
+checking acceptsURL(jdbc:derby://localhost:1527/wombat;create=true)
+checking acceptsURL(jdbc:derby:net://localhost:1527/wombat;create=true)
+checking acceptsURL(jdbc:db2j:wombat;create=true)
+testEmbeddedAttributes()
+Connection info for connect(jdbc:derby:testcreatedb1, {create=true})
+getURL() = jdbc:derby:testcreatedb1
+getUserName() = APP
+CURRENT SCHEMA = APP
+Connection info for connect(jdbc:derby:testcreatedb2;create=true, null)
+getURL() = jdbc:derby:testcreatedb2
+getUserName() = APP
+CURRENT SCHEMA = APP
+Connection info for connect(jdbc:derby:testpropdb, {password=xxxx, user=APP})
+getURL() = jdbc:derby:testpropdb
+getUserName() = APP
+CURRENT SCHEMA = APP
+Connection info for connect(jdbc:derby:testpropdb;user=testuser;password=testpass, null)
+getURL() = jdbc:derby:testpropdb
+getUserName() = testuser
+CURRENT SCHEMA = TESTUSER
+Connection info for connect(jdbc:derby:testpropdb;user=testusr, {password=testpass})
+getURL() = jdbc:derby:testpropdb
+getUserName() = testusr
+CURRENT SCHEMA = TESTUSR
+Connection info for connect(jdbc:derby:testpropdb;user=testuser;password=testpass, null)
+getURL() = jdbc:derby:testpropdb
+getUserName() = testuser
+CURRENT SCHEMA = TESTUSER
+Expected Exception:08006:Database 'testcreatedb1' shutdown.
