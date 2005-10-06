@@ -116,7 +116,8 @@ class Database
 		throws SQLException
 	{
 		this.conn = conn;
-		defaultStatement.setStatement(conn);
+		if(conn != null)
+			defaultStatement.setStatement(conn);
 	}
 	/**
 	 * Get the connection
@@ -245,9 +246,11 @@ class Database
                 // take care of case of SECMEC_USRIDONL
                 if(password != null) 
 		    p.put(Attribute.PASSWORD_ATTR, password);
-		Connection conn = NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
-							 + dbName + attrString, p);
-		conn.setAutoCommit(false);
+        Connection conn = NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
+							 + shortDbName + attrString, p);
+		if(conn != null){
+			conn.setAutoCommit(false);
+		}
 		setConnection(conn);
 		return conn;
 	}

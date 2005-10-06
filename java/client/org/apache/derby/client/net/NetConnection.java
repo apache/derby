@@ -128,6 +128,13 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     // stored the password for deferred reset only.
     private transient char[] deferredResetPassword_ = null;
+    
+    //If Network Server gets null connection from the embedded driver, 
+    //it sends RDBAFLRM followed by SQLCARD with null SQLException.
+    //Client will parse the SQLCARD and set connectionNull to true if the
+    //SQLCARD is empty. If connectionNull=true, connect method in 
+    //ClientDriver will in turn return null connection.
+    private boolean connectionNull = false;
 
     private void setDeferredResetPassword(String password) {
         deferredResetPassword_ = (password == null) ? null : flipBits(password.toCharArray());
@@ -186,7 +193,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         String password = ClientDataSource.getPassword(properties);
         securityMechanism_ = ClientDataSource.getSecurityMechanism(properties);
         flowConnect(password, securityMechanism_);
-        completeConnect();
+        if(!isConnectionNull())
+        	completeConnect();
     }
 
     // For JDBC 2 Connections
@@ -1502,5 +1510,18 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         agent_.flowOutsideUOW();
         agent_.endReadChain();
     }
+    
+	/**
+	 * @return Returns the connectionNull.
+	 */
+	public boolean isConnectionNull() {
+		return connectionNull;
+	}
+	/**
+	 * @param connectionNull The connectionNull to set.
+	 */
+	public void setConnectionNull(boolean connectionNull) {
+		this.connectionNull = connectionNull;
+	}
 }
 

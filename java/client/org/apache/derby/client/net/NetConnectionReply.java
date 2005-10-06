@@ -485,7 +485,12 @@ public class NetConnectionReply extends Reply
         }
 
         NetSqlca netSqlca = parseSQLCARD(null);
-        netConnection.completeSqlca(netSqlca);
+        
+        //Check if the SQLCARD has null SQLException
+        if(netSqlca.getSqlErrmc() == null)
+        	netConnection.setConnectionNull(true);
+        else
+        	netConnection.completeSqlca(netSqlca);
     }
 
 
