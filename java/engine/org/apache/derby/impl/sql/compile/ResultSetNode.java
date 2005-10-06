@@ -72,6 +72,7 @@ import org.apache.derby.catalog.types.DefaultInfoImpl;
 
 import java.util.Properties;
 import java.util.Vector;
+import java.util.Set;
 
 /**
  * A ResultSetNode represents a result set, that is, a set of rows.  It is
@@ -1857,9 +1858,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Is it possible to do a distinct scan on this ResultSet tree.
 	 * (See SelectNode for the criteria.)
 	 *
+	 * @param distinctColumns the set of distinct columns
 	 * @return Whether or not it is possible to do a distinct scan on this ResultSet tree.
 	 */
-	boolean isPossibleDistinctScan()
+	boolean isPossibleDistinctScan(Set distinctColumns)
 	{
 		return false;
 	}

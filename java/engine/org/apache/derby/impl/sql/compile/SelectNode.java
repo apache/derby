@@ -43,6 +43,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.util.JBitSet;
 
 import java.util.Vector;
+import java.util.HashSet;
 
 /**
  * A SelectNode represents the result set for any of the basic DML
@@ -1335,14 +1336,29 @@ public class SelectNode extends ResultSetNode
 			 *	   FromBaseTable.  This is because all of a table's columns must come
 			 *	   from the same conglomerate in order to get consistent data.
 			 */
+			boolean distinctScanPossible = false;
 			if (origFromListSize == 1 &&
 				(! orderByAndDistinctMerged) &&
-				resultColumns.countNumberOfSimpleColumnReferences() == resultColumns.size() &&
-				prnRSN.isPossibleDistinctScan())
+				resultColumns.countNumberOfSimpleColumnReferences() == resultColumns.size())
 			{
-				prnRSN.markForDistinctScan();
+				boolean simpleColumns = true;
+				HashSet distinctColumns = new HashSet();
+				int size = resultColumns.size();
+				for (int i = 1; i <= size; i++) {
+					BaseColumnNode bc = resultColumns.getResultColumn(i).getBaseColumnNode();
+					if (bc == null) {
+						simpleColumns = false;
+						break;
+					}
+					distinctColumns.add(bc);
+				}
+				if (simpleColumns && prnRSN.isPossibleDistinctScan(distinctColumns)) {
+					prnRSN.markForDistinctScan();
+					distinctScanPossible = true;
+				}
 			}
-			else
+
+			if (!distinctScanPossible)
 			{
 				/* We can't do a distinct scan. Determine if we can filter out 
 				 * duplicates without a sorter. 

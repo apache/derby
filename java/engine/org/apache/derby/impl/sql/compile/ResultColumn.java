@@ -1745,4 +1745,28 @@ public class ResultColumn extends ValueNode
     public TableName getTableNameObject() {
         return null;
     }
+	/**
+	 * Get the source BaseColumnNode for this result column. The
+	 * BaseColumnNode cannot be found unless the ResultColumn is bound
+	 * and is a simple reference to a column in a BaseFromTable.
+	 *
+	 * @return a BaseColumnNode,
+	 *   or null if a BaseColumnNode cannot be found
+	 */
+	public BaseColumnNode getBaseColumnNode() {
+		ValueNode vn = expression;
+		while (true) {
+			if (vn instanceof ResultColumn) {
+				vn = ((ResultColumn) vn).expression;
+			} else if (vn instanceof ColumnReference) {
+				vn = ((ColumnReference) vn).getSource();
+			} else if (vn instanceof VirtualColumnNode) {
+				vn = ((VirtualColumnNode) vn).getSourceColumn();
+			} else if (vn instanceof BaseColumnNode) {
+				return (BaseColumnNode) vn;
+			} else {
+				return null;
+			}
+		}
+	}
 }

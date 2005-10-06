@@ -2477,6 +2477,288 @@ NAME                                                                            
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 name1                                                                                                                           |sum2                                                                                                                            
 ij> rollback;
-ij> -- reset autocomiit
+ij> -- Tests for DERBY-504 (select distinct from a subquery)
+create table names (id int, name varchar(10), age int);
+0 rows inserted/updated/deleted
+ij> insert into names (id, name, age) values
+       (1, 'Anna', 23), (2, 'Ben', 24), (3, 'Carl', 25),
+       (4, 'Anna', 23), (5, 'Ben', 24), (6, 'Carl', 25);
+6 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 20000;
+ij> -- distinct names should be returned
+select distinct name from (select name, id from names) as n;
+NAME      
+----------
+Anna      
+Ben       
+Carl      
+ij> -- runtime statistics should not have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- distinct names should be returned
+select distinct name from (select name, id from names) as n
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 6
+Rows returned = 3
+Eliminate duplicates = true
+In sorted order = false
+Sort information: 
+	Number of rows input=6
+	Number of rows output=3
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (3):
+	Number of opens = 1
+	Rows seen = 6
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Table Scan ResultSet for NAMES at read committed isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 6
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 1}
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=6
+			Number of rows visited=6
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+ij> -- distinct names should be returned
+select distinct name from (select name from names) as n;
+NAME      
+----------
+Anna      
+Ben       
+Carl      
+ij> -- runtime statistics should have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- distinct names should be returned
+select distinct name from (select name from names) as n
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Distinct Scan ResultSet for NAMES using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+Number of opens = 1
+Hash table size = 3
+Distinct column is column number 1
+Rows seen = 3
+Rows filtered = 0
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={1}
+	Number of columns fetched=1
+	Number of pages visited=1
+	Number of rows qualified=6
+	Number of rows visited=6
+	Scan type=heap
+	start position:
+	None
+	stop position:
+	None
+	scan qualifiers:
+None
+	next qualifiers:
+None
+ij> select distinct a, b, b, a from (select y as a, x as b from (select id as x, name as y from names) as n) as m;
+A         |B          |B          |A         
+---------------------------------------------
+Anna      |1          |1          |Anna      
+Carl      |6          |6          |Carl      
+Ben       |5          |5          |Ben       
+Carl      |3          |3          |Carl      
+Ben       |2          |2          |Ben       
+Anna      |4          |4          |Anna      
+ij> -- runtime statistics should have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select distinct a, b, b, a from (select y as a, x as b from (select id as x, name as y from names) as n) as m
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (2):
+Number of opens = 1
+Rows seen = 6
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Distinct Scan ResultSet for NAMES using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+	Number of opens = 1
+	Hash table size = 6
+	Distinct columns are column numbers (0,1)
+	Rows seen = 6
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={0, 1}
+		Number of columns fetched=2
+		Number of pages visited=1
+		Number of rows qualified=6
+		Number of rows visited=6
+		Scan type=heap
+		start position:
+	None
+		stop position:
+	None
+		scan qualifiers:
+None
+		next qualifiers:
+None
+ij> select distinct a, a from (select y as a from (select id as x, name as y from names) as n) as m;
+A         |A         
+---------------------
+Anna      |Anna      
+Ben       |Ben       
+Carl      |Carl      
+ij> -- runtime statistics should not have Distinct Scan in it
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select distinct a, a from (select y as a from (select id as x, name as y from names) as n) as m
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 6
+Rows returned = 3
+Eliminate duplicates = true
+In sorted order = false
+Sort information: 
+	Number of rows input=6
+	Number of rows output=3
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (3):
+	Number of opens = 1
+	Rows seen = 6
+	Rows filtered = 0
+	restriction = false
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Table Scan ResultSet for NAMES at read committed isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 6
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 1}
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=6
+			Number of rows visited=6
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+0 rows inserted/updated/deleted
+ij> drop table names;
+0 rows inserted/updated/deleted
+ij> -- reset autocommit
 autocommit on;
 ij> 

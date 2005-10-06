@@ -248,11 +248,7 @@ ffff
 NULL
 ij> -- grouping by long varchar [for bit data] cols should fail in db2 mode
 select lbv from t group by lbv order by lbv;
-LBV                                                                                                                             
---------------------------------------------------------------------------------------------------------------------------------
-1234                                                                                                                            
-abcd                                                                                                                            
-NULL                                                                                                                            
+ERROR X0X67: Columns of type 'LONG VARCHAR FOR BIT DATA' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> -- multicolumn grouping
 select i, dt, b from t where 1=1 group by i, dt, b order by i,dt,b;
 I          |DT        |B   
@@ -292,7 +288,6 @@ from (select i * s, c || v from t) t (expr1, expr2) group by expr2, expr1 order 
 EXPR1      |EXPR2                                                       
 ------------------------------------------------------------------------
 0          |goodbye   everyone is here                                  
-0          |hello     everyone is here                                  
 0          |hello     everyone is here                                  
 100        |hello     everyone is here                                  
 0          |hello     noone is here                                     
