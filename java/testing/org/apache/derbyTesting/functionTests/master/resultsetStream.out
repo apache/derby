@@ -10,7 +10,7 @@ getColumnCount(): 1
 len=56
 number of reads=56
 EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
-EXPECTED SQLSTATE(XJ001): Java exception: 'Input stream held less data than requested length.: java.io.IOException'.
+EXPECTED SQLSTATE(XJ001): Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
-EXPECTED SQLSTATE(XJ001): Java exception: 'Input stream held less data than requested length.: java.io.IOException'.
+EXPECTED SQLSTATE(XJ001): Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 Test resultsetStream finished

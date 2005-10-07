@@ -160,7 +160,7 @@ final class ReaderToUTF8Stream
 		int remainingBytes = reader.clearLimit();
 
 		if (remainingBytes > 0)
-			throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INSUFFICIENT_DATA));
+			throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
 
 		// if we had a limit try reading one more character.
 		// JDBC 3.0 states the stream muct have the correct number of characters in it.
@@ -174,7 +174,7 @@ final class ReaderToUTF8Stream
 				c = -1;
 			}
 			if (c >= 0)
-				throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INSUFFICIENT_DATA));
+				throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
 		}
 
 		// can put the correct length into the stream.

@@ -2,9 +2,13 @@ Test characterStreams starting
 Test setAsciiStream into CHAR
 CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
-MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
-LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -22,9 +26,13 @@ Results from Character Stream (read block) stream
 Test setAsciiStream into VARCHAR
 CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
-MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
-LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -42,9 +50,13 @@ Results from Character Stream (read block) stream
 Test setAsciiStream into LONG VARCHAR
 CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
-MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
-LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -60,24 +72,36 @@ Results from Character Stream (read block) stream
 9,<NULL>,<NULL>,Lieberman ran with Gore
 12,<NULL>,<NULL>,<NULL>
 Test setCharacterStream into CHAR
-MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 13         |A Mississippi Republican |24         |NULL                     |NULL       |NULL                     |NULL       
 14         |Lott has apologized      |19         |NULL                     |NULL       |NULL                     |NULL       
 17         |NULL                     |NULL       |NULL                     |NULL       |NULL                     |NULL       
 Test setCharacterStream into VARCHAR
-MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 18         |NULL                     |NULL       |A Mississippi Republican |24         |NULL                     |NULL       
 19         |NULL                     |NULL       |Lott has apologized      |19         |NULL                     |NULL       
 22         |NULL                     |NULL       |NULL                     |NULL       |NULL                     |NULL       
 Test setCharacterStream into LONG VARCHAR
-MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED SQL Exception: An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
+EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 23         |NULL                     |NULL       |NULL                     |NULL       |A Mississippi Republican |24         
