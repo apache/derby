@@ -45,14 +45,6 @@ CURRENT SCHEMA = APP
 doClientURLTest()
 doClientURLTest with url: jdbc:derby://localhost:1527/wombat:create=true
 Null connection returned for url jdbc:derby://localhost:1527/wombat:create=true
-doClientURLTest with url: jdbc:derby://localhost:1527/[DERBY_SYSTEM_HOME]/wombat:create=true
-EXPECTED EXCEPTION:DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ040, SQLERRMC: Failed to start database '[DERBY_SYSTEM_HOME]/wombat:create=true', see the next exception for details.::SQLSTATE: XJ001Java exception: 'The filename, directory name, or volume label syntax is incorrect: java.io.IOException'.
-doClientURLTest with url: jdbc:derby://localhost:1527/"wombat";create=true
-EXPECTED EXCEPTION:DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ041, SQLERRMC: Failed to create database '"wombat"', see the next exception for details.::SQLSTATE: XBM0HDirectory [DERBY_SYSTEM_HOME]/"wombat" cannot be created.
-doClientURLTest with url: jdbc:derby://localhost:1527/"[DERBY_SYSTEM_HOME]/wombat";create=true
-Null connection returned for url jdbc:derby://localhost:1527/"[DERBY_SYSTEM_HOME]/wombat";create=true
-doClientURLTest with url: jdbc:derby://localhost:1527/'[DERBY_SYSTEM_HOME]/wombat';create=true
-Null connection returned for url jdbc:derby://localhost:1527/'[DERBY_SYSTEM_HOME]/wombat';create=true
 doClientURLTest with url: jdbc:derby://localhost:1527/'wombat';create=true
 Connection info for connect(jdbc:derby://localhost:1527/'wombat';create=true, null)
 getURL() = jdbc:derby://localhost:1527/'wombat';create=true
