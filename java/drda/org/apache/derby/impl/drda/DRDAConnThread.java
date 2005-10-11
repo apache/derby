@@ -3793,7 +3793,7 @@ public class DRDAConnThread extends Thread {
 		} 
 		catch (SQLException se)
 		{
-			skipRemainder(false);
+			skipRemainder(true);
 			throw se;
 		}
 	}

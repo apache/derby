@@ -439,7 +439,7 @@ public class TestUtil {
 			default : return String.valueOf(jdbcType);
 		}
 	}
-	  public static String jdbcNameFromJdbc(int jdbcType) {
+	  public static String getNameFromJdbcType(int jdbcType) {
 		switch (jdbcType) {
 			case Types.BIT 		:  return "Types.BIT";
 			case JDBC30Translation.SQL_TYPES_BOOLEAN  : return "Types.BOOLEAN";

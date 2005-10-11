@@ -448,7 +448,7 @@ public class parameterMapping {
 					CallableStatement csp = conn.prepareCall("CALL PMP.TYPE_AS(?, ?, ?)");
 
 					boolean bothRegistered = true;
-					System.out.print("INOUT " + sqlType + " registerOutParameter(" + TestUtil.jdbcNameFromJdbc(jopt) + ") ");
+					System.out.print("INOUT " + sqlType + " registerOutParameter(" + TestUtil.getNameFromJdbcType(jopt) + ") ");
 					try {
 						csp.registerOutParameter(2, jopt);
 						System.out.println("-- OK");
@@ -456,7 +456,7 @@ public class parameterMapping {
 						System.out.println("-- " + sqle.getSQLState());
 						bothRegistered = false;
 					}
-					System.out.print("OUT " + sqlType + " registerOutParameter(" + TestUtil.jdbcNameFromJdbc(jopt) + ") ");
+					System.out.print("OUT " + sqlType + " registerOutParameter(" + TestUtil.getNameFromJdbcType(jopt) + ") ");
 					try {
 						csp.registerOutParameter(3, jopt);
 						System.out.println("-- OK");
@@ -1594,6 +1594,12 @@ public class parameterMapping {
 
 		}
 		judge_setXXX(worked, sqleResult, 8, type);
+		}
+		{
+		 s.execute("DELETE FROM PM.TYPE_AS");	
+		
+		 // Set Invalid String for nonString types (DERBY-149)
+		 testSetStringInvalidValue(type,psi);
 		}
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
@@ -2867,6 +2873,60 @@ public class parameterMapping {
 			System.out.println("SQLSTATE("+se.getSQLState()+"): " + se.toString());
 			se = se.getNextException();
 		}
+	}
+
+	/**
+	 * Test for DERBY-149 fix 
+	 * Check that setString to an invalid value throws an exception
+	 * rather than causing a hang
+	 * 
+	 * @param type   type for SQLTypes array
+	 * @param psi     - insert prepared statement.
+	 * 
+	 */
+	private static void testSetStringInvalidValue(int type, PreparedStatement psi) {
+		// Do not perform this test for string types. 
+		// Only test for types wich will fail with setString("InvalidValue");
+		switch (jdbcTypes[type]) 
+		{
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+				return;
+		}
+		
+		String sqlType = SQLTypes[type];
+		try {
+			System.out.print(" setString(\"Invalid Value\") " );
+			psi.setString(1,"Invalid Value");	 
+			psi.executeUpdate();
+			// Should have gotten exception. Test fails
+			String  error = "FAIL - setString(1,\"Invalld Value\") for type " +
+			sqlType + " did not throw an exception as expected";		 				
+		 	}
+			catch (SQLException sqle)
+			{
+		 		
+				if ("22018".equals(sqle.getSQLState())||
+					"XCL12".equals(sqle.getSQLState())||
+					"22007".equals(sqle.getSQLState())||
+					(sqle.getMessage().indexOf("Invalid data conversion") != -1) ||
+					(sqle.getMessage().indexOf("Illegal Conversion") != -1))
+					System.out.println(" IC (Expected)"); 
+				else
+					dumpSQLExceptions(sqle);				 		
+			}
+			catch (Exception e)
+			{
+				// JCC may throw Illegal argument exception for 
+				// String conversion error for date/time/timestamp
+				if (TestUtil.isJCCFramework() && 
+						e instanceof IllegalArgumentException)
+					System.out.println( e.getMessage());
+				else
+					System.out.println("FAIL: Unexpected Exception " + e.getMessage());
+			}		 	
 	}
 
 	private static String showFirstTwo(java.io.Reader in) throws java.io.IOException {
