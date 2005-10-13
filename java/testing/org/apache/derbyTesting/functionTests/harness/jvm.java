@@ -108,7 +108,7 @@ public abstract class jvm {
 
 	// security defaults relative to WS
 	// not used if jvmargs serverPolicyFile or serverCodeBase are set
-	private static String DEFAULT_POLICY="util/nwsvr.policy";
+	private static String DEFAULT_POLICY="util/derby_tests.policy";
 	private static String DEFAULT_CODEBASE="/classes";
 
     // constructors
@@ -294,7 +294,7 @@ public abstract class jvm {
 		return wshome;
 	}
 
-	protected static String findCodeBase()
+	protected static String findCodeBase(boolean[] isJar)
 	{
 		String classpath = System.getProperty("java.class.path");
 		char sep = '/';
@@ -306,11 +306,15 @@ public abstract class jvm {
 			String location = zip[i].getLocation().replace('\\','/');
 			if (location.indexOf("derbynet.jar") != -1)
 			{
+				isJar[0] = true;
 				return location.substring(0,location.lastIndexOf(sep));
 			}
 			else if ((location.indexOf("classes") != -1) &&
 					 location.indexOf(".jar") == -1)
+			{
+				isJar[0] = false;
 				return location;
+			}
 		}
 		return null;
 	}
@@ -333,18 +337,21 @@ public abstract class jvm {
 		}
 
 		String serverCodeBase = System.getProperty("serverCodeBase");
+		boolean[] isJar = new boolean[1];
 		if (serverCodeBase == null)
-			serverCodeBase = findCodeBase();
+			serverCodeBase = findCodeBase(isJar);
    
 		if (serverCodeBase == null)
 		{
 			String ws = guessWSHome();
 			serverCodeBase = ws + DEFAULT_CODEBASE;
 		}
+		
+		File pf = new File(policyFile);
+		File cb = new File(serverCodeBase);
 
 		if (policyFile.toLowerCase().equals("none") || 
-			(!(new File(policyFile)).exists()) ||
-			!(new File(policyFile)).exists())
+			(!pf.exists()))
 		{
 			System.out.println("WARNING: Running without Security manager." +
 							   "serverPolicy(" + policyFile + 
@@ -352,12 +359,23 @@ public abstract class jvm {
 							   ") not available");
 		return;
 		}
+		
 		this.D.addElement("java.security.manager");
 		this.D.addElement("java.security.policy=" + policyFile);
-		this.D.addElement("csinfo.codebase=" + serverCodeBase);
+		
+		String codebaseType = isJar[0] ? "csinfo.codejar" : "csinfo.codeclasses";
+		String unusedType = isJar[0] ? "csinfo.codeclasses" : "csinfo.codejar";
+
+		// URL of the codebase
+		this.D.addElement(codebaseType + "=" + cb.toURL());
+		// file path to the codebase
+		this.D.addElement("csinfo.codedir=" + cb.getAbsolutePath());
 		this.D.addElement("csinfo.serverhost=localhost");
 		this.D.addElement("csinfo.trustedhost=localhost");	 
-
+		
+		// add an invalid path to the unused type 
+		this.D.addElement(unusedType + "=file://unused/");
+		
 	}
 
 	/** Get the base file name from a resource name string
