@@ -47,7 +47,25 @@
   </target>
 
   <target name="ensuresanitystate" unless="state.available">
+    <antcall target="evaluate.sane"/>
+  </target>
+  <target name="evaluate.sane">
+    <condition property="generate.sane">
+      <or>
+        <equals arg1="${sane}" arg2="true"/>
+        <not>
+          <isset property="${sane}"/>
+        </not>
+      </or>
+    </condition>
+    <antcall target="ensuresanitystate.sane"/>
+    <antcall target="ensuresanitystate.insane"/>
+  </target>
+  <target name="ensuresanitystate.sane" if="generate.sane">
     <antcall target="sane"/>
+  </target>
+  <target name="ensuresanitystate.insane" unless="generate.sane">
+    <antcall target="insane"/>
   </target>
 
   <target name="showenv" depends="init" unless="showenv.done">
@@ -482,11 +500,15 @@
     <propertyfile file="${state.file}" comment="${header}">
       <entry key="sanity" value="true" type="string"/>
     </propertyfile>
+    <delete file="${sanity.dir}/SanityState.java"/>
+    <delete dir="${sanity.out.dir}"/>
   </target>
   <target name="insane">
     <propertyfile file="${state.file}" comment="${header}">
       <entry key="sanity" value="false" type="string"/>
     </propertyfile>
+    <delete file="${sanity.dir}/SanityState.java"/>
+    <delete dir="${sanity.out.dir}"/>
   </target>
 
 
