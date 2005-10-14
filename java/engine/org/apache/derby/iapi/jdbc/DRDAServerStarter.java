@@ -104,10 +104,10 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 						  public Object run() throws NoSuchMethodException, SecurityException
 						  {
 							  if (listenAddress == null)
-								  return serverClass.getDeclaredConstructor(null);
+								  return serverClass.getConstructor(null);
 							  else
 								  return
-									  serverClass.getDeclaredConstructor(new
+									  serverClass.getConstructor(new
 										  Class[] {java.net.InetAddress.class,
 												   Integer.TYPE});}
 					  }
