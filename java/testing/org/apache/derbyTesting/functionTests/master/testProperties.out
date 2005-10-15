@@ -14,4 +14,22 @@ org.apache.derby.drda.NetworkServerControl start -p 1530
 Successfully Connected
 org.apache.derby.drda.NetworkServerControl shutdown -p 1530 
 Shutdown successful.
+Testing start server by specifying system properties without values
+First shutdown server started on default port by the test harness
+org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
+Shutdown successful.
+-Dderby.drda.logConnections -Dderby.drda.traceAll -Dderby.drda.traceDirectory -Dderby.drda.keepAlive -Dderby.drda.timeSlice -Dderby.drda.host -Dderby.drda.portNumber -Dderby.drda.minThreads -Dderby.drda.maxThreads -Dderby.drda.startNetworkServer -Dderby.drda.debug org.apache.derby.drda.NetworkServerControl start 
+-- listing properties --
+derby.drda.maxThreads=0
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=false
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=false
+Successfully Connected
+org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
+Shutdown successful.
 End test

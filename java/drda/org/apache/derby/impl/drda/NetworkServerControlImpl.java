@@ -285,8 +285,8 @@ public final class NetworkServerControlImpl {
 	// constructor
 	public NetworkServerControlImpl() throws Exception
 	{
-		getPropertyInfo();
 		init();
+		getPropertyInfo();
     }
 
 
@@ -299,12 +299,12 @@ public final class NetworkServerControlImpl {
 	 */
 	public NetworkServerControlImpl(InetAddress address, int portNumber) throws Exception
 	{
+		init();
 		getPropertyInfo();
 		this.hostAddress = address;
 		this.portNumber = (portNumber <= 0) ?
 			this.portNumber: portNumber;
 		this.hostArg = address.getHostAddress();
-		init();
 	}
 
     private void init() throws Exception
@@ -2448,29 +2448,51 @@ public final class NetworkServerControlImpl {
 															  "true"))  
 			setTraceAll(true);
 
-		setTraceDirectory(PropertyUtil.getSystemProperty( 
-			Property.DRDA_PROP_TRACEDIRECTORY));
+		//If the derby.system.home property has been set, it is the default. 
+		//Otherwise, the default is the current directory. 
+		//If derby.system.home is not set, directory will be null and trace files will get
+		//created in current directory.
+		propval = PropertyUtil.getSystemProperty(Property.DRDA_PROP_TRACEDIRECTORY,directory);
+		if(propval != null){
+			if(propval.equals(""))
+				propval = directory;
+			setTraceDirectory(propval);
+		}
 
+		//DERBY-375 If a system property is specified without any value, getProperty returns 
+		//an empty string. Use default values in such cases.
 		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_MINTHREADS);
-		if (propval != null)
+		if (propval != null){
+			if(propval.equals(""))
+				propval = "0";
 			setMinThreads(getIntPropVal(Property.DRDA_PROP_MINTHREADS, propval));
+		}
 
 		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_MAXTHREADS);
-		if (propval != null)
+		if (propval != null){
+			if(propval.equals(""))
+				propval = "0";
 			setMaxThreads(getIntPropVal(Property.DRDA_PROP_MAXTHREADS, propval));
+		}
 
 
 		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_TIMESLICE);
-		if (propval != null)
+		if (propval != null){
+			if(propval.equals(""))
+				propval = "0";
 			setTimeSlice(getIntPropVal(Property.DRDA_PROP_TIMESLICE, propval));
+		}
 
 		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_PORTNUMBER);
-		if (propval != null)
+		if (propval != null){
+			if(propval.equals(""))
+				propval = String.valueOf(NetworkServerControl.DEFAULT_PORTNUMBER);
 			portNumber = getIntPropVal(Property.DRDA_PROP_PORTNUMBER, propval);
+		}
 
 		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_KEEPALIVE);
@@ -2480,9 +2502,12 @@ public final class NetworkServerControlImpl {
 		
 		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_HOSTNAME);
-		if (propval != null)
-			hostArg = propval;
-
+		if (propval != null){
+			if(propval.equals(""))
+				hostArg = DEFAULT_HOST; 
+			else
+				hostArg = propval;
+		}	
 		propval = PropertyUtil.getSystemProperty(
 						 NetworkServerControlImpl.DRDA_PROP_DEBUG);
 		if (propval != null  && StringUtil.SQLEqualsIgnoreCase(propval, "true"))
@@ -3214,6 +3239,11 @@ public final class NetworkServerControlImpl {
 		retval.put(Property.DRDA_PROP_TIMESLICE, new  Integer(getTimeSlice()).toString());
 		retval.put(Property.DRDA_PROP_LOGCONNECTIONS, new Boolean(getLogConnections()).toString());
 		String startDRDA = PropertyUtil.getSystemProperty(Property.START_DRDA);
+		//DERBY-375 If a system property is specified without any value, getProperty returns 
+		//an empty string. Use default values in such cases.
+		if(startDRDA!=null && startDRDA.equals(""))
+			startDRDA = "false";
+		
 		retval.put(Property.START_DRDA, (startDRDA == null)? "false" : startDRDA);
 
 		//get the trace value for each session if tracing for all is not set
