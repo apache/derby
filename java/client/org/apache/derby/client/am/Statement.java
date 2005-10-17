@@ -1799,13 +1799,58 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // Should investigate if it can be optimized..  if we can avoid this parsing..
     //
     void parseSqlAndSetSqlModes(String sql) throws SqlException {
-        java.util.StringTokenizer tokenizer = new java.util.StringTokenizer(sql, "\t\n\r\f=? (");
+        String delims = "\t\n\r\f=? (";
+        java.util.StringTokenizer tokenizer = null;
+        String firstToken = null;
+
+        // See if the statement starts with a comment; if so, move
+        // past the comment and get the first token of the actual
+        // statement to be executed.  Note: must use "startsWith"
+        // when looking for the comment delimiters instead of
+        // "equals" because there may not be whitespace between the
+        // the delimiter and the comment itself, ex "--my comment".
+        if (sql.trim().startsWith("--")) {
+
+            // Read each line of the statement until we find a
+            // line that is NOT a comment.
+            int lastEndLine = -1;
+            String endline = "\n\r\f";
+            tokenizer = new java.util.StringTokenizer(sql, endline, true);
+            while (tokenizer.hasMoreTokens()) {
+                firstToken = tokenizer.nextToken();
+                if (endline.indexOf(firstToken) != -1)
+                // this is some sort of newline ("\n", "\r", or "\f").
+                    lastEndLine = sql.indexOf(firstToken, lastEndLine+1);
+                else if (!firstToken.trim().startsWith("--"))
+                    break;
+            }
+
+            if (firstToken.startsWith("--")) {
+            // entire statement was just one or more comments; pass it as
+            // a query to the server and let the server deal with it.
+                sqlMode_ = isQuery__;
+                return;
+            }
+            else {
+            // we have a non-comment line; get a tokenizer for the
+            // statement beginning at the start of this line.
+                tokenizer = new java.util.StringTokenizer(
+                    sql.substring(lastEndLine+1), delims);
+            }
+
+        }
+        else {
+        // there aren't any leading comments, so just get the first token
+        // in the SQL statement.
+            tokenizer = new java.util.StringTokenizer(sql, delims);
+        }
+
         if (!tokenizer.hasMoreTokens()) {
             throw new SqlException(agent_.logWriter_, "SQL passed with no tokens");
         }
 
         sqlUpdateMode_ = 0;
-        String firstToken = tokenizer.nextToken();
+        firstToken = tokenizer.nextToken();
 
         if (firstToken.equalsIgnoreCase("select") || // captures <subselect> production
                 firstToken.equalsIgnoreCase("values")) // captures <values-clause> production

@@ -536,7 +536,23 @@ ij> -- RESOLVE - add selects from sysdepends when simplified
 ----- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
 from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
-ERROR X0Y79: Statement.executeUpdate() cannot be called with a statement that returns a ResultSet.
+TABLENAME |2          
+-----
+SYSCONGLOMERATES |1          
+SYSTABLES |1          
+SYSCOLUMNS |1          
+SYSSCHEMAS |1          
+SYSCONSTRAINTS |1          
+SYSKEYS |1          
+SYSDEPENDS |1          
+SYSALIASES |1          
+SYSVIEWS |1          
+SYSCHECKS |1          
+SYSFOREIGNKEYS |1          
+SYSSTATEMENTS |1          
+SYSFILES |1          
+SYSTRIGGERS |1          
+SYSSTATISTICS |1          
 ij> -- drop views
 drop view dummyview;
 0 rows inserted/updated/deleted
