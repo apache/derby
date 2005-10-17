@@ -80,6 +80,7 @@ public interface MessageId {
     String STORE_BACKUP_COMPLETED           = "D012";
     String STORE_DURABILITY_TESTMODE_NO_SYNC = "D013"; // for derby.system.durability is 
                                                        // set to test
+    String STORE_BOOT_READONLY_MSG          = "D014";
 
 
 	/*
