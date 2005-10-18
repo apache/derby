@@ -36,10 +36,6 @@ grant codeBase "${csinfo.codejar}derby.jar" {
   // BUG DERBY-622 derbynet/sysinfo.java
   permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
   
-  // BUG DERBY-624 - required for sane=true, checking method signatures
-  // of compiled code - 17 tests fail including derbynet/callable
-  permission java.lang.RuntimePermission "accessDeclaredMembers";
-  
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
  
@@ -68,10 +64,6 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
   // BUG DERBY-623 - sane=true
   permission java.util.PropertyPermission "derby.monitor.verbose", "read";
   permission java.util.PropertyPermission "derby.debug.*", "read";
-  
-  // BUG DERBY-624 - required for sane=true, checking method signatures
-  // of compiled code - 17 tests fail including derbynet/callable
-  permission java.lang.RuntimePermission "accessDeclaredMembers";
   
 };
 
@@ -102,17 +94,6 @@ grant codeBase "${csinfo.codeclasses}" {
   permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
   permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
   permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
-  
-  // BUG DERBY-624 - required for sane=true, checking method signatures
-  // of compiled code - 17 tests fail including derbynet/callable
-  permission java.lang.RuntimePermission "accessDeclaredMembers";
 };
 
-// grant to all code, really don't want a section like this
-// remove once the bug is fixed. This is because it will grant
-// permissions to the generated code as well.
-grant {
-  // BUG DERBY-624 - required for sane=true, checking method signatures
-  // of compiled code
-  permission java.lang.RuntimePermission "accessDeclaredMembers";
-};
+

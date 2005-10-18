@@ -57,7 +57,7 @@ class d_BCValidate
 
 
 		if (SanityManager.DEBUG) {
-			String reason;
+			String reason = null;
 			try {
 
 				String declaringClass = dt.javaName();
@@ -84,33 +84,89 @@ class d_BCValidate
 					}
 
 				}
-
+				
+				// If the class is not in the same class loader then it
+				// it must be a non-Derby class. In that case any method etc.
+				// being accessed must be public, so don't use the getDeclared
+				// methods. Default SecurityManager behaviour is to grant access to public members
+				// and members from classes loaded by the same class loader. Thus
+				// we try to fall into these categories to avoid having to grant
+				// permissions to derby jars for the function tests.
+				
+				ClassLoader declareLoader = declaring.getClassLoader();
+				ClassLoader myLoader = d_BCValidate.class.getClassLoader();
+				
+				boolean sameClassLoader = false;
+				if (declareLoader == myLoader)
+					sameClassLoader = true;
+				else if (declareLoader != null)
+					sameClassLoader = declareLoader.equals(myLoader);
+				
 				String actualReturnType;
 
 				if (methodName.equals("<init>")) {
-					Constructor c = declaring.getDeclaredConstructor(params);
+					Constructor c;
+					
+					if (sameClassLoader)
+					{
+						c = declaring.getDeclaredConstructor(params);
+					}
+					else
+					{
+						c = declaring.getConstructor(params);
+						
+						// check this construct is declared by this
+						// class, has to be, right? But no harm checking.
+						if (!c.getDeclaringClass().equals(declaring))
+						{
+							reason = "constructor " + c.toString() + " declared on " + c.getDeclaringClass() + " expected " + declaring;
+						}
+					}
+					
 					actualReturnType = "void";
 				} else {
-					Method m = declaring.getDeclaredMethod(methodName, params);
+					Method m;
+					
+					if (sameClassLoader)
+					{
+						m = declaring.getDeclaredMethod(methodName, params);
+					}
+					else
+					{
+						m = declaring.getMethod(methodName, params);
+						
+						// check this method is declared by this
+						// class? But no harm checking.
+						if (!m.getDeclaringClass().equals(declaring))
+						{
+							reason = "method " + m.toString() + " declared on " + m.getDeclaringClass() + " expected " + declaring;
+						}
+					}
+					
 					actualReturnType = m.getReturnType().getName();
 				}
+				
+				// do we already have a problem?
+				if (reason == null)
+				{
 
-				Class requestedReturnType = loadClass(rt.javaName());
-
-				// check the return type
-				if (actualReturnType.equals(requestedReturnType.getName())) {
-
-					// check the inteface match
-					if (opcode != VMOpcode.INVOKEINTERFACE)
-						return;
-
-					if (declaring.isInterface())
-						return;
-
-					reason = "declaring class is not an interface";
-
-				} else {
-					reason = "return type is " + actualReturnType;
+					Class requestedReturnType = loadClass(rt.javaName());
+	
+					// check the return type
+					if (actualReturnType.equals(requestedReturnType.getName())) {
+	
+						// check the inteface match
+						if (opcode != VMOpcode.INVOKEINTERFACE)
+							return;
+	
+						if (declaring.isInterface())
+							return;
+	
+						reason = "declaring class is not an interface";
+	
+					} else {
+						reason = "return type is " + actualReturnType;
+					}
 				}
 
 
