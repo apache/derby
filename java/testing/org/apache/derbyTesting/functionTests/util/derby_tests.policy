@@ -50,10 +50,8 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
   permission java.net.SocketPermission "${csinfo.trustedhost}", "accept";
     
-  // tracing files - BUG DERBY-613 default location for tracing
-  // file is meant to be ${derby.system.home} but instead is ${user.dir}
-  // Changes DERBY-613 may require modifying this permission.
-  permission java.io.FilePermission "${user.dir}${/}*", "write";  
+  // tracing files default to derby.system.home, derbynet/getCurrentProperties.java 
+  permission java.io.FilePermission "${derby.system.home}${/}*", "write";  
   
   // BUG DERBY-622 derbynet/sysinfo.java
   permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
@@ -65,6 +63,8 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
   permission java.util.PropertyPermission "derby.monitor.verbose", "read";
   permission java.util.PropertyPermission "derby.debug.*", "read";
   
+  // sane=true, jdbcapi/secureUsers1.sql
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
 };
 
 //
@@ -85,15 +85,13 @@ grant codeBase "${csinfo.codeclasses}" {
   permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
   permission java.net.SocketPermission "${csinfo.trustedhost}", "accept";   
 
-  // tracing files - BUG DERBY-613 default location for tracing
-  // file is meant to be ${derby.system.home} but instead is ${user.dir}
-  // Changes DERBY-613 may require modifying this permission.
-  permission java.io.FilePermission "${user.dir}${/}*", "write"; 
-  
   // Import/export and other support files from these locations in tests
   permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
   permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
   permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
+  
+  // sane=true, jdbcapi/secureUsers1.sql
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
 };
 
 
