@@ -92,6 +92,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.FileNotFoundException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -903,7 +904,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 							//extend the file by wring zeros to it
 							preAllocateNewLogFile(theLog);
 							theLog.close();
-							theLog=  privRandomAccessFile(logFile, "rws");
+							theLog = openLogFileInWriteMode(logFile);
 							//postion the log at the current end postion
 							theLog.seek(endPosition);
 						}
@@ -939,7 +940,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						try
 						{
 							if(isWriteSynced)
-								theLog = privRandomAccessFile(logFile, "rws");
+								theLog = openLogFileInWriteMode(logFile);
 							else
 								theLog = privRandomAccessFile(logFile, "rw");
 						}
@@ -1914,7 +1915,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						//extend the file by wring zeros to it
 						preAllocateNewLogFile(newLog);
 						newLog.close();
-						newLog=  privRandomAccessFile(newLogFile, "rws");
+						newLog = openLogFileInWriteMode(newLogFile);
 						newLog.seek(endPosition);
 					}
 
@@ -3029,7 +3030,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                         //extend the file by wring zeros to it
                         preAllocateNewLogFile(firstLog);
                         firstLog.close();
-                        firstLog=  privRandomAccessFile(logFile, "rws");
+                        firstLog = openLogFileInWriteMode(logFile);
                         //postion the log at the current log end postion
                         firstLog.seek(endPosition);
                     }
@@ -4643,15 +4644,32 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         }
     } // end of preAllocateNewLogFile
 
-	/*open the given log file name for writes; if write sync 
-	 *is enabled open in rws mode otherwise in rw mode. 
-	 */
-	public StorageRandomAccessFile openLogFileInWriteMode(StorageFile logFile) throws IOException
+
+	/**
+	 * open the given log file name for writes; if file can not be 
+	 * be opened in write sync mode then disable the write sync mode and 
+	 * open the file in "rw" mode.
+ 	 */
+	private StorageRandomAccessFile openLogFileInWriteMode(StorageFile logFile) throws IOException
 	{
-		if(isWriteSynced)
-			return privRandomAccessFile(logFile, "rws");
-		else
-			return privRandomAccessFile(logFile, "rw");
+		StorageRandomAccessFile log;
+		try{
+			log = privRandomAccessFile(logFile, "rws");
+		}catch(FileNotFoundException ex)
+		{
+			// Normally this exception should never occur. For some reason
+			// currently on Mac JVM 1.4.2 FileNotFoundException exception is
+			// thrown if a file is opened in "rws" mode and if it already
+			// exists. Please refere to Derby-1 for more/ details on this issue.
+			// Temporary workaround to avoid this problem is to make the logging 
+			// system use file sync mechanism. 
+
+			// disable the write sync and open the file in "rw" mode. 
+			isWriteSynced = false;
+			log = privRandomAccessFile(logFile, "rw");
+		}
+		
+		return log ;
 	}
 
 
