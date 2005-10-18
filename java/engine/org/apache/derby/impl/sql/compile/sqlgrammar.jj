@@ -1583,7 +1583,7 @@ SKIP :
 
 SKIP :
 {	/* comments */
-  <SINGLE_LINE_SQLCOMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+  <SINGLE_LINE_SQLCOMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")?>
 }
 
 /*

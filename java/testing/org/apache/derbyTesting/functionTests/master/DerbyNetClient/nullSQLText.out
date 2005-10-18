@@ -14,10 +14,10 @@ Null SQL String Exception
 Starting test for DERBY-522.
 [ Test Statement ]:
  --
-[ EXPECTED ERROR ]: ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 3.
+[ EXPECTED ERROR ]: ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 2.
 [ Test Statement ]:
  -- 
-[ EXPECTED ERROR ]: ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 4.
+[ EXPECTED ERROR ]: ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 2.
 [ Test Statement ]:
  -- This is a comment 
  --

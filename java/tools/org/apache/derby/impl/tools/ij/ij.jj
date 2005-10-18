@@ -32,6 +32,7 @@ import org.apache.derby.tools.URLCheck;
 
 import java.lang.reflect.*;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -298,19 +299,32 @@ class ij {
 			haveConnection();
 			aStatement = theConnection.createStatement();
 
-			// for JCC or DNC - remove comments at the beginning of the statement
-			// and trim
-			if ((currentConnEnv != null) &&
-			    ((currentConnEnv.getSession().getIsJCC()) ||
-			     currentConnEnv.getSession().getIsDNC()))
-			{
-				int nextline;
-				while(stmt.startsWith("--"))
-				{
-					nextline = stmt.indexOf('\n')+1;
-					stmt = stmt.substring(nextline);
+			// for JCC - remove comments at the beginning of the statement
+			// and trim; do the same for Derby Clients that have versions
+			// earlier than 10.2.
+			if (currentConnEnv != null) {
+				boolean trimForDNC = currentConnEnv.getSession().getIsDNC();
+				if (trimForDNC) {
+				// we're using the Derby Client, but we only want to trim
+				// if the version is earlier than 10.2.
+					DatabaseMetaData dbmd = theConnection.getMetaData();
+					int majorVersion = dbmd.getDriverMajorVersion();
+					if ((majorVersion > 10) || ((majorVersion == 10) &&
+						(dbmd.getDriverMinorVersion() > 1)))
+					{ // 10.2 or later, so don't trim/remove comments.
+						trimForDNC = false;
+					}
 				}
-				stmt = stmt.trim();
+				if (currentConnEnv.getSession().getIsJCC() || trimForDNC) {
+				// remove comments and trim.
+					int nextline;
+					while(stmt.startsWith("--"))
+					{
+						nextline = stmt.indexOf('\n')+1;
+						stmt = stmt.substring(nextline);
+					}
+					stmt = stmt.trim();
+				}
 			}
 
 			aStatement.execute(stmt);
