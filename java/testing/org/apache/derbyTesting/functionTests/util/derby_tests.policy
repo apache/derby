@@ -1,0 +1,118 @@
+//
+// Policy file with minimal set of permissions to run derby's
+// functional tests.
+//
+// The test harness sets up three variables used by this policy file
+//
+// csinfo.codejar - URL to the jar files when they are in the classpath
+// csinfo.codeclasses - URL to the classes directory when it is in the classpath
+//
+// Only one of csinfo.codejar and csinfo.codeclasses will be valid, the
+// other will be set to a bogus URL like file://unused
+//
+// csinfo.codedir - File location of either csinfo.codejar or csinfo.codejar.
+// Only required due to a BUG.
+
+//
+// Permissions for the embedded engine (derby.jar)
+//
+grant codeBase "${csinfo.codejar}derby.jar" {
+  permission java.util.PropertyPermission "derby.*", "read";
+  
+  permission java.lang.RuntimePermission "createClassLoader";
+  
+  permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
+  permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";
+  permission java.io.FilePermission "${derby.system.home}", "read";
+  
+  // all databases under derby.system.home 
+  permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
+
+  // Import/export and other support files from these locations in tests
+  permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
+  permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
+  permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
+
+  // BUG derbynet/sysinfo.java
+  permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
+  
+  // BUG - required for sane=true, checking method signatures
+  // of compiled code - 17 tests fail including derbynet/callable
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  
+  // sane=true, jdbcapi/secureUsers1.sql
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
+ 
+};
+
+//
+// Permissions for the network server (derbynet.jar)
+//
+grant codeBase "${csinfo.codejar}derbynet.jar" {
+  permission java.net.SocketPermission "127.0.0.1", "accept";
+  permission java.net.SocketPermission "localhost", "accept";
+  permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
+  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept";
+    
+  // tracing files - BUG DERBY-613 default location for tracing
+  // file is meant to be ${derby.system.home} but instead is ${user.dir}
+  // Changes DERBY-613 may require modifying this permission.
+  permission java.io.FilePermission "${user.dir}${/}*", "write";  
+  
+  // BUG derbynet/sysinfo.java
+  permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
+  
+  // BUG DERBY-616 lang/wisconsin.sql & jdbcapi/maxfieldsize.java
+  permission java.io.FilePermission "${derby.system.home}${/}wombat${/}tmp${/}-", "read, write, delete";
+  
+  // BUG - sane=true
+  permission java.util.PropertyPermission "derby.monitor.verbose", "read";
+  permission java.util.PropertyPermission "derby.debug.*", "read";
+  
+  // BUG - required for sane=true, checking method signatures
+  // of compiled code - 17 tests fail including derbynet/callable
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  
+};
+
+//
+// super-set of the jar permissions for running out of the classes directory
+//
+grant codeBase "${csinfo.codeclasses}" {
+
+  permission java.util.PropertyPermission "derby.*", "read";
+  permission java.lang.RuntimePermission "createClassLoader";
+   
+  permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
+  permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";
+  permission java.io.FilePermission "${derby.system.home}", "read";
+  permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
+
+  permission java.net.SocketPermission "127.0.0.1", "accept";
+  permission java.net.SocketPermission "localhost", "accept";
+  permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
+  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept";   
+
+  // tracing files - BUG DERBY-613 default location for tracing
+  // file is meant to be ${derby.system.home} but instead is ${user.dir}
+  // Changes DERBY-613 may require modifying this permission.
+  permission java.io.FilePermission "${user.dir}${/}*", "write"; 
+  
+  // Import/export and other support files from these locations in tests
+  permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
+  permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
+  permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
+  
+  // BUG - required for sane=true, checking method signatures
+  // of compiled code - 17 tests fail including derbynet/callable
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+};
+
+// grant to all code, really don't want a section like this
+// remove once the bug is fixed. This is because it will grant
+// permissions to the generated code as well.
+grant {
+  // BUG - required for sane=true, checking method signatures
+  // of compiled code
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+};
