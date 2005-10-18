@@ -33,10 +33,10 @@ grant codeBase "${csinfo.codejar}derby.jar" {
   permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
   permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
 
-  // BUG derbynet/sysinfo.java
+  // BUG DERBY-622 derbynet/sysinfo.java
   permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
   
-  // BUG - required for sane=true, checking method signatures
+  // BUG DERBY-624 - required for sane=true, checking method signatures
   // of compiled code - 17 tests fail including derbynet/callable
   permission java.lang.RuntimePermission "accessDeclaredMembers";
   
@@ -59,17 +59,17 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
   // Changes DERBY-613 may require modifying this permission.
   permission java.io.FilePermission "${user.dir}${/}*", "write";  
   
-  // BUG derbynet/sysinfo.java
+  // BUG DERBY-622 derbynet/sysinfo.java
   permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
   
   // BUG DERBY-616 lang/wisconsin.sql & jdbcapi/maxfieldsize.java
   permission java.io.FilePermission "${derby.system.home}${/}wombat${/}tmp${/}-", "read, write, delete";
   
-  // BUG - sane=true
+  // BUG DERBY-623 - sane=true
   permission java.util.PropertyPermission "derby.monitor.verbose", "read";
   permission java.util.PropertyPermission "derby.debug.*", "read";
   
-  // BUG - required for sane=true, checking method signatures
+  // BUG DERBY-624 - required for sane=true, checking method signatures
   // of compiled code - 17 tests fail including derbynet/callable
   permission java.lang.RuntimePermission "accessDeclaredMembers";
   
@@ -103,7 +103,7 @@ grant codeBase "${csinfo.codeclasses}" {
   permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
   permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
   
-  // BUG - required for sane=true, checking method signatures
+  // BUG DERBY-624 - required for sane=true, checking method signatures
   // of compiled code - 17 tests fail including derbynet/callable
   permission java.lang.RuntimePermission "accessDeclaredMembers";
 };
@@ -112,7 +112,7 @@ grant codeBase "${csinfo.codeclasses}" {
 // remove once the bug is fixed. This is because it will grant
 // permissions to the generated code as well.
 grant {
-  // BUG - required for sane=true, checking method signatures
+  // BUG DERBY-624 - required for sane=true, checking method signatures
   // of compiled code
   permission java.lang.RuntimePermission "accessDeclaredMembers";
 };
