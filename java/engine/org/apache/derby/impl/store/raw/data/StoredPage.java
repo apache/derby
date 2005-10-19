@@ -6154,6 +6154,13 @@ public class StoredPage extends CachedPage
                 // into the RememberBytesInputStream.
                 if (row[arrayPosition] instanceof StreamStorable)
                     ((StreamStorable)row[arrayPosition]).setStream(bufferedIn);
+                
+                // set column to the RememberBytesInputStream so that 
+                // all future access to this column will be able to get 
+                // at bytes that have been already read. This assignment
+                // is needed to ensure that if long column exception is 
+                // thrown, the column is set correctly
+                column = bufferedIn;
 			}
 
 			// read the buffer by reading the max we can read.

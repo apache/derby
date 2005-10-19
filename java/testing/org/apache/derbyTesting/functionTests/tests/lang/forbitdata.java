@@ -717,44 +717,7 @@ public class forbitdata
 		psi.executeUpdate();
 		conn.commit();
 
-		ResultSet rs = pss.executeQuery();
-		while (rs.next())
-		{
-			System.out.print(" EL byte[] " + length);
-			byte[] v = rs.getBytes(1);
-			if (v != null) {
-				System.out.print(" C1 " + ((v.length == length) ? "OK" : ("FAIL <" + v.length + ">")));
-				System.out.print(" DATA " + ((v[off] == 0x23) ? "OK" : ("FAIL " + off)));
-			}
-			else
-				System.out.print(" C1 NULL");
-
-			v = rs.getBytes(2);
-			if (v != null) {
-				System.out.print(" C2 " + ((v.length == length) ? "OK" : ("FAIL <" + v.length + ">")));
-				System.out.print(" DATA " + ((v[off] == 0x23) ? "OK" : ("FAIL " + off)));
-			}
-			else
-				System.out.print(" C2 NULL");
-			InputStream c3 = rs.getBinaryStream(3);
-			checkEncodedLengthValue("C3", c3, length, off);
-
-			System.out.println("");
-		}
-		rs.close();
-
-		rs = pss.executeQuery();
-		while (rs.next())
-		{
-			System.out.print(" EL stream " + length);
-
-			checkEncodedLengthValue("C1", rs.getBinaryStream(1), length, off);
-			checkEncodedLengthValue("C2", rs.getBinaryStream(2), length, off);
-			checkEncodedLengthValue("C3", rs.getBinaryStream(3), length, off);
-
-			System.out.println("");
-		}
-		rs.close();
+		selectData(pss,data,off,length);
 
 		conn.commit();
 
@@ -762,21 +725,68 @@ public class forbitdata
 		conn.commit();
 
 
+        // Set values using stream and then verify that select is successful
 		psi.setBinaryStream(1, (length <= 32672) ? new java.io.ByteArrayInputStream(data) : null, length);
 		psi.setBinaryStream(2, (length <= 32700) ? new java.io.ByteArrayInputStream(data) : null, length);
 		psi.setBinaryStream(3, new java.io.ByteArrayInputStream(data), length); // BLOB column
 		psi.executeUpdate();
 		conn.commit();
 
+		selectData(pss,data,off,length);
+
+        conn.commit();
+
+
 		psd.executeUpdate();
-
-
-
 		conn.commit();
 
 
 	}
 
+    private static void selectData(PreparedStatement pss,byte[] data,int off,int length)
+        throws SQLException,IOException
+    {
+        
+        ResultSet rs = pss.executeQuery();
+        while (rs.next())
+        {
+            System.out.print(" EL byte[] " + length);
+            byte[] v = rs.getBytes(1);
+            if (v != null) {
+                System.out.print(" C1 " + ((v.length == length) ? "OK" : ("FAIL <" + v.length + ">")));
+                System.out.print(" DATA " + ((v[off] == 0x23) ? "OK" : ("FAIL " + off)));
+            }
+            else
+                System.out.print(" C1 NULL");
+
+            v = rs.getBytes(2);
+            if (v != null) {
+                System.out.print(" C2 " + ((v.length == length) ? "OK" : ("FAIL <" + v.length + ">")));
+                System.out.print(" DATA " + ((v[off] == 0x23) ? "OK" : ("FAIL " + off)));
+            }
+            else
+                System.out.print(" C2 NULL");
+            InputStream c3 = rs.getBinaryStream(3);
+            checkEncodedLengthValue("C3", c3, length, off);
+
+            System.out.println("");
+        }
+        rs.close();
+
+        rs = pss.executeQuery();
+        while (rs.next())
+        {
+            System.out.print(" EL stream " + length);
+
+            checkEncodedLengthValue("C1", rs.getBinaryStream(1), length, off);
+            checkEncodedLengthValue("C2", rs.getBinaryStream(2), length, off);
+            checkEncodedLengthValue("C3", rs.getBinaryStream(3), length, off);
+
+            System.out.println("");
+        }
+        rs.close();
+
+    }
 	private static void checkEncodedLengthValue(String col, InputStream is, int length, int off) throws IOException {
 
 		if (is == null) {

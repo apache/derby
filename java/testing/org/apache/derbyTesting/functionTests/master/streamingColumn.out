@@ -127,4 +127,39 @@ expected exception for data > 32672 in length
 ===> verified length 32672
 ===> verified length 32672
 Test 14 - clob truncation tests end in here
+======================================
+START  DERBY-500 TEST 
+Inserting rows 
+Rows inserted =10
+Rows selected =10
+Update qualifies many rows + streams
+EXPECTED EXCEPTION - streams cannot be re-used
+EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
+EXPECTED SQL Exception: (XJ001) Java exception: 'Stream has already been read and end-of-file reached and cannot be re-used.: java.io.EOFException'.
+Rows selected =10
+DERBY500 #2 Rows updated  =1
+Rows selected =1
+DERBY500 #3 Rows deleted =10
+Rows selected =0
+DERBY500 #4 Rows deleted  =0
+Rows selected =0
+EXPECTED EXCEPTION - streams cannot be re-used
+EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
+EXPECTED SQL Exception: (XJ001) Java exception: 'Stream has already been read and end-of-file reached and cannot be re-used.: java.io.EOFException'.
+END  DERBY-500 TEST 
+======================================
+======================================
+START  DERBY-500 TEST for varchar 
+Rows inserted =10
+Rows selected =10
+DERBY500 for varchar #1 Rows updated  =11
+Rows selected =10
+DERBY500 for varchar #2 Rows updated  =1
+Rows selected =1
+DERBY500 for varchar #3 Rows deleted =11
+Rows selected =0
+DERBY500 for varchar #4 Rows deleted  =0
+Rows selected =0
+END  DERBY-500 TEST  for varchar
+======================================
 Test streamingColumn finished
