@@ -1,4 +1,3 @@
-# excluding resultsetStream.java because this test uses java.io.FileInputStream throughout the test
 # excluding TestErrorStreamTarget.java since it's not relevant for clients
 # excluding scrollCursors2.java because updatable resultsets & scroll sensitive cursors are not supported
 # excluding batchUpdate.java for it hits a problem in networkserver ('beetle' 5561)
@@ -8,7 +7,6 @@
 # excluding jdbcapi/resultsetJdbc30.java because the features tested are not implemented by Derby Client
 # excluding jdbcapi/checkDataSource30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
-jdbcapi/resultsetStream.java
 lang/errorStream.java
 lang/scrollCursors2.java
 jdbcapi/batchUpdate.java
