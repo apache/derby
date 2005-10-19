@@ -214,6 +214,7 @@ supersimple.sql
 supersimple_app.properties
 supersimple_derby.properties
 syscat.sql
+syscat_app.properties
 synonym.sql
 tempRestrictions.sql
 triggerBeforeTrig.sql

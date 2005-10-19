@@ -63,6 +63,7 @@ heapscan.sql
 heapscan_app.properties
 heapscan_derby.properties
 holdCursorExternalSortJDBC30.sql
+holdCursorExternalSortJDBC30_app.properties
 holdCursorExternalSortJDBC30_derby.properties
 holdCursorJDBC30.sql
 holdCursorJDBC30_app.properties
