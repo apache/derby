@@ -2342,8 +2342,11 @@ public class DRDAConnThread extends Thread {
 			trace("sending QRYPRCTYP: " + prcType);
 		writer.writeScalar2Bytes(CodePoint.QRYPRCTYP, prcType);
 
-		//pass the SQLCSRHLD codepoint only if statement has hold cursors over commit set
-		if (stmt.withHoldCursor == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
+		//pass the SQLCSRHLD codepoint only if statement producing the ResultSet has 
+		//hold cursors over commit set. In case of stored procedures which use server-side
+		//JDBC, the holdability of the ResultSet will be the holdability of the statement 
+		//in the stored procedure, not the holdability of the calling statement.
+		if (stmt.getCurrentDrdaResultSet().withHoldCursor == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
 			writer.writeScalar1Byte(CodePoint.SQLCSRHLD, CodePoint.TRUE);
 		if (sqlamLevel >= MGRLVL_7)
 		{

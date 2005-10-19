@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -50,6 +51,8 @@ public class holdCursorJava {
 
     //set autocommit to off after creating table and inserting data
     conn.setAutoCommit(false);
+    testHoldability(conn,ResultSet.HOLD_CURSORS_OVER_COMMIT);
+    testHoldability(conn,ResultSet.CLOSE_CURSORS_AT_COMMIT);
 		testHoldCursorOnMultiTableQuery(conn);
 		testIsolationLevelChange(conn);
 
@@ -74,6 +77,12 @@ public class holdCursorJava {
     stmt.executeUpdate("INSERT INTO T2 VALUES(1,1)");
     stmt.executeUpdate("INSERT INTO T2 VALUES(1,2)");
     stmt.executeUpdate("INSERT INTO T2 VALUES(1,3)");
+    stmt.execute("create table testtable1 (id integer, vc varchar(100))");
+    stmt.execute("insert into testtable1 values (11, 'testtable1-one'), (12, 'testtable1-two')");
+    stmt.execute("create table testtable2 (id integer, vc varchar(100))");
+    stmt.execute("insert into testtable2 values (21, 'testtable2-one'), (22, 'testtable2-two')");
+    stmt.execute("create procedure MYPROC() language java parameter style java external name " +
+    				"'org.apache.derbyTesting.functionTests.tests.lang.holdCursorJava.testProc' result sets 2");
     System.out.println("done creating table and inserting data.");
 
     stmt.close();
@@ -190,4 +199,99 @@ public class holdCursorJava {
 	conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
   }
 
+	//set connection holdability and test holdability of statements inside and outside procedures
+	//test that holdability of statements always overrides holdability of connection
+	private static void testHoldability(Connection conn,int holdability) throws SQLException{
+		
+		conn.setHoldability(holdability);
+		
+		switch(holdability){
+			case ResultSet.HOLD_CURSORS_OVER_COMMIT:
+				System.out.println("\ntestHoldability with HOLD_CURSORS_OVER_COMMIT\n");
+				break;
+			case ResultSet.CLOSE_CURSORS_AT_COMMIT:
+				System.out.println("\ntestHoldability with CLOSE_CURSORS_AT_COMMIT\n");
+				break;
+		}
+	
+		testStatements(conn);
+	  	testStatementsInProcedure(conn);
+	}
+	
+	//test holdability of statements outside procedures
+	private static void testStatements(Connection conn) throws SQLException{
+	    System.out.println("\ntestStatements()\n");
+		
+		//HOLD_CURSORS_OVER_COMMIT
+		Statement st1 = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE ,
+					ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		ResultSet rs1 = st1.executeQuery("select * from testtable1");
+		checkResultSet(rs1, "before");
+		conn.commit();
+		checkResultSet(rs1, "after");
+		st1.close();
+		
+		//CLOSE_CURSORS_AT_COMMIT
+		Statement st2 = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE ,
+					ResultSet.CONCUR_READ_ONLY, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		ResultSet rs2 = st2.executeQuery("select * from testtable2");
+		checkResultSet(rs2, "before");
+		conn.commit();
+		checkResultSet(rs2, "after");
+		st2.close();
+	 }
+	
+	//test holdability of statements in procedures
+	private static void testStatementsInProcedure(Connection conn) throws SQLException{
+		System.out.println("\ntestStatementsInProcedure()\n");
+		
+		CallableStatement cs1 = conn.prepareCall("call MYPROC()");
+		cs1.execute();
+		do{
+			checkResultSet(cs1.getResultSet(), "before");
+		}while(cs1.getMoreResults());
+				
+		CallableStatement cs2 = conn.prepareCall("call MYPROC()");
+		cs2.execute();
+		conn.commit();
+		do{
+			checkResultSet(cs2.getResultSet(),"after");
+		}while(cs2.getMoreResults());
+		
+		cs1.close();
+		cs2.close();
+	}
+	
+	//check if resultset is accessible 
+	private static void checkResultSet(ResultSet rs, String beforeOrAfter) throws SQLException{
+		System.out.println("checkResultSet "+ beforeOrAfter  + " commit");
+	    try{
+	    	if(rs != null){
+	    		rs.next();
+	    		System.out.println(rs.getString(1) + ", " + rs.getString(2));
+	    	}
+	    	else{
+	    		System.out.println("EXPECTED:ResultSet is null");
+	    	}
+	  	} catch(SQLException se){
+	  		System.out.println("EXPECTED EXCEPTION:"+se.getMessage());
+	  	}
+	}
+	  
+	//Java method for stored procedure
+	public static void testProc(ResultSet[] rs1, ResultSet[] rs2) throws Exception
+	{
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		
+		//HOLD_CURSORS_OVER_COMMIT
+		Statement st1 = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE ,
+					ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		rs1[0] = st1.executeQuery("select * from testtable1");
+
+		//CLOSE_CURSORS_AT_COMMIT
+		Statement st2 = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE ,
+					ResultSet.CONCUR_READ_ONLY, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		rs2[0] = st2.executeQuery("select * from testtable2");
+
+	}
 }

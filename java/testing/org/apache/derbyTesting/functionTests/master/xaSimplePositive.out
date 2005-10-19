@@ -192,4 +192,39 @@ A
 ij(XA)> xa_end xa_success 5;
 ij(XA)> xa_prepare 5;
 ij(XA)> xa_commit xa_2Phase 5;
+ij(XA)> ---------------------------------------------
+-- Test procedure with server-side JDBC
+---------------------------------------------
+--- local transaction
+create table t1(i int not null primary key, b char(15));
+0 rows inserted/updated/deleted
+ij(XA)> insert into t1 values (1,'one'), (2, 'two'), (3,'three');
+3 rows inserted/updated/deleted
+ij(XA)> create procedure DRS(p1 int) parameter style JAVA READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows';
+0 rows inserted/updated/deleted
+ij(XA)> call DRS(1);
+selectRows - 1 arg - 1 rs
+I          |B              
+---------------------------
+1          |one            
+ij(XA)> drop table t1;
+0 rows inserted/updated/deleted
+ij(XA)> drop procedure DRS;
+0 rows inserted/updated/deleted
+ij(XA)> commit;
+ij(XA)> --- global transaction
+xa_start xa_noflags 6;
+ij(XA)> create table t1(i int not null primary key, b char(15));
+0 rows inserted/updated/deleted
+ij(XA)> insert into t1 values (1,'one'), (2, 'two'), (3,'three');
+3 rows inserted/updated/deleted
+ij(XA)> create procedure DRS(p1 int) parameter style JAVA READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows';
+0 rows inserted/updated/deleted
+ij(XA)> call DRS(1);
+selectRows - 1 arg - 1 rs
+I          |B              
+---------------------------
+1          |one            
+ij(XA)> xa_end xa_success 6;
+ij(XA)> xa_commit xa_1Phase 6;
 ij(XA)> 
