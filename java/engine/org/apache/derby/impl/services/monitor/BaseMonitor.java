@@ -1056,7 +1056,7 @@ abstract class BaseMonitor
 		If no implementations are listed in the properties object
 		then null is returned.
 	*/
-	protected Vector getImplementations(Properties moduleList, boolean actualModuleList) {
+	private Vector getImplementations(Properties moduleList, boolean actualModuleList) {
 
 		if (moduleList == null)
 			return null;
@@ -1251,19 +1251,36 @@ nextModule:
         return true;
     } // end of getPersistentServiceImplementation
         
-	protected Vector getDefaultImplementations() {
+	private Vector getDefaultImplementations() {
 
+		Properties moduleList = getDefaultModuleProperties();
+
+		return getImplementations(moduleList, true);
+	} // end of getDefaultImplementations
+	
+	/**
+	 * Get the complete set of module properties by
+	 * loading in contents of all the org/apache/derby/modules.properties
+	 * files. This must be executed in a privileged block otherwise
+	 * when running in a security manager environment no properties will
+	 * be returned.
+	 * @return
+	 */
+	Properties getDefaultModuleProperties()
+	{
+		// SECURITY PERMISSION - IP1 for modules in this jar
+		// or other jars shipped with the Derby release.
 		Properties moduleList = new Properties();
         boolean firstList = true;
-        ClassLoader cl = getClass().getClassLoader();
 
+        ClassLoader cl = getClass().getClassLoader();
         try {
-            for( Enumeration e = cl.getResources( "org/apache/derby/modules.properties");
+            for( Enumeration e = cl.getResources("org/apache/derby/modules.properties");
                  e.hasMoreElements() ;) {
                 URL modulesPropertiesURL = (URL) e.nextElement();
                 InputStream is = null;
                 try {
-                    is = loadModuleDefinitions( modulesPropertiesURL);
+                    is = modulesPropertiesURL.openStream();
                     if( firstList) {
                         moduleList.load( is);
                         firstList = false;
@@ -1297,18 +1314,13 @@ nextModule:
             if (SanityManager.DEBUG)
                 report("Can't load implementation list: " + ioe.toString());
         }
-        if( firstList) {
-			if (SanityManager.DEBUG)
+        if (SanityManager.DEBUG)
+        {
+			if (firstList)
 				report("Default implementation list not found");
-			return null;
 		}
-
-		return getImplementations(moduleList, true);
-	} // end of getDefaultImplementations
-
-	InputStream loadModuleDefinitions( URL propertyFileURL) throws IOException {
-		// SECURITY PERMISSION - IP1
-		return propertyFileURL.openStream();
+ 
+        return moduleList;
 	}
 
 	/*
