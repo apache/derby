@@ -20,7 +20,7 @@ autocommit off;
 ij> -- . leave out some keywords (for, update, read, only)
 ----- results: all of these should get syntax errors for missing/inappropriate keywords
 select i, v from t1 for;
-ERROR 42X01: Syntax error: Encountered "<EOF>" at line 3, column 23.
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 23.
 ij> select i, v from t1 for read;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 28.
 ij> select i, v from t1 for only;
@@ -177,7 +177,7 @@ I
 ij> -- . try using qualified column name
 ----- expect an error, only unqualified names are expected (SQL92 spec):
 select i from t1 for update of t1.v, t1.i, t1.d;
-ERROR 42X01: Syntax error: Encountered "." at line 3, column 34.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 34.
 ij> -- . for update when select list has expressions and correlation name in use,
 -----   and column is repeated
 ----- this is allowed:
