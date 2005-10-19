@@ -65,13 +65,57 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
   
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
+
+};
+
+//
+// Permissions for the network client (derbyclient.jar)
+//
+grant codeBase "${csinfo.codejar}derbyclient.jar" {
+  permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
+  permission java.net.SocketPermission "localhost", "connect,resolve";
+};
+
+//
+// Permissions for the tools (derbytools.jar)
+// Ideally this would be more secure, for now the
+// focus is on getting the engine & network server secure.
+//
+grant codeBase "${csinfo.codejar}derbytools.jar" {
+  // Access all properties using System.getProperties
+  permission java.util.PropertyPermission "*", "read, write";
+  
+  // Read all files under ${user.dir}
+  permission java.io.FilePermission "${user.dir}${/}-", "read";
+  
+  // ij needs permission to read the sql files in this jar
+  permission java.io.FilePermission "${csinfo.codedir}${/}derbyTesting.jar", "read";
+  
+  // sane=true, jdbcapi/secureUsers1.sql
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
+};
+
+//
+// Permissions for the tests (derbyTesting.jar)
+// We are liberal here, it's not a goal to make the test harness
+// or tests secure.
+//
+grant codeBase "${csinfo.codejar}derbyTesting.jar" {
+  // Access all properties using System.getProperties
+  permission java.util.PropertyPermission "*", "read, write";
+  
+  // Access all files under ${user.dir}to write the test directory structure
+  permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
+  
 };
 
 //
 // super-set of the jar permissions for running out of the classes directory
 //
 grant codeBase "${csinfo.codeclasses}" {
-
+  // Access all properties using System.getProperties
+  permission java.util.PropertyPermission "*", "read, write";
+  
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.lang.RuntimePermission "createClassLoader";
    
@@ -80,11 +124,16 @@ grant codeBase "${csinfo.codeclasses}" {
   permission java.io.FilePermission "${derby.system.home}", "read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
 
-  permission java.net.SocketPermission "127.0.0.1", "accept";
-  permission java.net.SocketPermission "localhost", "accept";
+  // combination of client and server side.
+  permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
+  permission java.net.SocketPermission "localhost", "accept,connect,resolve";
   permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
-  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept";   
+  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept"; 
 
+  // Access all files under ${user.dir}to write the test directory structure
+  permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
+  
+  
   // Import/export and other support files from these locations in tests
   permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
   permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";

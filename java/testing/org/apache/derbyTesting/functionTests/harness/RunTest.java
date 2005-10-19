@@ -172,6 +172,14 @@ public class RunTest
     static boolean lastTestFailed = false;
 
     static boolean isI18N = false;
+    
+    /**
+     * Run the test without a security manager. Hopefully
+     * should only be used in few cases. Though initially
+     * may be used to bypass problematic tests and get the
+     * remainder of the tests running with the security manager.
+     */
+    static boolean runWithoutSecurityManager;
 
     static InputStream isSed = null; // For test_sed.properties // Cliff
 
@@ -1116,6 +1124,7 @@ public class RunTest
 		String uscdb = sp.getProperty("useCommonDB");
 		if (uscdb != null && uscdb.equals("true"))
 			useCommonDB = true;
+		
     }
 
     private static String createPropString()
@@ -1500,9 +1509,13 @@ clp.list(System.out);
 	                if (jvmflags.startsWith("-ms"))
 	                    jvmflags = "";
 	            }
-	        }	        
+	        }
 	        
-    		// Also check for supportfiles
+	        if (NetServer.isJCCConnection(framework)
+	        		|| "true".equalsIgnoreCase(ap.getProperty("noSecurityManager")))
+	        	runWithoutSecurityManager = true;
+	        
+   		// Also check for supportfiles
     		String suppFiles = ap.getProperty("supportfiles");
 			boolean copySupportFiles = ((suppFiles != null) && (suppFiles.length()>0));
 			boolean createExtDirs= new Boolean(ap.getProperty("useextdirs","false")).booleanValue();
@@ -2060,6 +2073,12 @@ clp.list(System.out);
                         +"="+encryptionAlgorithm+"\"");
         }
         jvm.setD(jvmProps);
+        
+        // set security properties
+        if (!runWithoutSecurityManager)
+            jvm.setSecurityProps();
+        else
+        	System.out.println("-- SecurityManager not installed --");
             
         Vector v = jvm.getCommandLine();
         if ( ij.startsWith("ij") )
