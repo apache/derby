@@ -258,7 +258,7 @@ public class NetServer
 		{
 			Constructor serverConstructor;
 			Class serverClass = Class.forName(NETWORK_SERVER_CLASS_NAME);
-			serverConstructor = serverClass.getDeclaredConstructor(null);
+			serverConstructor = serverClass.getConstructor(null);
 			networkServer = serverConstructor.newInstance(null);
 			pingMethod = networkServer.getClass().getMethod("ping",
 															 null);
