@@ -866,13 +866,45 @@ recompileOutOfDatePlan:
 	}
 
 	/**
-	 * Return true if the query node for this statement references SESSION schema tables.
+	 * Return true if the query node for this statement references SESSION schema
+	 * tables/views.
+	 * This method gets called at the very beginning of the compile phase of any statement.
+	 * If the statement which needs to be compiled is already found in cache, then there is
+	 * no need to compile it again except the case when the statement is referencing SESSION
+	 * schema objects. There is a small window where such a statement might get cached 
+	 * temporarily (a statement referencing SESSION schema object will be removed from the
+	 * cache after the bind phase is over because that is when we know for sure that the 
+	 * statement is referencing SESSION schema objects.)
 	 *
 	 * @return	true if references SESSION schema tables, else false
 	 */
 	public boolean referencesSessionSchema()
 	{
 		return referencesSessionSchema;
+	}
+	
+	/**
+	 * Return true if the QueryTreeNode references SESSION schema tables/views.
+	 * The return value is also saved in the local field because it will be 
+	 * used by referencesSessionSchema() method. 
+	 * This method gets called when the statement is not found in cache and 
+	 * hence it is getting compiled.
+	 * At the beginning of compilation for any statement, first we check if
+	 * the statement's plan already exist in the cache. If not, then we add
+	 * the statement to the cache and continue with the parsing and binding.
+	 * At the end of the binding, this method gets called to see if the 
+	 * QueryTreeNode references a SESSION schema object. If it does, then
+	 * we want to remove it from the cache, since any statements referencing
+	 * SESSION schema objects should never get cached.  
+	 *
+	 * @return	true if references SESSION schema tables/views, else false
+	 */
+	public boolean referencesSessionSchema(QueryTreeNode qt)
+	throws StandardException {
+		//If the query references a SESSION schema table (temporary or permanent), then
+		// mark so in this statement
+		referencesSessionSchema = qt.referencesSessionSchema();
+		return(referencesSessionSchema);
 	}
 
 	//
@@ -886,22 +918,14 @@ recompileOutOfDatePlan:
 
 		@param qt the query tree for this statement
 
-		@return	true if there is a reference to SESSION schema tables, else false
-
 		@exception StandardException thrown on failure.
 	 */
-	boolean completeCompile(QueryTreeNode qt)
+	void completeCompile(QueryTreeNode qt)
 						throws StandardException {
 		//if (finished)
 		//	throw StandardException.newException(SQLState.LANG_STATEMENT_CLOSED, "completeCompile()");
 
 		paramTypeDescriptors = qt.getParameterTypes();
-
-		//If the query references a SESSION schema table (temporary or permanent), then mark so in this statement
-		//This information will be used by EXECUTE STATEMENT if it is executing a statement that was created with NOCOMPILE. Because
-		//of NOCOMPILE, we could not catch SESSION schema table reference by the statement at CREATE STATEMENT time. Need to catch
-		//such statements at EXECUTE STATEMENT time when the query is getting compiled.
-		referencesSessionSchema = qt.referencesSessionSchema();
 
 		// erase cursor info in case statement text changed
 		if (targetTable!=null) {
@@ -936,8 +960,7 @@ recompileOutOfDatePlan:
 		}
 		isValid = true;
 
-		//if this statement is referencing session schema tables, then we do not want cache it. 
-		return referencesSessionSchema;
+		return;
 	}
 
 	public GeneratedClass getActivationClass()

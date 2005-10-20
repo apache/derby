@@ -345,6 +345,42 @@ public class GenericStatement
 						}
 					}
 
+					//Derby424 - In order to avoid caching select statements referencing
+					// any SESSION schema objects (including statements referencing views
+					// in SESSION schema), we need to do the SESSION schema object check
+					// here.  
+					//a specific eg for statement referencing a view in SESSION schema 
+					//CREATE TABLE t28A (c28 int)
+					//INSERT INTO t28A VALUES (280),(281)
+					//CREATE VIEW SESSION.t28v1 as select * from t28A
+					//SELECT * from SESSION.t28v1 should show contents of view and we
+					// should not cache this statement because a user can later define
+					// a global temporary table with the same name as the view name.
+					//Following demonstrates that
+					//DECLARE GLOBAL TEMPORARY TABLE SESSION.t28v1(c21 int, c22 int) not
+					//     logged
+					//INSERT INTO SESSION.t28v1 VALUES (280,1),(281,2)
+					//SELECT * from SESSION.t28v1 should show contents of global temporary
+					//table and not the view.  Since this select statement was not cached
+					// earlier, it will be compiled again and will go to global temporary
+					// table to fetch data. This plan will not be cached either because
+					// select statement is using SESSION schema object.
+					//
+					//Following if statement makes sure that if the statement is
+					// referencing SESSION schema objects, then we do not want to cache it.
+					// We will remove the entry that was made into the cache for 
+					//this statement at the beginning of the compile phase.
+					//The reason we do this check here rather than later in the compile
+					// phase is because for a view, later on, we loose the information that
+					// it was referencing SESSION schema because the reference
+					//view gets replaced with the actual view definition. Right after
+					// binding, we still have the information on the view and that is why
+					// we do the check here.
+					if (preparedStmt.referencesSessionSchema(qt)) {
+						if (foundInCache)
+							((GenericLanguageConnectionContext)lcc).removeStatement(this);
+					}
+					
 					qt = qt.optimize();
 
 					optimizeTime = getCurrentTimeMillis(lcc);
@@ -468,14 +504,7 @@ public class GenericStatement
 												qt.executeSchemaName()
 												);
 					preparedStmt.setSPSName(qt.getSPSName());
-
-					//if this statement is referencing session schema tables, then we do not want cache it. Following will remove the
-					//entry that was made into the cache for this statement at the beginning of the compile phase
-					if (preparedStmt.completeCompile(qt)) {
-						if (foundInCache)
-							((GenericLanguageConnectionContext)lcc).removeStatement(this);
-					}
-
+					preparedStmt.completeCompile(qt);
 					preparedStmt.setCompileTimeWarnings(cc.getWarnings());
 				}
 				catch (StandardException e) 	// hold it, throw it

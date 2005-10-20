@@ -142,6 +142,24 @@ TEST26A PASSED
 TEST27A : CREATE VIEW not allowed on physical table in SESSION schema
 Expected message: The requested function can not reference tables in SESSION schema.
 TEST27A PASSED
+TEST28A : CREATE VIEW in SESSION schema referencing a table outside of SESSION schema
+SELECT * from SESSION.t28v1 should show contents of view
+	 C28
+	 ---
+	{280}
+	{281}
+Now declare a global temporary table with same name as the view in SESSION schema
+SELECT * from SESSION.t28v1 should show contents of global temporary table
+	 C21,C22
+	 --- ---
+	{280,1}
+	{281,2}
+We have dropped global temporary table hence SESSION.t28v1 should point to view at this point
+	 C28
+	 ---
+	{280}
+	{281}
+TEST28A PASSED
 TEST29A : DELETE FROM global temporary table allowed.
 	 1
 	 -

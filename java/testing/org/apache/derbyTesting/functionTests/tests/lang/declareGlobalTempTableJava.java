@@ -984,6 +984,27 @@ public class declareGlobalTempTableJava {
 			System.out.println("TEST27A PASSED");
 		}
 
+		//Derby424 - Queryplan for a query using SESSION schema view is incorrectly put in statement cache. This 
+		//could cause incorrect plan getting executed later if a temp. table is created with that name.
+		System.out.println("TEST28A : CREATE VIEW in SESSION schema referencing a table outside of SESSION schema");
+		s.executeUpdate("CREATE TABLE t28A (c28 int)");
+		s.executeUpdate("INSERT INTO t28A VALUES (280),(281)");
+		s.executeUpdate("CREATE VIEW SESSION.t28v1 as select * from t28A");
+		System.out.println("SELECT * from SESSION.t28v1 should show contents of view");
+		dumpRS(s.executeQuery("SELECT * from SESSION.t28v1"));
+		System.out.println("Now declare a global temporary table with same name as the view in SESSION schema");
+		s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE SESSION.t28v1(c21 int, c22 int) not logged");
+		s.executeUpdate("INSERT INTO SESSION.t28v1 VALUES (280,1),(281,2)");
+		System.out.println("SELECT * from SESSION.t28v1 should show contents of global temporary table");
+		dumpRS(s.executeQuery("SELECT * from SESSION.t28v1"));
+		s.executeUpdate("DROP TABLE SESSION.t28v1");
+		System.out.println("We have dropped global temporary table hence SESSION.t28v1 should point to view at this point");
+		dumpRS(s.executeQuery("SELECT * from SESSION.t28v1"));
+		s.executeUpdate("DROP VIEW SESSION.t28v1");
+		con1.rollback();
+		con1.commit();
+		System.out.println("TEST28A PASSED");
+
 		try
 		{
 			System.out.println("TEST29A : DELETE FROM global temporary table allowed.");
