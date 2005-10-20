@@ -61,6 +61,12 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	// true by default.
 	boolean 	useStatistics = true;
 
+	// FromList could have a view in it's list. If the view is defined in SESSION
+	// schema, then we do not want to cache the statement's plan. This boolean
+	// will help keep track of such a condition.
+	private boolean  referencesSessionSchema;
+
+
 	/** Initializer for a FromList */
 
 	public void init(Object optimizeJoinOrder)
@@ -208,6 +214,14 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		FromTable		fromTable;
 		boolean			found = false;
 
+		// Following if will return true if this FromList object had any VIEWs
+		// from SESSION schema as elements.  This information is gathered during
+		// the bindTables method. At the end of the bindTables, we loose
+		// the information on VIEWs since they get replaced with their view
+		// definition. Hence, we need to intercept in the middle on the bindTables
+		// method and save that information in referencesSeesionSchema field.
+		if (referencesSessionSchema) return true;
+
 		/* Check for table or VTI name in FROM list */
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -290,12 +304,22 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
-			setElementAt(fromTable.bindNonVTITables(dataDictionary, fromListParam), index);
+			ResultSetNode newNode = fromTable.bindNonVTITables(dataDictionary, fromListParam);
+			// If the fromTable is a view in the SESSION schema, then we need to save that information
+			// in referencesSessionSchema element. The reason for this is that the view will get
+			// replaced by it's view definition and we will loose the information that the statement
+			// was referencing a SESSION schema object. 
+			if (fromTable.referencesSessionSchema())
+				referencesSessionSchema = true;
+			setElementAt(newNode, index);
 		}
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
-			setElementAt(fromTable.bindVTITables(fromListParam), index);
+			ResultSetNode newNode = fromTable.bindVTITables(fromListParam);
+			if (fromTable.referencesSessionSchema())
+				referencesSessionSchema = true;
+			setElementAt(newNode, index);
 		}
 	}
 
