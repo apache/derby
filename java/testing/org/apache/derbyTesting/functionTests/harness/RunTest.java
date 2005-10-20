@@ -2075,10 +2075,12 @@ clp.list(System.out);
         jvm.setD(jvmProps);
         
         // set security properties
+        /*
         if (!runWithoutSecurityManager)
             jvm.setSecurityProps();
         else
         	System.out.println("-- SecurityManager not installed --");
+        */
             
         Vector v = jvm.getCommandLine();
         if ( ij.startsWith("ij") )
