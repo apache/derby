@@ -23,6 +23,7 @@ package org.apache.derby.impl.store.raw;
 import org.apache.derby.iapi.services.daemon.DaemonFactory;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherProvider;
 import org.apache.derby.iapi.services.locks.LockFactory;
@@ -37,7 +38,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.store.access.TransactionInfo;
-
+import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.raw.ScanHandle;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -97,7 +98,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 {
 	private static final String BACKUP_HISTORY = "BACKUP.HISTORY";
 	private static final String[] BACKUP_FILTER =
-	{ DataFactory.TEMP_SEGMENT_NAME, DataFactory.DB_LOCKFILE_NAME, DataFactory.DB_EX_LOCKFILE_NAME, LogFactory.LOG_DIRECTORY_NAME };
+	{ DataFactory.TEMP_SEGMENT_NAME, DataFactory.DB_LOCKFILE_NAME, DataFactory.DB_EX_LOCKFILE_NAME, LogFactory.LOG_DIRECTORY_NAME, "seg0" };
 
 	protected TransactionFactory	xactFactory;
 	protected DataFactory			dataFactory;
@@ -477,11 +478,31 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		if (backupDirURL != null)
 			backupDir = backupDirURL;
 
-		backup(new File(backupDir));
+		// find the user transaction, it is necessary for online backup 
+		// to open the container through page cache
+		Transaction t = findUserTransaction(ContextService.getFactory().getCurrentContextManager(), 
+											AccessFactoryGlobals.USER_TRANS_NAME);
+		backup(t, new File(backupDir));
 	}
 
 
-	public synchronized void backup(File backupDir) throws StandardException
+	public void backup(File backupDir) throws StandardException
+	{
+		backup(backupDir);
+	}
+
+	/*
+	 * Backup the database.
+	 * Online backup copies all the database files (log, seg0  ...Etc) to the
+	 * specified backup location  without blocking any user operation for the 
+	 * whole duration of the backup. Stable copy is made using  using page level
+	 * latches 	and in some cases with the help monitors.  Transaction 
+	 * log is also backed up, this will help in bringing the databse to the
+	 * consistent state on restore.
+	 * 
+	 * TODO : make sure no parallel backup/disabling log archive mode occurs.
+	 */
+	public synchronized void backup(Transaction t, File backupDir) throws StandardException
 	{
         if (!privExists(backupDir))
 		{
@@ -502,7 +523,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     (File) backupDir);
             }
 		}
-
+		
 		boolean error = true;
 		boolean renamed = false;
 		boolean renameFailed = false;
@@ -560,12 +581,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 				}
 			}
 
-			// checkpoint the database and freeze it
-			freeze();
 
 			// copy everything from the dataDirectory to the
-			// backup directory (except temp files)
-
+			// backup directory (except temp files, log , seg0 (see BACKUP_FILTER)
+			
             if (!privCopyDirectory(dbase, backupcopy, (byte[])null, BACKUP_FILTER))
             {
                 throw StandardException.
@@ -573,12 +592,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                  dbase, backupcopy);
             }
 
-			logHistory(historyFile,
-                MessageService.getTextMessage(
-                    MessageId.STORE_COPIED_DB_DIR,
-                    canonicalDbName,
-                    backupcopy.getCanonicalPath()));
-
+			
 			StorageFile logdir = logFactory.getLogDirectory();
 
 			// munge service.properties file if necessary
@@ -626,7 +640,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 privRemoveDirectory(logBackup);
 			}
 
-			//Create the log directory
+			// Create the log directory
             if (!privMkdirs(logBackup))
             {
                 throw StandardException.newException(
@@ -634,15 +648,37 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     (File) logBackup);
             }
 
+			// do a checkpoint to get the persistent store up to date.
+			logFactory.checkpoint(this, dataFactory, xactFactory, true);
+			
+			// start the transaction log  backup. 
+            logFactory.startLogBackup(logBackup);
+
+			File segBackup = new File(backupcopy, "seg0");
+			
+			// Create the data segment directory
+            if (!privMkdirs(segBackup))
+            {
+                throw StandardException.newException(
+                    SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
+                    (File) segBackup);
+            }
+
+
+			// backup all the information in the data segment.
+			dataFactory.backupDataFiles(t, segBackup);
+
+			logHistory(historyFile,
+                MessageService.getTextMessage(
+                    MessageId.STORE_COPIED_DB_DIR,
+                    canonicalDbName,
+                    backupcopy.getCanonicalPath()));
+
 		
-            // copy the log to the backup location
-            if(!logFactory.copyActiveLogFiles(logBackup))
-                {
-                    throw StandardException.
-                        newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-                                     logdir, logBackup);
-                }       
-            
+            // copy the log that got generated after the backup started to
+			// backup location and tell the logfactory that backup has come to end.
+			logFactory.endLogBackup(logBackup);
+																		  
 			logHistory(historyFile,
                 MessageService.getTextMessage(
                     MessageId.STORE_COPIED_LOG,
@@ -658,13 +694,15 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		}
 		finally
 		{
-			// unfreeze db ASAP
-			unfreeze();
 
 			try
 			{
 				if (error)
 				{
+					
+					// Abort all activity related to backup in the log factory.
+					logFactory.abortLogBackup();
+
 					// remove the half backed up copy
 					// unless the error occured during  rename process;
 					// inwhich case 'backupcopy' refers to the previous backup
@@ -721,7 +759,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 											  deleteOnlineArchivedLogFiles) 
 		throws StandardException
 	{
-		enableLogArchiveMode();
+		logFactory.enableLogArchiveMode();
 		backup(backupDir);
 		//After successful backup delete the archived log files
 		//that are not necessary to do a roll-forward recovery
@@ -737,7 +775,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 											  deleteOnlineArchivedLogFiles) 
 		throws StandardException
 	{
-		enableLogArchiveMode();
+		logFactory.enableLogArchiveMode();
 		backup(backupDir);
 		//After successful backup delete the archived log files
 		//that are not necessary to do a roll-forward recovery
@@ -749,12 +787,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 
-	private void enableLogArchiveMode() throws StandardException
-	{
-		logFactory.enableLogArchiveMode();
-	}
-
-	public void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)
+	public synchronized void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)
 		throws StandardException
 	{
 		logFactory.disableLogArchiveMode();

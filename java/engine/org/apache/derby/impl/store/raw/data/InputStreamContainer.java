@@ -233,4 +233,18 @@ final class InputStreamContainer extends FileContainer  {
     {
         return containerPath.getInputStream();
     }
+
+		
+	/**
+	   backup the container.
+	   @exception StandardException Standard Cloudscape error policy 
+	*/
+	protected void backupContainer(BaseContainerHandle handle,	String backupLocation)
+	    throws StandardException
+	{
+		// Nothing to do; No one would want to do a  backup of a readonly datbase. 
+		// RESOLVE: make sure some where this case is handled and 
+		// users sees a right error message.
+	}
+
 }

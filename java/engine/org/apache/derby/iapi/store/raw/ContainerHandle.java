@@ -591,4 +591,9 @@ public interface ContainerHandle
     **/
     public SpaceInfo getSpaceInfo() throws StandardException;
 
+	/**
+	   Backup the container to the specified path.
+	   @exception StandardException	Standard Cloudscape error policy
+	*/
+	public void backupContainer(String backupContainerPath) throws StandardException;
 }

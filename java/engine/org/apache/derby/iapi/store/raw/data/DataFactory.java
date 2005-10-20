@@ -33,9 +33,8 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
-
+import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.io.StorageFactory;
-
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.access.RowSource;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
@@ -43,6 +42,7 @@ import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.catalog.UUID;
 
 import java.util.Properties;
+import java.io.File;
 
 public interface DataFactory extends Corruptable {
 
@@ -309,6 +309,11 @@ public interface DataFactory extends Corruptable {
 	 * persistent store to proceed.
 	 */
 	public void writeFinished();
+
+	/**
+	 * Back up the data segment of the database.
+	 */
+	public void backupDataFiles(Transaction rt, File backupDir) throws StandardException;
 
     /**
      * Return an id which can be used to create a container.

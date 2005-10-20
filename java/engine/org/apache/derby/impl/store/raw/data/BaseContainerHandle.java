@@ -971,6 +971,17 @@ public class BaseContainerHandle extends Observable
         return container.getSpaceInfo(this);
     }
 
+
+	/**
+	   Backup the container to the specified path.
+	   @exception StandardException	Standard Cloudscape error policy
+	*/
+	public void backupContainer(String backupContainerPath) throws StandardException 
+    {
+		checkOpen();
+		container.backupContainer(this, backupContainerPath);
+	}
+
     
     public String toString()
     {

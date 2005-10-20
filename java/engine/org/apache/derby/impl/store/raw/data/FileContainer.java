@@ -1953,7 +1953,7 @@ abstract class FileContainer
 		return retval;
 	}
 
-	private long getLastPageNumber(BaseContainerHandle handle) throws StandardException
+	protected long getLastPageNumber(BaseContainerHandle handle) throws StandardException
 	{
 		long retval;
 		synchronized(allocCache)
@@ -2795,6 +2795,37 @@ abstract class FileContainer
 
 	}
 
+
+	/** 
+	 *  Get a latched page to write to the backup. Page Latch is necessary to 
+	 *  to prevent modification to the page when it is being backedup.
+	 *  Backup process relies on latches to get consistent snap
+	 *  shot of the page , user level table/page/row locks are NOT 
+	 *  acquired  by the online backup mechanism.
+	 *	@exception StandardException Cloudscape Standard error policy
+	 */
+	protected BasePage getPageForBackup(BaseContainerHandle handle, long pageNumber) 
+		throws StandardException 
+	{
+		PageKey pageKey = new PageKey(identity, pageNumber);
+		BasePage page = (BasePage) pageCache.find(pageKey);
+				
+		if (SanityManager.DEBUG){
+			SanityManager.ASSERT(page != null, "page is not found :" + pageKey);
+		}
+		
+        // latch the page
+        page = latchPage(handle, page, true);
+		
+		if (SanityManager.DEBUG){
+			SanityManager.ASSERT(page.isLatched(), "page is not latched:" + pageKey);
+		}
+
+		return page;
+	}
+
+	
+
 	private long getUnfilledPageNumber(BaseContainerHandle handle, long pagenum)
 		 throws StandardException
 	{
@@ -3176,5 +3207,13 @@ abstract class FileContainer
 		}
 		return ret;
 	}
+	
 
+
+	/**
+	   backup the container.
+	   @exception StandardException Standard Cloudscape error policy 
+	*/
+	protected abstract void backupContainer(BaseContainerHandle handle,	String backupLocation)
+	    throws StandardException;
 }

@@ -222,6 +222,8 @@ public final class BaseDataFileFactory
     private String databaseDirectory;
     private static final int RELEASE_LOCK_ON_DB_ACTION = 12;
     private static final int RESTORE_DATA_DIRECTORY_ACTION = 13;
+	private static final int GET_CONTAINER_NAMES_ACTION = 14;
+
     private String backupPath;
     private File backupRoot;
     private String[] bfilelist;
@@ -2049,6 +2051,105 @@ public final class BaseDataFileFactory
 		}
 	}
 
+
+	/*
+	 *  Find all the all the containers stored in the seg0 directory and 
+	 *  backup each container to the specified backup location.
+	 */
+	public void backupDataFiles(Transaction rt, File backupDir) throws StandardException
+	{
+				
+		/*
+		 * List of containers that needs to be backed up are identified by 
+		 * simply reading the list of files in seg0. 
+		 * All container that are created after the container list is created 
+		 * when backup is in progress are recreated on restore using the
+		 * transaction log.
+		 */
+
+		String[] files = getContainerNames();
+		
+		if (files != null) {
+			// No user visible locks are acquired to backup the database. A stable backup 
+			// is made by latching the pages and internal synchronization
+			// mechanisms.
+			LockingPolicy lockPolicy = 	rt.newLockingPolicy(LockingPolicy.MODE_NONE, 
+															TransactionController.ISOLATION_NOLOCK, 
+															false);
+			long segmentId = 0;
+
+			// loop through all the files in seg0 and backup all valid containers.
+			for (int f = files.length-1; f >= 0 ; f--) {
+				long containerId;
+				try	{
+					containerId = 
+						Long.parseLong(files[f].substring(1, (files[f].length() -4)), 16);
+				}
+				catch (Throwable t)
+				{
+					// ignore errors from parse, it just means that someone put
+					// a file in seg0 that we didn't expect.  Continue with the
+					// next one.
+					continue;
+				}
+
+				ContainerKey identity = new ContainerKey(segmentId, containerId);
+
+				/* Not necessary to get the container thru the transaction.
+				 * Backup opens in container in read only mode , No need to 
+				 * transition the transaction to active state. 
+				 * 
+				 *  dropped container stubs also has to be backed up 
+				 *  for restore to work correctly. That is 
+				 *  why we are using a open call that let us
+				 *  open dropped containers.
+				 */
+
+				ContainerHandle containerHdl = openDroppedContainer((RawTransaction)rt, 
+																	identity, lockPolicy, 
+																	ContainerHandle.MODE_READONLY);
+				/*
+				 * Note 1:
+				 * If a container creation is  in progress , open call will wait 
+				 * until it is complete; It will never return a handle to a 
+				 * container that is partially created. (see cache manager code
+				 * for more details)
+				 *
+				 * Note 2: 
+				 * if a container creation failed in the middle after the list 
+				 * of the names are read from seg0, it will not exist in
+				 * the database any more, so nothing to backup.  Attempt 
+				 * to open such container will return null.
+				 * 
+				 */
+
+				if( containerHdl !=  null) {
+					containerHdl.backupContainer(backupDir.getPath());
+					containerHdl.close();
+				}
+			}
+		} else
+		{
+			if (SanityManager.DEBUG) 
+				SanityManager.THROWASSERT("backup process is unable to read container names in seg0");
+		}
+	}
+
+	/**
+     * get all the names of the files in seg 0.
+	 * @return An array of all the file names in seg0.
+     **/
+	private String[] getContainerNames()
+	{
+        actionCode = GET_CONTAINER_NAMES_ACTION;
+        try{
+            return (String[]) AccessController.doPrivileged( this);
+        }
+        catch( PrivilegedActionException pae){ return null;}
+	}
+
+
+
 	/**
 	 * removes the data directory(seg*) from database home directory and
 	 * restores it from backup location.
@@ -2332,7 +2433,18 @@ public final class BaseDataFileFactory
         case RESTORE_DATA_DIRECTORY_ACTION:
             privRestoreDataDirectory();
             return null;
-        }
+		case GET_CONTAINER_NAMES_ACTION:
+        {
+            StorageFile seg = storageFactory.newStorageFile( "seg0");
+            if (seg.exists() && seg.isDirectory())
+            {
+                // return the  names of all files in seg0
+				return seg.list();
+            }
+            return null;
+        }  // end of case GET_CONTAINER_NAMES_ACTION
+		
+		}
         return null;
     } // end of run
 }

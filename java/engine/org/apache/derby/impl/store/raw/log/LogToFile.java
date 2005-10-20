@@ -2052,9 +2052,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		if ((firstLogNeeded = getFirstLogNeeded(checkpoint))==-1)
 			return;
 		
+		// when  backup is in progress, logfiles should not be deleted 
+		// if they are yet to be backedup, eventhough they are not required
+		// for crash recovery.
+		firstLogNeeded = (backupInProgress ? firstLogFileToBackup : firstLogNeeded);
 		oldFirstLog = firstLogFileNumber;
 		firstLogFileNumber = firstLogNeeded;
-		
+
 		while(oldFirstLog < firstLogNeeded)
 		{
 			StorageFile uselessLogFile = null;
@@ -2100,7 +2104,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		// one truncation at a time
 		synchronized (this)
 		{
-			firstLogNeeded = LogCounter.getLogFileNumber(checkpoint.undoLWM());
+			firstLogNeeded = (checkpoint != null ? LogCounter.getLogFileNumber(checkpoint.undoLWM()) : -1);
 
 			if (SanityManager.DEBUG)
 			{
@@ -3947,17 +3951,6 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		// of a write because writing to the log file is synchronized under this.
 		synchronized(this)
 		{
-			//when the log is being  archived for roll-frward recovery
-			//we would like to switch to  a new log file.
-			//otherwise during restore  logfile in the backup could 
-			//overwrite the more uptodate log files in the 
-			//online log path. And also we would like to mark the end
-			//marker for the log file other wise during roll-forward recovery,
-			//if we see a log file with fuzzy end , we think that is the 
-			//end of the recovery.
-			if(logArchived)
-				switchLogFile();
-
 			isFrozen = true;
 		}			
 	}
@@ -4379,50 +4372,146 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		deleteObsoleteLogfiles();
 	}
 
-	//copy all the active log files and the control files
-	//to the given directory from the log directory
-	public synchronized boolean copyActiveLogFiles(File toDir) throws StandardException
-	{
-		//find the first  log file number that is  active
-		long logNumber = getFirstLogNeeded(currentCheckpoint);
-		//if there is nothing to copy return
-		if (logNumber== -1)
-			return true;
 
-		StorageFile fromFile = getLogFileName(logNumber);
-		File toFile = null;
-		//copy all the active log files to the bakcup directory
-		//except the current log file , because log files is swicthed
-		//before this call when we freeze the database if the log is being 
-		//archived. If the log is not archived(the log switch does not occur in
-		//this case) copy all the log files 
-		long lastLogFileToCopy = (logArchived ? getLogFileNumber()-1 : getLogFileNumber());
-		while(logNumber <= lastLogFileToCopy)
+	private long firstLogFileToBackup ; //log file that is yet to be backedup
+	private boolean backupInProgress = false; // true if the online backup is in progress
+
+	/*
+	 * start the transaction log backup, transaction log is  is required
+	 * to bring the database to the consistent state on restore. 
+
+	 * All the log files that are created after the backup starts 
+	 * should be kept around until they are copied into the backup,
+	 * even if there are checkpoints when backup is in progress. 
+	 *
+	 * copy the control files to the backup and find first log file 
+	 * that need to be copied into the backup to bring the database
+	 * to the consistent state on restore. 
+	 * 
+	 * Log files are copied after all the data files are backed up.
+	 *
+	 */
+	public void startLogBackup(File toDir) throws StandardException
+	{
+		
+		// copy the checkpoint information into the backup, 
+		// and find the first log file that needs to be be backedup.
+		// Restore will use this checkpoint to perform recovery to bring 
+		// the database to the consistent state.
+		
+		// synchronization is necessary to make sure NO parallel 
+		// checkpoint happens when the current checkpoint information 
+		// is being copied to the backup.
+
+		synchronized(this) 
 		{
-			toFile = new File(toDir, fromFile.getName());
+			// wait until the thread that is doing the checkpoint completes it.
+			while(inCheckpoint)
+			{
+				try
+				{
+					wait();
+				}	
+				catch (InterruptedException ie)
+				{
+					throw StandardException.interrupt(ie);
+				}	
+			}
+		
+			backupInProgress = true;
+		
+			// copy the control files. 
+			StorageFile fromFile;
+			File toFile;
+			// copy the log control file
+			fromFile = getControlFileName();
+			toFile = new File(toDir,fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
-				return false;
-			fromFile = getLogFileName(++logNumber);	
+			{
+				throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+													 fromFile, toFile);
+			}
+
+			// copy the log mirror control file
+			fromFile = getMirrorControlFileName();
+			toFile = new File(toDir,fromFile.getName());
+			if(!privCopyFile(fromFile, toFile))
+			{
+				throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+													 fromFile, toFile);
+			}
+
+			// find the first  log file number that is  active
+			firstLogFileToBackup = getFirstLogNeeded(currentCheckpoint);
 		}
 
-		//copy the log control file
-		fromFile = getControlFileName();
-		toFile = new File(toDir,fromFile.getName());
-		if(!privCopyFile(fromFile, toFile))
-			return false;
-
-		//copy the log mirror control file
-		fromFile = getMirrorControlFileName();
-		toFile = new File(toDir,fromFile.getName());
-		if(!privCopyFile(fromFile, toFile))
-			return false;
-
-		return true;
+		// copy all the log files that has to go into the backup 
+		backupLogFiles(toDir, getLogFileNumber()-1);
 	}	
 
+	/*
+	 * copy the log files into the given backup location
+	 **/
+	private void backupLogFiles(File toDir, long lastLogFileToBackup) throws StandardException
+	{
+
+		while(firstLogFileToBackup <= lastLogFileToBackup)
+		{
+			StorageFile fromFile = getLogFileName(firstLogFileToBackup);
+			File toFile = new File(toDir, fromFile.getName());
+			if(!privCopyFile(fromFile, toFile))
+			{
+				throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+													 fromFile, toFile);
+			}
+			firstLogFileToBackup++;
+		}
+	}
+
+	/*
+	 * copy all the log files that has to go into  the backup
+	 * and mark that backup is compeleted. 
+	 */
+	public void endLogBackup(File toDir) throws StandardException
+	{
+		long lastLogFileToBackup;
+		if (logArchived)
+		{
+			// when the log is being  archived for roll-frward recovery
+			// we would like to switch to  a new log file.
+			// otherwise during restore  logfile in the backup could 
+			// overwrite the more uptodate log files in the 
+			// online log path. And also we would like to mark the end
+			// marker for the log file other wise during roll-forward recovery,
+			// if we see a log file with fuzzy end , we think that is the 
+			// end of the recovery.
+			switchLogFile();
+			lastLogFileToBackup = getLogFileNumber()-1 ;
+		}else
+		{
+			// for a plain online backup partiall filled up log file is ok, 
+			// no need to do a log switch.
+			lastLogFileToBackup = getLogFileNumber();	
+		}
+
+		// backup all the log that got generated after the backup started.
+		backupLogFiles(toDir, lastLogFileToBackup);
+
+		// mark that backup is completed.
+		backupInProgress = false;
+	}
 
 
-	//Is the transaction in rollforward recovery
+	/*
+	 * backup is not in progress any more, it failed for some reason.
+	 **/
+	public void abortLogBackup()
+	{
+		backupInProgress = false;
+	}
+
+
+	// Is the transaction in rollforward recovery
 	public boolean inRFR()
 	{
 		/*

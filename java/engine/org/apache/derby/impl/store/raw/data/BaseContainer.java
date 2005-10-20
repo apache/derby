@@ -822,6 +822,13 @@ abstract class BaseContainer implements Lockable {
 	 */
 	public abstract long getEstimatedPageCount(BaseContainerHandle handle, int flag) throws StandardException;
 
+	/**
+	   Backup the container to the specified path.
+	   @exception StandardException	Standard Cloudscape error policy
+	*/
+	protected abstract void  backupContainer(BaseContainerHandle handle, 
+											 String backupContainerPath) throws StandardException ;
+
 
 	/*
 	** Methods to be used by sub-classes.
@@ -854,6 +861,8 @@ abstract class BaseContainer implements Lockable {
 	{
 		return false;
 	}
+
+	
 
 }
 

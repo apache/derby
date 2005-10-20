@@ -699,6 +699,19 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		}
 	}
 
+
+	/*
+	 * returns the page data array, that is actually written to the disk,
+	 * when the page is cleaned from the page cache.
+	 */
+	protected byte[] getPageArray() throws StandardException 
+	{
+		writeFormatId(identity); // make subclass write the page format
+		writePage(identity);	// let subclass have a chance to write any cached
+								// data to page data array
+		return pageData;
+	}
+
 	/* methods for subclass of cached page */
 
 	// use a new pageData buffer, initialize in memory structure that depend on

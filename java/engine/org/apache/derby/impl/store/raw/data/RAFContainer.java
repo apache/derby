@@ -44,12 +44,13 @@ import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
-
+import org.apache.derby.iapi.services.io.FileUtil;
 import java.util.Vector;
 
 import java.io.DataInput;
 import java.io.IOException;
-
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
@@ -79,13 +80,20 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     private static final int REMOVE_FILE_ACTION = 3;
     private static final int OPEN_CONTAINER_ACTION = 4;
     private static final int STUBBIFY_ACTION = 5;
+	private static final int BACKUP_CONTAINER_ACTION = 6;
     private ContainerKey actionIdentity;
     private boolean actionStub;
     private boolean actionErrorOK;
     private boolean actionTryAlternatePath;
     private StorageFile actionFile;
     private LogInstant actionInstant;
-    
+	private String actionBackupLocation;
+	private BaseContainerHandle actionContainerHandle;
+
+	private boolean inBackup = false;
+	private boolean inRemove = false;
+
+
 	/*
 	 * Constructors
 	 */
@@ -152,9 +160,35 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	protected void removeContainer(LogInstant instant, boolean leaveStub)
 		 throws StandardException
 	{
+
+		try {
+			synchronized(this)
+			{
+				inRemove = true;
+				// wait until the thread that is doing the backup stops 
+				// before proceeding with the remove.
+				while(inBackup)
+				{
+					try	{
+						wait();
+					}
+					catch (InterruptedException ie)
+					{
+						throw StandardException.interrupt(ie);
+					}	
+				}
+			}
+
 		// discard all of my pages in the cache
 		pageCache.discard(identity);
 		stubbify(instant);
+		}finally
+		{	
+			synchronized(this) {
+				inRemove = false;
+				notifyAll();
+			}
+		}
 
 		// RESOLVE: leaveStub false
 	}
@@ -541,6 +575,19 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
         synchronized(this)
         {
+			// wait until the thread that is doing the backup completes it
+			// before truncting the container. 
+			while(inBackup)
+			{
+				try	{
+					wait();
+				}
+				catch (InterruptedException ie)
+				{
+					throw StandardException.interrupt(ie);
+				}	
+			}
+
             boolean inwrite = false;
             try
             {
@@ -838,6 +885,230 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         }
     }
 
+
+
+
+		
+	/**
+	   backup the  container.
+	   @exception StandardException Standard Cloudscape error policy 
+	*/
+	protected void backupContainer(BaseContainerHandle handle,	String backupLocation)
+	    throws StandardException 
+	{
+		actionContainerHandle = handle;
+        actionBackupLocation = backupLocation;
+        actionCode = BACKUP_CONTAINER_ACTION;
+        try
+        {
+            AccessController.doPrivileged(this);
+        }
+        catch( PrivilegedActionException pae){ throw (StandardException) pae.getException();}
+        finally
+        {
+            actionContainerHandle = null;
+            actionBackupLocation = null;
+        }
+	}
+
+	/**
+	 * Backup the  container.
+	 *
+	 * The container is backed up by reading all the pages through the page cache,
+	 * and then writing to the backup container if it not a committed drop
+	 * container. If the container is commited dropped one, stub is copied
+	 * to the backup using simple file copy. 
+	 *
+	 * MT scenarios:
+	 * 1) Remove and backup running in parallel thread:
+	 * The trickey case is if a request to remove the container(because of a
+	 * commited drop) comes when the conatiner backup is in progress. 
+	 * This case is handled by using the synchronization on this object monitor 
+	 * and using inRemove and inBackup flags.  Basic idea is to give 
+	 * preference to remove by stopping the backup of the container temporarily,
+	 * when  the remove container is requested by another thread. Generally,  it takes
+	 * more  time to backup a regular container than the stub becuase 
+	 * stub is just one page. After each page copy, a check is made to find 
+	 * if a remove is requested and if it is then backup of the container is
+	 * aborted and the backup thread puts itself into the wait state until
+	 * remove  request thread notifies that the remove is complete. When 
+	 * remove request compeletes stub is copies into the backup.
+	 * 
+	 * 2) Truncate and backup running in parallel:
+	 * Truncate will wait if the backup is in progress. Truncate does not
+	 * release the montitor until it is complete , backup can not start 
+	 * until it acquires, so if truncate is running, it has to release
+	 * the monitor before backup can proceed.
+	 * 
+ 	 * @exception StandardException Standard Cloudscape error policy 
+	*/
+	private void privBackupContainer(BaseContainerHandle handle,	String backupLocation)
+	    throws StandardException 
+	{
+		boolean done = true;
+		File backupFile = null;
+		RandomAccessFile backupRaf = null;
+		boolean isStub = false;
+		do {
+			try {
+
+				synchronized (this) {
+					// wait if some one is removing the container because of a drop.
+					while (inRemove)
+					{
+						try	{
+							wait();
+						}
+						catch (InterruptedException ie)
+						{
+							throw StandardException.interrupt(ie);
+						}	
+					}
+
+					if (getCommittedDropState())
+						isStub = true;
+					inBackup = true;
+				}
+			
+				// create container at the backup location.
+				if (isStub) {
+					// get the stub ( it is a committted drop table container )
+					StorageFile file = privGetFileName((ContainerKey)getIdentity(), true, false, true);
+					backupFile = new File(backupLocation, file.getName());
+
+					// directly copy the stub to the backup 
+					if(!FileUtil.copyFile(dataFactory.getStorageFactory(), file, backupFile))
+					{
+						throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+															 file, backupFile);
+					}
+				} else {
+					// regular container file 
+					StorageFile file = privGetFileName((ContainerKey)getIdentity(), false, false, true);
+					try{
+						backupFile = new File(backupLocation , file.getName());
+						backupRaf = new RandomAccessFile(backupFile,  "rw");
+					} catch (IOException ioe) {
+						throw StandardException.newException( SQLState.FILE_CREATE, ioe, backupFile);
+					}
+
+					// copy all the pages of the container from the database to the
+					// backup location by reading through the pahe cache.
+				
+					long lastPageNumber= getLastPageNumber(handle);
+					for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
+						 pageNumber <= lastPageNumber; pageNumber++) {
+						BasePage page = getPageForBackup(handle, pageNumber);
+						byte[] pageData = page.getPageArray();
+						writeToBackup(backupRaf, pageNumber, pageData);
+						// unlatch releases page from cache, see StoredPage.releaseExclusive()
+						page.unlatch();
+
+						// check if some one wants to commit drop the table while
+						// being backedup. If so, abort the backup and restart it 
+						// once the drop is complete.
+
+						synchronized (this)
+						{
+							if (inRemove) {
+								done = false;
+								break;
+							}
+						}
+					}
+				}	
+			} finally {
+				synchronized (this) {
+					inBackup = false;
+					notifyAll();
+				}
+			
+				// if backup of container is not complete, remove the container
+				// from the backup.
+				if (!done && backupFile != null) {
+					if (backupRaf != null) {
+						try {
+							backupRaf.close();
+							backupRaf = null;
+						} catch (IOException ioe){};
+					
+					}
+					if(backupFile.exists())
+						if (!backupFile.delete())
+							throw StandardException.newException(SQLState.UNABLE_TO_DELETE_FILE, 
+																 backupFile);
+				} else {
+					// close the backup conatiner.
+					// incase of a stub, it is already closed 
+					// while doing the copy.
+					if(!isStub) {
+						if (backupRaf != null) {
+							try {
+								backupRaf.getFD().sync();
+								backupRaf.close();
+							} catch (IOException ioe) {
+							} finally {
+								backupRaf = null;
+							}
+						}	
+					}
+				}
+			}
+	
+		} while (!done);
+	}
+
+
+	// write the page to the backup location.
+	private  void writeToBackup(RandomAccessFile backupRaf, long pageNumber, byte[] pageData) 
+		throws StandardException
+	{
+		byte[] dataToWrite;
+		
+		try {
+			if (pageNumber == FIRST_ALLOC_PAGE_NUMBER)
+			{
+				// write header into the alloc page array regardless of dirty
+				// bit because the alloc page have zero'ed out the borrowed
+				// space
+				writeHeader(pageData);
+
+				if (SanityManager.DEBUG) {
+					if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
+						SanityManager.THROWASSERT(
+												  "expect " +
+												  AllocPage.FORMAT_NUMBER +
+												  "got " +
+												  FormatIdUtil.readFormatIdInteger(pageData));
+				}
+
+			}
+
+			if (dataFactory.databaseEncrypted() 
+				&& pageNumber != FIRST_ALLOC_PAGE_NUMBER)
+			{
+				// We cannot encrypt the page in place because pageData is
+				// still being accessed as clear text.  The encryption
+				// buffer is shared by all who access this container and can
+				// only be used within the synchronized block.
+				dataToWrite = encryptPage(pageData, pageSize);
+			} else {
+				dataToWrite = pageData;
+			}
+			
+			long pageOffset = pageNumber * pageSize;
+			fileData.seek(pageOffset);
+			backupRaf.write(dataToWrite, 0, pageSize);
+
+		} catch (IOException ioe) {
+			// page cannot be written to the backup
+			throw StandardException.newException(
+                    SQLState.FILE_WRITE_PAGE_EXCEPTION, 
+                    ioe, getIdentity() + ":" + pageNumber);
+		}
+	}
+	
+
      // PrivilegedExceptionAction method
      public Object run() throws StandardException
      {
@@ -1112,7 +1383,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
              dataFactory.stubFileToRemoveAfterCheckPoint(stub,actionInstant, getIdentity());
              return null;
          } // end of case STUBBIFY_ACTION
-         }
+		 
+		 case BACKUP_CONTAINER_ACTION: {
+			 privBackupContainer(actionContainerHandle, actionBackupLocation);
+			 return null;
+		 } // end of case BACKUP_CONTAINER_ACTION
+		 
+		 } // end of switch
          return null;
+
      } // end of run
 }

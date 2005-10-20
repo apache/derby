@@ -2822,6 +2822,10 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	 */
 	public abstract void setContainerRowCount(long count);
 
+	/*
+	 * returns the page data array, that is actually written to the disk.
+	 */
+	protected abstract byte[] getPageArray() throws StandardException;
 												 
 	/*
 	** Debugging methods

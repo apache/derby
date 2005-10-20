@@ -215,15 +215,6 @@ public interface LogFactory extends Corruptable {
 
 
 	/*
-	  copies the active log files and control files to the given directory
-	  Used copy the necessary log files while doing online backup
-	  @param toDir - location where the log files should be copied to.
-	  @return true if log files copy is  successful
-	  @exception StandardException - encounter exception while doing checkpoint.
-	*/
-	public boolean copyActiveLogFiles(File toDir) throws StandardException;
-
-	/*
 	 * Enable the log archive mode, when log archive mode is 
 	 * on the system keeps all the old log files instead
 	 * of deleting them at the checkpoint.
@@ -262,6 +253,35 @@ public interface LogFactory extends Corruptable {
 	 */
 	public void checkpointInRFR(LogInstant cinstant, long redoLWM, 
 								DataFactory df) throws StandardException;
+
+	
+	/*
+	 * start the transaction log backup, the transaction log is  is required
+	 * to bring the database to the consistent state on restore. 
+	 * copies the log control information , active log files to the given 
+	 * backup directory and marks that backup is in progress.
+	 @param toDir - location where the log files should be copied to.
+	 @return true if log files copy is  successful
+	 @exception StandardException - encounter exception while doing checkpoint.
+	*/
+	public void startLogBackup(File toDir) throws StandardException;
+
+	
+	/*
+	 * copy all the log files that has to go into the backup directory
+	 * and mark that backup has come to an end. 
+	 @param toDir - location where the log files should be copied to.
+	 @return true if log files copy is  successful
+	 @exception StandardException - encounter exception while doing checkpoint.
+	*/
+	public void endLogBackup(File toDir) throws StandardException;
+
+	
+	/*
+	 * Abort any activity related to backup in the log factory.
+	 * Backup is not in progress any more, it failed for some reason.
+	 **/
+	public void abortLogBackup();
 
 
 }
