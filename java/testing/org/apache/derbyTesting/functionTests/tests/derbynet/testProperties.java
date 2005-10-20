@@ -42,6 +42,9 @@ import org.apache.derby.drda.NetworkServerControl;
 	   default
 
 	   The command line should take precedence
+
+	It also tests start server by specifying system properties without values.
+	In this case the server will use default values.
 */
 
 public class testProperties
@@ -52,6 +55,21 @@ public class testProperties
 	private static Vector vCmd;
     private static  BufferedOutputStream bos = null;
 
+    //Command to start server specifying system properties without values
+    private static String[] startServerCmd =
+					new String[] {  "-Dderby.drda.logConnections",
+    								"-Dderby.drda.traceAll",
+									"-Dderby.drda.traceDirectory",
+									"-Dderby.drda.keepAlive",
+									"-Dderby.drda.timeSlice",
+									"-Dderby.drda.host",
+									"-Dderby.drda.portNumber",
+									"-Dderby.drda.minThreads",
+									"-Dderby.drda.maxThreads",
+									"-Dderby.drda.startNetworkServer",
+									"-Dderby.drda.debug",
+									"org.apache.derby.drda.NetworkServerControl",
+									"start"};
 
 	/**
 	 * Execute the given command and dump the results to standard out
@@ -160,6 +178,14 @@ public class testProperties
         }
 	}
 
+	private static void listProperties(String portString) throws Exception{
+		int port = Integer.parseInt(portString);
+		NetworkServerControl derbyServer = new NetworkServerControl( InetAddress.getByName("localhost"),
+													port);
+		Properties p = derbyServer.getCurrentProperties();
+		p.list(System.out);
+	}
+
 	public static void main (String args[]) throws Exception
 	{
 		if ((System.getProperty("java.vm.name") != null) && System.getProperty("java.vm.name").equals("J9"))
@@ -204,6 +230,22 @@ public class testProperties
 			System.out.println("Successfully Connected");
 			//shutdown - with command line option
 			derbyServerCmd("shutdown","1530");
+
+			/**********************************************************************
+			 *  Test start server specifying system properties without values
+			 *********************************************************************/
+			System.out.println("Testing start server by specifying system properties without values");
+			System.out.println("First shutdown server started on default port by the test harness");
+
+			//Shutdown the server started by test
+			derbyServerCmd("shutdown","1527");
+			execCmd(startServerCmd);
+			waitForStart("1527",15000);
+			//check that default properties are used
+			listProperties("1527");
+			System.out.println("Successfully Connected");
+			derbyServerCmd("shutdown","1527");
+
 			System.out.println("End test");
 			bos.close();
 		}

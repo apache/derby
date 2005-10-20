@@ -7,6 +7,7 @@ dataSourcePermissions_net_app.properties
 dataSourcePermissions_net_sed.properties
 default_app.properties
 default_derby.properties
+getCurrentProperties_sed.properties
 runtimeinfo_sed.properties
 sysinfo_sed.properties
 testij.sql

@@ -87,7 +87,8 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	This changes where new trace files will be placed. 
 	For sessions with tracing already turned on,  
 	trace files remain in the previous location. 
-	Default is clousdcape.system.home</LI>
+	Default is derby.system.home, if it is set. 
+	Otherwise the default is the current directory.</LI>
 
 	</UL>
 	<P>Properties can be set in the derby.properties file or on the command line.
