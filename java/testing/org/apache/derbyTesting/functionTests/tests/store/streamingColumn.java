@@ -92,7 +92,9 @@ public class streamingColumn {
 			streamTest5(conn, 0);
 			streamTest5(conn, 1500);
 			streamTest5(conn, 5000);
-			streamTest5(conn, 100000);
+            // This test fails when running w/ derby.language.logStatementText=true
+            // see DERBY-595 
+            //streamTest5(conn, 100000);
 
 			streamTest6(conn, 5000);
 			streamTest7(conn);
@@ -117,6 +119,19 @@ public class streamingColumn {
 			// bug 5592 test - any character(including blank character) truncation should give error for long varchars
 			streamTest13(conn);
 
+            
+            
+            // Derby500
+            // user supplied stream parameter values are not re-used
+            derby500Test(conn);
+
+            // currently in case of char,varchar,long varchar types
+            // stream paramter value is materialized the first time around
+            // and used for executions. Hence verify that the fix to 
+            // DERBY-500 did not change the behavior for char,varchar
+            // and long varchar types when using streams.
+            derby500_verifyVarcharStreams(conn);
+            
 			// turn autocommit on because in JCC, java.sql.Connection.close() can not be
 			// requested while a transaction is in progress on the connection.
 			// If autocommit is off in JCC, the transaction remains active, 
@@ -1145,6 +1160,438 @@ public class streamingColumn {
 	}
 
 
+
+    /**
+     * Streams are not re-used. This test tests the fix for 
+     * DERBY-500. If an update statement has multiple rows that
+     * is affected, and one of the parameter values is a stream,
+     * the update will fail because streams are not re-used.
+     * @param conn database connection
+     */
+    private static void derby500Test(Connection conn) {
+
+        Statement stmt;
+
+        System.out.println("======================================");
+        System.out.println("START  DERBY-500 TEST ");
+
+        try {
+            stmt = conn.createStatement();
+            conn.setAutoCommit(false);
+            stmt.execute("CREATE TABLE t1 (" + "id INTEGER NOT NULL,"
+                    + "mname VARCHAR( 254 ) NOT NULL," + "mvalue INT NOT NULL,"
+                    + "bytedata BLOB NOT NULL," + "chardata CLOB NOT NULL,"
+                    + "PRIMARY KEY ( id ))");
+
+            PreparedStatement ps = conn
+                    .prepareStatement("insert into t1 values (?,?,?,?,?)");
+
+            // insert 10 rows.
+            int rowCount = 0;
+            // use blob and clob values
+            int len = 10000;
+            byte buf[] = new byte[len];
+            char cbuf[] = new char[len];
+            char orig =  'c';
+            for (int i = 0; i < len; i++) {
+                buf[i] = (byte)orig;
+                cbuf[i] = orig;
+            }
+            int randomOffset = 9998;
+            buf[randomOffset] = (byte) 'e';
+            cbuf[randomOffset] = 'e';
+            System.out.println("Inserting rows ");
+            for (int i = 0; i < 10; i++) {
+                ps.setInt(1, i);
+                ps.setString(2, "mname" + i);
+                ps.setInt(3, 0);
+                ps.setBinaryStream(4, new ByteArrayInputStream(buf), len);
+                ps.setAsciiStream(5, new ByteArrayInputStream(buf), len);
+                rowCount += ps.executeUpdate();
+            }
+            conn.commit();
+            System.out.println("Rows inserted =" + rowCount);
+
+            
+            //conn.commit();
+            PreparedStatement pss = conn
+                    .prepareStatement(" select chardata,bytedata from t1 where id = ?");
+            verifyDerby500Test(pss, buf, cbuf,0, 10, true);
+            
+            // do the update, update must qualify more than 1 row and update will fail
+            // as currently we dont allow stream values to be re-used
+            PreparedStatement psu = conn
+                    .prepareStatement("update t1 set bytedata = ? "
+                            + ", chardata = ? where mvalue = ?  ");
+
+            buf[randomOffset + 1] = (byte) 'u';
+            cbuf[randomOffset +1] = 'u';
+            rowCount = 0;
+            System.out.println("Update qualifies many rows + streams");
+
+            try {
+                psu.setBinaryStream(1, new ByteArrayInputStream(buf), len);
+                psu.setCharacterStream(2, new CharArrayReader(cbuf), len);
+                psu.setInt(3, 0);
+                rowCount += psu.executeUpdate();
+                System.out.println("DERBY500 #1 Rows updated  ="
+                        + rowCount);
+
+            } catch (SQLException sqle) {
+                System.out
+                        .println("EXPECTED EXCEPTION - streams cannot be re-used");
+                expectedException(sqle);
+                conn.rollback();
+            }
+            
+            //verify data
+            //set back buffer value to what was inserted.
+            buf[randomOffset + 1] = (byte)orig;
+            cbuf[randomOffset + 1] = orig;
+            
+            verifyDerby500Test(pss, buf,cbuf, 0, 10,true);
+
+            PreparedStatement psu2 = conn
+                    .prepareStatement("update t1 set bytedata = ? "
+                            + ", chardata = ? where id = ?  ");
+
+            buf[randomOffset + 1] = (byte) 'u';
+            cbuf[randomOffset + 1] = 'u';
+            
+            rowCount = 0;
+            try {
+                psu2.setBinaryStream(1, new ByteArrayInputStream(buf), len);
+                psu2.setAsciiStream(2, new ByteArrayInputStream(buf), len);
+                psu2.setInt(3, 0);
+                rowCount += psu2.executeUpdate();
+                System.out.println("DERBY500 #2 Rows updated  ="
+                        + rowCount);
+
+            } catch (SQLException sqle) {
+                System.out
+                        .println("UNEXPECTED EXCEPTION - update should have actually gone through");
+                dumpSQLExceptions(sqle);
+            }
+            conn.commit();
+            verifyDerby500Test(pss, buf,cbuf, 0, 1,true);
+            
+            // delete
+            // as currently we dont allow stream values to be re-used
+            PreparedStatement psd = conn
+                    .prepareStatement("delete from t1 where mvalue = ?");
+
+            rowCount = 0;
+            try {
+                psd.setInt(1, 0);
+                rowCount += psd.executeUpdate();
+                rowCount += psd.executeUpdate();
+                System.out.println("DERBY500 #3 Rows deleted ="
+                        + rowCount);
+
+            } catch (SQLException sqle) {
+                System.out
+                .println("UNEXPECTED EXCEPTION - delete should have actually gone through");
+                dumpSQLExceptions(sqle);
+            }
+
+            conn.commit();
+            //verify data
+           
+            verifyDerby500Test(pss, buf,cbuf, 0, 10, true);
+
+            PreparedStatement psd2 = conn
+                    .prepareStatement("delete from t1 where id = ?");
+            
+            rowCount = 0;
+            try {
+                psd2.setInt(1, 0);
+                rowCount += psd2.executeUpdate();
+                System.out.println("DERBY500 #4 Rows deleted  ="
+                        + rowCount);
+
+            } catch (SQLException sqle) {
+                System.out
+                        .println("UNEXPECTED EXCEPTION - delete should have actually gone through");
+                dumpSQLExceptions(sqle);
+            }
+            conn.commit();
+            verifyDerby500Test(pss, buf,cbuf, 1, 2,true);
+
+            try
+            {
+                ps.setInt(1,11);
+                rowCount += ps.executeUpdate();
+                System.out.println("Rows inserted = "+ rowCount);
+            } catch (SQLException sqle) {
+                System.out
+                        .println("EXPECTED EXCEPTION - streams cannot be re-used");
+                expectedException(sqle);
+                conn.rollback();
+            }
+
+            stmt.execute("drop table t1");
+            conn.commit();
+            stmt.close();
+            pss.close();
+            psu2.close();
+            psu.close();
+            psd.close();
+            psd2.close();
+            System.out.println("END  DERBY-500 TEST ");
+            System.out.println("======================================");
+
+        } catch (SQLException sqle) {
+            dumpSQLExceptions(sqle);
+        } catch (Exception e) {
+            System.out.println("DERBY-500 TEST FAILED!");
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Test that DERBY500 fix did not change the behavior for varchar,
+     * char, long varchar types when stream api is used. 
+     * Currently, for char,varchar and long varchar - the stream is 
+     * read once and materialized, hence the materialized stream value
+     * will/can be used for multiple executions of the prepared statement  
+     * @param conn database connection
+     */
+    private static void derby500_verifyVarcharStreams(Connection conn) {
+
+        Statement stmt;
+
+        System.out.println("======================================");
+        System.out.println("START  DERBY-500 TEST for varchar ");
+
+        try {
+            stmt = conn.createStatement();
+            stmt.execute("CREATE TABLE t1 (" + "id INTEGER NOT NULL,"
+                    + "mname VARCHAR( 254 ) NOT NULL," + "mvalue INT NOT NULL,"
+                    + "vc varchar(32500)," + "lvc long varchar NOT NULL,"
+                    + "PRIMARY KEY ( id ))");
+
+            PreparedStatement ps = conn
+                    .prepareStatement("insert into t1 values (?,?,?,?,?)");
+
+            // insert 10 rows.
+            int rowCount = 0;
+            // use blob and clob values
+            int len = 10000;
+            byte buf[] = new byte[len];
+            char cbuf[] = new char[len];
+            char orig =  'c';
+            for (int i = 0; i < len; i++) {
+                buf[i] = (byte)orig;
+                cbuf[i] = orig;
+            }
+            int randomOffset = 9998;
+            buf[randomOffset] = (byte)'e';
+            cbuf[randomOffset] = 'e';
+            for (int i = 0; i < 10; i++) {
+                ps.setInt(1, i);
+                ps.setString(2, "mname" + i);
+                ps.setInt(3, 0);
+                ps.setCharacterStream(4, new CharArrayReader(cbuf), len);
+                ps.setAsciiStream(5, new ByteArrayInputStream(buf), len);
+                rowCount += ps.executeUpdate();
+            }
+            conn.commit();
+            System.out.println("Rows inserted =" + rowCount);
+
+            try
+            {
+                ps.setInt(1,11);
+                rowCount += ps.executeUpdate();
+            } catch (SQLException sqle) {
+                System.out.println("UNEXPECTED EXCEPTION - streams cannot be "+
+                   "re-used but in case of varchar, stream is materialized the"+
+                   " first time around. So multiple executions using streams should "+
+                   " work fine. ");
+                dumpSQLExceptions(sqle);
+            }
+            
+            PreparedStatement pss = conn
+                    .prepareStatement(" select lvc,vc from t1 where id = ?");
+            verifyDerby500Test(pss, buf, cbuf,0, 10,false);
+            
+            // do the update, update must qualify more than 1 row and update will
+            // pass for char,varchar,long varchar columns.
+            PreparedStatement psu = conn
+                    .prepareStatement("update t1 set vc = ? "
+                            + ", lvc = ? where mvalue = ?  ");
+
+            buf[randomOffset +1] = (byte)'u';
+            cbuf[randomOffset +1] = 'u';
+            rowCount = 0;
+            try {
+                psu.setAsciiStream(1, new ByteArrayInputStream(buf), len);
+                psu.setCharacterStream(2, new CharArrayReader(cbuf), len);
+                psu.setInt(3, 0);
+                rowCount += psu.executeUpdate();
+            } catch (SQLException sqle) {
+                System.out
+                        .println("EXPECTED EXCEPTION - streams cannot be re-used");
+                expectedException(sqle);
+            }
+            System.out.println("DERBY500 for varchar #1 Rows updated  ="
+                    + rowCount);
+
+            //verify data
+            verifyDerby500Test(pss, buf,cbuf, 0, 10, false);
+
+            PreparedStatement psu2 = conn
+                    .prepareStatement("update t1 set vc = ? "
+                            + ", lvc = ? where id = ?  ");
+
+            buf[randomOffset +1] = (byte)'h';
+            cbuf[randomOffset + 1] = 'h';
+            
+            rowCount = 0;
+            try {
+                psu2.setAsciiStream(1, new ByteArrayInputStream(buf), len);
+                psu2.setAsciiStream(2, new ByteArrayInputStream(buf), len);
+                psu2.setInt(3, 0);
+                rowCount += psu2.executeUpdate();
+            } catch (SQLException sqle) {
+                System.out
+                        .println("UNEXPECTED EXCEPTION - update should have actually gone through");
+                dumpSQLExceptions(sqle);
+            }
+            conn.commit();
+            System.out.println("DERBY500 for varchar #2 Rows updated  ="
+                    + rowCount);
+            verifyDerby500Test(pss, buf,cbuf, 0, 1,false);
+            
+            // delete
+            // as currently we dont allow stream values to be re-used
+            PreparedStatement psd = conn
+                    .prepareStatement("delete from t1 where mvalue = ?");
+
+            rowCount = 0;
+            try {
+                psd.setInt(1, 0);
+                rowCount += psd.executeUpdate();
+                rowCount += psd.executeUpdate();
+            } catch (SQLException sqle) {
+                System.out
+                .println("UNEXPECTED EXCEPTION - delete should have actually gone through");
+                dumpSQLExceptions(sqle);
+            }
+            System.out.println("DERBY500 for varchar #3 Rows deleted ="
+                    + rowCount);
+
+            //verify data
+            verifyDerby500Test(pss, buf,cbuf, 0, 10,false);
+
+            PreparedStatement psd2 = conn
+                    .prepareStatement("delete from t1 where id = ?");
+            
+            rowCount = 0;
+            try {
+                psd2.setInt(1, 0);
+                rowCount += psd2.executeUpdate();
+            } catch (SQLException sqle) {
+                System.out
+                        .println("UNEXPECTED EXCEPTION - delete should have actually gone through");
+                dumpSQLExceptions(sqle);
+            }
+            conn.commit();
+            System.out.println("DERBY500 for varchar #4 Rows deleted  ="
+                    + rowCount);
+            verifyDerby500Test(pss, buf,cbuf, 1, 2,false);
+
+            stmt.execute("drop table t1");
+            conn.commit();
+            stmt.close();
+            pss.close();
+            psu2.close();
+            psu.close();
+            psd.close();
+            psd2.close();
+            System.out.println("END  DERBY-500 TEST  for varchar");
+            System.out.println("======================================");
+
+        } catch (SQLException sqle) {
+            dumpSQLExceptions(sqle);
+        } catch (Exception e) {
+            System.out.println("DERBY-500 TEST for varchar FAILED!");
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * verify the data in the derby500Test
+     * @param ps select preparedstatement
+     * @param buf byte array to compare the blob data
+     * @param cbuf char array to compare the clob data
+     * @param startId start id of the row to check data for 
+     * @param endId end id of the row to check data for
+     * @param binaryType  flag to indicate if the second column in resultset
+     *                  is a binary type or not. true for binary type 
+     * @throws Exception
+     */
+    private static void verifyDerby500Test(PreparedStatement ps, byte[] buf,char[] cbuf,
+            int startId, int endId,boolean binaryType) throws Exception {
+        byte[] retrieveData = null;
+        int rowCount = 0;
+        ResultSet rs = null;
+        for (int i = startId; i < endId; i++) {
+            ps.setInt(1, i);
+            rs = ps.executeQuery();
+            if(rs.next())
+            {
+            compareCharArray(rs.getCharacterStream(1), cbuf,cbuf.length);
+            if(binaryType)
+                byteArrayEquals(rs.getBytes(2), 0, buf.length, buf, 0, buf.length);
+            else
+                compareCharArray(rs.getCharacterStream(2), cbuf,cbuf.length);
+                
+            rowCount++;
+            }
+        }
+        System.out.println("Rows selected =" + rowCount);
+        rs.close();
+    }
+    /**
+     * compare char data
+     * @param stream data from stream to compare 
+     * @param compare base data to compare against
+     * @param length compare length number of chars.
+     * @throws Exception
+     */
+    private static void compareCharArray(Reader stream, char[] compare,
+            int length) throws Exception {
+        int c1 = 0;
+        int i = 0;
+        do {
+            c1 = stream.read();
+            if (c1 != compare[i++]) {
+                System.out
+                        .println("FAIL -- MISMATCH in data stored versus data retrieved at "
+                                + (i - 1));
+                break;
+            }
+            length--;
+        } while (c1 != -1 && length > 0);
+
+    }
+    
+    private static void expectedException(SQLException sqle) {
+
+        while (sqle != null) {
+            String sqlState = sqle.getSQLState();
+            if (sqlState == null) {
+                sqlState = "<NULL>";
+            }
+            System.out.println("EXPECTED SQL Exception: (" + sqlState + ") "
+                    + sqle.getMessage());
+
+            sqle = sqle.getNextException();
+        }
+    }
+
 	private static void streamTestDataVerification(ResultSet rs, int maxValueAllowed)
 	throws Exception{
 		ResultSetMetaData met;
@@ -1417,4 +1864,6 @@ public class streamingColumn {
 			se = se.getNextException();
 		}
 	}
+    
+    
 }

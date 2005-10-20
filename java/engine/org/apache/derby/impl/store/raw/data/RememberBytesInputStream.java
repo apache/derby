@@ -44,6 +44,12 @@ public class RememberBytesInputStream extends FilterInputStream
 {
 	ByteHolder bh;
 	boolean recording = true;
+    
+    // In case of streams (e.g ReaderToUTF8Stream,
+    // RawToBinaryFormatStream) that cannot be re-used
+    // a read on a closed stream will throw an EOFException
+    // hence keep track if the stream is closed or not
+    boolean streamClosed = false;
 	
 	/**
 	  Construct a RememberBytesInputStream.
@@ -58,6 +64,7 @@ public class RememberBytesInputStream extends FilterInputStream
             SanityManager.ASSERT(bh.writingMode());
 
 		this.bh = bh;
+
 	}
 	
 	/**
@@ -69,10 +76,19 @@ public class RememberBytesInputStream extends FilterInputStream
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(recording,
 								 "Must be in record mode to perform a read.");
-		int value = super.read();
-		if (value != -1)
-			bh.write(value);
-		return value;
+		
+        int value = -1;
+        
+        if ( !streamClosed )
+        {
+            value = super.read();
+            if ( value != -1 )
+                bh.write(value);
+            else
+                streamClosed =true;
+        }
+		
+        return value;
 	}
 
 	/**
@@ -84,22 +100,46 @@ public class RememberBytesInputStream extends FilterInputStream
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(recording,
 								 "Must be in record mode to perform a read.");
-		if ((len + off) > b.length)
-			len = b.length - off;
-		len = super.read(b,off,len);
-		if (len != -1)
-			bh.write(b,off,len);
-		return len;
+		
+        if ( !streamClosed ) {
+            if ((len + off) > b.length)
+                len = b.length - off;
+
+            len = super.read(b, off, len);
+            if (len > 0 )
+                bh.write(b, off, len);
+            else
+                streamClosed = true;
+        } else {
+            return -1;
+        }
+
+        return len;
 	}
 
 	/**
 	  read len bytes from the input stream, and store it in the byte holder.
 
+      Note, fillBuf does not return negative values, if there are no 
+      bytes to store in the byteholder, it will return 0
 	  @exception IOException thrown on an io error spooling rememberd bytes
 	             to backing storage.
 	  */
 	public long fillBuf(int len) throws IOException{
-		return bh.write(this.in, len);
+        
+        long val = 0;
+
+        if ( !streamClosed )
+        {
+            val = bh.write(this.in, len);
+            
+            // if bh.write returns less than len, then the stream
+            // has reached end of stream. See logic in MemByteHolder.write
+            if ( val < len )
+                streamClosed=true;
+        }       
+
+        return val;
 	}
 
 	/**
@@ -160,6 +200,7 @@ public class RememberBytesInputStream extends FilterInputStream
 	 */
 	public void setInput(InputStream in) {
 		this.in = in;
+        streamClosed = false;
 	}
 
 	/**

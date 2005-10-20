@@ -54,8 +54,22 @@ final class ReaderToUTF8Stream
 		blen = -1;
 	}
 
+    /**
+     * read from stream; characters converted to utf-8 derby specific encoding.
+     * If stream has been read, and eof reached, in that case any subsequent
+     * read will throw an EOFException
+     * @see java.io.InputStream#read()
+     */
 	public int read() throws IOException {
 
+        // when stream has been read and eof reached, stream is closed
+        // and buffer is set to null ( see close() method)
+        // since stream cannot be re-used, check if stream is closed and 
+        // if so throw an EOFException
+        if ( buffer == null)
+            throw new EOFException(MessageService.getTextMessage(SQLState.STREAM_EOF));
+
+        
 		// first read
 		if (blen < 0)
 			fillBuffer(2);
@@ -64,7 +78,14 @@ final class ReaderToUTF8Stream
 		{
 			// reached end of buffer, read more?
 			if (eof)
-				return -1;
+            {
+               // we have reached the end of this stream
+               // cleanup here and return -1 indicating 
+               // eof of stream
+               close();
+               return -1;
+            }
+                
 
 			fillBuffer(0);
 		}
@@ -74,7 +95,16 @@ final class ReaderToUTF8Stream
 	}
 
 	public int read(byte b[], int off, int len) throws IOException {
-		// first read
+        
+        // when stream has been read and eof reached, stream is closed
+        // and buffer is set to null ( see close() method)
+        // since stream cannot be re-used, check if stream is closed and 
+        // if so throw an EOFException
+        if ( buffer == null )
+            throw new EOFException(MessageService.getTextMessage
+                    (SQLState.STREAM_EOF));
+
+        // first read
 		if (blen < 0)
 			fillBuffer(2);
 
@@ -90,8 +120,18 @@ final class ReaderToUTF8Stream
 			{
 				if (eof)
 				{
-					return readCount == 0 ? readCount : -1;
-				}
+                    if (readCount > 0)
+                    {
+                        return readCount;
+                    }
+                    else
+                    {
+                        // we have reached the eof, so close the stream
+                        close();
+                        return -1;  
+                    }
+                }
+                    
 				fillBuffer(0);
 				continue;
 			}
@@ -105,7 +145,6 @@ final class ReaderToUTF8Stream
 			readCount += copyBytes;
 
 		}
-
 		return readCount;
 	}
 
@@ -184,6 +223,7 @@ final class ReaderToUTF8Stream
 
 			buffer[0] = (byte) ((utflen >>> 8) & 0xFF);
 			buffer[1] = (byte) ((utflen >>> 0) & 0xFF);
+
 		}
 		else
 		{
@@ -193,10 +233,23 @@ final class ReaderToUTF8Stream
 		}
 	}
 
+    /**
+     * return resources 
+     */
 	public void close() throws IOException
 	{
-		buffer = null;
-		reader.close();
+        // since stream has been read and eof reached, return buffer back to 
+        // the vm.
+        // Instead of using another variable to indicate stream is closed
+        // a check on (buffer==null) is used instead. 
+        buffer = null;
+
+        // Note : Do not call reader.close() here since the reader 
+        // holds the user's stream and calling reader.close would close
+        // the user's stream and that is incorrect. Derby must not
+        // close the user's stream, but it is the responsibility of the 
+        // application to close the stream or do whatever the application
+        // wishes.
 	}
 
     /**

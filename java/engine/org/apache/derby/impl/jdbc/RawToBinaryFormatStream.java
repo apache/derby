@@ -23,6 +23,7 @@ package org.apache.derby.impl.jdbc;
 import java.io.InputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.EOFException;
 
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -32,10 +33,16 @@ import org.apache.derby.iapi.reference.SQLState;
 	Stream that takes a raw input stream and converts it
 	to the format of the binary types by prepending the
 	length of the value. In this case 0 is always written.
+    Note: This stream cannot be re-used. Once end of file is
+    reached, the next read call will throw an EOFException
 */
 class RawToBinaryFormatStream extends LimitInputStream {
 
 	private int dummyBytes = 4;
+    
+    // flag to indicate the stream has already been read
+    // and eof reached
+    private boolean eof = false;
 
 	/**
 		@param	in Application's raw binary stream passed into JDBC layer
@@ -50,9 +57,15 @@ class RawToBinaryFormatStream extends LimitInputStream {
 
 	/**
 		Read from the wrapped stream prepending the intial bytes if needed.
+        If stream has been read, and eof reached, in that case any subsequent
+        read will throw an EOFException
 	*/
 	public int read() throws IOException {
 
+        if ( eof )
+            throw new EOFException(MessageService.getTextMessage
+                        (SQLState.STREAM_EOF));
+        
 		if (dummyBytes != 0) {
 			dummyBytes--;
 			return 0;
@@ -73,8 +86,13 @@ class RawToBinaryFormatStream extends LimitInputStream {
 	*/
 	private void checkSufficientData() throws IOException
 	{
+        // if we reached here, then read call returned -1, and we 
+        // have already reached the end of stream, so set eof=true
+        // so that subsequent reads on this stream will return an 
+        // EOFException
+        eof = true;
 		if (!limitInPlace)
-			return;
+        return;
 
 		int remainingBytes = clearLimit();
 
@@ -99,8 +117,13 @@ class RawToBinaryFormatStream extends LimitInputStream {
 
 	/**
 		Read from the wrapped stream prepending the intial bytes if needed.
+        If stream has been read, and eof reached, in that case any subsequent
+        read will throw an EOFException
 	*/
 	public int read(byte b[], int off, int len) throws IOException {
+  
+        if ( eof )
+            throw new EOFException(MessageService.getTextMessage(SQLState.STREAM_EOF));
 
 		int dlen = dummyBytes;
 
@@ -124,7 +147,6 @@ class RawToBinaryFormatStream extends LimitInputStream {
 				return dlen;
 
 			checkSufficientData();
-
 			return realRead;
 		}
 
