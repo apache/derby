@@ -273,6 +273,38 @@ class DRDAStatement
 		}
 		return holdValue;
 	}
+	
+	/**
+	 *
+	 *  get resultSetHoldability with reflection. 
+	 *  We need to use reflection so we can use hold cursors with 1.3.1. 
+	 *  And also since our statement might be a BrokeredStatement.
+	 * 
+	 * @param rs ResultSet 
+	 * @return the resultSet holdability for the prepared statement
+	 *
+	 */
+	protected int getResultSetHoldability(ResultSet rs) throws SQLException
+	{
+		Statement rsstmt = null;
+		int holdValue = -1;
+
+		if (rs  != null)
+			rsstmt = rs.getStatement();
+		else
+			rsstmt = getPreparedStatement();
+				
+		Class[] getResultSetHoldabilityParam  = {};
+		try {
+			Method sh =
+				rsstmt.getClass().getMethod("getResultSetHoldability", getResultSetHoldabilityParam);
+			holdValue =  ((Integer) sh.invoke(rsstmt,null)).intValue();
+		}
+		catch (Exception e) {
+			handleReflectionException(e);
+		}
+		return holdValue;
+	}	
 
 	/*
 	 * Is lob object nullable
@@ -540,7 +572,11 @@ class DRDAStatement
 			rs = ps.getResultSet();
 			if (rs !=null)
 			{
-				addResultSet(rs);
+				//For callable statement, get holdability of statement generating the result set
+				if(isCallable)
+					addResultSet(rs,getResultSetHoldability(rs));
+				else
+					addResultSet(rs,withHoldCursor);
 				hasResultSet = true;
 			}
 			// For normal selects we are done, but procedures might
@@ -706,6 +742,16 @@ class DRDAStatement
 		currentDrdaRs.setResultSet(value);
 		setRsDefaultOptions(currentDrdaRs);
 	}
+	
+	/**
+	 * Gets the current DRDA ResultSet
+	 * 
+	 * @return DRDAResultSet
+	 */
+	protected DRDAResultSet getCurrentDrdaResultSet()
+	{
+		return currentDrdaRs ;
+	}
 
 	/**
  	 * Set currentDrdaResultSet 
@@ -785,11 +831,12 @@ class DRDAStatement
 	 * Set as the current result set if  there is not an 
 	 * existing current resultset.
 	 * @param value - ResultSet to add
+	 * @param holdValue - Holdability of the ResultSet 
 	 * @return    Consistency token  for this resultSet
 	 *            For a single resultSet that is the same as the statement's 
 	 *            For multiple resultSets just the consistency token is changed 
 	 */
-	protected String  addResultSet(ResultSet value) throws SQLException
+	protected String  addResultSet(ResultSet value, int holdValue) throws SQLException
 	{
 
 		DRDAResultSet newDrdaRs = null;
@@ -822,6 +869,7 @@ class DRDAStatement
 
 		newDrdaRs.setResultSet(value);
 		newDrdaRs.setPkgcnstknStr(newRsPkgcnstknStr);
+		newDrdaRs.withHoldCursor = holdValue;
 		setRsDefaultOptions(newDrdaRs);
 		newDrdaRs.suspend();
 		numResultSets++;
