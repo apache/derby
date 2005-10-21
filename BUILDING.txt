@@ -298,11 +298,30 @@ You will need to create a property file to specify
 your environment and some of your options. Do the following
 to specify your environment and options:
 
-(1) Find out user home directory on your system. You can find  
-    user home directory by doing echo on variable %HOME% 
-    on windows and $home or $HOME on unix.
+(1) Determine the directory on your system that corresponds to
+    the "user.home" system property of the JVM referred to by
+    JAVA_HOME. This directory will be referred to as the 
+    ${user.home} directory in the rest of this document. 
+    In order to determine the correct value of ${user.home}, 
+    you can do either of the following:
 
-(2) Create a file called "ant.properties" in user home 
+	a) Run ant diagnostics and look for "user.home" in the
+           list of System properties:
+		
+           ant -diagnostics
+
+	b) Write and run a small java program that prints the
+           value of the "user.home" system property, e.g. by
+           including the following line in the program:
+
+           System.out.println(System.getProperty("user.home"));
+           
+    On Unix systems, ${user.home} is often equivalent to the
+    value of the environment variable $HOME or $home.
+    On newer Windows systems, ${user.home} is often equivalent
+    to the value of the environment variable %USERPROFILE%.
+
+(2) Create a file called "ant.properties" in your ${user.home} 
     directory and define the following variables in 
     "ant.properties". 
 
