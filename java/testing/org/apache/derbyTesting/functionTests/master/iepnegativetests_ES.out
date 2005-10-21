@@ -13,7 +13,7 @@ ij> --export error cases
 --export can not create file
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'nodir/t1.dat' , 
                                  null, null, null) ;
-ERROR XIE0I: Se ha obtenido una excepci EnC:>243< n de E/S al grabar datos en el archivo
+ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en el archivo.
 ij> --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
@@ -22,8 +22,8 @@ ERROR 42X05: La tabla 'IEP.NOTABLE' no existe.
 ij> ---export schema is not valid
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El esquema 'XXXX' no existe' al evaluar una expresi EnC:>243< n.
-ERROR 42Y07: El esquema 'XXXX' no existe
+ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El esquema 'XXXX' no existe.' al evaluar una expresi EnC:>243< n.
+ERROR 42Y07: El esquema 'XXXX' no existe.
 ij> --export query is invalid (syntax error)
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select from t1', 
                                     'extinout/t1.dat' , null, null, null) ;
@@ -32,11 +32,11 @@ ERROR 42X01: Error de sintaxis: Encountered "from" at line 1, column 8.
 ij> --export codeset is invalid
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1', 
                                     'extinout/t1.dat' , null, null, 'NOSUCHCODESET') ;
-ERROR XIE0I: Se ha obtenido una excepci EnC:>243< n de E/S al grabar datos en el archivo
+ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en el archivo.
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El esquema 'XXXX' no existe' al evaluar una expresi EnC:>243< n.
-ERROR 42Y07: El esquema 'XXXX' no existe
+ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El esquema 'XXXX' no existe.' al evaluar una expresi EnC:>243< n.
+ERROR 42Y07: El esquema 'XXXX' no existe.
 ij> --export delimiter errror cases
 --period can not be used as character ot column delimiter
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
@@ -98,22 +98,22 @@ call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'nodir/t1.dat' ,
                                  null, null, null, 0) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
-ERROR XJ001: Excepci EnC:>243< n Java: ': java.lang.reflect.InvocationTargetException'.
+ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE04: Archivo de datos no encontrado: nodir/t1.dat
 ij> --import table not found
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: La tabla 'IEP.NOTABLE' no existe.
+ERROR XIE0M: La tabla 'IEP.NOTABLE' no existe. 
 ij> --import schema is not valid
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: La tabla 'XXXX.T1' no existe.
+ERROR XIE0M: La tabla 'XXXX.T1' no existe. 
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, null, 'INCORRECTCODESET', 0) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
-ERROR XJ001: Excepci EnC:>243< n Java: ': java.lang.reflect.InvocationTargetException'.
-ERROR XJ001: Excepci EnC:>243< n Java: 'java.io.UnsupportedEncodingException: INCORRECTCODESET'.
+ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
+ERROR XJ001: Excepci EnC:>243< n de Java: 'java.io.UnsupportedEncodingException: INCORRECTCODESET'.
 ij> --check import with invalid delimiter usage
 --if emtry strinng is passed actual value delimiter should be space
 --and the that should become a invalid delimiter 
@@ -121,20 +121,20 @@ call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' ,
                                  '', ';', null, 0) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
-ERROR XJ001: Excepci EnC:>243< n Java: ': java.lang.reflect.InvocationTargetException'.
+ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, '', null, 0) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
-ERROR XJ001: Excepci EnC:>243< n Java: ': java.lang.reflect.InvocationTargetException'.
+ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
 ij> --same delimter can not be used as character and column delimters
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  ';', ';', null, 1) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
-ERROR XJ001: Excepci EnC:>243< n Java: ': java.lang.reflect.InvocationTargetException'.
+ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
 ij> autocommit off;
 ij> create table v1(a int) ;
@@ -188,7 +188,7 @@ declare global temporary table session.temp2(c1 int) not logged;
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SESSION', 'TEMP2' , 'extinout/temp1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: La tabla 'SESSION.TEMP2' no existe.
+ERROR XIE0M: La tabla 'SESSION.TEMP2' no existe. 
 ij> select * from session.temp2 ;
 ERROR 42X05: La tabla 'SESSION.TEMP2' no existe.
 ij> commit ;
@@ -227,11 +227,11 @@ ij> --import data column names are incorrect
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3, X4', null,
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE08: No hay ninguna columna de nombre: X1
+ERROR XIE08: No existe una columna denominada: X1.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE08: No hay ninguna columna de nombre: X1
+ERROR XIE08: No existe una columna denominada: X1.  
 ij> --import data insert column names count < column indexes does not match
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
@@ -246,8 +246,8 @@ ERROR 42802: El n EnC:>250< mero de valores asignado no coincide con el n EnC:>2
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
                                  'extinout/t3.dat' , 
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<  null, null, null, 0) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: La columna 'COLUMN11' no est EnC:>225<  en ninguna tabla de la lista FROM o aparece en una especificaci EnC:>243< n de uni EnC:>243< n y est EnC:>225<  fuera del  EnC:>225< mbito de la especificaci EnC:>243< n de uni EnC:>243< n o aparece en una cl EnC:>225< usula HAVING y no est EnC:>225<  en la lista GROUP BY.  Si se trata de una sentencia CREATE o ALTER TABLE entonces 'COLUMN11' no es una columna de la tabla destino.' al evaluar una expresi EnC:>243< n.
-ERROR 42X04: La columna 'COLUMN11' no est EnC:>225<  en ninguna tabla de la lista FROM o aparece en una especificaci EnC:>243< n de uni EnC:>243< n y est EnC:>225<  fuera del  EnC:>225< mbito de la especificaci EnC:>243< n de uni EnC:>243< n o aparece en una cl EnC:>225< usula HAVING y no est EnC:>225<  en la lista GROUP BY.  Si se trata de una sentencia CREATE o ALTER TABLE entonces 'COLUMN11' no es una columna de la tabla destino.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: La columna 'COLUMN11' no est EnC:>225<  en ninguna tabla de la lista FROM o aparece en una especificaci EnC:>243< n de uni EnC:>243< n y est EnC:>225<  fuera del  EnC:>225< mbito de la especificaci EnC:>243< n de uni EnC:>243< n o bien aparece en una cl EnC:>225< usula HAVING y no est EnC:>225<  en la lista GROUP BY. Si se trata de una sentencia CREATE o ALTER TABLE entonces 'COLUMN11' no es una columna de la tabla destino.' al evaluar una expresi EnC:>243< n.
+ERROR 42X04: La columna 'COLUMN11' no est EnC:>225<  en ninguna tabla de la lista FROM o aparece en una especificaci EnC:>243< n de uni EnC:>243< n y est EnC:>225<  fuera del  EnC:>225< mbito de la especificaci EnC:>243< n de uni EnC:>243< n o bien aparece en una cl EnC:>225< usula HAVING y no est EnC:>225<  en la lista GROUP BY. Si se trata de una sentencia CREATE o ALTER TABLE entonces 'COLUMN11' no es una columna de la tabla destino.
 ij> --repeat the above type cases with empty file and minor variation to paramters
 delete from t3 ;
 12 rows inserted/updated/deleted
@@ -258,11 +258,11 @@ ij> --import data column names are incorrect
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3, X4', null, 
                                  'extinout/t3.dat' , 
                                  ';', '^', 'utf-16', 1) ;
-ERROR XIE08: No hay ninguna columna de nombre: X1
+ERROR XIE08: No existe una columna denominada: X1.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3', '1,2,3,4', 
                                  'extinout/t3.dat' , 
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<     ';', '^', 'utf-16', 1) ;
-ERROR XIE08: No hay ninguna columna de nombre: X1
+ERROR XIE08: No existe una columna denominada: X1.  
 ij> --import data insert column names count < column indexes does not match
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3', null, 
                                  'extinout/t3.dat' , 
@@ -291,18 +291,18 @@ ij> create table ntype1(bt BLOB(1024) , a int);
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
                                  null, null, null) ;
-ERROR XIE0B: La columna 'CT' de la tabla de tipo CLOB no recibe soporte de import/export.
+ERROR XIE0B: La columna CT de la tabla de tipo CLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
 ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.ntype1',
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<    'extinout/ntype.dat' , 
                                    null, null, null) ;
-ERROR XIE0B: La columna 'BT' de la tabla de tipo BLOB no recibe soporte de import/export.
+ERROR XIE0B: La columna BT de la tabla de tipo BLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0B: La columna 'CT' de la tabla de tipo CLOB no recibe soporte de import/export.
+ERROR XIE0B: La columna CT de la tabla de tipo CLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'NTYPE1' , null , null, 
                                  'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0B: La columna 'BT' de la tabla de tipo BLOB no recibe soporte de import/export.
+ERROR XIE0B: La columna BT de la tabla de tipo BLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
 ij> --import should aquire a lock on the table
 create table parent(a int not null primary key);
 0 rows inserted/updated/deleted
@@ -323,8 +323,8 @@ ij(C2)> --following import should fail with lock time out
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '5');
 0 rows inserted/updated/deleted
 ij(C2)> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'PARENT', 'extinout/parent.del',null, null, null,1);
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: La tabla 'IEP.PARENT' no puede bloquearse en modalidad 'EXCLUSIVE'.' al evaluar una expresi EnC:>243< n.
-ERROR X0X02: La tabla 'IEP.PARENT' no puede bloquearse en modalidad 'EXCLUSIVE'.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: La tabla 'IEP.PARENT' no se puede bloquear en modalidad 'EXCLUSIVE'.' al evaluar una expresi EnC:>243< n.
+ERROR X0X02: La tabla 'IEP.PARENT' no se puede bloquear en modalidad 'EXCLUSIVE'.
 ERROR 40XL1: No se ha podido obtener un bloqueo dentro del tiempo solicitado
 ij(C2)> disconnect c1;
 ij(C2)> disconnect c2;
