@@ -100,54 +100,6 @@ njcL3Dmrk2xcuaQBRUk+uIiyGJfM
 =C/fM
 -----END PGP PUBLIC KEY BLOCK-----
 
-pub  1024D/B1669287 2004-08-11 Katherine Marsden <kmarsden@Sourcery.Org>
-sig 3       B1669287 2004-08-11   Katherine Marsden <kmarsden@Sourcery.Org>
-sig 3       AB821FBC 2004-08-12   Samuel Andrew McIntyre (Apache Derby Project) <fuzzylogic@nonintuitive.com>
-sig 3       AB1B7EE4 2004-08-13   Daniel John Debrunner <djd@debrunners.com>
-sig 3       99586C26 2004-08-26   Jean T. Anderson <jta@bristowhill.com>
-sig 3       8E8367B1 2004-08-27   Satheesh Bandaram (Apache Derby Project) <satheesh@Sourcery.Org>
-sig 3       21EA3ECD 2004-08-27   Mike Matrigali <mikem_app@sbcglobal.net>
-sub  2048g/8DB2F79B 2004-08-11
-sig         B1669287 2004-08-11   Katherine Marsden <kmarsden@Sourcery.Org>
-
------BEGIN PGP PUBLIC KEY BLOCK-----
-Version: GnuPG v1.2.4 (Darwin)
-
-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
-=ObfG
------END PGP PUBLIC KEY BLOCK-----
-
 pub  1024D/21EA3ECD 2004-08-27 Mike Matrigali <mikem_app@sbcglobal.net>
 sig 3       21EA3ECD 2004-08-27   Mike Matrigali <mikem_app@sbcglobal.net>
 sig 3       AB821FBC 2004-08-28   Samuel Andrew McIntyre (Apache Derby Project) <fuzzylogic@nonintuitive.com>
@@ -278,4 +230,56 @@ gtBzxOR7lwjo9Pjp6ZwxrZg6M2al1ynAvITZv6egM33oRMJoMYhJBBgRAgAJBQJB
 HoMUAhsMAAoJEBdC+ruZWGwmXzAAoKCTDi9b+/wCMuWSDnmeq5H5uEYlAJ9x2C0B
 wkrZTEJZy3Hta6ECTWSNRQ==
 =Pgt+
+-----END PGP PUBLIC KEY BLOCK-----
+pub  1024D/B1669287 2004-08-11 Kathey Marsden <kmarsden@apache.org>
+sig 3       B1669287 2005-10-21   Kathey Marsden <kmarsden@apache.org>
+uid                            Katherine Marsden <kmarsden@Sourcery.Org>
+sig 3       B1669287 2004-08-11   Kathey Marsden <kmarsden@apache.org>
+sig 3       AB821FBC 2004-08-12   Samuel Andrew McIntyre (Apache Derby Project) <fuzzylogic@nonintuitive.com>
+sig 3       AB1B7EE4 2004-08-13   Daniel John Debrunner <djd@debrunners.com>
+sig 3       99586C26 2004-08-26   Jean T. Anderson <jta@bristowhill.com>
+sig 3       8E8367B1 2004-08-27   Satheesh Bandaram (Apache Derby Project) <satheesh@Sourcery.Org>
+sig 3       21EA3ECD 2004-08-27   Mike Matrigali <mikem_app@sbcglobal.net>
+sub  2048g/8DB2F79B 2004-08-11
+sig         B1669287 2004-08-11   Kathey Marsden <kmarsden@apache.org>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.2.5 (MingW32)
+
+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
+=Y+Qi
 -----END PGP PUBLIC KEY BLOCK-----
