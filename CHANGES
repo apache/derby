@@ -1,31 +1,15 @@
-Changes in  the Derby 10.1.1.1/292391 since the official 10.1 reease, 10.1.1.0/SVN 208786
+The changes in the Derby 10.1.2.0 release since the official 10.1 release include.
 
-Complete Details for version 10.1.1.1 can be veiwed at:
-http://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12310332&styleName=Text&projectId=10594&Create=Create
+    - Globalization of  the 10.1 error messages.
+    - Eclipse 3.1 support
+    - Ability to run on  on MAC  with no special configuration    
+    - Support for direct execution of derbynet.jar using the -jar option
+of the VM.
+    - Fixes to allow databases to be loaded from jars in the classpath
+    - Fixes to improve J2ME  support.
+    - Fixes to improve security manager support.
+    - Fixes to eliminate many other product issues.
 
-** Bug fixes
-    * [DERBY-385] - servlet Back to Main Page link points to csnet instead of derbynet
-    * [DERBY-388] - Intermittent failures when executing UPDATE trigger statements
-    * [DERBY-406] - Client DataSource should not require user property to be set
-    * [DERBY-409] - ClientDataSource setConnectionAttributes("create=true") fails with   "An attempt was made to access a database, mydbcreate=true, which was not found."
-    * [DERBY-410] - ClientDataSource should not require serverName/portNumber to  be set
-    * [DERBY-414] - With Network Client starting an XA transaction resets the isolation level set with setTransactionIsolation
-    * [DERBY-440] - derby.jar has directory (package) entries in it which are not required
-    * [DERBY-447] - getBoolean() throws data conversion exception for DECIMAL type in J2ME/CDC/Foundation
-    * [DERBY-452] - Import/export fails for DECIMAL type in J2ME/Foundation
-    * [DERBY-470] - Exception when using LOCALIZEDDISPLAY with JSR169
-    * [DERBY-476] - Derby UI plug-in version 1.0.0 incompatible with Eclipse 3.1 M6 or higher
-    * [DERBY-485] - SecurityException or LinkageException thrown during loading a class from a database jar incorrectly shuts the engine down.
-    * [DERBY-488] - DatabaseMetaData.getColumns() fails on iSeries JDK 1.4 with verfier error on generated class.
-    * [DERBY-518] - Data type mismatch error for boolean to DECIMAL conversion in J2ME
-    * [DERBY-530] - ClientDriver ignores Properties object in connect(String url, Properties connectionProperties) method
-    * [DERBY-535] - Driver.acceptsURL() for embedded driver incorrectly returns true for a client url like jdbc:derby://
-    * [DERBY-540] - Loading databases from jars in the classpath is broken, databases cannot be found.
-    * [DERBY-559] - With Network Client, user and password attriubtes specified in the url should not  be sent to hte server with the RDBNAM or print with getURL
-    * [DERBY-561] - embedded driver jdbcCompliant() method should return true
-    * [DERBY-566] - Doc bug for saving ij output to a file
+For a complete list of changes in the release see the release notes:
+http://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12310270&styleName=Text&projectId=10594&Create=Create
 
-
-** Improvement
-    * [DERBY-419] - Support direct execution of derbynet.jar using the -jar option of the VM.
-    * [DERBY-468] - Unreserve COUNT keyword, if possible.
