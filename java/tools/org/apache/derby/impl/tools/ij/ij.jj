@@ -1148,6 +1148,24 @@ throws SQLException
 		// JDBC or not.
 		// get the value of the string
 		// n.b. at some point this will have to deal with ''s
+		if (userT != null)
+    		userS = stringValue(userT.image);
+
+    	if (passwordT != null)
+    		passwordS = stringValue(passwordT.image);
+    			
+    	//If ij.dataSource property is set,use DataSource to get the connection
+		String dsName = util.getSystemProperty("ij.dataSource");
+		if (dsName != null){
+    		//Check that t.image does not start with jdbc:
+    		//If it starts with jdbc:, do not use DataSource to get connection
+    		sVal = stringValue(t.image);
+    		if(!sVal.startsWith("jdbc:") ){
+    			theConnection = util.getDataSourceConnection(dsName,userS,passwordS,sVal,false);
+    			return addSession( theConnection, n );
+    		}
+    	}    			
+    	
 		if (simplifiedPath)
 			// url for the database W/O 'jdbc:protocol:', i.e. just a dbname
 			// For example,
@@ -1164,12 +1182,6 @@ throws SQLException
 			if (protocol == null) { throw ijException.noSuchProtocol(p); }
 			sVal = protocol + sVal; 
 		}
-
-		if (userT != null)
-			userS = stringValue(userT.image);
-
-		if (passwordT != null)
-			passwordS = stringValue(passwordT.image);
 
 		// add protocol if no driver matches url
 		boolean noDriver = false;

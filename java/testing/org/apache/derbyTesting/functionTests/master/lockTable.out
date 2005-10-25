@@ -1,8 +1,8 @@
 ij> -- multiuser lock table tests
 disconnect;
-ij> connect 'jdbc:derby:wombat;user=U1' AS C1;
+ij> connect 'wombat;user=U1' AS C1;
 ij> autocommit off;
-ij> connect 'jdbc:derby:wombat;user=U2' AS C2;
+ij> connect 'wombat;user=U2' AS C2;
 ij(C2)> autocommit off;
 ij(C2)> set connection C1;
 ij(C1)> -- create a table and populate it

@@ -1,5 +1,5 @@
 --test to make sure WAIT state is displayed when lock table is printed
-connect 'jdbc:derby:wombat;user=c1' AS C1;
+connect 'wombat;user=c1' AS C1;
 create procedure c1.sleep(t INTEGER) dynamic result sets 0  language java external name 'java.lang.Thread.sleep' parameter style java;
 create table c1.account (a int primary key not null, b int);
 autocommit off;
@@ -13,7 +13,7 @@ commit ;
 call c1.sleep(200);
 
 update c1.account set b = b + 11;
-connect 'jdbc:derby:wombat;user=c2' AS C2;
+connect 'wombat;user=c2' AS C2;
 autocommit off;
 async C2S1 'update c1.account set b = b + 11';
 set connection C1;

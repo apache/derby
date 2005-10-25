@@ -2557,7 +2557,7 @@ ij> -- ** insert implicitConversionsNegative.sql
 -- negate tests for implicit conversions
 -- to/from (var)char
 -- union
-connect 'jdbc:derby:wombat';
+connect 'wombat';
 ij> autocommit on;
 ij> values cast(1 as smallint), 'a';
 ERROR 42X61: Types 'SMALLINT' and 'CHAR' are not UNION compatible.

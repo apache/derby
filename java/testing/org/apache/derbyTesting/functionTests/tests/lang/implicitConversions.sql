@@ -1153,7 +1153,7 @@ disconnect;
 -- to/from (var)char
 
 -- union
-connect 'jdbc:derby:wombat';
+connect 'wombat';
 autocommit on;
 values cast(1 as smallint), 'a';
 values 'a', cast(1 as smallint);

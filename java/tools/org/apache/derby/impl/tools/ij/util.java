@@ -335,29 +335,95 @@ public final class util implements java.security.PrivilegedAction {
     private static final Class[] INT_P = { Integer.TYPE };
 
 
-    static public void setupDataSource(Object ds) throws Exception {
+    /**
+     * Sets up a data source with values specified in ij.dataSource.* properties or
+     * passed as parameters of this method
+     * 
+     * @param ds DataSource object
+     * @param dbName Database Name
+     * @param firstTime If firstTime is false, ij.dataSource.createDatabase and ij.dataSource.databaseName 
+     * properties will not be used. The value in parameter dbName will be used instead of 
+     * ij.dataSource.databaseName.
+     * 
+     * @throws Exception
+     */
+    static public void setupDataSource(Object ds,String dbName,boolean firstTime) throws Exception {
 	// Loop over set methods on Datasource object, if there is a property
-	// then call the method with corresponding value.
-	java.lang.reflect.Method[] methods = ds.getClass().getMethods();
+	// then call the method with corresponding value. Call setCreateDatabase based on
+    //parameter create. 	
+   java.lang.reflect.Method[] methods = ds.getClass().getMethods();
 	for (int i = 0; i < methods.length; i++) {
 	    java.lang.reflect.Method m = methods[i];
 	    String name = m.getName();
+	    
 	    if (name.startsWith("set") && (name.length() > "set".length())) {
-		String property = name.substring("set".length()); // setXyyyZwww
-		property = "ij.dataSource."+property.substring(0,1).toLowerCase(java.util.Locale.ENGLISH)+ property.substring(1); // xyyyZwww
-		String value = util.getSystemProperty(property);
-		//System.out.println("setupDateSource: method="+name+" property="+property+" value="+((value==null)?"null":value));
-		if (value != null) {
-		    try {
-			// call string method
-			m.invoke(ds, new Object[] {value});
-		    } catch (Throwable ignore) {
-			// failed, assume it's an integer parameter
-			m.invoke(ds, new Object[] {Integer.valueOf(value)});
-		    }
-		}
+	     	//Check if setCreateDatabase has to be called based on create parameter
+	    	if(name.equals("setCreateDatabase") && !firstTime)
+	    		continue;
+	    	
+	    	String property = name.substring("set".length()); // setXyyyZwww
+	    	property = "ij.dataSource."+property.substring(0,1).toLowerCase(java.util.Locale.ENGLISH)+ property.substring(1); // xyyyZwww
+	    	String value = util.getSystemProperty(property);
+	    	if(name.equals("setDatabaseName") && !firstTime)
+	    		value = dbName;
+	    	if (value != null) {
+	    		try {
+	    			// call string method
+	    			m.invoke(ds, new Object[] {value});
+	    		} catch (Throwable ignore) {
+	    			// failed, assume it's an integer parameter
+	    			m.invoke(ds, new Object[] {Integer.valueOf(value)});
+	    		}
+	    	}
 	    }
 	}
+    }
+    
+    /**
+     * Returns a connection obtained using the DataSource. This method will be called when ij.dataSource
+     * property is set. It uses ij.dataSource.* properties to get details for the connection. 
+     * 
+     * @param dsName Data Source name
+     * @param user User name
+     * @param password Password
+     * @param dbName Database Name
+     * @param firstTime Indicates if the method is called first time. This is passed to setupDataSource 
+     * method.
+     *   
+     * @return
+     * @throws SQLException
+     */
+    public static Connection getDataSourceConnection(String dsName,String user,String password,
+    												String dbName,boolean firstTime) throws SQLException{
+		// Get a new proxied connection through DataSource
+		Object ds = null; // really javax.sql.DataSource
+		try {
+			
+		    Class dc = Class.forName(dsName);
+		    ds = dc.newInstance();
+		    
+		    // set datasource properties
+		    setupDataSource(ds,dbName,firstTime);	   
+
+		    // Java method call "by hand" {  con = ds.getConnection(); }
+		    // or con = ds.getConnection(user, password)
+		    	
+			java.lang.reflect.Method m = 
+				user == null ? dc.getMethod("getConnection", null) :
+					 dc.getMethod("getConnection", DS_GET_CONN_TYPES);
+				
+			return (java.sql.Connection) m.invoke(ds,
+					 user == null ? null : new String[] {user, password});
+		} catch (InvocationTargetException ite)
+		{
+			if (ite.getTargetException() instanceof SQLException)
+				throw (SQLException) ite.getTargetException();
+			ite.printStackTrace(System.out);
+		} catch (Exception e)
+		{
+			e.printStackTrace(System.out);
+		}
+		return null;
     }
 
 	/**
@@ -433,37 +499,11 @@ public final class util implements java.security.PrivilegedAction {
 	    String dsName = util.getSystemProperty("ij.dataSource");
 	    if (dsName == null)
 	    	return null;
-
-		// Get a new proxied connection through DataSource
-		Object ds = null; // really javax.sql.DataSource
-		try {
-			
-		    Class dc = Class.forName(dsName);
-		    ds = dc.newInstance();
-		    
-		    // set datasource properties
-		    setupDataSource(ds);	   
-
-		    // Java method call "by hand" {  con = ds.getConnection(); }
-		    // or con = ds.getConnection(user, password)
-		    	
-			java.lang.reflect.Method m = 
-				user == null ? dc.getMethod("getConnection", null) :
-					 dc.getMethod("getConnection", DS_GET_CONN_TYPES);
-				
-			return (java.sql.Connection) m.invoke(ds,
-					 user == null ? null : new String[] {user, password});
-		} catch (InvocationTargetException ite)
-		{
-			if (ite.getTargetException() instanceof SQLException)
-				throw (SQLException) ite.getTargetException();
-			ite.printStackTrace(System.out);
-		} catch (Exception e)
-		{
-			e.printStackTrace(System.out);
-		}
-		
-		return null;
+	    
+	    //First connection - pass firstTime=true, dbName=null. For database name, 
+	    //value in ij.dataSource.databaseName will be used. 
+	    con = getDataSourceConnection(dsName,user,password,null,true);
+	    return con;
    }
 
 
