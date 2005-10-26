@@ -120,7 +120,7 @@ public class MultiTest
 		suite.setRoot(inputDir);
 		suite.init();
 	
-		log = openFile(outputDir, testName, ".log");
+		log = openFile(outputDir, testName + ".log");
 
 		try
 		{
@@ -143,7 +143,7 @@ public class MultiTest
 			String tester = "Tester" + (i+1);
 			try 
 			{
-				LocalizedOutput out = openFile(outputDir, tester, ".out");
+				LocalizedOutput out = openFile(outputDir, tester + ".out");
 				testers[i] = new mtTester(tester, suite, out, log);
 			} catch (IOException e) {
 				System.out.println("MultiTest ERROR: unable open output file "+e);
@@ -362,31 +362,13 @@ public class MultiTest
 	** Figure out the name of the log file and open
 	** it 
 	*/
-	private static LocalizedOutput openFile(String dir, String fileName, String suffix) 
+	private static LocalizedOutput openFile(String dir, String fileName) 
 			throws IOException
 	{
-		String filePath;
-		String base;
-		int	dotSpot;
-		String newFile;
-		filePath = (dir == null) ? fileName : (dir + "/" + fileName);
+		
+		java.io.File file = new java.io.File(dir, fileName);
 
-		if (suffix != null)
-		{
-			dotSpot = filePath.lastIndexOf(".");
-			if (dotSpot == -1)
-			{
-				dotSpot = filePath.length();
-			}
-
-			base = filePath.substring(0, dotSpot);
-			newFile = base + suffix;
-		}
-		else
-		{
-			newFile = filePath;
-		}	
-		return new LocalizedOutput(new FileOutputStream(newFile));
+		return new LocalizedOutput(new FileOutputStream(file));
 	}
 	/**
 	** Sequentially run scripts
@@ -409,8 +391,11 @@ public class MultiTest
 		while (e.hasMoreElements())
 		{
 			testCase = (mtTestCase)e.nextElement();
-			System.out.println("...running "+descr+" via "+testCase.getFile());	
-			out = openFile(outputDir, testCase.getFile(), ".out");
+			String testName = testCase.getFile();
+			System.out.println("...running "+descr+" via "+testName);
+			String logFileName = 
+				testName.substring(0, testName.lastIndexOf('.'));
+			out = openFile(outputDir, logFileName + ".out");
 			in = testCase.initialize(inputDir);
 			testCase.runMe(log, out, in);
 		}
