@@ -194,10 +194,14 @@ ij> -- Replace with a signed jar
 CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2s.jar', 'EMC.MAIL_APP');
 0 rows inserted/updated/deleted
 ij> VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
-ERROR XJ001: Java exception: 'java.security.NoSuchAlgorithmException: SHA1PRNG: java.lang.Error'.
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CN=EMC CTO,O=Easy Mail Company,OU=EMC APP,C=US                                                                                                                                                                                                                                                              
 ij> -- other jar should not be signed
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
-ERROR 40XT0: An internal error was identified by RawStore module.
+1                                                                                                                                                                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL                                                                                                                                                                                                                                                                                                        
 ij> -- Jar up this database (wombat) for use in database in a jar testing
 -- at the end of this script.
 disconnect;
@@ -300,7 +304,7 @@ ij> -- same set as dcl.sql for reading resources
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
 1                                                                                                                                                                                                                                                                                                           
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NULL                                                                                                                                                                                                                                                                                                        
+CN=EMC CTO,O=Easy Mail Company,OU=EMC APP,C=US                                                                                                                                                                                                                                                              
 ij> -- not signed
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
 1                                                                                                                                                                                                                                                                                                           
@@ -369,7 +373,7 @@ ij> -- same set as dcl.sql for reading resources
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
 1                                                                                                                                                                                                                                                                                                           
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NULL                                                                                                                                                                                                                                                                                                        
+CN=EMC CTO,O=Easy Mail Company,OU=EMC APP,C=US                                                                                                                                                                                                                                                              
 ij> -- not signed
 VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.addon.vendor.util');
 1                                                                                                                                                                                                                                                                                                           
