@@ -2483,6 +2483,14 @@ ij> values cast ('-1e--1' as DECIMAL(6,2));
 1        
 ---------
 ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('-1e+-1' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
+ij> values cast ('-1e+-1' as DECIMAL(6,2));
+1        
+---------
+ERROR 22018: Invalid character string format for type DECIMAL.
 ij> values cast ('1.0e' as DECIMAL(6,2));
 1        
 ---------
