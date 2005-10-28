@@ -1,244 +1,80 @@
 APACHE DERBY STATUS:
 Last modified at [$Date$] by $Author$.
 
-Web site: http://incubator.apache.org/derby/
+Web site: http://db.apache.org/derby/
 
-Incubator Status
+Project Status
 
   Description
 
-  "Derby" is a snapshot of the IBM's Cloudscape Java relational database. IBM is
-  opening the code by contributing it to The Apache Software Foundation and 
-  basing future versions of IBM Cloudscape on the Apache-managed code.
+  "Derby" began as a snapshot of the IBM's Cloudscape Java relational database.
+  IBM contributed the code to The Apache Software Foundation and
+  bases future versions of IBM Cloudscape on the Apache-managed code.
 
-  To participate in the Derby podling, you should join the mailing list. Just 
-  send an empty message to derby-dev-subscribe@db.apache.org .
+  To participate in Derby, you should join the mailing list. Just
+  send an empty message to derby-dev-subscribe@db.apache.org.
 
-  The initial goal of the project while in incubation is to build a viable 
-  developer community around the codebase.
+  Derby graduated from incubation in July, 2005 and is now a
+  full-fledged Apache DB project..
 
-  The second goal of Derby-in-incubation is to successfully produce a release. 
-  Since Derby is in incubation, such a release would not have formal standing; 
-  it will serve as a proof-of-concept to demonstrate to the developers' and 
-  incubator's satisfaction that this aspect of the project is health and 
-  understood.
 
 Project info
 
-  * The Apache DB project will own the Derby subproject, and the subproject will
-    follow the Apache DB PMC's direction. Significant contributors to this sub-
+  * The Apache DB project owns the Derby subproject, and the subproject
+    follows the Apache DB PMC's direction. Significant contributors to this sub-
     project (for example, after a significant interval of sustained
     contribution) will be proposed for commit access to the codebase.
 
-  * The Derby sub-project's modules will be available as distinct and discrete downloads.
+  * The Derby sub-project's modules will be available as distinct and discrete
+    downloads.
 
-Detailed References:
- 
-item            type      reference
-Status file     www       http://incubator.apache.org/projects/derby.html
-Website         www       http://incubator.apache.org/derby/
-Mailing list    dev       derby-dev@db.apache.org
-Mailing list    users     derby-user@db.apache.org
-Source code     SVN       /repos/asf/incubator/derby/code/trunk/
-Mentor          coar      Ken Coar (CLA on file)
-Committers      jta       Jean Anderson (CLA on file)
-Committers      satheesh  Satheesh Bandaram (CLA on file)
-Committers      jboynes   Jeremy Boynes (CLA on file)
-Committers      djd       Daniel Debrunner (CLA on file)
-Committers      kmarsden  Katherine Marsden (CLA on file)
-Committers      mikem     Mike Matrigali (CLA on file)
-Committers      mcintyre  Samuel McIntyre (CLA on file)
-Committers      coar      Ken Coar (CLA on file)
-Committers                Tomohito Nakayama (CLA on file)
+	
+Releases from the 10.1 branch:
 
-Completed tasks are shown by the completion date (YYYY-MM-dd).
-Incubation status reports
-
-    * none yet
-
-Incubation work items
-
-Project Setup
-
-Identify the codebase
-
-date        item
-2004-08-30  If applicable, make sure that any associated name does not already
-            exist and check www.nameprotect.com to be sure that the name is not
-            already trademarked for an existing software product.
-DONE        If request from an existing Apache project to adopt an external
-            package, then ask the Apache project for the cvs module and mail
-            address names.
-DONE        If request from outside Apache to enter an existing Apache project,
-            then post a message to that project for them to decide on 
-            acceptance.
-N/A         If request from anywhere to become a stand-alone PMC, then assess
-            the fit with the ASF, and create the lists and modules under the
-            incubator address/module names if accepted.
-
-Copyright
-
-date        item
-2004-08-26  Check and make sure that the papers that transfer rights to the ASF
-            been received. It is only necessary to transfer rights for the
-            package, the core code, and any new code produced by the project.
-2005-01-10  Check and make sure that the files that have been donated have been
-            updated to reflect the new ASF copyright.
-
-Verify distribution rights
-
-date        item
-2004-10-12  Check that all active committers have a signed CLA on record.
-2004-10-12  Remind active committers that they are responsible for ensuring that
-            a Corporate CLA is recorded if such is is required to authorize
-            their contributions under their individual CLA.
-2004-10-12  Check and make sure that for all items included with the
-            distribution that is not under the Apache license, we have the right
-            to combine with Apache-licensed code and redistribute.
-2004-10-12  Check and make sure that all items depended upon by the project is
-            covered by one or more of the following approved licenses: Apache,
-            BSD, Artistic, MIT/X, MIT/W3C, MPL 1.1, or something with
-            essentially the same terms.
-
-Establish a list of active committers !
-
-status  item
-DONE    Check that all active committers have submitted a contributors
-        agreement.
-DONE    Add all active committers in the STATUS file.
-DONE    Ask root for the creation of committers' accounts on cvs.apache.org.
-
-Infrastructure !
-
-status	item
-DONE	Ask infrastructure to create source repository modules and grant the
-        committers karma.
-DONE    Ask infrastructure to set up and archive Mailing lists.
-DONE    Decide about and then ask infrastructure to setup an issuetracking
-        system (Bugzilla, Scarab, Jira).
-DONE    Migrate the project to our infrastructure.
-
-Generally, the result of checking off these items will be a Software Grant, CLA,
-and Corporate CLA for ASF licensed code, which must have no dependencies upon
-items whose licenses that are incompatible with the Apache License.
-
-Licensing awareness
-
-DONE - Are all licensing, trademark, credit issues being taken care of and
-       acknowleged by all committers?
-
-Project Goals during Incubation
- 
-Build independent development community
-* 221 subscribers to dev list (12.68 posts/day)
-* 282 subscribers to user list (5.67 posts/day)
-* Added one committer during incubation (jboynes)
-* PPMC has adopted a plan to actively build the developer community
-
-Produce a release
-* 2004-12-06 10.0.2.1 release approval voted
-* 2004-12-06 SVN tag created
-             http://svn.apache.org/repos/asf/incubator/derby/code/tags/10.0.2.1
-
-Exit
-
-Things to check for before voting the project out.
-
-Organizational acceptance of responsibility for the project
-Has the receiving PMC voted to accept it? **YES**
-
-Incubator sign-off
-
-Has the Incubator decided that the project has accomplished all of the above
-tasks?
-
-
-Releases:
-
- * 10.0.2.1 : Released 12/06/2004
- * 10.1.0.0 : In development
+ * 10.1.2.1 : In development
+ * 10.1.2.0 : Unreleased
+ * 10.1.1.2 : Unreleased
+ * 10.1.1.1 : Snapshot, posted 10/5/2005
+ * 10.1.1.0 : Released 8/3/2005
 
 PENDING ISSUES
 ==============
 
-None.
+ The 10.1.2.x release is currently blocked by the following issues:
+
+ * DERBY-657: Release archives should have executable bits set for scripts
+              and text files should have proper line endings.
+              http://issues.apache.org/jira/browse/DERBY-657
+
+ * DERBY-652: Documentation and demos have incubator references
+              http://issues.apache.org/jira/browse/DERBY-652
+
+ The first 10.1.2.x will be 10.1.2.1 if no further showstopper issues are
+ found.
 
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
-[VOTE] Re-vote for Derby docs in DITA format
-
-  Jeff Levitt called for a vote to to decide whether to use DITA source files
-  for the Derby documentation, or to continue to look for other options.
-  This would allow us the project to create PDF's, single html files for each
-  document, or dynamically update indexes as opposed to the current HTML source.
-
-  Passed with seven +1 votes.
-
-[VOTE] Reject tally of logo votes
-
-  Due to irregularities in the voting for the Derby Logo Contest, Jean
-  Anderson called for a vote to reject the tally of votes and restart
-  the contest at a later date.
-
-[VOTE] to accept Derby Network Client contribution
-
-  On April 18, 2005, Satheesh Bandaram announced the availability of a new
-  open source Network Client Driver for the Derby Network Server, replacing
-  the need to use the IBM DB2 Universal JDBC Driver (JCC) as the client to
-  connect to the Derby Network Server.
-
-  Passed with nine +1 votes.
-
-[VOTE] Network client driver should match embedded where possible for
-       implementation specific behaviour.
-
-  In order to create a seamless transition from embedded to client, Kathey
-  Marsden called for a vote to agree that the client driver behavior should be
-  changed to match the embedded wherever possible.
-
-  Passed with ten +1 votes.
-
-[VOTE] to accept Derby UI and Help plugins for Eclipse
-
-  On May 13, 2005, Rajesh Kartha announced that the source for the UI components
-  for Eclipse that had been previously available as the IBM Integration plugin
-  for Derby would be contributed to the Derby project and called for a vote to
-  accept it.
-
-  Passed with three +1 votes.
-
-[VOTE] to accept Tomohito Nakayama as a committer
-  Passed with +1 votes from Jeremy Boynes, Jean T Anderson,
-  Satheesh Bandaram, Brian McAllister, Mike Matrigali,
-  Andrew McIntyre, Kathey Marsden
 
 OTHER NEWS
 ==========
 
-The Derby Logo contest has been restarted. New submissions for logos can be
-attached to JIRA entry Derby-297.
+ The 10.1 branch was created on 6/10/2005 at SVN revision 189890.
 
-http://issues.apache.org/jira/browse/DERBY-297
+ The 10.1 branch can be checked out of Subversion with the following
+ command:
+
+ svn co https://svn.apache.org/repos/asf/db/derby/branches/10.1/ 
 
 
 RELEASE STATUS
 ==============
 
-Work for A release that includes the new Network Client Driver, 10.1, is 
-underway.
+ A 10.1.2.x release is underway. A full list of changes from the original
+ 10.1.1.0 release to 10.1.2.0 can be found here:
 
-Any release must be approved by the Incubator PMC and must clearly be marked as
-an incubator release, according to the Apache Incubator guidelines:
+ http://issues.apache.org/jira/secure/ReleaseNote.jspa?version=12310270&styleName=Html&projectId=10594&Create=Create
 
-http://incubator.apache.org/incubation/Incubation_Policy.html#Releases%0A
-
-Bugs which need to be resolved before the 10.1 release can occur are being
-tracked in JIRA. You can see the current status at:
-
-http://issues.apache.org/jira/browse/DERBY?report=com.atlassian.jira.plugin.system.project:roadmap-panel
-
-Open showstoppers:
-
-  DERBY-217: issue with BLOBs and batch updates in 10.1.0.0
-
+ A 10.1.2.0 release candidate was posted on 10/22/2005. Several issues were
+ found with the release candidate. The remaining issues are listed in the
+ pending issues section above.
