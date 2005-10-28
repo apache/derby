@@ -19,23 +19,23 @@ I. Creating the Apache Derby UI and Help Plug-in projects:
    Refer to the detailed instructions on readying your environment
    to check out any Derby source here: 
 
-   http://incubator.apache.org/derby/derby_downloads.html
+   http://db.apache.org/derby/derby_downloads.html
 
    To check out the entire development trunk use this command:
 
-   svn checkout https://svn.apache.org/repos/asf/incubator/derby/code/trunk/
+   svn checkout https://svn.apache.org/repos/asf/db/derby/code/trunk/
 
    This includes the source for both the UI and Help plugins.  If you want to
    check out only the UI and Help plugins, and not the entire Derby source code 
    issue this command instead:
 
-   svn checkout https://svn.apache.org/repos/asf/incubator/derby/code/trunk/plugins
+   svn checkout https://svn.apache.org/repos/asf/db/derby/code/trunk/plugins
 
   
 2) Install Eclipse 3.x and the JDK needed
 
 3) Install the Apache Derby 10.1.0 Eclipse Core plug-in from:
-   http://incubator.apache.org/derby/derby_downloads.html
+   http://db.apache.org/derby/derby_downloads.html
 
    It is available as a zip file:
 

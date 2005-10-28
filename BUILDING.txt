@@ -709,9 +709,15 @@ derby.storage.fileSyncTransactionLog=true
 
 The derby.properties file should be located in your derby.system.home 
 directory. For more information, see:
- 
-http://incubator.apache.org/derby/manuals/tuning/perf14.html#HDRSII-SETPROP-16827
+
+http://db.apache.org/derby/docs/dev/tuning/rtunproper32066.html 
 
 While this bug has been fixed in Mac OS X 10.4, please be aware that
 Derby applications that may be deployed on Mac OS X 10.3 will need the
 workaround described above to create or modify a Derby database.
+
+NOTE: A workaround for this issue has been committed to versions of
+Derby from 10.1.2.0 onward. It is not necessary to set the
+derby.storage.fileSyncTransactionLog property for versions of Derby
+newer than 10.1.2.0 to work properly on the affected VMs.
+
