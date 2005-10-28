@@ -134,6 +134,10 @@ public class procedure
 		statementExceptionExpected(s, "create procedure missing07() external name 'goo.bar'");
 		statementExceptionExpected(s, "create procedure missing08() dynamic result sets 1");
 		//statementExceptionExpected(s, "create procedure missing09() specific name fred");
+		
+		// RETURNS NULL ON NULL INPUT not allowed in procedures.
+		statementExceptionExpected(s, "create procedure nullinput2() returns null on null input language java parameter style java external name 'foo.bar'");
+		
 
 
 		// no BLOB/CLOB/ long parameters

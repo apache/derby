@@ -155,8 +155,16 @@ import java.lang.Character;
 public class SQLParser
 {
 	private static final String[] SAVEPOINT_CLAUSE_NAMES = {"UNIQUE", "ON ROLLBACK RETAIN LOCKS", "ON ROLLBACK RETAIN CURSORS"};
-	private static final String[] PROCEDURE_CLAUSE_NAMES =
+	private static final String[] ROUTINE_CLAUSE_NAMES =
 		{null, "SPECIFIC", "RESULT SET", "LANGUAGE", "EXTERNAL NAME", "PARAMETER STYLE", "SQL", "ON NULL INPUT"};
+	/**
+	   Clauses required for Java routines. Numbers correspond
+	   to offsets in ROUTINE_CLAUSE_NAMES.
+	   3 - "LANGUAGE"
+	   4 - "EXTERNAL NAME"
+	   5 - "PARAMETER STYLE"
+	*/
+	private static final int[] JAVA_ROUTINE_CLAUSES = {3,4,5};
 	private static final String[] TEMPORARY_TABLE_CLAUSE_NAMES = {"NOT LOGGED", "ON COMMIT", "ON ROLLBACK"};
 	/* The default length of a char or bit if the length is omitted */
 	private static final int	DEFAULT_STRING_COLUMN_LENGTH = 1;
@@ -1559,6 +1567,27 @@ public class SQLParser
         return (ValueNode) nodeFactory.getNode( C_NodeTypes.INT_CONSTANT_NODE,
                                                 ReuseFactory.getInteger( intervalType),
                                                 getContextManager());
+    }
+    
+    /**
+        Check to see if the required claues have been added
+        to a procedure or function defintion.
+        
+        @param required int array of require clauses
+        @param the array of declared clauses.
+    */
+    void checkRequiredRoutineClause(int[] required, Object[] clauses)
+        throws StandardException
+    {
+        for (int i = 0; i < required.length; i++)
+        {
+            int re = required[i];
+            if (clauses[re] == null)
+            {
+                throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR,
+				 ROUTINE_CLAUSE_NAMES[re]);
+		    }
+		}
     }
 }
 
@@ -9016,9 +9045,7 @@ procedureDefinition() throws StandardException :
 		procedureElements[0] = procedureParameterList()
 		( routineElement(true, procedureElements) ) +
 		{
-			// some of the procedure elements are mandatory
-		    if ((procedureElements[3] == null) || (procedureElements[4] == null) || (procedureElements[5] == null))
-				throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "MISSING ELEMENT");
+		    checkRequiredRoutineClause(JAVA_ROUTINE_CLAUSES, procedureElements);
 
 			return getCreateAliasNode(
 							procedureName,
@@ -9063,8 +9090,7 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 			clauseValue = ReuseFactory.getShort(RoutineAliasInfo.MODIFIES_SQL_DATA); clausePosition = 6;
 		}
 
-	|   clauseValue = calledOnNullInput() {  clausePosition = 7; }
-
+	|   clauseValue = calledOnNullInput(isProcedure) { clausePosition = 7; }
 	)
 
 	{
@@ -9072,7 +9098,7 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 			// check for repeated clause
 			if (routineElements[clausePosition] != null) {
 
-				String which = PROCEDURE_CLAUSE_NAMES[clausePosition];
+				String which = ROUTINE_CLAUSE_NAMES[clausePosition];
 				throw StandardException.newException(SQLState.LANG_DB2_MULTIPLE_ELEMENTS, which);
 			}
 				
@@ -9081,14 +9107,20 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 	}
 }
 
-Boolean calledOnNullInput() :
+Boolean calledOnNullInput(boolean isProcedure) throws StandardException :
 {
 	Boolean calledOnNull;
 }
 {
 	(
 		<CALLED> { calledOnNull = Boolean.TRUE; }
-		| <RETURNS> <NULL> { calledOnNull = Boolean.FALSE; }
+		| <RETURNS> <NULL> {
+		   if (isProcedure)
+		     throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR,
+		             "RETURNS NULL ON NULL INPUT");
+		   
+		   calledOnNull = Boolean.FALSE;
+		}
 		
 	) <ON> <NULL> <INPUT>
 	{
@@ -9184,10 +9216,8 @@ functionDefinition() throws StandardException :
 		<RETURNS> functionElements[8] = dataTypeCommon() 
 		( routineElement(false, functionElements) ) +
 		{
-			// some of the elements are mandatory
-		    if ((functionElements[3] == null) || (functionElements[4] == null) || (functionElements[5] == null))
-				throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "MISSING ELEMENT");
-
+		    checkRequiredRoutineClause(JAVA_ROUTINE_CLAUSES, functionElements);
+		    
 			return getCreateAliasNode(
 							functionName,
 							(String) functionElements[4],

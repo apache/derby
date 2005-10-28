@@ -22,19 +22,21 @@ EXPECTED SQL Exception: (42X01) Syntax error: Encountered "derby_rs_collection" 
 create procedure missing01()
 EXPECTED SQL Exception: (42X01) Syntax error: Encountered "<EOF>" at line 1, column 28.
 create procedure missing02() language java
-EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+EXPECTED SQL Exception: (42X01) Syntax error: EXTERNAL NAME.
 create procedure missing03() language java parameter style java
-EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+EXPECTED SQL Exception: (42X01) Syntax error: EXTERNAL NAME.
 create procedure missing04() language java external name 'foo.bar'
-EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+EXPECTED SQL Exception: (42X01) Syntax error: PARAMETER STYLE.
 create procedure missing05() parameter style java
-EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
 create procedure missing06() parameter style java external name 'foo.bar'
-EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
 create procedure missing07() external name 'goo.bar'
-EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
 create procedure missing08() dynamic result sets 1
-EXPECTED SQL Exception: (42X01) Syntax error: MISSING ELEMENT.
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
+create procedure nullinput2() returns null on null input language java parameter style java external name 'foo.bar'
+EXPECTED SQL Exception: (42X01) Syntax error: RETURNS NULL ON NULL INPUT.
 create procedure NO_BLOB(IN P1 BLOB(3k)) language java parameter style java external name 'no.blob'
 EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
 create procedure NO_CLOB(IN P1 CLOB(3k)) language java parameter style java external name 'no.clob'
