@@ -507,7 +507,7 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(numcol*20));
+				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(numcol*20));
 			}
 			
 			logFactory.flushAll();
@@ -642,7 +642,7 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES,Integer.toString(numcol*20));
+				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES,Integer.toString(numcol*20));
 			}
 
 			logFactory.flushAll();
@@ -1055,7 +1055,7 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, "200");
+				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, "200");
 			}
 			logFactory.flushAll();
 
@@ -1267,7 +1267,7 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(11));
+				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(11));
 			}
 
 			logFactory.flushAll();
@@ -1408,7 +1408,7 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(3));
+				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(3));
 			}
 			logFactory.flushAll();
 
@@ -1547,7 +1547,7 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString((1997/2) + 16));
+				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString((1997/2) + 16));
 			}
 			logFactory.flushAll();
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
@@ -1686,7 +1686,7 @@ public class T_RecoverBadLog extends T_Generic {
 			if(!checksumTest)
 			{
 				SanityManager.DEBUG_SET(LogToFile.TEST_LOG_INCOMPLETE_LOG_WRITE);
-				System.getProperties().put(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(1997+15));
+				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(1997+15));
 			}
 			logFactory.flushAll();
 			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);

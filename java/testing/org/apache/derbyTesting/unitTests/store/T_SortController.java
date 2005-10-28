@@ -67,9 +67,7 @@ public class T_SortController extends T_Generic
 	}
 
 	private void setSortBufferSize(String buf_length) {
-		Properties p = System.getProperties();
-		p.put("derby.storage.sortBufferMax", buf_length);
-		System.setProperties(p);
+		System.setProperty("derby.storage.sortBufferMax", buf_length);
 	}
 
 	/*

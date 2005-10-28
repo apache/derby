@@ -112,6 +112,7 @@ char32703trailingblanks.data
 empty.data
 short.data
 testsqldecimal.sql
+testsqldecimal_app.properties
 testsqldecimal_derby.properties
 TestDurabilityProperty_app.properties
 updatecursorlocks.subsql

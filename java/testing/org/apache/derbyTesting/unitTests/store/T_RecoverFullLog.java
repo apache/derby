@@ -241,7 +241,7 @@ public class T_RecoverFullLog extends T_Generic {
 				if (recoveryFail)
 				{
 					SanityManager.DEBUG_SET(LogToFile.TEST_LOG_FULL);
-					System.getProperties().put(LogToFile.TEST_RECORD_TO_FILL_LOG, "10");
+					System.setProperty(LogToFile.TEST_RECORD_TO_FILL_LOG, "10");
 				}
 
 				if (!Monitor.startPersistentService(testService, startParams))
@@ -684,7 +684,7 @@ public class T_RecoverFullLog extends T_Generic {
 	protected void fillUpLog() throws T_Fail, StandardException
 	{
 		SanityManager.DEBUG_SET(LogToFile.TEST_LOG_FULL);
-		System.getProperties().put(LogToFile.TEST_RECORD_TO_FILL_LOG, "1");
+		System.setProperty(LogToFile.TEST_RECORD_TO_FILL_LOG, "1");
 
 		Transaction t = t_util.t_startTransaction();
 		try
