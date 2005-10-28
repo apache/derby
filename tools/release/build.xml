@@ -38,31 +38,41 @@
     <property name="derby.lib" value="${derby.basename}-lib"/>
     <property name="derby.src" value="${derby.basename}-src"/> 
 
+    <property name="crlf.dir" value="${basedir}/tools/release/crlf"/>
+    <property name="lf.dir" value="${basedir}/tools/release/lf"/>
+    <mkdir dir="${crlf.dir}"/>
+    <mkdir dir="${lf.dir}"/>
+    <fixcrlf srcdir="${basedir}" destdir="${crlf.dir}" eol="crlf"
+             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"/>
+    <fixcrlf srcdir="${basedir}" destdir="${lf.dir}" eol="lf"
+             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"/>
+
   </target>
 
   <!-- bin distribution -->
   <target name="bin" depends="bin.zip,bin.tgz"/>
   <target name="bin.zip" depends="init">    
-	<zip destfile="${release.dir}/${derby.bin}.zip"
-	     compress="true">
+    <zip destfile="${release.dir}/${derby.bin}.zip"
+         compress="true">
       <!-- top-level -->
-      <zipfileset dir="${basedir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
-				  prefix="${derby.bin}/"/>
+      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+                  prefix="${derby.bin}/"/>
       <!-- demo -->
-      <zipfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo"/>
+      <zipfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo" excludes="**/build.xml"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleApp.class"
-		         prefix="${derby.bin}/demo/simple"/>
+                  prefix="${derby.bin}/demo/simple"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
-				 prefix="${derby.bin}/demo/nserverdemo"/>
-	  <zipfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
-		         prefix="${derby.bin}/demo/nserverdemo"/>
+                  prefix="${derby.bin}/demo/nserverdemo"/>
+      <zipfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
+                  prefix="${derby.bin}/demo/nserverdemo"/>
       <!-- docs -->
       <zipfileset dir="${docs.out}" includes="**/*.html"
-		          prefix="${derby.bin}/docs/html"/>
-	  <zipfileset dir="${docs.out}" includes="**/*.pdf"
-	              prefix="${derby.bin}/docs/pdf"/>
+                  prefix="${derby.bin}/docs/html"/>
+      <zipfileset dir="${docs.out}" includes="**/*.pdf"
+                  prefix="${derby.bin}/docs/pdf"/>
       <!-- frameworks -->
-      <zipfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks"/> 
+      <zipfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/*.html"/> 
+      <zipfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/bin/*" filemode="755"/> 
       <!-- javadoc -->
       <zipfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
       <!-- lib -->
@@ -73,25 +83,26 @@
 
   <target name="bin.tgz" depends="init">
     <tar destfile="${release.dir}/${derby.bin}.tar.gz"
-	     compression="gzip" longfile="gnu">
+         compression="gzip" longfile="gnu">
       <!-- top-level -->
-      <tarfileset dir="${basedir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
-				  prefix="${derby.bin}/"/>
+      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+                  prefix="${derby.bin}/"/>
       <!-- demo -->
-      <tarfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo"/>
+      <tarfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo" excludes="**/build.xml"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleApp.class"
-		         prefix="${derby.bin}/demo/simple"/>
+                  prefix="${derby.bin}/demo/simple"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
-				 prefix="${derby.bin}/demo/nserverdemo"/>
-	  <tarfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
-		         prefix="${derby.bin}/demo/nserverdemo"/>
+                  prefix="${derby.bin}/demo/nserverdemo"/>
+      <tarfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
+                  prefix="${derby.bin}/demo/nserverdemo"/>
       <!-- docs -->
       <tarfileset dir="${docs.out}" includes="**/*.html"
 		          prefix="${derby.bin}/docs/html"/>
 	  <tarfileset dir="${docs.out}" includes="**/*.pdf"
 	              prefix="${derby.bin}/docs/pdf"/>
       <!-- frameworks -->
-      <tarfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks"/> 
+      <tarfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/*.html"/> 
+      <tarfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/bin/*" mode="755"/> 
       <!-- javadoc -->
       <tarfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
       <!-- lib -->
@@ -105,7 +116,7 @@
   <target name="lib.zip" depends="init">
     <zip destfile="${release.dir}/${derby.lib}.zip"
 	     compress="true">
-      <zipfileset dir="${basedir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
       			  prefix="${derby.lib}/"/>
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*"/>
@@ -114,7 +125,7 @@
   <target name="lib.tgz">
     <tar destfile="${release.dir}/${derby.lib}.tar.gz"
 	     compression="gzip">
-      <tarfileset dir="${basedir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
       			  prefix="${derby.lib}/"/>
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*"/>
@@ -127,7 +138,7 @@
     <zip destfile="${release.dir}/${derby.src}.zip">
       <zipfileset dir="${basedir}" prefix="${derby.src}"
                   includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/**/maintversion2props.java"/>
+         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties"/>
     </zip>
   </target>
   <target name="src.tgz">
@@ -135,7 +146,7 @@
          compression="gzip" longfile="gnu">
       <tarfileset dir="${basedir}" prefix="${derby.src}"
                   includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/**/maintversion2props.java"/>
+         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties"/>
     </tar>
   </target>
 
