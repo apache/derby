@@ -907,7 +907,7 @@ public class JoinNode extends TableOperatorNode
 			/* If joinClause is a parameter, (where ?), then we assume
 			 * it will be a nullable boolean.
 			 */
-			if (joinClause.isParameterNode())
+			if (joinClause.requiresTypeFromContext())
 			{
 				joinClause.setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, true));
 			}

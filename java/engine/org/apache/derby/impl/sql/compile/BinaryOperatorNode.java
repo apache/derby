@@ -313,26 +313,26 @@ public class BinaryOperatorNode extends ValueNode
 			return bindXMLExists();
 
 		/* Is there a ? parameter on the left? */
-		if (leftOperand.isParameterNode())
+		if (leftOperand.requiresTypeFromContext())
 		{
 			/*
 			** It's an error if both operands are ? parameters.
 			*/
-			if (rightOperand.isParameterNode())
+			if (rightOperand.requiresTypeFromContext())
 			{
 				throw StandardException.newException(SQLState.LANG_BINARY_OPERANDS_BOTH_PARMS, 
 																	operator);
 			}
 
 			/* Set the left operand to the type of right parameter. */
-			((ParameterNode) leftOperand).setDescriptor(rightOperand.getTypeServices());
+			leftOperand.setType(rightOperand.getTypeServices());
 		}
 
 		/* Is there a ? parameter on the right? */
-		if (rightOperand.isParameterNode())
+		if (rightOperand.requiresTypeFromContext())
 		{
 			/* Set the right operand to the type of the left parameter. */
-			((ParameterNode) rightOperand).setDescriptor(leftOperand.getTypeServices());
+			rightOperand.setType(leftOperand.getTypeServices());
 		}
 
 		return genSQLJavaSQLTree();
@@ -382,16 +382,16 @@ public class BinaryOperatorNode extends ValueNode
         }
 
         // Is there a ? parameter on the left?
-        if (leftOperand.isParameterNode())
+        if (leftOperand.requiresTypeFromContext())
         {
             // Set the left operand to be a VARCHAR, which should be
             // long enough to hold the XPath expression.
-            ((ParameterNode) leftOperand).setDescriptor(
+            leftOperand.setType(
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR));
         }
 
         // Is there a ? parameter on the right?
-        if (rightOperand.isParameterNode())
+        if (rightOperand.requiresTypeFromContext())
         {
             // For now, since JDBC has no type defined for XML, we
             // don't allow binding to an XML parameter.
@@ -619,6 +619,7 @@ public class BinaryOperatorNode extends ValueNode
 	//following method is no-op here but in concatenation node, this method is used to check if resultField is null,
 	//and if yes, then we want it to be initialized to NULL SQLxxx type object
 	protected void initializeResultField(ExpressionClassBuilder acb, MethodBuilder mb, LocalField resultField)
+	throws StandardException
 	{
 	}
 

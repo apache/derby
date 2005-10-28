@@ -172,7 +172,8 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 	/** @see JoinStrategy#nonBasePredicateSelectivity */
 	public double nonBasePredicateSelectivity(
 										Optimizable innerTable,
-										OptimizablePredicateList predList) {
+										OptimizablePredicateList predList) 
+	throws StandardException {
 		double retval = 1.0;
 
 		if (predList != null) {

@@ -85,12 +85,19 @@ public class TimestampOperatorNode extends BinaryOperatorNode
 		rightOperand = rightOperand.bindExpression(fromList, subqueryList, 
 			aggregateVector);
 
-        TypeId leftTypeId = leftOperand.getTypeId();
+		//Set the type if there is a parameter involved here 
+		if (leftOperand.requiresTypeFromContext())
+			leftOperand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.DATE));
+		//Set the type if there is a parameter involved here 
+		if (rightOperand.requiresTypeFromContext())
+			rightOperand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIME));
+
+		TypeId leftTypeId = leftOperand.getTypeId();
         TypeId rightTypeId = rightOperand.getTypeId();
-        if( !(leftTypeId.isStringTypeId() || leftTypeId.getJDBCTypeId() == Types.DATE || leftOperand.isParameterNode()))
+        if( !(leftOperand.requiresTypeFromContext() || leftTypeId.isStringTypeId() || leftTypeId.getJDBCTypeId() == Types.DATE))
             throw StandardException.newException(SQLState.LANG_BINARY_OPERATOR_NOT_SUPPORTED, 
                                                  operator, leftTypeId.getSQLTypeName(), rightTypeId.getSQLTypeName());
-        if( !(rightTypeId.isStringTypeId() || rightTypeId.getJDBCTypeId() == Types.TIME || rightOperand.isParameterNode()))
+        if( !(rightOperand.requiresTypeFromContext() || rightTypeId.isStringTypeId() || rightTypeId.getJDBCTypeId() == Types.TIME))
             throw StandardException.newException(SQLState.LANG_BINARY_OPERATOR_NOT_SUPPORTED, 
                                                  operator, leftTypeId.getSQLTypeName(), rightTypeId.getSQLTypeName());
         setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIMESTAMP));

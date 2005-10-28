@@ -645,8 +645,7 @@ public abstract class MethodCallNode extends JavaValueNode
 			{		
 				/* Set the type information in the null constant node */
 				DataTypeDescriptor dts = DataTypeDescriptor.getSQLDataTypeDescriptor(parmTypeNames[i]);
-				((SQLToJavaValueNode)methodParms[i]).value.setDescriptor(
-																	dts);
+				((SQLToJavaValueNode)methodParms[i]).value.setType(dts);
 
 				/* Set the correct java type name */
 				methodParms[i].setJavaTypeName(parmTypeNames[i]);
@@ -1058,7 +1057,7 @@ public abstract class MethodCallNode extends JavaValueNode
 			if (methodParms[index] instanceof SQLToJavaValueNode)
 			{
 				SQLToJavaValueNode stjvn = (SQLToJavaValueNode) methodParms[index];
-				if (stjvn.value.isParameterNode())
+				if (stjvn.value.requiresTypeFromContext())
 				{
 					isParam[index] = true;
 				}

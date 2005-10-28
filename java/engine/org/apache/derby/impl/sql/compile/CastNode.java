@@ -403,7 +403,7 @@ public class CastNode extends ValueNode
 			destCTI = castTarget.getTypeId();
 		}
 
-		if (castOperand.isParameterNode())
+		if (castOperand.requiresTypeFromContext())
 		{
 			bindParameter();
 		}
@@ -819,7 +819,7 @@ public class CastNode extends ValueNode
 	void bindParameter()
 					throws StandardException
 	{
-		((ParameterNode) castOperand).setDescriptor(castTarget);
+		castOperand.setType(castTarget);
 	}
 
 	/**
@@ -887,7 +887,7 @@ public class CastNode extends ValueNode
 		 * They'll get an exception, as expected, if the
 		 * conversion cannot be performed.
 		 */
-		else if (castOperand.isParameterNode())
+		else if (castOperand.requiresTypeFromContext())
 		{
 			sourceCTI = destCTI;
 		}

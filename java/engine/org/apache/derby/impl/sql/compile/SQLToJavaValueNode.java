@@ -103,6 +103,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *
 	  */
 	public String getJavaTypeName()
+	throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
 
@@ -143,15 +144,18 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *	@return	the corresponding JSQLType
 	  *
 	  */
-	public	JSQLType	getJSQLType
-	(
-    )
+	public	JSQLType	getJSQLType	() throws StandardException
 	{
 		if ( jsqlType == null )
 		{
-			if ( value.isParameterNode() ) 
+			if ( value.requiresTypeFromContext()) 
 			{
-				jsqlType = ((ParameterNode) value).getJSQLType();
+  				ParameterNode pn;
+	  			if (value instanceof UnaryOperatorNode) 
+	  				pn = ((UnaryOperatorNode)value).getParameterOperand();
+	  			else
+	  				pn = (ParameterNode) (value);
+				jsqlType = pn.getJSQLType();
 			}
 			else
 			{

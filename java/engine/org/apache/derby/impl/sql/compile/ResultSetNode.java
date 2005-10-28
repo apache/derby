@@ -329,7 +329,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 			ValueNode re = rc.getExpression();
 
-			if (re.isParameterNode())
+			if (re.requiresTypeFromContext())
 			{
 				ResultColumn	typeCol =
 					(ResultColumn) typeColumns.elementAt(index);
@@ -338,8 +338,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 				** We found a ? - set its type to the type of the
 				** corresponding column of the target table.
 				*/
-				((ParameterNode) re).setDescriptor(
-										typeCol.getTypeServices());
+				re.setType(typeCol.getTypeServices());
 			}
 			else if (re instanceof CharConstantNode)
 			{

@@ -381,7 +381,7 @@ public class StaticMethodCallNode extends MethodCallNode
 				}
 
 				boolean isParameterMarker = true;
-				if ((sqlParamNode == null) || !sqlParamNode.isParameterNode())
+				if ((sqlParamNode == null) || !sqlParamNode.requiresTypeFromContext())
 				{
 					if (parameterMode != JDBC30Translation.PARAMETER_MODE_IN) {
 					 
@@ -395,7 +395,11 @@ public class StaticMethodCallNode extends MethodCallNode
 				{
 					if (applicationParameterNumbers == null)
 						applicationParameterNumbers = new int[parameterCount];
-					applicationParameterNumbers[p] = ((ParameterNode) sqlParamNode).getParameterNumber();
+		  			if (sqlParamNode instanceof UnaryOperatorNode) {
+		  				ParameterNode pn = ((UnaryOperatorNode)sqlParamNode).getParameterOperand();
+		  				applicationParameterNumbers[p] = pn.getParameterNumber();
+		  			} else
+						applicationParameterNumbers[p] = ((ParameterNode) sqlParamNode).getParameterNumber();
 				}
 
 				// this is the SQL type of the procedure parameter.
@@ -416,7 +420,7 @@ public class StaticMethodCallNode extends MethodCallNode
 					// type of the procedure parameter.
 					if (sqlParamNode instanceof UntypedNullConstantNode)
 					{
-						sqlParamNode.setDescriptor(paramdtd);
+						sqlParamNode.setType(paramdtd);
 					}
 					else
 					{
@@ -504,7 +508,7 @@ public class StaticMethodCallNode extends MethodCallNode
 				// only force the type for a ? so that the correct type shows up
 				// in parameter meta data
 				if (isParameterMarker)
-					sqlParamNode.setDescriptor(paramdtd);
+					sqlParamNode.setType(paramdtd);
 			}
 
 			if (sigParameterCount != parameterCount) {
@@ -547,7 +551,6 @@ public class StaticMethodCallNode extends MethodCallNode
 	{
 		int parameterMode;
 
-
 		SQLToJavaValueNode sql2j = null;
 		if (methodParms[parameterNumber] instanceof SQLToJavaValueNode)
 			sql2j = (SQLToJavaValueNode) methodParms[parameterNumber];
@@ -562,10 +565,15 @@ public class StaticMethodCallNode extends MethodCallNode
 			parameterMode = JDBC30Translation.PARAMETER_MODE_IN;
 
 			if (sql2j != null) {
-				if (sql2j.getSQLValueNode().isParameterNode()) {
+				if (sql2j.getSQLValueNode().requiresTypeFromContext()) {
+	  				ParameterNode pn;
+		  			if (sql2j.getSQLValueNode() instanceof UnaryOperatorNode) 
+		  				pn = ((UnaryOperatorNode)sql2j.getSQLValueNode()).getParameterOperand();
+		  			else
+		  				pn = (ParameterNode) (sql2j.getSQLValueNode());
 
 					// applicationParameterNumbers is only set up for a procedure.
-					int applicationParameterNumber = ((ParameterNode) (sql2j.getSQLValueNode())).getParameterNumber();
+					int applicationParameterNumber = pn.getParameterNumber();
 
 					String parameterType = methodParameterTypes[parameterNumber];
 

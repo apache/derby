@@ -229,6 +229,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 */
 	public void generateExpression(ExpressionClassBuilder acb,
 											MethodBuilder mb)
+	throws StandardException
 	{
 		/*
 		** Generate the following:

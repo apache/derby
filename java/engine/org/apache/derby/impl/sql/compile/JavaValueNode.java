@@ -74,7 +74,7 @@ public abstract class JavaValueNode extends QueryTreeNode
 	/* Name of field holding receiver value, if any */
 	private LocalField receiverField;
 
-	public boolean isPrimitiveType()
+	public boolean isPrimitiveType() throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
 		
@@ -82,7 +82,7 @@ public abstract class JavaValueNode extends QueryTreeNode
 		else { return ( myType.getCategory() == JSQLType.JAVA_PRIMITIVE ); }
 	}
 
-	public String getJavaTypeName()
+	public String getJavaTypeName() throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
 
@@ -156,9 +156,7 @@ public abstract class JavaValueNode extends QueryTreeNode
 	  *	@return	the corresponding JSQLType
 	  *
 	  */
-	public	JSQLType	getJSQLType
-	(
-    )
+	public	JSQLType	getJSQLType() throws StandardException
 	{ return jsqlType; }
 
 

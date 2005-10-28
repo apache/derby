@@ -184,7 +184,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 			ValueNode			valueNode;
 
 			valueNode = (ValueNode) elementAt(index);
-			if (valueNode.isParameterNode())
+			if (valueNode.requiresTypeFromContext())
 				continue;
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
@@ -240,6 +240,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *			type precendence as the specified value.
 	 */
 	boolean allSamePrecendence(int precedence)
+	throws StandardException
 	{
 		boolean allSame = true;
 		int size = size();
@@ -285,7 +286,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 		for (int index = 0; index < size; index++)
 		{
 			valueNode = (ValueNode) elementAt(index);
-			if (valueNode.isParameterNode())
+			if (valueNode.requiresTypeFromContext())
 				continue;
 
 
@@ -350,6 +351,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *					are nullable.
 	 */
 	public boolean isNullable()
+	throws StandardException
 	{
 		int size = size();
 
@@ -374,7 +376,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			if (((ValueNode) elementAt(index)).isParameterNode())
+			if (((ValueNode) elementAt(index)).requiresTypeFromContext())
 			{
 				return true;
 			}
@@ -393,7 +395,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			if (! (((ValueNode) elementAt(index)).isParameterNode()))
+			if (! (((ValueNode) elementAt(index)).requiresTypeFromContext()))
 			{
 				return false;
 			}
@@ -488,9 +490,9 @@ public class ValueNodeList extends QueryTreeNodeVector
 		for (int index = 0; index < size; index++)
 		{
 			valueNode = (ValueNode) elementAt(index);
-			if (valueNode.isParameterNode())
+			if (valueNode.requiresTypeFromContext())
 			{
-				((ParameterNode) valueNode).setDescriptor(descriptor);
+				valueNode.setType(descriptor);
 			}
 		}
 	}

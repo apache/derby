@@ -164,7 +164,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
 		// pattern must be a string or a parameter
 
-		if (!(leftOperand.isParameterNode()) && !(leftOperand.getTypeId().isStringTypeId()))
+		if (!(leftOperand.requiresTypeFromContext()) && !(leftOperand.getTypeId().isStringTypeId()))
 			throw StandardException.newException(SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE,
 													 "LIKE", "FUNCTION");
 
@@ -177,7 +177,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
 		// escape must be a string or a parameter
 		if ((rightOperand != null) && 
-			!(rightOperand.isParameterNode()) && 
+			!(rightOperand.requiresTypeFromContext()) && 
 			!(rightOperand.getTypeId().isStringTypeId()))
 		{
 			throw StandardException.newException(SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE,
@@ -193,9 +193,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		 *  the left, since it won't match if it is any longer than it.
 		 */
 
-		if (receiver.isParameterNode())
+		if (receiver.requiresTypeFromContext())
 		{
-			((ParameterNode) receiver).setDescriptor(
+			receiver.setType(
 							new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true));
 		}
 
@@ -206,7 +206,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		 *  REMIND: should nullability be copied, or set to true?
 		 */
 
-		if (leftOperand.isParameterNode())
+		if (leftOperand.requiresTypeFromContext())
 		{
 			/*
 			 * Set the pattern to the type of the left parameter, if
@@ -214,11 +214,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 			 */
 			if (receiver.getTypeId().isStringTypeId())
 			{
-				((ParameterNode) leftOperand).setDescriptor(receiver.getTypeServices());
+				leftOperand.setType(receiver.getTypeServices());
 			}
 			else
 			{
-				((ParameterNode) leftOperand).setDescriptor(
+				leftOperand.setType(
 							new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true));
 			}
 		}
@@ -229,7 +229,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		 *  both will be max length.  nullability is set to true.
 		 */
 
-		if (rightOperand != null && rightOperand.isParameterNode())
+		if (rightOperand != null && rightOperand.requiresTypeFromContext())
 		{
 			/*
 			 * Set the pattern to the type of the left parameter, if
@@ -237,11 +237,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 			 */
 			if (receiver.getTypeId().isStringTypeId())
 			{
-				((ParameterNode) rightOperand).setDescriptor(receiver.getTypeServices());
+				rightOperand.setType(receiver.getTypeServices());
 			}
 			else
 			{
-				((ParameterNode) rightOperand).setDescriptor(
+				rightOperand.setType(
 							new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true));
 			}
 		}
@@ -526,7 +526,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		 * beginning of execution.
 		 */
 		if (!(leftOperand instanceof CharConstantNode) &&
-			!(leftOperand.isParameterNode()))
+			!(leftOperand.requiresTypeFromContext()))
 		{
 			return this;
 		}
@@ -604,11 +604,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		   Currently for a national string we do not add a < than operator
 		   since we don't know (?) how to calculate such a string.
 		 */
-		if ( lessThanString != null || ( leftOperand.isParameterNode() &&
+		if ( lessThanString != null || ( leftOperand.requiresTypeFromContext() &&
                                          ! receiver.getTypeId().isNationalStringTypeId() ))
 		{
 			QueryTreeNode likeLTopt;
-			if (leftOperand.isParameterNode())
+			if (leftOperand.requiresTypeFromContext())
 			{
 				likeLTopt = setupOptimizeStringFromParameter(leftOperand, rightOperand,
 								"lessThanStringFromParameter");
@@ -650,7 +650,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		 */
 
 		ValueNode likeGEopt;
-		if (leftOperand.isParameterNode()) {
+		if (leftOperand.requiresTypeFromContext()) {
 
 			// Create an expression off the parameter
 			// new SQLChar(Like.greaterEqualString(?));

@@ -146,8 +146,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 		** for a bit.
 		*/
 
-		((ParameterNode) operand).setDescriptor(
-							DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR));
+		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR));
 	}
 
 	/**
@@ -156,5 +155,15 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 	 */
 	public String getReceiverInterfaceName() {
 	    return ClassName.StringDataValue;
+	}
+
+	/**
+	 * @see ValueNode#requiresTypeFromContext
+	 */
+	public boolean requiresTypeFromContext()
+	{
+	    //should return false because lower(?)/upper(?) are bound to varchar and hence don't
+	    //require their type to be set from the context. 
+	    return false;
 	}
 }

@@ -115,7 +115,7 @@ public class HasVariantValueNodeVisitor implements Visitor
 	{
 		if (node instanceof ValueNode)
 		{
-			if (ignoreParameters && ((ValueNode)node).isParameterNode())
+			if (ignoreParameters && ((ValueNode)node).requiresTypeFromContext())
 				return node;
 				
 			if (((ValueNode)node).getOrderableVariantType() <= variantType)

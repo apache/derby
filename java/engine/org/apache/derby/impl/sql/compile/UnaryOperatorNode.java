@@ -260,6 +260,28 @@ public class UnaryOperatorNode extends ValueNode
 	}
 
 	/**
+	 * Get the parameter operand of this unary operator.
+	 * For the example below, for abs unary operator node, we want to get ?
+	 * select * from t1 where -? = max_cni(abs(-?), sqrt(+?))
+	 * 
+	 * This gets called when ParameterNode is needed to get parameter
+	 * specific information like getDefaultValue(), getParameterNumber() etc 
+	 * 
+	 * @return	The parameter operand of this unary operator else null.
+	 */
+	public ParameterNode getParameterOperand()
+	{
+		if (requiresTypeFromContext() == false)
+			return null;
+		else {
+			UnaryOperatorNode tempUON = this;
+			while (!(tempUON.getOperand() instanceof ParameterNode)) 
+				tempUON = (UnaryOperatorNode)tempUON.getOperand();
+			return (ParameterNode)(tempUON.getOperand());
+		}
+	}
+
+	/**
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
@@ -319,10 +341,14 @@ public class UnaryOperatorNode extends ValueNode
 			return this;
 		}
 
+		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
+		if (operand.requiresTypeFromContext() && ((operator.equals("-") || operator.equals("+"))) && operand.getTypeServices() == null)
+			return this;
+
 		operand = operand.bindExpression(fromList, subqueryList,
 								aggregateVector);
 
-		if (operand.isParameterNode())
+		if (operand.requiresTypeFromContext())
 			bindParameter();
 
 		/* If the operand is not a built-in type, then generate a bound conversion
@@ -533,6 +559,34 @@ public class UnaryOperatorNode extends ValueNode
 	}
 
 	/**
+	 * @see ValueNode#requiresTypeFromContext
+	 */
+	public boolean requiresTypeFromContext()
+	{
+		if (operand == null)
+			return false;
+		else
+			return (operand.requiresTypeFromContext()); 
+	}
+
+
+	/**
+	 * Returns true if this UnaryOperatorNode is for -?/+?.
+	 * This is required to check -?/+? say in the following sql
+	 * select * from t1 where -? and c11=c11 or +?
+	 * 
+	 * @return	True if this +?/-? node
+	 */
+	public boolean isUnaryMinusOrPlusWithParameter()
+	{
+		if (operand !=null && operand instanceof ParameterNode && operand.requiresTypeFromContext() && 
+				(operator!= null && (operator.equals("-") || operator.equals("+"))))
+			return true;
+		else
+			return false;
+	}
+
+	/**
 	 * By default unary operators don't accept ? parameters as operands.
 	 * This can be over-ridden for particular unary operators.
 	 *
@@ -554,7 +608,7 @@ public class UnaryOperatorNode extends ValueNode
         // an XML string can be arbitrarily long...is this okay?
         // The SQL/XML spec doesn't state what the type of the param
         // should be; only that it "shall be a character type".
-	        ((ParameterNode) operand).setDescriptor(
+	        operand.setType(
  	           DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CLOB));
 		}
 		else if (operatorType == XMLSERIALIZE_OP) {

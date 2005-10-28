@@ -182,7 +182,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	The DataTypeServices from this ValueNode.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices()
+	public DataTypeDescriptor getTypeServices() throws StandardException
 	{
 		return dataTypeServices;
 	}
@@ -193,7 +193,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	The TypeId from this ValueNode.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public TypeId getTypeId()
+	public TypeId getTypeId() throws StandardException
 	{
 		return typeId;
 	}
@@ -212,7 +212,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	This ValueNode's TypeCompiler
 	 *
 	 */
-	public TypeCompiler getTypeCompiler()
+	public TypeCompiler getTypeCompiler() throws StandardException
 	{
 		if (typeCompiler == null)
 		{
@@ -227,7 +227,8 @@ public abstract class ValueNode extends QueryTreeNode
 	}
 
 	/**
-	 * Set the DataTypeServices in this ValueNode.
+	 * Set the DataTypeServices for this ValueNode.  This method is
+	 * overridden in ParameterNode.
 	 *
 	 * @param dataTypeServices	The DataTypeServices to set in this
 	 *				ValueNode
@@ -235,7 +236,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	Nothing
 	 */
 
-	public void setType(DataTypeDescriptor dataTypeServices)
+	public void setType(DataTypeDescriptor dataTypeServices) throws StandardException
 	{
 		this.dataTypeServices = dataTypeServices;
 
@@ -249,20 +250,6 @@ public abstract class ValueNode extends QueryTreeNode
 		typeCompiler = null;
 	}
 
-	/**
-	 * Set the DataTypeServices for this ValueNode.  This method is
-	 * overridden in ParameterNode.
-	 *
-	 * @param descriptor	The DataTypeServices to set for this ValueNode
-	 *
-	 * @return	Nothing
-	 *
-	 */
-
-	public void setDescriptor(DataTypeDescriptor descriptor)
-	{
-		setType(descriptor);
-	}
 
 	/**
 	 * Get the source for this ValueNode.
@@ -768,7 +755,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @param oldVN		The ValueNode to copy from.
 	 *
 	 */
-	public void copyFields(ValueNode oldVN)
+	public void copyFields(ValueNode oldVN) throws StandardException
 	{
 		dataTypeServices = oldVN.getTypeServices();
 		typeId = oldVN.getTypeId();
@@ -1010,6 +997,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * in specific cases, such as the RelationalOperators.
 	 */
 	public double selectivity(Optimizable optTable)
+	throws StandardException
 	{
 		// Return 1 if additional predicates have been generated from this one.
 		if (transformed)
@@ -1172,7 +1160,7 @@ public abstract class ValueNode extends QueryTreeNode
 		 * It is a good = for only the All array if
 		 * the right side is a column from this query block.
 		 */
-		if ((arg1 instanceof ConstantNode) || (arg1.isParameterNode()))
+		if ((arg1 instanceof ConstantNode) || (arg1.requiresTypeFromContext()))
 		{
 			setValueCols(tableColMap, eqOuterCols,
 				((ColumnReference) arg2).getColumnNumber(), resultTable);
@@ -1326,6 +1314,17 @@ public abstract class ValueNode extends QueryTreeNode
 										   int columnNumber, 
 										   boolean isNullOkay)
 		throws StandardException
+	{
+		return false;
+	}
+
+	/**
+	 * Returns TRUE if the type of this node will be determined from the
+	 * context in which it is getting used.
+	 *
+	 * @return Whether this node's type will be determined from the context
+	 */
+	public boolean requiresTypeFromContext()
 	{
 		return false;
 	}

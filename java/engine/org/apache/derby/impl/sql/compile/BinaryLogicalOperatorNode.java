@@ -93,6 +93,13 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		//following is to check if we have something like "? AND 1=1" or "2>1 OR ?" 
 		if (leftOperand.isParameterNode() || rightOperand.isParameterNode())
 			throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
+		//following 2 ifs are to check if we have something like "+? AND 1=1" or "2>1 OR -?" ie -?/+? by themselves 
+		if ((leftOperand instanceof UnaryOperatorNode) &&
+				((UnaryOperatorNode)leftOperand).isUnaryMinusOrPlusWithParameter())
+			throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
+		if ((rightOperand instanceof UnaryOperatorNode) &&
+				((UnaryOperatorNode)rightOperand).isUnaryMinusOrPlusWithParameter())
+			throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
 
 		super.bindExpression(fromList, subqueryList, aggregateVector);
 

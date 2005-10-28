@@ -10356,7 +10356,7 @@ setSchemaStatement() throws StandardException :
 			setUpAndLinkParameters();
 			// set the type of parameter node, it should be a varchar max Limits.MAX_IDENTIFIER_LENGTH - non nullable
 			ParameterNode p = (ParameterNode)parameterList.elementAt(0);
-			p.setDescriptor(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), false, Limits.MAX_IDENTIFIER_LENGTH));
+			p.setType(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), false, Limits.MAX_IDENTIFIER_LENGTH));
 		}
 		return setSchema;
 	}

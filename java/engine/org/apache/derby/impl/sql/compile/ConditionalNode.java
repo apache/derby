@@ -175,9 +175,9 @@ public class ConditionalNode extends ValueNode
 		 * If it is a ? parameter on the left, then set type to boolean,
 		 * otherwise verify that the result type is boolean.
 		 */
-		if (testCondition.isParameterNode())
+		if (testCondition.requiresTypeFromContext())
 		{
-			((ParameterNode) testCondition).setDescriptor(
+			testCondition.setType(
 							new DataTypeDescriptor(
 										TypeId.BOOLEAN_ID,
 										true));
@@ -207,7 +207,7 @@ public class ConditionalNode extends ValueNode
 			DataTypeDescriptor dts;
 			ValueNode typeExpression;
 
-			if (thenExpression.isParameterNode())
+			if (thenExpression.requiresTypeFromContext())
 			{
 				dts = elseExpression.getTypeServices();
 			}

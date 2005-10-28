@@ -1532,7 +1532,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return Nothing.
 	 */
-	public void copyTypesAndLengthsToSource(ResultColumnList sourceRCL)
+	public void copyTypesAndLengthsToSource(ResultColumnList sourceRCL) throws StandardException
 	{
 		/* Source and target can have different lengths. */
 		int size = (size() > sourceRCL.size()) ? size() : sourceRCL.size();
@@ -2279,7 +2279,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not there is an exact UNION type match on the 2 RCLs.
 	 */
-	public boolean isExactTypeAndLengthMatch(ResultColumnList otherRCL)
+	public boolean isExactTypeAndLengthMatch(ResultColumnList otherRCL) throws StandardException
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -2843,7 +2843,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not the type information is consistent
 	 */
-	public boolean hasConsistentTypeInfo()
+	public boolean hasConsistentTypeInfo() throws StandardException
 	{
 		boolean isConsistent = true;
 

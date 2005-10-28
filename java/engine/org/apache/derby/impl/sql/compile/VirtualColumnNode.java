@@ -68,7 +68,7 @@ public class VirtualColumnNode extends ValueNode
 	public void init(
 						Object sourceResultSet,
 						Object sourceColumn,
-						Object columnId)
+						Object columnId) throws StandardException
 	{
 		ResultColumn source = (ResultColumn) sourceColumn;
 
@@ -280,7 +280,7 @@ public class VirtualColumnNode extends ValueNode
 	 * @return	The DataTypeServices from this Node.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices()
+	public DataTypeDescriptor getTypeServices() throws StandardException
 	{
         DataTypeDescriptor dtd = super.getTypeServices();
         if( dtd == null && sourceColumn != null)

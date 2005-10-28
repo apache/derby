@@ -52,7 +52,23 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 
 	private int operatorType;
 
-
+	//when the bindExpression method is called during the normal binding phase,
+	//unary minus and unary plus dynamic parameters are not ready for
+	//binding because the type of these dynamic parameters is not yet set.
+	//For eg, consider sql select * from t1 where c1 = -?
+	//bindExpression on -? gets called from BinaryComparisonOperatorNode's
+	//bindExpression but the parameter type has not been set yet for -?
+	//Later on, in BinaryComparisonOperatorNode's bindExpression, the type
+	//of the -? gets set to the type of c1 by the setType call. 
+	//Now, at this point, we are ready to finish binding phase for -? 
+	//(This class's setType method calls the bindExpression to finish binding)
+	//In order to accomplish binding later on, we need to save the following 
+	//3 objects during first call to bindExpression and then later this 
+	//gets used in setType method when it calls the bindExpression method.
+	FromList localCopyFromList;
+	SubqueryList localCopySubqueryList;
+	Vector localAggregateVector;
+  
 	/**
 	 * Initializer for a UnaryArithmeticOperatorNode
 	 *
@@ -103,9 +119,12 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	{
 		if (operatorType == SQRT || operatorType == ABSOLUTE)
 		{
-			((ParameterNode) operand).setDescriptor(
+			operand.setType(
 				new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.DOUBLE), true));
 		}
+		//Derby-582 add support for dynamic parameter for unary plus and minus
+		else if (operatorType == UNARY_MINUS || operatorType == UNARY_PLUS) 
+			return;
 		else if (operand.getTypeServices() == null)
 		{
 			throw StandardException.newException(SQLState.LANG_UNARY_OPERAND_PARM, operator);
@@ -128,6 +147,14 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		Vector	aggregateVector)
 			throws StandardException
 	{
+		localCopyFromList = fromList;
+		localCopySubqueryList = subqueryList;
+		localAggregateVector = aggregateVector;
+		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
+		if (operand.requiresTypeFromContext() && ((operatorType == UNARY_PLUS || operatorType == UNARY_MINUS))
+				&& operand.getTypeServices() == null)
+				return this;
+
 		super.bindExpression(fromList, subqueryList,
 				aggregateVector);
 
@@ -150,7 +177,7 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		/*
 		** The result type of a +, -, SQRT, ABS is the same as its operand.
 		*/
-		setType(operand.getTypeServices());
+		super.setType(operand.getTypeServices());
 		return this;
 	}
 
@@ -217,5 +244,20 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 					getContextManager());
 			((CastNode) operand).bindCastNodeOnly();
 		}
+	}
+
+	/** @see ValueNode#setType */
+	/* We are overwriting this method here because for -?/+?, we now know
+	the type of these dynamic parameters and hence we can do the parameter
+	binding. The setType method will call the binding code after setting
+	the type of the parameter*/
+	public void setType(DataTypeDescriptor descriptor) throws StandardException
+	{
+		operand.setType(descriptor);
+		super.setType(descriptor);
+		//Derby-582 add support for dynamic parameters for unary plus and minus
+		//Now that we know the type of this parameter node, we can do the
+		//binding.
+		bindExpression(localCopyFromList, localCopySubqueryList, localAggregateVector);
 	}
 }

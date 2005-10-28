@@ -152,11 +152,9 @@ public class NonStaticMethodCallNode extends MethodCallNode
 			//	then we have a type for it. Binding can continue.
 			//
 
-			if (SQLValue.isParameterNode())
+			if (SQLValue.requiresTypeFromContext())
 			{
-				ParameterNode	unnamedParameter = (ParameterNode) SQLValue;
-
-				if ( unnamedParameter.getTypeServices() == null )
+				if ( SQLValue.getTypeServices() == null )
 				{ throw StandardException.newException(SQLState.LANG_PARAMETER_RECEIVER, methodName); }
 			}
 		}

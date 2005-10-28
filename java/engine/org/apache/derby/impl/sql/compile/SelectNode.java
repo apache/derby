@@ -528,12 +528,13 @@ public class SelectNode extends ResultSetNode
 				throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_WHERE_CLAUSE);
 			}
 
-			/* If whereClause is a parameter, (where ?), then we should catch it and throw exception
+			/* If whereClause is a parameter, (where ?/where -?/where +?), then we should catch it and throw exception
 			 */
 			if (whereClause.isParameterNode())
-			{
 				throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
-			}
+			if ((whereClause instanceof UnaryOperatorNode) &&
+					((UnaryOperatorNode)whereClause).isUnaryMinusOrPlusWithParameter())
+				throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
 			
 			whereClause = whereClause.checkIsBoolean();
 		}

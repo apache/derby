@@ -146,8 +146,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 		** for a varchar.
 		*/
 
-		((ParameterNode) operand).setDescriptor(
-							new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true));
+		operand.setType(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true));
 	}
 
 	/* RelationalOperator interface */

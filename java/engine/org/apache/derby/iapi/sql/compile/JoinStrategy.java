@@ -115,7 +115,8 @@ public interface JoinStrategy {
 	 * @return	The extra selectivity due to non-base predicates
 	 */
 	double nonBasePredicateSelectivity(Optimizable innerTable,
-										OptimizablePredicateList predList);
+										OptimizablePredicateList predList)
+	throws StandardException;
 
 	/**
 	 * Put back and base predicates that were removed from the list by

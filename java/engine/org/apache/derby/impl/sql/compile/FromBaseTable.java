@@ -1239,7 +1239,7 @@ public class FromBaseTable extends FromTable
 						if (firstColumn != null && leftOpnd instanceof LikeEscapeOperatorNode)
 						{
 							LikeEscapeOperatorNode likeNode = (LikeEscapeOperatorNode) leftOpnd;
-							if (likeNode.getLeftOperand().isParameterNode())
+							if (likeNode.getLeftOperand().requiresTypeFromContext())
 							{
 								ValueNode receiver = ((TernaryOperatorNode) likeNode).getReceiver();
 								if (receiver instanceof ColumnReference)

@@ -67,7 +67,7 @@ public class BaseColumnNode extends ValueNode
 	public void init(
 							Object columnName,
 							Object tableName,
-				   			Object dts)
+				   			Object dts) throws StandardException
 	{
 		this.columnName = (String) columnName;
 		this.tableName = (TableName) tableName;

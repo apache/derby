@@ -94,9 +94,9 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 			maximum length for that type.
 		*/
 
-		if (leftOperand.isParameterNode())
+		if (leftOperand.requiresTypeFromContext())
 		{
-			if (rightOperand.isParameterNode())
+			if (rightOperand.requiresTypeFromContext())
 			{
 				throw StandardException.newException(SQLState.LANG_BINARY_OPERANDS_BOTH_PARMS,
 																	operator);
@@ -137,13 +137,13 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 					leftType = TypeId.getBuiltInTypeId(Types.VARCHAR);
 			}
 
-		((ParameterNode) leftOperand).setDescriptor(new DataTypeDescriptor(leftType, true));
+		leftOperand.setType(new DataTypeDescriptor(leftType, true));
 		}
 
 		/*
 			Is there a ? parameter on the right?
 		*/
-		if (rightOperand.isParameterNode())
+		if (rightOperand.requiresTypeFromContext())
 		{
 			TypeId 	rightType;
 
@@ -180,7 +180,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 					rightType = TypeId.getBuiltInTypeId(Types.VARCHAR);
 			}
 		
-		((ParameterNode) rightOperand).setDescriptor(
+		rightOperand.setType(
 							new DataTypeDescriptor(
 										rightType,
 										true));
@@ -491,6 +491,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 	 *worry about field coming in as null
 	*/
 	protected void initializeResultField(ExpressionClassBuilder acb, MethodBuilder mb, LocalField resultField)
+	throws StandardException
 	{
 		mb.conditionalIfNull();//get the field on the stack and if it is null
 			acb.generateNull(mb, getTypeCompiler());// yes, it is, hence create a NULL SQLxxx type object and put that on stack

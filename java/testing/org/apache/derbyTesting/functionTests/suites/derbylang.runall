@@ -132,6 +132,7 @@ lang/triggerGeneral.sql
 lang/triggerRecursion.sql
 lang/triggerRefClause.sql
 lang/triggerStream.sql
+lang/unaryArithmeticDynamicParameter.java
 lang/ungroupedAggregatesNegative.sql
 lang/union.sql
 lang/unlimited.sql

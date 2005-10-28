@@ -180,20 +180,11 @@ public class ParameterNode extends ValueNode
 	 * @return	Nothing
 	 */
 
-	public void setDescriptor(DataTypeDescriptor descriptor)
+	public void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		SanityManager.ASSERT(typeServices != null,
 			"typeServices not initialized");
-
-		// if type already determined, there's nothing to do.
-		// this can occur if a named parameter ("?paramName") is
-		// set equal to a unnamed parameter ("?") in a COPY PUBLICATION
-		// statement. in this case, the named parameter may be referenced
-		// multiple times. each time it must resolve to the same "?"
-		// parameter.
-
-		if ( typeServices[parameterNumber] != null ) { return; }
 
 		/* Make sure the type is nullable. */
 		if ( ! descriptor.isNullable())
@@ -207,7 +198,10 @@ public class ParameterNode extends ValueNode
 
 		typeServices[parameterNumber] = descriptor;
 
-		setType(descriptor);
+		//make sure we are calling super's setType. We will get into
+		//an infinite loop if this setType ends up calling the local
+		//setType method
+		super.setType(descriptor);
 
 		if ( getJSQLType() == null ) { setJSQLType(  new JSQLType( descriptor ) ); }
 	}
@@ -236,7 +230,7 @@ public class ParameterNode extends ValueNode
 	 * Bind this expression.  A parameter can't figure out what its type
 	 * is without knowing where it appears, so this method does nothing.
 	 * It is up to the node that points to this parameter node to figure
-	 * out the type of the parameter and set it, using the setDescriptor()
+	 * out the type of the parameter and set it, using the setType()
 	 * method above.
 	 *
 	 * @param fromList		The FROM list for the query this
@@ -387,7 +381,7 @@ public class ParameterNode extends ValueNode
 		// in "bindExpression" because at the time of bindExpression,
 		// we don't know yet what the type is going to be (only when
 		// the node that points to this parameter calls
-		// "setDescriptor" do we figure out the type).
+		// "setType" do we figure out the type).
 			throw StandardException.newException(
 				SQLState.LANG_ATTEMPT_TO_BIND_XML);
 		}
@@ -467,7 +461,7 @@ public class ParameterNode extends ValueNode
 		/* The constructor portion is done */
 	}
 
-	public TypeId getTypeId()
+	public TypeId getTypeId() throws StandardException
 	{
 		return (returnOutputParameter != null) ?
 			returnOutputParameter.getTypeId() : super.getTypeId();
@@ -593,6 +587,14 @@ public class ParameterNode extends ValueNode
 	DataValueDescriptor getDefaultValue()
 	{
 		return defaultValue;
+	}
+
+	/**
+	 * @see ValueNode#requiresTypeFromContext
+	 */
+	public boolean requiresTypeFromContext()
+	{
+		return true;
 	}
 	
 	/**

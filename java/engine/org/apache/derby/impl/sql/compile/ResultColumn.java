@@ -138,7 +138,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return	The newly initialized ResultColumn
 	 */
-	public void init(Object arg1, Object arg2)
+	public void init(Object arg1, Object arg2) throws StandardException
 	{
 		// RESOLVE: This is something of a hack - it is not obvious that
 		// the first argument being null means it should be treated as
@@ -282,7 +282,7 @@ public class ResultColumn extends ValueNode
 		return dataTypeServices;
 	}
 
-	public DataTypeDescriptor getExpressionType()
+	public DataTypeDescriptor getExpressionType() throws StandardException
 	{
 		return (expression == null) ?
 			dataTypeServices :
@@ -574,11 +574,11 @@ public class ResultColumn extends ValueNode
 		** Don't do it if this result column doesn't have a type yet.
 		** This can happen if the parameter is part of a table constructor.
 		*/
-		if (expression.isParameterNode())
+		if (expression.requiresTypeFromContext())
 		{
 			if (getTypeServices() != null)
 			{
-				((ParameterNode) expression).setDescriptor(getTypeServices());
+				expression.setType(getTypeServices());
 			}
 		}
 
@@ -977,7 +977,7 @@ public class ResultColumn extends ValueNode
 		** parameters.  So don't even bother in this
 		** case.
 		*/
-		if (expression.isParameterNode())
+		if (expression.requiresTypeFromContext())
 		{
 			return false;
 		}
@@ -1051,8 +1051,8 @@ public class ResultColumn extends ValueNode
 		** parameters.  So don't even bother in this
 		** case.
 		*/
-		if ((otherExpression != null) && (otherExpression.isParameterNode()) ||
-			(expression.isParameterNode()))
+		if ((otherExpression != null) && (otherExpression.requiresTypeFromContext()) ||
+			(expression.requiresTypeFromContext()))
 		{
 			return false;
 		}
@@ -1294,18 +1294,21 @@ public class ResultColumn extends ValueNode
 	}
 
 	/**
-	 * Look for and reject ? parameter under this ResultColumn.  This is
+	 * Look for and reject ?/-?/+? parameter under this ResultColumn.  This is
 	 * called for SELECT statements.
 	 *
 	 * @return	Nothing
 	 *
-	 * @exception StandardException		Thrown if a ? parameter was found
+	 * @exception StandardException		Thrown if a ?/-?/+? parameter was found
 	 *									directly under this ResultColumn.
 	 */
 
 	void rejectParameter() throws StandardException
 	{
 		if ((expression != null) && (expression.isParameterNode()))
+			throw StandardException.newException(SQLState.LANG_PARAM_IN_SELECT_LIST);
+		if ((expression != null) && (expression instanceof UnaryOperatorNode) &&
+				((UnaryOperatorNode)expression).isUnaryMinusOrPlusWithParameter())
 			throw StandardException.newException(SQLState.LANG_PARAM_IN_SELECT_LIST);
 	}
 
@@ -1710,7 +1713,7 @@ public class ResultColumn extends ValueNode
 	 * @return	The TypeId from this Node.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public TypeId getTypeId()
+	public TypeId getTypeId() throws StandardException
 	{
         TypeId t = super.getTypeId();
         if( t == null)
@@ -1731,7 +1734,7 @@ public class ResultColumn extends ValueNode
 	 * @return	The DataTypeServices from this Node.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices()
+	public DataTypeDescriptor getTypeServices() throws StandardException
 	{
         DataTypeDescriptor dtd = super.getTypeServices();
         if( dtd == null && expression != null)

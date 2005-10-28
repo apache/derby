@@ -1049,6 +1049,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * @return ValueNode	The rebuilt expression tree.
 	 */
 	public ValueNode restoreConstantPredicates()
+	throws StandardException
 	{
 		AndNode			nextAnd;
 		AndNode			falseAnd = null;
@@ -1145,6 +1146,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * @return ValueNode	The rebuilt expression tree.
 	 */
 	public ValueNode restorePredicates()
+	throws StandardException
 	{
 		AndNode			nextAnd;
 		AndNode			falseAnd = null;
@@ -3649,6 +3651,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * Compute selectivity the old fashioned way.
 	 */
 	private double selectivityNoStatistics(Optimizable optTable)
+	throws StandardException
 	{
 		double selectivity = 1.0;
 

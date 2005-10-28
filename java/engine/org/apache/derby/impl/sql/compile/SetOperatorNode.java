@@ -249,6 +249,7 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * @return	The number of new types found in the RowResultSetNode
 	 */
 	int getParamColumnTypes(DataTypeDescriptor[] types, RowResultSetNode rrsn)
+	 throws StandardException
 	{
 		int	numTypes = 0;
 
@@ -259,7 +260,7 @@ public abstract class SetOperatorNode extends TableOperatorNode
 			{
 				ResultColumn rc =
 					(ResultColumn) rrsn.getResultColumns().elementAt(i);
-				if ( ! (rc.getExpression().isParameterNode()))
+				if ( ! (rc.getExpression().requiresTypeFromContext()))
 				{
 					types[i] = rc.getExpressionType();
 					numTypes++;
@@ -294,14 +295,13 @@ public abstract class SetOperatorNode extends TableOperatorNode
 		{
 			ResultColumn	rc = (ResultColumn) rrcl.elementAt(index);
 
-			if (rc.getExpression().isParameterNode())
+			if (rc.getExpression().requiresTypeFromContext())
 			{
 				/*
 				** We found a ? - set its type to the type from the
 				** type array.
 				*/
-				((ParameterNode) rc.getExpression()).setDescriptor(
-											types[index]);
+				rc.getExpression().setType(types[index]);
 			}
 		}
 	}

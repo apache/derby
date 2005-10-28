@@ -133,7 +133,8 @@ public interface OptimizablePredicate
 	 *
 	 * @param optTable	The Optimizable that this predicate restricts
 	 */
-	double selectivity(Optimizable optTable);
+	double selectivity(Optimizable optTable)
+	throws StandardException;
 
 	/**
 	 * Get the position of the index column that this predicate restricts.

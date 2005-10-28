@@ -591,6 +591,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	public boolean defaultTypeIsValid(TypeId columnType,
 		DataTypeDescriptor columnDesc, TypeId defaultType,
 		ValueNode defaultNode, String defaultText)
+	throws StandardException
 	{
 
 		if (defaultText.length() > Limits.DB2_CHAR_MAXWIDTH)

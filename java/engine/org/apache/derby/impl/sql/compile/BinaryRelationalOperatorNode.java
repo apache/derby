@@ -710,7 +710,7 @@ public class BinaryRelationalOperatorNode
 		if (considerParameters)
 		{
 			return (node instanceof ConstantNode) ||
-						((node.isParameterNode()) &&
+						((node.requiresTypeFromContext()) &&
 						 (((ParameterNode)node).getDefaultValue() != null));
 		}
 		else
@@ -738,9 +738,14 @@ public class BinaryRelationalOperatorNode
 		{
 			return ((ConstantNode)node).getValue();
 		}
-		else if (node.isParameterNode())
+		else if (node.requiresTypeFromContext())
 		{
-			return ((ParameterNode)node).getDefaultValue();
+			ParameterNode pn;
+			if (node instanceof UnaryOperatorNode) 
+	  			pn = ((UnaryOperatorNode)node).getParameterOperand();
+			else
+	  			pn = (ParameterNode) (node);
+			return pn.getDefaultValue();
 		}
 		else
 		{	
@@ -754,6 +759,7 @@ public class BinaryRelationalOperatorNode
 	 * selectivity otherwise.
 	 */
 	protected double booleanSelectivity(Optimizable optTable)
+	throws StandardException
 	{
 		TypeId	typeId = null;
 		double				retval = -1.0d;
@@ -990,6 +996,7 @@ public class BinaryRelationalOperatorNode
 	/** return the selectivity of this predicate.
 	 */
 	public double selectivity(Optimizable optTable)
+	throws StandardException
 	{
 		double retval = booleanSelectivity(optTable);
 		

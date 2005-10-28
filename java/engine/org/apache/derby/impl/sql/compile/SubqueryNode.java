@@ -526,9 +526,9 @@ public class SubqueryNode extends ValueNode
 		 * A ? parameter to the left of this subquery gets type of the
 		 * subquery's sole column.
 		 */
-		if (leftOperand != null && leftOperand.isParameterNode())
+		if (leftOperand != null && leftOperand.requiresTypeFromContext())
 		{
-			((ParameterNode) leftOperand).setDescriptor(
+			leftOperand.setType(
 				((ResultColumn) resultColumns.elementAt(0)).getTypeServices());
 		}
 
@@ -712,8 +712,7 @@ public class SubqueryNode extends ValueNode
 				additionalEQ = additionalEQ &&
 								((leftOperand instanceof ConstantNode) ||
 								 (leftOperand instanceof ColumnReference) ||
-
-								 (leftOperand.isParameterNode()));
+								 (leftOperand.requiresTypeFromContext()));
 				/* If we got this far and we are an expression subquery
 				 * then we want to set leftOperand to be the left side
 				 * of the comparison in case we pull the comparison into
@@ -851,7 +850,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @return Whether or not the NOT IN or ALL subquery can be flattened.
 	 */
-	private boolean canAllBeFlattened ()
+	private boolean canAllBeFlattened () throws StandardException
 	{
 		boolean result = false;
 		if (isNOT_IN() || isALL())

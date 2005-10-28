@@ -539,7 +539,7 @@ public class TernaryOperatorNode extends ValueNode
 		// handle parameters here
 
 		/* Is there a ? parameter for the receiver? */
-		if (receiver.isParameterNode())
+		if (receiver.requiresTypeFromContext())
 		{
 			/*
 			** According to the SQL standard, if trim has a ? receiver,
@@ -547,14 +547,14 @@ public class TernaryOperatorNode extends ValueNode
 			** for a varchar.
 			*/
 	
-			((ParameterNode) receiver).setDescriptor(getVarcharDescriptor());
+			receiver.setType(getVarcharDescriptor());
 		}
 
 		/* Is there a ? parameter on the left? */
-		if (leftOperand.isParameterNode())
+		if (leftOperand.requiresTypeFromContext())
 		{
 			/* Set the left operand type to varchar. */
-			((ParameterNode) leftOperand).setDescriptor(getVarcharDescriptor());
+			leftOperand.setType(getVarcharDescriptor());
 		}
 
 		bindToBuiltIn();
@@ -626,17 +626,17 @@ public class TernaryOperatorNode extends ValueNode
 		 * left/firstOperand's.  If the left/firstOperand are both parameters,
 		 * both will be max length.
 		 */
-		if( receiver.isParameterNode())
+		if( receiver.requiresTypeFromContext())
 		{
-			if( leftOperand.isParameterNode())
+			if( leftOperand.requiresTypeFromContext())
 			{
-				((ParameterNode) receiver).setDescriptor(getVarcharDescriptor());
+				receiver.setType(getVarcharDescriptor());
 			}
 			else
 			{
 				if( leftOperand.getTypeId().isStringTypeId() )
 				{
-					((ParameterNode) receiver).setDescriptor(
+					receiver.setType(
 							         leftOperand.getTypeServices());
 				}
 			}
@@ -646,17 +646,17 @@ public class TernaryOperatorNode extends ValueNode
 		 * Is there a ? parameter for the second arg.  Copy the receiver's.
 		 * If the receiver are both parameters, both will be max length.
 		 */
-		if(leftOperand.isParameterNode())
+		if(leftOperand.requiresTypeFromContext())
 		{
-			if(receiver.isParameterNode())
+			if(receiver.requiresTypeFromContext())
 			{
-				((ParameterNode) leftOperand).setDescriptor(getVarcharDescriptor());
+				leftOperand.setType(getVarcharDescriptor());
 			}
 			else
 			{
 				if( receiver.getTypeId().isStringTypeId() )
 				{
-					((ParameterNode) leftOperand).setDescriptor(
+					leftOperand.setType(
 							         receiver.getTypeServices());
 				}
 			}
@@ -665,9 +665,9 @@ public class TernaryOperatorNode extends ValueNode
 		/*
 		 * Is there a ? paramter for the third arg.  It will be an int.
 		 */
-		if( rightOperand.isParameterNode())
+		if( rightOperand.requiresTypeFromContext())
 		{
-			((ParameterNode) rightOperand).setDescriptor(
+			rightOperand.setType(
 				new DataTypeDescriptor(TypeId.INTEGER_ID, true)); 
 		}
 
@@ -735,7 +735,7 @@ public class TernaryOperatorNode extends ValueNode
 		// handle parameters here
 
 		/* Is there a ? parameter for the receiver? */
-		if (receiver.isParameterNode())
+		if (receiver.requiresTypeFromContext())
 		{
 			/*
 			** According to the SQL standard, if substr has a ? receiver,
@@ -743,22 +743,22 @@ public class TernaryOperatorNode extends ValueNode
 			** for a varchar.
 			*/
 	
-			((ParameterNode) receiver).setDescriptor(getVarcharDescriptor());
+			receiver.setType(getVarcharDescriptor());
 		}
 
 		/* Is there a ? parameter on the left? */
-		if (leftOperand.isParameterNode())
+		if (leftOperand.requiresTypeFromContext())
 		{
 			/* Set the left operand type to int. */
-			((ParameterNode) leftOperand).setDescriptor(							
+			leftOperand.setType(							
 				new DataTypeDescriptor(TypeId.INTEGER_ID, true)); 
 		}
 
 		/* Is there a ? parameter on the right? */
-		if ((rightOperand != null) && rightOperand.isParameterNode())
+		if ((rightOperand != null) && rightOperand.requiresTypeFromContext())
 		{
 			/* Set the right operand type to int. */
-			((ParameterNode) rightOperand).setDescriptor(							
+			rightOperand.setType(							
 				new DataTypeDescriptor(TypeId.INTEGER_ID, true)); 
 		}
 
@@ -865,9 +865,9 @@ public class TernaryOperatorNode extends ValueNode
 
     private boolean bindParameter( ValueNode arg, int jdbcType) throws StandardException
     {
-        if( arg.isParameterNode() && arg.getTypeId() == null)
+        if( arg.requiresTypeFromContext() && arg.getTypeId() == null)
         {
-            ((ParameterNode) arg).setDescriptor( new DataTypeDescriptor(TypeId.getBuiltInTypeId( jdbcType), true));
+            arg.setType( new DataTypeDescriptor(TypeId.getBuiltInTypeId( jdbcType), true));
             return true;
         }
         return false;

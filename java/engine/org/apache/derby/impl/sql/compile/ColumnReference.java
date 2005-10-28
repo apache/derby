@@ -1018,7 +1018,7 @@ public class ColumnReference extends ValueNode
 	 * @return	The DataTypeServices from this Node.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices()
+	public DataTypeDescriptor getTypeServices() throws StandardException
 	{
         DataTypeDescriptor dtd = super.getTypeServices();
         if( dtd == null && source != null)

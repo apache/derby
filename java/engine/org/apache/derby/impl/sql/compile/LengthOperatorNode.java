@@ -147,8 +147,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 		** for a varchar.
 		*/
 
-		((ParameterNode) operand).setDescriptor(
-							DataTypeDescriptor.getBuiltInDataTypeDescriptor(parameterType, true, 
+		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(parameterType, true, 
 												parameterWidth));
 	}
 

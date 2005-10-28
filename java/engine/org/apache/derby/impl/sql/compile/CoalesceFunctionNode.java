@@ -147,7 +147,7 @@ public class CoalesceFunctionNode extends ValueNode
 		//find the first non-param argument. The generated method will generate code to call coalesce on this argument
 		for (int index = 0; index < argumentsListSize; index++)
 		{
-			if (!(((ValueNode) argumentsList.elementAt(index)).isParameterNode()))
+			if (!(((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext()))
 			{
 				firstNonParameterNode = (ValueNode) argumentsList.elementAt(index);
 				break;
@@ -157,7 +157,7 @@ public class CoalesceFunctionNode extends ValueNode
 		//make sure these arguments are compatible to each other before coalesce can be allowed
 		for (int index = 0; index < argumentsListSize; index++)
 		{
-			if (((ValueNode) argumentsList.elementAt(index)).isParameterNode()) //since we don't know the type of param, can't check for compatibility
+			if (((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext()) //since we don't know the type of param, can't check for compatibility
 				continue;
 				argumentsList.compatible((ValueNode) argumentsList.elementAt(index));
 		}
@@ -168,9 +168,9 @@ public class CoalesceFunctionNode extends ValueNode
 		//set all the parameter types to the type of the result type
 		for (int index = 0; index < argumentsListSize; index++)
 		{
-			if (((ValueNode) argumentsList.elementAt(index)).isParameterNode())
+			if (((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext())
 			{
-				((ParameterNode) argumentsList.elementAt(index)).setDescriptor(getTypeServices());
+				((ValueNode)argumentsList.elementAt(index)).setType(getTypeServices());
 				break;
 			}
 		}

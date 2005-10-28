@@ -164,7 +164,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 		rightOperandList.bindExpression(fromList, subqueryList, aggregateVector);
 
 		/* Is there a ? parameter on the left? */
-		if (leftOperand.isParameterNode())
+		if (leftOperand.requiresTypeFromContext())
 		{
 			ValueNode rightOperand = (ValueNode) rightOperandList.elementAt(0);
 
@@ -178,7 +178,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 			}
 
 			/* Set the left operand to the type of right parameter. */
-			((ParameterNode) leftOperand).setDescriptor(rightOperandList.getTypeServices());
+			leftOperand.setType(rightOperandList.getTypeServices());
 		}
 
 		/* Is there a ? parameter on the right? */
