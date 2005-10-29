@@ -38,6 +38,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.util.zip.CRC32;
+import java.io.Reader;
+import java.io.StringReader;
 
 /**
  * Test of JDBC result set Stream calls.
@@ -281,6 +283,9 @@ public class resultsetStream {
 			ppw.close();
 			rs.close();
 			stmt.close();
+			
+			TestOfGetAsciiStream.executeTestOfGetAsciiStream(con);
+
 			con.close();
 
 		}
@@ -302,4 +307,166 @@ public class resultsetStream {
 			se = se.getNextException();
 		}
 	}
+	
+	
+	static class TestOfGetAsciiStream {
+		
+		final static String TEST_STRING_DATA = 
+			"ABCDEFG" + 
+			"\u00c0\u00c1\u00c2\u00c3\u00c4\u00c5" + 
+			"\u00ff\u0100" + 
+			"\u3042\u3044\u3046\u3048\u304a";
+				
+		
+		static private void executeTestOfGetAsciiStream(Connection conn) throws SQLException {
+			
+			System.out.println("Test of getAsciiStream");
+			createTestTable(conn);
+			executeTestRun(conn);
+
+		}
+		
+
+		static private void createTestTable(Connection conn) throws SQLException {
+
+			PreparedStatement st = null;
+			
+			try{
+				st = conn.prepareStatement("create table t3(text_data clob)");
+				st.executeUpdate();
+				
+			}finally{
+				if(st != null)
+					st.close();
+				
+			}
+			
+		}
+		
+
+		static private void executeTestRun(Connection conn) throws SQLException {
+			
+			insertTestData(conn);
+			printTestData(conn);
+			
+		}
+
+
+		static private void insertTestData(Connection conn) throws SQLException {
+			
+			PreparedStatement st = null;
+			
+			try{
+				
+				st = conn.prepareStatement("insert into t3(text_data) values(?)");
+				st.setCharacterStream(1,
+						      new StringReader(TEST_STRING_DATA),
+						      TEST_STRING_DATA.length());
+				st.executeUpdate();
+				
+			}finally{
+				if(st != null)
+					st.close();
+				
+			}
+
+		}
+
+
+		static private void printTestData(Connection conn) throws SQLException {
+			
+			PreparedStatement st = null;
+			ResultSet rs = null;
+			
+			try{
+				st = conn.prepareStatement("select text_data from t3");
+				rs = st.executeQuery();
+				
+				while(rs.next()){
+					printTestDataInARowViaStream(rs);
+					printTestDataInARowViaReader(rs);
+				}
+				
+			}catch(IOException e){
+				System.out.println("FAIL -- unexpected IOException: " + e.toString());
+				e.printStackTrace();
+				
+			}finally{
+				if(rs != null){
+					rs.close();
+				}
+
+				if(st != null){
+					st.close();
+				}
+				
+			}
+		}
+		
+		
+		static private void printTestDataInARowViaStream(ResultSet rs) throws SQLException, 
+										      IOException{
+			
+			InputStream is = null;
+
+			try{
+				is = rs.getAsciiStream(1);
+			
+				for(int c = is.read();
+				    c > -1;
+				    c = is.read()){
+					
+					System.out.print(getCharacterCodeString((char) c));
+				}
+				
+				System.out.println();
+				
+			}finally{
+				if(is != null)
+					is.close();
+			}
+				
+		}
+
+
+		static private void printTestDataInARowViaReader(ResultSet rs) throws SQLException, 
+										      IOException{
+
+			Reader reader = null;
+			
+			try{
+				reader = rs.getCharacterStream(1);
+
+				for(int c = reader.read();
+				    c > -1;
+				    c = reader.read()){
+					
+					System.out.print(getCharacterCodeString((char) c));
+
+				}
+			
+				System.out.println();
+				
+			}finally{
+				if(reader != null){
+					reader.close();
+				}
+			}
+			
+		}
+		
+		
+		private static String getCharacterCodeString(char c){
+
+			String hexString = Integer.toHexString((int) c);
+			
+			while(hexString.length() < 4){
+				hexString = "0" + hexString;
+			}
+			
+			return "U+" + hexString;
+		}
+		
+	}
+
 }

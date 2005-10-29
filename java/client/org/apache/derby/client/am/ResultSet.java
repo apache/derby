@@ -939,9 +939,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         java.io.InputStream result = null;
         if (wasNonNullSensitiveUpdate(column)) {
 		
-		result = new java.io.ByteArrayInputStream
-			(convertToAsciiByteArray((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
-											    updatedColumns_[column - 1])));
+		result = new AsciiStream((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
+										    updatedColumns_[column - 1]));
         } else {
             result = isNull(column) ? null : cursor_.getAsciiStream(column);
         }
@@ -3962,25 +3961,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
         }
     }
-
-	
-	private static byte[] convertToAsciiByteArray(String original){
-
-		byte[] result = new byte[original.length()];
-
-		for(int i = 0;
-		    i < original.length();
-		    i ++){
-			
-			if(original.charAt(i) <= 0x00ff)
-				result[i] = (byte) original.charAt(i);
-			else
-				result[i] = 0x003f;
-		}
-
-		return result;
-
-	}
 	
 	
 	private CloseFilterInputStream createCloseFilterInputStream(java.io.InputStream is) throws SqlException {
