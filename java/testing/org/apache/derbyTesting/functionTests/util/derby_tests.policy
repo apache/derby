@@ -19,6 +19,9 @@
 grant codeBase "${csinfo.codejar}derby.jar" {
   permission java.util.PropertyPermission "derby.*", "read";
   
+  // for unit tests
+  permission java.util.PropertyPermission "db2j.unittest.*", "read";
+  
   permission java.lang.RuntimePermission "createClassLoader";
   
   permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
@@ -32,6 +35,11 @@ grant codeBase "${csinfo.codejar}derby.jar" {
   permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
   permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
   permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
+  permission java.io.FilePermission "${user.dir}${/}extinout", "read,write";
+  
+  // unit tests set this property (called from derbyTesting.jar through
+  // code in derby.jar
+  permission java.util.PropertyPermission "db2j.unittest.*", "write";
 
   // BUG DERBY-622 derbynet/sysinfo.java
   permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
