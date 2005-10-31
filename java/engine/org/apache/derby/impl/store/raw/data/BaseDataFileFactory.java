@@ -2223,7 +2223,7 @@ public final class BaseDataFileFactory
             else
             {
                 sb.append(stub ? 'D' : 'C');
-                sb.append(containerId.getContainerId());
+                sb.append(Long.toHexString(containerId.getContainerId()));
                 sb.append(".DAT");
             }
             return storageFactory.newStorageFile( sb.toString());

@@ -158,6 +158,50 @@ public abstract class BaseTest
     }
 
     /**
+     * Call consistency checker on all the tables.
+     * <p>
+     **/
+    protected boolean checkAllConsistency(
+    Connection  conn)
+		throws SQLException
+    {
+        Statement s = conn.createStatement();
+
+        ResultSet rs = 
+            s.executeQuery(
+                "select schemaname, tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE(schemaname, tablename) " + 
+                "from sys.systables a,  sys.sysschemas b where a.schemaid = b.schemaid");
+
+        int table_count = 0;
+
+        while (rs.next())
+        {
+            table_count++;
+            if (rs.getInt(3) != 1)
+            {
+                System.out.println(
+                    "Bad return from consistency check of " + 
+                    rs.getString(1) + "." + rs.getString(2));
+            }
+        }
+
+        if (table_count < 5)
+        {
+            // there are at least 5 system catalogs.
+            System.out.println(
+                "Something wrong with consistency check query, found only " + 
+                table_count + " tables.");
+        }
+
+        rs.close();
+        s.close();
+
+        conn.commit();
+
+        return(true);
+    }
+
+    /**
      * Create a system procedures to access SANE debug table routines.
      * <p>
      **/

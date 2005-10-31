@@ -1,0 +1,4 @@
+Beginning test: creating 500 tables.
+Ending test: creating 500 tables.
+Beginning test: dropping table with conglomerate number 2080.
+Ending test: dropping table with conglomerate number 2080.
