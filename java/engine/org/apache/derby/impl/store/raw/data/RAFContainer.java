@@ -1076,10 +1076,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				if (SanityManager.DEBUG) {
 					if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
 						SanityManager.THROWASSERT(
-												  "expect " +
-												  AllocPage.FORMAT_NUMBER +
-												  "got " +
-												  FormatIdUtil.readFormatIdInteger(pageData));
+                          "expect " +
+                          AllocPage.FORMAT_NUMBER +
+                          "got " +
+                          FormatIdUtil.readFormatIdInteger(pageData));
 				}
 
 			}
@@ -1097,7 +1097,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 			}
 			
 			long pageOffset = pageNumber * pageSize;
-			fileData.seek(pageOffset);
+			backupRaf.seek(pageOffset);
 			backupRaf.write(dataToWrite, 0, pageSize);
 
 		} catch (IOException ioe) {
