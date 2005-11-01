@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.Properties;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -160,7 +162,6 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	private String key3;
 	private Runnable task;
 	private int intValue;
-    private URL propertyFileURL;
 
 	/**
 		Initialize the system in a privileged block.
@@ -177,18 +178,12 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 		}
 	}
 
-	synchronized final InputStream loadModuleDefinitions(URL propertyFileURL) throws IOException {
+	synchronized final Properties getDefaultModuleProperties() {
 		action = 2;
-        this.propertyFileURL = propertyFileURL;
-		try {
-			return (InputStream) java.security.AccessController.doPrivileged(this);
+ 		try {
+			return (Properties) java.security.AccessController.doPrivileged(this);
         } catch (java.security.PrivilegedActionException pae) {
-            Exception e = pae.getException();
-            if( e instanceof IOException)
-                throw (IOException) e;
-            throw (RuntimeException) e;
-        } finally {
-            this.propertyFileURL = null;
+           throw (RuntimeException) pae.getException();
         }
     }
 
@@ -252,7 +247,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	}
 
 
-	public final Object run() throws IOException {
+	public synchronized final Object run() throws IOException {
 		switch (action) {
 		case 0:
 		case 1:
@@ -260,7 +255,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 			return new Boolean(PBinitialize(action == 0));
 		case 2: 
 			// SECURITY PERMISSION - IP1
-			return super.loadModuleDefinitions( propertyFileURL);
+			return super.getDefaultModuleProperties();
 		case 3:
 			// SECURITY PERMISSION - OP1
 			return PBgetJVMProperty(key3);
