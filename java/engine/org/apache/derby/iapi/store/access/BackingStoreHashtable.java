@@ -121,17 +121,10 @@ public class BackingStoreHashtable
     private long max_inmemory_size;
     private boolean keepAfterCommit;
 
-    private static int vectorSize; // The estimated number of bytes used by Vector(0)
-    static {
-        try
-        {
-            vectorSize = ClassSize.estimateBase( java.util.Vector.class);
-        }
-        catch( SecurityException se)
-        {
-            vectorSize = 4*ClassSize.refSize;
-        }
-    };
+    /**
+     * The estimated number of bytes used by Vector(0)
+     */  
+    private final static int vectorSize = ClassSize.estimateBaseFromCatalog(java.util.Vector.class);
     
     private DiskHashtable diskHashtable;
 
