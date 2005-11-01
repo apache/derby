@@ -39,6 +39,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java13compile.classpath}"/>
+		<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/VTIClasses/ExternalTable.java"/> 
     </javac>
@@ -56,6 +57,7 @@
       <classpath>
         <pathelement location="${oro}"/>
         <pathelement path="${compile.classpath}"/>
+		<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/> 
       <include name="${this.dir}/StaticInitializers/*.java"/> 

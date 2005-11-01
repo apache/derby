@@ -21,6 +21,7 @@
 
   <target name="compile">
     <copy file="${derby.build.src.dir}/org/apache/derbyBuild/odbcgen_fragments.properties" tofile="${out.dir}/org/apache/derbyBuild/odbcgen_fragments.properties"/>
+
     <javac
       bootclasspath="${empty}"
       nowarn="on"

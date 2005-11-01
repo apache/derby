@@ -1,0 +1,160 @@
+<html>
+<title>Derby Compatibility Tests</title>
+<body>
+
+<center><h1>Derby Compatibility Tests</h1></center>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Revision</b></TD>
+      <TD><b>Author</b></TD>
+      <TD><b>Date</b></TD>
+      <TD><b>Comment</b></TD>
+    </TR>
+
+    <TR>
+      <TD>1.0</TD>
+      <TD>Rick Hillegas</TD>
+      <TD>06 September 2005</TD>
+      <TD>First cut.</TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Test Setup">Test Setup</a></li>
+  <li><a href="#Running the Tests">Running the Tests</a></li>
+  <li><a href="#Analyzing Failures">Analyzing Failures</a></li>
+</ul>
+
+<h2><a name="Overview">Overview</a></h2>
+
+<p>
+This web page describes how to setup and run the Derby Compatibility
+Tests. These tests stress the compatibility of Derby clients and
+servers running at different rev levels and on different VMs. We
+currently test the following combinations:
+</p>
+
+<blockquote>
+
+<h3><a name="Clients">Clients</a></h2>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR><TD>Derby 10.1</TD></TR>
+    <TR><TD>Derby 10.2</TD></TR>
+    <TR><TD>DB2JCC 2.4</TD></TR>
+
+  </TBODY>
+</TABLE>
+
+<h3><a name="Servers">Servers</a></h2>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR><TD>Derby 10.1</TD></TR>
+    <TR><TD>Derby 10.2</TD></TR>
+
+  </TBODY>
+</TABLE>
+
+<h3><a name="VMs">VMs</a></h2>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR><TD>jdk1.3</TD></TR>
+    <TR><TD>jdk1.4</TD></TR>
+    <TR><TD>jdk1.5</TD></TR>
+
+  </TBODY>
+</TABLE>
+
+</blockquote>
+
+<h2><a name="Test Setup">Test Setup</a></h2>
+
+<p>
+To run these tests, you will need to download various VMs and Derby
+releases. You will also need to edit ant.properties in your home
+directory, adding variables which point at these VMs and releases. For
+a complete description of this setup, run the following command,
+invoking testScript.xml (which lives in the same directory as this web page):
+</p>
+
+<blockquote><pre>
+ant -buildfile testScript.xml -projecthelp
+</pre></blockquote>
+
+<h2><a name="Running the Tests">Running the Tests</a></h2>
+
+<p>
+To run the tests, you will need to do the following:
+</p>
+
+<ul>
+<li><b>mkdir</b> - Create a directory to hold the test output.</li>
+<li><b>ant</b> - Run ant against the compatibility test script.</li>
+</ul>
+
+<p>
+Something like the following should work:
+</p>
+
+<blockquote><pre>
+#! /usr/bin/bash
+#
+# Run the compatibility tests.
+#
+# $1    directory to hold output, e.g., c:/cygwin/home/aliceBToklas/derby/mainline/testRun
+# $2    location of derby trunk, e.g., c:/cygwin/home/aliceBToklas/derby/mainline/testRun/trunk
+
+outDir=$1
+trunkDir=$2
+COMPAT_DIR=$trunkDir/java/testing/org/apache/derbyTesting/functionTests/tests/compatibility
+
+rm -rf $outDir
+mkdir $outDir
+
+ant -buildfile $COMPAT_DIR/testScript.xml -DoutDir=$outDir
+</pre></blockquote>
+
+<p>
+When the tests startup, they defensively bring down the Derby network
+server in case it was running. Generally, it won't be, and you can
+expect to see a couple vacuous diagnostics, which you may ignore:
+</p>
+
+<blockquote><pre>
+_stopServer:
+     [exec] Could not connect to Derby Network Server on host localhost, port 1527.
+     [exec] Result: 1
+</pre></blockquote>
+
+<h2><a name="Analyzing Failures">Analyzing Failures</a></h2>
+
+<p>
+If the tests succeed, ant will happily report:
+</p>
+
+<blockquote><pre>
+BUILD SUCCESSFUL
+</pre></blockquote>
+
+<p>
+Otherwise, ant will report a failure. In this case, the output
+directory will hold a file called SUMMARY_COMPAT.txt. This file will
+identify which test run failed. More specifically, SUMMARY_COMPAT.txt
+will hold the name of an output file which describes the specific test failures.
+</p>
+
+
+</body>
+</html>

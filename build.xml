@@ -13,7 +13,7 @@
   <property file="${properties.dir}/sane${sanity}.properties"/>
   <property file="${properties.dir}/defaultcompiler.properties"/>
   <property file="${properties.dir}/${build.compiler}.properties"/>
-  <!-- Compile-time classpath properties files -->
+  <!-- Compile-time classpath`< properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
   <!-- Release and version info -->
@@ -29,6 +29,7 @@
 <!-- ==================================================================== -->
 
   <target name="init" unless="init.done">
+
     <tstamp/>
     <mkdir dir="${out.dir}"/>
     <!-- generate sanity state.properties if one does not exist -->

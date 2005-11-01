@@ -99,6 +99,11 @@ public class Sed
         deleteLines.addElement("^\\[.*db2jcc_license_c.jar\\] [1-9].[0-9] - .*$");	
         deleteLines.addElement("^XSDB.*$");
 
+		// JUnit noise
+        deleteLines.addElement("^\\.*$");
+        deleteLines.addElement("^Time: [0-9].*$");
+        deleteLines.addElement("^OK \\(.*$");
+
         // Vectors for substitutions
         Vector searchStrings = new Vector();
         searchStrings.addElement("^Transaction:\\(.*\\) *\\|"); 
