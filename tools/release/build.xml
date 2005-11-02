@@ -22,7 +22,7 @@
 
 <!-- Targets -->
 
-  <target name="release" depends="clean,bin,lib,src,sign"/>
+  <target name="release" depends="clean,bin,lib,src"/>
 
   <target name="init">
 
