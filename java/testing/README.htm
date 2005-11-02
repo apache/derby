@@ -145,10 +145,15 @@ tests. Before you can run, you need to setup your environment:</P>
 		<FONT SIZE=2>derby network server classes</FONT></P>
 		<LI><P STYLE="margin-bottom: 0in"><FONT SIZE=2>derbyclient.jar<BR></FONT>&nbsp;&nbsp;&nbsp;
 		<FONT SIZE=2>derby client classes</FONT></P>
-		<LI><P STYLE="margin-bottom: 0in"><FONT SIZE=2>db2jcc.jar and
-		db2jcc_license_c.jar<BR></FONT>&nbsp;&nbsp;&nbsp; <FONT SIZE=2>IBM
+		<LI><P STYLE="margin-bottom: 0in"><FONT SIZE=2>
+                db2jcc.jar and db2jcc_license_c.jar
+		<BR><FONT SIZE=2>IBM
 		Universal JDBC Driver classes. (See IBM <A HREF="http://www-106.ibm.com/developerworks/db2/downloads/jcc/">developerworks</A>
-		for download)</FONT></P>
+		for download)</FONT>
+                <BR><b>These jars are optional.  The tests using the IBM 
+                Universal JDBC driver are not run
+                 if these jar files are not present in your classpath</b>
+                </FONT>&nbsp;&nbsp;&nbsp; 
 		<LI><P><FONT SIZE=2>derbyLocale_*.jar</FONT> <BR>&nbsp;&nbsp;&nbsp;
 		<FONT SIZE=2>locale files holding translated messages.</FONT></P>
         <li><P><FONT SIZE=2>junit.jar &nbsp;&nbsp;&nbsp;</li>
@@ -164,7 +169,7 @@ tests. Before you can run, you need to setup your environment:</P>
 				<P><FONT SIZE=2>(note that $jardir is only a convenience variable
 				and that the set CLASSPATH command below has carriage returns for
 				formatting reasons):<BR>set jardir=/local/derbyjar<BR>set
-				CLASSPATH=&quot;$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbynet.jar:$jardir/derbyclient.jar:<BR>$jardir/db2jcc.jar:$jardir/db2jcc_license_c.jar:<BR>$jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<BR>$jardir/derbyLocale_de_DE.jar:$jardir/derbyLocale_es.jar:$jardir/derbyLocale_fr.jar:<BR>$jardir/derbyLocale_it.jar:$jardir/derbyLocale_ja_JP.jar:$jardir/derbyLocale_ko_KR.jar:<BR>$jardir/derbyLocale_pt_BR.jar:$jardir/derbyLocale_zh_CN.jar:$jardir/derbyLocale_zh_TW.jar:<BR>$CLASSPATH</FONT><BR><FONT SIZE=2>set
+				CLASSPATH=&quot;$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbynet.jar:$jardir/derbyclient.jar:<BR>$jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<BR>$jardir/derbyLocale_de_DE.jar:$jardir/derbyLocale_es.jar:$jardir/derbyLocale_fr.jar:<BR>$jardir/derbyLocale_it.jar:$jardir/derbyLocale_ja_JP.jar:$jardir/derbyLocale_ko_KR.jar:<BR>$jardir/derbyLocale_pt_BR.jar:$jardir/derbyLocale_zh_CN.jar:$jardir/derbyLocale_zh_TW.jar:<BR>$CLASSPATH</FONT><BR><FONT SIZE=2>set
 				PATH=/local/jdk141/bin:$PATH</FONT></P>
 			</TD>
 		</TR>
