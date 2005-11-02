@@ -700,9 +700,13 @@
     <property name="derby.jar.topdir" value="${basedir}/jars"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
-     <loadfile srcFile="${basedir}/changenumber.properties"
+    <loadfile srcFile="${basedir}/changenumber.properties"
                failonerror="false"
-               property="changenumber"/>
+               property="changenumber">
+      <filterchain>
+        <striplinebreaks/>
+      </filterchain>
+    </loadfile>    
     <condition property="changenumber" value="???">
       <not>
         <isset property="changenumber"/>
