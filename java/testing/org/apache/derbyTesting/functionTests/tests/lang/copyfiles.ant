@@ -228,6 +228,7 @@ triggerRefClause_app.properties
 triggerStream.sql
 triggerStream_app.properties
 triggerStream_derby.properties
+unaryArithmeticDynamicParameter_app.properties
 ungroupedAggregatesNegative.sql
 union.sql
 unlimited.sql
