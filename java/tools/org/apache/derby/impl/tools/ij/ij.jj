@@ -466,62 +466,73 @@ class ij {
         return array;
 	}
 
-        /**
+	    /**
 	  This is used at the ij startup time to see if there are already some
-          connections made and if so, show connections made so far.
+	      connections made and if so, show connections made so far.
 	  Following also gets executed when user types show connections command
-          in ij. In the former case, ignore0Rows is set whereas in the later cas
+	      in ij. In the former case, ignore0Rows is set whereas in the later cas
 	  it's set to false. The reason for this is, at ij startup time, if there
 	  are no connections made so far, we don't want to show anything. Only if
 	  there are connections made, we show the connections. Whereas in show
 	  connection command case, we want to show the connection status either way
 	  ie if there are no connections, we say no connections. Otherwise we list
 	  all the connections made so far.
-        */
+	    */
 	public ijResult showConnectionsMethod(boolean ignore0Rows) throws SQLException {
-  	  Hashtable ss = currentConnEnv.getSessions();
-	  Vector v = new Vector();
-	  SQLWarning w = null;
-          if (ss == null || ss.size() == 0) {
-             if (!ignore0Rows)
-                v.addElement(LocalizedResource.getMessage("IJ_NoConneAvail"));
-          } else {
-            boolean haveCurrent=false;
-	    int count = 0;
-	    for (Enumeration connectionNames = ss.keys(); connectionNames.hasMoreElements();
-				connectionNames.nextElement()) 
-		    count++;
+  		Hashtable ss = currentConnEnv.getSessions();
+	  	Vector v = new Vector();
+	  	SQLWarning w = null;
+        if (ss == null || ss.size() == 0) {
+        	if (!ignore0Rows)
+            	v.addElement(LocalizedResource.getMessage("IJ_NoConneAvail"));
+        } 
+        else {
+        	boolean haveCurrent=false;
+			int count = 0;
+			for (Enumeration connectionNames = ss.keys(); connectionNames.hasMoreElements();
+						connectionNames.nextElement()) 
+		    	count++;
             String[] array = sortConnectionNames();
-	    for ( int ictr = 0; ictr < count; ictr++ ) {
-			String connectionName = array[ ictr ];
-                Session s = (Session)ss.get(connectionName);
-                if (s.getConnection().isClosed()) {
-                   if (currentConnEnv.getSession() != null && connectionName.equals(currentConnEnv.getSession().getName())) {
-                      currentConnEnv.removeCurrentSession();
-                      theConnection = null;
-                   } else
-                     currentConnEnv.removeSession(connectionName);
-                } else {
-                  StringBuffer row = new StringBuffer();
-                  row.append(connectionName);
-                  if (currentConnEnv.getSession() != null && connectionName.equals(currentConnEnv.getSession().getName())) {
-                     row.append('*');
-                     haveCurrent=true;
-                  }
-                  row.append(" - 	");
-                  row.append(s.getConnection().getMetaData().getURL());
-                  // save the warnings from these connections
-                  w = appendWarnings(w,s.getConnection().getWarnings());
-                  s.getConnection().clearWarnings();
-                  v.addElement(row.toString());
-                }
-            }
-  	    if (haveCurrent)
-               v.addElement(LocalizedResource.getMessage("IJ_CurreConne"));
-	    else
-               v.addElement(LocalizedResource.getMessage("IJ_NoCurreConne"));
-	  }
-	  return new ijVectorResult(v,w);
+		    for ( int ictr = 0; ictr < count; ictr++ ) {
+				String connectionName = array[ ictr ];
+            	Session s = (Session)ss.get(connectionName);
+            	if (s.getConnection().isClosed()) {
+            		if (currentConnEnv.getSession() != null && 
+            				connectionName.equals(currentConnEnv.getSession().getName())) {
+                  		currentConnEnv.removeCurrentSession();
+                  		theConnection = null;
+               		}
+	               	else
+    	            	currentConnEnv.removeSession(connectionName);
+            	}
+            	else {
+            		StringBuffer row = new StringBuffer();
+	              	row.append(connectionName);
+              		if (currentConnEnv.getSession() != null && 
+              			connectionName.equals(currentConnEnv.getSession().getName())) {
+		               	row.append('*');
+                 		haveCurrent=true;
+              		}
+              
+		    	  	//If ij.dataSource property is set, show only connection names.
+		    	  	//In this case, URL is not used to get connection, so do not append URL
+	    		  	String dsName = util.getSystemProperty("ij.dataSource");
+				  	if(dsName == null){	
+                		row.append(" - 	");
+	              		row.append(s.getConnection().getMetaData().getURL());
+	          		}
+              		// save the warnings from these connections
+	              	w = appendWarnings(w,s.getConnection().getWarnings());
+    	          	s.getConnection().clearWarnings();
+        	      	v.addElement(row.toString());
+            	}
+        	}
+  	    	if (haveCurrent)
+            	v.addElement(LocalizedResource.getMessage("IJ_CurreConne"));
+		    else
+            	v.addElement(LocalizedResource.getMessage("IJ_NoCurreConne"));
+	  	}
+	  	return new ijVectorResult(v,w);
 	}
 
 
