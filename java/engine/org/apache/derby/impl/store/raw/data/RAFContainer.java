@@ -792,7 +792,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		dataFactory.writeInProgress();
 		try
 		{
-            if( file.exists())
+            if (file.exists())
                 return file.delete();
 		}
 		finally
@@ -1252,18 +1252,26 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  }
 
                  // maybe it is being stubbified... try that
-                 StorageFile stub = privGetFileName( actionIdentity, true, true, true);
+                 StorageFile stub = 
+                     privGetFileName(actionIdentity, true, true, true);
+
                  if (stub.exists())
                  {
                      try
                      {
+                         boolean delete_status = privRemoveFile(file);
                          if (SanityManager.DEBUG)
-                             SanityManager.DEBUG_PRINT("RAFContainer",
-                                                       "removing file because we opened it while it is being stubbified");
+                         {
+                             if (!delete_status)
+                             {
+                                 SanityManager.THROWASSERT(
+                                     "delete of file (" + file + ") failed.");
+                             }
+                         }
 
-                         privRemoveFile(file);
+                         fileData = 
+                             stub.getRandomAccessFile(canUpdate ? "rw" : "r");
 
-                         fileData = stub.getRandomAccessFile(canUpdate ? "rw" : "r");
                          readHeader(fileData);
                      }
                      catch (IOException ioe2)

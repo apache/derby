@@ -128,8 +128,9 @@ public final class BaseDataFileFactory
     private String subSubProtocol;
     StorageFactory storageFactory;
 
-    /* writableStorageFactory == (WritableStorageFactory) storageFactory if storageFactory also
-     * implements WritableStorageFactory, null if the storageFactory is read-only.
+    /* writableStorageFactory == (WritableStorageFactory) storageFactory if 
+     * storageFactory also implements WritableStorageFactory, null if the 
+     * storageFactory is read-only.
      */
     WritableStorageFactory writableStorageFactory;
 
@@ -203,43 +204,46 @@ public final class BaseDataFileFactory
 
     // PrivilegedAction actions
     private int actionCode;
-    private static final int GET_TEMP_DIRECTORY_ACTION = 1;
-    private static final int REMOVE_TEMP_DIRECTORY_ACTION = 2;
-    private static final int GET_CONTAINER_PATH_ACTION = 3;
-    private ContainerKey containerId;
-    private boolean stub;
-    private static final int GET_ALTERNATE_CONTAINER_PATH_ACTION = 4;
-    private static final int FIND_MAX_CONTAINER_ID_ACTION = 5;
-    private static final int DELETE_IF_EXISTS_ACTION = 6;
-    private static final int GET_PATH_ACTION = 7;
-    private static final int POST_RECOVERY_REMOVE_ACTION = 8;
-    private static final int REMOVE_STUBS_ACTION = 9;
-    private StorageFile actionFile;
-    private static final int BOOT_ACTION = 10;
-    private static final int GET_LOCK_ON_DB_ACTION = 11;
-    private UUID myUUID;
-    private UUIDFactory uuidFactory;
-    private String databaseDirectory;
-    private static final int RELEASE_LOCK_ON_DB_ACTION = 12;
-    private static final int RESTORE_DATA_DIRECTORY_ACTION = 13;
-	private static final int GET_CONTAINER_NAMES_ACTION = 14;
+    private static final int GET_TEMP_DIRECTORY_ACTION              = 1;
+    private static final int REMOVE_TEMP_DIRECTORY_ACTION           = 2;
+    private static final int GET_CONTAINER_PATH_ACTION              = 3;
+    private static final int GET_ALTERNATE_CONTAINER_PATH_ACTION    = 4;
+    private static final int FIND_MAX_CONTAINER_ID_ACTION           = 5;
+    private static final int DELETE_IF_EXISTS_ACTION                = 6;
+    private static final int GET_PATH_ACTION                        = 7;
+    private static final int POST_RECOVERY_REMOVE_ACTION            = 8;
+    private static final int REMOVE_STUBS_ACTION                    = 9;
+    private static final int BOOT_ACTION                            = 10;
+    private static final int GET_LOCK_ON_DB_ACTION                  = 11;
+    private static final int RELEASE_LOCK_ON_DB_ACTION              = 12;
+    private static final int RESTORE_DATA_DIRECTORY_ACTION          = 13;
+    private static final int GET_CONTAINER_NAMES_ACTION             = 14;
 
-    private String backupPath;
-    private File backupRoot;
-    private String[] bfilelist;
+    private ContainerKey    containerId;
+    private boolean         stub;
+    private StorageFile     actionFile;
+    private UUID            myUUID;
+    private UUIDFactory     uuidFactory;
+    private String          databaseDirectory;
+
+    private String          backupPath;
+    private File            backupRoot;
+    private String[]        bfilelist;
 
 	/*
 	** Constructor
 	*/
 
-	public BaseDataFileFactory() {
+	public BaseDataFileFactory() 
+    {
 	}
 
 	/*
 	** Methods of ModuleControl
 	*/
 
-	public boolean canSupport(Properties startParams) {
+	public boolean canSupport(Properties startParams) 
+    {
 
 		String serviceType = startParams.getProperty(PersistentService.TYPE);
 		if (serviceType == null)
@@ -254,7 +258,9 @@ public final class BaseDataFileFactory
 		return true;
 	}
 
-	public void	boot(boolean create, Properties startParams) throws StandardException {
+	public void	boot(boolean create, Properties startParams) 
+        throws StandardException 
+    {
 
 		jbmsVersion = Monitor.getMonitor().getEngineVersion();
 
@@ -269,29 +275,43 @@ public final class BaseDataFileFactory
         try
         {
             storageFactory =
-            ps.getStorageFactoryInstance( true,
-                                          dataDirectory,
-                                          startParams.getProperty(Property.STORAGE_TEMP_DIRECTORY,
-                                                                  PropertyUtil.getSystemProperty(Property.STORAGE_TEMP_DIRECTORY)),
-                                          identifier.toANSIidentifier());
+            ps.getStorageFactoryInstance(
+                true,
+                dataDirectory,
+                startParams.getProperty(
+                    Property.STORAGE_TEMP_DIRECTORY,
+                    PropertyUtil.getSystemProperty(
+                        Property.STORAGE_TEMP_DIRECTORY)),
+                identifier.toANSIidentifier());
         }
-        catch( IOException ioe)
+        catch(IOException ioe)
         {
-            if( create)
-                throw StandardException.newException( SQLState.SERVICE_DIRECTORY_CREATE_ERROR, ioe, dataDirectory);
+            if (create)
+            {
+                throw StandardException.newException(
+                    SQLState.SERVICE_DIRECTORY_CREATE_ERROR, 
+                    ioe, dataDirectory);
+            }
             else
-                throw StandardException.newException( SQLState.DATABASE_NOT_FOUND, ioe, dataDirectory);
+            {
+                throw StandardException.newException(
+                    SQLState.DATABASE_NOT_FOUND, ioe, dataDirectory);
+            }
         }
 
-        if( storageFactory instanceof WritableStorageFactory)
+        if (storageFactory instanceof WritableStorageFactory)
             writableStorageFactory = (WritableStorageFactory) storageFactory;
 
         actionCode = BOOT_ACTION;
 
-        try{
+        try
+        {
             AccessController.doPrivileged( this);
         }
-        catch( PrivilegedActionException pae) { } // BOOT_ACTION does not throw any exceptions.
+        catch (PrivilegedActionException pae)
+        { 
+            // BOOT_ACTION does not throw any exceptions.
+        }
         
         String value =
             startParams.getProperty(Property.FORCE_DATABASE_LOCK,
@@ -303,8 +323,11 @@ public final class BaseDataFileFactory
 		if (!isReadOnly())		// read only db, not interested in filelock
 			getJBMSLockOnDB(identifier, uf, dataDirectory);
 
-		// restoreFrom and createFrom operations also need to know if database is encrypted
-		String dataEncryption = startParams.getProperty(Attribute.DATA_ENCRYPTION);
+		// restoreFrom and createFrom operations also need to know if database 
+        // is encrypted
+		String dataEncryption = 
+            startParams.getProperty(Attribute.DATA_ENCRYPTION);
+
 		databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
 
 		//If the database is being restored/created from backup
@@ -315,11 +338,14 @@ public final class BaseDataFileFactory
 			restoreFrom = startParams.getProperty(Attribute.RESTORE_FROM);
 		if(restoreFrom == null)
 			restoreFrom = startParams.getProperty(Attribute.ROLL_FORWARD_RECOVERY_FROM);
-		if(restoreFrom !=null)
+
+		if (restoreFrom !=null)
 		{
-			try{
+			try
+            {
 				restoreDataDirectory(restoreFrom);
-			}catch(StandardException se)
+			}
+            catch(StandardException se)
 			{
 				releaseJBMSLockOnDB();
 				throw se;
@@ -343,8 +369,9 @@ public final class BaseDataFileFactory
 
 
 
-		CacheFactory cf = (CacheFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
-
+		CacheFactory cf = (CacheFactory) 
+            Monitor.startSystemModule(
+                org.apache.derby.iapi.reference.Module.CacheFactory);
 
 	    int pageCacheSize = getIntParameter(
 					RawStoreFactory.PAGE_CACHE_SIZE_PARAMETER,
@@ -366,14 +393,17 @@ public final class BaseDataFileFactory
                     2,
                     100);
 
-		containerCache = cf.newCacheManager(this, "ContainerCache", fileCacheSize / 2, fileCacheSize);
+		containerCache = 
+            cf.newCacheManager(
+                this, "ContainerCache", fileCacheSize / 2, fileCacheSize);
 
 		if (create)
 		{
 			String noLog =
 				startParams.getProperty(Property.CREATE_WITH_NO_LOG);
 
-			inCreateNoLog = (noLog != null && Boolean.valueOf(noLog).booleanValue());
+			inCreateNoLog = 
+                (noLog != null && Boolean.valueOf(noLog).booleanValue());
 
 		}
 
@@ -405,7 +435,8 @@ public final class BaseDataFileFactory
         fileHandler = new RFResource( this);
 	} // end of boot
 
-	public void	stop() {
+	public void	stop() 
+    {
 		boolean OK = false;
 
 		if (rawStoreFactory != null)
@@ -422,19 +453,21 @@ public final class BaseDataFileFactory
                     getIdentifier()));
 		istream.println(LINE);
 
-		if (!isCorrupt) {
-
-			try {
-				if (pageCache != null && containerCache != null) {
-
+		if (!isCorrupt) 
+        {
+			try 
+            {
+				if (pageCache != null && containerCache != null) 
+                {
 					pageCache.shutdown();
 					containerCache.shutdown();
 
 					OK = true;
 				}
 
-			} catch (StandardException se) {
-
+			} 
+            catch (StandardException se) 
+            {
 				se.printStackTrace(istream.getPrintWriter());
 			}
 		}
@@ -458,8 +491,10 @@ public final class BaseDataFileFactory
 	/*
 	** CacheableFactory
 	*/
-	public Cacheable newCacheable(CacheManager cm) {
-		if (cm == pageCache) {
+	public Cacheable newCacheable(CacheManager cm) 
+    {
+		if (cm == pageCache) 
+        {
 			StoredPage sp = new StoredPage();
 			sp.setFactory(this);
 			return sp;
@@ -491,15 +526,15 @@ public final class BaseDataFileFactory
 	** Methods of DataFactory
 	*/
 	
-	public ContainerHandle openContainer(RawTransaction t, 
-										 ContainerKey containerId, 
-										 LockingPolicy locking, 
-										 int mode)
-		throws StandardException {
-
-			return openContainer(t, containerId, locking, mode,
-						 false /* is not dropped */);
-
+	public ContainerHandle openContainer(
+    RawTransaction  t, 
+    ContainerKey    containerId, 
+    LockingPolicy   locking, 
+    int             mode)
+		throws StandardException 
+    {
+        return openContainer(
+                t, containerId, locking, mode, false /* is not dropped */);
 	}
 
 
@@ -507,43 +542,50 @@ public final class BaseDataFileFactory
 		@see DataFactory#openDroppedContainer
 		@exception StandardException Standard Cloudscape error policy
 	*/
-	public RawContainerHandle openDroppedContainer(RawTransaction t, 
-										 ContainerKey containerId,  
-										 LockingPolicy locking, 
-										 int mode)
+	public RawContainerHandle openDroppedContainer(
+    RawTransaction  t, 
+    ContainerKey    containerId,  
+    LockingPolicy   locking, 
+    int             mode)
 		 throws StandardException  
 	{
 		// since we are opening a possible dropped container
 		// lets not add any actions that will take palce on a commit.
 		mode |= ContainerHandle.MODE_NO_ACTIONS_ON_COMMIT;
 
-			return openContainer(t, containerId, locking, mode,
-								 true /* droppedOK */);
+        return openContainer(
+                t, containerId, locking, mode, true /* droppedOK */);
 	}
 
 	/**
 		@see DataFactory#openContainer
 		@exception StandardException Standard Cloudscape error policy
 	*/
-	private RawContainerHandle openContainer(RawTransaction t, ContainerKey identity,
-										 LockingPolicy locking, 
-										 int mode, boolean droppedOK)
+	private RawContainerHandle openContainer(
+    RawTransaction  t, 
+    ContainerKey    identity,
+    LockingPolicy   locking, 
+    int             mode, 
+    boolean         droppedOK)
 		 throws StandardException
 	{
 
-		if (SanityManager.DEBUG) {
+		if (SanityManager.DEBUG) 
+        {
 
 			if ((mode & (ContainerHandle.MODE_READONLY | ContainerHandle.MODE_FORUPDATE))
 				== (ContainerHandle.MODE_READONLY | ContainerHandle.MODE_FORUPDATE))
+            {
 				SanityManager.THROWASSERT("update and readonly mode specified");
+            }
 
 		}
 
 		boolean waitForLock = ((mode & ContainerHandle.MODE_LOCK_NOWAIT) == 0);
 
 
-		if ((mode & ContainerHandle.MODE_OPEN_FOR_LOCK_ONLY) != 0) {
-			
+		if ((mode & ContainerHandle.MODE_OPEN_FOR_LOCK_ONLY) != 0) 
+        {
 			// Open a container for lock only, we don't care if it exists, is 
             // deleted or anything about it. The container handle we return is
             // closed and cannot be used for fetch or update etc.
@@ -565,29 +607,42 @@ public final class BaseDataFileFactory
 		if (container == null)
 			return null;
 		
-		if (identity.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT) {
+		if (identity.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT) 
+        {
 
-			if (SanityManager.DEBUG) {
+			if (SanityManager.DEBUG) 
+            {
 				SanityManager.ASSERT(container instanceof TempRAFContainer);
 			}
 
-			if ((mode & ContainerHandle.MODE_TEMP_IS_KEPT) == ContainerHandle.MODE_TEMP_IS_KEPT) {
+			if ((mode & ContainerHandle.MODE_TEMP_IS_KEPT) == 
+                    ContainerHandle.MODE_TEMP_IS_KEPT) 
+            {
 				// if the mode is kept, then, we do not want to truncate 
 				mode |= ContainerHandle.MODE_UNLOGGED;
-			} else {
+			} 
+            else 
+            {
 				// this should be OK even if the table was opened read-only
-				mode |= ContainerHandle.MODE_UNLOGGED | ContainerHandle.MODE_TRUNCATE_ON_ROLLBACK;
+				mode |= 
+                    (ContainerHandle.MODE_UNLOGGED | 
+                     ContainerHandle.MODE_TRUNCATE_ON_ROLLBACK);
 			}
 			
 			locking = 
                 t.newLockingPolicy(
                     LockingPolicy.MODE_NONE, 
                     TransactionController.ISOLATION_NOLOCK, true);
-		} else {
-
+		} 
+        else 
+        {
 			// real tables
 			if (inCreateNoLog)
-				mode |= (ContainerHandle.MODE_UNLOGGED | ContainerHandle.MODE_CREATE_UNLOGGED);
+            {
+				mode |= 
+                    (ContainerHandle.MODE_UNLOGGED | 
+                     ContainerHandle.MODE_CREATE_UNLOGGED);
+            }
 
 			// make sure everything is logged if logArchived is turn on
 			// clear all UNLOGGED flag
@@ -595,17 +650,19 @@ public final class BaseDataFileFactory
 				mode &= ~(ContainerHandle.MODE_UNLOGGED |
 						  ContainerHandle.MODE_CREATE_UNLOGGED);
 
-			// if mode is UNLOGGED but not CREATE_HNLOGGED, then force the
+			// if mode is UNLOGGED but not CREATE_UNLOGGED, then force the
 			// container from cache when the transaction commits.  For
 			// CREATE_UNLOGGED, client has the responsibility of forcing the
 			// cache. 
-			if (((mode & ContainerHandle.MODE_UNLOGGED) == ContainerHandle.MODE_UNLOGGED) &&
-				((mode & ContainerHandle.MODE_CREATE_UNLOGGED) == 0)) {
+			if (((mode & ContainerHandle.MODE_UNLOGGED) == 
+                    ContainerHandle.MODE_UNLOGGED) &&
+				((mode & ContainerHandle.MODE_CREATE_UNLOGGED) == 0)) 
+            {
 				mode |= ContainerHandle.MODE_FLUSH_ON_COMMIT;
 			}
 		}
 
-		PageActions pageActions = null;
+		PageActions       pageActions  = null;
 		AllocationActions allocActions = null;
 
 		if ((mode & ContainerHandle.MODE_FORUPDATE) ==
@@ -615,38 +672,38 @@ public final class BaseDataFileFactory
 			if ((mode & ContainerHandle.MODE_UNLOGGED) == 0)
 			{
 				// get the current loggable actions
-				pageActions = getLoggablePageActions();
+				pageActions  = getLoggablePageActions();
 				allocActions = getLoggableAllocationActions();
 				
-			} else {
+			} 
+            else 
+            {
 				// unlogged
-				pageActions = new DirectActions();
+				pageActions  = new DirectActions();
 				allocActions = new DirectAllocActions();
-
-				// RESOLVE: need to get rid of this automatic escalation if
-				// MODE_CREATE_UNLOGGED for sure, why need it at all?
-				//
-				//	locking = t.newLockingPolicy(LockingPolicy.MODE_CONTAINER,
-				//		TransactionController.ISOLATION_SERIALIZABLE, true);
 			}
 		}
 
-		c = new BaseContainerHandle(getIdentifier(), t, pageActions,
-									allocActions, locking, container, mode);	
+		c = new BaseContainerHandle(
+                getIdentifier(), t, pageActions, 
+                allocActions, locking, container, mode);	
 
 		// see if we can use the container
-		try {
-			if (!c.useContainer(droppedOK, waitForLock)) {
+		try 
+        {
+			if (!c.useContainer(droppedOK, waitForLock)) 
+            {
 				containerCache.release(container);
 				return null;
 			}
-		} catch (StandardException se) {
+		} 
+        catch (StandardException se) 
+        {
 			containerCache.release(container);
 			throw se;
 		}
 
 		return c;
-		
 	}
 
 	/** Add a container with a specified page size to a segment.
@@ -661,8 +718,8 @@ public final class BaseDataFileFactory
     int             temporaryFlag)
         throws StandardException
 	{
-		if (SanityManager.DEBUG) {
-
+		if (SanityManager.DEBUG) 
+        {
 			if ((mode & ContainerHandle.MODE_CREATE_UNLOGGED) != 0)
 				SanityManager.ASSERT(
                     (mode & ContainerHandle.MODE_UNLOGGED) != 0,
@@ -712,8 +769,8 @@ public final class BaseDataFileFactory
 		ContainerHandle containerHdl = null;
 		Page            firstPage    = null;
 
-		try {
-
+		try 
+        {
 			// if opening a temporary container with IS_KEPT flag set,
 			// make sure to open it with IS_KEPT too.
 			if (tmpContainer && 
@@ -765,16 +822,20 @@ public final class BaseDataFileFactory
 
 			firstPage = containerHdl.addPage();
 
-		} finally {
+		} 
+        finally 
+        {
 
-			if (firstPage != null) {
+			if (firstPage != null) 
+            {
 				firstPage.unlatch();
 				firstPage = null;
 			}
 			
 			containerCache.release(container);
 
-			if (containerHdl != null) {
+			if (containerHdl != null) 
+            {
 				containerHdl.close();
 				containerHdl = null;
 			}
@@ -794,17 +855,20 @@ public final class BaseDataFileFactory
 	/** Add and load a stream container
 		@exception StandardException Standard Cloudscape error policy
 	*/
-	public long addAndLoadStreamContainer(RawTransaction t, long segmentId,
-			Properties tableProperties, RowSource rowSource)
+	public long addAndLoadStreamContainer(
+    RawTransaction  t, 
+    long            segmentId,
+    Properties      tableProperties, 
+    RowSource       rowSource)
 		throws StandardException
 	{
-
 		long containerId = getNextId();
 
 		ContainerKey identity = new ContainerKey(segmentId, containerId);
 
 		// create and load the stream container
-		StreamFileContainer sContainer = new StreamFileContainer(identity, this, tableProperties);
+		StreamFileContainer sContainer = 
+            new StreamFileContainer(identity, this, tableProperties);
 		sContainer.load(rowSource);
 
 		return containerId;
@@ -853,7 +917,10 @@ public final class BaseDataFileFactory
 
 		@exception StandardException Standard Cloudscape error policy
 	*/
-	public void dropStreamContainer(RawTransaction t, long segmentId, long containerId) 
+	public void dropStreamContainer(
+    RawTransaction  t, 
+    long            segmentId, 
+    long            containerId) 
 		throws StandardException
 	{
 
@@ -864,7 +931,8 @@ public final class BaseDataFileFactory
 		try
 		{
 			ContainerKey ckey = new ContainerKey(segmentId, containerId);
-			// close all open containers and 'onCommit' objects of this container
+
+			// close all open containers and 'onCommit' objects of the container
 			t.notifyObservers(ckey);
 
 			containerHdl = t.openStreamContainer(segmentId, containerId, false);
@@ -888,8 +956,11 @@ public final class BaseDataFileFactory
 
 		@exception StandardException Standard Cloudscape Error policy
 	 */
-	public void reCreateContainerForLoadTran(RawTransaction t, 
-			long segmentId, long containerId, ByteArray containerInfo)
+	public void reCreateContainerForLoadTran(
+    RawTransaction  t, 
+    long            segmentId, 
+    long            containerId, 
+    ByteArray       containerInfo)
 		 throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -914,8 +985,9 @@ public final class BaseDataFileFactory
 	    <P><B>Synchronisation</B>
 		<P>
 		This call will mark the container as dropped and then obtain an CX lock
-		on the container. Once a container has been marked as dropped it cannot
-		be retrieved by an openContainer() call unless explicitly with droppedOK.
+		(table level exclusive lock) on the container. Once a container has 
+        been marked as dropped it cannot be retrieved by an openContainer() 
+        call unless explicitly with droppedOK.
 		<P>
 		Once the exclusive lock has been obtained the container is removed
 		and all its pages deallocated. The container will be fully removed
@@ -923,17 +995,18 @@ public final class BaseDataFileFactory
 
 		@exception StandardException Standard Cloudscape error policy
 	*/
-	public void dropContainer(RawTransaction t, ContainerKey ckey) 
+	public void dropContainer(
+    RawTransaction  t, 
+    ContainerKey    ckey) 
 		 throws StandardException
 	{
-
 		boolean tmpContainer = 
             (ckey.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT);
 
 		LockingPolicy cl = null;
 
-		if (!tmpContainer) {
-
+		if (!tmpContainer) 
+        {
 			if (isReadOnly())
             {
 				throw StandardException.newException(
@@ -987,7 +1060,8 @@ public final class BaseDataFileFactory
 			else
 			{
 				ContainerOperation lop = 
-					new ContainerOperation(containerHdl, ContainerOperation.DROP);
+					new ContainerOperation(
+                            containerHdl, ContainerOperation.DROP);
 
 				// mark the container as pre-dirtied so that if a checkpoint
 				// happens after the log record is sent to the log stream, the
@@ -1006,8 +1080,12 @@ public final class BaseDataFileFactory
 
 
 				// remember this as a post commit work item
-				Serviceable p = new ReclaimSpace(ReclaimSpace.CONTAINER, ckey,
-												 this, true /* service ASAP */);
+				Serviceable p = 
+                    new ReclaimSpace(
+                            ReclaimSpace.CONTAINER, 
+                            ckey, 
+                            this, 
+                            true /* service ASAP */);
 
 				if (SanityManager.DEBUG)
                 {
@@ -1033,18 +1111,22 @@ public final class BaseDataFileFactory
 	}
 
 
-	public void checkpoint() throws StandardException {
+	public void checkpoint() throws StandardException 
+    {
 		pageCache.cleanAll();
 		containerCache.cleanAll();
 	}
 
-	public void idle() throws StandardException {
+	public void idle() throws StandardException 
+    {
 		pageCache.ageOut();
 		containerCache.ageOut();
 	}
 
-	public void setRawStoreFactory(RawStoreFactory rsf, boolean create,
-								   Properties startParams)
+	public void setRawStoreFactory(
+    RawStoreFactory rsf, 
+    boolean         create,
+    Properties      startParams)
 		 throws StandardException
 	{
 
@@ -1064,14 +1146,17 @@ public final class BaseDataFileFactory
 
 		@see DataFactory#getIdentifier
 	*/
-	public UUID getIdentifier() {
+	public UUID getIdentifier() 
+    {
 		return identifier;
 	}
 
 	/*
 	** Called by post commit daemon, calling ReclaimSpace.performWork()
 	*/
-	public int reclaimSpace(Serviceable work, ContextManager contextMgr)
+	public int reclaimSpace(
+    Serviceable     work, 
+    ContextManager  contextMgr)
 		 throws StandardException
 	{
 		if (work == null)
@@ -1084,6 +1169,7 @@ public final class BaseDataFileFactory
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(tran != null, "null transaction");
+
 			if (SanityManager.DEBUG_ON(DaemonService.DaemonTrace))
 				SanityManager.DEBUG(DaemonService.DaemonTrace, 
 									"Performing post commit work " + work);
@@ -1097,7 +1183,8 @@ public final class BaseDataFileFactory
 		Really this is just a convience routine for callers that might not
 		have access to a log factory.
 	*/
-	public StandardException markCorrupt(StandardException originalError) {
+	public StandardException markCorrupt(StandardException originalError) 
+    {
 		boolean firsttime = !isCorrupt;
 
 		isCorrupt = true;
@@ -1125,7 +1212,8 @@ public final class BaseDataFileFactory
 		return originalError;
 	}
 
-	public FileResource getFileHandler() {			
+	public FileResource getFileHandler() 
+    {			
 		return fileHandler;
 	}
 
@@ -1138,7 +1226,13 @@ public final class BaseDataFileFactory
 	** Implementation specific methods
 	*/
 
-	public int getIntParameter(String parameterName, Properties properties, int defaultValue, int minimumValue, int maximumValue) {
+	public int getIntParameter(
+    String      parameterName, 
+    Properties  properties, 
+    int         defaultValue, 
+    int         minimumValue, 
+    int         maximumValue) 
+    {
 
 		int newValue;
 
@@ -1150,13 +1244,17 @@ public final class BaseDataFileFactory
 		if (parameter == null)
 			parameter = PropertyUtil.getSystemProperty(parameterName);
 
-		if (parameter != null) {
-
-			try {
+		if (parameter != null) 
+        {
+			try 
+            {
 				newValue = Integer.parseInt(parameter);
+
 				if ((newValue >= minimumValue) && (newValue <= maximumValue)) 
-						return newValue;
-			} catch (NumberFormatException nfe) {
+                    return newValue;
+			} 
+            catch (NumberFormatException nfe) 
+            {
 				// just leave the size at the default.				
 			}
 		}
@@ -1164,40 +1262,54 @@ public final class BaseDataFileFactory
 		return defaultValue;
 	}
 
-	CacheManager getContainerCache() {
+	CacheManager getContainerCache() 
+    {
 		return containerCache;
 	}
 
-	CacheManager getPageCache() {
+	CacheManager getPageCache() 
+    {
 		return pageCache;
 	}
 
-	public long[] getCacheStats(String cacheName) {
+	public long[] getCacheStats(String cacheName) 
+    {
 
-		if (cacheName == null) {
+		if (cacheName == null) 
+        {
 			// cache name is not specified, return the default.
 			return getPageCache().getCacheStats();
 		}
 
-		if (cacheName.equals("pageCache")) {
+		if (cacheName.equals("pageCache")) 
+        {
 			return getPageCache().getCacheStats();
-		} else
+		} 
+        else
+        {
 			// return default set of cache.
 			return getPageCache().getCacheStats();
+        }
 	}
 
-	public void resetCacheStats(String cacheName) {
-		if (cacheName == null) {
+	public void resetCacheStats(String cacheName) 
+    {
+		if (cacheName == null) 
+        {
 			// cache name is not specified, return the default.
 			getPageCache().resetCacheStats();
 			return;
 		}
 
-		if (cacheName.equals("pageCache")) {
+		if (cacheName.equals("pageCache")) 
+        {
 			getPageCache().resetCacheStats();
-		} else
+		} 
+        else
+        {
 			// default
 			getPageCache().resetCacheStats();
+        }
 	}
 
 	/**
@@ -1231,14 +1343,17 @@ public final class BaseDataFileFactory
 	}
 
 
-	RawStoreFactory getRawStoreFactory() {
+	RawStoreFactory getRawStoreFactory() 
+    {
 		return rawStoreFactory;
 	}
 
 	/**
-		Get the root directory of the data storage area. Is always guaranteed to be an absolute path.
+		Get the root directory of the data storage area. Is always guaranteed 
+        to be an absolute path.
 	*/
-	public String getRootDirectory() {
+	public String getRootDirectory() 
+    {
 		return dataDirectory;
 	}
 
@@ -1289,7 +1404,7 @@ public final class BaseDataFileFactory
 	}
 
 	/**
-	 * Get the loggable allocation action that is associated with this implementation
+	 * Get the loggable allocation action associated with this implementation
 	 *
 	 * @return the PageActions
 	 */
@@ -1307,7 +1422,11 @@ public final class BaseDataFileFactory
         {
             return (StorageFile) AccessController.doPrivileged( this);
         }
-        catch( PrivilegedActionException pae){ return null;} // getTempDirectory does not actually throw an exception
+        catch (PrivilegedActionException pae)
+        {  
+            // getTempDirectory does not actually throw an exception
+            return null;
+        } 
     }
     
     private synchronized void removeTempDirectory()
@@ -1319,9 +1438,12 @@ public final class BaseDataFileFactory
             {
                 AccessController.doPrivileged( this);
             }
-            catch( PrivilegedActionException pae){} // removeTempDirectory does not throw an exception
+            catch (PrivilegedActionException pae)
+            {
+                // removeTempDirectory does not throw an exception
+            }
         }
-    } // end of removeTempDirectory
+    } 
 
     /**
      * Return the path to a container file.
@@ -1360,13 +1482,13 @@ public final class BaseDataFileFactory
     ContainerKey    containerId, 
     boolean         stub) 
     {
-        return getContainerPath( containerId, stub, GET_CONTAINER_PATH_ACTION);
+        return getContainerPath(containerId, stub, GET_CONTAINER_PATH_ACTION);
     }
 
     private synchronized StorageFile getContainerPath(
-        ContainerKey containerId, 
-        boolean stub,
-        int code)
+    ContainerKey    containerId, 
+    boolean         stub,
+    int             code)
     {
         actionCode = code;
         try
@@ -1377,14 +1499,21 @@ public final class BaseDataFileFactory
             {
                 return (StorageFile) AccessController.doPrivileged( this);
             }
-            catch( PrivilegedActionException pae){ return null;} // getContainerPath does not throw an exception
+            catch (PrivilegedActionException pae)
+            { 
+                // getContainerPath does not throw an exception
+                return null;
+            }
         }
-        finally { this.containerId = null; }
+        finally 
+        { 
+            this.containerId = null; 
+        }
 	}
 
 
 	/**
-		Return an alternate path to a container file that is relative to the root directory.
+		Return an alternate path to container file relative to the root directory.
         The alternate path uses upper case 'C','D', and 'DAT' instead of 
         lower case - there have been cases of people copying the database and
         somehow upper casing all the file names.
@@ -1395,9 +1524,12 @@ public final class BaseDataFileFactory
 		@param stub True if the file name for the stub is requested, otherwise the file name for the data file
 
 	*/
-	public StorageFile getAlternateContainerPath(ContainerKey containerId, boolean stub)
+	public StorageFile getAlternateContainerPath(
+    ContainerKey    containerId, 
+    boolean         stub)
     {
-        return getContainerPath( containerId, stub, GET_ALTERNATE_CONTAINER_PATH_ACTION);
+        return getContainerPath(
+                    containerId, stub, GET_ALTERNATE_CONTAINER_PATH_ACTION);
 	}
 
 
@@ -1412,7 +1544,10 @@ public final class BaseDataFileFactory
         {
             AccessController.doPrivileged( this);
         }
-        catch( PrivilegedActionException pae){} // removeStubs does not throw an exception
+        catch (PrivilegedActionException pae)
+        {
+            // removeStubs does not throw an exception
+        } 
 	}
 
 	/**
@@ -1425,47 +1560,55 @@ public final class BaseDataFileFactory
 	 * We maintain the information in a hashtable:
 	 * key(LOG INSTANT) Values: File handle , and ContainerIdentity.
 	 **/
-	public void stubFileToRemoveAfterCheckPoint(StorageFile file, LogInstant
-												logInstant, Object identity) {
+	public void stubFileToRemoveAfterCheckPoint(
+    StorageFile file, 
+    LogInstant  logInstant, 
+    Object      identity) 
+    {
 		if(droppedTableStubInfo != null)
 		{
 			Object[] removeInfo = new Object[2];
-			removeInfo[0] = file;
-			removeInfo[1] = identity;
+			removeInfo[0]       = file;
+			removeInfo[1]       = identity;
 			droppedTableStubInfo.put(logInstant, removeInfo);
 		}
 	}    
 
 	/**
-	 * Delete the stub files thare not required for recovery. A stub files
+	 * Delete the stub files that are not required for recovery. A stub file
 	 * is not required to be around if the recovery is not going to see
-	 * any log record that belong to that container. Since the stub files
-	 * are create as a post commit operations, they are not necessary during
+	 * any log record that belongs to that container. Since the stub files
+	 * are created as a post commit operation, they are not necessary during
 	 * undo operation of the recovery.
 	 *
 	 * To remove a stub file we have to be sure that it was created before the
 	 * redoLWM in the check point record. We can be sure that the stub is not
-	 * require if the log instant when it was created is less than the redoLWM. 
+	 * required if the log instant when it was created is less than the redoLWM.
 	 */
-	public void removeDroppedContainerFileStubs(LogInstant redoLWM) throws StandardException
+	public void removeDroppedContainerFileStubs(
+    LogInstant redoLWM) 
+        throws StandardException
 	{
 	
 		if (droppedTableStubInfo != null) 
 		{
 			synchronized(droppedTableStubInfo)
 			{
-				for (Enumeration e = droppedTableStubInfo.keys(); e.hasMoreElements(); ) 
+				for (Enumeration e = droppedTableStubInfo.keys(); 
+                     e.hasMoreElements(); ) 
 				{
 					LogInstant logInstant  = (LogInstant) e.nextElement();
 					if(logInstant.lessThan(redoLWM))
 					{
 						
-						Object[] removeInfo = (Object[]) droppedTableStubInfo.get(logInstant);
+						Object[] removeInfo = 
+                            (Object[]) droppedTableStubInfo.get(logInstant);
 						Object identity = removeInfo[1];
 						//delete the entry in the container cache.
 						Cacheable ccentry =	containerCache.findCached(identity);
 						if(ccentry!=null)
 							containerCache.remove(ccentry);
+
 						//delete the stub we don't require it during recovery
                         synchronized( this)
                         {
@@ -1475,12 +1618,15 @@ public final class BaseDataFileFactory
                             {
                                 if (AccessController.doPrivileged(this) != null) 
                                 {
-                                    //if we successfuly delete the file remove it 
-                                    //from the hash table.
+                                    //if we successfuly delete the file remove 
+                                    //it from the hash table.
                                     droppedTableStubInfo.remove(logInstant);
                                 }
                             }
-                            catch( PrivilegedActionException pae) {} // DELETE_IF_EXISTS does not throw an exception
+                            catch (PrivilegedActionException pae)
+                            {
+                                // DELETE_IF_EXISTS does not throw an exception
+                            }
                         }
 					}
 				}
@@ -1511,38 +1657,57 @@ public final class BaseDataFileFactory
 	private synchronized long findMaxContainerId()
 	{
         actionCode = FIND_MAX_CONTAINER_ID_ACTION;
-        try{
+        try
+        {
             return ((Long) AccessController.doPrivileged( this)).longValue();
         }
-        catch( PrivilegedActionException pae){ return 0;} // findMaxContainerId does not throw an exception
+        catch (PrivilegedActionException pae)
+        { 
+            // findMaxContainerId does not throw an exception
+            return 0;
+        }
 	}
 
-	private void bootLogFactory(boolean create, Properties startParams) throws StandardException {
+	private void bootLogFactory(
+    boolean     create, 
+    Properties  startParams) 
+        throws StandardException 
+    {
 
 		if (isReadOnly())
-			startParams.put(LogFactory.RUNTIME_ATTRIBUTES, LogFactory.RT_READONLY);
+        {
+			startParams.put(
+                LogFactory.RUNTIME_ATTRIBUTES, LogFactory.RT_READONLY);
+        }
 
 		logFactory = (LogFactory)
-			Monitor.bootServiceModule(create, this, 
-									  rawStoreFactory.getLogFactoryModule(), 
-									  startParams);
+			Monitor.bootServiceModule(
+                create, this, 
+                rawStoreFactory.getLogFactoryModule(), startParams);
 	}
 
 
 	/**
 		Does this factory support this service type.
 	*/
-	private boolean handleServiceType( Properties startParams, String type) {
+	private boolean handleServiceType(
+    Properties  startParams, 
+    String      type) 
+    {
         try
         {
-            PersistentService ps = Monitor.getMonitor().getServiceProvider( startParams, type);
+            PersistentService ps = 
+                Monitor.getMonitor().getServiceProvider( startParams, type);
             return ps != null && ps.hasStorageFactory();
         }
-        catch( StandardException se){ return false;}
+        catch (StandardException se)
+        { 
+            return false;
+        }
 	}
 
 	/**
-		check to see if we are the only JBMS opened agains this database.
+		check to see if we are the only JBMS opened against this database.
 
 		<BR>This method does nothing if this database is read only or we cannot
 		access files directly on the database directory.
@@ -1554,7 +1719,7 @@ public final class BaseDataFileFactory
 
 		<BR>If the db.lck file already exists when we boot this database, we
 		try to delete it first, assuming that an opened RandomAccessFile can
-		act as a file lock against delete.  If that succeed, we may hold a
+		act as a file lock against delete.  If that succeeds, we may hold a
 		file lock against subsequent JBMS that tries to attach to this
 		database before we exit.
 
@@ -1572,7 +1737,10 @@ public final class BaseDataFileFactory
 		@exception StandardException another JBMS is already attached to the
 		database at this directory
 	*/
-	private void getJBMSLockOnDB( UUID myUUID, UUIDFactory uuidFactory, String databaseDirectory)
+	private void getJBMSLockOnDB(
+    UUID        myUUID, 
+    UUIDFactory uuidFactory, 
+    String      databaseDirectory)
 		 throws StandardException
 	{
 		if (fileLockOnDB != null) // I already got the lock!
@@ -1597,7 +1765,10 @@ public final class BaseDataFileFactory
             {
                 AccessController.doPrivileged( this);
             }
-            catch( PrivilegedActionException pae) { throw (StandardException) pae.getException(); }
+            catch (PrivilegedActionException pae) 
+            { 
+                throw (StandardException) pae.getException(); 
+            }
             finally
             {
                 this.myUUID = null;
@@ -1663,7 +1834,9 @@ public final class BaseDataFileFactory
             // SECURITY PERMISSION OP5
             fileLockOnDB = fileLock.getRandomAccessFile( "rw");
 
-            fileLockOnDB.writeUTF(myUUID.toString()); // write it out for future reference
+            // write it out for future reference
+            fileLockOnDB.writeUTF(myUUID.toString()); 
+
             fileLockOnDB.sync( false);
             fileLockOnDB.seek(0);
             // check the UUID
@@ -1702,20 +1875,21 @@ public final class BaseDataFileFactory
             args[2] = blownUUID;
 
             //Try the exlcusive file lock method approach available in jdk1.4 or
-            //above jvms where delete machanism  does not reliably prevent double booting of 
-            //cloudscape databases. If we don't get a reliable exclusive
-            //lock still we send out a warning.
+            //above jvms where delete machanism  does not reliably prevent 
+            //double booting of derby databases. If we don't get a reliable 
+            //exclusive lock still we send out a warning.
 
             int exLockStatus = StorageFile.NO_FILE_LOCK_SUPPORT ;
             //If user has chosen to force lock option don't bother
             //about applying exclusive file lock mechanism 
             if(!throwDBlckException)
             {
-                exFileLock = storageFactory.newStorageFile( DB_EX_LOCKFILE_NAME);
+                exFileLock   = 
+                    storageFactory.newStorageFile( DB_EX_LOCKFILE_NAME);
                 exLockStatus = exFileLock.getExclusiveFileLock();
             }
 
-            if(exLockStatus == StorageFile.NO_FILE_LOCK_SUPPORT)
+            if (exLockStatus == StorageFile.NO_FILE_LOCK_SUPPORT)
             {
                 if (fileLockExisted && !throwDBlckException)
                 {
@@ -1725,12 +1899,14 @@ public final class BaseDataFileFactory
                           SQLState.DATA_MULTIPLE_JBMS_WARNING, args);
 
                     String warningMsg = 
-                      MessageService.getCompleteMessage(SQLState.DATA_MULTIPLE_JBMS_WARNING, args);
+                      MessageService.getCompleteMessage(
+                          SQLState.DATA_MULTIPLE_JBMS_WARNING, args);
 
                     logMsg(warningMsg);
 
                     // RESOLVE - need warning support.  Output to
-                    // system.err.println rather than just send warning message to db2j.LOG
+                    // system.err.println rather than just send warning 
+                    // message to derby.log.
                     System.err.println(warningMsg);
 
                 }
@@ -1741,11 +1917,15 @@ public final class BaseDataFileFactory
             try
             {
                 // the existing fileLockOnDB file descriptor may already be
-                // deleted by the delete call, close it and create the file again
+                // deleted by the delete call, close it and create the file 
+                // again
                 if(fileLockOnDB != null)
                     fileLockOnDB.close();
                 fileLockOnDB = fileLock.getRandomAccessFile( "rw");
-                fileLockOnDB.writeUTF(myUUID.toString()); // write it out for future reference
+
+                // write it out for future reference
+                fileLockOnDB.writeUTF(myUUID.toString()); 
+
                 fileLockOnDB.sync( false);
                 fileLockOnDB.close();
             }
@@ -1756,7 +1936,9 @@ public final class BaseDataFileFactory
                     fileLockOnDB.close();
                 }
                 catch (IOException ioe2)
-                { /* did the best I could */ }
+                { 
+                    /* did the best I could */ 
+                }
             }
             finally
             {
@@ -1811,9 +1993,11 @@ public final class BaseDataFileFactory
         if (fileLockOnDB != null)
             fileLockOnDB.close();
 
-        if( storageFactory != null)
+        if (storageFactory != null)
         {
-            StorageFile fileLock = storageFactory.newStorageFile(DB_LOCKFILE_NAME);
+            StorageFile fileLock = 
+                storageFactory.newStorageFile(DB_LOCKFILE_NAME);
+
             fileLock.delete();
         }
 
@@ -1840,18 +2024,28 @@ public final class BaseDataFileFactory
 		return databaseEncrypted;
 	}
 
-	public int encrypt(byte[] cleartext, int offset, int length, 
-						  byte[] ciphertext, int outputOffset)
+	public int encrypt(
+    byte[]  cleartext, 
+    int     offset, 
+    int     length, 
+    byte[]  ciphertext, 
+    int     outputOffset)
 		 throws StandardException
 	{
-		return rawStoreFactory.encrypt(cleartext, offset, length, ciphertext, outputOffset);
+		return rawStoreFactory.encrypt(
+                    cleartext, offset, length, ciphertext, outputOffset);
 	}
 
-	public int decrypt(byte[] ciphertext, int offset, int length,
-							 byte[] cleartext, int outputOffset)
+	public int decrypt(
+    byte[]  ciphertext, 
+    int     offset, 
+    int     length,
+    byte[]  cleartext, 
+    int     outputOffset)
 		 throws StandardException
 	{
-		return rawStoreFactory.decrypt(ciphertext, offset, length, cleartext, outputOffset);
+		return rawStoreFactory.decrypt(
+                ciphertext, offset, length, cleartext, outputOffset);
 	}
 
 	/**
@@ -1863,7 +2057,8 @@ public final class BaseDataFileFactory
 		return rawStoreFactory.getEncryptionBlockSize();
 	}
 
-	public String getVersionedName(String name, long generationId) {
+	public String getVersionedName(String name, long generationId) 
+    {
 		return name.concat(".G".concat(Long.toString(generationId)));
 	}
 
@@ -1899,7 +2094,8 @@ public final class BaseDataFileFactory
 	/**
 		Add a file to the list of files to be removed post recovery.
 	*/
-	void fileToRemove( StorageFile file, boolean remove) {
+	void fileToRemove( StorageFile file, boolean remove) 
+    {
 		if (postRecoveryRemovedFiles == null)
 			postRecoveryRemovedFiles = new Hashtable();
         String path = null;
@@ -1911,7 +2107,10 @@ public final class BaseDataFileFactory
             {
                 path = (String) AccessController.doPrivileged( this);
             }
-            catch( PrivilegedActionException pae) {} // GET_PATH does not throw an exception
+            catch (PrivilegedActionException pae) 
+            {
+                // GET_PATH does not throw an exception
+            } 
             finally
             {
                 actionFile = null;
@@ -1929,7 +2128,8 @@ public final class BaseDataFileFactory
 
 		@exception StandardException Standard Cloudscape Error Policy
 	*/
-	public void postRecovery() throws StandardException {
+	public void postRecovery() throws StandardException 
+    {
 
 		// hook up the cache cleaner daemon after recovery is finished
 		DaemonService daemon = rawStoreFactory.getDaemon();
@@ -1940,8 +2140,8 @@ public final class BaseDataFileFactory
 		containerCache.useDaemonService(daemon);
 
 		pageCache.useDaemonService(daemon);
-		if (postRecoveryRemovedFiles != null) {
-
+		if (postRecoveryRemovedFiles != null) 
+        {
             synchronized( this)
             {
                 actionCode = POST_RECOVERY_REMOVE_ACTION;
@@ -1949,7 +2149,10 @@ public final class BaseDataFileFactory
                 {
                     AccessController.doPrivileged( this);
                 }
-                catch( PrivilegedActionException pae){} // POST_RECOVERY_REMOVE does not throw an exception
+                catch (PrivilegedActionException pae)
+                {
+                    // POST_RECOVERY_REMOVE does not throw an exception
+                }
             }
 			postRecoveryRemovedFiles = null;
 		}
@@ -2156,16 +2359,18 @@ public final class BaseDataFileFactory
 	 * This function gets called only when any of the folling attributes
 	 * are specified on connection URL:
 	 * Attribute.CREATE_FROM (Create database from backup if it does not exist)
-	 * Attribute.RESTORE_FROM (Delete the whole database if it exists and then restore
-	 * it from backup)
+	 * Attribute.RESTORE_FROM (Delete the whole database if it exists and 
+     *     then restore * it from backup)
 	 * Attribute.ROLL_FORWARD_RECOVERY_FROM:(Perform Rollforward Recovery;
 	 * except for the log directory everthing else is replced  by the copy  from
-	 * backup. log files in the backup are copied to the existing online log directory.
+	 * backup. log files in the backup are copied to the existing online log 
+     * directory.
 	 *
 	 * In all the cases, data directory(seg*) is replaced by the data directory
 	 * directory from backup when this function is called.
 	 */
-	private void restoreDataDirectory(String backupPath) throws StandardException
+	private void restoreDataDirectory(String backupPath) 
+        throws StandardException
 	{
         File bsegdir;   //segment directory in the backup
         File backupRoot = new java.io.File(backupPath);	//root dir of backup db
@@ -2173,8 +2378,8 @@ public final class BaseDataFileFactory
         /* To be safe we first check if the backup directory exist and it has
          * atleast one seg* directory before removing the current data directory.
          *
-         * This will fail with a security exception unless the database engine and all
-         * its callers have permission to read the backup directory.
+         * This will fail with a security exception unless the database engine 
+         * and all its callers have permission to read the backup directory.
          */
         String[] bfilelist = backupRoot.list();
         if(bfilelist !=null)
@@ -2195,14 +2400,20 @@ public final class BaseDataFileFactory
             }
 		
             if(!segmentexist)
+            {
                 throw
-                  StandardException.newException(SQLState.DATA_DIRECTORY_NOT_FOUND_IN_BACKUP, backupRoot);
-        }else{
+                  StandardException.newException(
+                      SQLState.DATA_DIRECTORY_NOT_FOUND_IN_BACKUP, backupRoot);
+            }
+        }
+        else
+        {
 			
-            throw StandardException.newException(SQLState.DATA_DIRECTORY_NOT_FOUND_IN_BACKUP, backupRoot);
+            throw StandardException.newException(
+                    SQLState.DATA_DIRECTORY_NOT_FOUND_IN_BACKUP, backupRoot);
         }
 
-        synchronized( this)
+        synchronized (this)
         {
             actionCode = RESTORE_DATA_DIRECTORY_ACTION;
             this.backupPath = backupPath;
@@ -2212,7 +2423,10 @@ public final class BaseDataFileFactory
             {
                 AccessController.doPrivileged( this);
             }
-            catch( PrivilegedActionException pae){ throw (StandardException) pae.getException();}
+            catch (PrivilegedActionException pae)
+            { 
+                throw (StandardException) pae.getException();
+            }
             finally
             {
                 this.backupPath = null;
@@ -2224,8 +2438,9 @@ public final class BaseDataFileFactory
 
     private void privRestoreDataDirectory() throws StandardException
     {
-        StorageFile csegdir;	//segement directory in the current db home
-        StorageFile dataRoot = storageFactory.newStorageFile( null); //roor dir of db
+        StorageFile csegdir;	//segment directory in the current db home
+        StorageFile dataRoot = 
+            storageFactory.newStorageFile( null); //root dir of db
 
         //Remove the seg* directories in the current database home directory
         String[] cfilelist = dataRoot.list();
@@ -2240,7 +2455,9 @@ public final class BaseDataFileFactory
                     if(!csegdir.deleteAll())
                     {
                         throw
-                          StandardException.newException(SQLState.UNABLE_TO_REMOVE_DATA_DIRECTORY, csegdir);
+                          StandardException.newException(
+                              SQLState.UNABLE_TO_REMOVE_DATA_DIRECTORY, 
+                              csegdir);
                     }
                 }
             }
@@ -2250,30 +2467,40 @@ public final class BaseDataFileFactory
         for (int i = 0; i < bfilelist.length; i++) 
         {
             //copy only the seg* directories and copy them from backup
-            if(bfilelist[i].startsWith("seg"))
+            if (bfilelist[i].startsWith("seg"))
             {
                 csegdir = storageFactory.newStorageFile( bfilelist[i]);
                 File bsegdir1 = new java.io.File(backupRoot, bfilelist[i]);
-                if(!FileUtil.copyDirectory( writableStorageFactory, bsegdir1, csegdir))
+                if (!FileUtil.copyDirectory( 
+                        writableStorageFactory, bsegdir1, csegdir))
                 {
                     throw
-                      StandardException.newException(SQLState.UNABLE_TO_COPY_DATA_DIRECTORY, bsegdir1, csegdir);
+                      StandardException.newException(
+                          SQLState.UNABLE_TO_COPY_DATA_DIRECTORY, 
+                          bsegdir1, csegdir);
                 }
             }
-	    // Case of encrypted database and usage of an external encryption key, there is an extra
-            // file with name given by Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE that needs to be
-            // copied over during createFrom/restore operations.
-            else
-            if( databaseEncrypted && bfilelist[i].startsWith(Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE))
+            else if (databaseEncrypted && 
+                     bfilelist[i].startsWith(
+                         Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE))
             {
-		//copy the file
-		File fromFile = new File(backupRoot,bfilelist[i]);
-		StorageFile toFile = storageFactory.newStorageFile(bfilelist[i]);
+                // Case of encrypted database and usage of an external 
+                // encryption key, there is an extra file with name given by 
+                // Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE that needs to be
+                // copied over during createFrom/restore operations.
 
-		if(!FileUtil.copyFile(writableStorageFactory,fromFile,toFile))
-		    throw StandardException.newException(SQLState.UNABLE_TO_COPY_DATA_DIRECTORY,
-	    									bfilelist[i], toFile);
-	    }
+                //copy the file
+                File        fromFile = new File(backupRoot,bfilelist[i]);
+                StorageFile toFile   = 
+                    storageFactory.newStorageFile(bfilelist[i]);
+
+                if (!FileUtil.copyFile(writableStorageFactory,fromFile,toFile))
+                {
+                    throw StandardException.newException(
+                            SQLState.UNABLE_TO_COPY_DATA_DIRECTORY, 
+                            bfilelist[i], toFile);
+                }
+            }
         }
 
     } // end of privRestoreDataDirectory
@@ -2281,7 +2508,8 @@ public final class BaseDataFileFactory
 	/**
 		Is the store read-only.
 	*/
-	public boolean isReadOnly() {
+	public boolean isReadOnly() 
+    {
 		// return what the baseDataFileFactory thinks
 		return readOnly;
 	}
@@ -2345,7 +2573,9 @@ public final class BaseDataFileFactory
             {
                 if (segs[s].startsWith("seg"))
                 {
-                    StorageFile seg = storageFactory.newStorageFile(root, segs[s]);
+                    StorageFile seg = 
+                        storageFactory.newStorageFile(root, segs[s]);
+
                     if (seg.exists() && seg.isDirectory())
                     {
                         String[] files = seg.list();
@@ -2353,11 +2583,26 @@ public final class BaseDataFileFactory
                         {
                             // stub
                             if (files[f].startsWith("D") ||
-                                // below is for track 3444
                                 files[f].startsWith("d"))
                             {
-                                StorageFile stub = storageFactory.newStorageFile(root, segs[s] + separator + files[f]);
-                                stub.delete();
+                                StorageFile stub = 
+                                    storageFactory.newStorageFile(
+                                        root, segs[s] + separator + files[f]);
+
+                                boolean delete_status = stub.delete();
+                                
+                                if (SanityManager.DEBUG)
+                                {
+                                    // delete should always work, code which
+                                    // created the StorageFactory already 
+                                    // checked for existence.
+                                    if (!delete_status)
+                                    {
+                                        SanityManager.THROWASSERT(
+                                            "delete of stub (" + 
+                                            stub + ") failed.");
+                                    }
+                                }
                             }
                         }
                     }
@@ -2383,16 +2628,17 @@ public final class BaseDataFileFactory
                     {
                         long fileNumber = 
                           Long.parseLong(
-                              files[f].substring(1, (files[f].length() -4)), 16);
+                              files[f].substring(
+                                  1, (files[f].length() -4)), 16);
 
                         if (fileNumber > maxnum)
                             maxnum = fileNumber;
                     }
                     catch (Throwable t)
                     {
-                        // ignore errors from parse, it just means that someone put
-                        // a file in seg0 that we didn't expect.  Continue with the
-                        // next one.
+                        // ignore errors from parse, it just means that someone 
+                        // put a file in seg0 that we didn't expect.  Continue 
+                        // with the next one.
                     }
                 }
             }
@@ -2414,13 +2660,30 @@ public final class BaseDataFileFactory
         } // end of case GET_PATH_ACTION
 
         case POST_RECOVERY_REMOVE_ACTION:
-			for (Enumeration e = postRecoveryRemovedFiles.elements(); e.hasMoreElements(); )
+        {
+			for (Enumeration e = postRecoveryRemovedFiles.elements(); 
+                    e.hasMoreElements(); )
             {
 				StorageFile f = (StorageFile) e.nextElement();
 				if (f.exists())
-					f.delete();
+                {
+					boolean delete_status = f.delete();
+
+                    if (SanityManager.DEBUG)
+                    {
+                        // delete should always work, code which
+                        // created the StorageFactory already 
+                        // checked for existence.
+                        if (!delete_status)
+                        {
+                            SanityManager.THROWASSERT(
+                                "delete of stub (" + stub + ") failed.");
+                        }
+                    }
+                }
 			}
             return null;
+        }
 
         case GET_LOCK_ON_DB_ACTION:
             privGetJBMSLockOnDB();
