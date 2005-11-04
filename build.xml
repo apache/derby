@@ -1269,7 +1269,13 @@
     <ant dir="${derby.engine.dir}/jdbc" target="compile_jdbc2"/>
   </target>
 
-  <target name="gump_split_7" depends="all,buildjars,javadoc"/>
+  <target name="gump_split_7" depends="buildsource"/>
+  
+  <target name="gump_split_8">
+    <ant dir="${derby.testing.src.dir}/${derby.testing.dir}/functionTests/tests/compatibility" target="compilex"/>
+  </target>
+  
+  <target name="gump_split_9" depends="all,buildjars,javadoc"/>
 
   <target name="snapshot" depends="clobber,snapshotError,init,initjars">
     <antcall target="insane"/>
