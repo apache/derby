@@ -53,7 +53,7 @@ values (2,3)
 [ Results ]: (NO RESULT SET)
 [ Test Statement ]:
  --singleword
-call proc1()
+call za()
 [ Results ]: (NO RESULT SET)
 [ Test Statement ]:
  -- leading comment

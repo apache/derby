@@ -142,11 +142,10 @@ public class nullSQLText {
 
 		st.execute("create table t1 (i int)");
 		st.execute("insert into t1 values 1, 2, 3, 4, 5, 6, 7");
-		st.execute("create procedure proc1() language java " +
-			"parameter style java dynamic result sets 1 " +
-			"external name 'org.apache.derbyTesting.functionTests." +
-			"tests.jdbcapi.nullSQLText.sp1'");
-
+		st.execute("create procedure za() language java external name " +
+			"'org.apache.derbyTesting.functionTests.util.ProcedureTest.zeroArg'" +
+			" parameter style java");
+		
 		// These we expect to fail with syntax errors, as in embedded mode.
 		testCommentStmt(st, " --", true);
 		testCommentStmt(st, " -- ", true);
@@ -175,7 +174,7 @@ public class nullSQLText {
 			" --singleword\n insert into t1 values (8)",
 			TestUtil.isJCCFramework());
 		testCommentStmt(st,
-			" --singleword\ncall proc1()",
+			" --singleword\ncall za()",
 			TestUtil.isJCCFramework());
 		testCommentStmt(st,
 			" -- leading comment\n(\nvalues 4, 8)",
@@ -239,19 +238,4 @@ public class nullSQLText {
 		}
 
 	}
-
-	/* ****
-	 * Helper method for derby522.
-	 */
-	public static void sp1(ResultSet [] rs) throws SQLException {
-
-		Connection conn = DriverManager.getConnection(
-			"jdbc:default:connection");
-
-		Statement st = conn.createStatement();
-		rs[0] = st.executeQuery("select i from t1");
-		return;
-
-	}
-
 }
