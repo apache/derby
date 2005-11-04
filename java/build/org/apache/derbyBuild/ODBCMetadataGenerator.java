@@ -23,6 +23,7 @@ package org.apache.derbyBuild;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.FileWriter;
 
 import java.util.Properties;
@@ -230,39 +231,51 @@ public class ODBCMetadataGenerator {
 		// JDBC query that we read from metadata.properties.
 		StringBuffer query = new StringBuffer();
 
-		// We assume no single line/query is greater than 1K in
-		// length, and we'll fail if this isn't the case.  The
-		// limit of 1K was just picked arbitrarily; this can be
-		// increased if needed at a later time.
-		char [] line = new char[1024];
+		// Note: We use ISO-8859-1 because property files are
+		// defined to be that encoding.
+		LineNumberReader reader =
+			new LineNumberReader(new InputStreamReader(is, "ISO-8859-1"));
 
-		for (int count = readLine(is, line);
-		 	count != -1; count = readLine(is, line))
+		String line = null;
+		for (line = reader.readLine(); line != null;
+			line = reader.readLine())
 		{
 
-			if (count == 0)
+			if (line.length() == 0)
 			// blank line; ignore
 				continue;
-			else if (line[0] == '#') {
+			else if (line.charAt(0) == '#') {
 			// comment; write it to file.
-				odbcMetaFile.write(line, 0, count);
+				odbcMetaFile.write(line);
 				odbcMetaFile.write("\n");
 				continue;
 			}
 
-			// Verify that we haven't passed our limit.
-			if (count >= line.length) {
-				throw new IOException(
-					"Encountered line longer than expected when reading metadata " +
-					"file; either shorten the line, or increase the limit...");
+			// Write the line, then add an end-of-line to maintain
+			// readability.
+			query.append(line);
+			query.append("\n");
+
+			// Check to see if this is the last line of the query.
+			boolean done = true;
+			for (int lastNonWS = line.length() - 1;
+				lastNonWS >= 0; lastNonWS--)
+			{
+				char ch = line.charAt(lastNonWS);
+				if (!Character.isWhitespace(ch)) {
+				// this is the last non-whitespace character; if it's
+				// a backslash, then we continue building the query
+				// by reading the next line.
+					if (ch == '\\') {
+					// then continue building the query.
+						done = false;
+					}
+					break;
+				}
 			}
 
-			// "+1" in next line because we added a "\n" at the end and
-			// we want to include that, for sake of easier reading.
-			query.append(line, 0, count+1);
-
-			if (line[count-1] == '\\')
-			// then continue building the query.
+			if (!done)
+			// read next line and append it to current query.
 				continue;
 
 			// Take the query and see if we need to generate an ODBC-
@@ -1055,56 +1068,6 @@ public class ODBCMetadataGenerator {
 			queryText.replace(pos - 1, pos + fragKey.length() + 1,
 				getFragment(fragKey));
 		}
-
-	}
-
-	/* ****
-	 * readLine
-	 * Reads a line from the received input stream and stores it
-	 * into the received character array.  In this method, we
-	 * consider the end of the line to be either 1) "\n" char, or
-	 * 2) a single backslash "\", which is used in metadata
-	 * queries to indicate line continuation.  After reading
-	 * a line, we append an EOL to it for formatting purposes,
-	 * but that last EOL is NOT included in the count of
-	 * characters.
-	 * @param is The input stream from which we're reading.
-	 * @param line The char array into which we're reading.
-	 * @return the number of characters read from the
-	 *	stream; -1 if we reached end of the stream.
-	 */
-	private int readLine(InputStream is, char [] line)
-		throws IOException
-	{
-
-		int count = 0;
-		boolean atLeastOneNonWSChar = false;
-
-		char ch;
-		int byteRead;
-		for (byteRead = is.read();
-			(byteRead != -1) && (count < line.length);
-			byteRead = is.read())
-		{
-			ch = (char)byteRead;
-			line[count++] = ch;
-			atLeastOneNonWSChar = true;
-			if ((ch == '\\') || (ch == '\n'))
-				break;
-		}
-
-		if ((byteRead == -1) && (count == 0))
-		// end of file.
-			return -1;
-
-		// Take off trailing whitespace.
-		while ((count > 0) && Character.isWhitespace(line[count-1]))
-			count--;
-
-		// Add an EOL for ease of reading, but don't include it in
-		// "count" total.
-		line[count] = '\n';
-		return count;
 
 	}
 
