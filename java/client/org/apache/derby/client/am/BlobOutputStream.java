@@ -41,6 +41,7 @@ public class BlobOutputStream extends java.io.OutputStream {
         blob_.binaryString_[(int) offset_ + blob_.dataOffset_ - 1] = (byte) b;
         blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
         blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
+        offset_++;
     }
 
     public void write(byte b[], int off, int len) throws java.io.IOException {

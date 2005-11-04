@@ -34,12 +34,15 @@ public class ClobOutputStream extends java.io.OutputStream {
     }
 
     public void write(int b) throws java.io.IOException {
+        byte[] newByte = new byte[1];
+        newByte[0] = (byte)b;
         clob_.string_ = clob_.string_.substring(0, (int) offset_ - 1);
-        clob_.string_ = clob_.string_.concat("" + b + "");
+        clob_.string_ = clob_.string_.concat(new String(newByte));
         clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
         clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
         clob_.characterStream_ = new java.io.StringReader(clob_.string_);
         clob_.sqlLength_ = clob_.string_.length();
+        offset_++;
     }
 
 
@@ -62,6 +65,7 @@ public class ClobOutputStream extends java.io.OutputStream {
         clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
         clob_.characterStream_ = new java.io.StringReader(clob_.string_);
         clob_.sqlLength_ = clob_.string_.length();
+        offset_ += len;
     }
 }
 
