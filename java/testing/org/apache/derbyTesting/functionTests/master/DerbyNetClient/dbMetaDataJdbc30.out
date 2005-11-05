@@ -1,5 +1,5 @@
 Test dbMetaDataJdbc30 starting
-JDBC Driver 'Apache Derby Network Client JDBC Driver', version 10.1 (10.1.2.1)
+JDBC Driver 'Apache Derby Network Client JDBC Driver', version 10.1 (10.1.2.2)
 The URL is: jdbc:derby://localhost:1527/wombat;create=true
 supportsSavepoints() : true
 supportsNamedParameters() : false
