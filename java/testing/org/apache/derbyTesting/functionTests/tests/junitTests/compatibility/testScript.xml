@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-   Derby - Script org/apache/derbyTesting/functionTests/tests/compatibility/testScript.xml
+   Derby - Script org/apache/derbyTesting/functionTests/tests/junitTests/compatibility/testScript.xml
 
    Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
 
@@ -19,7 +19,7 @@
 -->
 
 
-<project default="allTests" basedir="../../../../../../../..">
+<project default="allTests" basedir="../../../../../../../../..">
   <description>
 	Driver for running compatibility tests, mixing and matching
 	clients and servers at different Derby rev levels on different
@@ -39,6 +39,7 @@
 
 	10.0.2.1_lib    Directory containing the released 10.0.2.1 jars.
 	10.1.1.0_lib    Directory containing the released 10.1.1.0 jars.
+	10.1.2.0_lib    Directory containing the released 10.1.2.0 jars.
 	trunk_lib       Directory containing jars built from the development mainline (trunk).
 
 	db2jcc_lib      Directory containing the db2jcc jars (see trunk/java/testing/README.htm).
@@ -65,6 +66,8 @@
 				bring down server
 			}
 		}
+
+	Note that the test exits as soon as one combination fails.
   </description>
 
   <property file="${user.home}/ant.properties"/>
@@ -80,10 +83,12 @@
 
   <property name="SERVER_10.0.2.1" value="${10.0.2.1_lib}/derby.jar;${10.0.2.1_lib}/derbynet.jar"/>
   <property name="SERVER_10.1.1.0" value="${10.1.1.0_lib}/derby.jar;${10.1.1.0_lib}/derbynet.jar"/>
+  <property name="SERVER_10.1.2.0" value="${10.1.2.0_lib}/derby.jar;${10.1.2.0_lib}/derbynet.jar"/>
   <property name="SERVER_TRUNK" value="${trunk_lib}/derby.jar;${trunk_lib}/derbynet.jar"/>
 
   <property name="CLIENT_DB2JCC" value="${db2jcc_lib}/db2jcc.jar;${db2jcc_lib}/db2jcc_license_c.jar"/>
   <property name="CLIENT_10.1.1.0" value="${10.1.1.0_lib}/derbyclient.jar"/>
+  <property name="CLIENT_10.1.2.0" value="${10.1.2.0_lib}/derbyclient.jar"/>
   <property name="CLIENT_TRUNK" value="${trunk_lib}/derbyclient.jar"/>
 
   <property name="TEST_JARS" value="${trunk_lib}/derbyTesting.jar;${junit}"/>
@@ -93,7 +98,7 @@
 
   <property name="VM_DEFAULT" value="${VM_1.4}"/>
 
-  <property name="JDBC_SUITE" value="org.apache.derbyTesting.functionTests.tests.compatibility.JDBCDriverTest"/>
+  <property name="JDBC_SUITE" value="org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilitySuite"/>
   <property name="EMBEDDED_CLIENT" value="org.apache.derby.jdbc.EmbeddedDriver"/>
 
   <!-- May be overridden on the command line -->
@@ -109,6 +114,7 @@
 
   <target
     name="cleanup"
+    depends="_vetSetup"
     description="Brings down the server in case it is still running."
   >
 
@@ -121,14 +127,14 @@
     description="Run all compatibility tests."
   >
 
-    <antcall target="jdbcCompatibility"/>
+    <antcall target="compatibility"/>
 
   </target>
 
   <target
-    name="jdbcCompatibility"
+    name="compatibility"
     depends="cleanup"
-    description="Run jdbc compatibility tests against all combinations."
+    description="Run compatibility tests against all combinations."
   >
     <antcall target="embeddedTrunk"/>
 
@@ -228,6 +234,12 @@
 
 	<antcall target="_forServerVersion">
 	  <param name="fsvnVM" value="${fsvVM}"/>
+	  <param name="fsvnCP" value="${SERVER_10.1.2.0}"/>
+	  <param name="fsvnName" value="${fsvName}_server10.1.2.0"/>
+    </antcall>
+
+	<antcall target="_forServerVersion">
+	  <param name="fsvnVM" value="${fsvVM}"/>
 	  <param name="fsvnCP" value="${SERVER_10.1.1.0}"/>
 	  <param name="fsvnName" value="${fsvName}_server10.1.1.0"/>
     </antcall>
@@ -294,6 +306,12 @@
 	  <param name="fcvnVM" value="${fcvVM}"/>
 	  <param name="fcvnCP" value="${CLIENT_TRUNK}"/>
 	  <param name="fcvnName" value="${fcvName}_clientTrunk"/>
+    </antcall>
+
+    <antcall target="_forClientVersion">
+	  <param name="fcvnVM" value="${fcvVM}"/>
+	  <param name="fcvnCP" value="${CLIENT_10.1.2.0}"/>
+	  <param name="fcvnName" value="${fcvName}_clientDerby10.1.2.0"/>
     </antcall>
 
     <antcall target="_forClientVersion">
@@ -450,7 +468,7 @@
 	  <arg value="-cp"/>
 	  <arg path="${FULL_TRUNK}"/>
 
-	  <arg value="org.apache.derbyTesting.functionTests.tests.compatibility.Pinger"/>
+	  <arg value="org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.Pinger"/>
 
 	</exec>
 
@@ -523,6 +541,121 @@
 ${summaryMessage}
 
 </echo>
+
+  </target>
+
+<!--
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!
+!! CLASSPATH/VM VETTING
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-->
+
+  <!-- Check that classpaths and vms look good -->
+  <target name="_vetSetup">
+
+    <antcall target="_vetClasspath"/>
+    <antcall target="_vetVMs"/>
+
+  </target>
+
+  <!-- Check that classpaths look good -->
+  <target name="_vetClasspath">
+
+    <antcall target="_vetServer"> <param name="vsLib" value="${10.0.2.1_lib}"/> </antcall>
+    <antcall target="_vetServer"> <param name="vsLib" value="${10.1.1.0_lib}"/> </antcall>
+    <antcall target="_vetServer"> <param name="vsLib" value="${10.1.2.0_lib}"/> </antcall>
+    <antcall target="_vetServer"> <param name="vsLib" value="${trunk_lib}"/> </antcall>
+
+    <antcall target="_vetClient"> <param name="vcLib" value="${10.1.1.0_lib}"/> </antcall>
+    <antcall target="_vetClient"> <param name="vcLib" value="${10.1.2.0_lib}"/> </antcall>
+    <antcall target="_vetClient"> <param name="vcLib" value="${trunk_lib}"/> </antcall>
+
+    <antcall target="_vetDb2Client"/>
+
+  </target>
+
+  <!-- Check that required db2 client jars are visible -->
+  <target name="_vetDb2Client">
+
+    <antcall target="_vetJar">
+	  <param name="vjLib" value="${db2jcc_lib}"/>
+	  <param name="vjJar" value="db2jcc.jar"/>
+    </antcall>
+
+    <antcall target="_vetJar">
+	  <param name="vjLib" value="${db2jcc_lib}"/>
+	  <param name="vjJar" value="db2jcc_license_c.jar"/>
+    </antcall>
+
+  </target>
+
+  <!-- Check that required client jar files are visible -->
+  <target name="_vetClient">
+
+    <antcall target="_vetJar">
+	  <param name="vjLib" value="${vcLib}"/>
+	  <param name="vjJar" value="derbyclient.jar"/>
+    </antcall>
+
+  </target>
+
+  <!-- Check that required server jar files are visible -->
+  <target name="_vetServer">
+
+    <antcall target="_vetJar">
+	  <param name="vjLib" value="${vsLib}"/>
+	  <param name="vjJar" value="derby.jar"/>
+    </antcall>
+
+    <antcall target="_vetJar">
+	  <param name="vjLib" value="${vsLib}"/>
+	  <param name="vjJar" value="derbynet.jar"/>
+    </antcall>
+
+  </target>
+
+  <!-- Check that required jarfile is visible -->
+  <target name="_vetJar">
+
+	<fail>
+	  <condition>
+	    <not>
+	      <available file="${vjLib}/${vjJar}"/>
+	    </not>
+	  </condition>
+	  Cannot find jar file ${vjJar} in directory ${vjLib}.
+	  Make sure that your ant.properties contains the correct
+	  values for all properties described in the header comment
+	  (-projecthelp) of this script.
+	</fail>
+
+  </target>
+
+  <!-- Check that required vms are visible -->
+  <target name="_vetVMs">
+
+    <antcall target="_vetVM"> <param name="vv" value="${j13lib}"/> </antcall>
+    <antcall target="_vetVM"> <param name="vv" value="${j14lib}"/> </antcall>
+    <antcall target="_vetVM"> <param name="vv" value="${jdk15}"/> </antcall>
+
+  </target>
+
+  <!-- Check that required vm is visible -->
+  <target name="_vetVM">
+
+	<fail>
+	  <condition>
+	    <not>
+	      <available file="${vv}" type="dir"/>
+	    </not>
+	  </condition>
+	  Cannot find VM ${vv}.
+	  Make sure that your ant.properties contains the correct
+	  values for all properties described in the header comment
+	  (-projecthelp) of this script.
+	</fail>
 
   </target>
 

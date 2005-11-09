@@ -4,7 +4,7 @@
 <!--                       Derby build file                          -->
 <!-- ==================================================================== -->
 
-<project default="FTOtestsubdir" basedir="../../../../../../../.." >
+<project default="FTOtestsubdir" basedir="../../../../../../../../.." >
 
 <!-- ==================================================================== -->
 <!--                           Set properties                             -->
@@ -38,18 +38,19 @@
   <!-- derby testing specific properties files -->
   <property file="${ant.home}/properties/derbytesting.properties"/>
   <property file="${user.home}/properties/derbytesting.properties"/>
-  <property name="this.dir" value="${derby.testing.functest.dir}/tests/tools"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/tests/junitTests/derbynet"/>
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet2,compilet1,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
-    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/tools"/>
+    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet"/>
   </target>
 
   <target name="compilet1">
+
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -64,56 +65,16 @@
       <classpath>
         <!--pathelement location="${oro}"/-->
         <pathelement path="${compile.classpath}"/>
+		<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
-      <!--exclude name=""/-->
     </javac>
   </target>
-
-  <target name="compilet2">
-    <javac
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java14compile.classpath}"/>
-        <pathelement path="${junit}"/>
-      </classpath>
-      <!--exclude name=""/-->
-      <!--include name=""/-->
-    </javac>
-  </target>
-
-  <target name="compilet3">
-    <javac
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java14compile.classpath}"/>
-      </classpath>
-      <!--include name=""/-->
-    </javac>
-  </target> 
 
   <target name="copyfiles">
-    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/tools">
-      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/tools" 
-        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/tools/copyfiles.ant"/>  
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet/copyfiles.ant"/>  
     </copy>
   </target> 
 

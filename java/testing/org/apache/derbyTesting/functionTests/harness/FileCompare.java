@@ -179,13 +179,10 @@ public class FileCompare
 	  is = master;
 	}
                 
-        // If the master is still not found, print an error and return
+        // If the master is still not found, create an empty master
         if ( is == null )
         {
-            System.out.println("No master file was found.");
-            pwDiff.println("No master file was found.");
-            pwDiff.flush();
-            return true;
+			is = new ByteArrayInputStream( new byte[] {} );
         }
 		// compress blanks in output columns to make up for column width differences
 		// for JCC output

@@ -29,6 +29,9 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.util;
 
+import java.io.*;
+import java.sql.*;
+
 import junit.framework.*;
 
 public	class	DerbyJUnitTest	extends	TestCase
@@ -39,11 +42,21 @@ public	class	DerbyJUnitTest	extends	TestCase
 	//
 	/////////////////////////////////////////////////////////////
 
+	/** If you set this startup property to true, you will get chatty output. */
+	public	static	final			String	DEBUG_FLAG = "drb.tests.debug";
+	
+	public	static	final			int		SUCCESS_EXIT = 0;
+	public	static	final			int		FAILURE_EXIT = 1;
+
 	/////////////////////////////////////////////////////////////
 	//
 	//	STATE
 	//
 	/////////////////////////////////////////////////////////////
+
+	private	static	boolean		_debug;					// if true, we print chatty diagnostics
+	
+	private	static	PrintStream	_outputStream = System.out;	// where to print debug output
 
 	/////////////////////////////////////////////////////////////
 	//
@@ -52,6 +65,66 @@ public	class	DerbyJUnitTest	extends	TestCase
 	/////////////////////////////////////////////////////////////
 	
 	public	DerbyJUnitTest() {}
+
+	/////////////////////////////////////////////////////////////
+	//
+	//	PUBLIC BEHAVIOR
+	//
+	/////////////////////////////////////////////////////////////
+
+	/**
+	 * <p>
+	 * Look for the system property which tells us whether to run
+	 * chattily.
+	 * </p>
+	 */
+	public	static	boolean	parseDebug()
+	{
+		_debug = Boolean.getBoolean( DEBUG_FLAG );
+
+		return true;
+	}
+		
+	/**
+	 * <p>
+	 * Debug code to print chatty informational messages.
+	 * </p>
+	 */
+	public	static	void	println( String text )
+	{
+		if ( _debug )
+		{
+			_outputStream.println( text );
+			_outputStream.flush();
+		}
+	}
+
+	/**
+	 * <p>
+	 * Print out a stack trace.
+	 * </p>
+	 */
+	public	static	void	printStackTrace( Throwable t )
+	{
+		while ( t != null )
+		{
+			t.printStackTrace( _outputStream );
+
+			if ( t instanceof SQLException )	{ t = ((SQLException) t).getNextException(); }
+			else { break; }
+		}
+	}
+
+	/**
+	 * <p>
+	 * Return a meaningful exit status so that calling scripts can take
+	 * evasive action.
+	 * </p>
+	 */
+	public	void	exit( int exitStatus )
+	{
+		Runtime.getRuntime().exit( exitStatus );
+	}
 
 	/////////////////////////////////////////////////////////////
 	//

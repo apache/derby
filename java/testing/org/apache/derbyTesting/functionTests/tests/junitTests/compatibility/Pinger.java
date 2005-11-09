@@ -24,7 +24,7 @@
  *
  * @author Rick
  */
-package org.apache.derbyTesting.functionTests.tests.compatibility;
+package org.apache.derbyTesting.functionTests.tests.junitTests.compatibility;
 
 import org.apache.derby.drda.NetworkServerControl;
 

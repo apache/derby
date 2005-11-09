@@ -1,3 +1,4 @@
+junitTests/derbynet/CompatibilityTest.java
 jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
 jdbcapi/lobStreams.java

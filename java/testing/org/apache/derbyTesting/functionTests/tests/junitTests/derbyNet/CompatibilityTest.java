@@ -25,12 +25,12 @@
  *
  * @author Rick
  */
-package org.apache.derbyTesting.functionTests.tests.jdbcapi;
+package org.apache.derbyTesting.functionTests.tests.junitTests.derbynet;
 
 import java.sql.*;
 
 import org.apache.derby.tools.ij;
-import org.apache.derbyTesting.functionTests.tests.compatibility.JDBCDriverTest;
+import org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilitySuite;
 
 public	class	CompatibilityTest
 {
@@ -68,7 +68,7 @@ public	class	CompatibilityTest
 		ij.getPropertyArg( args );
 		Connection conn = ij.startJBMS();
 
-		JDBCDriverTest.main( new String[] { DATABASE_NAME, NETWORK_CLIENT_NAME } );
+		CompatibilitySuite.main( new String[] { DATABASE_NAME, NETWORK_CLIENT_NAME } );
 	}
 	
 	/////////////////////////////////////////////////////////////

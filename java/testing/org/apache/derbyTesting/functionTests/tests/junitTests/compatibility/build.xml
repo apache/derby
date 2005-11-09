@@ -4,7 +4,7 @@
 <!--                       Derby build file                          -->
 <!-- ==================================================================== -->
 
-<project default="FTOtestsubdir" basedir="../../../../../../../.." >
+<project default="FTOtestsubdir" basedir="../../../../../../../../.." >
 
   <!-- User settings -->
   <property file="${user.home}/ant.properties"/>
@@ -34,7 +34,7 @@
   <!-- derby testing specific properties files -->
   <property file="${ant.home}/properties/derbytesting.properties"/>
   <property file="${user.home}/properties/derbytesting.properties"/>
-  <property name="this.dir" value="${derby.testing.functest.dir}/tests/compatibility"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/tests/junitTests/compatibility"/>
 
 <!--             ============ Begin Targets ==============                -->
  
