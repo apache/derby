@@ -939,7 +939,7 @@ public class RunTest
 		        upgradetest = true;
 		}
 	
-        if ( framework.startsWith("Derby") && (! jvmName.equals("j9_foundation")))
+        if ( framework.equals("DerbyNet") && (! jvmName.equals("j9_foundation")))
 		{	
 
 			Class c = null;
@@ -1462,7 +1462,7 @@ clp.list(System.out);
                 jvmnet = true;
 
             String excludeJcc = ap.getProperty("excludeJCC");
-            if ( framework.startsWith("Derby") )
+            if ( framework.equals("DerbyNet") )
             {	
                 try {
                     RunList.checkClientExclusion(excludeJcc, "JCC", jccMajor, jccMinor, javaVersion);
