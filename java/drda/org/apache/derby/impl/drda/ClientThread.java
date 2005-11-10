@@ -82,7 +82,8 @@ final class ClientThread extends Thread {
 				} // end priv try/catch block
 				
 				connNum = parent.getNewConnNum();
-	                	parent.consolePropertyMessage("DRDA_ConnNumber.I", 
+                                if (parent.getLogConnections())
+                                    parent.consolePropertyMessage("DRDA_ConnNumber.I", 
 							Integer.toString(connNum));
 
 				//create a new Session for this session
