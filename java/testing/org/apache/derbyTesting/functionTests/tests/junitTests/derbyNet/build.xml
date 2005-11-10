@@ -38,7 +38,7 @@
   <!-- derby testing specific properties files -->
   <property file="${ant.home}/properties/derbytesting.properties"/>
   <property file="${user.home}/properties/derbytesting.properties"/>
-  <property name="this.dir" value="${derby.testing.functest.dir}/tests/junitTests/derbynet"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/tests/junitTests/derbyNet"/>
 
 <!--             ============ Begin Targets ==============                -->
  
@@ -46,7 +46,7 @@
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
-    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet"/>
+    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/junitTests/derbyNet"/>
   </target>
 
   <target name="compilet1">
@@ -72,9 +72,9 @@
   </target>
 
   <target name="copyfiles">
-    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet">
-      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet" 
-        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbynet/copyfiles.ant"/>  
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/junitTests/derbyNet">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbyNet" 
+        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbyNet/copyfiles.ant"/>  
     </copy>
   </target> 
 
