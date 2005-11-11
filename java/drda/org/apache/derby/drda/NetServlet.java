@@ -23,12 +23,10 @@ package org.apache.derby.drda;
 import java.io.*;
 import java.util.*;
 
-import java.sql.*;
 import java.net.*;
 
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -60,7 +58,7 @@ public class NetServlet extends HttpServlet {
 	private boolean logStatus= false;	/* Logging off */
 	private boolean traceStatus = false;	/* Tracing off */
 	private String[] knownLang = {"en","es","de_DE", "fr", "it", "ja_JP",
-			"ko_KR", "zh_CN", "zh_TW"};
+			"ko_KR", "pt_BR", "zh_CN", "zh_TW"};
 	private String locale;
 
 	private final static int NOT_GIVEN = -2;
@@ -71,7 +69,7 @@ public class NetServlet extends HttpServlet {
 
 	// for doPri block
 	private Runnable service;
-
+	
 	/**
 		Initialize the servlet.
 		Configuration parameters:
@@ -84,7 +82,7 @@ public class NetServlet extends HttpServlet {
 	public void init(ServletConfig config)
 		throws ServletException
 	{
-
+		
 		LocalizedResource langUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
 				
 		String port = config.getInitParameter("portNumber");
@@ -94,15 +92,25 @@ public class NetServlet extends HttpServlet {
 				portNumber = p;
 		}
 
-		String tracingDirectory = config.getInitParameter("tracingDirectory");
+		this.tracingDirectory = config.getInitParameter("tracingDirectory");
+		
+		if ( this.tracingDirectory == null ) {
+			this.tracingDirectory = "";
+		}
 
 		String startup = config.getInitParameter("startNetworkServerOnInit");
 
 		// test if the server is already running
 		try {
 			//don't send output to console
-			if (server == null)
+			if (server == null) {
 				server = new NetworkServerControl(InetAddress.getByName(host), portNumber);
+				// assert this.tracingDirectory != null
+				if  ( ! this.tracingDirectory.trim().equals("")) {
+					server.setTraceDirectory(this.tracingDirectory);
+				}
+			}
+			
 			if (isServerStarted(server,1))
 				return;
 		} catch (Exception e) {}
@@ -401,7 +409,7 @@ public class NetServlet extends HttpServlet {
 				out.println( "<h4>" + getHtmlLabelledMessageInstance(langUtil,
 					"SRV_TraceDir", "tracedir") + "</h4>");
 				out.println( "<INPUT type=text name=tracedirectory size=60 maxlength=256 " +
-					"id='tracedir' value=''>");
+					"id='tracedir' value='"+tracingDirectory+"'>");
 				out.println( "<h4> </h4>");
 				out.println( "<INPUT type=submit name=doaction value='"+traceDirMessage+ "'>" );
 				out.println( "<INPUT type=submit name=form value='"+returnMessage+ "'>" );
@@ -658,6 +666,9 @@ public class NetServlet extends HttpServlet {
 				out.println( "<h4>"+localUtil.getTextMessage("SRV_StatusTraceOn")+"</h4>");
 			else
 				out.println( "<h4>"+localUtil.getTextMessage("SRV_StatusTraceOff")+"</h4>");
+			val = p.getProperty(Property.DRDA_PROP_PORTNUMBER);
+			out.println( "<h4>"+localUtil.getTextMessage("SRV_PortNumber", val)+"</h4>");
+			
 		}
 		catch (Exception e) {
 			printErrorForm(localUtil, request, e, returnMessage);
@@ -789,6 +800,7 @@ public class NetServlet extends HttpServlet {
 		}
 
 		try {
+			this.tracingDirectory = traceDirectory;
 			server.setTraceDirectory(traceDirectory);
 			retval = true;
 		} catch (Exception e) 
@@ -938,9 +950,8 @@ public class NetServlet extends HttpServlet {
 		{
 			lang = lang.substring(0, semi);
 		}
-		// trim any whitespace
-		lang = lang.trim();
-		
+		// trim any whitespace and fix the code, as some browsers might send a bad format
+		lang = fixLanguageCode(lang.trim());
 		return lang;
 	}
 	/**
@@ -952,10 +963,36 @@ public class NetServlet extends HttpServlet {
 	 */
 	private int translationAvailable(String lang)
 	{
+		// assert lang == fixLanguageCode(lang)
+		// we don't need to use toUpperCase() anymore, as the lang is already fixed
 		for (int i = 0; i < knownLang.length; i++)
-			if (knownLang[i].toUpperCase(Locale.ENGLISH).equals(lang.toUpperCase(Locale.ENGLISH)))
+			if (knownLang[i].equals(lang))
 				return i;
 		return -1;
+	}
+	
+	/**
+	 * Fix the language code, as some browsers send then in a bad format (for instance, 
+	 * Firefox sends en-us instead of en_US).
+	 *
+	 * @param lang	language to be fixed
+	 * 
+	 * @return fixed version of the language, with _ separating parts and country in upper case
+	 */
+	private String fixLanguageCode( String lang ) {
+		int index = lang.indexOf('-');
+		if ( index != -1 ) {		
+			return fixLanguageCode( lang, index );
+		}
+		index = lang.indexOf('_');
+		if ( index != -1 ) {		
+			return fixLanguageCode( lang, index );
+		}
+		return lang;
+	}
+
+	private String fixLanguageCode(String lang, int index) {
+		return lang.substring(0,index) + "_" + lang.substring(index+1).toUpperCase(Locale.ENGLISH);
 	}
 
 	/**
