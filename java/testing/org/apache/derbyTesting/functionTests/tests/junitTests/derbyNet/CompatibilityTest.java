@@ -25,7 +25,7 @@
  *
  * @author Rick
  */
-package org.apache.derbyTesting.functionTests.tests.junitTests.derbynet;
+package org.apache.derbyTesting.functionTests.tests.junitTests.derbyNet;
 
 import java.sql.*;
 
