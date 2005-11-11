@@ -405,8 +405,8 @@ public class CreateTriggerNode extends CreateStatementNode
 					continue;
 				}
 					
-				int tokBeginOffset = tableName.getTokenBeginOffset();
-				int tokEndOffset = tableName.getTokenEndOffset();
+				int tokBeginOffset = tableName.getBeginOffset();
+				int tokEndOffset = tableName.getEndOffset();
 				if (tokBeginOffset == -1)
 				{
 					continue;
@@ -415,7 +415,7 @@ public class CreateTriggerNode extends CreateStatementNode
 				regenNode = true;
 				checkInvalidTriggerReference(tableName.getTableName());
 				String colName = ref.getColumnName();
-				int columnLength = ref.getTokenEndOffset() - ref.getTokenBeginOffset() + 1;
+				int columnLength = ref.getEndOffset() - ref.getBeginOffset() + 1;
 
 				newText.append(originalActionText.substring(start, tokBeginOffset-actionOffset));
 				newText.append(genColumnReferenceSQL(dd, colName, tableName.getTableName(), tableName.getTableName().equals(oldTableName)));
@@ -444,8 +444,8 @@ public class CreateTriggerNode extends CreateStatementNode
 				{
 					continue;
 				}
-				int tokBeginOffset = fromTable.getTableNameField().getTokenBeginOffset();
-				int tokEndOffset = fromTable.getTableNameField().getTokenEndOffset();
+				int tokBeginOffset = fromTable.getTableNameField().getBeginOffset();
+				int tokEndOffset = fromTable.getTableNameField().getEndOffset();
 				if (tokBeginOffset == -1)
 				{
 					continue;
@@ -514,12 +514,12 @@ public class CreateTriggerNode extends CreateStatementNode
 			for (int j = 0; j < size - i - 1; j++)
 			{
 				if ((isRow && 
-					 ((ColumnReference) sorted[j]).getTokenBeginOffset() > 
-					 ((ColumnReference) sorted[j+1]).getTokenBeginOffset()
+					 sorted[j].getBeginOffset() > 
+					 sorted[j+1].getBeginOffset()
 					) ||
 					(!isRow &&
-					 ((FromBaseTable) sorted[j]).getTableNameField().getTokenBeginOffset() > 
-					 ((FromBaseTable) sorted[j+1]).getTableNameField().getTokenBeginOffset()
+					 ((FromBaseTable) sorted[j]).getTableNameField().getBeginOffset() > 
+					 ((FromBaseTable) sorted[j+1]).getTableNameField().getBeginOffset()
 					))
 				{
 					temp = sorted[j];

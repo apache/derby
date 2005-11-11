@@ -82,9 +82,9 @@ public abstract class QueryTreeNode implements Visitable
 	public static final int AUTOINCREMENT_INC_INDEX   = 1;
 	public static final int AUTOINCREMENT_IS_AUTOINCREMENT_INDEX   = 2;
 
-	int				beginOffset;		// offset into SQL input of the substring
+	private int		beginOffset = -1;		// offset into SQL input of the substring
 	                                // which this query node encodes.
-	int				endOffset;
+	private int		endOffset = -1;
 
 	private int nodeType;
 	private ContextManager cm;
@@ -199,7 +199,7 @@ public abstract class QueryTreeNode implements Visitable
 	 * Gets the beginning offset of the SQL substring which this
 	 * query node represents.
 	 *
-	 * @return	The beginning offset of the SQL substring.
+	 * @return	The beginning offset of the SQL substring. -1 means unknown.
 	 *
 	 */
     public	int	getBeginOffset() { return beginOffset; }
@@ -220,7 +220,7 @@ public abstract class QueryTreeNode implements Visitable
 	 * Gets the ending offset of the SQL substring which this
 	 * query node represents.
 	 *
-	 * @return	The ending offset of the SQL substring.
+	 * @return	The ending offset of the SQL substring. -1 means unknown.
 	 *
 	 */
 	public	int	getEndOffset()  { return endOffset; }
