@@ -86,6 +86,7 @@ final class GenericStatementContext
     private CancelQueryTask cancelTask = null;
         
     private	boolean		parentInTrigger;	// whetherparent started with a trigger on stack
+    private	boolean		isForReadOnly = false;	
     private	boolean		isAtomic;	
 	private boolean		isSystemCode;
 	private boolean		rollbackParentContext;
@@ -189,6 +190,7 @@ final class GenericStatementContext
 	( 
 		boolean parentInTrigger,
 		boolean isAtomic, 
+                boolean isForReadOnly,
 		String stmtText,
 		ParameterValueSet pvs,
         long timeoutMillis
@@ -197,6 +199,7 @@ final class GenericStatementContext
 		inUse = true;
 
 		this.parentInTrigger = parentInTrigger;
+		this.isForReadOnly = isForReadOnly;
 		this.isAtomic = isAtomic;
 		this.stmtText = stmtText;
 		this.pvs = pvs;
@@ -218,6 +221,7 @@ final class GenericStatementContext
 
 		parentInTrigger = false;
 		isAtomic = false;
+		isForReadOnly = false;
 		this.stmtText = null;
 		sqlAllowed = -1;
 		isSystemCode = false;
@@ -643,6 +647,10 @@ final class GenericStatementContext
 	{
 		return inUse;
 	}
+    public boolean isForReadOnly()
+    {
+	return isForReadOnly;
+    }
         
     /**
      * Tests whether the statement which has allocated this StatementContext

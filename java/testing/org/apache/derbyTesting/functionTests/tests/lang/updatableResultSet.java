@@ -366,27 +366,24 @@ public class updatableResultSet {
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
 
-			System.out.println("Negative Test5 - request updatable resultset for sql with no FOR UPDATE clause");
-			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			System.out.println("Negative Test5 - request resultset with no FOR UPDATE clause and CONCUR_READ_ONLY");
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			rs = stmt.executeQuery("select * from t1");//notice that we forgot to give mandatory FOR UPDATE clause for updatable resultset
 			System.out.println("Make sure that we got CONCUR_READ_ONLY? " + (rs.getConcurrency() == ResultSet.CONCUR_READ_ONLY));
-			System.out.println("Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode");
-			System.out.println("Will see the warnings in embedded mode only");
-			JDBCDisplayUtil.ShowWarnings(System.out, rs);
-			rs.next();
-      System.out.println("Now attempting to send a delete on a sql with no FOR UPDATE clause.");
+			
+			System.out.println("Now attempting to send a delete on a sql with no FOR UPDATE clause and CONCUR_READ_ONLY.");
 			try {
 				rs.deleteRow();
-				System.out.println("FAIL!!! deleteRow should have failed on sql with no FOR UPDATE clause");
+				System.out.println("FAIL!!! deleteRow should have failed on sql with no FOR UPDATE clause and CONCUR_READ_ONLY.");
 			}
 			catch (SQLException e) {
 				System.out.println("SQL State : " + e.getSQLState());
 				System.out.println("Got expected exception " + e.getMessage());
 			}
-      System.out.println("Now attempting to send a updateRow on a sql with no FOR UPDATE clause.");
+			System.out.println("Now attempting to send a updateRow on a sql with no FOR UPDATE clause and CONCUR_READ_ONLY.");
 			try {
 				rs.updateRow();
-				System.out.println("FAIL!!! updateRow should have failed on sql with no FOR UPDATE clause");
+				System.out.println("FAIL!!! updateRow should have failed on sql with no FOR UPDATE clause and CONCUR_READ_ONLY.");
 			}
 			catch (SQLException e) {
 				System.out.println("SQL State : " + e.getSQLState());
@@ -426,7 +423,7 @@ public class updatableResultSet {
 
 			System.out.println("Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+      rs = stmt.executeQuery("SELECT * FROM t1");
 			System.out.println("Make sure that we got CONCUR_UPDATABLE? " + (rs.getConcurrency() == ResultSet.CONCUR_UPDATABLE));
       System.out.println("Now attempt a deleteRow without first doing next on the resultset.");
 			try {
@@ -641,7 +638,7 @@ public class updatableResultSet {
       System.out.println("requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE");
       System.out.println("got TYPE_FORWARD_ONLY? " +  (stmt.getResultSetType() == ResultSet.TYPE_FORWARD_ONLY));
       System.out.println("got CONCUR_UPDATABLE? " +  (stmt.getResultSetConcurrency() == ResultSet.CONCUR_UPDATABLE));
-      rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+      rs = stmt.executeQuery("SELECT * FROM t1");
 			System.out.println("JDBC 2.0 updatable resultset apis on this ResultSet object will pass because this is an updatable resultset");
 			rs.next();
       System.out.println("column 1 on this row before deleteRow is " + rs.getInt(1));
@@ -712,6 +709,114 @@ public class updatableResultSet {
 			//have to close the resultset because by default, resultsets are held open over commit
 			rs.close();
 
+			System.out.println("Positive Test1c - use updatable resultset to do postitioned delete");
+			conn.setAutoCommit(false);
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			JDBCDisplayUtil.ShowWarnings(System.out, conn);
+			
+			System.out.println("requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE");
+			System.out.println("got TYPE_FORWARD_ONLY? " +  (stmt.getResultSetType() == ResultSet.TYPE_FORWARD_ONLY));
+			System.out.println("got CONCUR_UPDATABLE? " +  (stmt.getResultSetConcurrency() == ResultSet.CONCUR_UPDATABLE));
+			
+			rs = stmt.executeQuery("SELECT * FROM t1");
+			rs.next();
+			
+			System.out.println("column 1 on this row before positioned delete " + rs.getInt(1));
+			System.out.println("column 2 on this row before positioned delete " + rs.getString(2));
+			
+			pStmt = conn.prepareStatement("DELETE FROM T1 WHERE CURRENT OF " + rs.getCursorName());
+			pStmt.executeUpdate();
+			try {
+			    System.out.println("column 1 on this deleted row is " + rs.getInt(1));
+			    System.out.println("column 2 on this deleted row is " + rs.getString(2));
+			} catch (SQLException e) {
+			    System.out.println("SQL State : " + e.getSQLState());
+			    System.out.println("Got expected exception " + e.getMessage());
+			}
+			
+			System.out.println("doing positioned delete again w/o first positioning the ResultSet on the next row will fail");
+			
+			try {
+			    pStmt.executeUpdate();
+			    System.out.println("FAIL!!! positioned delete should have failed because ResultSet is not positioned on a row");
+			} catch (SQLException e) {
+			    System.out.println("SQL State : " + e.getSQLState());
+			    System.out.println("Got expected exception " + e.getMessage());
+			}
+			
+			System.out.println("Position the ResultSet with next()");
+			
+			rs.next();
+			
+			System.out.println("Should be able to do positioned delete on the current row now");
+			
+			pStmt.executeUpdate();
+			//have to close the resultset because by default, resultsets are held open over commit
+			rs.close();
+			conn.rollback();
+			
+			System.out.println("Positive Test1d - updatable resultset to do positioned update");
+			reloadData();
+			
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			JDBCDisplayUtil.ShowWarnings(System.out, conn);
+			
+			rs = stmt.executeQuery("SELECT * FROM t1");
+			rs.next();
+			
+			System.out.println("column 1 on this row before positioned update is " + rs.getInt(1));
+			
+			pStmt = conn.prepareStatement("UPDATE T1 SET C1=?,C2=? WHERE CURRENT OF " + rs.getCursorName());
+			final int c1 = 2345;
+			final String c2 = "UUU";
+			
+			pStmt.setInt(1, c1);
+			pStmt.setString(2, c2); // current value
+			System.out.println("now dow positioned update on the row");
+			
+			pStmt.executeUpdate();
+			
+			System.out.println("column 1 on the updated  row is " + rs.getInt(1));
+			System.out.println("column 1 on the updated  row is " + rs.getString(2));
+			
+			try {
+			    System.out.println("Refreshing the row");
+			    rs.refreshRow(); // MAY FAIL HERE
+			    
+			    // If not, verify that it worked..
+			    if (c1!=rs.getInt(1)) {
+				System.out.println("FAIL!!! Expected column 1 to be update to " + c1);
+			    }
+			    if (!c2.equals(rs.getString(2))) {
+				System.out.println("FAIL!!! Expected column 1 to be update to " + c2);
+			    }
+			} catch (SQLException e) {
+			    System.out.println("SQL State : " + e.getSQLState());
+			    System.out.println("Got expected exception " + e.getMessage());
+			}
+			
+			System.out.println("doing positioned update again w/o positioning the RS will succeed");
+			System.out.println("because the cursor is still positioned");
+			
+			pStmt.setInt(1, c1);
+			pStmt.setString(2, c2); // current value
+			pStmt.executeUpdate();
+			
+			System.out.println("Position the ResultSet with next()");
+			
+			rs.next();
+			
+			System.out.println("Should still be able to do positioned update");
+			
+			pStmt.setInt(1, rs.getInt(1)); // current value
+			pStmt.setString(2, "abc");
+			pStmt.executeUpdate();
+			
+			//have to close the resultset because by default, resultsets are held open over commit
+			rs.close();
+			conn.rollback();
+			
+			conn.setAutoCommit(true);
 			System.out.println("Positive Test2 - even if no columns from table " +
 				"specified in the column list, we should be able to get updatable " +
 				"resultset");
@@ -746,7 +851,7 @@ public class updatableResultSet {
 
 			System.out.println("Positive Test3a - use prepared statement with concur updatable status to test deleteRow");
       reloadData();
-			pStmt = conn.prepareStatement("select * from t1 where c1>? for update", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			pStmt = conn.prepareStatement("select * from t1 where c1>?", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
       System.out.println("requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE");
       System.out.println("got TYPE_FORWARD_ONLY? " +  (pStmt.getResultSetType() == ResultSet.TYPE_FORWARD_ONLY));
       System.out.println("got CONCUR_UPDATABLE? " +  (pStmt.getResultSetConcurrency() == ResultSet.CONCUR_UPDATABLE));
@@ -834,7 +939,7 @@ public class updatableResultSet {
 
 			System.out.println("Positive Test4 - use callable statement with concur updatable status");
       reloadData();
-			callStmt = conn.prepareCall("select * from t1 for update", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			callStmt = conn.prepareCall("select * from t1", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
       rs = callStmt.executeQuery();
       System.out.println("requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE");
       System.out.println("got TYPE_FORWARD_ONLY? " +  (callStmt.getResultSetType() == ResultSet.TYPE_FORWARD_ONLY));
@@ -869,7 +974,7 @@ public class updatableResultSet {
 			System.out.println("Positive Test5 - donot have to select primary key to get an updatable resultset");
       reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT c32 FROM t3 FOR UPDATE");
+      rs = stmt.executeQuery("SELECT c32 FROM t3");
 			rs.next();
       System.out.println("column 1 on this row is " + rs.getInt(1));
       System.out.println("now try to delete row when primary key is not selected for that row");
@@ -939,7 +1044,7 @@ public class updatableResultSet {
 			stmt.executeUpdate("insert into SESSION.t3 values(22, 1)");
 			System.out.println("following rows in temp table before deleteRow");
 			dumpRS(stmt.executeQuery("select * from SESSION.t3"));
-			rs = stmt.executeQuery("select c31 from session.t3 for update");
+			rs = stmt.executeQuery("select c31 from session.t3");
 			rs.next();
 			rs.updateLong(1,123);
 			rs.updateRow();
@@ -1113,7 +1218,7 @@ public class updatableResultSet {
       reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			stmt1 = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			rs = stmt.executeQuery("SELECT * FROM t1");
 			rs.next();
 			rs1 = stmt1.executeQuery("SELECT * FROM t1 FOR UPDATE");
 			rs1.next();
@@ -1168,7 +1273,7 @@ public class updatableResultSet {
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			System.out.println("Verify that before update trigger got fired, row count is 0 in updateTriggerInsertIntoThisTable");
 			dumpRS(stmt.executeQuery("select count(*) from updateTriggerInsertIntoThisTable"));
-			rs = stmt.executeQuery("SELECT * FROM table0WithTriggers FOR UPDATE");
+			rs = stmt.executeQuery("SELECT * FROM table0WithTriggers");
 			rs.next();
 			System.out.println("column 1 on this row is " + rs.getInt(1));
 			System.out.println("now try to update row and make sure that trigger got fired");
@@ -1231,7 +1336,7 @@ public class updatableResultSet {
 			System.out.println("Positive Test14a - make sure self referential delete cascade works when deleteRow is issued");
 			dumpRS(stmt.executeQuery("select * from selfReferencingT1"));
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			rs = stmt.executeQuery("SELECT * FROM selfReferencingT1 FOR UPDATE");
+			rs = stmt.executeQuery("SELECT * FROM selfReferencingT1");
 			rs.next();
 			System.out.println("column 1 on this row is " + rs.getString(1));
 			System.out.println("this delete row will cause the delete cascade constraint to delete all the rows from the table and from the resultset");
@@ -1274,7 +1379,7 @@ public class updatableResultSet {
       reloadData();
       conn.setAutoCommit(false);
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-      rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			rs = stmt.executeQuery("SELECT * FROM t1");
 			rs.next();
 			System.out.println("Opened an updatable resultset. Now trying to drop that table through another Statement");
 			stmt1 = conn.createStatement();
@@ -1326,7 +1431,7 @@ public class updatableResultSet {
 			dumpRS(stmt.executeQuery("select count(*) from updateTriggerInsertIntoThisTable"));
 			System.out.println("Look at the data in table0WithTriggers before trigger gets fired");
 			dumpRS(stmt.executeQuery("select * from table0WithTriggers"));
-			rs = stmt.executeQuery("SELECT * FROM table0WithTriggers FOR UPDATE");
+			rs = stmt.executeQuery("SELECT * FROM table0WithTriggers");
 			rs.next();
 			System.out.println("column 1 on this row is " + rs.getInt(1));
 			System.out.println("now try to update row and make sure that trigger got fired");
@@ -2080,7 +2185,7 @@ public class updatableResultSet {
 			System.out.println("Positive Test25 - issue cancelRowUpdates without any updateXXX");
 			reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			rs = stmt.executeQuery("SELECT * FROM t1");
 			rs.next();
 			rs.cancelRowUpdates();
 			//have to close the resultset because by default, resultsets are held open over commit
@@ -2099,7 +2204,7 @@ public class updatableResultSet {
 			System.out.println("Positive Test27 - issue updateXXX and then deleteRow");
 			reloadData();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			rs = stmt.executeQuery("SELECT * FROM t1");
 			rs.next();
 			rs.updateInt(1,1234);
 			rs.updateString(2,"aaaaa");
@@ -2170,7 +2275,7 @@ public class updatableResultSet {
 			System.out.println("Positive Test30 - call updateXXX methods on only columns that correspond to a column in the table");
 			dumpRS(stmt.executeQuery("select * from t1"));
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			rs = stmt.executeQuery("SELECT 1, 2, c1, c2 FROM t1 FOR UPDATE");
+			rs = stmt.executeQuery("SELECT 1, 2, c1, c2 FROM t1");
 			rs.next();
 			rs.updateInt(3,22);
 			rs.updateRow();
@@ -2197,7 +2302,7 @@ public class updatableResultSet {
 			stmt.executeUpdate("create table \" t 11 \" (\" c 111 \" int, c112 int)");
 			stmt.executeUpdate("insert into \" t 11 \" values(1, 2), (2,3)");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			rs = stmt.executeQuery("SELECT \" c 111 \", \"C112\" FROM \" t 11 \" FOR UPDATE");
+			rs = stmt.executeQuery("SELECT \" c 111 \", \"C112\" FROM \" t 11 \" ");
 			rs.next();
 			rs.updateInt(1,11);
 			rs.updateInt(2,22);

@@ -593,7 +593,7 @@ public interface LanguageConnectionContext extends Context {
 	 * @return StatementContext	The statement context.
 	 *
 	 */
-	StatementContext pushStatementContext(boolean isAtomic, String stmtText,
+	StatementContext pushStatementContext(boolean isAtomic, boolean isForReadOnly, String stmtText,
 		ParameterValueSet pvs, boolean rollbackParentContext, long timeoutMillis);
 
 	/**
@@ -863,12 +863,34 @@ public interface LanguageConnectionContext extends Context {
 	/** Get the AccessFactory cached in this LanguageConnectionContext */
 	AccessFactory getAccessFactory();
 
-	/**
-		Return a compiled Statement object. The schema and unicode
-		setting fo the returned statement are that of this connection.
-	*/
-	public PreparedStatement prepareInternalStatement(String sqlText) throws StandardException;
-	public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText) throws StandardException;
+        /**
+	 * Return a PreparedStatement object for the query.
+	 * This method first tries to locate the PreparedStatement object from a statement
+	 * cache.  If the statement is not found in the cache, the query will be compiled and
+	 * put into the cache.
+	 * @param compilationSchema schema
+	 * @param sqlText sql query string
+	 * @param isForReadOnly read only status for resultset. Set to true if the concurrency mode for the resultset 
+	 *                      is CONCUR_READ_ONLY
+	 */
+         public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText, boolean isForReadOnly) 
+	    throws StandardException;
+
+        /**
+	 * Return a PreparedStatement object for the query.
+	 * This method first tries to locate the PreparedStatement object from a statement
+	 * cache.  If the statement is not found in the cache, the query will be compiled and 
+	 * put into the cache.
+	 * The schema used when compiling the statement is the same schema as returned by
+	 * getDefaultSchema().  For internal statements, the read only status is set to
+	 * true.
+	 * Calling this method is equivalent to calling 
+	 * prepareExternalStatement(lcc.getDefaultSchema(), sqlText, true);
+	 * 
+	 * @param sqlText sql query string
+	 */
+        public PreparedStatement prepareInternalStatement(String sqlText) 
+	    throws StandardException;
 
 	/**
 	 * Control whether or not optimizer trace is on.

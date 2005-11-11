@@ -346,7 +346,7 @@ public class SPSDescriptor extends TupleDescriptor
 		}
 
 		// stored statements always stored as unicode.
-		Statement 			stmt = lcf.getStatement(dd.getSchemaDescriptor(compSchemaId, null), text);
+		Statement 			stmt = lcf.getStatement(dd.getSchemaDescriptor(compSchemaId, null), text, true);
 
 		try
 		{

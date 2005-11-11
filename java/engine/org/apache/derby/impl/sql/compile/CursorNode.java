@@ -272,28 +272,34 @@ public class CursorNode extends ReadCursorNode
 		// if it doesn't know if it is updatable, determine it
 		if (updateMode == UNSPECIFIED)
 		{
-			/*
-			** NOTE: THIS IS NOT COMPATIBLE WITH THE ISO/ANSI STANDARD!!!
-			**
-			** According to ANSI, cursors are updatable by default, unless
-			** they can't be (e.g. they contain joins).  But this would mean
-			** that we couldn't use an index on any single-table select,
-			** unless it was declared FOR READ ONLY.  This would be pretty
-			** terrible, so we are breaking the ANSI rules and making all
-			** cursors (i.e. select statements) read-only by default.
-			** Users will have to say FOR UPDATE if they want a cursor to
-			** be updatable.  Later, we may have an ANSI compatibility
-			** mode so we can pass the NIST tests.
-			*/
+		    // If the statement is opened with CONCUR_READ_ONLY, the upgrade mode is 
+		    // set to read only.
+		    
+		    // NOTE: THIS IS NOT COMPATIBLE WITH THE ISO/ANSI SQL STANDARD.
+
+		    // According to the SQL-standard:
+		    // If updatability is not specified, a SELECT * FROM T will be implicitely
+		    // read only in the context of a cursor which is insensitive, scrollable or
+		    // have an order by clause. Otherwise it is implicitely updatable.
+		    
+		    // In Derby, we make a SELECT * FROM T updatable if the concurrency mode is
+		    // ResultSet.CONCUR_UPDATE. If we do make all SELECT * FROM T  updatable
+		    // by default, we cannot use an index on any single-table select, unless it
+		    // was declared FOR READ ONLY. This would be pretty terrible, so we are
+		    // breaking the ANSI rules.
+
+		    if (getLanguageConnectionContext().getStatementContext().isForReadOnly()) {
 			updateMode = READ_ONLY;
-
-			/* updateMode = determineUpdateMode(); */
-
+		    } else {
+			updateMode = determineUpdateMode(dataDictionary);
+		    }
+		    		    
 			//if (SanityManager.DEBUG)
 			//SanityManager.DEBUG("DumpUpdateCheck","update mode is UNSPECIFIED ("+UNSPECIFIED+") checked mode is "+updateMode);
-
-			if (updateMode == READ_ONLY)
-				updatableColumns = null; // don't need them any more
+		}
+		
+		if (updateMode == READ_ONLY) {
+		    updatableColumns = null; // don't need them any more
 		}
 
 		// bind the update columns

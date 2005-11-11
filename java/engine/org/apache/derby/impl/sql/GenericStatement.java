@@ -77,19 +77,22 @@ public class GenericStatement
 	// these fields define the identity of the statement
 	private final SchemaDescriptor compilationSchema;
 	private final String			statementText;
+        private final boolean isForReadOnly;
 	private int                      prepareIsolationLevel;
 	private GenericPreparedStatement preparedStmt;
 
 	/**
 	 * Constructor for a Statement given the text of the statement in a String
-	 *
+	 * @param compliationSchema schema
 	 * @param statementText	The text of the statement
+	 * @param isForReadOnly if the statement is opened with level CONCUR_READ_ONLY
 	 */
 
-	public GenericStatement(SchemaDescriptor compilationSchema, String statementText)
+	public GenericStatement(SchemaDescriptor compilationSchema, String statementText, boolean isForReadOnly)
 	{
 		this.compilationSchema = compilationSchema;
 		this.statementText = statementText;
+		this.isForReadOnly = isForReadOnly;
 	}
 
 	/*
@@ -237,7 +240,7 @@ public class GenericStatement
 			{
 				// since this is for compilation only, set atomic
 				// param to true and timeout param to 0
-				statementContext = lcc.pushStatementContext(true, getSource(),
+				statementContext = lcc.pushStatementContext(true, isForReadOnly, getSource(),
                                                             null, false, 0L);
 			}
 
@@ -621,7 +624,7 @@ public class GenericStatement
 
 			GenericStatement os = (GenericStatement) other;
 
-			return statementText.equals(os.statementText)
+			return statementText.equals(os.statementText) && isForReadOnly==os.isForReadOnly
 				&& compilationSchema.equals(os.compilationSchema) &&
 				(prepareIsolationLevel == os.prepareIsolationLevel);
 		}

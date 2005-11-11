@@ -137,14 +137,16 @@ public class GenericLanguageConnectionFactory
 
 	/**
 		Get a Statement for the connection
-		
+		@param compilationSchema schema
 		@param statementText the text for the statement
+		@param forReadOnly if concurrency is CONCUR_READ_ONLY
 		@return	The Statement
 	 */
-	public Statement getStatement(SchemaDescriptor compilationSchema, String statementText)
-	{
-		return new GenericStatement(compilationSchema, statementText);
+        public Statement getStatement(SchemaDescriptor compilationSchema, String statementText, boolean forReadOnly)
+        {
+	    return new GenericStatement(compilationSchema, statementText, forReadOnly);
 	}
+
 
 	/**
 		Get a LanguageConnectionContext. this holds things

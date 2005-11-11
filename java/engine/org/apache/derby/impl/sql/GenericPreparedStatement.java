@@ -61,6 +61,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.impl.sql.compile.QueryTreeNode;
+import org.apache.derby.impl.sql.compile.CursorNode;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -343,7 +344,7 @@ recompileOutOfDatePlan:
 			}
 
 			StatementContext statementContext = lccToUse.pushStatementContext(
-				isAtomic, getSource(), pvs, rollbackParentContext, timeoutMillis);
+				isAtomic, updateMode==CursorNode.READ_ONLY, getSource(), pvs, rollbackParentContext, timeoutMillis);
 
 			if (needsSavepoint())
 			{

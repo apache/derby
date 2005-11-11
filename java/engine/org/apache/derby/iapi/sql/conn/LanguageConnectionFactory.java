@@ -80,13 +80,15 @@ public interface LanguageConnectionFactory {
 	 */
 	String MODULE = "org.apache.derby.iapi.sql.conn.LanguageConnectionFactory";
 
+
 	/**
-		Get a Statement.
-		
+		Get a Statement
+		@param compilationSchema schema
 		@param statementText the text for the statement
+		@param forReadOnly true if concurrency mode is CONCUR_READ_ONLY
 		@return	The Statement
 	 */
-	Statement getStatement(SchemaDescriptor compilationSchema, String statementText);
+	Statement getStatement(SchemaDescriptor compilationSchema, String statementText, boolean forReadOnly);
 
 	/**
 		Get a new LanguageConnectionContext. this holds things

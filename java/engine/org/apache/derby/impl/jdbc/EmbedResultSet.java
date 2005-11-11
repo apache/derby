@@ -336,8 +336,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 				 * (Cache the LanguageConnectionContext)
 				 */
                 StatementContext statementContext =
-                    lcc.pushStatementContext(isAtomic, getSQLText(),
-                                             getParameterValueSet(),
+                    lcc.pushStatementContext(isAtomic, 
+					     concurrencyOfThisResultSet==JDBC20Translation.CONCUR_READ_ONLY, 
+					     getSQLText(),
+					     getParameterValueSet(),
                                              false, timeoutMillis);
 
 				switch (position)
@@ -3234,7 +3236,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             lcc = getEmbedConnection().getLanguageConnection();
 
             // Context used for preparing, don't set any timeout (use 0)
-            statementContext = lcc.pushStatementContext(isAtomic, updateWhereCurrentOfSQL.toString(), null, false, 0L);
+            statementContext = lcc.pushStatementContext(isAtomic, false, updateWhereCurrentOfSQL.toString(), null, false, 0L);
             org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(updateWhereCurrentOfSQL.toString());
             Activation act = ps.getActivation(lcc, false);
 
@@ -3286,7 +3288,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
 
                 // Context used for preparing, don't set any timeout (use 0)
-                StatementContext statementContext = lcc.pushStatementContext(isAtomic, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
+                StatementContext statementContext = lcc.pushStatementContext(isAtomic, false, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
                 // Don't set any timeout when deleting rows (use 0)
                 org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true, 0L); //execute delete where current of sql
@@ -3918,7 +3920,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 							.getLanguageConnection();
                     // No timeout for this operation (use 0)
 					StatementContext statementContext =
-                        lcc.pushStatementContext(isAtomic, getSQLText(),
+                        lcc.pushStatementContext(isAtomic, 
+						 concurrencyOfThisResultSet==JDBC20Translation.CONCUR_READ_ONLY,
+						 getSQLText(),
                                                  getParameterValueSet(),
                                                  false, 0L);
 

@@ -47,6 +47,8 @@ public interface StatementContext extends Context {
 	 *	@param inTrigger true if the parent started in the context of a trigger
 	 *	@param	isAtomic true if the statement must be executed
 	 *		atomically
+	 *      @param isForReadOnly true if the statement is for producing non-updatable
+	 *                           resultset
 	 *  @param stmtText the text of the statement.  Needed for any language
 	 * 	statement (currently, for any statement that can cause a trigger
 	 * 	to fire).  Please set this unless you are some funky jdbc setXXX
@@ -55,8 +57,8 @@ public interface StatementContext extends Context {
      *  @param timeoutMillis timeout value for the statement, in milliseconds.
      *   Zero means no timeout.
 	 */
-    public void setInUse(boolean inTrigger, boolean isAtomic, String stmtText,
-                         ParameterValueSet pvs, long timeoutMillis);
+    public void setInUse(boolean inTrigger, boolean isAtomic, boolean isForReadOnly,
+			 String stmtText, ParameterValueSet pvs, long timeoutMillis);
 
 	/**
 	 * Mark this context as not in use.  This is important because we
@@ -173,6 +175,14 @@ public interface StatementContext extends Context {
 	 * @return true if in use
 	 */
 	public boolean inUse();
+
+    /**
+     * Is this statement for a read only, non-updatable ResultSet
+     * @return true if the statement is for creating a 
+     *         read only, non-updatable ResultSet
+     */
+    public boolean isForReadOnly();
+    
 	
     /**
      * Checks if the statement which has allocated this statement context

@@ -695,18 +695,24 @@ public class GenericLanguageConnectionContext
     tempTableInfo.setModifiedInSavepointLevel(currentSavepointLevel);
 	}
 
-	/**
-		Return a Statement object to compile a Statement. The schema 
-		setting fo the returned statement are that of this connection.
-	*/
-
-	public PreparedStatement prepareInternalStatement(String sqlText) throws StandardException {
-		return connFactory.getStatement(sd, sqlText).prepare(this);
+        /**
+	 * @see LanguageConnectionContext#prepareInternalStatement
+	 */
+        public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText, boolean isForReadOnly) 
+	    throws StandardException 
+        {
+	    return connFactory.getStatement(compilationSchema, sqlText, isForReadOnly).prepare(this);
 	}
-
-	public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText) throws StandardException {
-		return connFactory.getStatement(compilationSchema, sqlText).prepare(this);
+        
+        /**
+	 * @see LanguageConnectionContext#prepareInternalStatement
+	 */
+        public PreparedStatement prepareInternalStatement(String sqlText) 
+	    throws StandardException 
+        {
+	    return connFactory.getStatement(sd, sqlText, true).prepare(this);
 	}
+        
 
 	/**
 	 * Remove the activation to those known about by this connection.
@@ -1881,6 +1887,7 @@ public class GenericLanguageConnectionContext
 	 * Push a StatementContext on the context stack.
 	 *
 	 * @param isAtomic whether this statement is atomic or not
+	 * @param isForReadonly whether this statement is for a read only resultset
 	 * @param stmtText the text of the statement.  Needed for any language
 	 * 	statement (currently, for any statement that can cause a trigger
 	 * 	to fire).  Please set this unless you are some funky jdbc setXXX
@@ -1895,8 +1902,10 @@ public class GenericLanguageConnectionContext
 	 * @return StatementContext  The statement context.
 	 *
 	 */
-	public StatementContext pushStatementContext(boolean isAtomic, String stmtText,
-		ParameterValueSet pvs, boolean rollbackParentContext, long timeoutMillis)
+	public StatementContext pushStatementContext (boolean isAtomic, boolean isForReadOnly, 
+						      String stmtText, ParameterValueSet pvs, 
+						      boolean rollbackParentContext, 
+						      long timeoutMillis)
 	{
 		int					parentStatementDepth = statementDepth;
 		boolean				inTrigger = false;
@@ -1946,7 +1955,7 @@ public class GenericLanguageConnectionContext
 
 		incrementStatementDepth();
 
-		statementContext.setInUse(inTrigger, isAtomic || parentIsAtomic, stmtText, pvs, timeoutMillis);
+		statementContext.setInUse(inTrigger, isAtomic || parentIsAtomic, isForReadOnly, stmtText, pvs, timeoutMillis);
 		if (rollbackParentContext)
 			statementContext.setParentRollback();
 		return statementContext;

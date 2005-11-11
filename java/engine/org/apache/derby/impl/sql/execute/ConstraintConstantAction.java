@@ -308,7 +308,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 		ResultSet rs = null;
 		try
 		{
-			PreparedStatement ps = lcc.prepareInternalStatement(td.getSchemaDescriptor(), checkStmt.toString());
+			PreparedStatement ps = lcc.prepareInternalStatement(checkStmt.toString());
 
             // This is a substatement; for now, we do not set any timeout
             // for it. We might change this behaviour later, by linking
