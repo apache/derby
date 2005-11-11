@@ -54,8 +54,6 @@ public class metadataMultiConn
 	{
 		System.out.println("Test metadataMultiConn starting");
 
-		Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-
 		//Open 1st  connection
 		Connection conn1 = getConnection(args, false);
 		metadataCalls(conn1);

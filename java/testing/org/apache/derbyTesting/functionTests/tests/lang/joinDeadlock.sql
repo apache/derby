@@ -1,8 +1,8 @@
 disconnect;
 
-connect 'jdbc:derby:wombat;user=U1' AS C1;
+connect 'wombat;user=U1' AS C1;
 autocommit off;
-connect 'jdbc:derby:wombat;user=U2' AS C2;
+connect 'wombat;user=U2' AS C2;
 autocommit off;
 
 set connection C1;

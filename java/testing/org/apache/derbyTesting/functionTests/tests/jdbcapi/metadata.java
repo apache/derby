@@ -58,7 +58,8 @@ public class metadata extends metadata_test {
 
 		try {
 
-			con = createConnection(args);
+			ij.getPropertyArg(args);
+			con = ij.startJBMS();
 			s = con.createStatement();
 
 		} catch (SQLException e) {

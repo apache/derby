@@ -104,7 +104,8 @@ public class odbc_metadata extends metadata_test {
 
 		try {
 
-			con = createConnection(args);
+			ij.getPropertyArg(args);
+			con = ij.startJBMS();
 			s = con.createStatement();
 
 			// Run the compliance checks for column name and

@@ -67,6 +67,19 @@ public abstract class metadata_test {
  	protected static final int GET_INDEX_INFO = 14;
 
 	protected static final int IGNORE_PROC_ID = -1;
+	
+	//Used for JSR169
+	private static boolean HAVE_DRIVER_CLASS;
+	static{
+		try{
+			Class.forName("java.sql.Driver");
+			HAVE_DRIVER_CLASS = true;
+		}
+		catch(ClassNotFoundException e){
+			//Used for JSR169
+			HAVE_DRIVER_CLASS = false;
+		}
+	}
 
 	// We leave it up to the classes which extend this one to
 	// initialize the following fields at contruct time.
@@ -241,6 +254,9 @@ public abstract class metadata_test {
 
 			try {
 			    System.out.println("The URL is: " + met.getURL());
+			}catch (NoSuchMethodError msme)
+			{
+				System.out.println("DatabaseMetaData.getURL not present - correct for JSR169");
 			} catch (Throwable err) {
 			    System.out.println("%%getURL() gave the exception: " + err);
 			}
@@ -903,11 +919,12 @@ public abstract class metadata_test {
 			// tiny test moved over from no longer used metadata2.sql
 			// This checks for a bug where you get incorrect behavior on a nested connection.
 			// if you do not get an error, the bug does not occur.			
-                        s.execute("create procedure isReadO() "+
-				"language java external name " +
+            if(HAVE_DRIVER_CLASS){
+            	s.execute("create procedure isReadO() language java external name " +
 				"'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.isro'" +
 				" parameter style java"); 
-			s.execute("call isReadO()");
+            	s.execute("call isReadO()");
+            }
 			
 			s.close();
 			if (con.getAutoCommit() == false)

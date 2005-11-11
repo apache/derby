@@ -20,7 +20,7 @@ set schema user;
 values current schema;
 -- see what user does when there is a user
 create schema judy;
-connect 'jdbc:derby:wombat;user=judy' as judy;
+connect 'wombat;user=judy' as judy;
 set schema app;
 values current schema;
 set schema user;

@@ -9,7 +9,7 @@ ij> SELECT COUNT(*) FROM DST.DEF_SCHEMA_TEST WHERE NAME_USER = NAME_SCHEMA;
 1          
 ij> SET SCHEMA DILBERT;
 ERROR 42Y07: Schema 'DILBERT' does not exist
-ij> connect 'jdbc:derby:wombat;user=dilbert';
+ij> connect 'wombat;user=dilbert';
 ij(CONNECTION1)> INSERT INTO DST.DEF_SCHEMA_TEST VALUES(USER, CURRENT SCHEMA);
 1 row inserted/updated/deleted
 ij(CONNECTION1)> SELECT COUNT(*) FROM DST.DEF_SCHEMA_TEST WHERE NAME_USER = NAME_SCHEMA;
@@ -25,7 +25,7 @@ ij> SET CONNECTION CONNECTION0;
 ij> -- still should not be created
 SET SCHEMA DILBERT;
 ERROR 42Y07: Schema 'DILBERT' does not exist
-ij> connect 'jdbc:derby:wombat;user=dilbert';
+ij> connect 'wombat;user=dilbert';
 ij(CONNECTION1)> INSERT INTO DST.DEF_SCHEMA_TEST VALUES(USER, CURRENT SCHEMA);
 1 row inserted/updated/deleted
 ij(CONNECTION1)> SELECT COUNT(*) FROM DST.DEF_SCHEMA_TEST WHERE NAME_USER = NAME_SCHEMA;

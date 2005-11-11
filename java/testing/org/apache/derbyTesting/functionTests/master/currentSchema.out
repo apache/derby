@@ -46,7 +46,7 @@ APP
 ij> -- see what user does when there is a user
 create schema judy;
 0 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;user=judy' as judy;
+ij> connect 'wombat;user=judy' as judy;
 ij(JUDY)> set schema app;
 0 rows inserted/updated/deleted
 ij(JUDY)> values current schema;
