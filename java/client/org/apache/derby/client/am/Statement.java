@@ -131,7 +131,10 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     protected int indexOfCurrentResultSet_ = -1;
     ResultSet[] resultSetList_ = null;   // array of ResultSet objects
 
-    int timeout_ = 0; // for query timeout in seconds, multiplied by 1000 when passed to java.util.Timer
+    protected final static String TIMEOUT_STATEMENT = "SET STATEMENT_TIMEOUT ";
+    protected java.util.ArrayList timeoutArrayList = new java.util.ArrayList(1);
+    protected boolean doWriteTimeout = false;
+    int timeout_ = 0; // for query timeout in seconds
     int maxRows_ = 0;
     int maxFieldSize_ = 0; // zero means that there is no limit to the size of a column.
     boolean escapedProcedureCallWithResult_ = false;
@@ -204,6 +207,9 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         resultSetConcurrency_ = java.sql.ResultSet.CONCUR_READ_ONLY;
         resultSetHoldability_ = 0;
         cursorAttributesToSendOnPrepare_ = null;
+        if (timeoutArrayList.size() == 0) {
+            timeoutArrayList.add(null); // Make sure the list's length is 1
+        }
 
         initResetStatement();
     }
@@ -232,6 +238,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         indexOfCurrentResultSet_ = -1;
         resultSetList_ = null;
         timeout_ = 0;
+        doWriteTimeout = false;
         maxRows_ = 0;
         maxFieldSize_ = 0;
         escapedProcedureCallWithResult_ = false;
@@ -536,9 +543,14 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             }
             checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
             if (seconds < 0) {
-                throw new SqlException(agent_.logWriter_, "Attempt to set a negative query timeout");
+                throw new SqlException(agent_.logWriter_,
+                                       "Attempt to set a negative query timeout",
+                                       "XJ074.S");
             }
-            timeout_ = seconds; // java.util.Timer takes milliseconds
+            if (seconds != timeout_) {
+                timeout_ = seconds;
+                doWriteTimeout = true;
+            }
         }
     }
 
@@ -1446,17 +1458,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
         checkForAppropriateSqlMode(executeType, sqlMode_);
 
-        java.util.Timer queryTimer = null;
-        QueryTimerTask queryTimerTask = null;
-        if (timeout_ != 0) {
-            queryTimer = new java.util.Timer(); // A thread that ticks the seconds
-            queryTimerTask = new QueryTimerTask(this, queryTimer);
-            queryTimer.schedule(queryTimerTask, 1000 * timeout_);
-        }
+        boolean timeoutSent = false;
 
-        // enclose the processing in a try finally block in order to make sure
-        // the query timeout is cancelled at the end of this method.
-        try {
             agent_.beginWriteChain(this);
             boolean piggybackedAutoCommit = writeCloseResultSets(true);  // true means permit auto-commits
 
@@ -1464,6 +1467,12 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             Section newSection = null;
             boolean repositionedCursor = false;
 
+            if (doWriteTimeout) {
+                timeoutArrayList.set(0, TIMEOUT_STATEMENT + timeout_);
+                writeSetSpecialRegister(timeoutArrayList);
+                doWriteTimeout = false;
+                timeoutSent = true;
+            }
             switch (sqlMode_) {
             case isQuery__:
                 newSection = agent_.sectionManager_.getDynamicSection(resultSetHoldability_);
@@ -1555,6 +1564,10 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
             readCloseResultSets(true);  // true means permit auto-commits
 
+            if (timeoutSent) {
+                readSetSpecialRegister(); // Read response to the EXCSQLSET
+            }
+
             // turn inUnitOfWork_ flag back on and add statement
             // back on commitListeners_ list if they were off
             // by an autocommit chained to a close cursor.
@@ -1634,15 +1647,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 throw new SqlException(agent_.logWriter_, "Unable to open resultSet with requested " +
                         "holdability " + resultSetHoldability_ + ".");
             }
-        } finally {
-            // We don't want to cancel immediately after flow since there is still incoming data on the wire and
-            // so logically we have not completed a full traversal from the client to the server and back.
-            // Cancelling the query timers needs to occur after endReadChain() in order to avoid deadlock conditions.
-            if (timeout_ != 0) { // query timers need to be cancelled.
-                queryTimer.cancel();
-                queryTimerTask.cancel();
-            }
-        }
 
         // In the case of executing a call to a stored procedure.
         if (sqlMode_ == isCall__) {

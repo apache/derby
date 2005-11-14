@@ -70,7 +70,6 @@ import org.apache.derby.iapi.reference.SQLState;
  * 3. Sets an invalid (negative) timeout. Verifies that the correct
  *    exception is thrown.
  *
- * @author oyvind.bakksjo@sun.com
  */
 public class SetQueryTimeoutTest
 {
@@ -241,6 +240,12 @@ public class SetQueryTimeoutTest
             conn.setAutoCommit(true);
         } catch (SQLException e) {
             throw new TestFailedException("Should not happen", e);
+        }
+        
+        try {
+            exec(conn, "DROP FUNCTION DELAY");
+        } catch (Exception e) {
+            // Ignore
         }
 
         exec(conn, "CREATE FUNCTION DELAY(SECONDS INTEGER, VALUE INTEGER) RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest.delay'");
@@ -427,9 +432,11 @@ public class SetQueryTimeoutTest
         // B - different stmt on the same connection; should NOT time out
         // C - different stmt on different connection; should NOT time out
         // D - here just to create equal contention on conn1 and conn2
-        
+
+        // FIXME: Should have used conn1 for statementB below, but
+        // this is blocked by DERBY-694
         PreparedStatement statementA = prepare(conn1, getFetchQuery("t"));
-        PreparedStatement statementB = prepare(conn1, getFetchQuery("t"));
+        PreparedStatement statementB = prepare(conn2, getFetchQuery("t"));
         PreparedStatement statementC = prepare(conn2, getFetchQuery("t"));
         PreparedStatement statementD = prepare(conn2, getFetchQuery("t"));
 

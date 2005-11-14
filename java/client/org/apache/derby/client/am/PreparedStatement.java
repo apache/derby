@@ -1259,15 +1259,6 @@ public class PreparedStatement extends Statement
             updateCount_ = -1;
         }
 
-        java.util.Timer queryTimer = null;
-        QueryTimerTask queryTimerTask = null;
-        if (timeout_ != 0) {
-            queryTimer = new java.util.Timer(); // A thread that ticks the seconds
-            queryTimerTask = new QueryTimerTask(this, queryTimer);
-            queryTimer.schedule(queryTimerTask, 1000 * timeout_);
-        }
-
-        try {
             agent_.beginWriteChain(this);
 
             boolean piggybackedAutocommit = super.writeCloseResultSets(true);  // true means permit auto-commits
@@ -1278,8 +1269,15 @@ public class PreparedStatement extends Statement
             boolean chainAutoCommit = false;
             boolean commitSubstituted = false;
             boolean repositionedCursor = false;
+            boolean timeoutSent = false;
             ResultSet scrollableRS = null;
 
+            if (doWriteTimeout) {
+                timeoutArrayList.set(0, TIMEOUT_STATEMENT + timeout_);
+                writeSetSpecialRegister(timeoutArrayList);
+                doWriteTimeout = false;
+                timeoutSent = true;
+            }
             switch (sqlMode_) {
             case isUpdate__:
                 if (positionedUpdateCursorName_ != null) {
@@ -1369,6 +1367,10 @@ public class PreparedStatement extends Statement
 
             super.markResultSetsClosed(true); // true means remove from list of commit and rollback listeners
 
+            if (timeoutSent) {
+                readSetSpecialRegister(); // Read response to the EXCSQLSET
+            }
+
             switch (sqlMode_) {
             case isUpdate__:
                 // do not need to reposition for a rowset cursor
@@ -1450,14 +1452,6 @@ public class PreparedStatement extends Statement
                 throw new SqlException(agent_.logWriter_, "Unable to open resultSet with requested " +
                         "holdability " + resultSetHoldability_ + ".");
             }
-
-        } finally {
-            if (timeout_ != 0) { // query timers need to be cancelled.
-                queryTimer.cancel();
-                queryTimerTask.cancel();
-            }
-        }
-
     }
 
     public int[] executeBatchX(boolean supportsQueryBatchRequest) throws SqlException, BatchUpdateException {
@@ -1476,6 +1470,7 @@ public class PreparedStatement extends Statement
         int[] updateCounts = new int[batchSize];
         int numInputColumns = parameterMetaData_ == null ? 0 : parameterMetaData_.getColumnCount();
         Object[] savedInputs = null;  // used to save/restore existing parameters
+        boolean timeoutSent = false;
 
         if (batchSize == 0) {
             return updateCounts;
@@ -1509,6 +1504,13 @@ public class PreparedStatement extends Statement
 
         agent_.beginBatchedWriteChain(this);
         boolean chainAutoCommit = connection_.willAutoCommitGenerateFlow() && isAutoCommittableStatement_;
+
+        if (doWriteTimeout) {
+            timeoutArrayList.set(0, TIMEOUT_STATEMENT + timeout_);
+            writeSetSpecialRegister(timeoutArrayList);
+            doWriteTimeout = false;
+            timeoutSent = true;
+        }
 
         for (int i = 0; i < batchSize; i++) {
             parameters_ = (Object[]) batch_.get(i);
@@ -1553,6 +1555,10 @@ public class PreparedStatement extends Statement
         }
 
         agent_.flowBatch(this, batchSize);
+
+        if (timeoutSent) {
+            readSetSpecialRegister(); // Read response to the EXCSQLSET
+        }
 
         try {
             for (int i = 0; i < batchSize; i++) {

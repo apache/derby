@@ -139,6 +139,10 @@ public class DRDAConnThread extends Thread {
 	private String pkgcnstknStr;
 	private int secnumber;
 
+    private final static String TIMEOUT_STATEMENT = "SET STATEMENT_TIMEOUT ";
+
+    private int pendingStatementTimeout; // < 0 means no pending timeout to set
+
 	// this flag is for an execute statement/procedure which actually returns a result set;
 	// do not commit the statement, otherwise result set is closed
 
@@ -171,6 +175,7 @@ public class DRDAConnThread extends Thread {
 		this.server = server;
 		this.timeSlice = timeSlice;
 		this.logConnections = logConnections;
+        this.pendingStatementTimeout = -1;
 		initialize();
     }
 
@@ -706,6 +711,10 @@ public class DRDAConnThread extends Thread {
 							stmt = database.getDRDAStatement(pkgnamcsn);
 							ps = stmt.getPreparedStatement();
 							ps.clearWarnings();
+                            if (pendingStatementTimeout >= 0) {
+                                ps.setQueryTimeout(pendingStatementTimeout);
+                                pendingStatementTimeout = -1;
+                            }
 							stmt.execute();
 							writeOPNQRYRM(false, stmt);
 							checkWarning(null, ps, null, 0, false, true);
@@ -3506,6 +3515,10 @@ public class DRDAConnThread extends Thread {
  		stmt.maxrslcnt = maxrslcnt;
  		stmt.outovropt = outovropt;
  		stmt.rslsetflg = rslsetflg;
+        if (pendingStatementTimeout >= 0) {
+            stmt.getPreparedStatement().setQueryTimeout(pendingStatementTimeout);
+            pendingStatementTimeout = -1;
+        }
  
 	
 		// set the statement as the current statement
@@ -4323,8 +4336,13 @@ public class DRDAConnThread extends Thread {
 		// initialize statement for reuse
 		drdaStmt.initialize();
 		String sqlStmt = parseEXECSQLIMMobjects();
-		drdaStmt.getStatement().clearWarnings();
-		int updCount = drdaStmt.getStatement().executeUpdate(sqlStmt);
+        Statement statement = drdaStmt.getStatement();
+        statement.clearWarnings();
+        if (pendingStatementTimeout >= 0) {
+            statement.setQueryTimeout(pendingStatementTimeout);
+            pendingStatementTimeout = -1;
+        }
+		int updCount = statement.executeUpdate(sqlStmt);
 		return updCount;
 	}
 
@@ -4493,6 +4511,12 @@ public class DRDAConnThread extends Thread {
 						if (sqlStmt != null)
 						// then we have at least one SQL Statement.
 							gotSqlStt = true;
+
+                        if (sqlStmt.startsWith(TIMEOUT_STATEMENT)) {
+                            String timeoutString = sqlStmt.substring(TIMEOUT_STATEMENT.length());
+                            pendingStatementTimeout = Integer.valueOf(timeoutString).intValue();
+                            break;
+                        }
 
 						if (canIgnoreStmt(sqlStmt)) {
 						// We _know_ Cloudscape doesn't recognize this

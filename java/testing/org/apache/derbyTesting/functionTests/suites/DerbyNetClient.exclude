@@ -3,7 +3,6 @@
 # excluding batchUpdate.java for it hits a problem in networkserver ('beetle' 5561)
 # excluding statementJdbc20.java because this tests fetch_reverse throughout the test
 # excluding jdbcapi/testRelative.java because it is a new test that requires debugging with the IBM Driver
-# excluding jdbcapi/SetQueryTimeoutTest.java because neither the JCC driver nor the ClientDriver support setQueryTimeout() yet.
 # excluding jdbcapi/resultsetJdbc30.java because the features tested are not implemented by Derby Client
 # excluding jdbcapi/checkDataSource30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
@@ -12,7 +11,6 @@ lang/scrollCursors2.java
 jdbcapi/batchUpdate.java
 jdbcapi/statementJdbc20.java
 jdbcapi/testRelative.java
-jdbcapi/SetQueryTimeoutTest.java
 jdbcapi/resultsetJdbc30.java
 jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java
