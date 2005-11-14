@@ -856,18 +856,21 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 		// size() is the number of valid entries in the hash table
 
 
-		// no need to sync on getting the sizes since the if
-		// they are wrong we will just not find a invalid entry in
-		// the lookup below.
+		// no need to sync on getting the sizes since if they are
+		// wrong we will discover it in the loop.
 		if (validItemCount < holders.size()) {
 
 			synchronized (this) {
 
-				for (int i = holders.size() - 1; i >= 0 ; i--) {
+				int invalidItems = holders.size() - validItemCount;
+
+				for (int i = holders.size() - 1; (invalidItems > 0) && (i >= 0) ; i--) {
 					CachedItem item = (CachedItem) holders.get(i);
 
-					if (item.isKept())
+					if (item.isKept()) {
+						if (!item.isValid()) invalidItems--;
 						continue;
+					}
 
 					// found a free item, just use it
 					if (!item.isValid()) {
