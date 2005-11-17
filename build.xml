@@ -518,7 +518,7 @@
 
   <target name="javadoc" depends="init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs"/>
 
-  <target name="publishedapi">
+  <target name="publishedapi" depends="initjars">
  
     <tstamp>
       <format 
@@ -575,7 +575,7 @@
 
   </target>
 
-  <target name="derbydocs">
+  <target name="derbydocs" depends="initjars">
 
     <delete dir="${out.javadoc.dir}/engine"/>
     <mkdir dir="${out.javadoc.dir}/engine"/>
