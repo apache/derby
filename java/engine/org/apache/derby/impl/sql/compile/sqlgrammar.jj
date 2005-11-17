@@ -148,6 +148,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.sql.Types;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 import java.lang.Character;
@@ -308,6 +309,89 @@ public class SQLParser
 	{
 		getLanguageConnectionContext().getDataDictionary().checkVersion(
 				version, feature);
+	}
+
+	/*
+	** Make sure that a select list in a parser-rewritten tree does
+	** not contain two columns by the same name. This is the patch
+	** to bug 280. In this case, the bind phase cannot tell the
+	** difference between the two columns and so the query may
+	** return wrong results.
+	**
+	** This issue is caused by parser rewriting of group by/having clauses
+	** into table expressions. (See function tableExpression() in this file)
+	** There is an improvement request filed under DERBY-681 to eliminate this
+	** rewrite, after which it should be possible to allow multiple columns to
+	** have same name in the select list.
+	*/
+	private	void	vetSelectList280( ResultColumnList selectList )
+		throws StandardException
+	{
+		Hashtable	allNames = new Hashtable();
+		int			count = selectList.size();
+
+		for ( int i = 0; i < count; i++ )
+		{
+			ResultColumn	rc = (ResultColumn) selectList.elementAt( i );
+			String			duplicateName = ambiguousDuplicateName( allNames, rc );
+
+			if ( duplicateName != null )
+			{
+				throw StandardException.newException
+				( SQLState.LANG_UNBINDABLE_REWRITE, duplicateName );
+			}
+
+		}
+	}
+
+	// allow two references to the same column. disallow aliasing
+	// two different expressions to the same name. returns the
+	// ambiguous column name if two result columns cannot be distinguished.
+	private	String	ambiguousDuplicateName( Hashtable allNames, ResultColumn rc )
+		throws StandardException
+	{
+		String			columnName = rc.getName();
+		ValueNode		newExpression = rc.getExpression();
+
+		// no column name means that the compiler will generate a
+		// unique name. that's ok and avoids bug 280
+		if ( columnName == null ) { return null; }
+
+		ValueNode		oldExpression = (ValueNode) allNames.get( columnName );
+
+		// no problem yet if we haven't seen this column
+		if ( oldExpression == null )
+		{
+			allNames.put( columnName, newExpression );
+			return null;
+		}
+
+		// if the two identically named references aren't both the
+		// same table column, then the bug occurs
+		if (
+				!(newExpression instanceof ColumnReference) ||
+				!(oldExpression instanceof ColumnReference)
+		   )
+		{ return columnName; }
+
+		ColumnReference		 newCR = (ColumnReference) newExpression;
+		ColumnReference		 oldCR = (ColumnReference) oldExpression;
+		TableName			 newTableName = newCR.getTableNameNode();
+		TableName			 oldTableName = oldCR.getTableNameNode();
+
+		if (
+				( (newTableName == null) && (oldTableName == null) ) ||
+				( (newTableName != null) && (newTableName.equals( oldTableName )) )
+		   )
+		{
+			// same table but different column aliased to same column name
+			if ( !newCR.getColumnName().equals( oldCR.getColumnName() ) )
+			{ return columnName; }
+			else { return null; }
+		}
+
+		// different tables
+		return null;
 	}
 
 	/**
@@ -7736,6 +7820,8 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 		 */
 		if (groupByList != null || havingClause != null)
 		{
+			vetSelectList280( selectList );
+
 			FromSubquery		fromSubquery;
 			ResultColumnList	outerRCL =
 										(ResultColumnList) nodeFactory.getNode(

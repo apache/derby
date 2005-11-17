@@ -1160,6 +1160,10 @@ public interface SQLState {
 	String LANG_STOP_AFTER_BINDING                                     = "42Z56.U";
 	String LANG_STOP_AFTER_OPTIMIZING                                  = "42Z57.U";
 	String LANG_STOP_AFTER_GENERATING                                  = "42Z58.U";
+
+	// PARSER EXCEPTIONS
+	String LANG_UNBINDABLE_REWRITE                                     = "X0A00.S";
+	
 	// EXECUTION EXCEPTIONS
 	String LANG_CANT_LOCK_TABLE                                        = "X0X02.S";
 	String LANG_TABLE_NOT_FOUND_DURING_EXECUTION                       = "X0X05.S";
