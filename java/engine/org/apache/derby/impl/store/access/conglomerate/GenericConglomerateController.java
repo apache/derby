@@ -180,7 +180,10 @@ public abstract class GenericConglomerateController
 
         getRowPositionFromRowLocation(loc, pos);
 
-        open_conglom.latchPage(pos);
+        if (!open_conglom.latchPage(pos)) 
+        {
+            return false;
+        }
 
         open_conglom.lockPositionForWrite(pos, false /* not an insert */, true);
 
@@ -362,7 +365,10 @@ public abstract class GenericConglomerateController
 
         getRowPositionFromRowLocation(loc, pos);
 
-        open_conglom.latchPage(pos);
+        if (!open_conglom.latchPage(pos)) 
+        {
+            return false;
+        }
 
         // Do not get U row lock - only get X or S.  There is not good point
         // currently to convert the U lock to an S lock, we don't know when
@@ -453,7 +459,10 @@ public abstract class GenericConglomerateController
 
         getRowPositionFromRowLocation(loc, pos);
 
-        open_conglom.latchPage(pos);
+        if (!open_conglom.latchPage(pos)) 
+        {
+            return false;
+        }
 
         open_conglom.lockPositionForWrite(pos, false, true);
 

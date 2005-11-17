@@ -3750,8 +3750,8 @@ public class T_AccessFactory extends T_Generic
     /**
      * Test critical cases for read uncommitted.
      * <p>
-     * test 1 - test heap fetch of row on page which does not exist.  
-     * test 2 - test heap fetch of row on page where row does not exist.
+     * test 1 - test heap fetch, delete and replace of row on page which does not exist.  
+     * test 2 - test heap fetch, delete and replace of row on page where row does not exist.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -3848,11 +3848,35 @@ public class T_AccessFactory extends T_Generic
                 TransactionController.MODE_RECORD,
                 TransactionController.ISOLATION_READ_UNCOMMITTED);
 
+        // Test heap fetch of row on page which does not exist.
         if (cc.fetch(deleted_page_rowloc, big_row.getRowArray(), null))
         {
             throw T_Fail.testFailMsg(
                 "(readUncommitted) fetch should ret false for reclaimed page.");
         }
+             
+        // Test heap replace of row on page which does not exist.
+        FormatableBitSet   update_desc = new FormatableBitSet(1);
+        if (cc.replace(deleted_page_rowloc, big_row.getRowArray(), update_desc)) 
+        {
+            throw T_Fail.testFailMsg(
+                "(readUncommitted) delete should ret false for reclaimed page.");
+        }
+       
+        // Test heap fetch (overloaded call) of row on page which does not exist.
+        if (cc.fetch(deleted_page_rowloc, big_row.getRowArray(), null, true))
+        {
+            throw T_Fail.testFailMsg(
+                "(readUncommitted) fetch should ret false for reclaimed page.");
+        }
+        
+        // Test heap delete of row on page which does not exist.
+        if (cc.delete(deleted_page_rowloc)) 
+        {
+            throw T_Fail.testFailMsg(
+                "(readUncommitted) delete should ret false for reclaimed page.");
+        }
+                
         cc.close();
 
         /*
@@ -3943,11 +3967,34 @@ public class T_AccessFactory extends T_Generic
         // the following will be attempting to fetch a row which has been
         // reclaimed by post commit, on an existing page.
 
+        // test heap fetch of row on page where row does not exist.
         if (cc.fetch(deleted_row_rowloc, big_row.getRowArray(), null))
         {
             throw T_Fail.testFailMsg(
                 "(readUncommitted) fetch should ret false for reclaimed row.");
         }
+        
+        // test heap replace of row on page where row does not exist.
+        if (cc.replace(deleted_page_rowloc, big_row.getRowArray(), update_desc)) 
+        {
+            throw T_Fail.testFailMsg(
+                "(readUncommitted) delete should ret false for reclaimed page.");
+        }
+
+        // test heap fetch (overloaded) of row on page where row does not exist.
+        if (cc.fetch(deleted_page_rowloc, big_row.getRowArray(), null, true))
+        {
+            throw T_Fail.testFailMsg(
+                "(readUncommitted) fetch should ret false for reclaimed page.");
+        }
+        
+        // test heap delete of row on page where row does not exist.
+        if (cc.delete(deleted_page_rowloc)) 
+        {
+            throw T_Fail.testFailMsg(
+                "(readUncommitted) delete should ret false for reclaimed page.");
+        }
+
         cc.close();
 
         /*
